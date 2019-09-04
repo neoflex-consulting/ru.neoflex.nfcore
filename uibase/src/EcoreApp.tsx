@@ -163,7 +163,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     renderTest = ()=> {
-        const {t} = this.props as Props & WithTranslation;
         return (
             <div>
                 {/*Correct test example*/}
