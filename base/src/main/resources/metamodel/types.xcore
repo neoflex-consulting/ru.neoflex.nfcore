@@ -1,0 +1,43 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.base/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.base.types
+import java.sql.Timestamp
+import java.util.Date
+
+
+type Timestamp wraps Timestamp
+create {
+    try {
+        if (it !== null) new Timestamp(new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(it).getTime());
+    }
+    catch (java.text.ParseException ex) {
+        throw new RuntimeException(ex);
+    }
+}
+convert {
+    if (it !== null) new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(it);
+}
+type Date wraps Date
+create {
+    try {
+        if (it !== null) new java.text.SimpleDateFormat("yyyy-MM-dd").parse(it);
+    }
+    catch (java.text.ParseException ex) {
+        throw new RuntimeException(ex);
+    }
+}
+convert {
+    if (it !== null) new java.text.SimpleDateFormat("yyyy-MM-dd").format(it);
+}
+type Password wraps String
+type Text wraps String
+type URL wraps String
+type QName wraps String
+type JSON wraps String
+type Caption wraps String
+

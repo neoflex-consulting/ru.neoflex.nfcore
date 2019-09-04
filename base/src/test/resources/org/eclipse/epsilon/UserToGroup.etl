@@ -1,0 +1,6 @@
+rule UserToGroup
+    transform user: S!User
+    to group: T!Group {
+    "UserToGroup".println();
+    group.name = 'Group_for_' + user.name;
+}

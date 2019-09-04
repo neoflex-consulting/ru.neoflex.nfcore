@@ -1,0 +1,107 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.base/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.base.auth
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EBoolean
+import ru.neoflex.nfcore.base.types.Timestamp
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Text
+import ru.neoflex.nfcore.base.types.Password
+
+class Audit {
+    String createdBy
+    Timestamp created
+    String modifiedBy
+    Timestamp modified
+}
+
+class Role {
+    QName name
+    Text description
+    contains Permission[] grants opposite role
+    contains Audit audit
+
+    op GrantStatus permitted(ActionType actionType, EObject eObject)
+}
+
+abstract class Permission {
+    container Role role opposite grants
+    GrantStatus grantStatus
+    ActionType[] actionTypes
+
+    op Integer priority()
+    op GrantStatus permitted(ActionType actionType, EObject eObject)
+}
+
+class AllPermission extends Permission {
+    op Integer priority() {0}
+}
+
+class PackagePermission extends Permission {
+    refers EPackage ePackage
+    op Integer priority() {1}
+}
+
+class ClassPermission extends Permission {
+    refers EClass theClass
+    op Integer priority() {2}
+}
+
+class ReferencePermission extends Permission {
+    refers EObject referencedEObject
+    op Integer priority() {3}
+}
+
+class ObjectPermission extends Permission {
+    refers EObject eObject
+    op Integer priority() {4}
+}
+
+enum GrantStatus {
+    UNDEFINED
+    GRANTED
+    REVOKED
+}
+
+enum ActionType {
+    ALL
+    READ
+    WRITE
+    CALL
+}
+
+class GrantPermission {
+    refers Permission permission
+}
+
+abstract class Authority {
+    QName name
+    Text description
+    refers Role[] roles
+    contains Audit audit
+}
+
+abstract class Authenticator {
+    refers User user opposite authenticators
+    EBoolean disabled
+}
+
+class PasswordAuthenticator extends Authenticator {
+    Password password
+}
+
+class User extends Authority {
+    String email
+    contains Authenticator[] authenticators opposite user
+    refers Group[] groups
+}
+
+class Group extends Authority {
+}

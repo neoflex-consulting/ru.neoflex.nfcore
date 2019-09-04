@@ -1,0 +1,39 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.base/src/test/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.EObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.base.test.application
+import org.eclipse.emf.ecore.EClass
+
+abstract class ModuleContainer {
+    contains Module[] modules
+}
+
+class Application extends ModuleContainer {
+    EString name
+    contains Form[] forms opposite application
+    refers Application[] links
+}
+
+class Module extends ModuleContainer {
+    EString name
+    refers Form[] forms
+}
+
+abstract class Form {
+    EString name
+    container Application application opposite forms
+}
+
+abstract class EObjectForm extends Form {
+    refers EClass objectType
+}
+
+class EditForm extends EObjectForm {
+}
+
+class ListForm extends EObjectForm {
+}
