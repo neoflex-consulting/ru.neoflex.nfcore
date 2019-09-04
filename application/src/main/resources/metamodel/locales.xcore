@@ -1,0 +1,59 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.locales/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.locales
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Text
+
+class Lang {
+	QName name
+}
+
+abstract class LocBase {
+    op QName getFullPath()
+}
+
+abstract class LocContainer extends LocBase {
+	refers LocContainer[] inherits
+	contains LocNS[] children opposite parent
+	contains LangResource[] captions
+}
+
+class LocNS extends LocContainer {
+	String[1] name
+	container LocContainer parent opposite children
+    op QName getFullPath() {
+    	if (parent === null) {""} else {parent.getFullPath() + "."} + name
+    }
+}
+
+class LocModule extends LocContainer {
+	QName name
+	op QName getFullPath() {name}
+}
+
+abstract class LangResource {
+	refers Lang lang
+}
+
+class StringResource extends LangResource {
+	String caption
+}
+
+class TextResource extends LangResource {
+	Text caption
+}
+
+class LocText {
+	String name
+	contains TextResource[] resources
+}
+
+class LocString {
+	String name
+	contains StringResource[] resources
+}

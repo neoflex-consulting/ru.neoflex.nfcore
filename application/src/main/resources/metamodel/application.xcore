@@ -1,0 +1,116 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.application/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.application
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Caption
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EStructuralFeature
+
+/* Components */
+abstract class Component {
+    QName name
+	contains ViewElement view
+	contains Tools tools
+	op Tools generateTools() {tools}
+	contains TreeNode referenceTree	
+	op TreeNode generateReferenceTree() {referenceTree}
+}
+
+class StaticComponent extends Component {	
+}
+
+class RemoteComponent extends Component {
+	String path	
+	String componentName	
+}
+
+class Application extends Component {
+}
+
+class ClassComponent extends Component {
+	refers EClass aClass
+	int orderBy
+}
+
+/* Views */
+abstract class ViewElement {
+	String code
+	container ViewContainer parent opposite children
+}
+
+abstract class ViewContainer extends ViewElement {
+	contains ViewElement[] children opposite parent
+}
+
+abstract class Icon extends ViewElement {	
+}
+
+class FAIcon extends Icon {
+	String iconCode
+}
+
+class ComponentElement extends ViewElement {
+	refers Component component
+}
+
+abstract class TreeNode extends ViewContainer {
+}
+
+class CatalogNode extends TreeNode {	
+}
+
+class EObjectNode extends TreeNode {
+	refers EObject eObject
+}
+
+class ComponentNode extends TreeNode {
+	refers Component component
+}
+
+class Tools extends ViewContainer {
+}
+
+class Tool extends ViewContainer {
+	Caption caption
+	contains Icon icon
+}
+
+class Typography extends ViewElement {
+	Caption text
+}
+
+class Span extends ViewContainer {
+}
+
+class Div extends ViewContainer {
+}
+
+class Row extends ViewContainer {
+}
+
+class Column extends ViewContainer {
+}
+
+class Tabs extends ViewContainer {
+}
+
+class Form extends ViewContainer {
+}
+
+class EClassForm extends Form {
+	refers EClass aClass
+}
+
+class FormItem extends ViewContainer {
+}
+
+class ClassFeature extends FormItem {
+	refers EStructuralFeature eStructuralFeature
+}
+

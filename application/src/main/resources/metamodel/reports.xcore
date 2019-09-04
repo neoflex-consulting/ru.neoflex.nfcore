@@ -1,0 +1,15 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.reports/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.reports
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.datasource.Dataset
+
+class Report {
+	QName name
+	refers Dataset dataset	
+}

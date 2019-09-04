@@ -1,0 +1,20 @@
+{
+        "login": "登錄",
+        "logout": "登出",
+        "username": "用戶名",
+        "password": "密碼",
+        "developer": "開發人員",
+        "language": "語言",
+        "metadata": "元數據",
+        "data": "數據",
+        "query": "詢問",
+        "run": "跑",
+        "notfound": "未找到",
+        "regularexpression": "正則表達式",
+        "search": "搜索 ",
+        "action": "行動",
+        "edit": "編輯",
+        "delete": "刪除",
+        "addresource": "添加資源",
+        "dynamiccomponent": " 組件無法加載 "
+}

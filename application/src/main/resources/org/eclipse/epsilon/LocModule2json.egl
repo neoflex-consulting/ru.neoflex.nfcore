@@ -1,0 +1,35 @@
+[%
+	lang.println("lang: ");
+	var module = LocModule.all().first();
+	module.println("module: ");
+%][%=module.toJson()%][%
+
+@template
+operation LocContainer toJson() {
+var caption = self.captions.select(c|c.lang.name == lang).first();
+var children = self.getAllChildren();
+%]
+{
+[%if (caption.isDefined()) {%]
+  "caption": "[%=caption.caption%]"[%if (children.size() > 0) {%],[%}%]
+  
+[%}%]
+[%for (child in children) {%]
+  "[%=child.name%]":
+    [%=child.toJson()%][%if (hasMore) {%],
+[%}%]
+
+[%}%]
+}[%
+}
+
+operation LocContainer getAllChildren() {
+	var result = Sequence{};
+	for (i in self.inherits) {
+		result.addAll(i.getAllChildren());
+	}
+	result.addAll(self.children);
+	return result;
+}
+	
+%]

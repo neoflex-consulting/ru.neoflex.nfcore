@@ -1,0 +1,21 @@
+{
+        "login": "Login",
+        "logout": "Logout",
+        "username": "User Name",
+        "password": "Password",
+        "developer": "Developer",
+        "language": "Language",
+        "metadata": "Metadata",
+        "data": "Data",
+        "query": "Query",
+        "run": "Run",
+        "notfound": "Not found",
+        "regularexpression": "Regular expression",
+        "search": "Search: ",
+        "action": "Action",
+        "edit": "Edit",
+        "delete": "Delete",
+        "addresource": "Add resource",
+        "dynamiccomponent": " component cannot be downloaded from path "
+
+}
