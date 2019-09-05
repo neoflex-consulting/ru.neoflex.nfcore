@@ -16,6 +16,6 @@
         "edit": "Edit",
         "delete": "Delete",
         "addresource": "Add resource",
-        "dynamiccomponent": " component cannot be downloaded from path "
-
+        "dynamiccomponent": " component cannot be downloaded from path ",
+        "eClass": "eClass"
 }
