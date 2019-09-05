@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "Library for dynamic components for project for Neoflex EMF Framework",
   "dependencies": {
-    "react": "^16.9.0",
+    "react": "16.9.0",
     "react-dom": "^16.9.0",
     "react-i18next": "10.12.2",
     "react-scripts": "^3.1.1"
   },
   "devDependencies": {
-    "@types/react": "^16.9.2",
-    "@types/react-dom": "^16.9.0",
+    "@types/react": "16.9.2",
+    "@types/react-dom": "16.9.0",
     "antd": "3.20.2",
     "i18next": "^17.0.11",
     "i18next-browser-languagedetector": "3.0.3",
