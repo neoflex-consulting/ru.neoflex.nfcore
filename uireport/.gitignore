@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/dist
 /.pnp
 .pnp.js
 
@@ -19,6 +20,6 @@
 .env.production.local
 
 npm-debug.log*
-*.iml
 yarn-debug.log*
 yarn-error.log*
+*.iml
