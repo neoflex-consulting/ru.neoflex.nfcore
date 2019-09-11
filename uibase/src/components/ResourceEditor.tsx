@@ -313,6 +313,22 @@ export class ResourceEditor extends React.Component<any, State> {
                     {Object.keys(boolSelectionOption).map((value: any) =>
                         <Select.Option key={key + "_" + value + "_" + key} value={value}>{value}</Select.Option>)}
                 </Select>
+            } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Timestamp") {
+                return value
+            } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Date") {
+                return value
+            }else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Password") {
+                return <EditableTextArea
+                    type="password"
+                    key={key + "_" + idx}
+                    editedProperty={eObject.get('name')}
+                    value={value}
+                    onChange={(newValue: Object) => {
+                        const updatedJSON = targetObject.updater(newValue);
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             } else if (eObject.get('eType').isKindOf('EEnum')) {
                 return <Select value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [eObject.get('name')]: newValue });
@@ -324,6 +340,7 @@ export class ResourceEditor extends React.Component<any, State> {
                 </Select>
             } else {
                 return <EditableTextArea
+                    type="text"
                     key={key + "_" + idx}
                     editedProperty={eObject.get('name')}
                     value={value}
@@ -349,10 +366,6 @@ export class ResourceEditor extends React.Component<any, State> {
 
         return preparedData
     }
-
-    handleModalOk = () => {
-        this.setState({ modalVisible: false })
-    };
 
     handleModalCancel = () => {
         this.setState({ modalVisible: false })
@@ -473,6 +486,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
     handleSelect = (resources: Ecore.Resource[]): void => {
         this.setState({ modalVisible: false })
+        //processing selected object
     }
 
     componentWillUnmount() {
@@ -543,10 +557,11 @@ export class ResourceEditor extends React.Component<any, State> {
                     </Splitter>
                 </div>
                 <Modal
+                    key="add_resource_modal"
                     width={'1000px'}
                     title={t('addresource')}
                     visible={this.state.modalVisible}
-                    onOk={this.handleModalOk}
+                    footer={null}
                     onCancel={this.handleModalCancel}
                 >
                     <SearchGridTrans onSelect={this.handleSelect} showAction={true} specialEClass={undefined} />

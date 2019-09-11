@@ -185,7 +185,13 @@ class EcoreApp extends React.Component<any, State> {
                         <Menu.Item key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
                     </Menu>
                 </Sider>
+                
                 <Layout>
+                    <Header style={{ background: '#f0f2f5', padding: '6px 3px', height: 45, display: 'inline-flex' }}>
+                        <Button className="panel-button" style={{ border: 0 }} icon="save"/>
+                        <Button className="panel-button" style={{ border: 0 }} icon="inbox"/>
+                        <Button className="panel-button" style={{ border: 0 }} icon="usergroup-delete"/>
+                    </Header>
                     <Content>
                         <Switch>
                             <Route path='/settings/metadata' component={MetaBrowserTrans}/>

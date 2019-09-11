@@ -148,3 +148,7 @@
 .menu-delete-button:hover {
   background:#ff6868;
 }
+
+.panel-button {
+  margin-left: 5px;
+}
