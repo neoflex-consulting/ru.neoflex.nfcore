@@ -1,5 +1,5 @@
 import React, {Suspense} from 'react';
-import './App.css';
+import './styles/App.css';
 import EcoreAppTrans from "./EcoreApp";
 
 const App: React.FC = (props) => {

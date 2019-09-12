@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Tree, Icon, Table, Modal, Button, Select, Row, Col, Menu } from 'antd';
+import { Tree, Icon, Table, Modal, Button, Select, Row, Col, Menu, Tag } from 'antd';
 import Ecore from "ecore";
 import { API } from "../modules/api";
 import Splitter from './CustomSplitter'
@@ -31,7 +31,8 @@ interface State {
     rightClickMenuVisible: Boolean,
     rightMenuPosition: Object,
     uniqKey: String,
-    treeRightClickNode: { [key: string]: any }
+    treeRightClickNode: { [key: string]: any },
+    addRefPropertyName: String
 }
 
 export class ResourceEditor extends React.Component<any, State> {
@@ -55,7 +56,8 @@ export class ResourceEditor extends React.Component<any, State> {
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
-        treeRightClickNode: {}
+        treeRightClickNode: {},
+        addRefPropertyName: ""
     };
 
     getPackages(): void {
@@ -294,14 +296,14 @@ export class ResourceEditor extends React.Component<any, State> {
             if (eObject.isKindOf('EReference')) {
                 const elements = value ?
                     eObject.get('upperBound') === -1 ?
-                        value.map((el: Object, idx: number) => <React.Fragment key={idx}>{JSON.stringify(el)}<br /></React.Fragment>)
+                        value.map((el: { [key:string]:any }, idx: number) => <Tag onClose={this.handleDeleteRef} closable key={idx}>{`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;</Tag>)
                         :
                         <React.Fragment key={value.$ref}>{JSON.stringify(value)}<br /></React.Fragment>
                     :
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
-                    <Button key={key + "_" + idx} onClick={() => this.setState({ modalVisible: true })}>...</Button>
+                    <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalVisible: true, addRefPropertyName: eObject.get('name') })}>...</Button>
                 </React.Fragment>
                 return component
             } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "EBoolean") {
@@ -484,9 +486,31 @@ export class ResourceEditor extends React.Component<any, State> {
         }
     }
 
-    handleSelect = (resources: Ecore.Resource[]): void => {
-        this.setState({ modalVisible: false })
-        //processing selected object
+    handleAddNewRef = (resources: Ecore.Resource[]): void => {
+        const node: { [key: string]: any } = this.state.currentNode
+        const targetObject:{[key:string]:any} = this.state.targetObject
+        const { addRefPropertyName } = this.state
+        let updatedJSON:Object = {}
+        let oldRefsArray:Array<Object>
+        let newRefsMap:Array<Object>
+        let newRefsArray:Array<Object>|Object
+        //too explosive?
+        const upperBound = this.state.resource.eClass.get('eAllStructuralFeatures').find((feature:Ecore.EObject) => feature.get('name') === addRefPropertyName).get('upperBound')
+        //can res.eContents()[0] be null?
+        if(upperBound === -1){
+            oldRefsArray = node.targetObject[addRefPropertyName] ? node.targetObject[addRefPropertyName] : []
+            newRefsMap = resources.map((res:{[key:string]:any}) => ({ $ref: res.eContents()[0].eURI(), eClass: res.eContents()[0].eClass.eURI() })) 
+            newRefsArray = [...oldRefsArray, ...newRefsMap]
+            updatedJSON = node.targetObject.updater({ [addRefPropertyName]: newRefsArray })
+        }else{
+            newRefsMap = resources.map((res:{[key:string]:any}) => ({ $ref: res.eContents()[0].eURI(), eClass: res.eContents()[0].eClass.eURI() }))
+        }
+        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+        this.setState({ modalVisible: false, resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    }
+
+    handleDeleteRef = (e:any) => {
+        console.log(e)
     }
 
     componentWillUnmount() {
@@ -557,14 +581,14 @@ export class ResourceEditor extends React.Component<any, State> {
                     </Splitter>
                 </div>
                 <Modal
-                    key="add_resource_modal"
+                    key="add_ref_modal"
                     width={'1000px'}
                     title={t('addresource')}
                     visible={this.state.modalVisible}
                     footer={null}
                     onCancel={this.handleModalCancel}
                 >
-                    <SearchGridTrans onSelect={this.handleSelect} showAction={true} specialEClass={undefined} />
+                    <SearchGridTrans onSelect={this.handleAddNewRef} showAction={true} specialEClass={undefined} />
                 </Modal>
             </div>
         );

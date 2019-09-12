@@ -136,7 +136,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         }
         const {t} = this.props as Props & WithTranslation;
         return (
-            <Row>
+            <Row style={{ marginTop: 15 }}>
                 <Col span={1}/>
                 <Col span={22}>
                     <Table dataSource={data} pagination={false}>

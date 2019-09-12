@@ -2,7 +2,7 @@ import * as React from "react";
 import Splitter from './components/CustomSplitter'
 import {Tooltip} from "antd";
 import {Icon as IconFA} from 'react-fa';
-import './MainApp.css'
+import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'

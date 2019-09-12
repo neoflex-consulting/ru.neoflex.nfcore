@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Button, Icon, Layout, Menu, notification} from 'antd';
 import 'antd/dist/antd.css';
-//import {Ecore} from "ecore";
+import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowserTrans from "./components/MetaBrowser";
 import {ResourceEditor} from "./components/ResourceEditor"
@@ -187,10 +187,10 @@ class EcoreApp extends React.Component<any, State> {
                 </Sider>
                 
                 <Layout>
-                    <Header style={{ background: '#f0f2f5', padding: '6px 3px', height: 45, display: 'inline-flex' }}>
-                        <Button className="panel-button" style={{ border: 0 }} icon="save"/>
-                        <Button className="panel-button" style={{ border: 0 }} icon="inbox"/>
-                        <Button className="panel-button" style={{ border: 0 }} icon="usergroup-delete"/>
+                    <Header className="head-panel">
+                        <Button className="panel-button" icon="save"/>
+                        <Button className="panel-button" icon="inbox"/>
+                        <Button className="panel-button" icon="usergroup-delete"/>
                     </Header>
                     <Content>
                         <Switch>
