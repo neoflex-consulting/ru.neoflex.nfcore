@@ -27,7 +27,8 @@ interface State {
         [key: string]: any
     },
     selectedKey: String,
-    modalVisible: Boolean,
+    modalRefVisible: Boolean,
+    modalResourceVisible: Boolean,
     rightClickMenuVisible: Boolean,
     rightMenuPosition: Object,
     uniqKey: String,
@@ -52,7 +53,8 @@ export class ResourceEditor extends React.Component<any, State> {
         tableData: [],
         targetObject: { eClass: "" },
         selectedKey: "",
-        modalVisible: false,
+        modalRefVisible: false,
+        modalResourceVisible: false,
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
@@ -292,18 +294,28 @@ export class ResourceEditor extends React.Component<any, State> {
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
+        //TODO: process tag's onClose
         const prepareValue = (eObject: Ecore.EObject, value: any, idx: Number): any => {
             if (eObject.isKindOf('EReference')) {
                 const elements = value ?
                     eObject.get('upperBound') === -1 ?
-                        value.map((el: { [key:string]:any }, idx: number) => <Tag onClose={this.handleDeleteRef} closable key={idx}>{`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;</Tag>)
+                        value.map((el: { [key:string]:any }, idx: number) => 
+                            <Tag 
+                                onClose={(e:any)=>{
+                                    this.handleDeleteRef(el, eObject.get('name')) 
+                                }} 
+                                closable 
+                                key={el["$ref"]}
+                            >
+                                {`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;
+                            </Tag>)
                         :
                         <React.Fragment key={value.$ref}>{JSON.stringify(value)}<br /></React.Fragment>
                     :
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
-                    <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalVisible: true, addRefPropertyName: eObject.get('name') })}>...</Button>
+                    <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: eObject.get('name') })}>...</Button>
                 </React.Fragment>
                 return component
             } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "EBoolean") {
@@ -364,18 +376,22 @@ export class ResourceEditor extends React.Component<any, State> {
                 value: prepareValue(feature, targetObject[feature.get('name')], idx),
                 key: feature.get('name') + idx
             })
-        });
+        })
 
         return preparedData
     }
 
-    handleModalCancel = () => {
-        this.setState({ modalVisible: false })
-    };
+    handleRefModalCancel = () => {
+        this.setState({ modalRefVisible: false })
+    }
+
+    handleResourceModalCancel = () => {
+        this.setState({ modalResourceVisible: false })
+    }
 
     hideRightClickMenu = (e: any) => {
         this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
-    };
+    }
 
     renderRightMenu(): any {
         const node: { [key: string]: any } = this.state.treeRightClickNode
@@ -486,31 +502,50 @@ export class ResourceEditor extends React.Component<any, State> {
         }
     }
 
-    handleAddNewRef = (resources: Ecore.Resource[]): void => {
-        const node: { [key: string]: any } = this.state.currentNode
-        const targetObject:{[key:string]:any} = this.state.targetObject
-        const { addRefPropertyName } = this.state
-        let updatedJSON:Object = {}
-        let oldRefsArray:Array<Object>
-        let newRefsMap:Array<Object>
-        let newRefsArray:Array<Object>|Object
-        //too explosive?
-        const upperBound = this.state.resource.eClass.get('eAllStructuralFeatures').find((feature:Ecore.EObject) => feature.get('name') === addRefPropertyName).get('upperBound')
-        //can res.eContents()[0] be null?
-        if(upperBound === -1){
-            oldRefsArray = node.targetObject[addRefPropertyName] ? node.targetObject[addRefPropertyName] : []
-            newRefsMap = resources.map((res:{[key:string]:any}) => ({ $ref: res.eContents()[0].eURI(), eClass: res.eContents()[0].eClass.eURI() })) 
-            newRefsArray = [...oldRefsArray, ...newRefsMap]
-            updatedJSON = node.targetObject.updater({ [addRefPropertyName]: newRefsArray })
-        }else{
-            newRefsMap = resources.map((res:{[key:string]:any}) => ({ $ref: res.eContents()[0].eURI(), eClass: res.eContents()[0].eClass.eURI() }))
-        }
-        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
-        this.setState({ modalVisible: false, resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    handleAddNewResource = (resources: Ecore.Resource[]): void => {
+
     }
 
-    handleDeleteRef = (e:any) => {
-        console.log(e)
+    handleAddNewRef = (resources: Ecore.Resource[]): void => {
+        const targetObject: { [key: string]: any } = this.state.targetObject
+        const { addRefPropertyName } = this.state
+        let updatedJSON: Object = {}
+        let refsArray: Array<Object>
+        //too explosive?
+        const upperBound = this.state.resource.eClass.get('eAllStructuralFeatures').find((feature: Ecore.EObject) => feature.get('name') === addRefPropertyName).get('upperBound')
+        //can res.eContents()[0] be null?
+        if (upperBound === -1) {
+            //TODO: add check of existing object
+            //TODO: test processing of several resources
+            refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
+            resources.forEach((res) => {
+                const isInArray = refsArray.findIndex((refObj: { [key: string]: any }) => res.eContents()[0].eURI() === refObj["$ref"])
+                isInArray === -1 && refsArray.push({
+                    $ref: res.eContents()[0].eURI(),
+                    eClass: res.eContents()[0].eClass.eURI()
+                })
+            })
+            updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
+        } else {
+            //TODO: process adding objects, when upperBound === 1
+            //TODO: test on feature with upperBound === 1
+            //if user choose several resources for adding, but upperBound === 1, we put only first resource
+            updatedJSON = targetObject.updater({ [addRefPropertyName]: {
+                $ref: resources[0].eContents()[0].eURI(),
+                eClass: resources[0].eContents()[0].eClass.eURI()
+            }})
+        }
+        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+        this.setState({ modalRefVisible: false, resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    }
+
+    handleDeleteRef = (deletedObject:any, addRefPropertyName:string) => {
+        const targetObject: { [key: string]: any } = this.state.targetObject
+        const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : []
+        const newRefsArray = oldRefsArray.filter((refObj:{[key:string]:any})=>refObj["$ref"] !== deletedObject["$ref"])
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray })
+        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
 
     componentWillUnmount() {
@@ -557,7 +592,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                     {this.state.resource.eClass && this.createTree()}
                                 </Col>
                                 <Col span={1}>
-                                    <Button icon="plus" type="primary" style={{ marginLeft: '20px' }} shape="circle" size="large" onClick={() => this.setState({ modalVisible: true })}></Button>
+                                    <Button icon="plus" type="primary" style={{ marginLeft: '20px' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
                                 </Col>
                             </Row>
                         </div>
@@ -583,12 +618,22 @@ export class ResourceEditor extends React.Component<any, State> {
                 <Modal
                     key="add_ref_modal"
                     width={'1000px'}
-                    title={t('addresource')}
-                    visible={this.state.modalVisible}
+                    title={t('addreference')}
+                    visible={this.state.modalRefVisible}
                     footer={null}
-                    onCancel={this.handleModalCancel}
+                    onCancel={this.handleRefModalCancel}
                 >
-                    <SearchGridTrans onSelect={this.handleAddNewRef} showAction={true} specialEClass={undefined} />
+                    <SearchGridTrans key="search_grid_ref" onSelect={this.handleAddNewRef} showAction={true} specialEClass={undefined} />
+                </Modal>
+                <Modal
+                    key="add_resource_modal"
+                    width={'1000px'}
+                    title={t('addresource')}
+                    visible={this.state.modalResourceVisible}
+                    footer={null}
+                    onCancel={this.handleResourceModalCancel}
+                >
+                    <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
                 </Modal>
             </div>
         );
