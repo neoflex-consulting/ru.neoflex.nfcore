@@ -263,7 +263,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
     onTreeSelect = (selectedKeys: Array<String>, e: any, imitateClick: boolean = false) => {
         if (selectedKeys[0] && e.node.props.targetObject.eClass) {
-            const targetObject = imitateClick ? this.state.targetObject : e.node.props.targetObject
+            const targetObject = e.node.props.targetObject
             const uniqKey = e.node.props.eventKey
             this.setState({
                 tableData: this.prepareTableData(targetObject, this.state.resource, uniqKey),
@@ -294,7 +294,6 @@ export class ResourceEditor extends React.Component<any, State> {
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
-        //TODO: process tag's onClose
         const prepareValue = (eObject: Ecore.EObject, value: any, idx: Number): any => {
             if (eObject.isKindOf('EReference')) {
                 const elements = value ?
@@ -310,7 +309,15 @@ export class ResourceEditor extends React.Component<any, State> {
                                 {`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;
                             </Tag>)
                         :
-                        <React.Fragment key={value.$ref}>{JSON.stringify(value)}<br /></React.Fragment>
+                        <Tag
+                            onClose={(e: any) => {
+                                this.handleDeleteSingleRef(value, eObject.get('name'))
+                            }}
+                            closable
+                            key={value["$ref"]}
+                        >
+                            {`${value["$ref"]}`}<br />{`${value["eClass"]}`}&nbsp;
+                        </Tag>
                     :
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
@@ -318,7 +325,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: eObject.get('name') })}>...</Button>
                 </React.Fragment>
                 return component
-            } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "EBoolean") {
+            } else if (eObject.get('eType') && eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "EBoolean") {
                 return <Select value={convertPrimitiveToString(value)} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [eObject.get('name')]: getPrimitiveType(newValue) });
                     const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
@@ -327,11 +334,11 @@ export class ResourceEditor extends React.Component<any, State> {
                     {Object.keys(boolSelectionOption).map((value: any) =>
                         <Select.Option key={key + "_" + value + "_" + key} value={value}>{value}</Select.Option>)}
                 </Select>
-            } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Timestamp") {
+            } else if (eObject.get('eType') && eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Timestamp") {
                 return value
-            } else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Date") {
+            } else if (eObject.get('eType') && eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Date") {
                 return value
-            }else if (eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Password") {
+            }else if (eObject.get('eType') && eObject.get('eType').isKindOf('EDataType') && eObject.get('eType').get('name') === "Password") {
                 return <EditableTextArea
                     type="password"
                     key={key + "_" + idx}
@@ -343,7 +350,7 @@ export class ResourceEditor extends React.Component<any, State> {
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
                 />
-            } else if (eObject.get('eType').isKindOf('EEnum')) {
+            } else if (eObject.get('eType') && eObject.get('eType').isKindOf('EEnum')) {
                 return <Select value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [eObject.get('name')]: newValue });
                     const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
@@ -512,11 +519,10 @@ export class ResourceEditor extends React.Component<any, State> {
         let updatedJSON: Object = {}
         let refsArray: Array<Object>
         //too explosive?
-        const upperBound = this.state.resource.eClass.get('eAllStructuralFeatures').find((feature: Ecore.EObject) => feature.get('name') === addRefPropertyName).get('upperBound')
+        const feature = this.state.resource.eClass.get('eAllStructuralFeatures').find((feature: Ecore.EObject) => feature.get('name') === addRefPropertyName)
+        const upperBound = feature && feature.get('upperBound')
         //can res.eContents()[0] be null?
         if (upperBound === -1) {
-            //TODO: add check of existing object
-            //TODO: test processing of several resources
             refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
             resources.forEach((res) => {
                 const isInArray = refsArray.findIndex((refObj: { [key: string]: any }) => res.eContents()[0].eURI() === refObj["$ref"])
@@ -527,8 +533,6 @@ export class ResourceEditor extends React.Component<any, State> {
             })
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
-            //TODO: process adding objects, when upperBound === 1
-            //TODO: test on feature with upperBound === 1
             //if user choose several resources for adding, but upperBound === 1, we put only first resource
             updatedJSON = targetObject.updater({ [addRefPropertyName]: {
                 $ref: resources[0].eContents()[0].eURI(),
@@ -544,6 +548,13 @@ export class ResourceEditor extends React.Component<any, State> {
         const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : []
         const newRefsArray = oldRefsArray.filter((refObj:{[key:string]:any})=>refObj["$ref"] !== deletedObject["$ref"])
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray })
+        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    }
+
+    handleDeleteSingleRef = (deletedObject:any, addRefPropertyName:string) => {
+        const targetObject: { [key: string]: any } = this.state.targetObject
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null })
         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
