@@ -11,7 +11,7 @@ import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {EObject} from "ecore";
+import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 
 const { Header, Content, Sider } = Layout;
@@ -58,76 +58,30 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
-    };
+    }
 
     getLanguages() {
         const prepared: Array<string> = [];
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: EObject) => c._id === "//Lang");
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//Lang");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
                         resources.map((r) =>
                                 prepared.push(r.eContents()[0].get('name'))
-                        );
+                        )
                         this.setState({languages: prepared.sort()})
                     })
             }
-        });
+        })
     }
-
-    componentDidMount(): void {
-        if (!this.state.languages.length) {this.getLanguages()}
-        const _this = this;
-        let errorHandler : IErrorHandler = {
-            handleError(error: Error): void {
-                if (error.status === 401) {
-                    _this.setState({principal: undefined});
-                }
-                let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
-                    Close All
-                </Button>);
-                let key = error.error + error.status + error.message;
-                    notification.error({
-                        message: "Error: " + error.status + " (" + error.error + ")",
-                        btn,
-                        duration: 0,
-                        description: error.message,
-                        key,
-                        style: {
-                            width: 400,
-                            marginLeft: -10,
-                            marginTop: 16,
-                            wordWrap: "break-word"
-                        },
-                    })
-            }
-        } as IErrorHandler;
-        API.instance().addErrorHandler(errorHandler);
-    };
-
-    render = () => {
-        return (
-                <Layout>
-                    {this.state.principal === undefined ?
-                        <Layout>
-                            <Login onLoginSucceed={this.setPrincipal}/>
-                        </Layout>
-                        :
-                        <Layout>
-                            {this.renderDev()}
-                        </Layout>
-                    }
-                </Layout>
-        )
-    };
 
     renderDev = () => {
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
-            i18n.changeLanguage(lng);
-        };
+            i18n.changeLanguage(lng)
+        }
         return (
             <Layout style={{height: '100vh'}}>
                 <Header style={{height: '40px', padding: "0px"}}>
@@ -160,7 +114,7 @@ class EcoreApp extends React.Component<any, State> {
                 </Switch>
             </Layout>
         )
-    };
+    }
 
     renderTest = ()=> {
         return (
@@ -170,7 +124,7 @@ class EcoreApp extends React.Component<any, State> {
                 {/*Example with error*/}
                 <DynamicComponent componentPath={"components/reports/component.js"} componentName={"UnCorrect"}/>
             </div>
-        )};
+        )}
 
     renderSettings=()=>{
         const {t} = this.props as Props & WithTranslation;
@@ -179,19 +133,13 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout>
                 <Sider collapsible breakpoint="lg" collapsedWidth="0">
-                    <Menu theme="dark" mode="inline" selectedKeys={selectedKeys}>
-                        <Menu.Item key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
-                        <Menu.Item key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
-                        <Menu.Item key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
+                    <Menu className="aside-menu" theme="dark" mode="inline" selectedKeys={selectedKeys}>
+                        <Menu.Item style={{ fontSize: 17 }} key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
+                        <Menu.Item style={{ fontSize: 17 }} key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
+                        <Menu.Item style={{ fontSize: 17 }} key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
                     </Menu>
                 </Sider>
-                
                 <Layout>
-                    <Header className="head-panel">
-                        <Button className="panel-button" icon="save"/>
-                        <Button className="panel-button" icon="inbox"/>
-                        <Button className="panel-button" icon="usergroup-delete"/>
-                    </Header>
                     <Content>
                         <Switch>
                             <Route path='/settings/metadata' component={MetaBrowserTrans}/>
@@ -203,11 +151,57 @@ class EcoreApp extends React.Component<any, State> {
                 </Layout>
             </Layout>
         )
-    };
+    }
 
     renderStartPage = ()=>{
         return (
             <MainApp {...this.props}/>
+        )
+    }
+
+    componentDidMount(): void {
+        if (!this.state.languages.length) {this.getLanguages()}
+        const _this = this;
+        let errorHandler : IErrorHandler = {
+            handleError(error: Error): void {
+                if (error.status === 401) {
+                    _this.setState({principal: undefined});
+                }
+                let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+                    Close All
+                </Button>);
+                let key = error.error + error.status + error.message;
+                    notification.error({
+                        message: "Error: " + error.status + " (" + error.error + ")",
+                        btn,
+                        duration: 0,
+                        description: error.message,
+                        key,
+                        style: {
+                            width: 400,
+                            marginLeft: -10,
+                            marginTop: 16,
+                            wordWrap: "break-word"
+                        },
+                    })
+            }
+        } as IErrorHandler;
+        API.instance().addErrorHandler(errorHandler);
+    }
+
+    render = () => {
+        return (
+                <Layout>
+                    {this.state.principal === undefined ?
+                        <Layout>
+                            <Login onLoginSucceed={this.setPrincipal}/>
+                        </Layout>
+                        :
+                        <Layout>
+                            {this.renderDev()}
+                        </Layout>
+                    }
+                </Layout>
         )
     }
 }
