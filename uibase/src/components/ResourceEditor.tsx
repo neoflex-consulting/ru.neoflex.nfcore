@@ -514,12 +514,15 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
-        //add
-        //remove
-        //array
-        //this.state.mainEObject.eResource().eContainer.get('resources')
-        const resource = this.state.mainEObject.eResource()
-        resource.addAll(resources)
+        const resourceList:Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources')
+        resourceList.addAll(resources)
+        this.setState({ modalResourceVisible: false })
+    }
+
+    handleDeleteResource = (resource:{ [key: string]: any }): void => {
+        const resourceArray:Ecore.Resource[] = this.state.mainEObject.eResource().eContainer.get('resources').array()
+        resourceArray.forEach(res => res.eURI() === resource.eURI() && res.remove())
+        this.forceUpdate()
     }
 
     handleAddNewRef = (resources: Ecore.Resource[]): void => {
@@ -625,31 +628,40 @@ export class ResourceEditor extends React.Component<any, State> {
                                 <Col span={21}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </Col>
-                                <Col span={3} style={{ position: 'fixed', right: '33px' }}>
+                                <Col span={3} style={{ position: 'sticky', top: '0' }}>
                                     <Button icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
-                                    <div>
-                                    {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
-                                        this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }) =>
+                                    <div className="resource-container">
+                                        {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
+                                            this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }) =>
                                                 <div
                                                     className="resource-container-item"
-                                                    onClick={(e: any) => {
-                                                        //this.handleDeleteRef(el, feature.get('name'))
-                                                    }}
-                                                    key={res["$ref"]}
+                                                    key={res.eURI()}
                                                 >
-                                                    <span style={{ margin: 'auto' }}>
-                                                        {`${res.eContents()[0].get('name')}`}&nbsp;{`${res.eContents()[0].eClass.get('name')}`}&nbsp;
-                                                    </span>
-                                                    <Icon type="close" style={{ position: 'absolute', right: '0', display: 'block', padding: '10px' }} />
+                                                    <Row>
+                                                        <Col span={20}>
+                                                            <span className="item-title">
+                                                                {`${res.eContents()[0].get('name')}`}&nbsp;{<b>{`${res.eContents()[0].eClass.get('name')}`}</b>}&nbsp;
+                                                            </span>
+                                                        </Col>
+                                                        <Col span={4}>
+                                                            <Button
+                                                                className="item-close-button"
+                                                                shape="circle"
+                                                                icon="close"
+                                                                onClick={(e:any)=>this.handleDeleteResource(res)}
+                                                            />
+                                                        </Col>
+                                                    </Row>
                                                 </div>
-                                        )
-                                    }
+                                            )
+                                        }
                                     </div>
                                 </Col>
                             </Row>
                         </div>
                         <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
-                            <Table bordered
+                            <Table 
+                                bordered
                                 size="small"
                                 pagination={false}
                                 columns={[

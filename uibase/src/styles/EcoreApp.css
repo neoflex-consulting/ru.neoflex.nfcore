@@ -29,7 +29,10 @@
 }
 
 .resource-container {
-	overflow: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 0px 6px 8px 0px;
+	height: 420px;
 }
 
 .resource-container-item {
@@ -43,12 +46,15 @@
 	background: #ffffff
 }
 
-.resource-container-item-close-button {
-	margin: 10px 0px 0px auto; 
-	text-align: center;
+.item-close-button {
+	right: 6px;
+	padding: 6px;
 	border: none;
-    box-shadow: 3px 3px 4px 0px #e0e0e0;
-    border-radius: 0px;
-	height: 35px;
-	background: #ffffff
+	box-shadow: none;
+}
+
+.item-title {
+	display: inline-block;
+	user-select: none; 
+	margin-top: 6px;
 }
