@@ -25,6 +25,7 @@ interface State {
     principal?: any;
     appName: string;
     languages: string[];
+    notifierDuration: number;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -34,7 +35,8 @@ class EcoreApp extends React.Component<any, State> {
         this.state = {
             principal: undefined,
             appName: props.appName,
-            languages: []
+            languages: [],
+            notifierDuration: 0
         };
     }
 
@@ -53,6 +55,14 @@ class EcoreApp extends React.Component<any, State> {
         }
         else if (e.key === "testComponent") {
             this.props.history.push('/test');
+        }
+        else if (e.key === "showNotifications"){
+            this.setState({notifierDuration : 0});
+            localStorage.setItem('notifierDuration', '0');
+        }
+        else if (e.key === "autoHideNotifications"){
+            this.setState({notifierDuration : 3});
+            localStorage.setItem('notifierDuration', '3');
         }
     }
 
@@ -101,6 +111,10 @@ class EcoreApp extends React.Component<any, State> {
                                             {c.toUpperCase()}
                                         </Menu.Item>)
                                 }
+                            </Menu.SubMenu>
+                            <Menu.SubMenu  title={<span><Icon type="notification" style={{fontSize: '17px'}}/>Notification</span>}>
+                                <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Show constantly</Menu.Item>
+                                <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>
                             </Menu.SubMenu>
                         </Menu.SubMenu>
                     </Menu>
@@ -174,7 +188,7 @@ class EcoreApp extends React.Component<any, State> {
                     notification.error({
                         message: "Error: " + error.status + " (" + error.error + ")",
                         btn,
-                        duration: 0,
+                        duration: _this.state.notifierDuration,
                         description: error.message,
                         key,
                         style: {
@@ -187,6 +201,9 @@ class EcoreApp extends React.Component<any, State> {
             }
         } as IErrorHandler;
         API.instance().addErrorHandler(errorHandler);
+
+        const localDuration = localStorage.getItem('notifierDuration');
+        localDuration && this.setState({notifierDuration: Number(localDuration) });
     }
 
     render = () => {
