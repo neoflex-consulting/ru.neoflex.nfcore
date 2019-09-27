@@ -1,17 +1,19 @@
 import * as React from "react";
 import Ecore from "ecore";
 import {API} from "../modules/api";
-import Button from "antd/es/button";
-import Form from "antd/es/form";
-import Input from "antd/es/input";
-import FormItem from "antd/es/form/FormItem";
-import {Icon, Select, Tabs} from "antd";
+//import Button from "antd/es/button";
+//import Form from "antd/es/form";
+//import Input from "antd/es/input";
+//import FormItem from "antd/es/form/FormItem";
+import {Icon, Select, Tabs, Button, Form, Input} from "antd";
 import {FormComponentProps} from 'antd/lib/form/Form';
 import Checkbox from "antd/lib/checkbox";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
 import ponyCat from '../ponyCat.png';
 import {withTranslation, WithTranslation} from "react-i18next";
+
+const FormItem = Form.Item;
 
 interface Props {
     onSearch: (resources: Ecore.Resource[]) => void;
