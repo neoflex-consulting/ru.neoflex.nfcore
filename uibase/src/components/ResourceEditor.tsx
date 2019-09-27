@@ -8,9 +8,6 @@ import Ecore from "ecore";
 import { API } from "../modules/api";
 import Splitter from './CustomSplitter'
 import update from 'immutability-helper';
-//import { any } from "prop-types";
-//import _filter from 'lodash/filter'
-//import _map from 'lodash/map'
 import EditableTextArea from './EditableTextArea'
 import SearchGridTrans from "./SearchGrid";
 import { WithTranslation } from "react-i18next";
@@ -95,7 +92,6 @@ export class ResourceEditor extends React.Component<any, State> {
                 let updatedData;
                 if (updaterProperty) {
                     if (indexForParentUpdater !== undefined) {
-                        //updating element of array
                         updatedData = update(currentObject as any, { [updaterProperty]: { [indexForParentUpdater]: { $merge: newValues } } })
                     } else {
                         if (options && options.operation === "push") {
@@ -153,7 +149,6 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     findObjectById(data: any, id: String): any {
-
         const walkThroughArray = (array: Array<any>): any => {
             for (var el of array) {
                 if (el._id && el._id === id) {
@@ -175,7 +170,9 @@ export class ResourceEditor extends React.Component<any, State> {
                 if (Array.isArray(obj[prop])) {
                     result = this.findObjectById(obj[prop], id)
                 } else {
-                    if (obj[prop] instanceof Object && typeof obj[prop] === "object") result = this.findObjectById(obj[prop], id)
+                    if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
+                        result = this.findObjectById(obj[prop], id)
+                    }
                 }
             }
             if (result) return result
@@ -520,8 +517,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     handleDeleteResource = (resource:{ [key: string]: any }): void => {
-        const resourceArray:Ecore.Resource[] = this.state.mainEObject.eResource().eContainer.get('resources').array()
-        resourceArray.forEach(res => res.eURI() === resource.eURI() && res.remove())
+        this.state.mainEObject.eResource().eContainer.get('resources').remove(resource)
         this.forceUpdate()
     }
 
@@ -574,9 +570,10 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     save = () => {
-        //const resourceSet = Ecore.ResourceSet.create()
-        //const resource = resourceSet.create({ uri: this.state.mainEObject.eURI() }).parse(this.state.resourceJSON as Ecore.EObject, () => { })
-        //API.instance().saveResource(resource)
+        const resource: Ecore.Resource = this.state.mainEObject.eResource()
+        if(resource) {
+            API.instance().saveResource(resource)
+        }
     }
 
     componentWillUnmount() {
@@ -604,8 +601,6 @@ export class ResourceEditor extends React.Component<any, State> {
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
                 <Layout.Header className="head-panel">
                     <Button className="panel-button" icon="save" onClick={this.save} />
-                    <Button className="panel-button" icon="inbox" />
-                    <Button className="panel-button" icon="usergroup-delete" />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
@@ -639,16 +634,23 @@ export class ResourceEditor extends React.Component<any, State> {
                                                 >
                                                     <Row>
                                                         <Col span={20}>
-                                                            <span className="item-title">
-                                                                {`${res.eContents()[0].get('name')}`}&nbsp;{<b>{`${res.eContents()[0].eClass.get('name')}`}</b>}&nbsp;
-                                                            </span>
+                                                            <a className="resource-link" href={`/settings/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                                <span className="item-title">
+                                                                    {`${res.eContents()[0].get('name')}`}
+                                                                    &nbsp;
+                                                                    {<b>
+                                                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                                                    </b>}
+                                                                    &nbsp;
+                                                                </span>
+                                                            </a>
                                                         </Col>
                                                         <Col span={4}>
                                                             <Button
                                                                 className="item-close-button"
                                                                 shape="circle"
                                                                 icon="close"
-                                                                onClick={(e:any)=>this.handleDeleteResource(res)}
+                                                                onClick={(e: any) => this.handleDeleteResource(res)}
                                                             />
                                                         </Col>
                                                     </Row>

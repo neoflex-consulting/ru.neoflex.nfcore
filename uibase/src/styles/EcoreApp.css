@@ -58,3 +58,7 @@
 	user-select: none; 
 	margin-top: 6px;
 }
+
+.resource-link {
+	color: inherit;
+}
