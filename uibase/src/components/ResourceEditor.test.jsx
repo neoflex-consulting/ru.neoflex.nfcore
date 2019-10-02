@@ -1,4 +1,7 @@
 import {ResourceEditor} from './ResourceEditor';
+import cloneDeep from 'lodash/cloneDeep'
+
+const resourceEditor = new ResourceEditor();
 
 const testJSONData = { 
     "eClass": "ru.neoflex.nfcore.base.auth#//User", 
@@ -23,11 +26,10 @@ const testJSONData = {
 }
 
 describe("function findObjectById", () => {
-    const resourceEditor = new ResourceEditor();
     let expextedFoundObject
     let result
 
-    it("should return found object from shallow", () => {
+    it("should return a found object from shallow", () => {
         expextedFoundObject = Object.assign({}, testJSONData)
         result = resourceEditor.findObjectById(testJSONData, '/');
         expect(result).toEqual(expextedFoundObject);
@@ -45,7 +47,7 @@ describe("function findObjectById", () => {
         expect(result).toEqual(expextedFoundObject);
     });
 
-    it("should return found object from 'authenticators' array", () => {
+    it("should return a found object from 'authenticators' array", () => {
         expextedFoundObject = { 
             "eClass": "ru.neoflex.nfcore.base.auth#//PasswordAuthenticator", 
             "_id": "//@authenticators.0", 
@@ -55,7 +57,7 @@ describe("function findObjectById", () => {
         expect(result).toEqual(expextedFoundObject);
     });
 
-    it("should return found object from deep 'tests' array", () => {
+    it("should return a found object from deep 'tests' array", () => {
         expextedFoundObject = {
             "testAudit": { "eClass": "ru.neoflex.nfcore.base.testAudit#//testAudit", "_id": "//@testAudit", "created": "2019-08-19T08:55:43.121+0000" },
             "eClass": "ru.neoflex.nfcore.base.test#//Test",
@@ -66,3 +68,21 @@ describe("function findObjectById", () => {
     });
 
 });
+
+describe("function nestUpdaters", () =>{
+    const copyOfJSONData = cloneDeep(testJSONData)
+    const nestedJSON = resourceEditor.nestUpdaters(copyOfJSONData)
+
+    it("should return an object with updaters, particular checking for existing of some updaters", ()=>{
+        expect(nestedJSON).toHaveProperty('updater')
+        expect(nestedJSON.audit).toHaveProperty('updater')
+        expect(nestedJSON.authenticators[1]).toHaveProperty('updater')
+        expect(nestedJSON.authenticators[1].tests[0]).toHaveProperty('updater')
+    })
+})
+
+describe("testing of calling updaters in", () =>{
+    it("should return an updated object with correct data", ()=>{
+        
+    })
+})

@@ -26,3 +26,5 @@ yarn-debug.log*
 yarn-error.log*
 *.iml
 /node_modules
+/build
+/target

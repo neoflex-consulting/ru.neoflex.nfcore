@@ -1,1 +1,6 @@
 uibase/.vscode/launch.json
+/.idea
+/workspace
+
+/uireport
+/parent.iml

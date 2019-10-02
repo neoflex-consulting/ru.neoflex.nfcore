@@ -34,16 +34,19 @@ interface State {
     rightMenuPosition: Object,
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
-    addRefPropertyName: String
+    addRefPropertyName: String,
+    isSaving: Boolean
 }
 
 export class ResourceEditor extends React.Component<any, State> {
 
     private splitterRef: React.RefObject<any>;
+    private selectedRefUries: string[];
 
     constructor(props: any) {
         super(props);
         this.splitterRef = React.createRef();
+        this.selectedRefUries = []
     }
 
     state = {
@@ -60,7 +63,8 @@ export class ResourceEditor extends React.Component<any, State> {
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
         treeRightClickNode: {},
-        addRefPropertyName: ""
+        addRefPropertyName: "",
+        isSaving: false,
     }
 
     getPackages(): void {
@@ -69,7 +73,7 @@ export class ResourceEditor extends React.Component<any, State> {
         })
     }
 
-    getResource(): void {
+    getEObject(): void {
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -79,7 +83,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     /**
-     * Creates updaters for all levels of object, including for objects in arrays.
+     * Creates updaters for all levels of an object, including for objects in arrays.
      */
     nestUpdaters(json: any, parentObject: any = null, property?: String): Object {
 
@@ -103,7 +107,7 @@ export class ResourceEditor extends React.Component<any, State> {
                         } else if (options && options.operation === "set") {
                             updatedData = update(currentObject as any, { [updaterProperty]: { $set: newValues } })
                         } else {
-                            //if nothing from listed above, then updating object by property name
+                            //if nothing from listed above, then updating the object by a property name
                             updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
                         }
                     }
@@ -521,7 +525,7 @@ export class ResourceEditor extends React.Component<any, State> {
         this.forceUpdate()
     }
 
-    handleAddNewRef = (resources: Ecore.Resource[]): void => {
+    addRef = (resources: Ecore.Resource[]): void => {
         const targetObject: { [key: string]: any } = this.state.targetObject
         const { addRefPropertyName } = this.state
         let updatedJSON: Object = {}
@@ -529,19 +533,20 @@ export class ResourceEditor extends React.Component<any, State> {
         //too explosive?
         const feature = this.state.mainEObject.eClass.get('eAllStructuralFeatures').find((feature: Ecore.EObject) => feature.get('name') === addRefPropertyName)
         const upperBound = feature && feature.get('upperBound')
-        //can res.eContents()[0] be null?
+        //res.eContents()[0] may not be null, I hope
         if (upperBound === -1) {
             refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
             resources.forEach((res) => {
-                const isInArray = refsArray.findIndex((refObj: { [key: string]: any }) => res.eContents()[0].eURI() === refObj["$ref"])
-                isInArray === -1 && refsArray.push({
+                //const isInArray = refsArray.findIndex((refObj: { [key: string]: any }) => res.eContents()[0].eURI() === refObj["$ref"])
+                //isInArray === -1 && refsArray.push({
+                refsArray.push({
                     $ref: res.eContents()[0].eURI(),
                     eClass: res.eContents()[0].eClass.eURI()
                 })
             })
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
-            //if user choose several resources for adding, but upperBound === 1, we put only first resource
+            //if a user choose several resources for the adding, but upperBound === 1, we put only a first resource
             updatedJSON = targetObject.updater({
                 [addRefPropertyName]: {
                     $ref: resources[0].eContents()[0].eURI(),
@@ -551,6 +556,15 @@ export class ResourceEditor extends React.Component<any, State> {
         }
         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
         this.setState({ modalRefVisible: false, resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    }
+
+    handleAddNewRef = () => {
+        const resources:any = []
+        this.state.mainEObject.eResource().eContainer.get('resources').each((res: { [key: string]: any }) =>{
+            const isFound = this.selectedRefUries.indexOf(res.eURI())
+            isFound !== -1 && resources.push(res)
+        })
+        this.addRef(resources)
     }
 
     handleDeleteRef = (deletedObject: any, addRefPropertyName: string) => {
@@ -570,9 +584,17 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     save = () => {
-        const resource: Ecore.Resource = this.state.mainEObject.eResource()
+        this.state.mainEObject.eResource().clear()
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
+    
         if(resource) {
-            API.instance().saveResource(resource)
+            this.setState({ isSaving: true })
+            API.instance().saveResource(resource).then((result:any) => {
+                this.getEObject()
+                this.setState({ isSaving: false })
+            }).catch(()=>{
+                this.setState({ isSaving: false })
+            })
         }
     }
 
@@ -591,7 +613,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
     componentDidMount(): void {
         this.getPackages()
-        this.getResource()
+        this.getEObject()
         window.addEventListener("click", this.hideRightClickMenu)
     }
 
@@ -600,7 +622,10 @@ export class ResourceEditor extends React.Component<any, State> {
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
                 <Layout.Header className="head-panel">
-                    <Button className="panel-button" icon="save" onClick={this.save} />
+                    {this.state.isSaving ?
+                        <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
+                    :
+                        <Button className="panel-button" icon="save" onClick={this.save} />}
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
@@ -681,17 +706,35 @@ export class ResourceEditor extends React.Component<any, State> {
                         </div>
                     </Splitter>
                 </div>
-                <Modal
+                {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
-                    width={'1000px'}
+                    width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
-                    footer={null}
                     onCancel={this.handleRefModalCancel}
+                    onOk={this.handleAddNewRef}
                 >
-                    <SearchGridTrans key="search_grid_ref" onSelect={this.handleAddNewRef} showAction={true} specialEClass={undefined} />
-                </Modal>
-                <Modal
+                    <Select
+                        mode="multiple"
+                        style={{ width: '93%' }}
+                        placeholder="Please select"
+                        defaultValue={[]}
+                        onChange={(uriArray:string[])=>{
+                            this.selectedRefUries = uriArray
+                        }}
+                    >
+                        {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) =>
+                            <Select.Option key={index} value={res.eURI()}>
+                                {<b>
+                                    {`${res.eContents()[0].eClass.get('name')}`}
+                                </b>}
+                                &nbsp;
+                                {`${res.eContents()[0].get('name')}`}
+                            </Select.Option>
+                        )}
+                    </Select>
+                </Modal>}
+                {this.state.modalResourceVisible && <Modal
                     key="add_resource_modal"
                     width={'1000px'}
                     title={t('addresource')}
@@ -700,7 +743,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     onCancel={this.handleResourceModalCancel}
                 >
                     <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
-                </Modal>
+                </Modal>}
             </div>
         );
     }

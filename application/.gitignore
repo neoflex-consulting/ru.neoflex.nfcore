@@ -1,5 +1,6 @@
 HELP.md
 target/
+workspace/
 .mvn/
 **/src/main/java-gen/**
 !**/src/test/**
