@@ -68,7 +68,7 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
-    }
+    };
 
     getLanguages() {
         const prepared: Array<string> = [];
@@ -79,7 +79,7 @@ class EcoreApp extends React.Component<any, State> {
                     .then((resources) => {
                         resources.map((r) =>
                                 prepared.push(r.eContents()[0].get('name'))
-                        )
+                        );
                         this.setState({languages: prepared.sort()})
                     })
             }
@@ -91,7 +91,7 @@ class EcoreApp extends React.Component<any, State> {
         const {t, i18n} = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
-        }
+        };
         return (
             <Layout style={{height: '100vh'}}>
                 <Header style={{height: '40px', padding: "0px"}}>
@@ -147,10 +147,10 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout>
                 <Sider collapsible breakpoint="lg" collapsedWidth="0">
-                    <Menu className="aside-menu" theme="dark" mode="inline" selectedKeys={selectedKeys}>
-                        <Menu.Item style={{ fontSize: 17 }} key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 17 }} key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 17 }} key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
+                    <Menu className="dark" theme="dark" mode="inline" selectedKeys={selectedKeys}>
+                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
