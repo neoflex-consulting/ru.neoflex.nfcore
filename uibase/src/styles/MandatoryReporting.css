@@ -36,11 +36,7 @@
 
 /* GENERAL */
 
-* {
-    box-sizing: border-box;
-}
-
-body {
+.body {
     font-family: 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     font-size: 1em;
     font-weight: 300;
@@ -48,6 +44,7 @@ body {
     color: var(--text-color);
     background: var(--bg-color);
     position: relative;
+    box-sizing: border-box
 }
 
 .headerCalendar {
