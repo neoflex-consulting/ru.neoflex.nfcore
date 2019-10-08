@@ -6,7 +6,7 @@ import {API} from "../../modules/api";
 interface State {
     currentMonth: Date;
     selectedDate: Date;
-    Reports: any;
+    Reports: Ecore.EObject[];
 }
 
 interface Props {
@@ -90,14 +90,16 @@ class Calendar extends React.Component<Props, State> {
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
-                    <div
+                    < div
                         className={`col cell ${
                             !dateFns.isSameMonth(day, monthStart)
                                 ? "disabled"
                                 : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
                             }`}
                         key = {day.toString()}
-                        onClick={() => this.onDateClick(dateFns.parse(cloneDay.toString(), "dddd", 0))}
+                        onClick={() =>
+                            this.onDateClick(cloneDay)
+                        }
                     >
                         <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
