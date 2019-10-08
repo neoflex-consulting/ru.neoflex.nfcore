@@ -9,9 +9,13 @@ package ru.neoflex.nfcore.reports
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.datasource.Dataset
 import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.base.types.Text
 
 class Report {
 	QName name
 	Date date
-	refers Dataset dataset	
+	refers Dataset dataset
+
+	Text description
+	Text status
 }
