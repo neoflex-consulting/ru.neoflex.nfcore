@@ -83,6 +83,6 @@ describe("function nestUpdaters", () =>{
 
 describe("testing of calling updaters in", () =>{
     it("should return an updated object with correct data", ()=>{
-        
+        copyOfJSONData 
     })
 })

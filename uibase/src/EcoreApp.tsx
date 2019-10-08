@@ -88,45 +88,50 @@ class EcoreApp extends React.Component<any, State> {
 
     renderDev = () => {
         let principal = this.state.principal as any;
-        const {t, i18n} = this.props as Props & WithTranslation;
+        const { t, i18n } = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
+        const getLogoClass = () => window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"
+            
         return (
-            <Layout style={{height: '100vh'}}>
-                <Header style={{height: '40px', padding: "0px"}}>
-                    <Menu theme="dark" mode="horizontal" onClick={(e) => this.onRightMenu(e)} style={{float: "right", height: '100%'}}>
-                        <Menu.SubMenu title={<span><Icon type="user" style={{fontSize: '17px', marginRight: '0'}}/> {principal.name}</span>} style={{float: "right", height: '100%', top: '-3px'}}>
-                            <Menu.Item key={'logout'}><Icon type="logout" style={{fontSize: '17px'}}/>{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}><Icon type="setting" style={{fontSize: '17px'}} theme="filled"/>{t('developer')}</Menu.Item>
-                            <Menu.Item key={'app'}><Icon type="sketch" style={{fontSize: '17px'}}/>App</Menu.Item>
-                            <Menu.Item key={'testComponent'}><Icon type="coffee" style={{fontSize: '17px'}}/>Test component</Menu.Item>
-                            <Menu.SubMenu  title={<span><Icon type="global" style={{fontSize: '17px'}}/>{t('language')}</span>}>
+            <Layout style={{ height: '100vh' }}>
+                <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
+                    <div className={getLogoClass()}>
+                        <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
+                        <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
+                    </div>
+                    <Menu theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)} style={{ float: "right", height: '100%', border: 'none' }}>
+                        <Menu.SubMenu title={<span><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                            <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
+                            <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
+                            <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
+                            <Menu.Item key={'testComponent'}><Icon type="coffee" style={{ fontSize: '17px' }} />Test component</Menu.Item>
+                            <Menu.SubMenu title={<span><Icon type="global" style={{ fontSize: '17px' }} />{t('language')}</span>}>
                                 {
                                     this.state.languages.map((c: any) =>
                                         <Menu.Item key={c} onClick={() =>
                                             setLang(c)
                                         }>
-                                            <Icon type="flag" style={{fontSize: '17px'}}/>
+                                            <Icon type="flag" style={{ fontSize: '17px' }} />
                                             {c.toUpperCase()}
                                         </Menu.Item>)
                                 }
                             </Menu.SubMenu>
-                            <Menu.SubMenu  title={<span><Icon type="notification" style={{fontSize: '17px'}}/>Notification</span>}>
+                            <Menu.SubMenu title={<span><Icon type="notification" style={{ fontSize: '17px' }} />Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
-                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Disable autohiding</Menu.Item>
-                                :
-                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>}
+                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{ fontSize: '17px' }} />Disable autohiding</Menu.Item>
+                                    :
+                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{ fontSize: '17px' }} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
                         </Menu.SubMenu>
                     </Menu>
                 </Header>
-
                 <Switch>
-                    <Redirect from={'/'} exact={true} to={'/app'}/>
-                    <Route path='/app' component={this.renderStartPage}/>
-                    <Route path='/settings' component={this.renderSettings}/>
-                    <Route path='/test' component={this.renderTest}/>
+                    <Redirect from={'/'} exact={true} to={'/app'} />
+                    <Route path='/app' component={this.renderStartPage} />
+                    <Route path='/settings' component={this.renderSettings} />
+                    <Route path='/test' component={this.renderTest} />
                 </Switch>
             </Layout>
         )
@@ -142,26 +147,41 @@ class EcoreApp extends React.Component<any, State> {
             </div>
         )}
 
-    renderSettings=()=>{
-        const {t} = this.props as Props & WithTranslation;
+    renderSettings = () => {
+        const { t } = this.props as Props & WithTranslation;
         let selectedKeys = ['metadata', 'data', 'query']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
-                <Sider collapsible breakpoint="lg" collapsedWidth="0">
-                    <Menu className="dark" theme="dark" mode="inline" selectedKeys={selectedKeys}>
-                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
+                <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
+                    <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430' }}>
+                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
+                        <Link to={`/settings/metadata`}>
+                            <Icon type="compass" style={{ color: '#7d7d7d' }} />
+                            <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
+                        </Link>
+                        </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'data'}>
+                            <Link to={`/settings/data`}>
+                            <Icon type="shopping" style={{ color: '#7d7d7d' }} />  
+                            <span style={{ color: '#eeeeee' }}>{t('data')}</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'query'}>
+                            <Link to={`/settings/query`}>
+                            <Icon type="database" style={{ color: '#7d7d7d' }} />  
+                            <span style={{ color: '#eeeeee' }}>{t('query')}</span>
+                            </Link>
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Content>
+                    <Content className="app-content">
                         <Switch>
-                            <Route path='/settings/metadata' component={MetaBrowserTrans}/>
-                            <Route exact={true} path='/settings/data' component={DataBrowser}/>
-                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans}/>
-                            <Route path='/settings/query' component={QueryRunnerTrans}/>
+                            <Route path='/settings/metadata' component={MetaBrowserTrans} />
+                            <Route exact={true} path='/settings/data' component={DataBrowser} />
+                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans} />
+                            <Route path='/settings/query' component={QueryRunnerTrans} />
                         </Switch>
                     </Content>
                 </Layout>
@@ -212,13 +232,9 @@ class EcoreApp extends React.Component<any, State> {
         return (
                 <Layout>
                     {this.state.principal === undefined ?
-                        <Layout>
                             <Login onLoginSucceed={this.setPrincipal}/>
-                        </Layout>
                         :
-                        <Layout>
-                            {this.renderDev()}
-                        </Layout>
+                            this.renderDev()
                     }
                 </Layout>
         )
