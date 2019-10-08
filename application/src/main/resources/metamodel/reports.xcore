@@ -8,8 +8,10 @@
 package ru.neoflex.nfcore.reports
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.datasource.Dataset
+import ru.neoflex.nfcore.base.types.Date
 
 class Report {
 	QName name
+	Date date
 	refers Dataset dataset	
 }
