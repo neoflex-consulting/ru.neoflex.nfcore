@@ -13,6 +13,7 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
+import MandatoryReporting from "./components/app/MandatoryReporting";
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -63,6 +64,9 @@ class EcoreApp extends React.Component<any, State> {
         else if (e.key === "autoHideNotifications"){
             this.setState({notifierDuration : 3});
             localStorage.setItem('notifierDuration', '3');
+        }
+        else if (e.key === "mandatoryreporting"){
+            this.props.history.push('/mandatoryreporting');
         }
     }
 
@@ -124,6 +128,7 @@ class EcoreApp extends React.Component<any, State> {
                                     :
                                     <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{ fontSize: '17px' }} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
+                            <Menu.Item key={'mandatoryreporting'}><Icon type="calendar" style={{fontSize: '17px'}}/>Mandatory Reporting</Menu.Item>
                         </Menu.SubMenu>
                     </Menu>
                 </Header>
@@ -132,6 +137,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/app' component={this.renderStartPage} />
                     <Route path='/settings' component={this.renderSettings} />
                     <Route path='/test' component={this.renderTest} />
+                    <Route path='/mandatoryreporting' component={this.renderMandatoryReporting}/>
                 </Switch>
             </Layout>
         )
@@ -147,8 +153,16 @@ class EcoreApp extends React.Component<any, State> {
             </div>
         )}
 
-    renderSettings = () => {
-        const { t } = this.props as Props & WithTranslation;
+	renderMandatoryReporting = ()=> {
+        return (
+            <div>
+                <MandatoryReporting/>
+            </div>
+        )};
+
+    
+    renderSettings=()=>{
+        const {t} = this.props as Props & WithTranslation;
         let selectedKeys = ['metadata', 'data', 'query']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
