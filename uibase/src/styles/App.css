@@ -46,11 +46,11 @@
 }
 
 .ant-layout-sider-zero-width-trigger{
-  /*bottom: 0px !important;*/
-  top: -50px !important;
+  bottom: 0px !important;
+  top: unset !important;
   /*z-index: 5 !important;*/
   background-color: transparent !important;
-  color: #7e7e7e !important;
+  color: #b4b4b4 !important;
   font-size: 20px;
 }
 
