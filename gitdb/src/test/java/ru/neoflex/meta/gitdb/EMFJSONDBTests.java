@@ -58,11 +58,12 @@ public class EMFJSONDBTests {
 
     @Test
     public void createEMFObject() throws IOException {
+        String userId;
         try (Transaction tx = database.createTransaction("users")) {
             Group group = TestFactory.eINSTANCE.createGroup();
             group.setName("masters");
             ResourceSet resourceSet = database.getResourceSet(tx);
-            Resource groupResource = resourceSet.createResource(URI.createURI("http://").appendSegment(""));
+            Resource groupResource = resourceSet.createResource(URI.createURI("http://"));
             groupResource.getContents().add(group);
             groupResource.save(null);
             User user = TestFactory.eINSTANCE.createUser();
@@ -72,8 +73,17 @@ public class EMFJSONDBTests {
             userResource.getContents().add(user);
             userResource.save(null);
             tx.commit("User Orlov and group masters created", "orlov");
-            String userId = userResource.getURI().segment(0);
+            userId = userResource.getURI().segment(0);
             Assert.assertNotNull(userId);
+        }
+        try (Transaction tx = database.createTransaction("users")){
+            ResourceSet resourceSet = database.getResourceSet(tx);
+            Resource userResource = resourceSet.createResource(URI.createURI("http://").appendSegment(userId));
+            userResource.load(null);
+            User user = (User) userResource.getContents().get(0);
+            user.setName("Simanihin");
+            userResource.save(null);
+            tx.commit("User Orlov was renamed to Simanihin", "orlov");
         }
     }
 }
