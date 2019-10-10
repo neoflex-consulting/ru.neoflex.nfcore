@@ -40,17 +40,7 @@ public class EMFJSONDB extends Database {
             @Override
             public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
                 IndexEntry entry = new IndexEntry();
-                ObjectNode node = (ObjectNode) mapper.readTree(entity.getContent());
-                ResourceSet resourceSet = getResourceSet(transaction);
-                Resource resource = resourceSet.createResource(URI.createURI("http://"));
-                ContextAttributes attributes = ContextAttributes
-                        .getEmpty()
-                        .withSharedAttribute("resourceSet", resourceSet)
-                        .withSharedAttribute("resource", resource);
-                mapper.reader()
-                        .with(attributes)
-                        .withValueToUpdate(resource)
-                        .treeToValue(node, Resource.class);
+                Resource resource = getResource(entity, transaction);
                 EObject eObject = resource.getContents().get(0);
                 EClass eClass = eObject.eClass();
                 EPackage ePackage = eClass.getEPackage();
@@ -71,17 +61,7 @@ public class EMFJSONDB extends Database {
             @Override
             public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
                 ArrayList<IndexEntry> result = new ArrayList<IndexEntry>();
-                ObjectNode node = (ObjectNode) mapper.readTree(entity.getContent());
-                ResourceSet resourceSet = getResourceSet(transaction);
-                Resource resource = resourceSet.createResource(URI.createURI("http://"));
-                ContextAttributes attributes = ContextAttributes
-                        .getEmpty()
-                        .withSharedAttribute("resourceSet", resourceSet)
-                        .withSharedAttribute("resource", resource);
-                mapper.reader()
-                        .with(attributes)
-                        .withValueToUpdate(resource)
-                        .treeToValue(node, Resource.class);
+                Resource resource = getResource(entity, transaction);
                 if (!resource.getContents().isEmpty()) {
                     Map<EObject, Collection<EStructuralFeature.Setting>> cr =  EcoreUtil.CrossReferencer.find(resource.getContents());
                     for (EObject eObject: cr.keySet()) {
@@ -96,6 +76,21 @@ public class EMFJSONDB extends Database {
                 return result;
             }
         });
+    }
+
+    private Resource getResource(Entity entity, Transaction transaction) throws IOException {
+        ObjectNode node = (ObjectNode) mapper.readTree(entity.getContent());
+        ResourceSet resourceSet = getResourceSet(transaction);
+        Resource resource = resourceSet.createResource(URI.createURI("http://"));
+        ContextAttributes attributes = ContextAttributes
+                .getEmpty()
+                .withSharedAttribute("resourceSet", resourceSet)
+                .withSharedAttribute("resource", resource);
+        mapper.reader()
+                .with(attributes)
+                .withValueToUpdate(resource)
+                .treeToValue(node, Resource.class);
+        return resource;
     }
 
     public ResourceSet getResourceSet(Transaction transaction) {
