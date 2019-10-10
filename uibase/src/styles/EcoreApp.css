@@ -52,6 +52,10 @@
 	display: inline-block;
 	user-select: none; 
 	margin-top: 6px;
+	white-space: nowrap;
+	width: 115px;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .resource-link {
