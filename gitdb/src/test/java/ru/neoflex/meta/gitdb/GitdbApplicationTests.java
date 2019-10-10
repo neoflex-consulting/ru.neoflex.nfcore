@@ -21,7 +21,7 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class GitdbApplicationTests {
-    public static final String GITDB = "gitdb";
+    public static final String GITDB = "gitdbtest";
     Database database;
     ObjectMapper mapper = new ObjectMapper();
 
