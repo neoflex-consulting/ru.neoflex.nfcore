@@ -42,33 +42,8 @@ public class EMFJSONDBTests {
     @Before
     public void startUp() throws IOException, GitAPIException {
         deleteDirectory(new File(GITDB));
-        database = new EMFJSONDB(GITDB, getMapper(), new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        database = new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
         database.createBranch("users", "master");
-    }
-
-    public static EMFModule getModule() {
-        EMFModule emfModule = new EMFModule();
-        emfModule.configure(EMFModule.Feature.OPTION_USE_ID, true);
-        emfModule.setTypeInfo(new EcoreTypeInfo("eClass"));
-        emfModule.setIdentityInfo(new EcoreIdentityInfo("_id",
-                new ValueWriter<EObject, Object>() {
-                    @Override
-                    public Object writeValue(EObject eObject, SerializerProvider context) {
-                        URI eObjectURI = EMFContext.getURI(context, eObject);
-                        if (eObjectURI == null) {
-                            return null;
-                        }
-                        return eObjectURI.fragment();
-                    }
-                }));
-        return emfModule;
-    }
-
-    public static ObjectMapper getMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(getModule());
-        mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
-        return mapper;
     }
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
