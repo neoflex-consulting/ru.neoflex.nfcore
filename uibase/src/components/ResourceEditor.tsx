@@ -18,7 +18,6 @@ export interface Props {
 interface State {
     mainEObject: Ecore.EObject,
     resourceJSON: { [key: string]: any },
-    ePackages: Ecore.EPackage[],
     currentNode: {
         [key: string]: any
     },
@@ -52,7 +51,6 @@ export class ResourceEditor extends React.Component<any, State> {
     state = {
         mainEObject: {} as Ecore.EObject,
         resourceJSON: {},
-        ePackages: [],
         currentNode: {},
         tableData: [],
         targetObject: { eClass: "" },
@@ -67,13 +65,8 @@ export class ResourceEditor extends React.Component<any, State> {
         isSaving: false,
     }
 
-    getPackages(): void {
-        API.instance().fetchPackages().then(packages => {
-            this.setState({ ePackages: packages })
-        })
-    }
-
     getEObject(): void {
+
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -194,7 +187,7 @@ export class ResourceEditor extends React.Component<any, State> {
     createTree() {
 
         const getTitle = (object: { [key: string]: any }) => {
-            const possibleTitles: Array<string> = ["name", "qname", "caption", "createdBy"]
+            const possibleTitles: Array<string> = ["name", "qname", "caption", "createdBy", "code"]
             let result = null
             for (let title of possibleTitles) {
                 if (object[title]) {
@@ -477,8 +470,7 @@ export class ResourceEditor extends React.Component<any, State> {
             }
             const nestedJSON = this.nestUpdaters(updatedJSON, null);
             const updatedTargetObject = !targetObject._id ? targetObject : this.findObjectById(updatedJSON, targetObject._id)
-            const resourceSet = Ecore.ResourceSet.create()
-            const resource = resourceSet.create({ uri: this.state.mainEObject.eURI() }).parse(updatedJSON, () => { })
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
@@ -504,8 +496,7 @@ export class ResourceEditor extends React.Component<any, State> {
             }
             const nestedJSON = this.nestUpdaters(updatedJSON, null);
             const updatedTargetObject = !targetObject._id ? targetObject : this.findObjectById(updatedJSON, targetObject._id)
-            const resourceSet = Ecore.ResourceSet.create()
-            const resource = resourceSet.create({ uri: this.state.mainEObject.eURI() }).parse(updatedJSON, () => { })
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
@@ -612,8 +603,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getPackages()
-        this.getEObject()
+        this.getEObject() 
         window.addEventListener("click", this.hideRightClickMenu)
     }
 

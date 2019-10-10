@@ -13,7 +13,7 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import MandatoryReporting from "./components/app/MandatoryReporting";
+import MandatoryReportingTrans from "./components/app/MandatoryReporting";
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -66,7 +66,6 @@ class EcoreApp extends React.Component<any, State> {
             localStorage.setItem('notifierDuration', '3');
         }
         else if (e.key === "mandatoryreporting"){
-            this.setState({notifierDuration : 0});
             this.props.history.push('/mandatoryreporting');
         }
     }
@@ -118,8 +117,10 @@ class EcoreApp extends React.Component<any, State> {
                                 }
                             </Menu.SubMenu>
                             <Menu.SubMenu  title={<span><Icon type="notification" style={{fontSize: '17px'}}/>Notification</span>}>
-                                <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Show constantly</Menu.Item>
-                                <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>
+                                {localStorage.getItem('notifierDuration') === '3' ?
+                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Disable autohiding</Menu.Item>
+                                :
+                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
                             <Menu.Item key={'mandatoryreporting'}><Icon type="calendar" style={{fontSize: '17px'}}/>Mandatory Reporting</Menu.Item>
                         </Menu.SubMenu>
@@ -150,7 +151,7 @@ class EcoreApp extends React.Component<any, State> {
     renderMandatoryReporting = ()=> {
         return (
             <div>
-                <MandatoryReporting/>
+                <MandatoryReportingTrans/>
             </div>
         )};
 
