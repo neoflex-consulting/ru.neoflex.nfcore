@@ -18,7 +18,6 @@ export interface Props {
 interface State {
     mainEObject: Ecore.EObject,
     resourceJSON: { [key: string]: any },
-    ePackages: Ecore.EPackage[],
     currentNode: {
         [key: string]: any
     },
@@ -52,7 +51,6 @@ export class ResourceEditor extends React.Component<any, State> {
     state = {
         mainEObject: {} as Ecore.EObject,
         resourceJSON: {},
-        ePackages: [],
         currentNode: {},
         tableData: [],
         targetObject: { eClass: "" },
@@ -67,13 +65,8 @@ export class ResourceEditor extends React.Component<any, State> {
         isSaving: false,
     }
 
-    getPackages(): void {
-        API.instance().fetchPackages().then(packages => {
-            this.setState({ ePackages: packages })
-        })
-    }
-
     getEObject(): void {
+
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -610,8 +603,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getPackages()
-        this.getEObject()
+        this.getEObject() 
         window.addEventListener("click", this.hideRightClickMenu)
     }
 

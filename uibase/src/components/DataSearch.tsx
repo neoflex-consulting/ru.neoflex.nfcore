@@ -1,17 +1,15 @@
 import * as React from "react";
 import Ecore from "ecore";
-import {API} from "../modules/api";
-//import Button from "antd/es/button";
-//import Form from "antd/es/form";
-//import Input from "antd/es/input";
-//import FormItem from "antd/es/form/FormItem";
-import {Icon, Select, Tabs, Button, Form, Input} from "antd";
-import {FormComponentProps} from 'antd/lib/form/Form';
+import { API } from "../modules/api";
+import { Icon, Select, Tabs, Button, Form, Input, Row, Col } from "antd";
+import { FormComponentProps } from 'antd/lib/form/Form';
 import Checkbox from "antd/lib/checkbox";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
 import ponyCat from '../ponyCat.png';
-import {withTranslation, WithTranslation} from "react-i18next";
+import { withTranslation, WithTranslation } from "react-i18next";
+
+import ResourceCreateFrom from './ResourceCreateForm'
 
 const FormItem = Form.Item;
 
@@ -23,13 +21,15 @@ interface Props {
 interface State {
     classes: Ecore.EObject[];
     indicatorError: boolean;
+    createResModalVisible: boolean;
 }
 
 class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
 
     state = {
         classes: [],
-        indicatorError: false
+        indicatorError: false,
+        createResModalVisible: false
     };
 
     handleSubmit = (e: any) => {
@@ -40,7 +40,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.setState({indicatorError: false});
+                this.setState({ indicatorError: false });
                 let selectedClassObject: Ecore.EClass | undefined;
                 if (this.props.specialEClass === undefined) {
                     selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
@@ -64,15 +64,15 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                             .then((resources) => {
                                 this.props.onSearch(resources)
                             }))
-            } else this.setState({indicatorError: true})
+            } else this.setState({ indicatorError: true })
         });
     };
 
     getEClasses(): void {
-            API.instance().fetchAllClasses(false).then(classes => {
+        API.instance().fetchAllClasses(false).then(classes => {
             const filtered = (classes.filter((c: Ecore.EObject) => !c.get('interface')))
                 .sort((a: any, b: any) => this.sortEClasses(a, b));
-            this.setState({classes: filtered})
+            this.setState({ classes: filtered })
         })
     }
 
@@ -82,110 +82,141 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         else return 0;
     };
 
+    setModalVisible = (state:boolean) => {
+        this.setState({ createResModalVisible: state })
+    }
+
     componentDidMount(): void {
         this.getEClasses()
     }
 
     render() {
-        const {Option} = Select;
-        const {getFieldDecorator, getFieldValue, setFields} = this.props.form;
-        const {TabPane} = Tabs;
-        const {t} = this.props;
+        const { Option } = Select;
+        const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
+        const { TabPane } = Tabs;
+        const { t } = this.props;
+
         return (
-            <Form onSubmit={this.handleSubmit}>
-                {getFieldDecorator('key', {initialValue: 'data_search'})(
-                    <Tabs onChange={(key: string) => {
-                        setFields({key: {value: key}});
-                    }}>
-                        <TabPane tab='Data Search' key='data_search'>
-                            <FormItem>
-                                {getFieldDecorator('selectEClass', {
-                                    initialValue: this.props.specialEClass === undefined
-                                        ? undefined :
-                                        this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                    rules: [{
-                                        required: getFieldValue('key') === 'data_search',
-                                        message: 'Please select eClass',
-                                    }],
-                                })(
-                                    <Select
-                                        notFoundContent={t('notfound')}
-                                        allowClear={true}
-                                        showSearch={true}
-                                        disabled={!!this.props.specialEClass}
-                                        style={{width: '270px'}}
-                                        autoFocus
-                                        placeholder="EClass">
-                                        {
-                                            this.state.classes.map((c: Ecore.EObject, i: Number) =>
-                                            <Option value={`${c.eContainer.get('name')}.${c.get('name')}`} key={`${i}${c.get('name')}`}>
-                                                {`${c.eContainer.get('name')}.${c.get('name')}`}
-                                            </Option>)
+            <React.Fragment>
+                {this.state.createResModalVisible && <ResourceCreateFrom 
+                    classes={ this.state.classes }
+                    refresh={ this.refresh }
+                    createResModalVisible={ this.state.createResModalVisible }
+                    form = { this.props.form }
+                    translate={ t }
+                    setModalVisible={this.setModalVisible}
+                />}
+                <Row>
+                    <Col span={23}>
+                        <Form onSubmit={this.handleSubmit}>
+                            {getFieldDecorator('key', { initialValue: 'data_search' })(
+                                <Tabs onChange={(key: string) => {
+                                    setFields({ key: { value: key } });
+                                }}>
+                                    <TabPane tab='Data Search' key='data_search'>
+                                        <FormItem>
+                                            {getFieldDecorator('selectEClass', {
+                                                initialValue: this.props.specialEClass === undefined
+                                                    ? undefined :
+                                                    this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
+                                                rules: [{
+                                                    required: getFieldValue('key') === 'data_search',
+                                                    message: 'Please select eClass',
+                                                }],
+                                            })(
+                                                <Select
+                                                    notFoundContent={t('notfound')}
+                                                    allowClear={true}
+                                                    showSearch={true}
+                                                    disabled={!!this.props.specialEClass}
+                                                    style={{ width: '270px' }}
+                                                    autoFocus
+                                                    placeholder="EClass">
+                                                    {
+                                                        this.state.classes.map((c: Ecore.EObject, i: Number) =>
+                                                            <Option value={`${c.eContainer.get('name')}.${c.get('name')}`} key={`${i}${c.get('name')}`}>
+                                                                {`${c.eContainer.get('name')}.${c.get('name')}`}
+                                                            </Option>)
+                                                    }
+                                                </Select>
+                                            )}
+                                        </FormItem>
+                                        <FormItem style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator('name', {
+                                                rules: [{
+                                                    required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
+                                                    message: 'Please enter name'
+                                                }]
+                                            })(
+                                                <Input placeholder={t("datasource.eClasses.Driver.eStructuralFeatures.name.caption",
+                                                    { ns: 'packages' })} style={{ width: '270px' }} type="text" />
+                                            )}
+                                        </FormItem>
+                                        <FormItem style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator('regular_expression', {
+                                                valuePropName: 'checked'
+                                            })(
+                                                <Checkbox style={{ marginLeft: '10px' }}>{t("regularexpression")}</Checkbox>
+                                            )}
+                                        </FormItem>
+                                        {this.state.indicatorError ?
+                                            <img alt={t('notfound')} src={ponyCat} className="error" />
+                                            :
+                                            undefined
                                         }
-                                    </Select>
-                                )}
-                            </FormItem>
-                            <FormItem style={{display: 'inline-block'}}>
-                                {getFieldDecorator('name', {
-                                    rules: [{
-                                        required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
-                                        message: 'Please enter name'
-                                    }]
-                                })(
-                                    <Input placeholder={t("datasource.eClasses.Driver.eStructuralFeatures.name.caption",
-                                        {ns: 'packages'})} style={{width: '270px'}} type="text"/>
-                                )}
-                            </FormItem>
-                            <FormItem style={{display: 'inline-block'}}>
-                                {getFieldDecorator('regular_expression', {
-                                    valuePropName: 'checked'
-                                })(
-                                    <Checkbox style={{marginLeft: '10px'}}>{t("regularexpression")}</Checkbox>
-                                )}
-                            </FormItem>
-                            {this.state.indicatorError ?
-                                <img alt={t('notfound')} src={ponyCat} className="error" />
-                                :
-                                undefined
-                            }
-                        </TabPane>
-                        <TabPane tab='Json Search' key='json_search'>
+                                    </TabPane>
+                                    <TabPane tab='Json Search' key='json_search'>
+                                        <FormItem>
+                                            {getFieldDecorator('json_field', {
+                                                initialValue: JSON.stringify({
+                                                    contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
+                                                }, null, 4),
+                                                rules: [{
+                                                    required: getFieldValue('key') === 'json_search',
+                                                    message: 'Please enter json'
+                                                }]
+                                            })(
+                                                <div>
+                                                    <AceEditor
+                                                        ref={"aceEditor"}
+                                                        mode={"json"}
+                                                        width={"100%"}
+                                                        onChange={(json_field: string) => {
+                                                            setFields({ json_field: { value: json_field } });
+                                                        }}
+                                                        editorProps={{ $blockScrolling: true }}
+                                                        value={getFieldValue('json_field')}
+                                                        showPrintMargin={false}
+                                                        theme={"tomorrow"}
+                                                        debounceChangePeriod={100}
+                                                        height={"104px"}
+                                                    />
+                                                </div>
+                                            )}
+                                        </FormItem>
+                                    </TabPane>
+                                </Tabs>
+                            )}
                             <FormItem>
-                                {getFieldDecorator('json_field', {
-                                    initialValue: JSON.stringify({
-                                        contents: {eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User"}}, null, 4),
-                                    rules: [{
-                                        required: getFieldValue('key') === 'json_search',
-                                        message: 'Please enter json'
-                                    }]
-                                })(
-                                    <div>
-                                    <AceEditor
-                                        ref={"aceEditor"}
-                                        mode={"json"}
-                                        width={"100%"}
-                                        onChange={(json_field: string) => {
-                                            setFields({json_field: {value: json_field}});
-                                        }}
-                                        editorProps={{$blockScrolling: true}}
-                                        value={getFieldValue('json_field')}
-                                        showPrintMargin={false}
-                                        theme={"tomorrow"}
-                                        debounceChangePeriod={100}
-                                        height={"104px"}
-                                    />
-                                    </div>
-                                    )}
-                              </FormItem>
-                        </TabPane>
-                    </Tabs>
-                )}
-                <FormItem>
-                    <Button type="primary" htmlType="submit" style={{width: '100px', fontSize: '17px'}}>
-                        <Icon type="search" />
-                    </Button>
-                </FormItem>
-            </Form>
+                                <Button type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
+                                    <Icon type="search" />
+                                </Button>
+                            </FormItem>
+                        </Form>
+                    </Col>
+                    <Col span={1}>
+                        <Button 
+                            icon="plus" 
+                            type="primary" 
+                            style={{ display: 'block', margin: '0px 0px 10px auto' }} 
+                            shape="circle" 
+                            size="large"
+                            onClick={()=>this.setModalVisible(true)} 
+                        />
+                    </Col>
+                </Row>
+               
+            </React.Fragment>
         );
     }
 }
