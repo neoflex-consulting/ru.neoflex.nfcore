@@ -109,7 +109,7 @@ public class Transaction implements Closeable {
         entity.setRev(rev);
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity)) {
+            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 Files.createDirectories(indexValuePath.getParent());
                 Files.write(indexValuePath, entry.getContent());
@@ -142,7 +142,7 @@ public class Transaction implements Closeable {
         Set<String> toDelete = new HashSet<>();
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old)) {
+            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 toDelete.add(indexValuePath.toString());
             }
@@ -150,7 +150,7 @@ public class Transaction implements Closeable {
         byte[] indexContent = entity.getId().getBytes("utf-8");
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity)) {
+            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 toDelete.remove(indexValuePath.toString());
                 Files.createDirectories(indexValuePath.getParent());
@@ -173,7 +173,7 @@ public class Transaction implements Closeable {
         Files.delete(path);
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old)) {
+            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 Files.delete(indexValuePath);
             }
