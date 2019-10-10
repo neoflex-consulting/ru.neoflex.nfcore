@@ -117,8 +117,10 @@ class EcoreApp extends React.Component<any, State> {
                                 }
                             </Menu.SubMenu>
                             <Menu.SubMenu  title={<span><Icon type="notification" style={{fontSize: '17px'}}/>Notification</span>}>
-                                <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Show constantly</Menu.Item>
-                                <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>
+                                {localStorage.getItem('notifierDuration') === '3' ?
+                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Disable autohiding</Menu.Item>
+                                :
+                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
                             <Menu.Item key={'mandatoryreporting'}><Icon type="calendar" style={{fontSize: '17px'}}/>Mandatory Reporting</Menu.Item>
                         </Menu.SubMenu>

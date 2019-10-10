@@ -224,10 +224,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             return (
              <div style={{padding: '20px'}}>
                  <div>
-                     <DataSearchTrans onSearch={this.handleSearch}
-                                        specialEClass={this.props.specialEClass}
-                                        wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
-
+                     <DataSearchTrans 
+                        onSearch={this.handleSearch}
+                        specialEClass={this.props.specialEClass}
+                        wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
                      />
                  </div>
                  <div>
