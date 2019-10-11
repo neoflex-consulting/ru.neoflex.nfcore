@@ -1,26 +1,40 @@
 import React from "react";
-
-import Calendar from "./Calendar";
+import CalendarTrans from "./Calendar";
 import './../../styles/MandatoryReporting.css';
+import {Button, Form} from "antd";
+import {withTranslation, WithTranslation} from "react-i18next";
 
-class MandatoryReporting extends React.Component<any, any> {
+interface Props {
+}
+
+interface State {
+}
+
+class MandatoryReporting extends React.Component<Props & WithTranslation, State> {
+
 
     render() {
         return (
-            <div>
-                <header className="headerCalendar">
-                    <div id="logo">
-                        {/*<span>*/}
-                            <b>Обязательная отчетность</b>
-                        {/*</span>*/}
+            <Form style={{backgroundColor: "#fff"}}>
+                <div className="headerCalendar">
+                    <div>
+                        <div id="logo" className="gradient">
+                            Обязательная отчетность
+                        </div>
                     </div>
-                </header>
-                <main className="mainCalendar">
-                    <Calendar />
-                </main>
-            </div>
+                </div>
+                <div style={{height: "7vh", backgroundColor: "#fff"}}>
+                    <Button style={{textAlign: "right"}}>
+                        Редактировать отчеты
+                    </Button>
+                    </div>
+                <div style={{height: "82vh"}}>
+                    <CalendarTrans />
+                </div>
+            </Form>
         );
     }
 }
 
-export default MandatoryReporting;
+const MandatoryReportingTrans = withTranslation()(MandatoryReporting);
+export default MandatoryReportingTrans;
