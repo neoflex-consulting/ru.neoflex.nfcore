@@ -2,36 +2,36 @@ import React from 'react';
 import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
+import {ru} from "date-fns/locale";
+import {Button, notification, Tag} from "antd";
+import {withTranslation, WithTranslation} from "react-i18next";
+import {colorList, statues} from '../../utils/consts'
 
 interface State {
     currentMonth: Date;
     selectedDate: Date;
     Reports: Ecore.EObject[];
+    calendarLanguage: string;
 }
 
 interface Props {
-    allReports?: (reports: Ecore.EObject[]) => void;
 }
 
-class Calendar extends React.Component<Props, State> {
+class Calendar extends React.Component<Props & WithTranslation, State> {
 
     state = {
         currentMonth: new Date(),
         selectedDate: new Date(),
-        Reports: []
+        Reports: [],
+        calendarLanguage: "",
     };
 
     getAllReports() {
-        // const prepared: Array<string> = [];
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Report");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
-                        // resources.map((r) =>
-                        //     prepared.push(r.eContents()[0].get('name'))
-                        // );
-                        // this.setState({Reports: prepared.sort()})
                         this.setState({Reports: resources})
                     })
             }
@@ -39,7 +39,7 @@ class Calendar extends React.Component<Props, State> {
     };
 
     renderHeader() {
-        const dateFormat = "MMMM yyyy";
+        const dateFormat = "LLLL yyyy";
         return (
             <div className="header row flex-middle">
                 <div className="col col-start">
@@ -48,8 +48,8 @@ class Calendar extends React.Component<Props, State> {
                     </div>
                 </div>
                 <div className="col col-center">
-        <span>
-            {dateFns.format(this.state.currentMonth, dateFormat)}
+        <span className="gradient">
+            {dateFns.format(this.state.currentMonth, dateFormat, {locale: ru})}
         </span>
                 </div>
                 <div className="col col-end" onClick={this.nextMonth}>
@@ -60,13 +60,15 @@ class Calendar extends React.Component<Props, State> {
     }
 
     renderDays() {
-        const dateFormat = "dddd";
+        const dateFormat = "EEEE";
         const days = [];
-        let startDate = dateFns.startOfWeek(this.state.currentMonth);
+        let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
-                <div className="col col-center" key={i}>
-                    {dateFns.format(dateFns.addDays(startDate, i), dateFormat)}
+                <div key={i}
+                     className="col col-center gradient"
+                >
+                    <b>{dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: ru})}</b>
                 </div>
             );
         }
@@ -77,8 +79,8 @@ class Calendar extends React.Component<Props, State> {
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
-        const startDate = dateFns.startOfWeek(monthStart);
-        const endDate = dateFns.endOfWeek(monthEnd);
+        const startDate = dateFns.startOfWeek(monthStart, {locale: ru});
+        const endDate = dateFns.endOfWeek(monthEnd, {locale: ru});
 
         const dateFormat = "d";
         const rows = [];
@@ -87,10 +89,11 @@ class Calendar extends React.Component<Props, State> {
         let formattedDate = "";
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
+                let temp = this.getReports(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
-                    < div
+                    <div
                         className={`col cell ${
                             !dateFns.isSameMonth(day, monthStart)
                                 ? "disabled"
@@ -103,6 +106,19 @@ class Calendar extends React.Component<Props, State> {
                     >
                         <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
+                        <div>
+                            {temp.length !== 0
+                                ?
+                                temp.map( (t: any) =>
+                                        <Button onClick={this.onReportClick} size="small"
+                                                style={{display: 'block', backgroundColor: this.selectStatusColor(t.eContents()[0].get('status'))}}
+                                                title={`${t.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(t.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+[за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
+                                        >
+                                            {t.eContents()[0].get('name')}
+                                        </Button>
+                                ) : ""}
+                        </div>
                     </div>
                 );
                 day = dateFns.addDays(day, 1);
@@ -114,10 +130,79 @@ class Calendar extends React.Component<Props, State> {
             );
             days = [];
         }
-        return <div className="body">{rows}</div>;
+        return (
+            <div>
+                <div className="body">{rows}</div>
+            </div>
+        )
     }
 
-    onDateClick = (day:any) => {
+    private getReports(day: any) {
+        let temp: any = [];
+        this.state.Reports.filter((r: any) =>
+            dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
+            && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
+            && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
+        ).map((r) => temp.push(r));
+        return temp;
+    }
+
+    renderLegend() {
+        const stat: { push(div: any): void } = [];
+            statues.filter( status =>
+                stat.push(
+                    <div>
+                        <Tag style={{
+                            display: "table-caption",
+                            width: "300px",
+                            textAlign: "left",
+                            backgroundColor: `${this.selectStatusColor(status)}`,
+                        }}
+                        >
+                            {status}
+                        </Tag>
+                    </div>
+                )
+            );
+        return (
+            <div>
+                <Button
+                onClick = { () => {
+                    let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+                        Close All
+                    </Button>);
+                    notification.open({
+                        message: "Легенда",
+                        description: stat,
+                        duration: 0,
+                        key: "single",
+                        btn,
+                        style: {
+                            width: 400,
+                            marginLeft: -10,
+                            marginTop: 16,
+                            wordWrap: "break-word"
+                        },
+                    })}}
+                style={{width: "300px"}}
+                >
+                    Легенда
+                </Button>
+            </div>
+        )
+    }
+
+    selectStatusColor = (status: string): any => {
+        let colorButton: any;
+        colorList
+            .filter( (c:{ [key:string]: any }) => c[`${status}`] && c[`${status}`].status === status)
+            .map( (c:{ [key:string]: any }) => colorButton = c[`${status}`].color);
+        return colorButton;
+    };
+
+    onReportClick = () => {};
+
+    onDateClick = (day: any) => {
         this.setState({
             selectedDate: day
         });
@@ -136,18 +221,24 @@ class Calendar extends React.Component<Props, State> {
 
 
     componentDidMount(): void {
-        this.getAllReports()
+        this.getAllReports();
     }
 
     render() {
         return (
-            <div className="calendar">
-                {this.renderHeader()}
-                {this.renderDays()}
-                {this.renderCells()}
+            <div>
+                <div className="calendar">
+                    {this.renderHeader()}
+                    {this.renderDays()}
+                    {this.renderCells()}
+                </div>
+                <div style={{display: "table-caption"}}>
+                    {this.renderLegend()}
+                </div>
             </div>
         );
     }
 }
 
-export default Calendar;
+const CalendarTrans = withTranslation()(Calendar);
+export default CalendarTrans;

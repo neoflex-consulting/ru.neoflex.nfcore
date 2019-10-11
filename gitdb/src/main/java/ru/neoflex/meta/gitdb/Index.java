@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface Index {
     String getName();
-    List<IndexEntry> getEntries(Entity entity) throws IOException;
+    List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException;
 }

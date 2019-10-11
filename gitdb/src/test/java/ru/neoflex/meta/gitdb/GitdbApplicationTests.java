@@ -32,7 +32,7 @@ public class GitdbApplicationTests {
             }
 
             @Override
-            public List<IndexEntry> getEntries(Entity entity) throws IOException {
+            public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
                 IndexEntry entry = new IndexEntry();
                 ObjectNode node = (ObjectNode) mapper.readTree(entity.getContent());
                 entry.setPath(new String[]{node.get("type").asText(), node.get("name").asText()});
@@ -47,10 +47,10 @@ public class GitdbApplicationTests {
             }
 
             @Override
-            public List<IndexEntry> getEntries(Entity entity) throws IOException {
+            public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
                 ArrayList<IndexEntry> indexes = new ArrayList<>();
                 ObjectNode node = (ObjectNode) mapper.readTree(entity.getContent());
-                for (JsonNode linkNode: (ArrayNode) node.get("links")) {
+                for (JsonNode linkNode: node.get("links")) {
                     String link = linkNode.asText();
                     IndexEntry entry = new IndexEntry();
                     entry.setPath(new String[]{link.substring(0, 2), link.substring(2), entity.getId()});
