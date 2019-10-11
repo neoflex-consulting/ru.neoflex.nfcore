@@ -56,7 +56,7 @@ public class EMFJSONDBTests {
             Resource userResource = resourceSet.createResource(database.createURI(null, null));
             userResource.getContents().add(user);
             userResource.save(null);
-            tx.commit("User Orlov and group masters created", "orlov");
+            tx.commit("User Orlov and group masters created", "orlov", "");
             userId = database.getId(userResource.getURI());
             Assert.assertNotNull(userId);
         }
@@ -67,7 +67,7 @@ public class EMFJSONDBTests {
             User user = (User) userResource.getContents().get(0);
             user.setName("Simanihin");
             userResource.save(null);
-            tx.commit("User Orlov was renamed to Simanihin", "orlov");
+            tx.commit("User Orlov was renamed to Simanihin", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet resourceSet = database.createResourceSet(tx);
@@ -90,7 +90,7 @@ public class EMFJSONDBTests {
             Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
             Resource userResource = database.loadResource(userId, tx);
             userResource.delete(null);
-            tx.commit("User Simanihin was deleted", "orlov");
+            tx.commit("User Simanihin was deleted");
             dependent = database.getDependentResources(groupId, tx);
             Assert.assertEquals(0, dependent.getResources().size());
         }

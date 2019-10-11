@@ -94,7 +94,7 @@ public class GitdbApplicationTests {
             tx.create(userEntity);
             Assert.assertNotNull(userEntity.getId());
             Assert.assertNotNull(userEntity.getRev());
-            tx.commit("User Orlov and group masters created", "orlov");
+            tx.commit("User Orlov and group masters created", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             for (IndexEntry entry : tx.findByIndex("type_name", "User")) {
@@ -122,7 +122,7 @@ public class GitdbApplicationTests {
             tx.update(userEntity);
             Assert.assertEquals(userEntity.getId(), id);
             Assert.assertNotEquals(userEntity.getRev(), rev);
-            tx.commit("User Orlov was renamed to Simanihin", "orlov");
+            tx.commit("User Orlov was renamed to Simanihin", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             for (IndexEntry entry : tx.findByIndex("type_name", "User")) {
@@ -144,7 +144,7 @@ public class GitdbApplicationTests {
             Assert.assertEquals(1, tx.findByIndex("input_links", groupEntity.getIdPath()).size());
             userEntity = tx.load(userEntity);
             tx.delete(userEntity);
-            tx.commit("User Orlov deleted", "orlov");
+            tx.commit("User Orlov deleted", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             Assert.assertEquals(0, tx.findByIndex("input_links", groupEntity.getIdPath()).size());

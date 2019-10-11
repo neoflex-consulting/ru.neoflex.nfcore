@@ -58,9 +58,13 @@ public class Transaction implements Closeable {
         }
     }
 
-    public void commit(String message, String author) throws IOException {
-        PersonIdent authorId = new PersonIdent(author, "");
-        Gfs.commit(gfs).message(message).author(authorId).committer(authorId).execute();
+    public void commit(String message, String author, String email) throws IOException {
+        PersonIdent authorId = new PersonIdent(author, email);
+        Gfs.commit(gfs).message(message).author(authorId).execute();
+    }
+
+    public void commit(String message) throws IOException {
+        Gfs.commit(gfs).message(message).execute();
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
