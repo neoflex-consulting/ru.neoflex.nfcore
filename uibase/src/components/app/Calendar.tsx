@@ -110,7 +110,9 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                             {temp.length !== 0
                                 ?
                                 temp.map( (t: any) =>
-                                        <Button onClick={this.onReportClick} size="small"
+                                        <Button
+                                            key={`${t.eContents()[0].get('name')}`}
+                                            onClick={this.onReportClick} size="small"
                                                 style={{display: 'block', backgroundColor: this.selectStatusColor(t.eContents()[0].get('status'))}}
                                                 title={`${t.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(t.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}

@@ -39,7 +39,7 @@ class UserComponent extends React.Component<Props & WithTranslation, any> {
     render() {
         const Component = this.state.Component as unknown as FC;
         return (
-            <MandatoryReportingTrans/>
+            <Component/>
         )}
     }
 
