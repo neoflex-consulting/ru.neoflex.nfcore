@@ -181,4 +181,21 @@ public class EMFJSONDB extends Database {
         JsonNode contentNode = mapper.valueToTree(resource);
         return mapper.writeValueAsBytes(contentNode);
     }
+
+    public ResourceSet getDependentResources(Resource resource, Transaction transaction) throws IOException {
+        String id = getId(resource.getURI());
+        ResourceSet resourceSet = getDependentResources(id, transaction);
+        return resourceSet;
+    }
+
+    public ResourceSet getDependentResources(String id, Transaction transaction) throws IOException {
+        ResourceSet resourceSet = createResourceSet(transaction);
+        List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
+        for (IndexEntry entry: refList) {
+            URI uri = createURI(new String(entry.getContent()), null);
+            Resource refResource = resourceSet.createResource(uri);
+            refResource.load(null);
+        }
+        return resourceSet;
+    }
 }

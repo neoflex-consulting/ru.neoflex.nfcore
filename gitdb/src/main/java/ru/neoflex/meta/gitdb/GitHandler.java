@@ -7,6 +7,7 @@ import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 public class GitHandler extends URIHandlerImpl {
@@ -18,7 +19,11 @@ public class GitHandler extends URIHandlerImpl {
 
     public void delete(URI uri, Map<?, ?> options) throws IOException {
         EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
-        String id = uri.segment(0);
+        String id = db.getId(uri);
+        List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
+        if (!refList.isEmpty()) {
+            throw new IOException("Object " + id + " is referenced by " + new String(refList.get(0).getContent()));
+        }
         String rev = db.getRev(uri);
         EntityId entityId = new EntityId(id, rev);
         transaction.delete(entityId);

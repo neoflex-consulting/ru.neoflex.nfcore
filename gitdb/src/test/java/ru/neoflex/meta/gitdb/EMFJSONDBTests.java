@@ -41,13 +41,15 @@ public class EMFJSONDBTests {
     @Test
     public void createEMFObject() throws IOException {
         String userId;
+        String groupId;
+        Group group = TestFactory.eINSTANCE.createGroup();
         try (Transaction tx = database.createTransaction("users")) {
-            Group group = TestFactory.eINSTANCE.createGroup();
             group.setName("masters");
             ResourceSet resourceSet = database.createResourceSet(tx);
             Resource groupResource = resourceSet.createResource(database.createURI(null, null));
             groupResource.getContents().add(group);
             groupResource.save(null);
+            groupId = database.getId(groupResource.getURI());
             User user = TestFactory.eINSTANCE.createUser();
             user.setName("Orlov");
             user.setGroup(group);
@@ -55,12 +57,12 @@ public class EMFJSONDBTests {
             userResource.getContents().add(user);
             userResource.save(null);
             tx.commit("User Orlov and group masters created", "orlov");
-            userId = userResource.getURI().segment(0);
+            userId = database.getId(userResource.getURI());
             Assert.assertNotNull(userId);
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet resourceSet = database.createResourceSet(tx);
-            Resource userResource = resourceSet.createResource(URI.createURI("http://").appendSegment(userId));
+            Resource userResource = resourceSet.createResource(database.createURI(userId, null));
             userResource.load(null);
             User user = (User) userResource.getContents().get(0);
             user.setName("Simanihin");
@@ -69,10 +71,26 @@ public class EMFJSONDBTests {
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet resourceSet = database.createResourceSet(tx);
-            Resource userResource = resourceSet.createResource(URI.createURI("http://").appendSegment(userId));
+            Resource groupResource = resourceSet.createResource(database.createURI(groupId, null));
+            groupResource.load(null);
+            try {
+                groupResource.delete(null);
+                Assert.assertTrue(false);
+            }
+            catch (IOException e) {
+                Assert.assertTrue(e.getMessage().startsWith("Object "));
+            }
+        }
+        try (Transaction tx = database.createTransaction("users")){
+            ResourceSet resourceSet = database.createResourceSet(tx);
+            Resource userResource = resourceSet.createResource(database.createURI(userId, null));
+            ResourceSet dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(1, dependent.getResources().size());
             userResource.load(null);
-            User user = (User) userResource.getContents().get(0);
-            Assert.assertEquals("Simanihin", user.getName());
+            userResource.delete(null);
+            tx.commit("User Simanihin was deleted", "orlov");
+            dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(0, dependent.getResources().size());
         }
     }
 }
