@@ -147,14 +147,13 @@ public class Transaction implements Closeable {
                 toDelete.add(indexValuePath.toString());
             }
         }
-        byte[] indexContent = entity.getId().getBytes("utf-8");
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
             for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 toDelete.remove(indexValuePath.toString());
                 Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, indexContent);
+                Files.write(indexValuePath, entry.getContent());
             }
         }
         for (String indexValuePathString: toDelete) {

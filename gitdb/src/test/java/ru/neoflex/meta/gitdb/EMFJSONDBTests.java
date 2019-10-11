@@ -82,11 +82,13 @@ public class EMFJSONDBTests {
             }
         }
         try (Transaction tx = database.createTransaction("users")){
-            ResourceSet resourceSet = database.createResourceSet(tx);
-            Resource userResource = resourceSet.createResource(database.createURI(userId, null));
             ResourceSet dependent = database.getDependentResources(groupId, tx);
             Assert.assertEquals(1, dependent.getResources().size());
-            userResource.load(null);
+            Assert.assertEquals(2, tx.all().size());
+            Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
+            Assert.assertEquals(1, database.findByEClass(group.eClass(), "masters", tx).getResources().size());
+            Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
+            Resource userResource = database.loadResource(userId, tx);
             userResource.delete(null);
             tx.commit("User Simanihin was deleted", "orlov");
             dependent = database.getDependentResources(groupId, tx);

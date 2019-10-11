@@ -48,14 +48,22 @@ public class EMFJSONDB extends Database {
 
             @Override
             public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
-                IndexEntry entry = new IndexEntry();
+                ArrayList<IndexEntry> result = new ArrayList<IndexEntry>();
                 Resource resource = loadResource(entity.getContent(), transaction);
                 EObject eObject = resource.getContents().get(0);
                 EClass eClass = eObject.eClass();
-                EPackage ePackage = eClass.getEPackage();
-                entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), (String) eObject.eGet(eClass.getEStructuralFeature("name"))});
-                entry.setContent(entity.getId().getBytes("utf-8"));
-                return new ArrayList<IndexEntry>(){{add(entry);}};
+                EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
+                if (nameSF != null) {
+                    String name = (String) eObject.eGet(nameSF);
+                    if (name != null && name.length() > 0) {
+                        EPackage ePackage = eClass.getEPackage();
+                        IndexEntry entry = new IndexEntry();
+                        entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
+                        entry.setContent(entity.getId().getBytes("utf-8"));
+                        result.add(entry);
+                    }
+                }
+                return result;
             }
         });
     }
@@ -192,10 +200,39 @@ public class EMFJSONDB extends Database {
         ResourceSet resourceSet = createResourceSet(transaction);
         List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
         for (IndexEntry entry: refList) {
-            URI uri = createURI(new String(entry.getContent()), null);
-            Resource refResource = resourceSet.createResource(uri);
-            refResource.load(null);
+            String refId = entry.getPath()[entry.getPath().length - 1];
+            loadResource(resourceSet, refId);
         }
         return resourceSet;
+    }
+
+    public ResourceSet findByEClass(EClass eClass, String name, Transaction transaction) throws IOException {
+        ResourceSet resourceSet = createResourceSet(transaction);
+        String nsURI = eClass.getEPackage().getNsURI();
+        String className = eClass.getName();
+        List<IndexEntry> ieList;
+        if (name == null || name.length() == 0) {
+            ieList = transaction.findByIndex("type_name", nsURI, className);
+        }
+        else {
+            ieList = transaction.findByIndex("type_name", nsURI, className, name);
+        }
+        for (IndexEntry entry: ieList) {
+            String id = new String(entry.getContent());
+            loadResource(resourceSet, id);
+        }
+        return resourceSet;
+    }
+
+    public Resource loadResource(ResourceSet resourceSet, String id) throws IOException {
+        URI uri = createURI(id, null);
+        Resource resource = resourceSet.createResource(uri);
+        resource.load(null);
+        return resource;
+    }
+
+    public Resource loadResource(String id, Transaction transaction) throws IOException {
+        ResourceSet resourceSet = createResourceSet(transaction);
+        return loadResource(resourceSet, id);
     }
 }
