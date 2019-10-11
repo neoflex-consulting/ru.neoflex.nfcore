@@ -211,4 +211,8 @@ public class Transaction implements Closeable {
             return entityId;
         }).collect(Collectors.toList());
     }
+
+    public Database getDatabase() {
+        return database;
+    }
 }

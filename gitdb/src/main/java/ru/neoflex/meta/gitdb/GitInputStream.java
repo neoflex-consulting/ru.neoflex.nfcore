@@ -30,28 +30,18 @@ public class GitInputStream extends InputStream implements URIConverter.Loadable
 
     @Override
     public void loadResource(Resource resource) throws IOException {
-        String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
         Transaction transaction = handler.getTransaction();
+        EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
+        String id = db.getId(uri);
         EntityId entityId = new EntityId(id, null);
         Entity entity = transaction.load(entityId);
         String rev = entity.getRev();
         if (!resource.getContents().isEmpty()) {
             resource.getContents().clear();
         }
-        ResourceSet resourceSet = resource.getResourceSet();
-        if (resourceSet == null) {
-            resourceSet = new ResourceSetImpl();
-        }
-        JsonNode content = handler.getMapper().readTree(entity.getContent());
-        ContextAttributes attributes = ContextAttributes
-                .getEmpty()
-                .withSharedAttribute("resourceSet", resourceSet)
-                .withSharedAttribute("resource", resource);
-        handler.getMapper().reader()
-                .with(attributes)
-                .withValueToUpdate(resource)
-                .treeToValue(content, Resource.class);
-        URI newURI = resource.getURI().trimFragment().trimQuery().trimSegments(1).appendSegment(id).appendQuery("rev=" + rev);
+        db.loadResource(entity.getContent(), resource);
+        URI newURI = resource.getURI().trimFragment().trimQuery();
+        newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
         resource.setURI(newURI);
     }
 }

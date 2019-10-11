@@ -24,11 +24,11 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
 
     @Override
     public void saveResource(Resource resource) throws IOException {
-        String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
-        String rev = id == null || id.length() == 0 ? null : handler.getRev(uri);
-        JsonNode contentNode = handler.getMapper().valueToTree(resource);
-        byte[] content = handler.getMapper().writeValueAsBytes(contentNode);
         Transaction transaction = handler.getTransaction();
+        EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
+        String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
+        String rev = id == null || id.length() == 0 ? null : db.getRev(uri);
+        byte[] content = db.getResourceContent(resource);
         Entity entity = new Entity(id, rev, content);
         if (rev == null) {
             transaction.create(entity);
@@ -38,7 +38,8 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
             transaction.update(entity);
         }
         rev = entity.getRev();
-        URI newURI = resource.getURI().trimFragment().trimQuery().trimSegments(1).appendSegment(id).appendQuery("rev=" + rev);
+        URI newURI = resource.getURI().trimFragment().trimQuery();
+        newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
         resource.setURI(newURI);
     }
 }

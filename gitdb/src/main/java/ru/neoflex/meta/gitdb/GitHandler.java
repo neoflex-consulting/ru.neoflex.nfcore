@@ -11,26 +11,17 @@ import java.util.Map;
 
 public class GitHandler extends URIHandlerImpl {
     private Transaction transaction;
-    private ObjectMapper mapper;
 
-    public GitHandler(Transaction transaction, ObjectMapper mapper) {
+    public GitHandler(Transaction transaction) {
         this.transaction = transaction;
-        this.mapper = mapper;
     }
 
     public void delete(URI uri, Map<?, ?> options) throws IOException {
+        EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
         String id = uri.segment(0);
-        String rev = getRev(uri);
+        String rev = db.getRev(uri);
         EntityId entityId = new EntityId(id, rev);
         transaction.delete(entityId);
-    }
-
-    public String getRev(URI uri) throws IOException {
-        String query = uri.query();
-        if (!query.contains("rev=")) {
-            throw new IOException("Revision not found: " + uri.toString());
-        }
-        return query.split("rev=")[1];
     }
 
     @Override
@@ -46,9 +37,5 @@ public class GitHandler extends URIHandlerImpl {
 
     public Transaction getTransaction() {
         return transaction;
-    }
-
-    public ObjectMapper getMapper() {
-        return mapper;
     }
 }
