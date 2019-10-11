@@ -61,3 +61,19 @@
 .resource-link {
 	color: inherit;
 }
+
+.header-menu{
+	float: right; 
+	height: 100%;
+	border: none;
+	padding-top: 7px;
+}
+
+.lang-icon{
+	width: 30px;
+    float: right;
+    margin-top: 13px;
+    margin-right: 25px;
+	border-radius: 29px;
+	border: 1px solid #efefef;
+}

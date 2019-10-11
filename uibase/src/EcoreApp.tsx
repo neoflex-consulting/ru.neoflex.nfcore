@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -14,6 +14,17 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import MandatoryReportingTrans from "./components/app/MandatoryReporting";
+import _map from "lodash/map"
+
+import ru from 'flag-icon-css/flags/1x1/ru.svg';
+import en from 'flag-icon-css/flags/1x1/us.svg';
+import cn from 'flag-icon-css/flags/1x1/cn.svg';
+
+const langIcon: {[key:string]: any} = {
+    'en': en,
+    'ru': ru,
+    'ch': cn
+}
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -96,16 +107,23 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const getLogoClass = () => window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"
-            
+        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+        const langMenu = () => <Menu>
+            {_map(langIcon, (iconRes:any, index:number)=>
+                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '50px' }}>
+                    <img alt='language' src={iconRes} />
+                </Menu.Item>
+            )}
+        </Menu>
+
         return (
             <Layout style={{ height: '100vh' }}>
                 <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
-                    <div className={getLogoClass()}>
+                    <div className={window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"}>
                         <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
                         <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
                     </div>
-                    <Menu theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)} style={{ float: "right", height: '100%', border: 'none' }}>
+                    <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
                         <Menu.SubMenu title={<span><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
                             <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
@@ -131,6 +149,9 @@ class EcoreApp extends React.Component<any, State> {
                             <Menu.Item key={'mandatoryreporting'}><Icon type="calendar" style={{fontSize: '17px'}}/>Mandatory Reporting</Menu.Item>
                         </Menu.SubMenu>
                     </Menu>
+                    <Dropdown overlay={langMenu} placement="bottomCenter">
+                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
+                    </Dropdown>
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'} />
