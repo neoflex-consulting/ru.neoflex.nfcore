@@ -175,7 +175,7 @@
 /*Подсветка выбранной ячейки (текуйщий день о умолчанию)*/
 .calendar .body .selected {
     border-left: 8px solid transparent;
-    border-image: linear-gradient(45deg, rgb(128,86,205) 0%, rgb(87, 218, 255) 25%);
+    border-image: linear-gradient(45deg, #8056CD 0%, #57DAFF 25%);
     border-image-slice: 1;
 }
 
