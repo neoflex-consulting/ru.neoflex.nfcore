@@ -52,7 +52,7 @@ class AntdFactory implements ViewFactory {
         if (!Component) {
             Component = View
         }
-        return <Component viewObject={viewObject} мvievFactory={this} {...props}/>
+        return <Component viewObject={viewObject} vievFactory={this} {...props}/>
     }
 }
 

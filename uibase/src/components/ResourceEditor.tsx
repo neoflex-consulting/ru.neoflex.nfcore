@@ -650,7 +650,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                                     <Row>
                                                         <Col span={20}>
                                                             <a className="resource-link" href={`/settings/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
-                                                                <span className="item-title">
+                                                                <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
                                                                     {`${res.eContents()[0].get('name')}`}
                                                                     &nbsp;
                                                                     {<b>
