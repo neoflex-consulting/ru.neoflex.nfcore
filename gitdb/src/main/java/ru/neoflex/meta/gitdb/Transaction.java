@@ -58,9 +58,13 @@ public class Transaction implements Closeable {
         }
     }
 
-    public void commit(String message, String author) throws IOException {
-        PersonIdent authorId = new PersonIdent(author, "");
-        Gfs.commit(gfs).message(message).author(authorId).committer(authorId).execute();
+    public void commit(String message, String author, String email) throws IOException {
+        PersonIdent authorId = new PersonIdent(author, email);
+        Gfs.commit(gfs).message(message).author(authorId).execute();
+    }
+
+    public void commit(String message) throws IOException {
+        Gfs.commit(gfs).message(message).execute();
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -147,14 +151,13 @@ public class Transaction implements Closeable {
                 toDelete.add(indexValuePath.toString());
             }
         }
-        byte[] indexContent = entity.getId().getBytes("utf-8");
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
             for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 toDelete.remove(indexValuePath.toString());
                 Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, indexContent);
+                Files.write(indexValuePath, entry.getContent());
             }
         }
         for (String indexValuePathString: toDelete) {
@@ -210,5 +213,9 @@ public class Transaction implements Closeable {
             entityId.setId(parent.getFileName().toString() + file.getFileName().toString());
             return entityId;
         }).collect(Collectors.toList());
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 }
