@@ -182,7 +182,9 @@ public class Transaction implements Closeable {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
             for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                toDelete.remove(indexValuePath.toString());
+                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
                 Files.createDirectories(indexValuePath.getParent());
                 Files.write(indexValuePath, entry.getContent());
             }
