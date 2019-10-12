@@ -1,10 +1,8 @@
 import React from "react";
-import CalendarTrans from "./Calendar";
 import './../../styles/MandatoryReporting.css';
 import {Button, Form, notification, Tag} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {colorList, statues} from "../../utils/consts";
-import StatusLegendTrans from "./StatusLegend";
 
 interface Props {
 }
@@ -12,7 +10,7 @@ interface Props {
 interface State {
 }
 
-class MandatoryReporting extends React.Component<Props & WithTranslation, State> {
+class StatusLegend extends React.Component<Props & WithTranslation, State> {
 
     selectStatusColor = (status: string): any => {
         let colorButton: any;
@@ -22,7 +20,7 @@ class MandatoryReporting extends React.Component<Props & WithTranslation, State>
         return colorButton;
     };
 
-    renderLegend() {
+    render() {
         const stat: { push(div: any): void } = [];
         statues.filter( status =>
             stat.push(
@@ -66,21 +64,7 @@ class MandatoryReporting extends React.Component<Props & WithTranslation, State>
             </div>
         )
     }
-
-    render() {
-        return (
-            <Form style={{backgroundColor: "#fff"}}>
-                <div className="headerCalendar">
-                    <div id="logo" className="gradient">
-                        Обязательная отчетность
-                    </div>
-                </div>
-                <StatusLegendTrans/>
-                <CalendarTrans />
-            </Form>
-        );
-    }
 }
 
-const MandatoryReportingTrans = withTranslation()(MandatoryReporting);
-export default MandatoryReportingTrans;
+const StatusLegendTrans = withTranslation()(StatusLegend);
+export default StatusLegendTrans;
