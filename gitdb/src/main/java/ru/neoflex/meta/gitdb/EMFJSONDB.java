@@ -55,13 +55,14 @@ public class EMFJSONDB extends Database {
                 EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
                 if (nameSF != null) {
                     String name = (String) eObject.eGet(nameSF);
-                    if (name != null && name.length() > 0) {
-                        EPackage ePackage = eClass.getEPackage();
-                        IndexEntry entry = new IndexEntry();
-                        entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
-                        entry.setContent(entity.getId().getBytes("utf-8"));
-                        result.add(entry);
+                    if (name == null && name.length() == 0) {
+                        throw new IOException("Empty feature name");
                     }
+                    EPackage ePackage = eClass.getEPackage();
+                    IndexEntry entry = new IndexEntry();
+                    entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
+                    entry.setContent(entity.getId().getBytes("utf-8"));
+                    result.add(entry);
                 }
                 return result;
             }

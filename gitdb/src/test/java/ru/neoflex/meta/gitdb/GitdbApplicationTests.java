@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GitdbApplicationTests {
+public class GitdbApplicationTests extends TestBase {
     public static final String GITDB = "gitdbtest";
     Database database;
     ObjectMapper mapper = new ObjectMapper();
@@ -66,16 +66,6 @@ public class GitdbApplicationTests {
         ObjectNode node = mapper.createObjectNode().put("type", type).put("name", name);
         node.putArray("links");
         return node;
-    }
-
-    public static boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        return directoryToBeDeleted.delete();
     }
 
     @Test

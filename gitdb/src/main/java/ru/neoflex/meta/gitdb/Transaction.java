@@ -3,8 +3,11 @@ package ru.neoflex.meta.gitdb;
 import com.beijunyi.parallelgit.filesystem.Gfs;
 import com.beijunyi.parallelgit.filesystem.GitFileSystem;
 import com.beijunyi.parallelgit.filesystem.GitPath;
+import com.beijunyi.parallelgit.filesystem.commands.GfsCommit;
 import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -25,17 +28,34 @@ public class Transaction implements Closeable {
     private Database database;
     private String branch;
     private GitFileSystem gfs;
+    private boolean readonly;
 
-    public Transaction(Database database, String branch) throws IOException {
+    public Transaction(Database database, String branch, boolean readonly) throws IOException {
         this.database = database;
         this.branch = branch;
+        this.readonly = readonly;
+        if (!readonly) {
+            database.getLock().writeLock().lock();
+        }
+        else {
+            database.getLock().readLock().lock();
+        }
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
-        ;
+    }
+
+    public Transaction(Database database, String branch) throws IOException {
+        this(database, branch, false);
     }
 
     @Override
     public void close() throws IOException {
         gfs.close();
+        if (!readonly) {
+            database.getLock().writeLock().unlock();
+        }
+        else {
+            database.getLock().readLock().unlock();
+        }
     }
 
     public RevCommit getLastCommit(EntityId entityId) throws IOException {
@@ -59,12 +79,19 @@ public class Transaction implements Closeable {
     }
 
     public void commit(String message, String author, String email) throws IOException {
-        PersonIdent authorId = new PersonIdent(author, email);
-        Gfs.commit(gfs).message(message).author(authorId).execute();
+        if (readonly) {
+            throw new IOException("Can't commit readonly transaction");
+        }
+        GfsCommit commit = Gfs.commit(gfs).message(message);
+        if (author != null && email != null) {
+            PersonIdent authorId = new PersonIdent(author, email);
+            commit.author(authorId);
+        }
+        commit.execute();
     }
 
     public void commit(String message) throws IOException {
-        Gfs.commit(gfs).message(message).execute();
+        commit(message, null, null);
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
