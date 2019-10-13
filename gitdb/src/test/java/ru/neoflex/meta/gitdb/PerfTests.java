@@ -4,8 +4,6 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
@@ -20,7 +18,6 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
-    public static final String GITDB = "gitdbtest";
     EMFJSONDB database;
     int nGroups = 10;
     int nUsers = 100;
@@ -31,8 +28,7 @@ public class PerfTests extends TestBase {
 
     @Test
     public void fullTest() throws IOException, InterruptedException, GitAPIException {
-        deleteDirectory(new File(GITDB));
-        database = new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        database = refreshRatabase();
         database.createBranch("users", "master");
         long start = System.currentTimeMillis();
         for (int i = 0; i < nGroups; ++i) {

@@ -8,6 +8,7 @@ import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
 import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
 import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
+import com.github.marschall.pathclassloader.PathClassLoader;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Transaction implements Closeable {
@@ -246,5 +248,23 @@ public class Transaction implements Closeable {
 
     public Database getDatabase() {
         return database;
+    }
+
+    public GitFileSystem getFileSystem() {
+        return gfs;
+    }
+    public ClassLoader getClassLoader(ClassLoader parent) {
+        ClassLoader classLoader = new PathClassLoader(gfs.getRootPath(), parent);
+        return classLoader;
+    }
+
+    public<R> R withClassLoader(Callable<R> f) throws Exception {
+        ClassLoader parent = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader(parent));
+        try {
+            return f.call();
+        } finally {
+            Thread.currentThread().setContextClassLoader(parent);
+        }
     }
 }

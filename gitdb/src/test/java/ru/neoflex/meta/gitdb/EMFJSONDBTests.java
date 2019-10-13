@@ -12,18 +12,21 @@ import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class EMFJSONDBTests extends TestBase {
     public static final String GITDB = "gitdbtest";
-    EMFJSONDB database;
 
     @Before
     public void startUp() throws IOException, GitAPIException {
-        deleteDirectory(new File(GITDB));
-        database = new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        database = refreshRatabase();
         database.createBranch("users", "master");
     }
 
@@ -82,6 +85,24 @@ public class EMFJSONDBTests extends TestBase {
             tx.commit("User Simanihin was deleted");
             dependent = database.getDependentResources(groupId, tx);
             Assert.assertEquals(0, dependent.getResources().size());
+        }
+    }
+
+    @Test
+    public void testClassLoader() throws Exception {
+        try(Transaction txw = database.createTransaction("master")) {
+            Path path = txw.getFileSystem().getPath("/ru/neoflex/meta/test/test.txt");
+            Files.createDirectories(path.getParent());
+            Files.write(path, "test content".getBytes());
+            txw.commit("written test resource");
+        }
+        try(Transaction tx = database.createTransaction("master", true)) {
+            byte[] data = tx.withClassLoader(() -> {
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                URI uri = classLoader.getResource("/ru/neoflex/meta/test/test.txt").toURI();
+                return Files.readAllBytes(Paths.get(uri));
+            });
+            Assert.assertEquals("test content", new String(data));
         }
     }
 }
