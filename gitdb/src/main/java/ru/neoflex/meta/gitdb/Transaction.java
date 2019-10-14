@@ -3,8 +3,12 @@ package ru.neoflex.meta.gitdb;
 import com.beijunyi.parallelgit.filesystem.Gfs;
 import com.beijunyi.parallelgit.filesystem.GitFileSystem;
 import com.beijunyi.parallelgit.filesystem.GitPath;
+import com.beijunyi.parallelgit.filesystem.commands.GfsCommit;
 import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
+import com.github.marschall.pathclassloader.PathClassLoader;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -17,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Transaction implements Closeable {
@@ -25,17 +30,34 @@ public class Transaction implements Closeable {
     private Database database;
     private String branch;
     private GitFileSystem gfs;
+    private boolean readonly;
 
-    public Transaction(Database database, String branch) throws IOException {
+    public Transaction(Database database, String branch, boolean readonly) throws IOException {
         this.database = database;
         this.branch = branch;
+        this.readonly = readonly;
+        if (!readonly) {
+            database.getLock().writeLock().lock();
+        }
+        else {
+            database.getLock().readLock().lock();
+        }
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
-        ;
+    }
+
+    public Transaction(Database database, String branch) throws IOException {
+        this(database, branch, false);
     }
 
     @Override
     public void close() throws IOException {
         gfs.close();
+        if (!readonly) {
+            database.getLock().writeLock().unlock();
+        }
+        else {
+            database.getLock().readLock().unlock();
+        }
     }
 
     public RevCommit getLastCommit(EntityId entityId) throws IOException {
@@ -58,9 +80,20 @@ public class Transaction implements Closeable {
         }
     }
 
-    public void commit(String message, String author) throws IOException {
-        PersonIdent authorId = new PersonIdent(author, "");
-        Gfs.commit(gfs).message(message).author(authorId).committer(authorId).execute();
+    public void commit(String message, String author, String email) throws IOException {
+        if (readonly) {
+            throw new IOException("Can't commit readonly transaction");
+        }
+        GfsCommit commit = Gfs.commit(gfs).message(message);
+        if (author != null && email != null) {
+            PersonIdent authorId = new PersonIdent(author, email);
+            commit.author(authorId);
+        }
+        commit.execute();
+    }
+
+    public void commit(String message) throws IOException {
+        commit(message, null, null);
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -147,14 +180,15 @@ public class Transaction implements Closeable {
                 toDelete.add(indexValuePath.toString());
             }
         }
-        byte[] indexContent = entity.getId().getBytes("utf-8");
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
             for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                toDelete.remove(indexValuePath.toString());
+                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
                 Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, indexContent);
+                Files.write(indexValuePath, entry.getContent());
             }
         }
         for (String indexValuePathString: toDelete) {
@@ -210,5 +244,27 @@ public class Transaction implements Closeable {
             entityId.setId(parent.getFileName().toString() + file.getFileName().toString());
             return entityId;
         }).collect(Collectors.toList());
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public GitFileSystem getFileSystem() {
+        return gfs;
+    }
+    public ClassLoader getClassLoader(ClassLoader parent) {
+        ClassLoader classLoader = new PathClassLoader(gfs.getRootPath(), parent);
+        return classLoader;
+    }
+
+    public<R> R withClassLoader(Callable<R> f) throws Exception {
+        ClassLoader parent = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader(parent));
+        try {
+            return f.call();
+        } finally {
+            Thread.currentThread().setContextClassLoader(parent);
+        }
     }
 }

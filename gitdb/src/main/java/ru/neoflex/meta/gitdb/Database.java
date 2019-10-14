@@ -12,12 +12,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.eclipse.jgit.lib.Constants.DOT_GIT;
 
 public class Database implements Closeable {
     private Repository repository;
     private Map<String, Index> indexes = new HashMap<>();
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public Database(String repoPath) throws IOException, GitAPIException {
         File repoFile = new File(repoPath);
@@ -42,6 +46,10 @@ public class Database implements Closeable {
         return new Transaction(this, branch);
     }
 
+    public Transaction createTransaction(String branch, boolean readonly) throws IOException {
+        return new Transaction(this, branch, readonly);
+    }
+
     @Override
     public void close() throws IOException {
         repository.close();
@@ -61,5 +69,9 @@ public class Database implements Closeable {
 
     public void createIndex(Index index) {
         getIndexes().put(index.getName(), index);
+    }
+
+    public ReadWriteLock getLock() {
+        return lock;
     }
 }

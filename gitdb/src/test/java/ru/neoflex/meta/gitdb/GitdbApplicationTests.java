@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GitdbApplicationTests {
+public class GitdbApplicationTests extends TestBase {
     public static final String GITDB = "gitdbtest";
     Database database;
     ObjectMapper mapper = new ObjectMapper();
@@ -68,16 +68,6 @@ public class GitdbApplicationTests {
         return node;
     }
 
-    public static boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        return directoryToBeDeleted.delete();
-    }
-
     @Test
     public void createSimpleObject() throws IOException {
         ObjectNode user;
@@ -94,7 +84,7 @@ public class GitdbApplicationTests {
             tx.create(userEntity);
             Assert.assertNotNull(userEntity.getId());
             Assert.assertNotNull(userEntity.getRev());
-            tx.commit("User Orlov and group masters created", "orlov");
+            tx.commit("User Orlov and group masters created", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             for (IndexEntry entry : tx.findByIndex("type_name", "User")) {
@@ -122,7 +112,7 @@ public class GitdbApplicationTests {
             tx.update(userEntity);
             Assert.assertEquals(userEntity.getId(), id);
             Assert.assertNotEquals(userEntity.getRev(), rev);
-            tx.commit("User Orlov was renamed to Simanihin", "orlov");
+            tx.commit("User Orlov was renamed to Simanihin", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             for (IndexEntry entry : tx.findByIndex("type_name", "User")) {
@@ -144,7 +134,7 @@ public class GitdbApplicationTests {
             Assert.assertEquals(1, tx.findByIndex("input_links", groupEntity.getIdPath()).size());
             userEntity = tx.load(userEntity);
             tx.delete(userEntity);
-            tx.commit("User Orlov deleted", "orlov");
+            tx.commit("User Orlov deleted", "orlov", "");
         }
         try (Transaction tx = database.createTransaction("master")) {
             Assert.assertEquals(0, tx.findByIndex("input_links", groupEntity.getIdPath()).size());

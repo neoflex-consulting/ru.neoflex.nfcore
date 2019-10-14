@@ -45,9 +45,8 @@ class ApplicationInit {
             reportNode.setEObject(report1)
             (referenceTree.children[0] as CatalogNode).children.add(reportNode)
             application.setReferenceTree(referenceTree)
-            def typography = ApplicationFactory.eINSTANCE.createTypography()
-            typography.text = "Hello From Reports!"
-            application.view = typography
+            def componentElement = ApplicationFactory.eINSTANCE.createComponentElement()
+            application.view = componentElement
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)
