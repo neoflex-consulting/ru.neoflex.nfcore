@@ -87,7 +87,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     {this.props.classes.map((eclass: Ecore.EObject) =>
                         !eclass.get('abstract') ?
                             <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
-                                {eclass.get('name')}
+                                {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
                             </Select.Option>
                             :
                             null
