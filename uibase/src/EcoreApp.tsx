@@ -110,8 +110,8 @@ class EcoreApp extends React.Component<any, State> {
         const storeLangValue = String(localStorage.getItem('i18nextLng'))
         const langMenu = () => <Menu>
             {_map(langIcon, (iconRes:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '50px' }}>
-                    <img alt='language' src={iconRes} />
+                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
+                    <img style={{ borderRadius: '25px' }} alt='language' src={iconRes} />
                 </Menu.Item>
             )}
         </Menu>
@@ -152,6 +152,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Dropdown overlay={langMenu} placement="bottomCenter">
                         <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
                     </Dropdown>
+                    <Icon className="bell-icon" type="bell" />
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'} />

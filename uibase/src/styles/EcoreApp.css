@@ -70,10 +70,28 @@
 }
 
 .lang-icon{
-	width: 30px;
+	width: 25px;
     float: right;
-    margin-top: 13px;
+    margin-top: 15px;
     margin-right: 25px;
-	border-radius: 29px;
+	border-radius: 15px;
 	border: 1px solid #efefef;
+}
+
+.bell-icon{
+	font-size: 26px;
+    color: #c5c5c5;
+    float: right;
+    margin-top: 15px;
+    margin-right: 25px;
+}
+
+.ant-layout-sider-zero-width-trigger{
+	bottom: 0px !important;
+	top: unset !important;
+	/*z-index: 5 !important;*/
+	background-color: transparent !important;
+	color: #b4b4b4 !important;
+	font-size: 20px;
+	z-index: 2;
 }
