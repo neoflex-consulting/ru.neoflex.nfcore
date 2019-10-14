@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Tree, Icon, Table, Modal,
     Button, Select, Row, Col,
-    Menu, Tag, Layout
+    Menu, Tag, Layout, DatePicker
 } from 'antd';
 import Ecore from "ecore";
 import { API } from "../modules/api";
@@ -11,6 +11,7 @@ import update from 'immutability-helper';
 import EditableTextArea from './EditableTextArea'
 import SearchGridTrans from "./SearchGrid";
 import { WithTranslation } from "react-i18next";
+import moment from 'moment';
 
 export interface Props {
 }
@@ -66,7 +67,6 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     getEObject(): void {
-
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -335,7 +335,17 @@ export class ResourceEditor extends React.Component<any, State> {
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Timestamp") {
                 return value
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Date") {
-                return value
+                return <DatePicker
+                    showTime
+                    key={key + "_date_" + idx} 
+                    defaultValue={moment(value)}
+                    onChange={(value: any)=>{
+                        const newValue = { [feature.get('name')]: value.format() }
+                        const updatedJSON = targetObject.updater(newValue);
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Password") {
                 return <EditableTextArea
                     type="password"
