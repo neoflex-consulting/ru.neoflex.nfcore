@@ -3,14 +3,14 @@ import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
 import {ru} from "date-fns/locale";
-import {Button, notification, Tag} from "antd";
+import {Button} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {colorList, statues} from '../../utils/consts'
 
 interface State {
     currentMonth: Date;
     selectedDate: Date;
     Reports: Ecore.EObject[];
+    ReportStatus: Ecore.EObject[];
     calendarLanguage: string;
 }
 
@@ -23,6 +23,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         currentMonth: new Date(),
         selectedDate: new Date(),
         Reports: [],
+        ReportStatus: [],
         calendarLanguage: "",
     };
 
@@ -33,6 +34,18 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
                         this.setState({Reports: resources})
+                    })
+            }
+        })
+    };
+
+    getAllStatuses() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//ReportStatus");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((statuses) => {
+                        this.setState({ReportStatus: statuses})
                     })
             }
         })
@@ -89,7 +102,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         let formattedDate = "";
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
-                let temp = this.getReports(day);
+                let report = this.getReports(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
@@ -107,17 +120,17 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                         <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
                         <div>
-                            {temp.length !== 0
+                            {report.length !== 0
                                 ?
-                                temp.map( (t: any) =>
+                                report.map( (r: any) =>
                                         <Button
-                                            key={`${t.eContents()[0].get('name')}`}
+                                            key={`${r.eContents()[0].get('name')}`}
                                             onClick={this.onReportClick} size="small"
-                                                style={{display: 'block', backgroundColor: this.selectStatusColor(t.eContents()[0].get('status'))}}
-                                                title={`${t.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(t.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                                style={{display: 'block', backgroundColor: r.eContents()[0].get('status').get('color')}}
+                                                title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                         >
-                                            {t.eContents()[0].get('name')}
+                                            {r.eContents()[0].get('name')}
                                         </Button>
                                 ) : ""}
                         </div>
@@ -149,14 +162,6 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         return temp;
     }
 
-    selectStatusColor = (status: string): any => {
-        let colorButton: any;
-        colorList
-            .filter( (c:{ [key:string]: any }) => c[`${status}`] && c[`${status}`].status === status)
-            .map( (c:{ [key:string]: any }) => colorButton = c[`${status}`].color);
-        return colorButton;
-    };
-
     onReportClick = () => {};
 
     onDateClick = (day: any) => {
@@ -176,9 +181,9 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         });
     };
 
-
     componentDidMount(): void {
         this.getAllReports();
+        this.getAllStatuses();
     }
 
     render() {
