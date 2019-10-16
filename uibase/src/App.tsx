@@ -6,7 +6,11 @@ const App: React.FC = (props) => {
     return (
         <div className="App">
             <Suspense fallback={<div className="loader"/>}>
-                <EcoreAppTrans {...props} appName="ReportsApp" />
+                <EcoreAppTrans {...props}
+                               objectPackage="ru.neoflex.nfcore.application"
+                               objectClass="Application"
+                               objectName="ReportsApp"
+                />
             </Suspense>
         </div>
     );

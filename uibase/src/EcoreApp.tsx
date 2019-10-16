@@ -23,7 +23,9 @@ export interface Props extends RouteComponentProps {
 
 interface State {
     principal?: any;
-    appName: string;
+    objectName: string;
+    objectPackage: string;
+    objectClass: string;
     languages: string[];
     notifierDuration: number;
 }
@@ -34,7 +36,9 @@ class EcoreApp extends React.Component<any, State> {
         super(props);
         this.state = {
             principal: undefined,
-            appName: props.appName,
+            objectName: props.objectName,
+            objectPackage: props.objectPackage,
+            objectClass: props.objectClass,
             languages: [],
             notifierDuration: 0
         };
@@ -130,7 +134,7 @@ class EcoreApp extends React.Component<any, State> {
                 </Switch>
             </Layout>
         )
-    }
+    };
 
     renderTest = ()=> {
         return (
@@ -167,13 +171,13 @@ class EcoreApp extends React.Component<any, State> {
                 </Layout>
             </Layout>
         )
-    }
+    };
 
     renderStartPage = ()=>{
         return (
             <MainApp {...this.props}/>
         )
-    }
+    };
 
     componentDidMount(): void {
         if (!this.state.languages.length) {this.getLanguages()}

@@ -41,13 +41,18 @@ class Col_ extends ViewContainer {
 
 class ComponentElement_ extends ViewContainer {
     render = () => {
-        return <UserComponent componentClassName="MandatoryReportingTrans"/>
+        if (this.viewObject.eClass.get("name") === "ComponentElement") {
+            return <UserComponent componentClassName={this.viewObject.get('component').get('componentClassName')}/>
+        } else return <div></div>
     }
 }
 
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof View>();
+    getComponent(){
+
+    }
     constructor() {
         this.components.set('ru.neoflex.nfcore.application#//Div', Div_);
         this.components.set('ru.neoflex.nfcore.application#//Span', Span_);
