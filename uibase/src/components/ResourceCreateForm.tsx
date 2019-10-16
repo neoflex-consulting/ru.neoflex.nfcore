@@ -63,6 +63,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
 
     render() {
         const { translate } = this.props
+        
         return (
             <Modal
                 key="create_resource"
