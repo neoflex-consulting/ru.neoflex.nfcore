@@ -6,6 +6,7 @@ import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.beijunyi.parallelgit.filesystem.GitFileSystem;
 import com.beijunyi.parallelgit.filesystem.GitFileSystemProvider;
 
 public final class GfsUriUtils {
@@ -20,48 +21,19 @@ public final class GfsUriUtils {
   @Nonnull
   public static String getRepository(URI uri) {
     checkScheme(uri);
-    String path = uri.getPath();
-    if(path.length() > 1 && path.endsWith("/") && !path.endsWith(":/"))
-      path = path.substring(0, path.length() - 1);
-    return path;
+    GitFileSystem fs = GitFileSystemProvider.getDefault().getFileSystem(getSession(uri));
+    return fs.getObjectService().getRepository().getDirectory().getAbsolutePath();
   }
 
   @Nonnull
   public static String getFile(URI uri) throws ProviderMismatchException {
     checkScheme(uri);
-    String fragment = uri.getFragment();
-    if(fragment == null)
-      fragment = "";
-    if(!fragment.startsWith("/"))
-      fragment = "/" + fragment;
-    if(fragment.length() > 1 && fragment.endsWith("/"))
-      fragment = fragment.substring(0, fragment.length() - 1);
-    return fragment;
-  }
-
-  @Nonnull
-  public static Map<String, String> parseQuery(@Nullable String query, @Nullable Set<String> keys) {
-    Map<String, String> params = new HashMap<>();
-    if(query != null) {
-      String[] pairs = query.split("&");
-      int count = 0;
-      for(String pair : pairs) {
-        String[] keyValue = pair.split("=", 2);
-        String key = keyValue[0];
-        if(keys == null || keys.contains(key)) {
-          params.put(key, keyValue.length > 1 ? keyValue[1] : null);
-          if(keys != null && ++count == keys.size())
-            break;
-        }
-      }
-    }
-    return params;
+    return "/" + uri.getPath().split("/", 3)[2];
   }
 
   @Nullable
   public static String getSession(URI uri) throws ProviderMismatchException {
     checkScheme(uri);
-    return parseQuery(uri.getQuery(), Collections.singleton(SID_KEY)).get(SID_KEY);
+    return uri.getPath().split("/", 3)[1];
   }
-
 }

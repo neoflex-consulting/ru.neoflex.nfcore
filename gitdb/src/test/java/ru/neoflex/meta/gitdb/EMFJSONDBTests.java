@@ -90,19 +90,21 @@ public class EMFJSONDBTests extends TestBase {
 
     @Test
     public void testClassLoader() throws Exception {
+        String content = "test content";
+        String name = "/ru/neoflex/meta/test/test.txt";
         try(Transaction txw = database.createTransaction("master")) {
-            Path path = txw.getFileSystem().getPath("/ru/neoflex/meta/test/test.txt");
+            Path path = txw.getFileSystem().getPath(name);
             Files.createDirectories(path.getParent());
-            Files.write(path, "test content".getBytes());
+            Files.write(path, content.getBytes());
             txw.commit("written test resource");
         }
-        try(Transaction tx = database.createTransaction("master", true)) {
+        try(Transaction tx = database.createTransaction("master", Transaction.LockType.DIRTY)) {
             byte[] data = tx.withClassLoader(() -> {
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                URI uri = classLoader.getResource("/ru/neoflex/meta/test/test.txt").toURI();
+                URI uri = classLoader.getResource(name).toURI();
                 return Files.readAllBytes(Paths.get(uri));
             });
-            Assert.assertEquals("test content", new String(data));
+            Assert.assertEquals(content, new String(data));
         }
     }
 }

@@ -154,13 +154,13 @@ public class PerfTests extends TestBase {
 
     private void readIds() throws IOException {
         groupIds.clear();
-        try (Transaction tx = database.createTransaction("users", true)) {
+        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
             for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getGroup(), null, tx).getResources()) {
                 groupIds.add(database.getId(resource.getURI()));
             }
         }
         userIds.clear();
-        try (Transaction tx = database.createTransaction("users", true)) {
+        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
             for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getUser(), null, tx).getResources()) {
                 userIds.add(database.getId(resource.getURI()));
             }
