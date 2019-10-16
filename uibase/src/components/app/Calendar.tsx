@@ -3,27 +3,29 @@ import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
 import {ru} from "date-fns/locale";
-import {Button, notification, Tag} from "antd";
-import {withTranslation, WithTranslation} from "react-i18next";
-import {colorList, statues} from '../../utils/consts'
+import {withTranslation} from "react-i18next";
+import {MainContext} from "../../MainContext";
+import {Button} from "antd";
 
 interface State {
     currentMonth: Date;
     selectedDate: Date;
     Reports: Ecore.EObject[];
+    ReportStatus: Ecore.EObject[];
     calendarLanguage: string;
 }
 
 interface Props {
 }
 
-class Calendar extends React.Component<Props & WithTranslation, State> {
+class Calendar extends React.Component<any, State> {
 
     state = {
         currentMonth: new Date(),
         selectedDate: new Date(),
         Reports: [],
-        calendarLanguage: "",
+        ReportStatus: [],
+        calendarLanguage: ""
     };
 
     getAllReports() {
@@ -33,6 +35,18 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
                         this.setState({Reports: resources})
+                    })
+            }
+        })
+    };
+
+    getAllStatuses() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//ReportStatus");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((statuses) => {
+                        this.setState({ReportStatus: statuses})
                     })
             }
         })
@@ -75,7 +89,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         return <div className="days row">{days}</div>;
     }
 
-    renderCells() {
+    renderCells(context: any) {
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
@@ -89,7 +103,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         let formattedDate = "";
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
-                let temp = this.getReports(day);
+                let report = this.getReports(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
@@ -107,18 +121,25 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                         <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
                         <div>
-                            {temp.length !== 0
+                            {report.length !== 0
                                 ?
-                                temp.map( (t: any) =>
-                                        <Button
-                                            key={`${t.eContents()[0].get('name')}`}
-                                            onClick={this.onReportClick} size="small"
-                                                style={{display: 'block', backgroundColor: this.selectStatusColor(t.eContents()[0].get('status'))}}
-                                                title={`${t.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(t.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                report.map( (r: any) =>
+                                    <Button
+                                        onClick={() =>
+                                            context.changeActiveObject!(
+                                                "ru.neoflex.nfcore.application",  //"ru.neoflex.nfcore.reports"
+                                                "Application",  // "Report"
+                                                "EcoreApp"  //r.eContents()[0].get('name')
+                                            )
+                                        }
+                                        key={`${r.get('uri')}/${r.rev}`}
+                                        size="small"
+                                        style={{width: "100px", display: 'block', backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
+                                        title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
-                                        >
-                                            {t.eContents()[0].get('name')}
-                                        </Button>
+                                    >
+                                        {r.eContents()[0].get('name')}
+                                    </Button>
                                 ) : ""}
                         </div>
                     </div>
@@ -149,45 +170,40 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         return temp;
     }
 
-    selectStatusColor = (status: string): any => {
-        let colorButton: any;
-        colorList
-            .filter( (c:{ [key:string]: any }) => c[`${status}`] && c[`${status}`].status === status)
-            .map( (c:{ [key:string]: any }) => colorButton = c[`${status}`].color);
-        return colorButton;
-    };
-
-    onReportClick = () => {};
-
     onDateClick = (day: any) => {
         this.setState({
             selectedDate: day
-        });
+        })
     };
 
     nextMonth = () => {
         this.setState({
             currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        });
+        })
     };
+
     prevMonth = () => {
         this.setState({
             currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        });
+        })
     };
-
 
     componentDidMount(): void {
         this.getAllReports();
+        this.getAllStatuses();
     }
 
     render() {
         return (
-            <div className="calendar">
-                {this.renderHeader()}
-                {this.renderDays()}
-                {this.renderCells()}
-            </div>
+            <MainContext.Consumer>
+                { context => (
+                    <div className="calendar">
+                        {this.renderHeader()}
+                        {this.renderDays()}
+                        {this.renderCells(context)}
+                    </div>
+                )}
+            </MainContext.Consumer>
         );
     }
 }

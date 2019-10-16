@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Tree, Icon, Table, Modal,
     Button, Select, Row, Col,
-    Menu, Tag, Layout
+    Menu, Tag, Layout, DatePicker
 } from 'antd';
 import Ecore from "ecore";
 import { API } from "../modules/api";
@@ -11,6 +11,8 @@ import update from 'immutability-helper';
 import EditableTextArea from './EditableTextArea'
 import SearchGridTrans from "./SearchGrid";
 import { WithTranslation } from "react-i18next";
+import moment from 'moment';
+import EClassSelection from './EClassSelection'
 
 export interface Props {
 }
@@ -30,6 +32,7 @@ interface State {
     modalRefVisible: Boolean,
     modalResourceVisible: Boolean,
     rightClickMenuVisible: Boolean,
+    modalSelectEClassVisible: Boolean,
     rightMenuPosition: Object,
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
@@ -57,6 +60,7 @@ export class ResourceEditor extends React.Component<any, State> {
         selectedKey: "",
         modalRefVisible: false,
         modalResourceVisible: false,
+        modalSelectEClassVisible: false,
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
@@ -66,7 +70,6 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     getEObject(): void {
-
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -320,7 +323,11 @@ export class ResourceEditor extends React.Component<any, State> {
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
-                    <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                    {feature.get('eType').get('name') === 'EClass' ? 
+                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalSelectEClassVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                        :
+                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                    }
                 </React.Fragment>
                 return component
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "EBoolean") {
@@ -335,7 +342,17 @@ export class ResourceEditor extends React.Component<any, State> {
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Timestamp") {
                 return value
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Date") {
-                return value
+                return <DatePicker
+                    showTime
+                    key={key + "_date_" + idx} 
+                    defaultValue={moment(value)}
+                    onChange={(value: any)=>{
+                        const newValue = { [feature.get('name')]: value.format() }
+                        const updatedJSON = targetObject.updater(newValue);
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Password") {
                 return <EditableTextArea
                     type="password"
@@ -384,6 +401,10 @@ export class ResourceEditor extends React.Component<any, State> {
         })
 
         return preparedData
+    }
+
+    setSelectEClassVisible = (visible:boolean) => {
+        this.setState({ modalSelectEClassVisible: visible })
     }
 
     handleRefModalCancel = () => {
@@ -734,6 +755,23 @@ export class ResourceEditor extends React.Component<any, State> {
                 >
                     <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
                 </Modal>}
+                <EClassSelection
+                    key="eclass_selection" 
+                    translate={t} 
+                    modalSelectEClassVisible={this.state.modalSelectEClassVisible} 
+                    setSelectEClassVisible={this.setSelectEClassVisible}
+                    onOk={(EClassObject:any)=>{
+                        const targetObject:{ [key: string]: any } = this.state.targetObject;
+                        const updatedJSON = targetObject.updater({
+                            [this.state.addRefPropertyName]: {
+                                //$ref: EClassObject.eURI(),
+                                eClass: EClassObject.eURI()
+                            }
+                        })
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             </div>
         );
     }

@@ -1,38 +1,56 @@
 import React from "react";
 import './../../styles/MandatoryReporting.css';
-import {Button, Form, notification, Tag} from "antd";
+import {Button, notification, Tag} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {colorList, statues} from "../../utils/consts";
+import {API} from "../../modules/api";
+import Ecore from "ecore";
 
 interface Props {
 }
 
 interface State {
+    ReportStatus: Ecore.EObject[];
 }
 
 class StatusLegend extends React.Component<Props & WithTranslation, State> {
 
-    selectStatusColor = (status: string): any => {
-        let colorButton: any;
-        colorList
-            .filter( (c:{ [key:string]: any }) => c[`${status}`] && c[`${status}`].status === status)
-            .map( (c:{ [key:string]: any }) => colorButton = c[`${status}`].color);
-        return colorButton;
+    state = {
+        ReportStatus: []
     };
+
+    getAllStatuses() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//ReportStatus");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((statuses) => {
+                        this.setState({ReportStatus: statuses})
+                    })
+            }
+        })
+    };
+
+    EditReportStatuses(): void {
+    }
+
+    componentDidMount(): void {
+        this.getAllStatuses();
+    }
 
     render() {
         const stat: { push(div: any): void } = [];
-        statues.filter( status =>
+        this.state.ReportStatus.map(
+            (status: any) =>
             stat.push(
                 <div>
                     <Tag style={{
                         display: "table-caption",
                         width: "300px",
                         textAlign: "left",
-                        backgroundColor: `${this.selectStatusColor(status)}`,
+                        backgroundColor: `${status.eContents()[0].get('color')}`,
                     }}
                     >
-                        {status}
+                        {status.eContents()[0].get('name')}
                     </Tag>
                 </div>
             )
@@ -41,15 +59,18 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
             <div>
                 <Button
                     onClick = { () => {
-                        let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+                        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
                             Close All
+                        </Button>);
+                        let btnEdit = (<Button type="link" size="small" onClick={() => this.EditReportStatuses}>
+                            Edit
                         </Button>);
                         notification.open({
                             message: "Легенда",
                             description: stat,
                             duration: 0,
                             key: "single",
-                            btn,
+                            btn: [btnEdit, btnCloseAll],
                             style: {
                                 width: 400,
                                 marginLeft: -10,
