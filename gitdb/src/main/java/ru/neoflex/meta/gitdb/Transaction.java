@@ -32,6 +32,15 @@ public class Transaction implements Closeable {
     private GitFileSystem gfs;
     public enum LockType {DIRTY, READ, WRITE}
     private LockType lockType;
+    private static final ThreadLocal<Transaction> tlTransaction = new ThreadLocal<>();
+
+    public static void setCurrent(Transaction tx) {
+        tlTransaction.set(tx);
+    }
+
+    public static Transaction getCurrent() {
+        return tlTransaction.get();
+    }
 
     public Transaction(Database database, String branch, LockType lockType) throws IOException {
         this.database = database;
@@ -266,6 +275,15 @@ public class Transaction implements Closeable {
             return f.call();
         } finally {
             Thread.currentThread().setContextClassLoader(parent);
+        }
+    }
+
+    public void withCurrent(Runnable f) {
+        setCurrent(this);
+        try {
+            f.run();
+        } finally {
+            setCurrent(null);
         }
     }
 }
