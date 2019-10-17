@@ -16,5 +16,7 @@
         "edit": "編輯",
         "delete": "刪除",
         "addresource": "添加資源",
-        "dynamiccomponent": " 組件無法加載 "
+        "dynamiccomponent": " 組件無法加載 ",
+        "mandatoryreporting": "強制性報告",
+        "legend": "傳說"
 }

@@ -3,7 +3,7 @@ import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
 import {ru} from "date-fns/locale";
-import {withTranslation} from "react-i18next";
+import {WithTranslation, withTranslation} from "react-i18next";
 import {MainContext} from "../../MainContext";
 import {Button} from "antd";
 
@@ -18,7 +18,7 @@ interface State {
 interface Props {
 }
 
-class Calendar extends React.Component<any, State> {
+class Calendar extends React.Component<WithTranslation, State> {
 
     state = {
         currentMonth: new Date(),
@@ -62,7 +62,7 @@ class Calendar extends React.Component<any, State> {
                     </div>
                 </div>
                 <div className="col col-center">
-        <span className="gradient">
+        <span className="col-text">
             {dateFns.format(this.state.currentMonth, dateFormat, {locale: ru})}
         </span>
                 </div>
@@ -80,7 +80,7 @@ class Calendar extends React.Component<any, State> {
         for (let i = 0; i < 7; i++) {
             days.push(
                 <div key={i}
-                     className="col col-center gradient"
+                     className="col col-center col-text"
                 >
                     <b>{dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: ru})}</b>
                 </div>
