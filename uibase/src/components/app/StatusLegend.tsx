@@ -31,13 +31,14 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
     };
 
     EditReportStatuses(): void {
+
     }
 
     componentDidMount(): void {
         this.getAllStatuses();
     }
 
-    render() {
+    render() {const {t, i18n} = this.props;
         const stat: { push(div: any): void } = [];
         this.state.ReportStatus.map(
             (status: any) =>
@@ -60,13 +61,13 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
                 <Button
                     onClick = { () => {
                         let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
-                            Close All
+                            {t("closeall")}
                         </Button>);
                         let btnEdit = (<Button type="link" size="small" onClick={() => this.EditReportStatuses}>
-                            Edit
+                            {t("edit")}
                         </Button>);
                         notification.open({
-                            message: "Легенда",
+                            message: t('legend'),
                             description: stat,
                             duration: 0,
                             key: "single",
@@ -80,7 +81,7 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
                         })}}
                     style={{width: "300px"}}
                 >
-                    Легенда
+                    {t('legend')}
                 </Button>
             </div>
         )

@@ -14,6 +14,7 @@
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
+    color: rgb(135,75,199);
 
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -21,8 +22,7 @@
     font-feature-settings: 'liga';
 }
 
-
-/* VARIABLES */
+/*!* VARIABLES *!*/
 
 :root {
     --main-color: #1a8fff;
@@ -33,7 +33,7 @@
     --neutral-color: #fff;
 }
 
-/* GENERAL */
+/*!* GENERAL *!*/
 
 .headerCalendar {
     font-weight: 500;
@@ -41,11 +41,7 @@
     width: 100%;
     padding: 1.4em 0;
     border-bottom: 1px solid var(--border-color);
-    background: var(--neutral-color);
-}
-
-.col-text {
-    color: rgb(135,75,199);
+    /*background: var(--neutral-color);*/
 }
 
 .headerCalendar #logo {
@@ -55,7 +51,10 @@
     margin-left: 39%;
 }
 
-/* GRID */
+.col-text {
+    color: rgb(135,75,199);
+    font-weight: initial;
+}
 
 .row {
     margin: 0;
@@ -90,7 +89,7 @@
     text-align: start;
 }
 
-/* Calendar */
+/*!* Calendar *!*/
 
 .calendar {
     display: block;
@@ -120,7 +119,7 @@
     color: var(--main-color);
 }
 
-/*День недели*/
+/*!*День недели*!*/
 .calendar .days {
     font-weight: 400;
     font-size: 100%;
@@ -128,7 +127,7 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-/*Даты в месяце*/
+/*!*Даты в месяце*!*/
 .calendar .body .cell {
     position: relative;
     min-height: 10vh;
@@ -139,7 +138,7 @@
     transition: 0.25s ease-out;
 }
 
-/*Подсветка ячейки при наведении мыши*/
+/*!*Подсветка ячейки при наведении мыши*!*/
 .calendar .body .cell:hover {
     background: var(--bg-color);
     transition: 0.5s ease-out;
@@ -157,7 +156,6 @@
     border-right: none;
 }
 
-/*+ еще одна цифра*/
 .calendar .body .cell .number {
     position: absolute;
     font-size: 82.5%;
@@ -196,5 +194,5 @@
 .calendar .body .col {
     flex-grow: 0;
     flex-basis: calc(100%/7);
-    width: calc(100%/7);
+    /*width: calc(100%/7);*/
 }

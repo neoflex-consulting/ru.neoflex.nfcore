@@ -18,5 +18,6 @@
         "addresource": "Добавить ресурсы",
         "dynamiccomponent": " компонента не может быть загружена из ",
         "mandatoryreporting": "Обязательная отчетность",
-        "legend": "Легенда"
+        "legend": "Легенда",
+        "closeall": "Закрыть все"
 }
