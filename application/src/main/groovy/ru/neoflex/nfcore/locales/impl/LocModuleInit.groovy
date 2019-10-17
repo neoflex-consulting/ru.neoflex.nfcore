@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.locales.impl
 import org.apache.commons.lang3.StringUtils
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.resource.ResourceSet
+import ru.neoflex.meta.gitdb.Transaction
 import ru.neoflex.nfcore.locales.LocalesFactory
 import ru.neoflex.nfcore.locales.LocalesPackage
 import ru.neoflex.nfcore.locales.Lang
@@ -11,6 +12,9 @@ import ru.neoflex.nfcore.locales.LocModule
 import ru.neoflex.nfcore.locales.LocNS
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class LocModuleInit extends LocModuleImpl {
 
@@ -164,10 +168,17 @@ class LocModuleInit extends LocModuleImpl {
             Lang lang = lgrs.contents[0] as Lang
             locModulesResources.each {lmrs->
                 LocModule locModule = lmrs.contents[0] as LocModule
-                String json = Context.current.epsilon.generate("org/eclipse/epsilon/LocModule2json.egl", [lang: lang.name], locModule)
-                File out = Context.current.workspace.getFile("public/locales/${lang.name}/${locModule.name}.json")
-                out.parentFile.mkdirs()
-                out.write(json)
+                String json = Context.current.epsilon.generate("LocModule2json.egl", [lang: lang.name], locModule)
+                Transaction tx = Context.current.workspace.createTransaction()
+                try {
+                    Path path = tx.fileSystem.getPath("/public/locales/${lang.name}/${locModule.name}.json")
+                    Files.createDirectories(path.parent)
+                    Files.write(path, json.getBytes())
+                    tx.commit("Generated " + path.toString())
+                }
+                finally {
+                    tx.close()
+                }
             }
         }
     }
