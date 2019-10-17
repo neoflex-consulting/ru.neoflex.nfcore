@@ -30,32 +30,42 @@ public class Transaction implements Closeable {
     private Database database;
     private String branch;
     private GitFileSystem gfs;
-    private boolean readonly;
+    public enum LockType {DIRTY, READ, WRITE}
+    private LockType lockType;
+    private static final ThreadLocal<Transaction> tlTransaction = new ThreadLocal<>();
 
-    public Transaction(Database database, String branch, boolean readonly) throws IOException {
+    public static void setCurrent(Transaction tx) {
+        tlTransaction.set(tx);
+    }
+
+    public static Transaction getCurrent() {
+        return tlTransaction.get();
+    }
+
+    public Transaction(Database database, String branch, LockType lockType) throws IOException {
         this.database = database;
         this.branch = branch;
-        this.readonly = readonly;
-        if (!readonly) {
+        this.lockType = lockType;
+        if (lockType == LockType.WRITE) {
             database.getLock().writeLock().lock();
         }
-        else {
+        else if (lockType == LockType.READ) {
             database.getLock().readLock().lock();
         }
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
     }
 
     public Transaction(Database database, String branch) throws IOException {
-        this(database, branch, false);
+        this(database, branch, LockType.WRITE);
     }
 
     @Override
     public void close() throws IOException {
         gfs.close();
-        if (!readonly) {
+        if (lockType == LockType.WRITE) {
             database.getLock().writeLock().unlock();
         }
-        else {
+        else if (lockType == LockType.READ) {
             database.getLock().readLock().unlock();
         }
     }
@@ -81,7 +91,7 @@ public class Transaction implements Closeable {
     }
 
     public void commit(String message, String author, String email) throws IOException {
-        if (readonly) {
+        if (lockType != LockType.WRITE) {
             throw new IOException("Can't commit readonly transaction");
         }
         GfsCommit commit = Gfs.commit(gfs).message(message);
@@ -265,6 +275,15 @@ public class Transaction implements Closeable {
             return f.call();
         } finally {
             Thread.currentThread().setContextClassLoader(parent);
+        }
+    }
+
+    public void withCurrent(Runnable f) {
+        setCurrent(this);
+        try {
+            f.run();
+        } finally {
+            setCurrent(null);
         }
     }
 }

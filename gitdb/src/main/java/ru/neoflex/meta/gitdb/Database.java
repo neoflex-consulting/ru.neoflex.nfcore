@@ -22,6 +22,13 @@ public class Database implements Closeable {
     private Repository repository;
     private Map<String, Index> indexes = new HashMap<>();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
+    {
+        try {
+            GitURLStreamHandler.registerFactory();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Database(String repoPath) throws IOException, GitAPIException {
         File repoFile = new File(repoPath);
@@ -46,8 +53,8 @@ public class Database implements Closeable {
         return new Transaction(this, branch);
     }
 
-    public Transaction createTransaction(String branch, boolean readonly) throws IOException {
-        return new Transaction(this, branch, readonly);
+    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException {
+        return new Transaction(this, branch, lockType);
     }
 
     @Override

@@ -36,8 +36,20 @@ public class Groovy {
             b.setVariable("instance", instance);
             b.setVariable("method", method);
             b.setVariable("args", args);
-            GroovyShell sh = new GroovyShell(b);
+            GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
             Object result =  sh.evaluate("instance.\"$method\"(*args)");
+            return result;
+        });
+    }
+
+    public Object eval(String code, List args) throws Exception {
+        return context.withContext(() -> {
+            Binding b = new Binding();
+            if (args != null) {
+                b.setVariable("args", args);
+            }
+            GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+            Object result =  sh.evaluate(code);
             return result;
         });
     }

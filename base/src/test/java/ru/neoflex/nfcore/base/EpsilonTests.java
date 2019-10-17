@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.FileCopyUtils;
+import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
 import ru.neoflex.nfcore.base.auth.User;
 import ru.neoflex.nfcore.base.services.Context;
@@ -27,7 +28,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -82,7 +87,7 @@ public class EpsilonTests {
     @Test
     public void testImport() throws Exception {
         ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-        String text = context.getEpsilon().generate("org/eclipse/epsilon/ToValid.egl", null, resourceSet);
+        String text = context.getEpsilon().generate("ToValid.egl", null, resourceSet);
         Assert.assertEquals("_12_", text);
     }
 
@@ -95,21 +100,29 @@ public class EpsilonTests {
 
     @Test
     public void testClassLoader() throws Exception {
-        String text = context.withClassLoader(()->{
-            ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-            ClassPathResource resource = new ClassPathResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl");
-            File newResourceFile = context.getWorkspace().getFile(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
-            newResourceFile.getParentFile().mkdirs();
-            FileCopyUtils.copy(resource.getInputStream(), Files.newOutputStream(newResourceFile.toPath()));
+        ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+        try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
+            Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
+            Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
+            Files.createDirectories(newResourcePath.getParent());
+            Files.copy(resourcePath, newResourcePath, REPLACE_EXISTING);
             String program = "[%import \"Utils2.egl\";%]" +
                     "[%=toValidName('12,')%]";
-            File newProgramFile = context.getWorkspace().getFile(Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
-            FileCopyUtils.copy(new ByteArrayInputStream(program.getBytes()), Files.newOutputStream(newProgramFile.toPath()));
-            String result = context.getEpsilon().generate(Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl", null, resourceSet);
-            newProgramFile.delete();
-            newResourceFile.delete();
+            Path newProgramPath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
+            Files.write(newProgramPath, program.getBytes());
+            tx.commit("Written Utils2.egl, ToValid2.egl");
+        }
+        String text = context.withClassLoader(()->{
+            String result = context.getEpsilon().generate("ToValid2.egl", null, resourceSet);
             return result;
         });
+        try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
+            Path resourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
+            Files.delete(resourcePath);
+            Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
+            Files.delete(newResourcePath);
+            tx.commit("Deleted Utils2.egl, ToValid2.egl");
+        }
         Assert.assertEquals("_12_", text);
     }
 
