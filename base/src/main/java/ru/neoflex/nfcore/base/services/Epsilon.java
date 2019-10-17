@@ -142,8 +142,8 @@ public class Epsilon {
 
     public String generate(String templatePath, Map<String, Object> params, List<IModel> models) throws EglRuntimeException, IOException, URISyntaxException {
         EglTemplateFactory factory = getEglTemplateFactory(params, models);
-        java.net.URI templateURI = (new ClassPathResource(templatePath)).getURL().toURI();
-        EglTemplate template = factory.load(templateURI);
+        //java.net.URI templateURI = Thread.currentThread().getContextClassLoader().getResource(templatePath).toURI();
+        EglTemplate template = factory.load(templatePath);
         checkModuleErrors(template.getModule());
         String result = template.process();
         return result;

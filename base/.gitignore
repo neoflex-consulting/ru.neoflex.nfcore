@@ -1,5 +1,6 @@
 HELP.md
 target/
+workspace/
 java-gen/
 .mvn/
 
