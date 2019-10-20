@@ -55,7 +55,7 @@ public class EMFJSONDB extends Database {
                 EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
                 if (nameSF != null) {
                     String name = (String) eObject.eGet(nameSF);
-                    if (name == null && name.length() == 0) {
+                    if (name == null || name.length() == 0) {
                         throw new IOException("Empty feature name");
                     }
                     EPackage ePackage = eClass.getEPackage();
