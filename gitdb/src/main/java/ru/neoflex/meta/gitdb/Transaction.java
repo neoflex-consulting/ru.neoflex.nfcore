@@ -150,6 +150,11 @@ public class Transaction implements Closeable {
         Files.write(path, entity.getContent());
         String rev = getObjectId(path).getName();
         entity.setRev(rev);
+        createEntityIndexes(entity);
+        return entity;
+    }
+
+    public void createEntityIndexes(Entity entity) throws IOException {
         for (String indexName: database.getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
             for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
@@ -161,7 +166,6 @@ public class Transaction implements Closeable {
                 Files.write(indexValuePath, entry.getContent());
             }
         }
-        return entity;
     }
 
     public Entity load(EntityId entityId) throws IOException {
@@ -226,6 +230,20 @@ public class Transaction implements Closeable {
             }
         }
     }
+
+    public void reindex() throws IOException {
+        GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
+        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        for(Path path : pathsToDelete) {
+            Files.deleteIfExists(path);
+        }
+        for (EntityId entityId: all()) {
+            Entity entity = load(entityId);
+            createEntityIndexes(entity);
+        }
+    }
+
+
 
     public List<IndexEntry> findByIndex(String indexName, String... path) throws IOException {
         GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);

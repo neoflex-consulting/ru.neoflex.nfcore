@@ -28,6 +28,8 @@ import java.util.Map;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 public class EMFJSONDB extends Database {
+    public static final String TYPE_NAME_IDX = "type_name";
+    public static final String REF_IDX = "ref";
     private ObjectMapper mapper;
     private List<EPackage> packages;
 
@@ -43,7 +45,7 @@ public class EMFJSONDB extends Database {
         createIndex(new Index() {
             @Override
             public String getName() {
-                return "type_name";
+                return TYPE_NAME_IDX;
             }
 
             @Override
@@ -73,7 +75,7 @@ public class EMFJSONDB extends Database {
         createIndex(new Index() {
             @Override
             public String getName() {
-                return "ref";
+                return REF_IDX;
             }
 
             @Override
@@ -199,7 +201,7 @@ public class EMFJSONDB extends Database {
 
     public ResourceSet getDependentResources(String id, Transaction transaction) throws IOException {
         ResourceSet resourceSet = createResourceSet(transaction);
-        List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
+        List<IndexEntry> refList = transaction.findByIndex(REF_IDX, id.substring(0, 2), id.substring(2));
         for (IndexEntry entry: refList) {
             String refId = entry.getPath()[entry.getPath().length - 1];
             loadResource(resourceSet, refId);
@@ -213,10 +215,10 @@ public class EMFJSONDB extends Database {
         String className = eClass.getName();
         List<IndexEntry> ieList;
         if (name == null || name.length() == 0) {
-            ieList = transaction.findByIndex("type_name", nsURI, className);
+            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className);
         }
         else {
-            ieList = transaction.findByIndex("type_name", nsURI, className, name);
+            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className, name);
         }
         for (IndexEntry entry: ieList) {
             String id = new String(entry.getContent());
