@@ -103,6 +103,10 @@ public class EMFJSONDB extends Database {
 
     public Resource loadResource(byte[] content, Resource resource) throws IOException {
         JsonNode node = mapper.readTree(content);
+        return loadResource(node, resource);
+    }
+
+    public Resource loadResource(JsonNode node, Resource resource) throws IOException {
         ContextAttributes attributes = ContextAttributes
                 .getEmpty()
                 .withSharedAttribute("resourceSet", resource.getResourceSet())
@@ -131,7 +135,7 @@ public class EMFJSONDB extends Database {
         return uri;
     }
 
-    public ResourceSet createResourceSet(Transaction transaction) {
+    public ResourceSet createResourceSet() {
         ResourceSet resourceSet = new ResourceSetImpl();
         resourceSet.getPackageRegistry()
                 .put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
@@ -142,6 +146,11 @@ public class EMFJSONDB extends Database {
         resourceSet.getResourceFactoryRegistry()
                 .getExtensionToFactoryMap()
                 .put("*", new JsonResourceFactory());
+        return resourceSet;
+    }
+
+    public ResourceSet createResourceSet(Transaction transaction) {
+        ResourceSet resourceSet = createResourceSet();
         resourceSet.getURIConverter()
                 .getURIHandlers()
                 .add(0, new GitHandler(transaction));
@@ -237,5 +246,13 @@ public class EMFJSONDB extends Database {
     public Resource loadResource(String id, Transaction transaction) throws IOException {
         ResourceSet resourceSet = createResourceSet(transaction);
         return loadResource(resourceSet, id);
+    }
+
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    public List<EPackage> getPackages() {
+        return packages;
     }
 }

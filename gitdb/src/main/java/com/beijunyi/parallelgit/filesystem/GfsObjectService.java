@@ -116,7 +116,7 @@ public class GfsObjectService implements Closeable {
       closed = true;
       reader.close();
       inserter.close();
-      repo.close();
+      //repo.close();
     }
   }
 

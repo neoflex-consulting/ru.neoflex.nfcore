@@ -9,6 +9,7 @@ import com.beijunyi.parallelgit.filesystem.io.Node;
 import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
 import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
 import com.github.marschall.pathclassloader.PathClassLoader;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -25,8 +26,9 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Transaction implements Closeable {
-    final public static String IDS_PATH = "ids";
-    final public static String IDX_PATH = "idx";
+    final public static String DP_PATH = "db";
+    final public static String IDS_PATH = DP_PATH + "/ids";
+    final public static String IDX_PATH = DP_PATH + "/idx";
     private Database database;
     private String branch;
     private GitFileSystem gfs;
@@ -42,7 +44,7 @@ public class Transaction implements Closeable {
         return tlTransaction.get();
     }
 
-    public Transaction(Database database, String branch, LockType lockType) throws IOException {
+    public Transaction(Database database, String branch, LockType lockType) throws IOException, GitAPIException {
         this.database = database;
         this.branch = branch;
         this.lockType = lockType;
@@ -55,7 +57,7 @@ public class Transaction implements Closeable {
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
     }
 
-    public Transaction(Database database, String branch) throws IOException {
+    public Transaction(Database database, String branch) throws IOException, GitAPIException {
         this(database, branch, LockType.WRITE);
     }
 
@@ -233,16 +235,19 @@ public class Transaction implements Closeable {
 
     public void reindex() throws IOException {
         GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
-        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-        for(Path path : pathsToDelete) {
-            Files.deleteIfExists(path);
-        }
+        deleteRecursive(indexRootPath);
         for (EntityId entityId: all()) {
             Entity entity = load(entityId);
             createEntityIndexes(entity);
         }
     }
 
+    public void deleteRecursive(Path indexRootPath) throws IOException {
+        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        for(Path path : pathsToDelete) {
+            Files.deleteIfExists(path);
+        }
+    }
 
 
     public List<IndexEntry> findByIndex(String indexName, String... path) throws IOException {
@@ -269,6 +274,9 @@ public class Transaction implements Closeable {
 
     public List<EntityId> all() throws IOException {
         GitPath idsPath = gfs.getPath("/", IDS_PATH);
+        if (!Files.exists(idsPath)) {
+            return Collections.emptyList();
+        }
         return Files.walk(idsPath).filter(Files::isRegularFile).map(file -> {
             EntityId entityId = new EntityId();
             Path parent = file.getParent();

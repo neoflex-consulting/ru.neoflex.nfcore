@@ -25,8 +25,6 @@ import static ru.neoflex.meta.gitdb.EMFJSONDB.TYPE_NAME_IDX;
 import static ru.neoflex.meta.gitdb.Transaction.IDX_PATH;
 
 public class EMFJSONDBTests extends TestBase {
-    public static final String GITDB = "gitdbtest";
-
     @Before
     public void startUp() throws IOException, GitAPIException {
         database = refreshRatabase();
@@ -34,7 +32,7 @@ public class EMFJSONDBTests extends TestBase {
     }
 
     @Test
-    public void createEMFObject() throws IOException {
+    public void createEMFObject() throws IOException, GitAPIException {
         String userId;
         String groupId;
         Group group = TestFactory.eINSTANCE.createGroup();
