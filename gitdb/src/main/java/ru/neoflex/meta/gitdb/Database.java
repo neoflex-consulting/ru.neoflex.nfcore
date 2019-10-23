@@ -36,15 +36,15 @@ public class Database implements Closeable {
         this.repository = openRepository(repoPath);
     }
 
-    public Set<String> getBranches() throws IOException, GitAPIException {
+    public Set<String> getBranches() throws IOException {
         return BranchUtils.getBranches(repository).keySet();
     }
 
-    public void createBranch(String branch, String from) throws IOException, GitAPIException {
+    public void createBranch(String branch, String from) throws IOException {
         BranchUtils.createBranch(branch, from, repository);
     }
 
-    public Transaction createTransaction(String branch) throws IOException, GitAPIException {
+    public Transaction createTransaction(String branch) throws IOException {
         return new Transaction(this, branch);
     }
 

@@ -1,13 +1,8 @@
 package ru.neoflex.nfcore.base.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.emfjson.jackson.module.EMFModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,20 +11,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.neoflex.meta.gitdb.EMFJSONDB;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
-import ru.neoflex.nfcore.base.util.FileUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Service
 public class Workspace {
@@ -75,7 +63,7 @@ public class Workspace {
         return branch;
     }
 
-    public void setCurrentBranch(String branch) throws IOException, GitAPIException {
+    public void setCurrentBranch(String branch) throws IOException {
         if (!database.getBranches().contains(branch)) {
             throw new IOException("Branch " + branch + " does not exists");
         }
