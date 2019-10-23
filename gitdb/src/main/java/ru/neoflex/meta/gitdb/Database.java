@@ -12,14 +12,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 
 import static org.eclipse.jgit.lib.Constants.DOT_GIT;
 
 public class Database implements Closeable {
-    private Repository repository;
+    private final Repository repository;
     private Map<String, Index> indexes = new HashMap<>();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     {
@@ -31,43 +33,55 @@ public class Database implements Closeable {
     }
 
     public Database(String repoPath) throws IOException, GitAPIException {
+        this.repository = openRepository(repoPath);
+    }
+
+    public Set<String> getBranches() throws IOException, GitAPIException {
+        return BranchUtils.getBranches(repository).keySet();
+    }
+
+    public void createBranch(String branch, String from) throws IOException, GitAPIException {
+        BranchUtils.createBranch(branch, from, repository);
+    }
+
+    public Transaction createTransaction(String branch) throws IOException, GitAPIException {
+        return new Transaction(this, branch);
+    }
+
+    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException, GitAPIException {
+        return new Transaction(this, branch, lockType);
+    }
+
+    public interface Transactional<R> {
+        public R call(Transaction tx) throws IOException;
+    }
+
+    public<R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException, GitAPIException {
+        try (Transaction tx = createTransaction(branch, lockType)) {
+            return f.call(tx);
+        }
+    }
+
+
+    @Override
+    public void close() throws IOException {
+    }
+
+    public Repository getRepository() throws IOException, GitAPIException {
+        return repository;
+    }
+
+    public Repository openRepository(String repoPath) throws IOException, GitAPIException {
         File repoFile = new File(repoPath);
-        repository = new File(repoFile, DOT_GIT).exists() ?
+        Repository repository = new File(repoFile, DOT_GIT).exists() ?
                 RepositoryUtils.openRepository(repoFile, false):
                 RepositoryUtils.createRepository(repoFile, false);
-        if (getBranches().size() == 0) {
+        if (BranchUtils.getBranches(repository).size() == 0) {
             try(Git git = new Git(repository);) {
                 git.commit().setMessage("Initial commit").setAllowEmpty(true).call();
             }
         }
-    }
-    public Set<String> getBranches() throws IOException {
-        return BranchUtils.getBranches(repository).keySet();
-    }
-
-    public void createBranch(String branch, String from) throws IOException {
-        BranchUtils.createBranch(branch, from, getRepository());
-    }
-
-    public Transaction createTransaction(String branch) throws IOException {
-        return new Transaction(this, branch);
-    }
-
-    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException {
-        return new Transaction(this, branch, lockType);
-    }
-
-    @Override
-    public void close() throws IOException {
-        repository.close();
-    }
-
-    public Repository getRepository() {
         return repository;
-    }
-
-    public void setIndexes(Map<String, Index> indexes) {
-        this.indexes = indexes;
     }
 
     public Map<String, Index> getIndexes() {

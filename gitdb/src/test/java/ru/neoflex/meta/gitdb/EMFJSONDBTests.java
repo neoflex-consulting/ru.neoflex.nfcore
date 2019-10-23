@@ -21,9 +21,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class EMFJSONDBTests extends TestBase {
-    public static final String GITDB = "gitdbtest";
+import static ru.neoflex.meta.gitdb.EMFJSONDB.TYPE_NAME_IDX;
+import static ru.neoflex.meta.gitdb.Transaction.IDX_PATH;
 
+public class EMFJSONDBTests extends TestBase {
     @Before
     public void startUp() throws IOException, GitAPIException {
         database = refreshRatabase();
@@ -31,7 +32,7 @@ public class EMFJSONDBTests extends TestBase {
     }
 
     @Test
-    public void createEMFObject() throws IOException {
+    public void createEMFObject() throws IOException, GitAPIException {
         String userId;
         String groupId;
         Group group = TestFactory.eINSTANCE.createGroup();
@@ -72,6 +73,14 @@ public class EMFJSONDBTests extends TestBase {
             catch (IOException e) {
                 Assert.assertTrue(e.getMessage().startsWith("Object "));
             }
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/", IDX_PATH, TYPE_NAME_IDX);
+            Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
+            Files.delete(path);
+            Assert.assertEquals(0, database.findByEClass(group.eClass(), null, tx).getResources().size());
+            tx.reindex();
+            Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet dependent = database.getDependentResources(groupId, tx);

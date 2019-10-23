@@ -69,7 +69,7 @@ public class GitdbApplicationTests extends TestBase {
     }
 
     @Test
-    public void createSimpleObject() throws IOException {
+    public void createSimpleObject() throws IOException, GitAPIException {
         ObjectNode user;
         Entity userEntity;
         ObjectNode group;
