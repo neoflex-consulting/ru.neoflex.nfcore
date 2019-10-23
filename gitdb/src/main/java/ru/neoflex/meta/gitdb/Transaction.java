@@ -44,7 +44,7 @@ public class Transaction implements Closeable {
         return tlTransaction.get();
     }
 
-    public Transaction(Database database, String branch, LockType lockType) throws IOException, GitAPIException {
+    public Transaction(Database database, String branch, LockType lockType) throws IOException {
         this.database = database;
         this.branch = branch;
         this.lockType = lockType;
@@ -57,7 +57,7 @@ public class Transaction implements Closeable {
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
     }
 
-    public Transaction(Database database, String branch) throws IOException, GitAPIException {
+    public Transaction(Database database, String branch) throws IOException {
         this(database, branch, LockType.WRITE);
     }
 

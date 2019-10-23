@@ -19,8 +19,6 @@ public class GitClasspathFilter implements Filter {
                     throw new RuntimeException(e);
                 }
             });
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
         }
     }
 }

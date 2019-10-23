@@ -48,7 +48,7 @@ public class Database implements Closeable {
         return new Transaction(this, branch);
     }
 
-    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException, GitAPIException {
+    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException {
         return new Transaction(this, branch, lockType);
     }
 
@@ -56,7 +56,7 @@ public class Database implements Closeable {
         public R call(Transaction tx) throws IOException;
     }
 
-    public<R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException, GitAPIException {
+    public<R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException {
         try (Transaction tx = createTransaction(branch, lockType)) {
             return f.call(tx);
         }
@@ -67,7 +67,7 @@ public class Database implements Closeable {
     public void close() throws IOException {
     }
 
-    public Repository getRepository() throws IOException, GitAPIException {
+    public Repository getRepository() {
         return repository;
     }
 

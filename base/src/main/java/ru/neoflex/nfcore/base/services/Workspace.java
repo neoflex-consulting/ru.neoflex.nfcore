@@ -89,11 +89,11 @@ public class Workspace {
         tlCurrentBranch.set(branch);
     }
 
-    public Transaction createTransaction(Transaction.LockType lockType) throws IOException, GitAPIException {
+    public Transaction createTransaction(Transaction.LockType lockType) throws IOException {
         return database.createTransaction(getCurrentBranch(), lockType);
     }
 
-    public Transaction createTransaction() throws IOException, GitAPIException {
+    public Transaction createTransaction() throws IOException {
         return createTransaction(Transaction.LockType.WRITE);
     }
 
@@ -103,7 +103,7 @@ public class Workspace {
         }
     }
 
-    public boolean pathExists(String path) throws IOException, GitAPIException {
+    public boolean pathExists(String path) throws IOException {
         try (Transaction tx = createTransaction(Transaction.LockType.DIRTY)) {
             return Files.exists(tx.getFileSystem().getPath(path));
         }
