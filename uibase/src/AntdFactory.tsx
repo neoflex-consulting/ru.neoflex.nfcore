@@ -18,7 +18,6 @@ abstract class ViewContainer extends View {
 }
 
 class Div_ extends ViewContainer {
-
     render = () => {
         return (
             <div>

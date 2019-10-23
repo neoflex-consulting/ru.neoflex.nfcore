@@ -116,5 +116,11 @@ public class ExporterTests extends TestBase {
             tx.commit("Database was restored with zip archive");
             Assert.assertEquals(2, tx.all().size());
         }
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/zip/all.zip");
+            exporter.unzip(path, tx);
+            tx.commit("Database was restored 2 time with zip archive");
+            Assert.assertEquals(2, tx.all().size());
+        }
     }
 }
