@@ -2,10 +2,11 @@ import React from 'react';
 import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
-import {ru} from "date-fns/locale";
-import {withTranslation} from "react-i18next";
+import {ru, enUS} from "date-fns/locale";
+import {WithTranslation, withTranslation} from "react-i18next";
 import {MainContext} from "../../MainContext";
 import {Button} from "antd";
+import {zhCN} from "date-fns/esm/locale";
 
 interface State {
     currentMonth: Date;
@@ -18,7 +19,7 @@ interface State {
 interface Props {
 }
 
-class Calendar extends React.Component<any, State> {
+class Calendar extends React.Component<WithTranslation, State> {
 
     state = {
         currentMonth: new Date(),
@@ -52,7 +53,15 @@ class Calendar extends React.Component<any, State> {
         })
     };
 
+    private getLocale(i18n: any) {
+        return i18n.language === "ch" ? zhCN
+            :
+            i18n.language === "ru" ? ru
+                : enUS;
+    }
+
     renderHeader() {
+        const {t, i18n} = this.props;
         const dateFormat = "LLLL yyyy";
         return (
             <div className="header row flex-middle">
@@ -62,8 +71,8 @@ class Calendar extends React.Component<any, State> {
                     </div>
                 </div>
                 <div className="col col-center">
-        <span className="gradient">
-            {dateFns.format(this.state.currentMonth, dateFormat, {locale: ru})}
+        <span className="col-text">
+            {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
         </span>
                 </div>
                 <div className="col col-end" onClick={this.nextMonth}>
@@ -74,15 +83,16 @@ class Calendar extends React.Component<any, State> {
     }
 
     renderDays() {
+        const {t, i18n} = this.props;
         const dateFormat = "EEEE";
         const days = [];
         let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
                 <div key={i}
-                     className="col col-center gradient"
+                     className="col col-center col-text"
                 >
-                    <b>{dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: ru})}</b>
+                    {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
                 </div>
             );
         }
@@ -90,6 +100,7 @@ class Calendar extends React.Component<any, State> {
     }
 
     renderCells(context: any) {
+        const {t, i18n} = this.props;
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
@@ -134,7 +145,7 @@ class Calendar extends React.Component<any, State> {
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"
-                                        style={{width: "100px", display: 'block', backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
+                                        style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
                                         title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                     >

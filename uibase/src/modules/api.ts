@@ -211,7 +211,19 @@ export class API implements IErrorHandler {
         if (level > 0) {
             let refs = Array.from(API.collectReferences(jsonObject, new Set<string>()).values());
             refEObjects = refs.map(ref => {
-                return this.fetchResource(ref, level - 1, resourceSet, loading);
+                let resid: string|undefined, fragment: string|undefined;
+                [resid, fragment] = ref.split('#', 2);
+                return this.fetchPackages().then(packages => {
+                    let foundPackage = packages.find(p => p.get("nsURI") === resid);
+                    if(foundPackage) {
+                        for (let eClassifier of foundPackage.get('eClassifiers').array()) {
+                            if("//" + eClassifier.get("name") === fragment){
+                                return Promise.resolve(eClassifier);
+                            }
+                        }
+                    }
+                    return this.fetchResource(ref, level - 1, resourceSet, loading);
+                });
             })
         }
         return Promise.all(refEObjects).then(_ => {

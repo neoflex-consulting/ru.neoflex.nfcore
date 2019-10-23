@@ -14,6 +14,7 @@
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
+    color: rgb(135,75,199);
 
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -21,8 +22,7 @@
     font-feature-settings: 'liga';
 }
 
-
-/* VARIABLES */
+/*!* VARIABLES *!*/
 
 :root {
     --main-color: #1a8fff;
@@ -33,7 +33,7 @@
     --neutral-color: #fff;
 }
 
-/* GENERAL */
+/*!* GENERAL *!*/
 
 .headerCalendar {
     font-weight: 500;
@@ -41,48 +41,20 @@
     width: 100%;
     padding: 1.4em 0;
     border-bottom: 1px solid var(--border-color);
-    background: var(--neutral-color);
-}
-
-.gradient {
-    background: linear-gradient(90deg,
-    rgb(61,197,255),
-    rgb(66,189,251),
-    rgb(69,183,249),
-    rgb(73,177,246),
-    rgb(77,171,273),
-    rgb(80,166,241),
-    rgb(83,161,239),
-    rgb(87,155,236),
-    rgb(90,149,233),
-    rgb(94,143,230),
-    rgb(98,136,227),
-    rgb(101,130,225),
-    rgb(107,121,221),
-    rgb(110,115,218),
-    rgb(114,110,215),
-    rgb(117,104,213),
-    rgb(121,98,210),
-    rgb(124,93,208),
-    rgb(128,86,205),
-    rgb(132,80,202),
-    rgb(135,75,199),
-    rgb(138,69,198)
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    /*background: var(--neutral-color);*/
 }
 
 .headerCalendar #logo {
     font-size: 175%;
     text-align: center;
-    line-height: 1;
-
     margin-right: 39%;
     margin-left: 39%;
 }
 
-/* GRID */
+.col-text {
+    color: rgb(135,75,199);
+    font-weight: initial;
+}
 
 .row {
     margin: 0;
@@ -117,7 +89,7 @@
     text-align: start;
 }
 
-/* Calendar */
+/*!* Calendar *!*/
 
 .calendar {
     display: block;
@@ -147,7 +119,7 @@
     color: var(--main-color);
 }
 
-/*День недели*/
+/*!*День недели*!*/
 .calendar .days {
     font-weight: 400;
     font-size: 100%;
@@ -155,7 +127,7 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-/*Даты в месяце*/
+/*!*Даты в месяце*!*/
 .calendar .body .cell {
     position: relative;
     min-height: 10vh;
@@ -166,17 +138,10 @@
     transition: 0.25s ease-out;
 }
 
-/*Подсветка ячейки при наведении мыши*/
+/*!*Подсветка ячейки при наведении мыши*!*/
 .calendar .body .cell:hover {
     background: var(--bg-color);
     transition: 0.5s ease-out;
-}
-
-/*Подсветка выбранной ячейки (текуйщий день о умолчанию)*/
-.calendar .body .selected {
-    border-left: 8px solid transparent;
-    border-image: linear-gradient(45deg, #8056CD 0%, #57DAFF 25%);
-    border-image-slice: 1;
 }
 
 .calendar .body .row {
@@ -191,7 +156,6 @@
     border-right: none;
 }
 
-/*+ еще одна цифра*/
 .calendar .body .cell .number {
     position: absolute;
     font-size: 82.5%;
@@ -230,5 +194,5 @@
 .calendar .body .col {
     flex-grow: 0;
     flex-basis: calc(100%/7);
-    width: calc(100%/7);
+    /*width: calc(100%/7);*/
 }

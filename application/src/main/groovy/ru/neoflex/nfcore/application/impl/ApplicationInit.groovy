@@ -45,8 +45,10 @@ class ApplicationInit {
             reportNode.setEObject(report1)
             (referenceTree.children[0] as CatalogNode).children.add(reportNode)
             application.setReferenceTree(referenceTree)
+            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", true)
             def componentElement = ApplicationFactory.eINSTANCE.createComponentElement()
             application.view = componentElement
+            componentElement.setComponent(userComponent1)
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)

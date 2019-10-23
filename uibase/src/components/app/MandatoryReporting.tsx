@@ -11,17 +11,18 @@ interface Props {
 interface State {
 }
 
-class MandatoryReporting extends React.Component<Props & WithTranslation, State> {
+class MandatoryReporting extends React.Component<WithTranslation, any> {
 
     render() {
+        const {t} = this.props;
         return (
-            <Form style={{backgroundColor: "#fff"}}>
-                <div className="headerCalendar">
-                    <div id="logo" className="gradient">
-                        Обязательная отчетность
+            <Form>
+                <div className="headerCalendar col-text">
+                    <div id="logo">
+                        {t('mandatoryreporting')}
                     </div>
                 </div>
-                <StatusLegendTrans/>
+                <StatusLegendTrans />
                 <CalendarTrans />
             </Form>
         );

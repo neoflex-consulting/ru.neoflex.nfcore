@@ -7,10 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 /**
  * Loads classes from a certain {@link Path}.
@@ -21,6 +18,7 @@ import java.util.List;
 public final class PathClassLoader extends ClassLoader {
 
   private final Path path;
+  private final ClassLoader parent;
 
   static {
     registerAsParallelCapable();
@@ -46,6 +44,7 @@ public final class PathClassLoader extends ClassLoader {
   public PathClassLoader(Path path, ClassLoader parent) {
     super(parent);
     this.path = path;
+    this.parent = parent;
   }
 
   @Override
@@ -113,6 +112,17 @@ public final class PathClassLoader extends ClassLoader {
 
   private URL toURL(Path path) throws IOException {
     return new URL(null, path.toUri().toString(), PathURLStreamHandler.INSTANCE);
+  }
+
+  public URL getResource(String name) {
+    Objects.requireNonNull(name);
+    URL url = findResource(name);
+    if (url == null) {
+      if (parent != null) {
+        url = parent.getResource(name);
+      }
+    }
+    return url;
   }
 
 }

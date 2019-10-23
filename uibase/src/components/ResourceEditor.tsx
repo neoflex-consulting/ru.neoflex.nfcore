@@ -323,7 +323,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
-                    {feature.get('eType').get('name') === 'EClass' ? 
+                    {feature.get('eType').get('name') === 'EClass' ?
                         <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalSelectEClassVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
                         :
                         <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
@@ -344,7 +344,7 @@ export class ResourceEditor extends React.Component<any, State> {
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Date") {
                 return <DatePicker
                     showTime
-                    key={key + "_date_" + idx} 
+                    key={key + "_date_" + idx}
                     defaultValue={moment(value)}
                     onChange={(value: any)=>{
                         const newValue = { [feature.get('name')]: value.format() }
@@ -598,7 +598,7 @@ export class ResourceEditor extends React.Component<any, State> {
     save = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-    
+
         if(resource) {
             this.setState({ isSaving: true })
             API.instance().saveResource(resource).then((result:any) => {
@@ -624,7 +624,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getEObject() 
+        this.getEObject()
         window.addEventListener("click", this.hideRightClickMenu)
     }
 
@@ -698,7 +698,7 @@ export class ResourceEditor extends React.Component<any, State> {
                             </Row>
                         </div>
                         <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
-                            <Table 
+                            <Table
                                 bordered
                                 size="small"
                                 pagination={false}
@@ -756,16 +756,16 @@ export class ResourceEditor extends React.Component<any, State> {
                     <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
                 </Modal>}
                 <EClassSelection
-                    key="eclass_selection" 
-                    translate={t} 
-                    modalSelectEClassVisible={this.state.modalSelectEClassVisible} 
+                    key="eclass_selection"
+                    translate={t}
+                    modalSelectEClassVisible={this.state.modalSelectEClassVisible}
                     setSelectEClassVisible={this.setSelectEClassVisible}
                     onOk={(EClassObject:any)=>{
                         const targetObject:{ [key: string]: any } = this.state.targetObject;
                         const updatedJSON = targetObject.updater({
                             [this.state.addRefPropertyName]: {
-                                //$ref: EClassObject.eURI(),
-                                eClass: EClassObject.eURI()
+                                $ref: EClassObject.eURI(),
+                                eClass: EClassObject.eClass.eURI()
                             }
                         })
                         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);

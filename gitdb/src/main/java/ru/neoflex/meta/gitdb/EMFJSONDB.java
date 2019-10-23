@@ -28,6 +28,8 @@ import java.util.Map;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 public class EMFJSONDB extends Database {
+    public static final String TYPE_NAME_IDX = "type_name";
+    public static final String REF_IDX = "ref";
     private ObjectMapper mapper;
     private List<EPackage> packages;
 
@@ -43,7 +45,7 @@ public class EMFJSONDB extends Database {
         createIndex(new Index() {
             @Override
             public String getName() {
-                return "type_name";
+                return TYPE_NAME_IDX;
             }
 
             @Override
@@ -55,7 +57,7 @@ public class EMFJSONDB extends Database {
                 EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
                 if (nameSF != null) {
                     String name = (String) eObject.eGet(nameSF);
-                    if (name == null && name.length() == 0) {
+                    if (name == null || name.length() == 0) {
                         throw new IOException("Empty feature name");
                     }
                     EPackage ePackage = eClass.getEPackage();
@@ -73,7 +75,7 @@ public class EMFJSONDB extends Database {
         createIndex(new Index() {
             @Override
             public String getName() {
-                return "ref";
+                return REF_IDX;
             }
 
             @Override
@@ -101,6 +103,10 @@ public class EMFJSONDB extends Database {
 
     public Resource loadResource(byte[] content, Resource resource) throws IOException {
         JsonNode node = mapper.readTree(content);
+        return loadResource(node, resource);
+    }
+
+    public Resource loadResource(JsonNode node, Resource resource) throws IOException {
         ContextAttributes attributes = ContextAttributes
                 .getEmpty()
                 .withSharedAttribute("resourceSet", resource.getResourceSet())
@@ -129,7 +135,7 @@ public class EMFJSONDB extends Database {
         return uri;
     }
 
-    public ResourceSet createResourceSet(Transaction transaction) {
+    public ResourceSet createResourceSet() {
         ResourceSet resourceSet = new ResourceSetImpl();
         resourceSet.getPackageRegistry()
                 .put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
@@ -140,6 +146,11 @@ public class EMFJSONDB extends Database {
         resourceSet.getResourceFactoryRegistry()
                 .getExtensionToFactoryMap()
                 .put("*", new JsonResourceFactory());
+        return resourceSet;
+    }
+
+    public ResourceSet createResourceSet(Transaction transaction) {
+        ResourceSet resourceSet = createResourceSet();
         resourceSet.getURIConverter()
                 .getURIHandlers()
                 .add(0, new GitHandler(transaction));
@@ -199,7 +210,7 @@ public class EMFJSONDB extends Database {
 
     public ResourceSet getDependentResources(String id, Transaction transaction) throws IOException {
         ResourceSet resourceSet = createResourceSet(transaction);
-        List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
+        List<IndexEntry> refList = transaction.findByIndex(REF_IDX, id.substring(0, 2), id.substring(2));
         for (IndexEntry entry: refList) {
             String refId = entry.getPath()[entry.getPath().length - 1];
             loadResource(resourceSet, refId);
@@ -213,10 +224,10 @@ public class EMFJSONDB extends Database {
         String className = eClass.getName();
         List<IndexEntry> ieList;
         if (name == null || name.length() == 0) {
-            ieList = transaction.findByIndex("type_name", nsURI, className);
+            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className);
         }
         else {
-            ieList = transaction.findByIndex("type_name", nsURI, className, name);
+            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className, name);
         }
         for (IndexEntry entry: ieList) {
             String id = new String(entry.getContent());
@@ -235,5 +246,13 @@ public class EMFJSONDB extends Database {
     public Resource loadResource(String id, Transaction transaction) throws IOException {
         ResourceSet resourceSet = createResourceSet(transaction);
         return loadResource(resourceSet, id);
+    }
+
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    public List<EPackage> getPackages() {
+        return packages;
     }
 }

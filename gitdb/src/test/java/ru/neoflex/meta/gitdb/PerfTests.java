@@ -107,7 +107,6 @@ public class PerfTests extends TestBase {
         System.out.println("Errors found: " + eCount.get());
     }
 
-    @Test
     public void updateTest() throws IOException, InterruptedException, GitAPIException {
         database = new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
         readIds();
@@ -152,15 +151,15 @@ public class PerfTests extends TestBase {
         System.out.println("Errors found: " + eCount.get());
     }
 
-    private void readIds() throws IOException {
+    private void readIds() throws IOException, GitAPIException {
         groupIds.clear();
-        try (Transaction tx = database.createTransaction("users", true)) {
+        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
             for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getGroup(), null, tx).getResources()) {
                 groupIds.add(database.getId(resource.getURI()));
             }
         }
         userIds.clear();
-        try (Transaction tx = database.createTransaction("users", true)) {
+        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
             for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getUser(), null, tx).getResources()) {
                 userIds.add(database.getId(resource.getURI()));
             }

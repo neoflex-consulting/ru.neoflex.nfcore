@@ -41,7 +41,7 @@ class Col_ extends ViewContainer {
 
 class ComponentElement_ extends ViewContainer {
     render = () => {
-        if (this.viewObject.eClass.get("name") === "ComponentElement") {
+        if (this.viewObject.eClass.get("name") === "ComponentElement" && this.viewObject.get('component')) {
             return <UserComponent componentClassName={this.viewObject.get('component').get('componentClassName')}/>
         } else return <div></div>
     }

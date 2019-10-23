@@ -6,24 +6,6 @@
     <version>0.3.0-arch7tect</version>
     <packaging>jar</packaging>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-
-    <licenses>
-        <license>
-            <name>EPL</name>
-            <url>www.eclipse.org/legal/epl-v10.html</url>
-        </license>
-    </licenses>
-
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/emfjson/emfjson-couchdb/issues</url>
-    </issueManagement>
-
     <developers>
         <developer>
             <id>ghillairet</id>
@@ -31,13 +13,6 @@
             <email>g.hillairet@gmail.com</email>
         </developer>
     </developers>
-
-    <scm>
-        <url>scm:git:git@github.com:emfjson/emfjson-couchdb.git</url>
-        <connection>scm:git:git@github.com:emfjson/emfjson-couchdb.git</connection>
-        <developerConnection>scm:git:git@github.com:emfjson/emfjson-couchdb.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
 
     <properties>
         <java.version>1.8</java.version>
