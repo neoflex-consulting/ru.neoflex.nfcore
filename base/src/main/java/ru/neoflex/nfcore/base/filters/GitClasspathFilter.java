@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.base.filters;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.meta.gitdb.TransactionClassLoader;
 import ru.neoflex.nfcore.base.services.Workspace;
@@ -18,6 +19,8 @@ public class GitClasspathFilter implements Filter {
                     throw new RuntimeException(e);
                 }
             });
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
         }
     }
 }

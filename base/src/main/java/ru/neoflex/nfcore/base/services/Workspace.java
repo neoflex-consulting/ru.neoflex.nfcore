@@ -75,7 +75,7 @@ public class Workspace {
         return branch;
     }
 
-    public void setCurrentBranch(String branch) throws IOException {
+    public void setCurrentBranch(String branch) throws IOException, GitAPIException {
         if (!database.getBranches().contains(branch)) {
             throw new IOException("Branch " + branch + " does not exists");
         }
@@ -89,11 +89,11 @@ public class Workspace {
         tlCurrentBranch.set(branch);
     }
 
-    public Transaction createTransaction(Transaction.LockType lockType) throws IOException {
+    public Transaction createTransaction(Transaction.LockType lockType) throws IOException, GitAPIException {
         return database.createTransaction(getCurrentBranch(), lockType);
     }
 
-    public Transaction createTransaction() throws IOException {
+    public Transaction createTransaction() throws IOException, GitAPIException {
         return createTransaction(Transaction.LockType.WRITE);
     }
 
@@ -103,7 +103,7 @@ public class Workspace {
         }
     }
 
-    public boolean pathExists(String path) throws IOException {
+    public boolean pathExists(String path) throws IOException, GitAPIException {
         try (Transaction tx = createTransaction(Transaction.LockType.DIRTY)) {
             return Files.exists(tx.getFileSystem().getPath(path));
         }
