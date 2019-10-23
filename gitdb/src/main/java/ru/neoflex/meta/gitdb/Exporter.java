@@ -13,7 +13,10 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class Exporter {
     public static final String EXTERNAL_REFERENCES = "externalReferences";
@@ -112,12 +118,13 @@ public class Exporter {
             String name = (String) eObject.eGet(nameAttribute);
             if (name != null && name.length() > 0) {
                 byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
-                Path filePath = path.resolve(ePackage.getNsURI()).resolve(eClass.getName()).resolve(name + JSON);
+                String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                Path filePath = path.resolve(fileName + JSON);
                 Files.createDirectories(filePath.getParent());
                 Files.write(filePath, bytes);
                 byte[] refsBytes = exportExternalRefs(eObject);
                 if (refsBytes != null) {
-                    Path refsPath = path.resolve(ePackage.getNsURI()).resolve(eClass.getName()).resolve(name + REFS);
+                    Path refsPath = path.resolve(fileName + REFS);
                     Files.createDirectories(refsPath.getParent());
                     Files.write(refsPath, refsBytes);
                 }
@@ -129,6 +136,72 @@ public class Exporter {
         for (Resource resource: resourceSet.getResources()) {
             for (EObject eObject: resource.getContents()) {
                 exportEObject(eObject, path);
+            }
+        }
+    }
+
+    public void zipResourceSet(ResourceSet resourceSet, OutputStream outputStream) throws IOException {
+        try (ZipOutputStream zipOutputStream = new java.util.zip.ZipOutputStream(outputStream);) {
+            for (Resource resource: resourceSet.getResources()) {
+                for (EObject eObject: resource.getContents()) {
+                    EClass eClass = eObject.eClass();
+                    EPackage ePackage = eClass.getEPackage();
+                    EStructuralFeature nameAttribute = eClass.getEStructuralFeature(NAME);
+                    if (nameAttribute != null) {
+                        String name = (String) eObject.eGet(nameAttribute);
+                        if (name != null && name.length() > 0) {
+                            String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                            byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
+                            ZipEntry zipEntry = new ZipEntry(fileName + JSON);
+                            zipOutputStream.putNextEntry(zipEntry);
+                            zipOutputStream.write(bytes);
+                            zipOutputStream.closeEntry();
+                        }
+                    }
+                }
+            }
+            for (Resource resource: resourceSet.getResources()) {
+                for (EObject eObject: resource.getContents()) {
+                    EClass eClass = eObject.eClass();
+                    EPackage ePackage = eClass.getEPackage();
+                    EStructuralFeature nameAttribute = eClass.getEStructuralFeature(NAME);
+                    if (nameAttribute != null) {
+                        String name = (String) eObject.eGet(nameAttribute);
+                        if (name != null && name.length() > 0) {
+                            String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                            byte[] refsBytes = exportExternalRefs(eObject);
+                            if (refsBytes != null) {
+                                ZipEntry refsEntry = new ZipEntry(fileName + REFS);
+                                zipOutputStream.putNextEntry(refsEntry);
+                                zipOutputStream.write(refsBytes);
+                                zipOutputStream.closeEntry();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void unzip(InputStream inputStream, Transaction tx) throws IOException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(inputStream);) {
+            ZipEntry zipEntry = zipInputStream.getNextEntry();
+            while (zipEntry != null) {
+                if (!zipEntry.isDirectory()) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[4096];
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    if (zipEntry.getName().endsWith(JSON)) {
+                        importEObject(outputStream.toByteArray(), tx);
+                    }
+                    else if (zipEntry.getName().endsWith(REFS)) {
+                        importExternalRefs(outputStream.toByteArray(), tx);
+                    }
+                }
+                zipEntry = zipInputStream.getNextEntry();
             }
         }
     }

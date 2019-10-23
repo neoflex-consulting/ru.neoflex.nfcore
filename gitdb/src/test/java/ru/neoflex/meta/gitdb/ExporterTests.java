@@ -60,8 +60,8 @@ public class ExporterTests extends TestBase {
         String uri = exporter.eClass2String(user.eClass());
         Assert.assertEquals(user.eClass(), exporter.string2EClass(uri));
     }
-    @Test
 
+    @Test
     public void exportTest() throws Exception {
         try (Transaction tx = database.createTransaction("users")) {
             Path path = tx.getFileSystem().getPath("/export");
@@ -86,6 +86,34 @@ public class ExporterTests extends TestBase {
             Path path = tx.getFileSystem().getPath("/export");
             exporter.importPath(path, tx);
             tx.commit("Database was restored with existing objects");
+            Assert.assertEquals(2, tx.all().size());
+        }
+    }
+
+    @Test
+    public void zipTest() throws Exception {
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/zip/all.zip");
+            Files.createDirectories(path.getParent());
+            ResourceSet resourceSet = database.createResourceSet(tx);
+            for (EntityId entityId: tx.all()) {
+                Resource resource = resourceSet.createResource(database.createURI(entityId.getId(), null));
+                resource.load(null);
+            }
+            exporter.zipResourceSet(resourceSet, Files.newOutputStream(path));
+            tx.commit("Zip all objects");
+            Assert.assertEquals(1, Files.walk(path).filter(Files::isRegularFile).count());
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/db");
+            tx.deleteRecursive(path);
+            tx.commit("Database was deleted");
+            Assert.assertEquals(0, tx.all().size());
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/zip/all.zip");
+            exporter.unzip(Files.newInputStream(path), tx);
+            tx.commit("Database was restored with zip archive");
             Assert.assertEquals(2, tx.all().size());
         }
     }
