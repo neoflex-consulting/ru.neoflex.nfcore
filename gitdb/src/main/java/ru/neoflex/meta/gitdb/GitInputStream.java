@@ -39,5 +39,6 @@ public class GitInputStream extends InputStream implements URIConverter.Loadable
         URI newURI = resource.getURI().trimFragment().trimQuery();
         newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
         resource.setURI(newURI);
+        db.getEvents().fireAfterLoad(resource, transaction);
     }
 }

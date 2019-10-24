@@ -31,6 +31,10 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
             EntityId oldEntityId = new EntityId(id, rev);
             Entity oldEntity = transaction.load(oldEntityId);
             oldResource = db.entityToResource(transaction, oldEntity);
+            db.getEvents().fireBeforeUpdate(oldResource, resource, transaction);
+        }
+        else {
+            db.getEvents().fireBeforeInsert(resource, transaction);
         }
         byte[] content = db.getResourceContent(resource);
         Entity entity = new Entity(id, rev, content);
@@ -46,10 +50,10 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
         newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
         resource.setURI(newURI);
         if (isNew) {
-            db.createResourceIndexes(resource, transaction);
+            db.getEvents().fireAfterInsert(resource, transaction);
         }
         else {
-            db.updateResourceIndexes(oldResource, resource, transaction);
+            db.getEvents().fireAfterUpdate(oldResource, resource, transaction);
         }
     }
 }

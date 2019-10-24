@@ -49,6 +49,7 @@ public class Database implements Closeable {
     private ObjectMapper mapper;
     private List<EPackage> packages;
     private Map<String, Index> indexes = new HashMap<>();
+    private Events events = new Events();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     {
@@ -65,6 +66,13 @@ public class Database implements Closeable {
         this.packages = packages;
         createTypeNameIndex();
         createRefIndex();
+        registerEvents();
+    }
+
+    private void registerEvents() {
+        events.registerBeforeDelete(this::deleteResourceIndexes);
+        events.registerAfterInsert(this::createResourceIndexes);
+        events.registerAfterUpdate(this::updateResourceIndexes);
     }
 
     private void createTypeNameIndex() {
@@ -275,7 +283,7 @@ public class Database implements Closeable {
         return packages;
     }
 
-    public void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
+    private void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
         GitFileSystem gfs = tx.getFileSystem();
         for (String indexName: getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
@@ -286,7 +294,7 @@ public class Database implements Closeable {
         }
     }
 
-    public void updateResourceIndexes(Resource old, Resource entity, Transaction tx) throws IOException {
+    private void updateResourceIndexes(Resource old, Resource entity, Transaction tx) throws IOException {
         GitFileSystem gfs = tx.getFileSystem();
         Set<String> toDelete = new HashSet<>();
         for (String indexName: getIndexes().keySet()) {
@@ -337,7 +345,7 @@ public class Database implements Closeable {
         }
     }
 
-    public void createResourceIndexes(Resource entity, Transaction tx) throws IOException {
+    private void createResourceIndexes(Resource entity, Transaction tx) throws IOException {
         GitFileSystem gfs = tx.getFileSystem();
         for (String indexName: getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
@@ -429,6 +437,10 @@ public class Database implements Closeable {
 
     public ReadWriteLock getLock() {
         return lock;
+    }
+
+    public Events getEvents() {
+        return events;
     }
 
     public interface Transactional<R> {
