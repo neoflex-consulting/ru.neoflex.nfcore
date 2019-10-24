@@ -61,7 +61,7 @@ class Calendar extends React.Component<WithTranslation, State> {
     }
 
     renderHeader() {
-        const {t, i18n} = this.props;
+        const {i18n} = this.props;
         const dateFormat = "LLLL yyyy";
         return (
             <div className="header row flex-middle">
@@ -71,7 +71,7 @@ class Calendar extends React.Component<WithTranslation, State> {
                     </div>
                 </div>
                 <div className="col col-center">
-        <span className="col-text">
+        <span className="col-text" style={{fontSize: "120%"}}>
             {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
         </span>
                 </div>
@@ -83,14 +83,14 @@ class Calendar extends React.Component<WithTranslation, State> {
     }
 
     renderDays() {
-        const {t, i18n} = this.props;
+        const {i18n} = this.props;
         const dateFormat = "EEEE";
         const days = [];
         let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
                 <div key={i}
-                     className="col col-center col-text"
+                     className="col col-center col-text" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
                 </div>
@@ -100,7 +100,6 @@ class Calendar extends React.Component<WithTranslation, State> {
     }
 
     renderCells(context: any) {
-        const {t, i18n} = this.props;
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
@@ -138,9 +137,9 @@ class Calendar extends React.Component<WithTranslation, State> {
                                     <Button
                                         onClick={() =>
                                             context.changeActiveObject!(
-                                                "ru.neoflex.nfcore.application",  //"ru.neoflex.nfcore.reports"
-                                                "Application",  // "Report"
-                                                "EcoreApp"  //r.eContents()[0].get('name')
+                                                "ru.neoflex.nfcore.reports",
+                                                "Report",
+                                                r.eContents()[0].get('name')
                                             )
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}
@@ -151,7 +150,8 @@ class Calendar extends React.Component<WithTranslation, State> {
                                     >
                                         {r.eContents()[0].get('name')}
                                     </Button>
-                                ) : ""}
+                                )
+                                : ""}
                         </div>
                     </div>
                 );
