@@ -65,6 +65,7 @@ public class Database implements Closeable {
 
     @Override
     public void close() throws IOException {
+        repository.close();
     }
 
     public Repository getRepository() {
