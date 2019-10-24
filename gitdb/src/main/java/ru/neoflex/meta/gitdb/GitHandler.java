@@ -17,12 +17,8 @@ public class GitHandler extends URIHandlerImpl {
         this.transaction = transaction;
     }
 
-    public EMFJSONDB getDatabase() {
-        return (EMFJSONDB) transaction.getDatabase();
-    }
-
     public void delete(URI uri, Map<?, ?> options) throws IOException {
-        EMFJSONDB db = getDatabase();
+        Database db = transaction.getDatabase();
         String id = db.getId(uri);
         List<IndexEntry> refList = db.findByIndex(transaction, "ref", id.substring(0, 2), id.substring(2));
         if (!refList.isEmpty()) {

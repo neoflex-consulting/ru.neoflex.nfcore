@@ -16,10 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static ru.neoflex.meta.gitdb.EMFJSONDB.TYPE_NAME_IDX;
-import static ru.neoflex.meta.gitdb.EMFJSONDB.IDX_PATH;
+import static ru.neoflex.meta.gitdb.Database.TYPE_NAME_IDX;
+import static ru.neoflex.meta.gitdb.Database.IDX_PATH;
 
-public class EMFJSONDBTests extends TestBase {
+public class DatabaseTests extends TestBase {
     @Before
     public void startUp() throws IOException, GitAPIException {
         database = refreshRatabase();

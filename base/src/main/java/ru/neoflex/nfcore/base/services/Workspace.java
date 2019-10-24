@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import ru.neoflex.meta.gitdb.EMFJSONDB;
+import ru.neoflex.meta.gitdb.Database;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 
@@ -27,13 +27,13 @@ public class Workspace {
     public static final String BRANCH = "branch";
     @Value("${workspace.root:${user.dir}/workspace}")
     String workspaceRoot;
-    private static EMFJSONDB database;
+    private static Database database;
     @Autowired
     PackageRegistry registry;
 
     @PostConstruct
     void init() throws GitAPIException, IOException {
-        database = new EMFJSONDB(workspaceRoot, registry.getEPackages());
+        database = new Database(workspaceRoot, registry.getEPackages());
     }
 
     @PreDestroy
@@ -41,7 +41,7 @@ public class Workspace {
         database.close();
     }
 
-    public static EMFJSONDB getDatabase() {
+    public static Database getDatabase() {
         return database;
     }
 

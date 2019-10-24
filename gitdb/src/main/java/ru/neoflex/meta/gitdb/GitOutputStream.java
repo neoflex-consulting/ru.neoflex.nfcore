@@ -22,7 +22,7 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
     @Override
     public void saveResource(Resource resource) throws IOException {
         Transaction transaction = handler.getTransaction();
-        EMFJSONDB db = handler.getDatabase();
+        Database db = transaction.getDatabase();
         String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
         boolean isNew = id == null || id.length() == 0;
         String rev = isNew ? null : db.getRev(uri);

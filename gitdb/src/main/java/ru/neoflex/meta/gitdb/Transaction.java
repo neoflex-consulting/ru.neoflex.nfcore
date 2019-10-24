@@ -16,15 +16,14 @@ import org.eclipse.jgit.treewalk.filter.PathFilter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static ru.neoflex.meta.gitdb.Database.IDS_PATH;
+
 public class Transaction implements Closeable {
-    final public static String DB_PATH = "db";
-    final public static String IDS_PATH = DB_PATH + "/ids";
     private Database database;
     private String branch;
     private GitFileSystem gfs;
