@@ -55,7 +55,6 @@ class EClassSelection extends React.Component<Props & WithTranslation, State>{
 
     render() {
         const { translate } = this.props
-        const test:any = []
         return (
             this.props.modalSelectEClassVisible && <Modal
                 width={'400px'}
