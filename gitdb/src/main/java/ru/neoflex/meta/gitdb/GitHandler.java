@@ -1,7 +1,7 @@
 package ru.neoflex.meta.gitdb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
 
 import java.io.IOException;
@@ -17,15 +17,22 @@ public class GitHandler extends URIHandlerImpl {
         this.transaction = transaction;
     }
 
+    public EMFJSONDB getDatabase() {
+        return (EMFJSONDB) transaction.getDatabase();
+    }
+
     public void delete(URI uri, Map<?, ?> options) throws IOException {
-        EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
+        EMFJSONDB db = getDatabase();
         String id = db.getId(uri);
-        List<IndexEntry> refList = transaction.findByIndex("ref", id.substring(0, 2), id.substring(2));
+        List<IndexEntry> refList = db.findByIndex(transaction, "ref", id.substring(0, 2), id.substring(2));
         if (!refList.isEmpty()) {
             throw new IOException("Object " + id + " is referenced by " + new String(refList.get(0).getContent()));
         }
         String rev = db.getRev(uri);
         EntityId entityId = new EntityId(id, rev);
+        Entity old = transaction.load(entityId);
+        Resource resource = db.entityToResource(transaction, old);
+        db.deleteResourceIndexes(resource, transaction);
         transaction.delete(entityId);
     }
 

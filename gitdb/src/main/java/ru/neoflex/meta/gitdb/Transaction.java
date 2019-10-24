@@ -6,10 +6,7 @@ import com.beijunyi.parallelgit.filesystem.GitPath;
 import com.beijunyi.parallelgit.filesystem.commands.GfsCommit;
 import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
-import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
-import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
 import com.github.marschall.pathclassloader.PathClassLoader;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -26,9 +23,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Transaction implements Closeable {
-    final public static String DP_PATH = "db";
-    final public static String IDS_PATH = DP_PATH + "/ids";
-    final public static String IDX_PATH = DP_PATH + "/idx";
+    final public static String DB_PATH = "db";
+    final public static String IDS_PATH = DB_PATH + "/ids";
     private Database database;
     private String branch;
     private GitFileSystem gfs;
@@ -152,22 +148,7 @@ public class Transaction implements Closeable {
         Files.write(path, entity.getContent());
         String rev = getObjectId(path).getName();
         entity.setRev(rev);
-        createEntityIndexes(entity);
         return entity;
-    }
-
-    public void createEntityIndexes(Entity entity) throws IOException {
-        for (String indexName: database.getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                if (Files.exists(indexValuePath)) {
-                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
-                }
-                Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, entry.getContent());
-            }
-        }
     }
 
     public Entity load(EntityId entityId) throws IOException {
@@ -182,94 +163,25 @@ public class Transaction implements Closeable {
     }
 
     public Entity update(Entity entity) throws IOException {
-        Entity old = load(entity);
-        if (old == null || !Objects.equals(old.getRev(), entity.getRev())) {
+        GitPath path = getIdPath(entity);
+        String rev = getObjectId(path).getName();
+        if (!Objects.equals(rev, entity.getRev())) {
             throw new ConcurrentModificationException("Entity was updated: " + entity.getId());
         }
-        GitPath path = getIdPath(entity);
         Files.createDirectories(path.getParent());
         Files.write(path, entity.getContent());
-        String rev = getObjectId(path).getName();
-        entity.setRev(rev);
-        Set<String> toDelete = new HashSet<>();
-        for (String indexName: database.getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old, this)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                toDelete.add(indexValuePath.toString());
-            }
-        }
-        for (String indexName: database.getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(entity, this)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
-                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
-                }
-                Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, entry.getContent());
-            }
-        }
-        for (String indexValuePathString: toDelete) {
-            GitPath indexValuePath = gfs.getPath(indexValuePathString);
-            Files.delete(indexValuePath);
-        }
+        String newRev = getObjectId(path).getName();
+        entity.setRev(newRev);
         return entity;
     }
 
     public void delete(EntityId entityId) throws IOException {
-        Entity old = load(entityId);
-        if (old == null || !Objects.equals(old.getRev(), entityId.getRev())) {
+        GitPath path = getIdPath(entityId);
+        String rev = getObjectId(path).getName();
+        if (!Objects.equals(rev, entityId.getRev())) {
             throw new ConcurrentModificationException("Entity was updated: " + entityId.getId());
         }
-        GitPath path = getIdPath(entityId);
         Files.delete(path);
-        for (String indexName: database.getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry: database.getIndexes().get(indexName).getEntries(old, this)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                Files.delete(indexValuePath);
-            }
-        }
-    }
-
-    public void reindex() throws IOException {
-        GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
-        deleteRecursive(indexRootPath);
-        for (EntityId entityId: all()) {
-            Entity entity = load(entityId);
-            createEntityIndexes(entity);
-        }
-    }
-
-    public void deleteRecursive(Path indexRootPath) throws IOException {
-        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-        for(Path path : pathsToDelete) {
-            Files.deleteIfExists(path);
-        }
-    }
-
-
-    public List<IndexEntry> findByIndex(String indexName, String... path) throws IOException {
-        GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-        GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", path).normalize());
-        try {
-            return Files.walk(indexValuePath).filter(Files::isRegularFile).map(file -> {
-                IndexEntry entry = new IndexEntry();
-                Path relPath = indexPath.relativize(file);
-                entry.setPath(relPath.toString().split("/"));
-                try {
-                    byte[] content = Files.readAllBytes(file);
-                    entry.setContent(content);
-                    return entry;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList());
-        }
-        catch (NoSuchFileException e) {
-            return new ArrayList<>();
-        }
     }
 
     public List<EntityId> all() throws IOException {

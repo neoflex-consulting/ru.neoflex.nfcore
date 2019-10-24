@@ -1,6 +1,5 @@
 package ru.neoflex.meta.gitdb;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -9,20 +8,16 @@ import org.junit.Before;
 import org.junit.Test;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
-import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 import static ru.neoflex.meta.gitdb.EMFJSONDB.TYPE_NAME_IDX;
-import static ru.neoflex.meta.gitdb.Transaction.IDX_PATH;
+import static ru.neoflex.meta.gitdb.EMFJSONDB.IDX_PATH;
 
 public class EMFJSONDBTests extends TestBase {
     @Before
@@ -79,7 +74,7 @@ public class EMFJSONDBTests extends TestBase {
             Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
             Files.delete(path);
             Assert.assertEquals(0, database.findByEClass(group.eClass(), null, tx).getResources().size());
-            tx.reindex();
+            database.reindex(tx);
             Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
         }
         try (Transaction tx = database.createTransaction("users")){

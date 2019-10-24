@@ -1,5 +1,7 @@
 package ru.neoflex.meta.gitdb;
 
+import com.beijunyi.parallelgit.filesystem.GitFileSystem;
+import com.beijunyi.parallelgit.filesystem.GitPath;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,14 +22,17 @@ import org.emfjson.jackson.resource.JsonResourceFactory;
 import org.emfjson.jackson.utils.ValueWriter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+import static ru.neoflex.meta.gitdb.Transaction.DB_PATH;
 
 public class EMFJSONDB extends Database {
+    final public static String IDX_PATH = DB_PATH + "/idx";
     public static final String TYPE_NAME_IDX = "type_name";
     public static final String REF_IDX = "ref";
     private ObjectMapper mapper;
@@ -49,9 +54,8 @@ public class EMFJSONDB extends Database {
             }
 
             @Override
-            public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
-                ArrayList<IndexEntry> result = new ArrayList<IndexEntry>();
-                Resource resource = loadResource(entity.getContent(), transaction);
+            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
+                ArrayList<IndexEntry> result = new ArrayList<>();
                 EObject eObject = resource.getContents().get(0);
                 EClass eClass = eObject.eClass();
                 EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
@@ -63,7 +67,7 @@ public class EMFJSONDB extends Database {
                     EPackage ePackage = eClass.getEPackage();
                     IndexEntry entry = new IndexEntry();
                     entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
-                    entry.setContent(entity.getId().getBytes("utf-8"));
+                    entry.setContent(getId(resource.getURI()).getBytes("utf-8"));
                     result.add(entry);
                 }
                 return result;
@@ -79,26 +83,20 @@ public class EMFJSONDB extends Database {
             }
 
             @Override
-            public List<IndexEntry> getEntries(Entity entity, Transaction transaction) throws IOException {
-                ArrayList<IndexEntry> result = new ArrayList<IndexEntry>();
-                Resource resource = loadResource(entity.getContent(), transaction);
+            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
+                ArrayList<IndexEntry> result = new ArrayList<>();
                 Map<EObject, Collection<EStructuralFeature.Setting>> cr =  EcoreUtil.CrossReferencer.find(resource.getContents());
                 for (EObject eObject: cr.keySet()) {
                     URI uri = eObject.eResource().getURI();
-                    String id = uri.segment(0);
+                    String id = getId(uri);
                     IndexEntry entry = new IndexEntry();
-                    entry.setPath(new String[]{id.substring(0, 2), id.substring(2), entity.getId()});
+                    entry.setPath(new String[]{id.substring(0, 2), id.substring(2), getId(resource.getURI())});
                     entry.setContent(new byte[0]);
                     result.add(entry);
                 }
                 return result;
             }
         });
-    }
-
-    public Resource loadResource(byte[] content, Transaction transaction) throws IOException {
-        Resource resource = createResource(transaction, null, null);
-        return loadResource(content, resource);
     }
 
     public Resource loadResource(byte[] content, Resource resource) throws IOException {
@@ -118,8 +116,8 @@ public class EMFJSONDB extends Database {
         return resource;
     }
 
-    public Resource createResource(Transaction transaction, String id, String rev) {
-        ResourceSet resourceSet = createResourceSet(transaction);
+    public Resource createResource(Transaction tx, String id, String rev) {
+        ResourceSet resourceSet = createResourceSet(tx);
         URI uri = createURI(id, rev);
         return resourceSet.createResource(uri);
     }
@@ -149,11 +147,11 @@ public class EMFJSONDB extends Database {
         return resourceSet;
     }
 
-    public ResourceSet createResourceSet(Transaction transaction) {
+    public ResourceSet createResourceSet(Transaction tx) {
         ResourceSet resourceSet = createResourceSet();
         resourceSet.getURIConverter()
                 .getURIHandlers()
-                .add(0, new GitHandler(transaction));
+                .add(0, new GitHandler(tx));
         return resourceSet;
     }
 
@@ -202,15 +200,15 @@ public class EMFJSONDB extends Database {
         return mapper.writeValueAsBytes(contentNode);
     }
 
-    public ResourceSet getDependentResources(Resource resource, Transaction transaction) throws IOException {
+    public ResourceSet getDependentResources(Resource resource, Transaction tx) throws IOException {
         String id = getId(resource.getURI());
-        ResourceSet resourceSet = getDependentResources(id, transaction);
+        ResourceSet resourceSet = getDependentResources(id, tx);
         return resourceSet;
     }
 
-    public ResourceSet getDependentResources(String id, Transaction transaction) throws IOException {
-        ResourceSet resourceSet = createResourceSet(transaction);
-        List<IndexEntry> refList = transaction.findByIndex(REF_IDX, id.substring(0, 2), id.substring(2));
+    public ResourceSet getDependentResources(String id, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
+        List<IndexEntry> refList = findByIndex(tx, REF_IDX, id.substring(0, 2), id.substring(2));
         for (IndexEntry entry: refList) {
             String refId = entry.getPath()[entry.getPath().length - 1];
             loadResource(resourceSet, refId);
@@ -218,16 +216,16 @@ public class EMFJSONDB extends Database {
         return resourceSet;
     }
 
-    public ResourceSet findByEClass(EClass eClass, String name, Transaction transaction) throws IOException {
-        ResourceSet resourceSet = createResourceSet(transaction);
+    public ResourceSet findByEClass(EClass eClass, String name, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
         String nsURI = eClass.getEPackage().getNsURI();
         String className = eClass.getName();
         List<IndexEntry> ieList;
         if (name == null || name.length() == 0) {
-            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className);
+            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className);
         }
         else {
-            ieList = transaction.findByIndex(TYPE_NAME_IDX, nsURI, className, name);
+            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className, name);
         }
         for (IndexEntry entry: ieList) {
             String id = new String(entry.getContent());
@@ -243,8 +241,8 @@ public class EMFJSONDB extends Database {
         return resource;
     }
 
-    public Resource loadResource(String id, Transaction transaction) throws IOException {
-        ResourceSet resourceSet = createResourceSet(transaction);
+    public Resource loadResource(String id, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
         return loadResource(resourceSet, id);
     }
 
@@ -255,4 +253,105 @@ public class EMFJSONDB extends Database {
     public List<EPackage> getPackages() {
         return packages;
     }
+
+    public void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(old, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                Files.delete(indexValuePath);
+            }
+        }
+    }
+
+    public void updateResourceIndexes(Resource old, Resource entity, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        Set<String> toDelete = new HashSet<>();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(old, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                toDelete.add(indexValuePath.toString());
+            }
+        }
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(entity, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
+                Files.createDirectories(indexValuePath.getParent());
+                Files.write(indexValuePath, entry.getContent());
+            }
+        }
+        for (String indexValuePathString: toDelete) {
+            GitPath indexValuePath = gfs.getPath(indexValuePathString);
+            Files.delete(indexValuePath);
+        }
+    }
+
+    public void reindex(Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
+        deleteRecursive(indexRootPath);
+        for (EntityId entityId: tx.all()) {
+            Entity entity = tx.load(entityId);
+            Resource resource = entityToResource(tx, entity);
+            createResourceIndexes(resource, tx);
+        }
+    }
+
+    public Resource entityToResource(Transaction tx, Entity entity) throws IOException {
+        Resource resource = createResource(tx, entity.getId(), entity.getRev());
+        loadResource(entity.getContent(), resource);
+        return resource;
+    }
+
+    public void deleteRecursive(Path indexRootPath) throws IOException {
+        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        for(Path path : pathsToDelete) {
+            Files.deleteIfExists(path);
+        }
+    }
+
+    public void createResourceIndexes(Resource entity, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(entity, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                if (Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
+                Files.createDirectories(indexValuePath.getParent());
+                Files.write(indexValuePath, entry.getContent());
+            }
+        }
+    }
+
+    public List<IndexEntry> findByIndex(Transaction tx, String indexName, String... path) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+        GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", path).normalize());
+        try {
+            return Files.walk(indexValuePath).filter(Files::isRegularFile).map(file -> {
+                IndexEntry entry = new IndexEntry();
+                Path relPath = indexPath.relativize(file);
+                entry.setPath(relPath.toString().split("/"));
+                try {
+                    byte[] content = Files.readAllBytes(file);
+                    entry.setContent(content);
+                    return entry;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+        }
+        catch (NoSuchFileException e) {
+            return new ArrayList<>();
+        }
+    }
+
 }
