@@ -2,7 +2,6 @@ package ru.neoflex.meta.gitdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.EList;
@@ -17,14 +16,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -39,9 +35,9 @@ public class Exporter {
     public static final String JSON = ".json";
     public static final String REFS = ".refs";
 
-    EMFJSONDB database;
+    Database database;
 
-    public Exporter(EMFJSONDB database) {
+    public Exporter(Database database) {
         this.database = database;
     }
 
@@ -82,14 +78,18 @@ public class Exporter {
         Resource resource = resourceSet.createResource(eObject.eResource().getURI());
         EObject copyObject = EcoreUtil.copy(eObject);
         resource.getContents().add(copyObject);
-        Map<EObject, Collection<EStructuralFeature.Setting>> crs = EcoreUtil.ExternalCrossReferencer.find(Collections.singleton(copyObject));
+        unsetExternalReferences(copyObject);
+        JsonNode contentNode = database.getMapper().valueToTree(resource);
+        return database.getMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(contentNode);
+    }
+
+    public void unsetExternalReferences(EObject eObject) {
+        Map<EObject, Collection<EStructuralFeature.Setting>> crs = EcoreUtil.ExternalCrossReferencer.find(Collections.singleton(eObject));
         for (EObject refObject: crs.keySet()) {
             for (EStructuralFeature.Setting setting: crs.get(refObject)) {
                 setting.unset();
             }
         }
-        JsonNode contentNode = database.getMapper().valueToTree(resource);
-        return database.getMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(contentNode);
     }
 
 
@@ -206,6 +206,17 @@ public class Exporter {
         }
     }
 
+    public void unzip(Path zipFile, Transaction tx) throws IOException {
+        Map<String, Object> env = new HashMap<>();
+        //env.put("create", "true");
+        env.put("useTempFile", Boolean.TRUE);
+        java.net.URI uri = java.net.URI.create("jar:" + zipFile.toUri());
+        FileSystem fileSystem = FileSystems.newFileSystem(uri, env);
+        Iterable<Path> roots = fileSystem.getRootDirectories();
+        Path root = roots.iterator().next();
+        importPath(root, tx);
+    }
+
     public void exportAll(String branch, Path path) throws IOException, GitAPIException {
         List<EntityId> all = database.withTransaction(branch, Transaction.LockType.DIRTY, Transaction::all);
         for (EntityId entityId: all) {
@@ -255,6 +266,7 @@ public class Exporter {
     public EObject importExternalRefs(byte[] refs, Transaction tx) throws IOException {
         ObjectNode objectNode = (ObjectNode) database.getMapper().readTree(refs);
         EObject eObject = treeToObject(objectNode, tx);
+        unsetExternalReferences(eObject);
         ArrayNode externalReferences = objectNode.withArray(EXTERNAL_REFERENCES);
         for (JsonNode externalReference: externalReferences) {
             EObject refObject = treeToObject(externalReference.get(REF_OBJECT), tx);

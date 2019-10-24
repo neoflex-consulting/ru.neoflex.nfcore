@@ -2,9 +2,13 @@ import * as React from "react";
 import {FC} from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
 import MandatoryReportingTrans from "./MandatoryReporting";
+import ReportPivotTrans from "./ReportPivot";
+
+
 
 const UserComponents: any = {
-    MandatoryReportingTrans: MandatoryReportingTrans
+    MandatoryReportingTrans: MandatoryReportingTrans,
+    ReportPivotTrans: ReportPivotTrans
 };
 
 export interface Props {

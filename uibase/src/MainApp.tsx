@@ -22,6 +22,7 @@ interface State {
     application?: Ecore.EObject
     objectApp?: Ecore.EObject
     path: Ecore.EObject[]
+    classComponents: Ecore.EObject[]
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -41,7 +42,8 @@ export class MainApp extends React.Component<any, State> {
             objectClass: props.objectClass,
             hideReferences: false,
             path: [],
-            context
+            context,
+            classComponents: []
         }
     }
 
@@ -52,7 +54,29 @@ export class MainApp extends React.Component<any, State> {
     };
 
     changeActiveObject = (objectPackage: string, objectClass: string, objectName: string) => {
-        this.setState({objectPackage, objectClass, objectName})
+        this.state.classComponents.map(c => {
+            console.log()
+                if (c.eContents()[0].get('aClass').get('name') === objectClass) {
+                    this.setState({
+                        objectPackage: c.eContents()[0].eClass.eContainer.get('nsURI'),
+                        objectClass: c.eContents()[0].eClass.get('name'),
+                        objectName: c.eContents()[0].get('name')
+                    })
+                }
+        });
+    };
+
+    getAllClassComponents() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//ClassComponent");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((classComponent) => {
+                        console.log()
+                        this.setState({classComponents: classComponent})
+                    })
+            }
+        })
     };
 
     setViewObject = (viewObject: Ecore.EObject) => {
@@ -68,13 +92,15 @@ export class MainApp extends React.Component<any, State> {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
                         this.setState({objectApp}, () => {
-                            API.instance().call(objectApp.eURI(), "generateReferenceTree", []).then(referenceTree => {
+                            API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
+                                .then(referenceTree => {
                                 if (!!referenceTree) {
                                     API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, objectApp.eURI() + referenceTree._id).then(r => {
                                         this.updateContext(({applicationReferenceTree: r.eContents()[0]}))
                                     })
                                 }
                             })
+                                .catch( ()=> {console.log("Reference Tree not exists")} )
                         });
                         this.setViewObject(objectApp.get('view'))
                     }
@@ -93,6 +119,7 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        this.getAllClassComponents();
         this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
     }
 

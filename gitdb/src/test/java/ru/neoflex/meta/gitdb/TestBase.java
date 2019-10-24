@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class TestBase {
     public static final String GITDB = "gitdbtest";
-    EMFJSONDB database;
+    Database database;
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
@@ -22,11 +22,11 @@ public class TestBase {
         return directoryToBeDeleted.delete();
     }
 
-    public static EMFJSONDB getDatabase() throws IOException, GitAPIException {
-        return new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+    public static Database getDatabase() throws IOException, GitAPIException {
+        return new Database(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
     }
 
-    public static EMFJSONDB refreshRatabase() throws IOException, GitAPIException {
+    public static Database refreshRatabase() throws IOException, GitAPIException {
         deleteDirectory(new File(GITDB));
         return getDatabase();
     }

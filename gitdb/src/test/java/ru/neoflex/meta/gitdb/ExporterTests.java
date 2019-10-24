@@ -72,7 +72,7 @@ public class ExporterTests extends TestBase {
         }
         try (Transaction tx = database.createTransaction("users")) {
             Path path = tx.getFileSystem().getPath("/db");
-            tx.deleteRecursive(path);
+            database.deleteRecursive(path);
             tx.commit("Database was deleted");
             Assert.assertEquals(0, tx.all().size());
         }
@@ -106,7 +106,7 @@ public class ExporterTests extends TestBase {
         }
         try (Transaction tx = database.createTransaction("users")) {
             Path path = tx.getFileSystem().getPath("/db");
-            tx.deleteRecursive(path);
+            database.deleteRecursive(path);
             tx.commit("Database was deleted");
             Assert.assertEquals(0, tx.all().size());
         }
@@ -114,6 +114,12 @@ public class ExporterTests extends TestBase {
             Path path = tx.getFileSystem().getPath("/zip/all.zip");
             exporter.unzip(Files.newInputStream(path), tx);
             tx.commit("Database was restored with zip archive");
+            Assert.assertEquals(2, tx.all().size());
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            Path path = tx.getFileSystem().getPath("/zip/all.zip");
+            exporter.unzip(path, tx);
+            tx.commit("Database was restored 2 time with zip archive");
             Assert.assertEquals(2, tx.all().size());
         }
     }

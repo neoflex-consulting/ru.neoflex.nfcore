@@ -10,7 +10,6 @@ import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
-    EMFJSONDB database;
+    Database database;
     int nGroups = 10;
     int nUsers = 100;
     int nThreads = 3;
@@ -108,7 +107,7 @@ public class PerfTests extends TestBase {
     }
 
     public void updateTest() throws IOException, InterruptedException, GitAPIException {
-        database = new EMFJSONDB(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        database = new Database(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
         readIds();
         long start = System.currentTimeMillis();
         List<Thread> threads = new ArrayList<>();
