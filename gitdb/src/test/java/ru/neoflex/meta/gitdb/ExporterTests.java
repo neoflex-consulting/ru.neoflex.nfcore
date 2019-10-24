@@ -72,7 +72,7 @@ public class ExporterTests extends TestBase {
         }
         try (Transaction tx = database.createTransaction("users")) {
             Path path = tx.getFileSystem().getPath("/db");
-            tx.deleteRecursive(path);
+            database.deleteRecursive(path);
             tx.commit("Database was deleted");
             Assert.assertEquals(0, tx.all().size());
         }
@@ -106,7 +106,7 @@ public class ExporterTests extends TestBase {
         }
         try (Transaction tx = database.createTransaction("users")) {
             Path path = tx.getFileSystem().getPath("/db");
-            tx.deleteRecursive(path);
+            database.deleteRecursive(path);
             tx.commit("Database was deleted");
             Assert.assertEquals(0, tx.all().size());
         }

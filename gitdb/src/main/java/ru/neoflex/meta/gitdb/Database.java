@@ -1,29 +1,57 @@
 package ru.neoflex.meta.gitdb;
 
+import com.beijunyi.parallelgit.filesystem.GitFileSystem;
+import com.beijunyi.parallelgit.filesystem.GitPath;
 import com.beijunyi.parallelgit.utils.BranchUtils;
 import com.beijunyi.parallelgit.utils.RepositoryUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.ContextAttributes;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.*;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.emfjson.jackson.annotations.EcoreIdentityInfo;
+import org.emfjson.jackson.annotations.EcoreTypeInfo;
+import org.emfjson.jackson.databind.EMFContext;
+import org.emfjson.jackson.module.EMFModule;
+import org.emfjson.jackson.resource.JsonResourceFactory;
+import org.emfjson.jackson.utils.ValueWriter;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static org.eclipse.jgit.lib.Constants.DOT_GIT;
 
 public class Database implements Closeable {
+    final public static String DB_PATH = "db";
+    final public static String IDS_PATH = DB_PATH + "/ids";
+    final public static String IDX_PATH = DB_PATH + "/idx";
+    public static final String TYPE_NAME_IDX = "type_name";
+    public static final String REF_IDX = "ref";
     private final Repository repository;
+    private ObjectMapper mapper;
+    private List<EPackage> packages;
     private Map<String, Index> indexes = new HashMap<>();
+    private Events events = new Events();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
+
     {
         try {
             GitURLStreamHandler.registerFactory();
@@ -32,42 +60,357 @@ public class Database implements Closeable {
         }
     }
 
-    public Database(String repoPath) throws IOException, GitAPIException {
+    public Database(String repoPath, List<EPackage> packages) throws IOException, GitAPIException {
         this.repository = openRepository(repoPath);
+        this.mapper = createMapper();
+        this.packages = packages;
+        createTypeNameIndex();
+        createRefIndex();
+        registerEvents();
     }
 
-    public Set<String> getBranches() throws IOException, GitAPIException {
+    private void registerEvents() {
+        events.registerBeforeDelete(this::deleteResourceIndexes);
+        events.registerAfterInsert(this::createResourceIndexes);
+        events.registerAfterUpdate(this::updateResourceIndexes);
+    }
+
+    private void createTypeNameIndex() {
+        createIndex(new Index() {
+            @Override
+            public String getName() {
+                return TYPE_NAME_IDX;
+            }
+
+            @Override
+            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
+                ArrayList<IndexEntry> result = new ArrayList<>();
+                EObject eObject = resource.getContents().get(0);
+                EClass eClass = eObject.eClass();
+                EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
+                if (nameSF != null) {
+                    String name = (String) eObject.eGet(nameSF);
+                    if (name == null || name.length() == 0) {
+                        throw new IOException("Empty feature name");
+                    }
+                    EPackage ePackage = eClass.getEPackage();
+                    IndexEntry entry = new IndexEntry();
+                    entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
+                    entry.setContent(getId(resource.getURI()).getBytes("utf-8"));
+                    result.add(entry);
+                }
+                return result;
+            }
+        });
+    }
+
+    private void createRefIndex() {
+        createIndex(new Index() {
+            @Override
+            public String getName() {
+                return REF_IDX;
+            }
+
+            @Override
+            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
+                ArrayList<IndexEntry> result = new ArrayList<>();
+                Map<EObject, Collection<EStructuralFeature.Setting>> cr =  EcoreUtil.CrossReferencer.find(resource.getContents());
+                for (EObject eObject: cr.keySet()) {
+                    URI uri = eObject.eResource().getURI();
+                    String id = getId(uri);
+                    IndexEntry entry = new IndexEntry();
+                    entry.setPath(new String[]{id.substring(0, 2), id.substring(2), getId(resource.getURI())});
+                    entry.setContent(new byte[0]);
+                    result.add(entry);
+                }
+                return result;
+            }
+        });
+    }
+
+    public Resource loadResource(byte[] content, Resource resource) throws IOException {
+        JsonNode node = mapper.readTree(content);
+        return loadResource(node, resource);
+    }
+
+    public Resource loadResource(JsonNode node, Resource resource) throws IOException {
+        ContextAttributes attributes = ContextAttributes
+                .getEmpty()
+                .withSharedAttribute("resourceSet", resource.getResourceSet())
+                .withSharedAttribute("resource", resource);
+        mapper.reader()
+                .with(attributes)
+                .withValueToUpdate(resource)
+                .treeToValue(node, Resource.class);
+        return resource;
+    }
+
+    public Resource createResource(Transaction tx, String id, String rev) {
+        ResourceSet resourceSet = createResourceSet(tx);
+        URI uri = createURI(id, rev);
+        return resourceSet.createResource(uri);
+    }
+
+    public URI createURI(String id, String rev) {
+        URI uri = URI.createURI("http:/");
+        if (id != null) {
+            uri = uri.appendSegment(id);
+        }
+        if (rev != null) {
+            uri = uri.appendQuery("rev=" + rev);
+        }
+        return uri;
+    }
+
+    public ResourceSet createResourceSet() {
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getPackageRegistry()
+                .put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
+        for (EPackage ePackage: packages) {
+            resourceSet.getPackageRegistry()
+                    .put(ePackage.getNsURI(), ePackage);
+        }
+        resourceSet.getResourceFactoryRegistry()
+                .getExtensionToFactoryMap()
+                .put("*", new JsonResourceFactory());
+        return resourceSet;
+    }
+
+    public ResourceSet createResourceSet(Transaction tx) {
+        ResourceSet resourceSet = createResourceSet();
+        resourceSet.getURIConverter()
+                .getURIHandlers()
+                .add(0, new GitHandler(tx));
+        return resourceSet;
+    }
+
+    public static EMFModule createModule() {
+        EMFModule emfModule = new EMFModule();
+        emfModule.configure(EMFModule.Feature.OPTION_USE_ID, true);
+        emfModule.setTypeInfo(new EcoreTypeInfo("eClass"));
+        emfModule.setIdentityInfo(new EcoreIdentityInfo("_id",
+                new ValueWriter<EObject, Object>() {
+                    @Override
+                    public Object writeValue(EObject eObject, SerializerProvider context) {
+                        URI eObjectURI = EMFContext.getURI(context, eObject);
+                        if (eObjectURI == null) {
+                            return null;
+                        }
+                        return eObjectURI.fragment();
+                    }
+                }));
+        return emfModule;
+    }
+
+    public static ObjectMapper createMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(createModule());
+        mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
+        return mapper;
+    }
+
+    public static String getRev(URI uri) throws IOException {
+        String query = uri.query();
+        if (!query.contains("rev=")) {
+            throw new IOException("Revision not found: " + uri.toString());
+        }
+        return query.split("rev=")[1];
+    }
+
+    public static String getId(URI uri) throws IOException {
+        if (uri.segmentCount() == 0) {
+            throw new IOException("Can't handle resource without id: " + uri.toString());
+        }
+        return uri.segment(0);
+    }
+
+    public byte[] getResourceContent(Resource resource) throws JsonProcessingException {
+        JsonNode contentNode = mapper.valueToTree(resource);
+        return mapper.writeValueAsBytes(contentNode);
+    }
+
+    public ResourceSet getDependentResources(Resource resource, Transaction tx) throws IOException {
+        String id = getId(resource.getURI());
+        ResourceSet resourceSet = getDependentResources(id, tx);
+        return resourceSet;
+    }
+
+    public ResourceSet getDependentResources(String id, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
+        List<IndexEntry> refList = findByIndex(tx, REF_IDX, id.substring(0, 2), id.substring(2));
+        for (IndexEntry entry: refList) {
+            String refId = entry.getPath()[entry.getPath().length - 1];
+            loadResource(resourceSet, refId);
+        }
+        return resourceSet;
+    }
+
+    public ResourceSet findByEClass(EClass eClass, String name, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
+        String nsURI = eClass.getEPackage().getNsURI();
+        String className = eClass.getName();
+        List<IndexEntry> ieList;
+        if (name == null || name.length() == 0) {
+            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className);
+        }
+        else {
+            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className, name);
+        }
+        for (IndexEntry entry: ieList) {
+            String id = new String(entry.getContent());
+            loadResource(resourceSet, id);
+        }
+        return resourceSet;
+    }
+
+    public Resource loadResource(ResourceSet resourceSet, String id) throws IOException {
+        URI uri = createURI(id, null);
+        Resource resource = resourceSet.createResource(uri);
+        resource.load(null);
+        return resource;
+    }
+
+    public Resource loadResource(String id, Transaction tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
+        return loadResource(resourceSet, id);
+    }
+
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    public List<EPackage> getPackages() {
+        return packages;
+    }
+
+    private void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(old, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                Files.delete(indexValuePath);
+            }
+        }
+    }
+
+    private void updateResourceIndexes(Resource old, Resource entity, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        Set<String> toDelete = new HashSet<>();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(old, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                toDelete.add(indexValuePath.toString());
+            }
+        }
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(entity, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
+                Files.createDirectories(indexValuePath.getParent());
+                Files.write(indexValuePath, entry.getContent());
+            }
+        }
+        for (String indexValuePathString: toDelete) {
+            GitPath indexValuePath = gfs.getPath(indexValuePathString);
+            Files.delete(indexValuePath);
+        }
+    }
+
+    public void reindex(Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
+        deleteRecursive(indexRootPath);
+        for (EntityId entityId: tx.all()) {
+            Entity entity = tx.load(entityId);
+            Resource resource = entityToResource(tx, entity);
+            createResourceIndexes(resource, tx);
+        }
+    }
+
+    public Resource entityToResource(Transaction tx, Entity entity) throws IOException {
+        Resource resource = createResource(tx, entity.getId(), entity.getRev());
+        loadResource(entity.getContent(), resource);
+        return resource;
+    }
+
+    public void deleteRecursive(Path indexRootPath) throws IOException {
+        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        for(Path path : pathsToDelete) {
+            Files.deleteIfExists(path);
+        }
+    }
+
+    private void createResourceIndexes(Resource entity, Transaction tx) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        for (String indexName: getIndexes().keySet()) {
+            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+            for (IndexEntry entry: getIndexes().get(indexName).getEntries(entity, tx)) {
+                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                if (Files.exists(indexValuePath)) {
+                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
+                }
+                Files.createDirectories(indexValuePath.getParent());
+                Files.write(indexValuePath, entry.getContent());
+            }
+        }
+    }
+
+    public List<IndexEntry> findByIndex(Transaction tx, String indexName, String... path) throws IOException {
+        GitFileSystem gfs = tx.getFileSystem();
+        GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+        GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", path).normalize());
+        try {
+            return Files.walk(indexValuePath).filter(Files::isRegularFile).map(file -> {
+                IndexEntry entry = new IndexEntry();
+                Path relPath = indexPath.relativize(file);
+                entry.setPath(relPath.toString().split("/"));
+                try {
+                    byte[] content = Files.readAllBytes(file);
+                    entry.setContent(content);
+                    return entry;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+        }
+        catch (NoSuchFileException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public Set<String> getBranches() throws IOException {
         return BranchUtils.getBranches(repository).keySet();
     }
 
-    public void createBranch(String branch, String from) throws IOException, GitAPIException {
+    public void createBranch(String branch, String from) throws IOException {
         BranchUtils.createBranch(branch, from, repository);
     }
 
-    public Transaction createTransaction(String branch) throws IOException, GitAPIException {
+    public Transaction createTransaction(String branch) throws IOException {
         return new Transaction(this, branch);
     }
 
-    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException, GitAPIException {
+    public Transaction createTransaction(String branch, Transaction.LockType lockType) throws IOException {
         return new Transaction(this, branch, lockType);
     }
 
-    public interface Transactional<R> {
-        public R call(Transaction tx) throws IOException;
-    }
-
-    public<R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException, GitAPIException {
+    public<R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException {
         try (Transaction tx = createTransaction(branch, lockType)) {
             return f.call(tx);
         }
     }
 
-
     @Override
     public void close() throws IOException {
+        repository.close();
     }
 
-    public Repository getRepository() throws IOException, GitAPIException {
+    public Repository getRepository() {
         return repository;
     }
 
@@ -94,5 +437,13 @@ public class Database implements Closeable {
 
     public ReadWriteLock getLock() {
         return lock;
+    }
+
+    public Events getEvents() {
+        return events;
+    }
+
+    public interface Transactional<R> {
+        public R call(Transaction tx) throws IOException;
     }
 }

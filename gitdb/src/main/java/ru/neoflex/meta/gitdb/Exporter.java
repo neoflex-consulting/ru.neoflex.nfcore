@@ -2,7 +2,6 @@ package ru.neoflex.meta.gitdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.EList;
@@ -17,13 +16,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -38,9 +35,9 @@ public class Exporter {
     public static final String JSON = ".json";
     public static final String REFS = ".refs";
 
-    EMFJSONDB database;
+    Database database;
 
-    public Exporter(EMFJSONDB database) {
+    public Exporter(Database database) {
         this.database = database;
     }
 

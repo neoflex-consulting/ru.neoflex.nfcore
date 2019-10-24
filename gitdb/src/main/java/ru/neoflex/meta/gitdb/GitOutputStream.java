@@ -1,11 +1,8 @@
 package ru.neoflex.meta.gitdb;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,12 +22,23 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
     @Override
     public void saveResource(Resource resource) throws IOException {
         Transaction transaction = handler.getTransaction();
-        EMFJSONDB db = (EMFJSONDB) transaction.getDatabase();
+        Database db = transaction.getDatabase();
         String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
-        String rev = id == null || id.length() == 0 ? null : db.getRev(uri);
+        boolean isNew = id == null || id.length() == 0;
+        String rev = isNew ? null : db.getRev(uri);
+        Resource oldResource = null;
+        if (!isNew) {
+            EntityId oldEntityId = new EntityId(id, rev);
+            Entity oldEntity = transaction.load(oldEntityId);
+            oldResource = db.entityToResource(transaction, oldEntity);
+            db.getEvents().fireBeforeUpdate(oldResource, resource, transaction);
+        }
+        else {
+            db.getEvents().fireBeforeInsert(resource, transaction);
+        }
         byte[] content = db.getResourceContent(resource);
         Entity entity = new Entity(id, rev, content);
-        if (rev == null) {
+        if (isNew) {
             transaction.create(entity);
             id = entity.getId();
         }
@@ -41,5 +49,11 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
         URI newURI = resource.getURI().trimFragment().trimQuery();
         newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
         resource.setURI(newURI);
+        if (isNew) {
+            db.getEvents().fireAfterInsert(resource, transaction);
+        }
+        else {
+            db.getEvents().fireAfterUpdate(oldResource, resource, transaction);
+        }
     }
 }
