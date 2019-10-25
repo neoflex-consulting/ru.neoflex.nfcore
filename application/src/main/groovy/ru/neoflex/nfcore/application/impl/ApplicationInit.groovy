@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.CatalogNode
-import ru.neoflex.nfcore.application.Tabs
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.reports.ReportsPackage
@@ -69,18 +68,25 @@ class ApplicationInit {
             ClassComponentReport.AClass = rs.getEObject(URI.createURI("ru.neoflex.nfcore.reports#//Report"), true)
             ClassComponentReport.name = name
             def viewTree = ApplicationFactory.eINSTANCE.createForm()
-            def ReportTab = ApplicationFactory.eINSTANCE.createTabs()
+            viewTree.code = 'Report Form'
+            def ReportTab = ApplicationFactory.eINSTANCE.createTabsViewReport()
+            ReportTab.code = 'Report Tab'
             viewTree.children.add(ReportTab)
-            for (i in 1..3) {
-                def ReportTabPane = ApplicationFactory.eINSTANCE.createTabPane()
-                ReportTabPane.code = 'ReportTabPane' + i
-                ReportTab.children.add(ReportTabPane)
-            }
-            def componentElement = ApplicationFactory.eINSTANCE.createComponentElement()
-            componentElement.code = 'Report Pivot'
-            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Report Pivot", "ReportPivotTrans",true)
-            componentElement.setComponent(userComponent1)
-            (ReportTab.children[0] as Tabs).children.add(componentElement)
+            def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
+            componentElement1.code = 'Pivot'
+            def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
+            componentElement2.code = 'Diagram'
+            def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
+            componentElement3.code = 'Rich Grid'
+            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "ReportPivotTrans",true)
+            def userComponent2 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Diagram", "ReportDiagramTrans",true)
+            def userComponent3 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Rich Grid", "ReportRichGridTrans",true)
+            componentElement1.setComponent(userComponent1)
+            componentElement2.setComponent(userComponent2)
+            componentElement3.setComponent(userComponent3)
+            ReportTab.children.add(componentElement1)
+            ReportTab.children.add(componentElement2)
+            ReportTab.children.add(componentElement3)
             ClassComponentReport.setView(viewTree)
             rs.resources.add(Context.current.store.createEObject(ClassComponentReport))
         }

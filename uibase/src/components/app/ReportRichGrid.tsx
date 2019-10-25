@@ -8,7 +8,7 @@ interface Props {
 interface State {
 }
 
-class ReportPivot extends React.Component<Props & WithTranslation, State> {
+class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     state = {
     };
@@ -19,11 +19,11 @@ class ReportPivot extends React.Component<Props & WithTranslation, State> {
     render() {
         return (
             <div>
-                This is Pivot (Test)
+                This is Rich Grid (Test)
             </div>
         )
     }
 }
 
-const ReportPivotTrans = withTranslation()(ReportPivot);
-export default ReportPivotTrans;
+const ReportRichGridTrans = withTranslation()(ReportRichGrid);
+export default ReportRichGridTrans;
