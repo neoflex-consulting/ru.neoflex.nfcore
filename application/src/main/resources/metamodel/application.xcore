@@ -104,6 +104,9 @@ class Column extends ViewContainer {
 class Tabs extends ViewContainer {
 }
 
+class TabsViewReport extends ViewContainer {
+}
+
 class Form extends ViewContainer {
 }
 

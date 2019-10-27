@@ -4,12 +4,15 @@ import * as React from "react";
 import {Col, Form, Row, Tabs} from "antd";
 import UserComponent from "./components/app/UserComponent";
 
+const { TabPane } = Tabs;
+
 abstract class ViewContainer extends View {
     renderChildren = () => {
         let children = this.viewObject.get("children") as Ecore.EObject[];
         let childrenView = children.map(
             (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
         return <div>{childrenView}</div>
+
     };
 
     render = () => {
@@ -69,12 +72,28 @@ class Form_ extends ViewContainer {
 
 class Tabs_ extends ViewContainer {
     render = () => {
-        const { TabPane } = Tabs;
         return (
             <Tabs>
                 <TabPane tab={`${this.viewObject.get('code')}`}>
-                {this.renderChildren()}
+                    {this.renderChildren()}
                 </TabPane>
+            </Tabs>
+        )
+    }
+}
+
+class TabsViewReport_ extends ViewContainer {
+    render = () => {
+        let children = this.viewObject.get("children") as Ecore.EObject[];
+        return (
+            <Tabs>
+                {
+                    children.map((c: Ecore.EObject) =>
+                        <TabPane tab={c.get('code')} key={c.get('code')} >
+                            {this.viewFactory.createView(c, this.props)}
+                        </TabPane>
+                    )
+                }
             </Tabs>
         )
     }
@@ -102,6 +121,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//Tabs', Tabs_);
+        this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
