@@ -256,6 +256,15 @@ public class Database implements Closeable {
 
     public ResourceSet findByEClass(EClass eClass, String name, Transaction tx) throws IOException {
         ResourceSet resourceSet = createResourceSet(tx);
+        List<IndexEntry> ieList = findEClassIndexEntries(eClass, name, tx);
+        for (IndexEntry entry: ieList) {
+            String id = new String(entry.getContent());
+            loadResource(resourceSet, id);
+        }
+        return resourceSet;
+    }
+
+    public List<IndexEntry> findEClassIndexEntries(EClass eClass, String name, Transaction tx) throws IOException {
         String nsURI = eClass.getEPackage().getNsURI();
         String className = eClass.getName();
         List<IndexEntry> ieList;
@@ -265,11 +274,7 @@ public class Database implements Closeable {
         else {
             ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className, name);
         }
-        for (IndexEntry entry: ieList) {
-            String id = new String(entry.getContent());
-            loadResource(resourceSet, id);
-        }
-        return resourceSet;
+        return ieList;
     }
 
     public Resource loadResource(ResourceSet resourceSet, String id) throws IOException {
