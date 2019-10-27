@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.base;
 
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,14 @@ public class GitDBTests {
         Role superAdminRole = createSuperAdminRole();
         User superAdminUser = createSuperAdminUser();
         superAdminUser.getRoles().add(superAdminRole);
+        try (Transaction tx = context.getWorkspace().createTransaction()) {
+            Database db = tx.getDatabase();
+            ResourceSet rs1 = db.findByEClass(superAdminUser.eClass(), superAdminUser.getName(), tx);
+            if (!rs1.getResources().isEmpty()) rs1.getResources().get(0).delete(null);
+            ResourceSet rs2 = db.findByEClass(superAdminRole.eClass(), superAdminRole.getName(), tx);
+            if (!rs2.getResources().isEmpty()) rs2.getResources().get(0).delete(null);
+            tx.commit("superadmin role and user deleted");
+        }
         try (Transaction tx = context.getWorkspace().createTransaction()) {
             Database db = tx.getDatabase();
             Resource roleResource = db.createResource(tx, null, null);
