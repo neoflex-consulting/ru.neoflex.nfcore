@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.base.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.neoflex.meta.gitdb.Database;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
+import ru.neoflex.nfcore.base.types.TypesPackage;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -34,6 +36,14 @@ public class Workspace {
     @PostConstruct
     void init() throws GitAPIException, IOException {
         database = new Database(workspaceRoot, registry.getEPackages());
+        database.setQualifiedNameDelegate(eClass -> {
+            for (EAttribute eAttribute: eClass.getEAllAttributes()) {
+                if (eAttribute.getEAttributeType() == TypesPackage.Literals.QNAME) {
+                    return eAttribute;
+                }
+            }
+            return eClass.getEStructuralFeature("name");
+        });
     }
 
     @PreDestroy
