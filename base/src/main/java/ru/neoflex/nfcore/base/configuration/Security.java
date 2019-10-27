@@ -63,6 +63,7 @@ public class Security extends WebSecurityConfigurerAdapter {
                     .antMatchers("/emf/*").permitAll()
                     .antMatchers("/system/user/**").authenticated()
                     .antMatchers("/app/**").authenticated()
+                    .antMatchers("/git/**").authenticated()
                 .and()
                      .cors().configurationSource(source)
                 .and()
