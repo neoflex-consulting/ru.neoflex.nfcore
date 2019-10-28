@@ -8,6 +8,7 @@ import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.CatalogNode
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.reports.ReportsFactory
 import ru.neoflex.nfcore.reports.ReportsPackage
 
 class ApplicationInit {
@@ -69,6 +70,9 @@ class ApplicationInit {
             ClassComponentReport.name = name
             def viewTree = ApplicationFactory.eINSTANCE.createForm()
             viewTree.code = 'Report Form'
+            def ReportDivName = ApplicationFactory.eINSTANCE.createDiv()
+            ReportDivName.code = 'Report Name'
+            viewTree.children.add(ReportDivName)
             def ReportTab = ApplicationFactory.eINSTANCE.createTabsViewReport()
             ReportTab.code = 'Report Tab'
             viewTree.children.add(ReportTab)
@@ -93,8 +97,23 @@ class ApplicationInit {
         return rs.resources.get(0).contents.get(0)
     }
 
+    static def recreateReport(String name) {
+        def rs = DocFinder.create(Context.current.store, ReportsPackage.Literals.REPORT, [name: name])
+                .execute().resourceSet
+        while (!rs.resources.empty) {
+            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
+        }
+        if (rs.resources.empty) {
+            def Report = ReportsFactory.eINSTANCE.createReport()
+            Report.name = name
+            Report.date = new Date()
+            rs.resources.add(Context.current.store.createEObject(Report))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
     {
         recreateApplication("ReportsApp")
         recreateClassComponent("ReportsReport")
+        recreateReport("ReportAuto1")
     }
 }
