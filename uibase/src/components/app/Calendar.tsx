@@ -135,20 +135,20 @@ class Calendar extends React.Component<WithTranslation, State> {
                                 ?
                                 report.map( (r: any) =>
                                     <Button
-                                        onClick={() =>
-                                            context.changeActiveObject!(
-                                                "ru.neoflex.nfcore.reports",
-                                                "Report",
-                                                r.eContents()[0].get('name')
+                                   onClick={() =>
+                                       context.changeActiveObject!(
+                                                // "ru.neoflex.nfcore.reports",
+                                                 "Report"
+                                                // r.eContents()[0].get('name')
                                             )
                                         }
-                                        key={`${r.get('uri')}/${r.rev}`}
-                                        size="small"
+                                         key={`${r.get('uri')}/${r.rev}`}
+                                       size="small"
                                         style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
-                                        title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                       title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
-                                    >
-                                        {r.eContents()[0].get('name')}
+                                   >
+                                    {r.eContents()[0].get('name')}
                                     </Button>
                                 )
                                 : ""}
