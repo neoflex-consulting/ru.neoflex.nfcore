@@ -5,7 +5,7 @@ import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowserTrans from "./components/MetaBrowser";
 import {ResourceEditor} from "./components/ResourceEditor"
-import {Link, Redirect, Route, RouteComponentProps, Switch} from "react-router-dom";
+import {Link, Redirect, Route, Switch} from "react-router-dom";
 import QueryRunnerTrans from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
