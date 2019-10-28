@@ -54,12 +54,9 @@ export class MainApp extends React.Component<any, State> {
     };
 
     changeActiveObject = (objectClass: string) => {
-        this.state.classComponents.map(c => {
-            if (c.eContents()[0].get('aClass').get('name') === objectClass) {
-                this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`
-                );
-            }
-        });
+        this.state.classComponents.filter((c: any) =>
+            c.eContents()[0].get('aClass').get('name') === objectClass)
+            .map((c) => this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`));
     };
 
     getAllClassComponents() {
