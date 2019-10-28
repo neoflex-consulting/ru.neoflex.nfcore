@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
@@ -17,6 +18,8 @@ import ru.neoflex.nfcore.base.util.EMFMapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,4 +82,29 @@ public class GroovyTests {
         Assert.assertEquals(GrantStatus.GRANTED, result);
     }
 
+    @Test
+    public void invokeFromGit() throws Exception {
+        try (Transaction tx = context.getWorkspace().createTransaction()) {
+            String code = "package ru.neoflex.meta.test\n" +
+                    "class Test {\n" +
+                    "static add(x, y) {\n" +
+                    "        return x+y;\n" +
+                    "    }\n" +
+                    "}";
+            Path codePath = tx.getFileSystem().getPath("/ru/neoflex/meta/test/Test.groovy");
+            Files.createDirectories(codePath.getParent());
+            Files.write(codePath, code.getBytes());
+            tx.commit("Created Test.groovy");
+            Object result =  context.withClassLoader(()->{
+                return groovy.eval("import ru.neoflex.meta.test.Test\nTest.add(*args)", new ArrayList() {{
+                    add(1);
+                    add(2);
+                }});
+            });
+            Files.delete(codePath);
+            tx.commit("Deleted Test.groovy");
+            Assert.assertEquals(3, result);
+        }
+
+    }
 }

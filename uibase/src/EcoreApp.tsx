@@ -35,7 +35,9 @@ export interface Props extends RouteComponentProps {
 
 interface State {
     principal?: any;
-    appName: string;
+    objectName: string;
+    objectPackage: string;
+    objectClass: string;
     languages: string[];
     notifierDuration: number;
 }
@@ -46,7 +48,9 @@ class EcoreApp extends React.Component<any, State> {
         super(props);
         this.state = {
             principal: undefined,
-            appName: props.appName,
+            objectName: props.objectName,
+            objectPackage: props.objectPackage,
+            objectClass: props.objectClass,
             languages: [],
             notifierDuration: 0
         };
@@ -75,9 +79,6 @@ class EcoreApp extends React.Component<any, State> {
         else if (e.key === "autoHideNotifications"){
             this.setState({notifierDuration : 3});
             localStorage.setItem('notifierDuration', '3');
-        }
-        else if (e.key === "mandatoryreporting"){
-            this.props.history.push('/mandatoryreporting');
         }
     }
 
@@ -146,7 +147,6 @@ class EcoreApp extends React.Component<any, State> {
                                     :
                                     <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{ fontSize: '17px' }} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
-                            <Menu.Item key={'mandatoryreporting'}><Icon type="calendar" style={{fontSize: '17px'}}/>Mandatory Reporting</Menu.Item>
                         </Menu.SubMenu>
                     </Menu>
                     <Dropdown overlay={langMenu} placement="bottomCenter">
@@ -155,15 +155,14 @@ class EcoreApp extends React.Component<any, State> {
                     <Icon className="bell-icon" type="bell" />
                 </Header>
                 <Switch>
-                    <Redirect from={'/'} exact={true} to={'/app'} />
-                    <Route path='/app' component={this.renderStartPage} />
-                    <Route path='/settings' component={this.renderSettings} />
-                    <Route path='/test' component={this.renderTest} />
-                    <Route path='/mandatoryreporting' component={this.renderMandatoryReporting}/>
+                    <Redirect from={'/'} exact={true} to={'/app'}/>
+                    <Route path='/app' component={this.renderStartPage}/>
+                    <Route path='/settings' component={this.renderSettings}/>
+                    <Route path='/test' component={this.renderTest}/>
                 </Switch>
             </Layout>
         )
-    }
+    };
 
     renderTest = ()=> {
         return (
@@ -173,15 +172,7 @@ class EcoreApp extends React.Component<any, State> {
                 {/*Example with error*/}
                 <DynamicComponent componentPath={"components/reports/component.js"} componentName={"UnCorrect"}/>
             </div>
-        )}
-
-	renderMandatoryReporting = ()=> {
-        return (
-            <div>
-                <MandatoryReportingTrans/>
-            </div>
-        )};
-
+    )};
     
     renderSettings=()=>{
         const {t} = this.props as Props & WithTranslation;
@@ -223,13 +214,13 @@ class EcoreApp extends React.Component<any, State> {
                 </Layout>
             </Layout>
         )
-    }
+    };
 
     renderStartPage = ()=>{
         return (
             <MainApp {...this.props}/>
         )
-    }
+    };
 
     componentDidMount(): void {
         if (!this.state.languages.length) {this.getLanguages()}

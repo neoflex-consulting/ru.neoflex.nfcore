@@ -22,7 +22,11 @@ abstract class Component {
 	op TreeNode generateReferenceTree() {referenceTree}
 }
 
-class StaticComponent extends Component {	
+class StaticComponent extends Component {
+}
+
+class UserComponent extends Component {
+    String componentClassName
 }
 
 class RemoteComponent extends Component {
@@ -98,6 +102,9 @@ class Column extends ViewContainer {
 }
 
 class Tabs extends ViewContainer {
+}
+
+class TabsViewReport extends ViewContainer {
 }
 
 class Form extends ViewContainer {

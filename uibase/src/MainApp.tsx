@@ -10,66 +10,116 @@ import {Tree} from 'antd'
 import {IMainContext, MainContext} from './MainContext'
 import update from 'immutability-helper'
 
-const FooterHeight = '2em'
+const FooterHeight = '2em';
 
 interface State {
-    appName: string
+    objectName: string;
+    objectPackage: string;
+    objectClass: string;
     context: IMainContext
     hideReferences: boolean
     currentTool?: string
     application?: Ecore.EObject
+    objectApp?: Ecore.EObject
     path: Ecore.EObject[]
+    classComponents: Ecore.EObject[]
 }
 
 export class MainApp extends React.Component<any, State> {
-    private refSplitterRef: React.RefObject<any> = React.createRef()
-    private toolsSplitterRef: React.RefObject<any> = React.createRef()
-    private viewFactory = ViewRegistry.INSTANCE.get('antd')
+    private refSplitterRef: React.RefObject<any> = React.createRef();
+    private toolsSplitterRef: React.RefObject<any> = React.createRef();
+    private viewFactory = ViewRegistry.INSTANCE.get('antd');
 
     constructor(props: any) {
         super(props)
         const context: IMainContext = {
-            updateContext: this.updateContext
+            updateContext: this.updateContext,
+            changeActiveObject: this.changeActiveObject
+        };
+        this.state = {
+            objectName: props.objectName,
+            objectPackage: props.objectPackage,
+            objectClass: props.objectClass,
+            hideReferences: false,
+            path: [],
+            context,
+            classComponents: []
         }
-        this.state = {appName: props.appName, hideReferences: false, path: [], context}
     }
 
     updateContext = (context: any, cb?: ()=>void) => {
         this.setState((state, props) => {
             return {context: update(state.context, {$merge: context})}
         }, cb)
-    }
+    };
+
+    changeActiveObject = (objectPackage: string, objectClass: string, objectName: string) => {
+        this.state.classComponents.map(c => {
+                if (c.eContents()[0].get('aClass').get('name') === objectClass) {
+                    this.setState({
+                        objectPackage: c.eContents()[0].eClass.eContainer.get('nsURI'),
+                        objectClass: c.eContents()[0].eClass.get('name'),
+                        objectName: c.eContents()[0].get('name')
+                    })
+                }
+        });
+    };
+
+    getAllClassComponents() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//ClassComponent");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((classComponent) => {
+                        console.log()
+                        this.setState({classComponents: classComponent})
+                    })
+            }
+        })
+    };
 
     setViewObject = (viewObject: Ecore.EObject) => {
         this.updateContext({viewObject})
-    }
+    };
 
-    loadApplication = (name: string) => {
+    loadObject = (objectPackage: string, objectClass: string, name: string) => {
         API.instance().fetchPackages().then(packages => {
-            const ePackage = packages.find(p => p.get("nsURI") === "ru.neoflex.nfcore.application");
+            const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
             if (ePackage) {
-                const eClass = ePackage.eContents().find(c => c.get("name") === "Application") as Ecore.EClass
+                const eClass = ePackage.eContents().find(c => c.get("name") === objectClass) as Ecore.EClass;
                 API.instance().findByKindAndName(eClass, name).then(resources => {
                     if (resources.length > 0) {
-                        const application = resources[0].eContents()[0]
-                        this.setState({application}, () => {
-                            API.instance().call(application.eURI(), "generateReferenceTree", []).then(referenceTree => {
+                        const objectApp = resources[0].eContents()[0];
+                        this.setState({objectApp}, () => {
+                            API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
+                                .then(referenceTree => {
                                 if (!!referenceTree) {
-                                    API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, application.eURI() + referenceTree._id).then(r => {
+                                    API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, objectApp.eURI() + referenceTree._id).then(r => {
                                         this.updateContext(({applicationReferenceTree: r.eContents()[0]}))
                                     })
                                 }
                             })
-                        })
-                        this.setViewObject(application.get('view'))
+                                .catch( ()=> {console.log("Reference Tree not exists")} )
+                        });
+                        this.setViewObject(objectApp.get('view'))
                     }
                 })
             }
         })
+    };
+
+    componentDidUpdate(prevProps: any, prevState: any): void {
+        if (prevState.objectPackage !== this.state.objectPackage ||
+            prevState.objectClass !== this.state.objectClass ||
+            prevState.objectName !== this.state.objectName)
+        {
+            this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+        }
     }
 
     componentDidMount(): void {
-        this.loadApplication(this.state.appName)
+        this.getAllClassComponents();
+        this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
@@ -78,7 +128,7 @@ export class MainApp extends React.Component<any, State> {
                          this.setState({currentTool: this.state.currentTool === name ? undefined : name})
                      }}><IconFA className="magnify" name={icon}><span
             style={{paddingLeft: 5}}>{label}</span></IconFA></span>
-    }
+    };
 
     renderFooter = () => {
         return (
@@ -99,60 +149,60 @@ export class MainApp extends React.Component<any, State> {
                 </div>
             </div>
         )
-    }
+    };
 
     renderToolbox = () => {
         return this.state.currentTool
-    }
+    };
 
     renderContent = () => {
-        const {context} = this.state
-        const {viewObject} = context
-        if (!viewObject) return null
+        const {context} = this.state;
+        const {viewObject} = context;
+        if (!viewObject) return null;
         return this.viewFactory.createView(viewObject, this.props)
-    }
+    };
 
     renderReferences = () => {
-        const {context} = this.state
-        const {applicationReferenceTree, viewReferenceTree} = context
-        const referenceTree = viewReferenceTree || applicationReferenceTree
-        const cbs = new Map<string, () => void>()
+        const {context} = this.state;
+        const {applicationReferenceTree, viewReferenceTree} = context;
+        const referenceTree = viewReferenceTree || applicationReferenceTree;
+        const cbs = new Map<string, () => void>();
         const onSelect = (keys: string[], event: any) => {
-            const cb = cbs.get(keys[keys.length - 1])
+            const cb = cbs.get(keys[keys.length - 1]);
             if (cb) cb()
-        }
+        };
         return !referenceTree ? null : (
             <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
                 {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
             </Tree.DirectoryTree>
 
         )
-    }
+    };
 
     push = (eObjectNode: Ecore.EObject, args?: any) => {
-        const eRefObject = eObjectNode.get('eObject')
-        const eObjectView = eObjectNode.get('eObjectView')
-        console.log(eRefObject, eObjectView)
-        this.state.path.push(eObjectNode)
-        let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/')
+        const eRefObject = eObjectNode.get('eObject');
+        const eObjectView = eObjectNode.get('eObjectView');
+        console.log(eRefObject, eObjectView);
+        this.state.path.push(eObjectNode);
+        let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
         if (args) {
             href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
         }
         this.props.history.push(href)
-    }
+    };
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
-        const code = eObject.get('code')
-        const key = parentKey ? parentKey + '.' + code : code
-        const children = eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key))
-        const isLeaf = !eObject.isKindOf('CatalogNode')
+        const code = eObject.get('code');
+        const key = parentKey ? parentKey + '.' + code : code;
+        const children = eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
+        const isLeaf = !eObject.isKindOf('CatalogNode');
         if (eObject.isKindOf('EObjectNode')) {
             cbs.set(key, () => {
                 this.push(eObject)
             })
         }
         return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
-    }
+    };
 
     render = () => {
         return (
@@ -169,7 +219,7 @@ export class MainApp extends React.Component<any, State> {
                         dispatchResize={true}
                         postPoned={false}
                         onDragFinished={() => {
-                            const size: string = this.refSplitterRef.current!.panePrimary.props.style.width
+                            const size: string = this.refSplitterRef.current!.panePrimary.props.style.width;
                             localStorage.setItem('mainapp_refsplitter_pos', size)
                         }}
                     >
@@ -189,7 +239,7 @@ export class MainApp extends React.Component<any, State> {
                                     maximizedPrimaryPane={this.state.currentTool === undefined}
                                     allowResize={this.state.currentTool !== undefined}
                                     onDragFinished={() => {
-                                        const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height
+                                        const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height;
                                         localStorage.setItem('mainapp_toolssplitter_pos', size)
                                     }}
                                 >

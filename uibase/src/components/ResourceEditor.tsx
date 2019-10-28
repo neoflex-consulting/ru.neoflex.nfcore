@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Tree, Icon, Table, Modal,
     Button, Select, Row, Col,
-    Menu, Tag, Layout
+    Menu, Tag, Layout, DatePicker
 } from 'antd';
 import Ecore from "ecore";
 import { API } from "../modules/api";
@@ -11,6 +11,8 @@ import update from 'immutability-helper';
 import EditableTextArea from './EditableTextArea'
 import SearchGridTrans from "./SearchGrid";
 import { WithTranslation } from "react-i18next";
+import moment from 'moment';
+import EClassSelection from './EClassSelection'
 
 export interface Props {
 }
@@ -30,6 +32,7 @@ interface State {
     modalRefVisible: Boolean,
     modalResourceVisible: Boolean,
     rightClickMenuVisible: Boolean,
+    modalSelectEClassVisible: Boolean,
     rightMenuPosition: Object,
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
@@ -57,6 +60,7 @@ export class ResourceEditor extends React.Component<any, State> {
         selectedKey: "",
         modalRefVisible: false,
         modalResourceVisible: false,
+        modalSelectEClassVisible: false,
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
@@ -66,7 +70,6 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     getEObject(): void {
-
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
@@ -295,7 +298,7 @@ export class ResourceEditor extends React.Component<any, State> {
         const prepareValue = (feature: Ecore.EObject, value: any, idx: Number): any => {
             if (feature.isKindOf('EReference')) {
                 const elements = value ?
-                feature.get('upperBound') === -1 ?
+                    feature.get('upperBound') === -1 ?
                         value.map((el: { [key: string]: any }, idx: number) =>
                             <Tag
                                 onClose={(e: any) => {
@@ -320,7 +323,11 @@ export class ResourceEditor extends React.Component<any, State> {
                     []
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
-                    <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                    {feature.get('eType').get('name') === 'EClass' ?
+                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalSelectEClassVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                        :
+                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                    }
                 </React.Fragment>
                 return component
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "EBoolean") {
@@ -335,7 +342,17 @@ export class ResourceEditor extends React.Component<any, State> {
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Timestamp") {
                 return value
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Date") {
-                return value
+                return <DatePicker
+                    showTime
+                    key={key + "_date_" + idx}
+                    defaultValue={moment(value)}
+                    onChange={(value: any) => {
+                        const newValue = { [feature.get('name')]: value.format() }
+                        const updatedJSON = targetObject.updater(newValue);
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Password") {
                 return <EditableTextArea
                     type="password"
@@ -384,6 +401,10 @@ export class ResourceEditor extends React.Component<any, State> {
         })
 
         return preparedData
+    }
+
+    setSelectEClassVisible = (visible: boolean) => {
+        this.setState({ modalSelectEClassVisible: visible })
     }
 
     handleRefModalCancel = () => {
@@ -506,12 +527,12 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
-        const resourceList:Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources')
+        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources')
         resourceList.addAll(resources)
         this.setState({ modalResourceVisible: false })
     }
 
-    handleDeleteResource = (resource:{ [key: string]: any }): void => {
+    handleDeleteResource = (resource: { [key: string]: any }): void => {
         this.state.mainEObject.eResource().eContainer.get('resources').remove(resource)
         this.forceUpdate()
     }
@@ -550,8 +571,8 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     handleAddNewRef = () => {
-        const resources:any = []
-        this.state.mainEObject.eResource().eContainer.get('resources').each((res: { [key: string]: any }) =>{
+        const resources: any = []
+        this.state.mainEObject.eResource().eContainer.get('resources').each((res: { [key: string]: any }) => {
             const isFound = this.selectedRefUries.indexOf(res.eURI())
             isFound !== -1 && resources.push(res)
         })
@@ -577,13 +598,13 @@ export class ResourceEditor extends React.Component<any, State> {
     save = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-    
-        if(resource) {
+
+        if (resource) {
             this.setState({ isSaving: true })
-            API.instance().saveResource(resource).then((result:any) => {
+            API.instance().saveResource(resource).then((result: any) => {
                 this.getEObject()
                 this.setState({ isSaving: false })
-            }).catch(()=>{
+            }).catch(() => {
                 this.setState({ isSaving: false })
             })
         }
@@ -603,7 +624,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getEObject() 
+        this.getEObject()
         window.addEventListener("click", this.hideRightClickMenu)
     }
 
@@ -614,7 +635,7 @@ export class ResourceEditor extends React.Component<any, State> {
                 <Layout.Header className="head-panel">
                     {this.state.isSaving ?
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
-                    :
+                        :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
@@ -647,28 +668,22 @@ export class ResourceEditor extends React.Component<any, State> {
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <Row>
-                                                        <Col span={20}>
-                                                            <a className="resource-link" href={`/settings/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
-                                                                <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
-                                                                    {`${res.eContents()[0].get('name')}`}
-                                                                    &nbsp;
+                                                    <a className="resource-link" href={`/settings/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                        <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
+                                                            {`${res.eContents()[0].get('name')}`}
+                                                            &nbsp;
                                                                     {<b>
-                                                                        {`${res.eContents()[0].eClass.get('name')}`}
-                                                                    </b>}
-                                                                    &nbsp;
+                                                                {`${res.eContents()[0].eClass.get('name')}`}
+                                                            </b>}
+                                                            &nbsp;
                                                                 </span>
-                                                            </a>
-                                                        </Col>
-                                                        <Col span={4}>
-                                                            <Button
-                                                                className="item-close-button"
-                                                                shape="circle"
-                                                                icon="close"
-                                                                onClick={(e: any) => this.handleDeleteResource(res)}
-                                                            />
-                                                        </Col>
-                                                    </Row>
+                                                    </a>
+                                                    <Button
+                                                        className="item-close-button"
+                                                        shape="circle"
+                                                        icon="close"
+                                                        onClick={(e: any) => this.handleDeleteResource(res)}
+                                                    />
                                                 </div>
                                             )
                                         }
@@ -677,7 +692,7 @@ export class ResourceEditor extends React.Component<any, State> {
                             </Row>
                         </div>
                         <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
-                            <Table 
+                            <Table
                                 bordered
                                 size="small"
                                 pagination={false}
@@ -709,7 +724,7 @@ export class ResourceEditor extends React.Component<any, State> {
                         style={{ width: '93%' }}
                         placeholder="Please select"
                         defaultValue={[]}
-                        onChange={(uriArray:string[])=>{
+                        onChange={(uriArray: string[]) => {
                             this.selectedRefUries = uriArray
                         }}
                     >
@@ -734,6 +749,23 @@ export class ResourceEditor extends React.Component<any, State> {
                 >
                     <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
                 </Modal>}
+                <EClassSelection
+                    key="eclass_selection"
+                    translate={t}
+                    modalSelectEClassVisible={this.state.modalSelectEClassVisible}
+                    setSelectEClassVisible={this.setSelectEClassVisible}
+                    onOk={(EClassObject: any) => {
+                        const targetObject: { [key: string]: any } = this.state.targetObject;
+                        const updatedJSON = targetObject.updater({
+                            [this.state.addRefPropertyName]: {
+                                $ref: EClassObject.eURI(),
+                                eClass: EClassObject.eClass.eURI()
+                            }
+                        })
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}
+                />
             </div>
         );
     }

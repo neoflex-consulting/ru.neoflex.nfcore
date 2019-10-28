@@ -57,6 +57,19 @@
   margin-right: 30vh;
 }
 
+.login-box{
+  width: 300px;
+  height: 414px;
+  background-color: #ffffff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 3px;
+  box-shadow: 0px 0px 12px 1px #ebebeb;
+  transform: translate(-50%,-50%);
+  padding: 24px;
+}
+
 /*Design for img ERROR*/
 .error {
   width: 73px;
@@ -67,36 +80,52 @@
 }
 
 /*Design filds for login and password*/
-.input-border {
+
+.input-login::placeholder{
+  color: #dfdfdf;
+}
+
+.input-login:focus {
+  border-color: #64b3f8;
+  border-width: 1.5px;
+}
+
+.input-login {
   border: none;
-  border-bottom: 1.5px solid #bbb;
-  width: 35vh;
+  border-bottom: 1px solid #c6c5c5;
+  width: 100%;
   outline: none;
-  font-size: 19px;
+  font-size: 15px;
   color: #7e7e7e;
   /*расстрояние между кнопками - what is that?*/
   margin-bottom: 3vh;
 }
 
 /*Form for login and password*/
-.form-div {
-  width: 20vh;
-  margin-left: 14vh;
-  margin-top: 5vh;
+.login-form {
+  margin-top: 30px;
+  padding: 18px;
+}
+
+.language-menu{
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 /*Button Sing in*/
-.custom-button {
-  border-radius: 36px;
-  background-color: #0253a9;
+.login-button {
+  border-radius: 5px;
+  background-color: #3799f3;
   border: none;
   color: white;
-  padding: 10px 50px;
+  padding: 8px 90px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 19px;
-  margin-top: 2vh;
+  font-size: 16px;
+  margin-top: 85px;
+  font-weight: lighter;
 }
 
 /*style for spinner*/

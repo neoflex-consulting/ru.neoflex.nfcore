@@ -82,6 +82,11 @@
             <version>0.3.0-arch7tect</version>
         </dependency>
         <dependency>
+            <groupId>ru.neoflex.meta</groupId>
+            <artifactId>gitdb</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
@@ -91,11 +96,6 @@
             <artifactId>groovy-all</artifactId>
             <version>2.5.7</version>
             <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.3.0.201903130848-r</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.epsilon</groupId>
@@ -111,6 +111,11 @@
             <groupId>org.eclipse.epsilon</groupId>
             <artifactId>epsilon-hutn</artifactId>
             <version>1.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.http.server</artifactId>
+            <version>5.3.0.201903130848-r</version>
         </dependency>
 
     </dependencies>

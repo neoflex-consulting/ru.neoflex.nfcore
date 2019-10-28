@@ -16,5 +16,8 @@
         "edit": "Edit",
         "delete": "Delete",
         "addresource": "Add resource",
-        "dynamiccomponent": " component cannot be downloaded from path "
+        "dynamiccomponent": " component cannot be downloaded from path ",
+        "mandatoryreporting": "Mandatory Reporting",
+        "legend": "Legend",
+        "closeall": "Close All"
 }

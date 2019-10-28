@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.util.FileUtils;
@@ -69,6 +70,6 @@ public class Context {
     }
 
     public<R> R withClassLoader(Callable<R> f) throws Exception {
-        return FileUtils.withClassLoader(()->{return withContext(f);});
+        return workspace.withClassLoader(()->{return withContext(f);}, Transaction.LockType.DIRTY);
     }
 }
