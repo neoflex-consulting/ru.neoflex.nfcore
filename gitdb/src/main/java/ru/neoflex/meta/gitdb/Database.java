@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
@@ -51,6 +52,7 @@ public class Database implements Closeable {
     private Map<String, Index> indexes = new HashMap<>();
     private Events events = new Events();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
 
     {
         try {
@@ -75,6 +77,13 @@ public class Database implements Closeable {
         events.registerAfterUpdate(this::updateResourceIndexes);
     }
 
+    public EStructuralFeature getQNameFeature(EClass eClass) {
+        if (qualifiedNameDelegate != null) {
+            return qualifiedNameDelegate.apply(eClass);
+        }
+        return eClass.getEStructuralFeature("name");
+    }
+
     private void createTypeNameIndex() {
         createIndex(new Index() {
             @Override
@@ -87,7 +96,7 @@ public class Database implements Closeable {
                 ArrayList<IndexEntry> result = new ArrayList<>();
                 EObject eObject = resource.getContents().get(0);
                 EClass eClass = eObject.eClass();
-                EStructuralFeature nameSF = eClass.getEStructuralFeature("name");
+                EStructuralFeature nameSF = getQNameFeature(eClass);
                 if (nameSF != null) {
                     String name = (String) eObject.eGet(nameSF);
                     if (name == null || name.length() == 0) {
@@ -247,6 +256,15 @@ public class Database implements Closeable {
 
     public ResourceSet findByEClass(EClass eClass, String name, Transaction tx) throws IOException {
         ResourceSet resourceSet = createResourceSet(tx);
+        List<IndexEntry> ieList = findEClassIndexEntries(eClass, name, tx);
+        for (IndexEntry entry: ieList) {
+            String id = new String(entry.getContent());
+            loadResource(resourceSet, id);
+        }
+        return resourceSet;
+    }
+
+    public List<IndexEntry> findEClassIndexEntries(EClass eClass, String name, Transaction tx) throws IOException {
         String nsURI = eClass.getEPackage().getNsURI();
         String className = eClass.getName();
         List<IndexEntry> ieList;
@@ -256,11 +274,7 @@ public class Database implements Closeable {
         else {
             ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className, name);
         }
-        for (IndexEntry entry: ieList) {
-            String id = new String(entry.getContent());
-            loadResource(resourceSet, id);
-        }
-        return resourceSet;
+        return ieList;
     }
 
     public Resource loadResource(ResourceSet resourceSet, String id) throws IOException {
@@ -441,6 +455,14 @@ public class Database implements Closeable {
 
     public Events getEvents() {
         return events;
+    }
+
+    public Function<EClass, EStructuralFeature> getQualifiedNameDelegate() {
+        return qualifiedNameDelegate;
+    }
+
+    public void setQualifiedNameDelegate(Function<EClass, EStructuralFeature> qualifiedNameDelegate) {
+        this.qualifiedNameDelegate = qualifiedNameDelegate;
     }
 
     public interface Transactional<R> {

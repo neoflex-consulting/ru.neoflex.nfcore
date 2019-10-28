@@ -10,7 +10,6 @@ import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -217,7 +216,7 @@ public class Exporter {
         importPath(root, tx);
     }
 
-    public void exportAll(String branch, Path path) throws IOException, GitAPIException {
+    public void exportAll(String branch, Path path) throws IOException {
         List<EntityId> all = database.withTransaction(branch, Transaction.LockType.DIRTY, Transaction::all);
         for (EntityId entityId: all) {
             database.withTransaction(branch, Transaction.LockType.DIRTY, tx -> {

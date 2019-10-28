@@ -116,14 +116,14 @@ public class Transaction implements Closeable {
         return new String(hexChars);
     }
 
-    private GitPath getIdPath(EntityId entityId) {
+    public GitPath getIdPath(EntityId entityId) {
         String idStr = entityId.getId();
         String idDir = idStr.substring(0, 2);
         String idFile = idStr.substring(2);
         return gfs.getPath("/", IDS_PATH, idDir, idFile);
     }
 
-    private static ObjectId getObjectId(GitPath path) throws IOException {
+    static ObjectId getObjectId(GitPath path) throws IOException {
         if(!path.isAbsolute()) throw new IllegalArgumentException(path.toString());
         Node current = path.getFileStore().getRoot();
         for(int i = 0; i < path.getNameCount(); i++) {
