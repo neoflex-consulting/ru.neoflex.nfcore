@@ -125,7 +125,7 @@ class EcoreApp extends React.Component<any, State> {
                         <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
                     </div>
                     <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
-                        <Menu.SubMenu title={<span><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps' }}><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
                             <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
                             <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
@@ -181,7 +181,7 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout>
                 <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
-                    <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430' }}>
+                    <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
                         <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
                         <Link to={`/settings/metadata`}>
                             <Icon type="compass" style={{ color: '#7d7d7d' }} />
