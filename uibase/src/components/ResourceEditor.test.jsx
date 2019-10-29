@@ -69,20 +69,38 @@ describe("function findObjectById", () => {
 
 });
 
-describe("function nestUpdaters", () =>{
+{
     const copyOfJSONData = cloneDeep(testJSONData)
     const nestedJSON = resourceEditor.nestUpdaters(copyOfJSONData)
 
-    it("should return an object with updaters, particular checking for existing of some updaters", ()=>{
-        expect(nestedJSON).toHaveProperty('updater')
-        expect(nestedJSON.audit).toHaveProperty('updater')
-        expect(nestedJSON.authenticators[1]).toHaveProperty('updater')
-        expect(nestedJSON.authenticators[1].tests[0]).toHaveProperty('updater')
+    describe("function nestUpdaters", () => {
+        it("should return an object with updaters, particular checking for existing of some updaters", () => {
+            expect(nestedJSON).toHaveProperty('updater')
+            expect(nestedJSON.audit).toHaveProperty('updater')
+            expect(nestedJSON.authenticators[1]).toHaveProperty('updater')
+            expect(nestedJSON.authenticators[1].tests[0]).toHaveProperty('updater')
+        })
     })
-})
 
-describe("testing of calling updaters in", () =>{
-    it("should return an updated object with correct data", ()=>{
+    describe("testing of calling updaters in JSON object", () => {
+        it("should return an updated object with correct data", () => {
+            let updatedJSON = nestedJSON.updater({ name: 'admin2', newFeature: 'value' })
+            expect(updatedJSON).toHaveProperty('name')
+            expect(updatedJSON.name).toEqual('admin2')
+            expect(updatedJSON).toHaveProperty('newFeature')
+            expect(updatedJSON.newFeature).toEqual('value')
+
+            updatedJSON = nestedJSON.audit.updater({ 'created': null })
+            expect(updatedJSON.audit).toHaveProperty('created')
+            expect(updatedJSON.audit.created).toEqual(null)
+
+            updatedJSON = nestedJSON.authenticators[0].updater({ 'password': 'newpass' })
+            expect(updatedJSON.authenticators[0]).toHaveProperty('password')
+            expect(updatedJSON.authenticators[0].password).toEqual('newpass')
+        })
+    })
+
+    describe("testing of calling parent updaters and parameters", () => {
         
     })
-})
+}
