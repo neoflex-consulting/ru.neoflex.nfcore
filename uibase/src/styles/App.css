@@ -1,36 +1,39 @@
-.App {
-  /*text-align: center;*/
+.app-logo {
+  background-color: #fff;
+  color: #262626;
+  font-weight: lighter;
+  font-size: 23px;
+  height: 55px;
+  line-height: 55px;
+  display: inline-block;
+  width: 260px;
+  padding-left: 14px;
+  border-bottom: 1px solid #e8e8e8;
+  user-select: none;
 }
 
-.App-logo {
-  /*animation: App-logo-spin infinite 20s linear;
-   */
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  background-color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.app-logo-settings {
+  background-color: #232f3e;
   color: white;
+  font-weight: lighter;
+  font-size: 23px;
+  height: 55px;
+  line-height: 55px;
+  display: inline-block;
+  width: 260px;
+  padding-left: 14px;
+  user-select: none;
 }
 
-.App-link {
-  color: #61dafb;
+.app-header {
+  height: '55px'; 
+  padding: '0px'; 
+  background-color: 'white';
+  border-bottom: 1px solid #e8e8e8;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-content{
+  background-color: #f9f9fc;
 }
 
 #edit:hover {
@@ -41,12 +44,6 @@
 #delete:hover {
   color: #dd1b1b;
   cursor: pointer;
-}
-
-.ant-layout-sider-zero-width-trigger{
-  bottom: 0px !important;
-  top: initial !important;
-  z-index: 5 !important;
 }
 
 .view-box{
@@ -60,6 +57,18 @@
   margin-right: 30vh;
 }
 
+.login-box{
+  width: 300px;
+  height: 414px;
+  background-color: #ffffff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  box-shadow: 0px 0px 12px 1px #ebebeb;
+  transform: translate(-50%,-50%);
+  padding: 24px;
+}
+
 /*Design for img ERROR*/
 .error {
   width: 73px;
@@ -70,36 +79,52 @@
 }
 
 /*Design filds for login and password*/
-.input-border {
+
+.input-login::placeholder{
+  color: #dfdfdf;
+}
+
+.input-login:focus {
+  border-color: #64b3f8;
+  border-width: 1.5px;
+}
+
+.input-login {
   border: none;
-  border-bottom: 1.5px solid #bbb;
-  width: 35vh;
+  border-bottom: 1px solid #c6c5c5;
+  width: 100%;
   outline: none;
-  font-size: 19px;
+  font-size: 15px;
   color: #7e7e7e;
   /*расстрояние между кнопками - what is that?*/
   margin-bottom: 3vh;
 }
 
 /*Form for login and password*/
-.form-div {
-  width: 20vh;
-  margin-left: 14vh;
-  margin-top: 5vh;
+.login-form {
+  margin-top: 30px;
+  padding: 18px;
+}
+
+.language-menu{
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 /*Button Sing in*/
-.custom-button {
-  border-radius: 36px;
-  background-color: #0253a9;
+.login-button {
+  background-color: #3799f3;
   border: none;
   color: white;
-  padding: 10px 50px;
+  padding: 8px 90px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 19px;
-  margin-top: 2vh;
+  font-size: 16px;
+  margin-top: 85px;
+  font-weight: lighter;
+  cursor: pointer;
 }
 
 /*style for spinner*/

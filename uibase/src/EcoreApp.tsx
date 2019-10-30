@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -13,6 +13,18 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
+import MandatoryReportingTrans from "./components/app/MandatoryReporting";
+import _map from "lodash/map"
+
+import ru from 'flag-icon-css/flags/1x1/ru.svg';
+import en from 'flag-icon-css/flags/1x1/us.svg';
+import cn from 'flag-icon-css/flags/1x1/cn.svg';
+
+const langIcon: {[key:string]: any} = {
+    'en': en,
+    'ru': ru,
+    'ch': cn
+}
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -86,36 +98,52 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
+        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+        const langMenu = () => <Menu>
+            {_map(langIcon, (iconRes:any, index:number)=>
+                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
+                    <img style={{ borderRadius: '25px' }} alt='language' src={iconRes} />
+                </Menu.Item>
+            )}
+        </Menu>
+
         return (
-            <Layout style={{height: '100vh'}}>
-                <Header style={{height: '40px', padding: "0px"}}>
-                    <Menu theme="dark" mode="horizontal" onClick={(e) => this.onRightMenu(e)} style={{float: "right", height: '100%'}}>
-                        <Menu.SubMenu title={<span><Icon type="user" style={{fontSize: '17px', marginRight: '0'}}/> {principal.name}</span>} style={{float: "right", height: '100%', top: '-3px'}}>
-                            <Menu.Item key={'logout'}><Icon type="logout" style={{fontSize: '17px'}}/>{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}><Icon type="setting" style={{fontSize: '17px'}} theme="filled"/>{t('developer')}</Menu.Item>
-                            <Menu.Item key={'app'}><Icon type="sketch" style={{fontSize: '17px'}}/>App</Menu.Item>
-                            <Menu.Item key={'testComponent'}><Icon type="coffee" style={{fontSize: '17px'}}/>Test component</Menu.Item>
-                            <Menu.SubMenu title={<span><Icon type="global" style={{fontSize: '17px'}}/>{t('language')}</span>}>
+            <Layout style={{ height: '100vh' }}>
+                <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
+                    <div className={window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"}>
+                        <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
+                        <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
+                    </div>
+                    <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
+                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps' }}><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                            <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
+                            <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
+                            <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
+                            <Menu.Item key={'testComponent'}><Icon type="coffee" style={{ fontSize: '17px' }} />Test component</Menu.Item>
+                            <Menu.SubMenu title={<span><Icon type="global" style={{ fontSize: '17px' }} />{t('language')}</span>}>
                                 {
                                     this.state.languages.map((c: any) =>
                                         <Menu.Item key={c} onClick={() =>
                                             setLang(c)
                                         }>
-                                            <Icon type="flag" style={{fontSize: '17px'}}/>
+                                            <Icon type="flag" style={{ fontSize: '17px' }} />
                                             {c.toUpperCase()}
                                         </Menu.Item>)
                                 }
                             </Menu.SubMenu>
-                            <Menu.SubMenu  title={<span><Icon type="notification" style={{fontSize: '17px'}}/>Notification</span>}>
+                            <Menu.SubMenu title={<span><Icon type="notification" style={{ fontSize: '17px' }} />Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
-                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{fontSize: '17px'}} />Disable autohiding</Menu.Item>
-                                :
-                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{fontSize: '17px'}} />Autohide</Menu.Item>}
+                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{ fontSize: '17px' }} />Disable autohiding</Menu.Item>
+                                    :
+                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{ fontSize: '17px' }} />Autohide</Menu.Item>}
                             </Menu.SubMenu>
                         </Menu.SubMenu>
                     </Menu>
+                    <Dropdown overlay={langMenu} placement="bottomCenter">
+                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
+                    </Dropdown>
+                    <Icon className="bell-icon" type="bell" />
                 </Header>
-
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
                     <Redirect from={'/app'} exact={true} to={'/app/ru.neoflex.nfcore.application/Application/ReportsApp'}/>
@@ -136,23 +164,38 @@ class EcoreApp extends React.Component<any, State> {
                 {/*Example with error*/}
                 <DynamicComponent componentPath={"components/reports/component.js"} componentName={"UnCorrect"}/>
             </div>
-        )};
-
+    )};
+    
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
         let selectedKeys = ['metadata', 'data', 'query']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
-                <Sider collapsible breakpoint="lg" collapsedWidth="0">
-                    <Menu className="dark" theme="dark" mode="inline" selectedKeys={selectedKeys}>
-                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}><Link to={`/settings/metadata`}>{t('metadata')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'data'}><Link to={`/settings/data`}>{t('data')}</Link></Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'query'}><Link to={`/settings/query`}>{t('query')}</Link></Menu.Item>
+                <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
+                    <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
+                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
+                        <Link to={`/settings/metadata`}>
+                            <Icon type="compass" style={{ color: '#7d7d7d' }} />
+                            <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
+                        </Link>
+                        </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'data'}>
+                            <Link to={`/settings/data`}>
+                            <Icon type="shopping" style={{ color: '#7d7d7d' }} />  
+                            <span style={{ color: '#eeeeee' }}>{t('data')}</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'query'}>
+                            <Link to={`/settings/query`}>
+                            <Icon type="database" style={{ color: '#7d7d7d' }} />  
+                            <span style={{ color: '#eeeeee' }}>{t('query')}</span>
+                            </Link>
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Content>
+                    <Content className="app-content">
                         <Switch>
                             <Route path='/settings/metadata' component={MetaBrowserTrans}/>
                             <Route path='/settings/query' component={QueryRunnerTrans}/>
@@ -208,13 +251,9 @@ class EcoreApp extends React.Component<any, State> {
         return (
                 <Layout>
                     {this.state.principal === undefined ?
-                        <Layout>
                             <Login onLoginSucceed={this.setPrincipal}/>
-                        </Layout>
                         :
-                        <Layout>
-                            {this.renderDev()}
-                        </Layout>
+                            this.renderDev()
                     }
                 </Layout>
         )
