@@ -51,7 +51,7 @@ public class ExporterTests extends TestBase {
             userResource.getContents().add(user);
             userResource.save(null);
             tx.commit("User Orlov and group masters created", "orlov", "");
-            userId = database.getId(userResource.getURI());
+            userId = database.getResourceId(userResource);
         }
     }
 

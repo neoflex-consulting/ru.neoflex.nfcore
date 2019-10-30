@@ -27,8 +27,8 @@ public class GitInputStream extends InputStream implements URIConverter.Loadable
     @Override
     public void loadResource(Resource resource) throws IOException {
         Transaction transaction = handler.getTransaction();
-        Database db = (Database) transaction.getDatabase();
-        String id = db.getId(uri);
+        Database db = transaction.getDatabase();
+        String id = db.checkAndGetId(uri);
         EntityId entityId = new EntityId(id, null);
         Entity entity = transaction.load(entityId);
         String rev = entity.getRev();
@@ -36,8 +36,7 @@ public class GitInputStream extends InputStream implements URIConverter.Loadable
             resource.getContents().clear();
         }
         db.loadResource(entity.getContent(), resource);
-        URI newURI = resource.getURI().trimFragment().trimQuery();
-        newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
+        URI newURI = db.createURI(id, rev);
         resource.setURI(newURI);
         db.getEvents().fireAfterLoad(resource, transaction);
     }
