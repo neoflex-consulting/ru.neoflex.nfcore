@@ -3,10 +3,11 @@ import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
 import {ru, enUS} from "date-fns/locale";
+import {zhCN} from "date-fns/esm/locale";
 import {WithTranslation, withTranslation} from "react-i18next";
 import {MainContext} from "../../MainContext";
 import {Button} from "antd";
-import {zhCN} from "date-fns/esm/locale";
+
 
 interface State {
     currentMonth: Date;
@@ -54,7 +55,7 @@ class Calendar extends React.Component<WithTranslation, State> {
     };
 
     private getLocale(i18n: any) {
-        return i18n.language === "ch" ? zhCN
+        return i18n.language === "cn" ? zhCN
             :
             i18n.language === "ru" ? ru
                 : enUS;
@@ -135,20 +136,20 @@ class Calendar extends React.Component<WithTranslation, State> {
                                 ?
                                 report.map( (r: any) =>
                                     <Button
-                                        onClick={() =>
-                                            context.changeActiveObject!(
-                                                "ru.neoflex.nfcore.reports",
-                                                "Report",
-                                                r.eContents()[0].get('name')
+                                   onClick={() =>
+                                       context.changeActiveObject!(
+                                                // "ru.neoflex.nfcore.reports",
+                                                 "Report"
+                                                // r.eContents()[0].get('name')
                                             )
                                         }
-                                        key={`${r.get('uri')}/${r.rev}`}
-                                        size="small"
+                                         key={`${r.get('uri')}/${r.rev}`}
+                                       size="small"
                                         style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
-                                        title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                       title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
-                                    >
-                                        {r.eContents()[0].get('name')}
+                                   >
+                                    {r.eContents()[0].get('name')}
                                     </Button>
                                 )
                                 : ""}

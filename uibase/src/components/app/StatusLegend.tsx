@@ -38,7 +38,7 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
         this.getAllStatuses();
     }
 
-    render() {const {t, i18n} = this.props;
+    render() {const {t} = this.props;
         const stat: { push(div: any): void } = [];
         this.state.ReportStatus.map(
             (status: any) =>

@@ -36,23 +36,35 @@ class ApplicationInit {
         if (rs.resources.empty) {
             def application = ApplicationFactory.eINSTANCE.createApplication()
             application.name = name
-            def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
-            for (i in 1..5) {
-                def catalog = ApplicationFactory.eINSTANCE.createCatalogNode()
-                catalog.code = 'Catalog' + i
-                referenceTree.children.add(catalog)
-            }
-            def reportNode = ApplicationFactory.eINSTANCE.createEObjectNode()
-            reportNode.code = 'report1'
-            def report1 = findOrCreateEObject(ReportsPackage.Literals.REPORT, "report1", "",true)
-            reportNode.setEObject(report1)
-            (referenceTree.children[0] as CatalogNode).children.add(reportNode)
-            application.setReferenceTree(referenceTree)
+
             def componentElement = ApplicationFactory.eINSTANCE.createComponentElement()
             componentElement.code = 'Mandatory Reporting'
             def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReportingTrans",true)
             componentElement.setComponent(userComponent1)
             application.view = componentElement
+
+            def referenceTree = ApplicationFactory.eINSTANCE.createTree()
+            def eObjectNode1 = ApplicationFactory.eINSTANCE.createEObjectNode()
+            eObjectNode1.name = 'rootEObjectNode'
+            def componentNode1 = ApplicationFactory.eINSTANCE.createComponentNode()
+            componentNode1.name = 'rootComponentNode'
+            def catalogNode1 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            catalogNode1.name = 'rootCatalogNode'
+            referenceTree.root.add(eObjectNode1)
+            referenceTree.root.add(componentNode1)
+            referenceTree.root.add(catalogNode1)
+            def eObjectNode2 = ApplicationFactory.eINSTANCE.createEObjectNode()
+            eObjectNode2.name = 'childrenEObjectNode'
+            def componentNode2 = ApplicationFactory.eINSTANCE.createComponentNode()
+            componentNode2.name = 'childrenComponentNode'
+            def catalogNode2 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            catalogNode2.name = 'childrenCatalogNode'
+
+            catalogNode1.children.add(eObjectNode2)
+            catalogNode1.children.add(componentNode2)
+            catalogNode1.children.add(catalogNode2)
+            application.setReferenceTree(referenceTree)
+
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)

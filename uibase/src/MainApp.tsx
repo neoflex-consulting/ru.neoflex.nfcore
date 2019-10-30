@@ -43,7 +43,7 @@ export class MainApp extends React.Component<any, State> {
             hideReferences: false,
             path: [],
             context,
-            classComponents: []
+            classComponents: [],
         }
     }
 
@@ -53,17 +53,10 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeActiveObject = (objectPackage: string, objectClass: string, objectName: string) => {
-        this.state.classComponents.map(c => {
-            console.log()
-                if (c.eContents()[0].get('aClass').get('name') === objectClass) {
-                    this.setState({
-                        objectPackage: c.eContents()[0].eClass.eContainer.get('nsURI'),
-                        objectClass: c.eContents()[0].eClass.get('name'),
-                        objectName: c.eContents()[0].get('name')
-                    })
-                }
-        });
+    changeActiveObject = (objectClass: string) => {
+        this.state.classComponents.filter((c: any) =>
+            c.eContents()[0].get('aClass').get('name') === objectClass)
+            .map((c) => this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`));
     };
 
     getAllClassComponents() {
@@ -119,8 +112,22 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        console.log()
         this.getAllClassComponents();
         this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+    }
+
+
+    static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        if (prevState.objectPackage !== nextProps.match.params.objectPackage ||
+            prevState.objectClass !== nextProps.match.params.objectClass ||
+            prevState.objectName !== nextProps.match.params.objectName) {
+            return {
+                objectPackage: nextProps.match.params.objectPackage,
+                objectClass: nextProps.match.params.objectClass,
+                objectName: nextProps.match.params.objectName
+            };
+        }
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
@@ -164,46 +171,49 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderReferences = () => {
-        const {context} = this.state;
-        const {applicationReferenceTree, viewReferenceTree} = context;
-        const referenceTree = viewReferenceTree || applicationReferenceTree;
-        const cbs = new Map<string, () => void>();
-        const onSelect = (keys: string[], event: any) => {
-            const cb = cbs.get(keys[keys.length - 1]);
-            if (cb) cb()
-        };
-        return !referenceTree ? null : (
-            <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
-            </Tree.DirectoryTree>
-
-        )
+    //     const {context} = this.state;
+    //     const {applicationReferenceTree, viewReferenceTree} = context;
+    //     const referenceTree = viewReferenceTree || applicationReferenceTree;
+    //     const cbs = new Map<string, () => void>();
+    //     const onSelect = (keys: string[], event: any) => {
+    //         const cb = cbs.get(keys[keys.length - 1]);
+    //         if (cb) cb()
+    //     };
+    //     return !referenceTree ? null : (
+    //         <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
+    //             {referenceTree.get('children').map((c: Ecore.EObject) =>
+    //                 this.renderTreeNode(c, cbs))}
+    //         </Tree.DirectoryTree>
+    //
+    //     )
+        return null
     };
 
-    push = (eObjectNode: Ecore.EObject, args?: any) => {
-        const eRefObject = eObjectNode.get('eObject');
-        const eObjectView = eObjectNode.get('eObjectView');
-        console.log(eRefObject, eObjectView);
-        this.state.path.push(eObjectNode);
-        let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
-        if (args) {
-            href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
-        }
-        this.props.history.push(href)
-    };
+    // push = (eObjectNode: Ecore.EObject, args?: any) => {
+    //     const eRefObject = eObjectNode.get('eObject');
+    //     const eObjectView = eObjectNode.get('eObjectView');
+    //     console.log(eRefObject, eObjectView);
+    //     this.state.path.push(eObjectNode);
+    //     let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
+    //     if (args) {
+    //         href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
+    //     }
+    //     this.props.history.push(href)
+    // };
 
-    renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
-        const code = eObject.get('code');
-        const key = parentKey ? parentKey + '.' + code : code;
-        const children = eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
-        const isLeaf = !eObject.isKindOf('CatalogNode');
-        if (eObject.isKindOf('EObjectNode')) {
-            cbs.set(key, () => {
-                this.push(eObject)
-            })
-        }
-        return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
-    };
+    // renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
+    //     const code = eObject.get('code');
+    //     const key = parentKey ? parentKey + '.' + code : code;
+    //     const children =  eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
+    //     const isLeaf = !eObject.isKindOf('CatalogNode');
+    //
+    //     if (eObject.isKindOf('EObjectNode') || eObject.isKindOf('ComponentNode')) {
+    //         cbs.set(key, () => {
+    //             // this.push(eObject)
+    //         })
+    //     }
+    //     return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+    // };
 
     render = () => {
         return (
@@ -225,7 +235,7 @@ export class MainApp extends React.Component<any, State> {
                         }}
                     >
                         <div style={{flexGrow: 1, backgroundColor: "white", height: '100%', overflow: "auto"}}>
-                            {this.renderReferences()}
+                            {/*{this.renderReferences()}*/}
                         </div>
                         <div style={{backgroundColor: "white", height: '100%', overflow: 'auto'}}>
                             <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
