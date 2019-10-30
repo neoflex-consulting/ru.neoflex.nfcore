@@ -37,6 +37,7 @@ describe("function findObjectById", () => {
 
     it("should not return any object", () => {
         expextedFoundObject = undefined
+
         result = resourceEditor.findObjectById(testJSONData, '/qwerty');
         expect(result).toEqual(expextedFoundObject);
 
@@ -97,10 +98,33 @@ describe("function findObjectById", () => {
             updatedJSON = nestedJSON.authenticators[0].updater({ 'password': 'newpass' })
             expect(updatedJSON.authenticators[0]).toHaveProperty('password')
             expect(updatedJSON.authenticators[0].password).toEqual('newpass')
+
+        })
+        it("should return an object with fresh updaters without any lost data", () => {
+            let updatedJSON = nestedJSON.updater({ newFeature: 'value' })
+            const newNested = resourceEditor.nestUpdaters(updatedJSON)
+            updatedJSON = newNested.updater({ name: 'admin1' })
+            expect(updatedJSON).toHaveProperty('newFeature')
+            expect(updatedJSON.name).toEqual('admin1')
         })
     })
 
     describe("testing of calling parent updaters and parameters", () => {
-        
+        //operation: { operation: "push" }
+        //operation: { operation: "set" }
+        //params: { operation: "splice", index: index }
+
+        it("should return an object with a spliced array by the property 'authenticators'", () => {
+            //params: { operation: "splice", index: index }
+            let updatedJSON = copyOfJSONData.updater(null, undefined, 'authenticators', { operation: 'splice', index: '1' })
+            expect(updatedJSON.authenticators).toHaveLength(1)
+        })
+
+        /*it("should return an object with a spliced array by the property 'authenticators'", () => {
+            //params: { operation: "splice", index: index }
+            let updatedJSON = copyOfJSONData.updater(null, undefined, 'authenticators', { operation: 'splice', index: '1' })
+            expect(updatedJSON.authenticators).toHaveLength(1)
+        })*/
+
     })
 }

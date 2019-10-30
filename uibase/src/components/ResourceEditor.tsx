@@ -103,7 +103,7 @@ export class ResourceEditor extends React.Component<any, State> {
                         } else if (options && options.operation === "set") {
                             updatedData = update(currentObject as any, { [updaterProperty]: { $set: newValues } })
                         } else {
-                            //if nothing from listed above, then updating the object by a property name
+                            //if nothing from listed above, then merge updating the object by a property name
                             updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
                         }
                     }
@@ -279,7 +279,7 @@ export class ResourceEditor extends React.Component<any, State> {
                 currentNode: {}
             })
         }
-    };
+    }
 
     onTreeRightClick = (e: any) => {
         this.setState({
@@ -287,7 +287,7 @@ export class ResourceEditor extends React.Component<any, State> {
             rightMenuPosition: { x: e.event.clientX, y: e.event.clientY },
             treeRightClickNode: e.node.props
         })
-    };
+    }
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
 
@@ -297,7 +297,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
         const prepareValue = (feature: Ecore.EObject, value: any, idx: Number): any => {
             if (feature.isKindOf('EReference')) {
-                const refObject = value && mainEObject.eContainer.eResource().eContents().find(res=>res.eURI() === value!.$ref)
+                const refObject = value && mainEObject.eContainer.eResource().eContainer.eContents().find(res=>res.eContents()[0]!.eURI() === value!.$ref)!.eContents()[0]
                 const elements = value ?
                     feature.get('upperBound') === -1 ?
                         value.map((el: { [key: string]: any }, idx: number) =>
