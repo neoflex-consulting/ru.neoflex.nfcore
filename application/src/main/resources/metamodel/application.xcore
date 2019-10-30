@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.base.types.Caption
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /* Components */
 abstract class Component {
@@ -18,8 +19,8 @@ abstract class Component {
 	contains ViewElement view
 	contains Tools tools
 	op Tools generateTools() {tools}
-	contains TreeNode referenceTree	
-	op TreeNode generateReferenceTree() {referenceTree}
+	contains Tree referenceTree
+	op Tree generateReferenceTree() {EcoreUtil.copy(referenceTree)}
 }
 
 class StaticComponent extends Component {
@@ -63,10 +64,16 @@ class ComponentElement extends ViewElement {
 	refers Component component
 }
 
-abstract class TreeNode extends ViewContainer {
+class Tree {
+    contains TreeNode[] root
 }
 
-class CatalogNode extends TreeNode {	
+abstract class TreeNode {
+    QName name
+}
+
+class CatalogNode extends TreeNode {
+    contains TreeNode[] children
 }
 
 class EObjectNode extends TreeNode {
