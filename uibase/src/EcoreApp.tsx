@@ -13,7 +13,6 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import MandatoryReportingTrans from "./components/app/MandatoryReporting";
 import _map from "lodash/map"
 
 import ru from 'flag-icon-css/flags/1x1/ru.svg';
