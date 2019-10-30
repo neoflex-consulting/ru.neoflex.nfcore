@@ -13,7 +13,6 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import MandatoryReportingTrans from "./components/app/MandatoryReporting";
 import _map from "lodash/map"
 
 import ru from 'flag-icon-css/flags/1x1/ru.svg';
@@ -147,7 +146,6 @@ class EcoreApp extends React.Component<any, State> {
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
                     <Redirect from={'/app'} exact={true} to={'/app/ru.neoflex.nfcore.application/Application/ReportsApp'}/>
-                    <Route exact={true} path='/app' component={this.renderStartPage}/>
                     <Route path='/app/:objectPackage/:objectClass/:objectName' component={this.renderStartPage}/>
                     <Route path='/settings' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>

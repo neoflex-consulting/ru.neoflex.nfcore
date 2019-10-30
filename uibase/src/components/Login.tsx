@@ -13,7 +13,7 @@ import cn from 'flag-icon-css/flags/1x1/cn.svg';
 const langIcon: {[key:string]: any} = {
     'en': en,
     'ru': ru,
-    'ch': cn
+    'cn': cn
 }
 
 export interface Props {

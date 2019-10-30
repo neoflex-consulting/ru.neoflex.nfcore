@@ -3,10 +3,11 @@ import * as dateFns from "date-fns";
 import Ecore from "ecore";
 import {API} from "../../modules/api";
 import {ru, enUS} from "date-fns/locale";
+import {zhCN} from "date-fns/esm/locale";
 import {WithTranslation, withTranslation} from "react-i18next";
 import {MainContext} from "../../MainContext";
 import {Button} from "antd";
-import {zhCN} from "date-fns/esm/locale";
+
 
 interface State {
     currentMonth: Date;
@@ -54,7 +55,7 @@ class Calendar extends React.Component<WithTranslation, State> {
     };
 
     private getLocale(i18n: any) {
-        return i18n.language === "ch" ? zhCN
+        return i18n.language === "cn" ? zhCN
             :
             i18n.language === "ru" ? ru
                 : enUS;
