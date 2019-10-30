@@ -309,8 +309,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                 key={el["$ref"]}
                             >
                                 {refObject!.get('name')}<br />
-                                {refObject!.eClass.get('name')}<br />
-                                {`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;
+                                {refObject!.eClass.get('name')}&nbsp; 
                             </Tag>)
                         :
                         <Tag
@@ -321,8 +320,7 @@ export class ResourceEditor extends React.Component<any, State> {
                             key={value["$ref"]}
                         >
                             {refObject!.get('name')}&nbsp;
-                            {refObject!.eClass.get('name')}<br />
-                            {`${value["$ref"]}`}&nbsp;
+                            {refObject!.eClass.get('name')}&nbsp;
                         </Tag>
                     :
                     []
