@@ -114,7 +114,7 @@ class EcoreApp extends React.Component<any, State> {
                         <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
                     </div>
                     <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
-                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps' }}><Icon type="user" style={{ fontSize: '17px', marginRight: '0' }} /> {principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
                             <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
                             <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
