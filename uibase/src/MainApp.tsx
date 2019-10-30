@@ -43,7 +43,7 @@ export class MainApp extends React.Component<any, State> {
             hideReferences: false,
             path: [],
             context,
-            classComponents: []
+            classComponents: [],
         }
     }
 
@@ -53,16 +53,10 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeActiveObject = (objectPackage: string, objectClass: string, objectName: string) => {
-        this.state.classComponents.map(c => {
-                if (c.eContents()[0].get('aClass').get('name') === objectClass) {
-                    this.setState({
-                        objectPackage: c.eContents()[0].eClass.eContainer.get('nsURI'),
-                        objectClass: c.eContents()[0].eClass.get('name'),
-                        objectName: c.eContents()[0].get('name')
-                    })
-                }
-        });
+    changeActiveObject = (objectClass: string) => {
+        this.state.classComponents.filter((c: any) =>
+            c.eContents()[0].get('aClass').get('name') === objectClass)
+            .map((c) => this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`));
     };
 
     getAllClassComponents() {
@@ -118,8 +112,22 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        console.log()
         this.getAllClassComponents();
         this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+    }
+
+
+    static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        if (prevState.objectPackage !== nextProps.match.params.objectPackage ||
+            prevState.objectClass !== nextProps.match.params.objectClass ||
+            prevState.objectName !== nextProps.match.params.objectName) {
+            return {
+                objectPackage: nextProps.match.params.objectPackage,
+                objectClass: nextProps.match.params.objectClass,
+                objectName: nextProps.match.params.objectName
+            };
+        }
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {

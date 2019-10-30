@@ -22,6 +22,7 @@
     "i18next-browser-languagedetector": "3.0.3",
     "i18next-xhr-backend": "3.1.2",
     "immutability-helper": "^3.0.1",
+    "jqwidgets-scripts": "^8.3.2",
     "m-react-splitters": "^1.2.0",
     "moment": "^2.24.0",
     "react": "16.8.6",

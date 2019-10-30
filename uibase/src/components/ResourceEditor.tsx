@@ -297,6 +297,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
         const prepareValue = (feature: Ecore.EObject, value: any, idx: Number): any => {
             if (feature.isKindOf('EReference')) {
+                const refObject = value && mainEObject.eContainer.eResource().eContents().find(res=>res.eURI() === value!.$ref)
                 const elements = value ?
                     feature.get('upperBound') === -1 ?
                         value.map((el: { [key: string]: any }, idx: number) =>
@@ -307,6 +308,8 @@ export class ResourceEditor extends React.Component<any, State> {
                                 closable
                                 key={el["$ref"]}
                             >
+                                {refObject!.get('name')}<br />
+                                {refObject!.eClass.get('name')}<br />
                                 {`${el["$ref"]}`}<br />{`${el["eClass"]}`}&nbsp;
                             </Tag>)
                         :
@@ -317,7 +320,9 @@ export class ResourceEditor extends React.Component<any, State> {
                             closable
                             key={value["$ref"]}
                         >
-                            {`${value["$ref"]}`}<br />{`${value["eClass"]}`}&nbsp;
+                            {refObject!.get('name')}&nbsp;
+                            {refObject!.eClass.get('name')}<br />
+                            {`${value["$ref"]}`}&nbsp;
                         </Tag>
                     :
                     []

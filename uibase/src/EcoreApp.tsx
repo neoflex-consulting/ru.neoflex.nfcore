@@ -5,7 +5,7 @@ import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowserTrans from "./components/MetaBrowser";
 import {ResourceEditor} from "./components/ResourceEditor"
-import {Link, Redirect, Route, RouteComponentProps, Switch} from "react-router-dom";
+import {Link, Redirect, Route, Switch} from "react-router-dom";
 import QueryRunnerTrans from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
@@ -29,15 +29,8 @@ const langIcon: {[key:string]: any} = {
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
 
-export interface Props extends RouteComponentProps {
-    name: string;
-}
-
 interface State {
     principal?: any;
-    objectName: string;
-    objectPackage: string;
-    objectClass: string;
     languages: string[];
     notifierDuration: number;
 }
@@ -48,9 +41,6 @@ class EcoreApp extends React.Component<any, State> {
         super(props);
         this.state = {
             principal: undefined,
-            objectName: props.objectName,
-            objectPackage: props.objectPackage,
-            objectClass: props.objectClass,
             languages: [],
             notifierDuration: 0
         };
@@ -104,7 +94,7 @@ class EcoreApp extends React.Component<any, State> {
 
     renderDev = () => {
         let principal = this.state.principal as any;
-        const { t, i18n } = this.props as Props & WithTranslation;
+        const {t, i18n} = this.props as WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
@@ -156,7 +146,9 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
-                    <Route path='/app' component={this.renderStartPage}/>
+                    <Redirect from={'/app'} exact={true} to={'/app/ru.neoflex.nfcore.application/Application/ReportsApp'}/>
+                    <Route exact={true} path='/app' component={this.renderStartPage}/>
+                    <Route path='/app/:objectPackage/:objectClass/:objectName' component={this.renderStartPage}/>
                     <Route path='/settings' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
                 </Switch>
@@ -175,7 +167,7 @@ class EcoreApp extends React.Component<any, State> {
     )};
     
     renderSettings=()=>{
-        const {t} = this.props as Props & WithTranslation;
+        const {t} = this.props as WithTranslation;
         let selectedKeys = ['metadata', 'data', 'query']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
@@ -205,10 +197,10 @@ class EcoreApp extends React.Component<any, State> {
                 <Layout>
                     <Content className="app-content">
                         <Switch>
-                            <Route path='/settings/metadata' component={MetaBrowserTrans} />
-                            <Route exact={true} path='/settings/data' component={DataBrowser} />
-                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans} />
-                            <Route path='/settings/query' component={QueryRunnerTrans} />
+                            <Route path='/settings/metadata' component={MetaBrowserTrans}/>
+                            <Route path='/settings/query' component={QueryRunnerTrans}/>
+                            <Route exact={true} path='/settings/data' component={DataBrowser}/>
+                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans}/>
                         </Switch>
                     </Content>
                 </Layout>
@@ -216,9 +208,9 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-    renderStartPage = ()=>{
+    renderStartPage = (props: any)=>{
         return (
-            <MainApp {...this.props}/>
+            <MainApp {...props}/>
         )
     };
 
