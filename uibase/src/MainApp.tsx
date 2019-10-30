@@ -171,46 +171,49 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderReferences = () => {
-        const {context} = this.state;
-        const {applicationReferenceTree, viewReferenceTree} = context;
-        const referenceTree = viewReferenceTree || applicationReferenceTree;
-        const cbs = new Map<string, () => void>();
-        const onSelect = (keys: string[], event: any) => {
-            const cb = cbs.get(keys[keys.length - 1]);
-            if (cb) cb()
-        };
-        return !referenceTree ? null : (
-            <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
-            </Tree.DirectoryTree>
-
-        )
+    //     const {context} = this.state;
+    //     const {applicationReferenceTree, viewReferenceTree} = context;
+    //     const referenceTree = viewReferenceTree || applicationReferenceTree;
+    //     const cbs = new Map<string, () => void>();
+    //     const onSelect = (keys: string[], event: any) => {
+    //         const cb = cbs.get(keys[keys.length - 1]);
+    //         if (cb) cb()
+    //     };
+    //     return !referenceTree ? null : (
+    //         <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
+    //             {referenceTree.get('children').map((c: Ecore.EObject) =>
+    //                 this.renderTreeNode(c, cbs))}
+    //         </Tree.DirectoryTree>
+    //
+    //     )
+        return null
     };
 
-    push = (eObjectNode: Ecore.EObject, args?: any) => {
-        const eRefObject = eObjectNode.get('eObject');
-        const eObjectView = eObjectNode.get('eObjectView');
-        console.log(eRefObject, eObjectView);
-        this.state.path.push(eObjectNode);
-        let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
-        if (args) {
-            href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
-        }
-        this.props.history.push(href)
-    };
+    // push = (eObjectNode: Ecore.EObject, args?: any) => {
+    //     const eRefObject = eObjectNode.get('eObject');
+    //     const eObjectView = eObjectNode.get('eObjectView');
+    //     console.log(eRefObject, eObjectView);
+    //     this.state.path.push(eObjectNode);
+    //     let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
+    //     if (args) {
+    //         href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
+    //     }
+    //     this.props.history.push(href)
+    // };
 
-    renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
-        const code = eObject.get('code');
-        const key = parentKey ? parentKey + '.' + code : code;
-        const children = eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
-        const isLeaf = !eObject.isKindOf('CatalogNode');
-        if (eObject.isKindOf('EObjectNode')) {
-            cbs.set(key, () => {
-                this.push(eObject)
-            })
-        }
-        return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
-    };
+    // renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
+    //     const code = eObject.get('code');
+    //     const key = parentKey ? parentKey + '.' + code : code;
+    //     const children =  eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
+    //     const isLeaf = !eObject.isKindOf('CatalogNode');
+    //
+    //     if (eObject.isKindOf('EObjectNode') || eObject.isKindOf('ComponentNode')) {
+    //         cbs.set(key, () => {
+    //             // this.push(eObject)
+    //         })
+    //     }
+    //     return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+    // };
 
     render = () => {
         return (
@@ -232,7 +235,7 @@ export class MainApp extends React.Component<any, State> {
                         }}
                     >
                         <div style={{flexGrow: 1, backgroundColor: "white", height: '100%', overflow: "auto"}}>
-                            {this.renderReferences()}
+                            {/*{this.renderReferences()}*/}
                         </div>
                         <div style={{backgroundColor: "white", height: '100%', overflow: 'auto'}}>
                             <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
