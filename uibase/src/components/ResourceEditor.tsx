@@ -37,7 +37,8 @@ interface State {
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
     addRefPropertyName: String,
-    isSaving: Boolean
+    isSaving: Boolean,
+    addRefPossibleTypes: Array<string>
 }
 
 export class ResourceEditor extends React.Component<any, State> {
@@ -67,6 +68,7 @@ export class ResourceEditor extends React.Component<any, State> {
         treeRightClickNode: {},
         addRefPropertyName: "",
         isSaving: false,
+        addRefPossibleTypes: []
     }
 
     getEObject(): void {
@@ -327,9 +329,29 @@ export class ResourceEditor extends React.Component<any, State> {
                 const component = <React.Fragment key={key + "_" + idx}>
                     {elements}
                     {feature.get('eType').get('name') === 'EClass' ?
-                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalSelectEClassVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                        <Button 
+                            style={{ display: "inline-block" }} 
+                            key={key + "_" + idx} 
+                            onClick={() => 
+                                this.setState({ modalSelectEClassVisible: true, addRefPropertyName: feature.get('name') })}
+                        >...</Button>
                         :
-                        <Button style={{ display: "inline-block" }} key={key + "_" + idx} onClick={() => this.setState({ modalRefVisible: true, addRefPropertyName: feature.get('name') })}>...</Button>
+                        <Button 
+                            style={{ display: "inline-block" }} 
+                            key={key + "_" + idx} 
+                            onClick={() => {
+                                const addRefPossibleTypes = []
+                                addRefPossibleTypes.push(feature.get('eType').get('name'))
+                                feature.get('eType').get('eAllSubTypes').forEach((subType: Ecore.EObject) => 
+                                    addRefPossibleTypes.push(subType.get('name'))
+                                )
+                                this.setState({ 
+                                    modalRefVisible: true, 
+                                    addRefPropertyName: feature.get('name'),
+                                    addRefPossibleTypes: addRefPossibleTypes
+                                })
+                            }}
+                        >...</Button>
                     }
                 </React.Fragment>
                 return component
@@ -731,15 +753,16 @@ export class ResourceEditor extends React.Component<any, State> {
                             this.selectedRefUries = uriArray
                         }}
                     >
-                        {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) =>
-                            <Select.Option key={index} value={res.eURI()}>
+                        {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) => {
+                            const possibleTypes: Array<string> = this.state.addRefPossibleTypes
+                            return possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
                                 {<b>
                                     {`${res.eContents()[0].eClass.get('name')}`}
                                 </b>}
                                 &nbsp;
                                 {`${res.eContents()[0].get('name')}`}
                             </Select.Option>
-                        )}
+                        })}
                     </Select>
                 </Modal>}
                 {this.state.modalResourceVisible && <Modal
