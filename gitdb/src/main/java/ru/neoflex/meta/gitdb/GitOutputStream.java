@@ -23,9 +23,9 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
     public void saveResource(Resource resource) throws IOException {
         Transaction transaction = handler.getTransaction();
         Database db = transaction.getDatabase();
-        String id = uri.segmentCount() > 0 ? uri.segment(0) : null;
+        String id = db.getResourceId(resource);
         boolean isNew = id == null || id.length() == 0;
-        String rev = isNew ? null : db.getRev(uri);
+        String rev = isNew ? null : db.checkAndGetRev(uri);
         Resource oldResource = null;
         if (!isNew) {
             EntityId oldEntityId = new EntityId(id, rev);
@@ -46,8 +46,7 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
             transaction.update(entity);
         }
         rev = entity.getRev();
-        URI newURI = resource.getURI().trimFragment().trimQuery();
-        newURI = newURI.trimSegments(newURI.segmentCount()).appendSegment(id).appendQuery("rev=" + rev);
+        URI newURI = db.createURI(id, rev);
         resource.setURI(newURI);
         if (isNew) {
             db.getEvents().fireAfterInsert(resource, transaction);

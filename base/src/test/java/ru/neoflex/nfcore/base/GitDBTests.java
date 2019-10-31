@@ -42,7 +42,7 @@ public class GitDBTests {
             Resource userResource = db.createResource(tx, null, null);
             userResource.getContents().add(superAdminUser);
             userResource.save(null);
-            Resource resource2 = db.createResource(tx, db.getId(userResource.getURI()), null);
+            Resource resource2 = db.createResource(tx, db.getResourceId(userResource), null);
             resource2.load(null);
             Assert.assertEquals(superAdminUser.getName(), ((User)resource2.getContents().get(0)).getName());
             tx.commit("superadmin role and user created");
