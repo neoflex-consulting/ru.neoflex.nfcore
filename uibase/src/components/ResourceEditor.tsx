@@ -104,6 +104,8 @@ export class ResourceEditor extends React.Component<any, State> {
                             updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
                         } else if (options && options.operation === "set") {
                             updatedData = update(currentObject as any, { [updaterProperty]: { $set: newValues } })
+                        } else if (options && options.operation === "unset") {
+                            updatedData = update(currentObject as any, { $unset: [updaterProperty] })
                         } else {
                             //if nothing from listed above, then merge updating the object by a property name
                             updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
@@ -299,7 +301,9 @@ export class ResourceEditor extends React.Component<any, State> {
 
         const prepareValue = (feature: Ecore.EObject, value: any, idx: Number): any => {
             if (feature.isKindOf('EReference')) {
-                const refObject = value && mainEObject.eContainer.eResource().eContainer.eContents().find(res=>res.eContents()[0]!.eURI() === value!.$ref)!.eContents()[0]
+                const refObject = value && mainEObject.eContainer
+                    .eResource().eContainer.eContents()
+                    .find(res=>res.eContents()[0]!.eURI() === value!.$ref)!.eContents()[0]
                 const elements = value ?
                     feature.get('upperBound') === -1 ?
                         value.map((el: { [key: string]: any }, idx: number) =>
@@ -583,7 +587,7 @@ export class ResourceEditor extends React.Component<any, State> {
             })
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
-            //if a user choose several resources for the adding, but upperBound === 1, we put only a first resource
+            //if a user choose several resources for the adding, but upperBound === 1, we put only first resource
             updatedJSON = targetObject.updater({
                 [addRefPropertyName]: {
                     $ref: resources[0].eContents()[0].eURI(),
@@ -615,8 +619,9 @@ export class ResourceEditor extends React.Component<any, State> {
 
     handleDeleteSingleRef = (deletedObject: any, addRefPropertyName: string) => {
         const targetObject: { [key: string]: any } = this.state.targetObject
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null })
+        const updatedJSON = targetObject.updater({[addRefPropertyName]: null })
         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
+        delete updatedTargetObject[addRefPropertyName]
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
 

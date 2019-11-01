@@ -7,24 +7,15 @@ interface Props {
 }
 
 interface State {
-    grid: GridElement[][];
+    
 }
 
-export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
-    value: number | null;
-}
-
-class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
-
-class ReportRichGrid extends React.Component<Props & WithTranslation & GridElement, State> {
+class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     constructor(props: any) {
         super(props)
         this.state = {
-            grid: [
-                [{ value: 1 }, { value: -3 }, { value: -3 }, { value: -3 }, { value: -3 }, { value: -3 } ],
-                [{ value: -2 }, { value: 4 }, { value: -3 }, { value: -3 }, { value: -3 }, { value: -3 } ]
-            ]
+            
         }
     }
 
@@ -33,18 +24,8 @@ class ReportRichGrid extends React.Component<Props & WithTranslation & GridEleme
 
     render() {
         return (
-            <div>
-                <MyReactDataSheet
-                    data={this.state.grid}
-                    valueRenderer={(cell) => cell.value}
-                /*onCellsChanged={changes => {
-                    const grid = this.state.grid.map(row => [...row])
-                    changes.forEach(({ cell, row, col, value }) => {
-                        grid[row][col] = { ...grid[row][col], value }
-                    })
-                    this.setState({ grid })
-                }}*/
-                />
+            <div style={{ width: '100%' }}>
+               
             </div>
         )
     }
