@@ -129,6 +129,5 @@ class AntdFactory implements ViewFactory {
              )
     }
 }
-{/*<Component {...props} key={viewObject.get('uri')} viewObject={viewObject} viewFactory={this} activeObject={activeObject}/>*/}
 
 export default new AntdFactory()
