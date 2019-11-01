@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.base;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +23,7 @@ public class GitDBTests {
     Context context;
 
     @Test
-    public void loadAndStore() throws IOException {
+    public void loadAndStore() throws IOException, GitAPIException {
         Role superAdminRole = createSuperAdminRole();
         User superAdminUser = createSuperAdminUser();
         superAdminUser.getRoles().add(superAdminRole);

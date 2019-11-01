@@ -1,7 +1,6 @@
 import * as React from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
-import ReactDataSheet from 'react-datasheet';
-import "react-datasheet/lib/react-datasheet.css";
+// import "react-datasheet/lib/react-datasheet.css";
 
 interface Props {
 }
