@@ -45,7 +45,8 @@ public class Exporter {
         EObject rootContainer = EcoreUtil.getRootContainer(eObject);
         String fragment = EcoreUtil.getRelativeURIFragmentPath(rootContainer, eObject);
         objectNode.put("eClass", eClass2String(rootContainer.eClass()));
-        objectNode.put(NAME, (String) rootContainer.eGet(rootContainer.eClass().getEStructuralFeature(NAME)));
+        EStructuralFeature nameAttribute = database.checkAndGetQNameFeature(rootContainer.eClass());
+        objectNode.put(NAME, (String) rootContainer.eGet(nameAttribute));
         objectNode.put(FRAGMENT, fragment);
         return objectNode;
     }
@@ -112,7 +113,7 @@ public class Exporter {
     public void exportEObject(EObject eObject, Path path) throws IOException {
         EClass eClass = eObject.eClass();
         EPackage ePackage = eClass.getEPackage();
-        EStructuralFeature nameAttribute = eClass.getEStructuralFeature(NAME);
+        EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
         if (nameAttribute != null) {
             String name = (String) eObject.eGet(nameAttribute);
             if (name != null && name.length() > 0) {
@@ -145,7 +146,7 @@ public class Exporter {
                 for (EObject eObject: resource.getContents()) {
                     EClass eClass = eObject.eClass();
                     EPackage ePackage = eClass.getEPackage();
-                    EStructuralFeature nameAttribute = eClass.getEStructuralFeature(NAME);
+                    EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
                     if (nameAttribute != null) {
                         String name = (String) eObject.eGet(nameAttribute);
                         if (name != null && name.length() > 0) {
@@ -163,7 +164,7 @@ public class Exporter {
                 for (EObject eObject: resource.getContents()) {
                     EClass eClass = eObject.eClass();
                     EPackage ePackage = eClass.getEPackage();
-                    EStructuralFeature nameAttribute = eClass.getEStructuralFeature(NAME);
+                    EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
                     if (nameAttribute != null) {
                         String name = (String) eObject.eGet(nameAttribute);
                         if (name != null && name.length() > 0) {
@@ -248,9 +249,9 @@ public class Exporter {
         database.loadResource(objectNode, resource);
         EObject eObject = resource.getContents().get(0);
         EClass eClass = eObject.eClass();
-        EStructuralFeature nameFeature = eClass.getEStructuralFeature(NAME);
+        EStructuralFeature nameFeature = database.getQNameFeature(eClass);
         if (nameFeature == null) {
-            throw new IOException("Attribute 'name' not found in " + eClass2String(eClass));
+            throw new IOException("Qualified name not found in " + eClass2String(eClass));
         }
         String name = (String) eObject.eGet(nameFeature);
         ResourceSet existentRS = database.findByEClass(eClass, name, tx);

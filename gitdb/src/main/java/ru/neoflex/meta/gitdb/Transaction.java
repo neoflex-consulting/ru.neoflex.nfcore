@@ -7,6 +7,7 @@ import com.beijunyi.parallelgit.filesystem.commands.GfsCommit;
 import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
 import com.github.marschall.pathclassloader.PathClassLoader;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -103,19 +104,6 @@ public class Transaction implements Closeable {
         commit(message, null, null);
     }
 
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    public static String getRandomId(int length) {
-        byte[] bytes = new byte[length];
-        new Random().nextBytes(bytes);
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
     public GitPath getIdPath(EntityId entityId) {
         String idStr = entityId.getId();
         String idDir = idStr.substring(0, 2);
@@ -140,8 +128,33 @@ public class Transaction implements Closeable {
         return current.getObjectId(false);
     }
 
+//    public static String getRandomId(int length) {
+//        byte[] bytes = new byte[length];
+//        return hex(bytes);
+//    }
+
+    public static String getUUID() {
+        byte[] bytes = new byte[16];
+        EcoreUtil.generateUUID(bytes);
+        return hex(bytes);
+    }
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static String hex(byte[] bytes) {
+        new Random().nextBytes(bytes);
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     public Entity create(Entity entity) throws IOException {
-        entity.setId(getRandomId(16));
+        String id = getUUID();
+//        String id = getRandomId(16);
+        entity.setId(id);
         GitPath path = getIdPath(entity);
         Files.createDirectories(path.getParent());
         Files.write(path, entity.getContent());

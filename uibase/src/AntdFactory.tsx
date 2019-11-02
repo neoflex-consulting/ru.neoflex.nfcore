@@ -10,6 +10,7 @@ abstract class ViewContainer extends View {
     renderChildren = () => {
         let children = this.viewObject.get("children") as Ecore.EObject[];
         let childrenView = children.map(
+            // (c: Ecore.EObject) => this.viewFactory.createView(c, this.props, this.activeObject));
             (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
         return <div>{childrenView}</div>
 
@@ -70,18 +71,6 @@ class Form_ extends ViewContainer {
     }
 }
 
-class Tabs_ extends ViewContainer {
-    render = () => {
-        return (
-            <Tabs>
-                <TabPane tab={`${this.viewObject.get('code')}`}>
-                    {this.renderChildren()}
-                </TabPane>
-            </Tabs>
-        )
-    }
-}
-
 class TabsViewReport_ extends ViewContainer {
     render = () => {
         let children = this.viewObject.get("children") as Ecore.EObject[];
@@ -90,6 +79,7 @@ class TabsViewReport_ extends ViewContainer {
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('code')} key={c.get('code')} >
+                            {/*{this.viewFactory.createView(c, this.props, this.activeObject)}*/}
                             {this.viewFactory.createView(c, this.props)}
                         </TabPane>
                     )
@@ -102,8 +92,13 @@ class TabsViewReport_ extends ViewContainer {
 class ComponentElement_ extends ViewContainer {
     render = () => {
         if (this.viewObject.eClass.get("name") === "ComponentElement" && this.viewObject.get('component')) {
-            return <UserComponent componentClassName={this.viewObject.get('component').get('componentClassName')}/>
-        } else return <div></div>
+            const componentClassName = this.viewObject.get('component').get('componentClassName')
+            return <UserComponent componentClassName={componentClassName}/>
+        } else return <div>Not found</div>
+        // if (this.viewObject.eClass.get("name") === "ComponentElement" && (this.viewObject.get('component') || this.activeObject)) {
+        //     const componentClassName = this.viewObject.get('component').get('componentClassName') || this.activeObject.get('componentClassName')
+        //     return <UserComponent componentClassName={componentClassName}/>
+        // } else return <div>Not found</div>
     }
 }
 
@@ -120,18 +115,18 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
-        this.components.set('ru.neoflex.nfcore.application#//Tabs', Tabs_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
+    // createView(viewObject: Ecore.EObject, props: any): JSX.Element {
         let Component = this.components.get(viewObject.eClass.eURI());
         if (!Component) {
             Component = View
         }
         return (
-            <Component {...props} key={viewObject.get('uri')} viewObject={viewObject} viewFactory={this}/>
-        )
+             <Component {...props} key={viewObject.get('uri')} viewObject={viewObject} viewFactory={this} />
+             )
     }
 }
 

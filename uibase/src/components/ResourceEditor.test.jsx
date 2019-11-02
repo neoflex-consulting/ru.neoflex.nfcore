@@ -37,6 +37,7 @@ describe("function findObjectById", () => {
 
     it("should not return any object", () => {
         expextedFoundObject = undefined
+
         result = resourceEditor.findObjectById(testJSONData, '/qwerty');
         expect(result).toEqual(expextedFoundObject);
 
@@ -69,20 +70,61 @@ describe("function findObjectById", () => {
 
 });
 
-describe("function nestUpdaters", () =>{
+{
     const copyOfJSONData = cloneDeep(testJSONData)
     const nestedJSON = resourceEditor.nestUpdaters(copyOfJSONData)
 
-    it("should return an object with updaters, particular checking for existing of some updaters", ()=>{
-        expect(nestedJSON).toHaveProperty('updater')
-        expect(nestedJSON.audit).toHaveProperty('updater')
-        expect(nestedJSON.authenticators[1]).toHaveProperty('updater')
-        expect(nestedJSON.authenticators[1].tests[0]).toHaveProperty('updater')
+    describe("function nestUpdaters", () => {
+        it("should return an object with updaters, particular checking for existing of some updaters", () => {
+            expect(nestedJSON).toHaveProperty('updater')
+            expect(nestedJSON.audit).toHaveProperty('updater')
+            expect(nestedJSON.authenticators[1]).toHaveProperty('updater')
+            expect(nestedJSON.authenticators[1].tests[0]).toHaveProperty('updater')
+        })
     })
-})
 
-describe("testing of calling updaters in", () =>{
-    it("should return an updated object with correct data", ()=>{
-        
+    describe("testing of calling updaters in JSON object", () => {
+        it("should return an updated object with correct data", () => {
+            let updatedJSON = nestedJSON.updater({ name: 'admin2', newFeature: 'value' })
+            expect(updatedJSON).toHaveProperty('name')
+            expect(updatedJSON.name).toEqual('admin2')
+            expect(updatedJSON).toHaveProperty('newFeature')
+            expect(updatedJSON.newFeature).toEqual('value')
+
+            updatedJSON = nestedJSON.audit.updater({ 'created': null })
+            expect(updatedJSON.audit).toHaveProperty('created')
+            expect(updatedJSON.audit.created).toEqual(null)
+
+            updatedJSON = nestedJSON.authenticators[0].updater({ 'password': 'newpass' })
+            expect(updatedJSON.authenticators[0]).toHaveProperty('password')
+            expect(updatedJSON.authenticators[0].password).toEqual('newpass')
+
+        })
+        it("should return an object with fresh updaters without any lost data", () => {
+            let updatedJSON = nestedJSON.updater({ newFeature: 'value' })
+            const newNested = resourceEditor.nestUpdaters(updatedJSON)
+            updatedJSON = newNested.updater({ name: 'admin1' })
+            expect(updatedJSON).toHaveProperty('newFeature')
+            expect(updatedJSON.name).toEqual('admin1')
+        })
     })
-})
+
+    describe("testing of calling parent updaters and parameters", () => {
+        //operation: { operation: "push" }
+        //operation: { operation: "set" }
+        //params: { operation: "splice", index: index }
+
+        it("should return an object with a spliced array by the property 'authenticators'", () => {
+            //params: { operation: "splice", index: index }
+            let updatedJSON = copyOfJSONData.updater(null, undefined, 'authenticators', { operation: 'splice', index: '1' })
+            expect(updatedJSON.authenticators).toHaveLength(1)
+        })
+
+        /*it("should return an object with a spliced array by the property 'authenticators'", () => {
+            //params: { operation: "splice", index: index }
+            let updatedJSON = copyOfJSONData.updater(null, undefined, 'authenticators', { operation: 'splice', index: '1' })
+            expect(updatedJSON.authenticators).toHaveLength(1)
+        })*/
+
+    })
+}

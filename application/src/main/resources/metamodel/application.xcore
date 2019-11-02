@@ -15,31 +15,22 @@ import org.eclipse.emf.ecore.EStructuralFeature
 /* Components */
 abstract class Component {
     QName name
-	contains ViewElement view
-	contains Tools tools
-	op Tools generateTools() {tools}
-	contains TreeNode referenceTree	
-	op TreeNode generateReferenceTree() {referenceTree}
 }
 
-class StaticComponent extends Component {
+abstract class ViewComponent {
+    contains ViewElement view
 }
 
 class UserComponent extends Component {
     String componentClassName
 }
 
-class RemoteComponent extends Component {
-	String path	
-	String componentName	
-}
-
-class Application extends Component {
-}
-
-class ClassComponent extends Component {
-	refers EClass aClass
-	int orderBy
+/* Applications */
+class AppModule {
+    QName name
+    contains ViewElement view
+	contains Tools tools
+	contains CatalogNode referenceTree
 }
 
 /* Views */
@@ -60,20 +51,6 @@ class FAIcon extends Icon {
 }
 
 class ComponentElement extends ViewElement {
-	refers Component component
-}
-
-abstract class TreeNode extends ViewContainer {
-}
-
-class CatalogNode extends TreeNode {	
-}
-
-class EObjectNode extends TreeNode {
-	refers EObject eObject
-}
-
-class ComponentNode extends TreeNode {
 	refers Component component
 }
 
@@ -101,9 +78,6 @@ class Row extends ViewContainer {
 class Column extends ViewContainer {
 }
 
-class Tabs extends ViewContainer {
-}
-
 class TabsViewReport extends ViewContainer {
 }
 
@@ -120,4 +94,33 @@ class FormItem extends ViewContainer {
 class ClassFeature extends FormItem {
 	refers EStructuralFeature eStructuralFeature
 }
+
+/* Trees */
+abstract class TreeNode{
+    String name
+}
+
+class CatalogNode extends TreeNode {
+    contains TreeNode[] children
+}
+
+class TreeComponentNode extends TreeNode {
+    refers Component component
+    refers EObject eObject
+}
+
+class DynamicNode extends TreeNode {
+    refers AppModule appModule
+    refers EObject eObject
+}
+
+class ViewNode extends TreeNode {
+    contains ViewElement view
+    refers EObject eObject
+}
+
+class EClassNode extends ViewNode {
+    refers EClass aClass
+}
+
 

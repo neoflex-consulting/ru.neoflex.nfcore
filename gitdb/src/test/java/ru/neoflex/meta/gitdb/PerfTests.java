@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
     Database database;
-    int nGroups = 10;
-    int nUsers = 100;
+    int nGroups = 5;
+    int nUsers = 10;
     int nThreads = 3;
-    int nUpdates = 200;
+    int nUpdates = 10;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 

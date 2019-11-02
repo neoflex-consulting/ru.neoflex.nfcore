@@ -37,7 +37,7 @@ public class DatabaseTests extends TestBase {
             Resource groupResource = resourceSet.createResource(database.createURI(null, null));
             groupResource.getContents().add(group);
             groupResource.save(null);
-            groupId = database.getId(groupResource.getURI());
+            groupId = database.getResourceId(groupResource);
             User user = TestFactory.eINSTANCE.createUser();
             user.setName("Orlov");
             user.setGroup(group);
@@ -45,7 +45,7 @@ public class DatabaseTests extends TestBase {
             userResource.getContents().add(user);
             userResource.save(null);
             tx.commit("User Orlov and group masters created", "orlov", "");
-            userId = database.getId(userResource.getURI());
+            userId = database.getResourceId(userResource);
             Assert.assertNotNull(userId);
         }
         try (Transaction tx = database.createTransaction("users")){
@@ -56,6 +56,30 @@ public class DatabaseTests extends TestBase {
             user.setName("Simanihin");
             userResource.save(null);
             tx.commit("User Orlov was renamed to Simanihin", "orlov", "");
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            User user = TestFactory.eINSTANCE.createUser();
+            user.setName("Orlov");
+            user.setGroup(group);
+            Resource userResource = database.createResource(tx, null, null);
+            userResource.getContents().add(user);
+            userResource.save(null);
+            tx.commit("User Orlov created", "orlov", "");
+        }
+        try (Transaction tx = database.createTransaction("users")) {
+            User user = TestFactory.eINSTANCE.createUser();
+            user.setName("Orlov");
+            user.setGroup(group);
+            Resource userResource = database.createResource(tx, null, null);
+            userResource.getContents().add(user);
+            try {
+                userResource.save(null);
+                tx.commit("User Orlov created", "orlov", "");
+                Assert.assertTrue(false);
+            }
+            catch (IllegalArgumentException e) {
+                Assert.assertTrue(e.getMessage().startsWith("Duplicate"));
+            }
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet resourceSet = database.createResourceSet(tx);
@@ -79,16 +103,20 @@ public class DatabaseTests extends TestBase {
         }
         try (Transaction tx = database.createTransaction("users")){
             ResourceSet dependent = database.getDependentResources(groupId, tx);
-            Assert.assertEquals(1, dependent.getResources().size());
-            Assert.assertEquals(2, tx.all().size());
+            Assert.assertEquals(2, dependent.getResources().size());
+            Assert.assertEquals(3, tx.all().size());
             Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
             Assert.assertEquals(1, database.findByEClass(group.eClass(), "masters", tx).getResources().size());
             Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
+            dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(2, dependent.getResources().size());
             Resource userResource = database.loadResource(userId, tx);
             userResource.delete(null);
             tx.commit("User Simanihin was deleted");
-            dependent = database.getDependentResources(groupId, tx);
-            Assert.assertEquals(0, dependent.getResources().size());
+        }
+        try (Transaction tx = database.createTransaction("users")){
+            ResourceSet dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(1, dependent.getResources().size());
         }
     }
 

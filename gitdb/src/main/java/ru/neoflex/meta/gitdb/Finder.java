@@ -23,6 +23,10 @@ public class Finder {
     private String warning;
     private int skip = 0;
     private int limit = -1;
+    private int idsLoaded = 0;
+    private long idsLoadedMs = 0;
+    private int resLoaded = 0;
+    private long resLoadedMs = 0;
     private ResourceSet resourceSet;
     private ObjectNode selector = new ObjectMapper().createObjectNode();
 
@@ -59,12 +63,15 @@ public class Finder {
 
 
     public Finder execute(Transaction tx) throws IOException {
+        long startTime = System.currentTimeMillis();
         Database database = tx.getDatabase();
         List<EntityId> ids = findIds(selector, tx);
+        long idsLoadedTime = System.currentTimeMillis();
+        idsLoaded = ids.size();
         resourceSet = database.createResourceSet(tx);
         ObjectMapper mapper = new ObjectMapper();
-        int startIndex = max(min(skip, ids.size()), 0);
-        int length = min(limit, ids.size() - startIndex);
+        int startIndex = skip <= 0 ? 0 : min(skip, ids.size());
+        int length = limit <= 0 ? ids.size() - startIndex : min(limit, ids.size() - startIndex);
         for (EntityId entityId: ids.subList(startIndex, startIndex + length)) {
             Entity entity = tx.load(entityId);
             ObjectNode object = (ObjectNode) mapper.readTree(entity.getContent());
@@ -73,16 +80,20 @@ public class Finder {
                 database.loadResource(object, resource);
             }
         }
+        resLoaded = length;
+        long resLoadedTime = System.currentTimeMillis();
+        idsLoadedMs = idsLoadedTime - startTime;
+        resLoadedMs = resLoadedTime - idsLoadedTime;
         return this;
     }
 
     private boolean match(EntityId entityId, ObjectNode object, ObjectNode query) throws IOException {
-        String _id = query.get("id").asText();
-        if (_id != null && !_id.equals(entityId.getId())) {
+        JsonNode _id = query.get("id");
+        if (_id != null && !Objects.equals(_id.textValue(), entityId.getId())) {
             return false;
         }
-        String _rev = query.get("rev").asText();
-        if (_rev != null && !_rev.equals(entityId.getRev())) {
+        JsonNode _rev = query.get("rev");
+        if (_rev != null && !Objects.equals(_rev.textValue(), entityId.getRev())) {
             return false;
         }
         JsonNode contents = query.get("contents");
@@ -304,9 +315,7 @@ public class Finder {
             String fieldName = it.next();
             JsonNode queryNode = query.get(fieldName);
             if (fieldName.startsWith("$")) {
-                if (!matchOp(fieldName, object, queryNode)) {
-                    return false;
-                }
+                return matchOp(fieldName, object, queryNode);
             }
             JsonNode objectNode = object.get(unescape(fieldName));
             if (!matchNodes(objectNode, queryNode)) {
@@ -352,8 +361,10 @@ public class Finder {
                     String name = null;
                     EStructuralFeature nameSF = database.getQNameFeature(eClass);
                     if (nameSF != null) {
-                        String featureName = nameSF.getName();
-                        name = contents.get(featureName).asText();
+                        JsonNode nameNode = contents.get(nameSF.getName());
+                        if (nameNode != null) {
+                            name = nameNode.asText();
+                        }
                     }
                     List<IndexEntry> ieList = database.findEClassIndexEntries(eClass, name, tx);
                     List<EntityId> result = new ArrayList<>();
@@ -364,16 +375,12 @@ public class Finder {
                 }
             }
         }
-        setWarning("No index used");
+        warning = "No index used";
         return tx.all();
     }
 
     public String getWarning() {
         return warning;
-    }
-
-    public void setWarning(String warning) {
-        this.warning = warning;
     }
 
     public ResourceSet getResourceSet() {
@@ -382,5 +389,14 @@ public class Finder {
 
     public ObjectNode selector() {
         return selector;
+    }
+
+    public JsonNode getExecutionStats() {
+        ObjectNode executionStats = new ObjectMapper().createObjectNode();
+        executionStats.put("idsLoaded", idsLoaded);
+        executionStats.put("idsLoadedMs", idsLoadedMs);
+        executionStats.put("resLoaded", resLoaded);
+        executionStats.put("resLoadedMs", resLoadedMs);
+        return executionStats;
     }
 }

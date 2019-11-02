@@ -34,7 +34,7 @@ export class MainApp extends React.Component<any, State> {
         super(props)
         const context: IMainContext = {
             updateContext: this.updateContext,
-            changeActiveObject: this.changeActiveObject
+            changeURL: this.changeURL
         };
         this.state = {
             objectName: props.objectName,
@@ -53,17 +53,23 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeActiveObject = (objectPackage: string, objectClass: string, objectName: string) => {
-        this.state.classComponents.map(c => {
-            console.log()
-                if (c.eContents()[0].get('aClass').get('name') === objectClass) {
-                    this.setState({
-                        objectPackage: c.eContents()[0].eClass.eContainer.get('nsURI'),
-                        objectClass: c.eContents()[0].eClass.get('name'),
-                        objectName: c.eContents()[0].get('name')
-                    })
-                }
-        });
+    //Зписать в URL id объекта (реального) не класс компоненты
+    changeURL = (objectClass: string, objectName?: string, objectPackage?: string) => {
+        // const {context} = this.state;
+        // // const {activeObject} = context;
+        // // if (!activeObject) return null;
+        //
+        // let readWithClassComponent = false;
+        // this.state.classComponents
+        //     .filter((c: any) => c.eContents()[0].get('aClass') && c.eContents()[0].get('aClass').get('name') === objectClass)
+        //     .map((c) =>
+        //     {
+        //         this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`);
+        //         readWithClassComponent = true
+        //     });
+        // if (!readWithClassComponent && objectPackage && objectClass && objectName) {
+        //     this.props.history.push(`/app/${objectPackage}/${objectClass}/${objectName}`);
+        // }
     };
 
     getAllClassComponents() {
@@ -83,6 +89,10 @@ export class MainApp extends React.Component<any, State> {
         this.updateContext({viewObject})
     };
 
+    setActiveObject = (activeObject: Ecore.EObject) => {
+        this.updateContext({activeObject})
+    };
+
     loadObject = (objectPackage: string, objectClass: string, name: string) => {
         API.instance().fetchPackages().then(packages => {
             const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
@@ -92,15 +102,18 @@ export class MainApp extends React.Component<any, State> {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
                         this.setState({objectApp}, () => {
-                            API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
-                                .then(referenceTree => {
-                                if (!!referenceTree) {
-                                    API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, objectApp.eURI() + referenceTree._id).then(r => {
-                                        this.updateContext(({applicationReferenceTree: r.eContents()[0]}))
-                                    })
-                                }
-                            })
-                                .catch( ()=> {console.log("Reference Tree not exists")} )
+                            if (objectApp.get('referenceTree'))
+                            this.updateContext(({applicationReferenceTree: objectApp.get('referenceTree')}))
+                            //NOT DELETE!
+                                // API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
+                                //     .then(referenceTree => {
+                                //     if (!!referenceTree) {
+                                //         API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, objectApp.eURI() + referenceTree._id).then(r => {
+                                //             this.updateContext(({applicationReferenceTree: r.eContents()[0]}))
+                                //         })
+                                //     }
+                                // })
+                                //     .catch( ()=> {console.log("Reference Tree not exists")} )
                         });
                         this.setViewObject(objectApp.get('view'))
                     }
@@ -114,13 +127,26 @@ export class MainApp extends React.Component<any, State> {
             prevState.objectClass !== this.state.objectClass ||
             prevState.objectName !== this.state.objectName)
         {
-            this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+            // this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
         }
     }
 
     componentDidMount(): void {
         this.getAllClassComponents();
-        this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+        // this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+    }
+
+
+    static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        if (prevState.objectPackage !== nextProps.match.params.objectPackage ||
+            prevState.objectClass !== nextProps.match.params.objectClass ||
+            prevState.objectName !== nextProps.match.params.objectName) {
+            return {
+                objectPackage: nextProps.match.params.objectPackage,
+                objectClass: nextProps.match.params.objectClass,
+                objectName: nextProps.match.params.objectName
+            };
+        }
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
@@ -158,8 +184,11 @@ export class MainApp extends React.Component<any, State> {
 
     renderContent = () => {
         const {context} = this.state;
+        // const {viewObject, activeObject} = context;
         const {viewObject} = context;
         if (!viewObject) return null;
+        // if (!activeObject) return null;
+        // return this.viewFactory.createView(viewObject, this.props, activeObject)
         return this.viewFactory.createView(viewObject, this.props)
     };
 
@@ -170,36 +199,47 @@ export class MainApp extends React.Component<any, State> {
         const cbs = new Map<string, () => void>();
         const onSelect = (keys: string[], event: any) => {
             const cb = cbs.get(keys[keys.length - 1]);
-            if (cb) cb()
+            if (cb) cb();
         };
         return !referenceTree ? null : (
             <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
+                {referenceTree.get('root').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
             </Tree.DirectoryTree>
-
         )
     };
 
-    push = (eObjectNode: Ecore.EObject, args?: any) => {
-        const eRefObject = eObjectNode.get('eObject');
-        const eObjectView = eObjectNode.get('eObjectView');
-        console.log(eRefObject, eObjectView);
-        this.state.path.push(eObjectNode);
-        let href = "app?path=/" + this.state.path.map(e => e.eResource().eURI()).join('/');
-        if (args) {
-            href = href + '&' + Object.keys(args).map(key => `${key}=${args[key]}`).join('&')
-        }
-        this.props.history.push(href)
-    };
-
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
-        const code = eObject.get('code');
+        const code = eObject.get('name');
         const key = parentKey ? parentKey + '.' + code : code;
-        const children = eObject.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, key));
+        let children = [];
+        if (eObject.get('children')) {
+            children = eObject.get('children')
+                .map((c: Ecore.EObject) =>
+                    this.renderTreeNode(c, cbs, key));
+        }
+
         const isLeaf = !eObject.isKindOf('CatalogNode');
+
         if (eObject.isKindOf('EObjectNode')) {
             cbs.set(key, () => {
-                this.push(eObject)
+                if (eObject.get('eObject')) {
+                    const objectClass = eObject.get('eObject').eClass.get('name');
+                    const objectName = eObject.get('eObject').get('name');
+                    const objectPackage = eObject.get('eObject').eClass.eContainer.get('nsURI');
+                    this.setActiveObject(eObject.get('eObject'));
+                    this.changeURL(objectClass, objectName, objectPackage)
+                }
+            })
+        }
+        else if (eObject.isKindOf('View')) {
+            cbs.set(key, () => {
+                if (eObject.get('view')) {
+                    const objectClass = eObject.get('view').get('component').eClass.get('name');
+                    const objectName = eObject.get('view').get('component').get('name');
+                    const objectPackage = eObject.get('view').get('component').eClass.eContainer.get('nsURI');
+                    this.setActiveObject(eObject.get('view').get('component'));
+                    this.changeURL(objectClass, objectName, objectPackage)
+                }
             })
         }
         return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
