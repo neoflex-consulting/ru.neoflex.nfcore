@@ -155,7 +155,7 @@ class LocModuleInit extends LocModuleImpl {
                 }
             }
         }
-        Context.current.store.updateEObject(locModule)
+        Context.current.store.saveResource(locModule.eResource())
         return locModule
     }
 
