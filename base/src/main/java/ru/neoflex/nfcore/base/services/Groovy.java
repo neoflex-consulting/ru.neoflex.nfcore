@@ -31,27 +31,23 @@ public class Groovy {
     }
 
     public Object eval(Object instance, String method, List args) throws Exception {
-        return context.withContext(() -> {
-            Binding b = new Binding();
-            b.setVariable("instance", instance);
-            b.setVariable("method", method);
-            b.setVariable("args", args);
-            GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
-            Object result =  sh.evaluate("instance.\"$method\"(*args)");
-            return result;
-        });
+        Binding b = new Binding();
+        b.setVariable("instance", instance);
+        b.setVariable("method", method);
+        b.setVariable("args", args);
+        GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        Object result =  sh.evaluate("instance.\"$method\"(*args)");
+        return result;
     }
 
     public Object eval(String code, List args) throws Exception {
-        return context.withContext(() -> {
-            Binding b = new Binding();
-            if (args != null) {
-                b.setVariable("args", args);
-            }
-            GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
-            Object result =  sh.evaluate(code);
-            return result;
-        });
+        Binding b = new Binding();
+        if (args != null) {
+            b.setVariable("args", args);
+        }
+        GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        Object result =  sh.evaluate(code);
+        return result;
     }
 
     public Object callStatic(String fullClassName, String method, JsonNode args) throws Exception {
@@ -64,12 +60,10 @@ public class Groovy {
     }
 
     public Object callStatic(String fullClassName, String method, List args) throws Exception {
-        return context.withContext(() -> {
-            Class scriptClass = Thread.currentThread().getContextClassLoader().loadClass(fullClassName);
-            Class[] argsClasses = (Class[]) args.stream().map((Object object) -> object.getClass()).toArray(size->new Class[size]);
-            Method declaredMethod = scriptClass.getDeclaredMethod(method, argsClasses);
-            Object result = declaredMethod.invoke(null, args.toArray());
-            return result;
-        });
+        Class scriptClass = Thread.currentThread().getContextClassLoader().loadClass(fullClassName);
+        Class[] argsClasses = (Class[]) args.stream().map((Object object) -> object.getClass()).toArray(size->new Class[size]);
+        Method declaredMethod = scriptClass.getDeclaredMethod(method, argsClasses);
+        Object result = declaredMethod.invoke(null, args.toArray());
+        return result;
     }
 }
