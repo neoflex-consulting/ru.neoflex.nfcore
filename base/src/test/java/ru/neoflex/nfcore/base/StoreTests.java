@@ -25,7 +25,7 @@ public class StoreTests {
         superAdminUser.getRoles().add(superAdminRole);
         Resource roleResource = context.getStore().createEObject(superAdminRole);
         Resource userResource = context.getStore().createEObject(superAdminUser);
-        Resource resource2 = context.getStore().getResourceSet().createResource(userResource.getURI());
+        Resource resource2 = context.getStore().createResourceSet().createResource(userResource.getURI());
         resource2.load(null);
         Assert.assertEquals(superAdminUser.getName(), ((User)resource2.getContents().get(0)).getName());
         context.getStore().deleteResource(roleResource.getURI());

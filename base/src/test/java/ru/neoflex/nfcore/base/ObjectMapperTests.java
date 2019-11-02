@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.nfcore.base.auth.GrantStatus;
 import ru.neoflex.nfcore.base.services.Context;
-import ru.neoflex.nfcore.base.util.EMFMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,7 @@ public class ObjectMapperTests {
 
     @Test
     public void simpleTypesTest() throws JsonProcessingException {
-        ObjectMapper mapper = EMFMapper.getMapper();
+        ObjectMapper mapper = context.getStore().createMapper();
         String stringValue = "test";
         Object deserStringValue = mapper.treeToValue(mapper.valueToTree(stringValue), String.class);
         Assert.assertEquals(stringValue, deserStringValue);

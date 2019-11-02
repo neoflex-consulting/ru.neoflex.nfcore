@@ -14,7 +14,6 @@ import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.util.DocFinder;
-import ru.neoflex.nfcore.base.util.EMFMapper;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -34,12 +33,12 @@ public class EMFController {
 
     @PostConstruct
     void init() {
-        mapper = EMFMapper.getMapper();
+        mapper = store.createMapper();
     }
 
     private ObjectNode resourceToTree(Resource resource) {
         ObjectNode result = mapper.createObjectNode();
-        result.put("uri", store.getRefByUri(resource.getURI()));
+        result.put("uri", store.getRef(resource));
         result.withArray("contents").add(mapper.valueToTree(resource.getContents().get(0)));
         return result;
     }
@@ -69,15 +68,14 @@ public class EMFController {
 
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws IOException {
-        URI uri = store.getUriByRef(ref);
-        Resource resource = store.treeToResource(uri, contents);
-        resource.save(null);
-        return getObject(store.getRefByUri(resource.getURI()));
+        Resource resource = store.treeToResource(ref, contents);
+        store.saveResource(resource);
+        return getObject(store.getRef(resource));
     }
 
     @GetMapping("/packages")
     JsonNode getPackages() {
-        ArrayNode nodes = (new ObjectMapper()).createArrayNode();
+        ArrayNode nodes = mapper.createArrayNode();
         for (EPackage ePackage: registry.getEPackages()) {
             nodes.add(mapper.valueToTree(ePackage));
         }

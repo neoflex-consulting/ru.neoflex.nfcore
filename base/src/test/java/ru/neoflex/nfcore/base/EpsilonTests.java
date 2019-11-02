@@ -14,9 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.FileCopyUtils;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
 import ru.neoflex.nfcore.base.auth.User;
@@ -24,8 +22,6 @@ import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Epsilon;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -130,7 +126,7 @@ public class EpsilonTests {
     public void testUserToGroup() throws Exception {
         ResourceSet inputSet = getUserFinder().execute().getResourceSet();
         EObject eObject = inputSet.getResources().get(0).getContents().get(0);
-        context.getStore().getEmptyResource().getContents().add(eObject);
+        context.getStore().createEmptyResource().getContents().add(eObject);
         ResourceSet outputSet = context.getEpsilon().transform(Epsilon.EPSILON_TEMPLATE_ROOT + "/UserToGroup.etl",
                 null, eObject);
         Assert.assertEquals(1, outputSet.getResources().size());

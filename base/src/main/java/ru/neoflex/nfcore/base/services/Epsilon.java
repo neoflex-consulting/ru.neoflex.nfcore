@@ -11,9 +11,7 @@ import org.eclipse.epsilon.egl.EglTemplate;
 import org.eclipse.epsilon.egl.EglTemplateFactory;
 import org.eclipse.epsilon.egl.exceptions.EglRuntimeException;
 import org.eclipse.epsilon.egl.execute.context.IEglContext;
-import org.eclipse.epsilon.emc.emf.CachedResourceSet;
 import org.eclipse.epsilon.emc.emf.EmfModel;
-import org.eclipse.epsilon.eol.AbstractModule;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.IEolModule;
 import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
@@ -48,7 +46,7 @@ public class Epsilon {
     }
 
     public EmfModel createModel(String name, URI uri) throws EolModelLoadingException {
-        return createModel(name, uri, context.getStore().getResourceSet());
+        return createModel(name, uri, context.getStore().createResourceSet());
     }
 
     public EmfModel createModel(String name, Resource resource) throws EolModelLoadingException {
@@ -94,7 +92,7 @@ public class Epsilon {
         model.setName(name);
         model.setStoredOnDisposal(false);
         EcoreUtil.resolveAll(resourceSet);
-        model.setResource(context.getStore().getEmptyResource(resourceSet));
+        model.setResource(context.getStore().createEmptyResource(resourceSet));
         return model;
     }
 
@@ -196,7 +194,7 @@ public class Epsilon {
 
     public ResourceSet transform(String scriptPath, Map<String, Object> params, EObject eObject) throws Exception {
         IModel source = createModel("S", eObject);
-        Resource resource = context.getStore().getEmptyResource();
+        Resource resource = context.getStore().createEmptyResource();
         EmfModel target = createModel("T", resource);
         List<IModel> models = new ArrayList<IModel>(){{
             add(source);
@@ -204,7 +202,7 @@ public class Epsilon {
         }};
         EtlModule module = new EtlModule();
         ececuteScript(scriptPath, params, models, module);
-        ResourceSet resourceSet = context.getStore().getResourceSet();
+        ResourceSet resourceSet = context.getStore().createResourceSet();
         while (resource.getContents().size() > 0) {
             EObject object = resource.getContents().get(0);
             context.getStore().createEObject(object);
