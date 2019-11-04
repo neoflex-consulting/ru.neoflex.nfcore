@@ -94,7 +94,7 @@ public class GroovyTests {
             Files.createDirectories(codePath.getParent());
             Files.write(codePath, code.getBytes());
             tx.commit("Created Test.groovy");
-            Object result =  context.withClassLoader(()->{
+            Object result =  context.inContextWithClassLoaderInTransaction(()->{
                 return groovy.eval("import ru.neoflex.meta.test.Test\nTest.add(*args)", new ArrayList() {{
                     add(1);
                     add(2);

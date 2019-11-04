@@ -24,6 +24,7 @@ import org.emfjson.jackson.resource.JsonResourceFactory;
 import org.emfjson.jackson.utils.ValueWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
@@ -37,6 +38,7 @@ import java.util.Set;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 @Service
+@ConditionalOnProperty(name = "dbtype", havingValue = "couchdb", matchIfMissing = false)
 public class CouchDBStoreProvider implements StoreSPI {
     @Value("${couchdb.host:localhost}")
     String host;
@@ -146,12 +148,6 @@ public class CouchDBStoreProvider implements StoreSPI {
         return baseURI.appendSegment(id).appendQuery("rev=" + rev);
     }
 
-    private Resource saveEObject(URI uri, EObject eObject) throws IOException {
-        Resource resource = createResourceSet().createResource(uri);
-        resource.getContents().add(eObject);
-        return saveResource(resource);
-    }
-
     @Override
     public Resource saveResource(Resource resource) throws IOException {
         EObject eObject = resource.getContents().get(0);
@@ -184,7 +180,7 @@ public class CouchDBStoreProvider implements StoreSPI {
     }
 
     @Override
-    public ResourceSet createResourceSet() {
+    public ResourceSet createResourceSet(TransactionSPI tx) {
         ResourceSet resourceSet = new ResourceSetImpl();
         resourceSet.getPackageRegistry()
                 .put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
@@ -210,8 +206,8 @@ public class CouchDBStoreProvider implements StoreSPI {
     }
 
     @Override
-    public Resource loadResource(URI uri) throws IOException {
-        Resource resource = createResourceSet().createResource(uri.trimFragment().trimQuery());
+    public Resource loadResource(URI uri, TransactionSPI tx) throws IOException {
+        Resource resource = createResourceSet(tx).createResource(uri.trimFragment().trimQuery());
         resource.load(null);
         if (!resource.getContents().isEmpty()) {
             EObject eObject = resource.getContents().get(0);
@@ -229,8 +225,8 @@ public class CouchDBStoreProvider implements StoreSPI {
     }
 
     @Override
-    public void deleteResource(URI uri) throws IOException {
-        ResourceSet resourceSet = createResourceSet();
+    public void deleteResource(URI uri, TransactionSPI tx) throws IOException {
+        ResourceSet resourceSet = createResourceSet(tx);
         Resource resource = resourceSet.createResource(uri);
         resource.load(null);
         if (resource.getContents().isEmpty()) {
@@ -242,10 +238,6 @@ public class CouchDBStoreProvider implements StoreSPI {
         resourceSet.createResource(uri).delete(null);
         Publisher.AfterDeleteEvent afterDeleteEvent = new Publisher.AfterDeleteEvent(eObject);
         publisher.publish(afterDeleteEvent);
-    }
-
-    public Resource createEmptyResource() {
-        return createEmptyResource(createResourceSet());
     }
 
     @Override
@@ -264,23 +256,6 @@ public class CouchDBStoreProvider implements StoreSPI {
             ref = ref + "#" + fragment;
         }
         return ref;
-    }
-
-    public Resource loadResource(String ref) throws IOException {
-        URI uri = getUriByRef(ref);
-        Resource resource = loadResource(uri);
-        String fragment = uri.fragment();
-        if (fragment == null) {
-            return resource;
-        }
-        EObject eObject = resource.getEObject(fragment);
-        Resource result = createResourceSet().createResource(resource.getURI().appendFragment(fragment));
-        result.getContents().add(eObject);
-        return result;
-    }
-
-    public Resource treeToResource(URI uri, JsonNode contents) throws JsonProcessingException {
-        return treeToResource(createResourceSet(), uri, contents);
     }
 
     public EMFModule getModule() {
@@ -326,5 +301,20 @@ public class CouchDBStoreProvider implements StoreSPI {
     @Override
     public FinderSPI createFinderProvider() {
         return new CouchDBFinderProvider(this);
+    }
+
+    @Override
+    public TransactionSPI createTransaction(boolean readOnly) throws IOException {
+        return new NullTransactionProvider();
+    }
+
+    @Override
+    public TransactionSPI getCurrentTransaction() throws IOException {
+        return new NullTransactionProvider();
+    }
+
+    @Override
+    public TransactionSPI setCurrentTransaction(TransactionSPI tx) throws IOException {
+        return null;
     }
 }

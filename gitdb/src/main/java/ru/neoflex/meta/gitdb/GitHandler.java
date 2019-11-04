@@ -22,7 +22,8 @@ public class GitHandler extends URIHandlerImpl {
         String id = db.getId(uri);
         List<IndexEntry> refList = db.findByIndex(transaction, "ref", id.substring(0, 2), id.substring(2));
         if (!refList.isEmpty()) {
-            throw new IOException("Object " + id + " is referenced by " + new String(refList.get(0).getContent()));
+            String[] path = refList.get(0).getPath();
+            throw new IOException("Object " + id + " is referenced by " + path[path.length - 1]);
         }
         String rev = db.getRev(uri);
         EntityId entityId = new EntityId(id, rev);

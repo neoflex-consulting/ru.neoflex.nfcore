@@ -2,11 +2,9 @@ package ru.neoflex.meta.gitdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
-import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 
 public class Finder {
@@ -29,9 +26,6 @@ public class Finder {
     private long resLoadedMs = 0;
     private ResourceSet resourceSet;
     private ObjectNode selector = new ObjectMapper().createObjectNode();
-
-    private Finder() {
-    }
 
     public static Finder create() {
         return new Finder();
@@ -383,7 +377,7 @@ public class Finder {
         return warning;
     }
 
-    public ResourceSet getResourceSet() {
+    public ResourceSet getResourceSet() throws IOException {
         return resourceSet;
     }
 
@@ -391,7 +385,12 @@ public class Finder {
         return selector;
     }
 
-    public JsonNode getExecutionStats() {
+    public Finder selector(ObjectNode selector) {
+        this.selector = selector;
+        return this;
+    }
+
+    public ObjectNode getExecutionStats() {
         ObjectNode executionStats = new ObjectMapper().createObjectNode();
         executionStats.put("idsLoaded", idsLoaded);
         executionStats.put("idsLoadedMs", idsLoadedMs);

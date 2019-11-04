@@ -1,6 +1,5 @@
 package ru.neoflex.nfcore.base.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
-import ru.neoflex.nfcore.base.util.FileUtils;
 
 import java.util.concurrent.Callable;
 
@@ -64,12 +62,12 @@ public class Context {
         return registry;
     }
 
-    public<R> R withContext(Callable<R> f) throws Exception {
+    public<R> R inContext(Callable<R> f) throws Exception {
         setCurrent();
         return f.call();
     }
 
-    public<R> R withClassLoader(Callable<R> f) throws Exception {
-        return workspace.withClassLoader(()->{return withContext(f);}, Transaction.LockType.DIRTY);
+    public<R> R inContextWithClassLoaderInTransaction(Callable<R> f) throws Exception {
+        return workspace.withClassLoaderInTransaction(true, ()->{return inContext(f);});
     }
 }

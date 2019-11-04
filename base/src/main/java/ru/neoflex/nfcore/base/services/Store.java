@@ -1,6 +1,5 @@
 package ru.neoflex.nfcore.base.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.emf.common.util.URI;
@@ -8,11 +7,14 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.neoflex.nfcore.base.services.providers.CouchDBFinderProvider;
-import ru.neoflex.nfcore.base.services.providers.CouchDBStoreProvider;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
+import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.base.services.providers.StoreSPI;
+import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -20,14 +22,23 @@ import java.io.IOException;
 @Service
 public class Store {
     @Autowired
+    private
     StoreSPI provider;
+
+    public TransactionSPI getCurrentTransaction() throws IOException {
+        TransactionSPI tx = provider.getCurrentTransaction();
+        if (tx == null) {
+            throw new RuntimeException("No current transaction found");
+        }
+        return tx;
+    }
 
     @PostConstruct
     public void init() {
     }
 
-    public ResourceSet createResourceSet() {
-        return provider.createResourceSet();
+    public ResourceSet createResourceSet() throws IOException {
+        return provider.createResourceSet(getCurrentTransaction());
     }
 
     public Resource createEmptyResource(ResourceSet resourceSet) {
@@ -35,7 +46,7 @@ public class Store {
     }
 
     public Resource createEObject(EObject eObject) throws IOException {
-        Resource resource = createEmptyResource();
+        Resource resource = createEmptyResource(createResourceSet());
         resource.getContents().add(eObject);
         return saveResource(resource);
     }
@@ -51,8 +62,8 @@ public class Store {
         return provider.saveResource(resource);
     }
 
-    public Resource createEmptyResource() {
-        ResourceSet resourceSet = provider.createResourceSet();
+    public Resource createEmptyResource() throws IOException {
+        ResourceSet resourceSet = createResourceSet();
         return provider.createEmptyResource(resourceSet);
     }
 
@@ -62,25 +73,25 @@ public class Store {
 
     public Resource loadResource(String ref) throws IOException {
         URI uri = provider.getUriByRef(ref);
-        return provider.loadResource(uri);
+        return provider.loadResource(uri, getCurrentTransaction());
     }
 
     public Resource loadResource(URI uri) throws IOException {
-        return provider.loadResource(uri);
+        return provider.loadResource(uri, getCurrentTransaction());
     }
 
     public void deleteResource(String ref) throws IOException {
         URI uri = provider.getUriByRef(ref);
-        provider.deleteResource(uri);
+        provider.deleteResource(uri, getCurrentTransaction());
     }
 
     public void deleteResource(URI uri) throws IOException {
-        provider.deleteResource(uri);
+        provider.deleteResource(uri, getCurrentTransaction());
     }
 
-    public Resource treeToResource(String ref, JsonNode contents) throws JsonProcessingException {
+    public Resource treeToResource(String ref, JsonNode contents) throws IOException {
         URI uri = getUriByRef(ref);
-        return provider.treeToResource(provider.createResourceSet(), uri, contents);
+        return provider.treeToResource(provider.createResourceSet(getCurrentTransaction()), uri, contents);
     }
 
     public URI getUriByIdAndRev(String id, String rev) {
@@ -97,5 +108,40 @@ public class Store {
 
     public FinderSPI createFinderProvider () {
         return provider.createFinderProvider();
+    }
+
+    public StoreSPI getProvider() {
+        return provider;
+    }
+
+    public interface Transactional<R> {
+        public R call(TransactionSPI tx) throws Exception;
+    }
+    public <R> R withTransaction(boolean readOnly, Transactional<R> f) throws Exception {
+        try (TransactionSPI tx = provider.createTransaction(readOnly)) {
+            TransactionSPI old = provider.getCurrentTransaction();
+            provider.setCurrentTransaction(tx);
+            try {
+                return f.call(tx);
+            }
+            finally {
+                provider.setCurrentTransaction(old);
+            }
+        }
+    }
+
+    public void commit(String message) throws IOException {
+        String username = "";
+        String email = "";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails)principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+        }
+        getCurrentTransaction().commit(message, username, email);
     }
 }

@@ -16,19 +16,25 @@ public interface StoreSPI {
 
     URI getUriByRef(String ref);
 
-    ResourceSet createResourceSet();
+    ResourceSet createResourceSet(TransactionSPI tx);
 
     Resource createEmptyResource(ResourceSet resourceSet);
 
-    Resource loadResource(URI uri) throws IOException;
+    Resource loadResource(URI uri, TransactionSPI tx) throws IOException;
 
-    void deleteResource(URI uri) throws IOException;
+    void deleteResource(URI uri, TransactionSPI tx) throws IOException;
 
     String getRef(Resource resource);
 
     ObjectMapper createMapper();
 
-    Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws JsonProcessingException;
+    Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws IOException;
 
     FinderSPI createFinderProvider();
+
+    TransactionSPI createTransaction(boolean readOnly)  throws IOException;
+
+    TransactionSPI getCurrentTransaction() throws IOException;
+
+    TransactionSPI setCurrentTransaction(TransactionSPI tx) throws IOException;
 }

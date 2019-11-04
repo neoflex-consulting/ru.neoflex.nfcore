@@ -27,10 +27,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -42,10 +46,10 @@ public class Epsilon {
     Context context;
 
     @PostConstruct
-    void init() {
+    void init() throws Exception {
     }
 
-    public EmfModel createModel(String name, URI uri) throws EolModelLoadingException {
+    public EmfModel createModel(String name, URI uri) throws EolModelLoadingException, IOException {
         return createModel(name, uri, context.getStore().createResourceSet());
     }
 
@@ -204,9 +208,10 @@ public class Epsilon {
         ececuteScript(scriptPath, params, models, module);
         ResourceSet resourceSet = context.getStore().createResourceSet();
         while (resource.getContents().size() > 0) {
-            EObject object = resource.getContents().get(0);
-            context.getStore().createEObject(object);
-            resourceSet.getResources().add(object.eResource());
+            Resource newResource = context.getStore().createEmptyResource(resourceSet);
+            EObject newObject = resource.getContents().get(0);
+            newResource.getContents().add(newObject);
+            context.getStore().saveResource(newResource);
         }
         return resourceSet;
     }

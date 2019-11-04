@@ -3,14 +3,19 @@ package ru.neoflex.nfcore.base;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.services.Context;
+import ru.neoflex.nfcore.base.services.providers.CouchDBStoreProvider;
+import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +27,14 @@ public class PublisherTests {
     @Autowired
     Context context;
 
+    @Before
+    public void beforeMethod() {
+        org.junit.Assume.assumeTrue(CouchDBStoreProvider.class.isInstance(context.getStore().getProvider()));
+    }
+
     @Test
     public void handleEvents() throws IOException {
+        TransactionSPI tx = context.getStore().getCurrentTransaction();
         List<String> strings = new ArrayList<>();
         Publisher.BeforeSaveHandler<Role> beforeSaveHandler = new Publisher.BeforeSaveHandler<Role>(AuthPackage.Literals.ROLE) {
             @Override

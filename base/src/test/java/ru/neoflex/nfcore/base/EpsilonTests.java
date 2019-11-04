@@ -15,11 +15,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.neoflex.meta.gitdb.Database;
 import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.gitdb.TransactionClassLoader;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
 import ru.neoflex.nfcore.base.auth.User;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Epsilon;
+import ru.neoflex.nfcore.base.services.Workspace;
+import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
 import java.io.IOException;
@@ -37,13 +41,15 @@ public class EpsilonTests {
     Context context;
 
     @Test
-    public void testCreateModelByURI() throws IOException, EolModelLoadingException, EolModelElementTypeNotFoundException {
-        JsonNode result = getUserFinder().execute().getResult();
-        JsonNode doc = result.withArray("docs").get(0);
-        String id = doc.get("_id").textValue();
-        String rev = doc.get("_rev").textValue();
-        URI uri = context.getStore().getUriByIdAndRev(id, rev);
-        EmfModel model = context.getEpsilon().createModel("s", uri);
+    public void testCreateModelByURI() throws Exception {
+        EmfModel model = context.getStore().withTransaction(true, tx -> {
+            JsonNode result = getUserFinder().execute().getResult();
+            JsonNode doc = result.withArray("docs").get(0);
+            String id = doc.get("_id").textValue();
+            String rev = doc.get("_rev").textValue();
+            URI uri = context.getStore().getUriByIdAndRev(id, rev);
+            return context.getEpsilon().createModel("s", uri);
+        });
         Assert.assertEquals(1, model.getAllOfType("User").size());
     }
 
@@ -55,35 +61,41 @@ public class EpsilonTests {
     }
 
     @Test
-    public void testCreateModelByResourceSet() throws IOException, EolModelLoadingException, EolModelElementTypeNotFoundException {
-        ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-        EmfModel model = context.getEpsilon().createModel("s", resourceSet);
+    public void testCreateModelByResourceSet() throws Exception {
+        EmfModel model = context.getStore().withTransaction(true, tx -> {
+            ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+            return context.getEpsilon().createModel("s", resourceSet);
+        });
         Assert.assertTrue(model.getAllOfType("User").size() > 0);
         Assert.assertTrue(model.getAllOfType("Role").size() > 0);
     }
 
     @Test
     public void testModels() throws Exception {
-        ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-        String template = "[%=User.all().select(u|u.name=='admin').first().name%]!";
-        for (Resource resource: resourceSet.getResources()) {
-            User user = (User) resource.getContents().get(0);
-            if (user.getName().equals("admin")) {
-                String text1 = context.getEpsilon().generateFromString(template, null, resource.getURI(), resourceSet);
-                Assert.assertEquals("admin!", text1);
-                String text2 = context.getEpsilon().generateFromString(template, null, user);
-                Assert.assertEquals("admin!", text2);
-                break;
+        String text  = context.getStore().withTransaction(true, tx -> {
+            ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+            String template = "[%=User.all().select(u|u.name=='admin').first().name%]!";
+            for (Resource resource: resourceSet.getResources()) {
+                User user = (User) resource.getContents().get(0);
+                if (user.getName().equals("admin")) {
+                    String text1 = context.getEpsilon().generateFromString(template, null, resource.getURI(), resourceSet);
+                    Assert.assertEquals("admin!", text1);
+                    String text2 = context.getEpsilon().generateFromString(template, null, user);
+                    Assert.assertEquals("admin!", text2);
+                    break;
+                }
             }
-        }
-        String text = context.getEpsilon().generateFromString(template, null, resourceSet);
+            return context.getEpsilon().generateFromString(template, null, resourceSet);
+        });
         Assert.assertEquals("admin!", text);
     }
 
     @Test
     public void testImport() throws Exception {
-        ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-        String text = context.getEpsilon().generate("ToValid.egl", null, resourceSet);
+        String text  = context.getStore().withTransaction(true, tx -> {
+            ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+            return context.getEpsilon().generate("ToValid.egl", null, resourceSet);
+        });
         Assert.assertEquals("_12_", text);
     }
 
@@ -96,43 +108,48 @@ public class EpsilonTests {
 
     @Test
     public void testClassLoader() throws Exception {
-        ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-        try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
-            Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
-            Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
-            Files.createDirectories(newResourcePath.getParent());
-            Files.copy(resourcePath, newResourcePath, REPLACE_EXISTING);
-            String program = "[%import \"Utils2.egl\";%]" +
-                    "[%=toValidName('12,')%]";
-            Path newProgramPath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
-            Files.write(newProgramPath, program.getBytes());
-            tx.commit("Written Utils2.egl, ToValid2.egl");
-        }
-        String text = context.withClassLoader(()->{
-            String result = context.getEpsilon().generate("ToValid2.egl", null, resourceSet);
-            return result;
+        TransactionClassLoader.withClassLoader(()->{
+            String text = context.getStore().withTransaction(false, (transaction)->{
+                Transaction tx = (Transaction)transaction;
+                ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+                Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
+                Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
+                Files.createDirectories(newResourcePath.getParent());
+                Files.copy(resourcePath, newResourcePath, REPLACE_EXISTING);
+                String program = "[%import \"Utils2.egl\";%]" +
+                        "[%=toValidName('12,')%]";
+                Path newProgramPath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
+                Files.write(newProgramPath, program.getBytes());
+                String result = context.getEpsilon().generate("ToValid2.egl", null, resourceSet);
+                tx.commit("Written Utils2.egl, ToValid2.egl", "orlov", "");
+                return result;
+            });
+            Assert.assertEquals("_12_", text);
+            try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
+                Path resourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
+                Files.delete(resourcePath);
+                Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
+                Files.delete(newResourcePath);
+                tx.commit("Deleted Utils2.egl, ToValid2.egl");
+            }
+            return 0;
         });
-        try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
-            Path resourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
-            Files.delete(resourcePath);
-            Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
-            Files.delete(newResourcePath);
-            tx.commit("Deleted Utils2.egl, ToValid2.egl");
-        }
-        Assert.assertEquals("_12_", text);
     }
 
     @Test
     public void testUserToGroup() throws Exception {
-        ResourceSet inputSet = getUserFinder().execute().getResourceSet();
-        EObject eObject = inputSet.getResources().get(0).getContents().get(0);
-        context.getStore().createEmptyResource().getContents().add(eObject);
-        ResourceSet outputSet = context.getEpsilon().transform(Epsilon.EPSILON_TEMPLATE_ROOT + "/UserToGroup.etl",
-                null, eObject);
-        Assert.assertEquals(1, outputSet.getResources().size());
-        for (Resource resource: outputSet.getResources()) {
-            context.getStore().deleteResource(resource.getURI());
-        }
+        context.getStore().withTransaction(true, tx -> {
+            ResourceSet inputSet = getUserFinder().execute().getResourceSet();
+            EObject eObject = inputSet.getResources().get(0).getContents().get(0);
+            context.getStore().createEmptyResource().getContents().add(eObject);
+            ResourceSet outputSet = context.getEpsilon().transform(Epsilon.EPSILON_TEMPLATE_ROOT + "/UserToGroup.etl",
+                    null, eObject);
+            Assert.assertEquals(1, outputSet.getResources().size());
+            for (Resource resource: outputSet.getResources()) {
+                context.getStore().deleteResource(resource.getURI());
+            }
+            return 0;
+        });
     }
 
 }

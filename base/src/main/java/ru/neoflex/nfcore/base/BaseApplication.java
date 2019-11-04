@@ -40,7 +40,7 @@ public class BaseApplication {
                 = new FilterRegistrationBean<>();
 
         registrationBean.setFilter(new GitClasspathFilter());
-        registrationBean.addUrlPatterns("/*");
+        registrationBean.addUrlPatterns("*");
 
         return registrationBean;
     }

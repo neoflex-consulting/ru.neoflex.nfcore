@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CouchDBFinderProvider implements FinderSPI {
     protected ObjectNode result;
@@ -29,7 +32,7 @@ public class CouchDBFinderProvider implements FinderSPI {
     }
 
     @Override
-    public void selector(JsonNode selector) {
+    public void setSelector(ObjectNode selector) {
         rootNode.set("selector", selector);
     }
 
@@ -39,12 +42,12 @@ public class CouchDBFinderProvider implements FinderSPI {
     }
 
     @Override
-    public void limit(Integer limit) {
+    public void setLimit(Integer limit) {
         rootNode.put("limit", limit);
     }
 
     @Override
-    public void field(String field) {
+    public void addField(String field) {
         if (fields == null) {
             fields = rootNode.putArray("fields");
         }
@@ -52,7 +55,7 @@ public class CouchDBFinderProvider implements FinderSPI {
     }
 
     @Override
-    public void sort(String field, SortOrder order) {
+    public void addSort(String field, SortOrder order) {
         getSort().addObject().put(field, order.toString());
     }
 
@@ -64,22 +67,22 @@ public class CouchDBFinderProvider implements FinderSPI {
     }
 
     @Override
-    public void sort(String field) {
+    public void addSort(String field) {
         getSort().add(field);
     }
 
     @Override
-    public void skip(Integer value) {
+    public void setSkip(Integer value) {
         rootNode.put("limit", value);
     }
 
     @Override
-    public void bookmark(String key) {
+    public void setBookmark(String key) {
         rootNode.put("bookmark", key);
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute(TransactionSPI tx) throws IOException {
         result = (ObjectNode) store.getDefaultClient().post("_find", mapper.writeValueAsString(rootNode));
     }
 
@@ -100,7 +103,7 @@ public class CouchDBFinderProvider implements FinderSPI {
 
     @Override
     public ResourceSet getResourceSet() throws IOException {
-        ResourceSet resourceSet = store.createResourceSet();
+        ResourceSet resourceSet = store.createResourceSet(new NullTransactionProvider());
         if (result != null) {
             for (JsonNode doc: result.withArray("docs")) {
                 String id = doc.get("_id").textValue();
@@ -126,12 +129,12 @@ public class CouchDBFinderProvider implements FinderSPI {
     }
 
     @Override
-    public void update(boolean value) {
+    public void setUpdate(boolean value) {
         rootNode.put("update", value);
     }
 
     @Override
-    public void executionStats(boolean value) {
+    public void setExecutionStats(boolean value) {
         rootNode.put("execution_stats", value);
     }
 

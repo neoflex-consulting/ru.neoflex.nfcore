@@ -231,12 +231,13 @@ public class Transaction implements Closeable {
         }
     }
 
-    public void withCurrent(Runnable f) {
+    public<R> R withCurrent(Callable<R> f) throws Exception {
+        Transaction old = getCurrent();
         setCurrent(this);
         try {
-            f.run();
+            return f.call();
         } finally {
-            setCurrent(null);
+            setCurrent(old);
         }
     }
 }

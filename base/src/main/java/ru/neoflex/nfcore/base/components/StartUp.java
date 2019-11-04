@@ -8,6 +8,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.neoflex.nfcore.base.services.Context;
+import ru.neoflex.nfcore.base.services.Store;
 
 import javax.annotation.PostConstruct;
 
@@ -19,30 +20,34 @@ public class StartUp {
 
     @PostConstruct
     void init() throws Exception {
-        context.withContext(() -> {
-            for (EPackage ePackage: context.getRegistry().getEPackages()) {
-                String nsURI = ePackage.getNsURI();
-                String name = StringUtils.capitalize(ePackage.getName());
-                String initClassName = nsURI + ".impl." + name + "PackageInit";
-                try {
-                    Thread.currentThread().getContextClassLoader().loadClass(initClassName).getDeclaredConstructor().newInstance();
-                    logger.info(String.format("%s: instantiated", initClassName));
+        context.inContext(() -> {
+            Store store = context.getStore();
+            return store.withTransaction(false, tx -> {
+                for (EPackage ePackage: context.getRegistry().getEPackages()) {
+                    String nsURI = ePackage.getNsURI();
+                    String name = StringUtils.capitalize(ePackage.getName());
+                    String initClassName = nsURI + ".impl." + name + "PackageInit";
+                    try {
+                        Thread.currentThread().getContextClassLoader().loadClass(initClassName).getDeclaredConstructor().newInstance();
+                        logger.info(String.format("%s: instantiated", initClassName));
+                    }
+                    catch (ClassNotFoundException e) {
+                    }
                 }
-                catch (ClassNotFoundException e) {
+                for (EClassifier eClassifier: context.getRegistry().getEClassifiers()) {
+                    String nsURI = eClassifier.getEPackage().getNsURI();
+                    String name = StringUtils.capitalize(eClassifier.getName());
+                    String initClassName = nsURI + ".impl." + name + "Init";
+                    try {
+                        Thread.currentThread().getContextClassLoader().loadClass(initClassName).getDeclaredConstructor().newInstance();
+                        logger.info(String.format("%s: instantiated", initClassName));
+                    }
+                    catch (ClassNotFoundException e) {
+                    }
                 }
-            }
-            for (EClassifier eClassifier: context.getRegistry().getEClassifiers()) {
-                String nsURI = eClassifier.getEPackage().getNsURI();
-                String name = StringUtils.capitalize(eClassifier.getName());
-                String initClassName = nsURI + ".impl." + name + "Init";
-                try {
-                    Thread.currentThread().getContextClassLoader().loadClass(initClassName).getDeclaredConstructor().newInstance();
-                    logger.info(String.format("%s: instantiated", initClassName));
-                }
-                catch (ClassNotFoundException e) {
-                }
-            }
-            return null;
+                store.commit("StartUp");
+                return null;
+            });
         });
     }
 }

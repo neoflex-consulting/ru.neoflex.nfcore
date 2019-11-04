@@ -11,7 +11,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.neoflex.meta.gitdb.Database;
 import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.gitdb.TransactionClassLoader;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
+import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.base.types.TypesPackage;
 
 import javax.annotation.PostConstruct;
@@ -29,7 +31,7 @@ public class Workspace {
     public static final String BRANCH = "branch";
     @Value("${workspace.root:${user.dir}/workspace}")
     String workspaceRoot;
-    private static Database database;
+    private Database database;
     @Autowired
     PackageRegistry registry;
 
@@ -51,7 +53,7 @@ public class Workspace {
         database.close();
     }
 
-    public static Database getDatabase() {
+    public Database getDatabase() {
         return database;
     }
 
@@ -87,18 +89,26 @@ public class Workspace {
         tlCurrentBranch.set(branch);
     }
 
-    public Transaction createTransaction(Transaction.LockType lockType) throws IOException {
-        return database.createTransaction(getCurrentBranch(), lockType);
+    public GitDBTransactionProvider createTransaction(Transaction.LockType lockType) throws IOException {
+        return new GitDBTransactionProvider(database, getCurrentBranch(), lockType);
     }
 
-    public Transaction createTransaction() throws IOException {
+    public GitDBTransactionProvider createTransaction() throws IOException {
         return createTransaction(Transaction.LockType.WRITE);
     }
 
-    public<R> R withClassLoader(Callable<R> f, Transaction.LockType lockType) throws Exception {
-        try (Transaction tx = createTransaction(lockType)) {
-            return tx.withClassLoader(f);
+    public<R> R inTransaction(boolean readOnly, Callable<R> f) throws Exception {
+        try (GitDBTransactionProvider tx = createTransaction(readOnly ? Transaction.LockType.DIRTY : Transaction.LockType.WRITE)) {
+            return tx.withCurrent(f);
         }
+    }
+
+    public<R> R withClassLoader(Callable<R> f) throws Exception {
+        return TransactionClassLoader.withClassLoader(f);
+    }
+
+    public<R> R withClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
+        return withClassLoader(()-> inTransaction(readOnly, f));
     }
 
     public boolean pathExists(String path) throws IOException {

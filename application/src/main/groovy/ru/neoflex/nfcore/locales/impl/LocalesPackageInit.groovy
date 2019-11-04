@@ -10,12 +10,12 @@ class LocalesPackageInit {
     static def createLangIfNotExists(String lang) {
         def rs = DocFinder.create(Context.current.store, LocalesPackage.Literals.LANG, [name: lang])
                 .execute().resourceSet
-        if (rs.resources.empty) {
+        if (rs.getResources().empty) {
             def eObject = LocalesFactory.eINSTANCE.createLang()
             eObject.name = lang
-            rs.resources.add(Context.current.store.createEObject(eObject))
+            rs.getResources().add(Context.current.store.createEObject(eObject))
         }
-        return rs.resources.get(0).contents.get(0)
+        return rs.getResources().get(0).contents.get(0)
     }
 
     {

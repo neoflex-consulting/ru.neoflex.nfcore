@@ -1,12 +1,12 @@
 package ru.neoflex.nfcore.base.services.providers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import ru.neoflex.nfcore.base.util.DocFinder;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface FinderSPI {
     enum SortOrder {
@@ -14,25 +14,25 @@ public interface FinderSPI {
         desc
     }
 
-    JsonNode getResult();
+    JsonNode getResult() throws IOException;
 
-    void selector(JsonNode selector);
+    void setSelector(ObjectNode selector);
 
     ObjectNode selector();
 
-    void skip(Integer value);
+    void setSkip(Integer value);
 
-    void limit(Integer limit);
+    void setLimit(Integer limit);
 
-    void sort(String field, SortOrder order);
+    void addSort(String field, SortOrder order);
 
-    void sort(String field);
+    void addSort(String field);
 
-    void field(String field);
+    void addField(String field);
 
-    void bookmark(String key);
+    void setBookmark(String key);
 
-    void execute() throws IOException;
+    void execute(TransactionSPI tx) throws IOException;
 
     ObjectNode getExecutionStats();
 
@@ -46,7 +46,7 @@ public interface FinderSPI {
 
     void useIndex(String designDoc);
 
-    void update(boolean value);
+    void setUpdate(boolean value);
 
-    void executionStats(boolean value);
+    void setExecutionStats(boolean value);
 }

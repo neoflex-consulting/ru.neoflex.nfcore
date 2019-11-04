@@ -5,11 +5,21 @@ import java.net.URL;
 import java.net.URLStreamHandler;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
 public class TransactionClassLoader extends ClassLoader {
 
     public TransactionClassLoader(ClassLoader parent) {
         super(parent);
+    }
+
+    @Override
+    public URL getResource(String name) {
+        URL url = findResource(name);
+        if (url == null) {
+            url = super.getResource(name);
+        }
+        return url;
     }
 
     @Override
@@ -35,6 +45,17 @@ public class TransactionClassLoader extends ClassLoader {
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
             f.run();
+        } finally {
+            Thread.currentThread().setContextClassLoader(parent);
+        }
+    }
+
+    static public<R> R withClassLoader(Callable<R> f) throws Exception {
+        ClassLoader parent = Thread.currentThread().getContextClassLoader();
+        ClassLoader classLoader = new TransactionClassLoader(parent);
+        Thread.currentThread().setContextClassLoader(classLoader);
+        try {
+            return f.call();
         } finally {
             Thread.currentThread().setContextClassLoader(parent);
         }
