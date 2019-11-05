@@ -2,7 +2,6 @@ import React from 'react'
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
 import { Modal, Select, Button, Input } from 'antd';
-import { Guid } from "guid-typescript";
 
 import {API} from './../modules/api'
 
@@ -36,7 +35,6 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         newResourceJSON._id = '/'
         newResourceJSON.name = this.state.name
 
-        const id:string = Guid.create().toString()
         const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
         
         resource.set('uri', null)
