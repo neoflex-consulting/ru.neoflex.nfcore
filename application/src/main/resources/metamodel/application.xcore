@@ -105,12 +105,12 @@ class CatalogNode extends TreeNode {
 }
 
 class TreeComponentNode extends TreeNode {
-    refers Component component
+    refers AppModule componentWithTree
     refers EObject eObject
 }
 
 class DynamicNode extends TreeNode {
-    refers AppModule appModule
+    String methodName
     refers EObject eObject
 }
 

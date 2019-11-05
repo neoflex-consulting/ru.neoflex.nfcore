@@ -37,8 +37,10 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         newResourceJSON.name = this.state.name
 
         const id:string = Guid.create().toString()
-        const resource = resourceSet.create({ uri: id }).parse(newResourceJSON as Ecore.EObject)
+        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
         
+        resource.set('uri', null)
+
         API.instance().saveResource(resource).then(() => {
             this.props.form.setFields({
                 selectEClass:{

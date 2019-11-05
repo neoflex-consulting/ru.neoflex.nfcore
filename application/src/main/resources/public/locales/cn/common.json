@@ -19,5 +19,6 @@
         "dynamiccomponent": " 組件無法加載 ",
         "mandatoryreporting": "強制性報告",
         "legend": "傳說",
-        "closeall": "關閉所有"
+        "closeall": "關閉所有",
+        "eClass": "eClass"
 }
