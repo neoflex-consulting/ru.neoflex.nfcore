@@ -19,5 +19,6 @@
         "dynamiccomponent": " компонента не может быть загружена из ",
         "mandatoryreporting": "Обязательная отчетность",
         "legend": "Легенда",
-        "closeall": "Закрыть все"
+        "closeall": "Закрыть все",
+        "eClass": "eClass"
 }

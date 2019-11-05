@@ -60,7 +60,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         });
 
         let name: string = 'eClass';
-        let title: string = 'application.eClasses.EClassView.eStructuralFeatures.eClass.caption';
+        let title: string = 'eClass';
         let type: string = 'stringType';
         let AllColumns:Array<any> = [{title: title, dataIndex: name, key: name, type: name,
             sorter: (a: any, b: any) => this.sortColumns(a, b, name, type),
@@ -198,7 +198,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     render() {
         const {t} = this.props;
         const columnsT = this.state.columns.map( (c: any) =>(
-            {...c, title: t(c.title, {ns: 'packages'})}
+            {...c, title: c.title === 'eClass' ? t(c.title, {ns: 'common'}) : t(c.title, {ns: 'packages'})}
         )) ;
             const actionColumnDef = [{
                 title: t('action'),
