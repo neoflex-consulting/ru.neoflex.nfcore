@@ -221,7 +221,7 @@ public class Database implements Closeable {
     }
 
     public URI createURIByRef(String ref) {
-        URI uri = URI.createURI("http:/" + ref);
+        URI uri = URI.createURI("http:/" + (ref == null ? "" : ref));
         return uri;
     }
 
@@ -274,7 +274,7 @@ public class Database implements Closeable {
 
     public String getRev(URI uri) throws IOException {
         String query = uri.query();
-        if (!query.contains("rev=")) {
+        if (query == null || !query.contains("rev=")) {
             return null;
         }
         return query.split("rev=")[1];
