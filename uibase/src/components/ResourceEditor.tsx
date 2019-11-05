@@ -299,11 +299,16 @@ export class ResourceEditor extends React.Component<any, State> {
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
+        const getRelatedResourceByRef = (reference: string) => {
+            const refObject = mainEObject.eResource().eContainer.get('resources')
+                .find((res: Ecore.Resource) => res.eContents()[0].eURI() === reference)
+
+            return (refObject && refObject.eContents()[0]) || null
+        }
+
         const prepareValue = (feature: Ecore.EObject, value: any, idx: Number): any => {
             if (feature.isKindOf('EReference')) {
-                const refObject = value && mainEObject.eContainer
-                    .eResource().eContainer.eContents()
-                    .find(res=>res.eContents()[0]!.eURI() === value!.$ref)!.eContents()[0]
+                const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)
                 const elements = value ?
                     feature.get('upperBound') === -1 ?
                         value.map((el: { [key: string]: any }, idx: number) =>
@@ -314,8 +319,8 @@ export class ResourceEditor extends React.Component<any, State> {
                                 closable
                                 key={el["$ref"]}
                             >
-                                {refObject!.get('name')}<br />
-                                {refObject!.eClass.get('name')}&nbsp; 
+                                {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
+                                {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp; 
                             </Tag>)
                         :
                         <Tag
@@ -325,8 +330,8 @@ export class ResourceEditor extends React.Component<any, State> {
                             closable
                             key={value["$ref"]}
                         >
-                            {refObject!.get('name')}&nbsp;
-                            {refObject!.eClass.get('name')}&nbsp;
+                            {relatedResource && relatedResource.get('name')}&nbsp;
+                            {relatedResource && relatedResource.eClass.get('name')}&nbsp;
                         </Tag>
                     :
                     []
