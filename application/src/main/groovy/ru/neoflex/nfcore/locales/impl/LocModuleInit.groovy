@@ -44,12 +44,12 @@ class LocModuleInit extends LocModuleImpl {
     static def createLocModuleIfNotExists(String name) {
         def rs = DocFinder.create(Context.current.store, LocalesPackage.Literals.LOC_MODULE, [name: name])
                 .execute().resourceSet
-        if (rs.resources.empty) {
+        if (rs.getResources().empty) {
             def eObject = LocalesFactory.eINSTANCE.createLocModule()
             eObject.name = name
-            rs.resources.add(Context.current.store.createEObject(eObject))
+            rs.getResources().add(Context.current.store.createEObject(eObject))
         }
-        return rs.resources.get(0).contents.get(0) as LocModule
+        return rs.getResources().get(0).contents.get(0) as LocModule
     }
 
     static def generatePackagesModule() {
@@ -155,15 +155,15 @@ class LocModuleInit extends LocModuleImpl {
                 }
             }
         }
-        Context.current.store.updateEObject(locModule)
+        Context.current.store.saveResource(locModule.eResource())
         return locModule
     }
 
     static def generateLocales() {
         def locModulesResources = DocFinder.create(Context.current.store, LocalesPackage.Literals.LOC_MODULE)
-                .execute().resourceSet.resources.findAll {true}
+                .execute().resourceSet.getResources().findAll {true}
         def langsResources = DocFinder.create(Context.current.store, LocalesPackage.Literals.LANG)
-                .execute().resourceSet.resources.findAll {true}
+                .execute().resourceSet.getResources().findAll {true}
         langsResources.each {lgrs->
             Lang lang = lgrs.contents[0] as Lang
             locModulesResources.each {lmrs->

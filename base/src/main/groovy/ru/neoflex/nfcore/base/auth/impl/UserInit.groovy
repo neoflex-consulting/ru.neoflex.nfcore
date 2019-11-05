@@ -47,9 +47,9 @@ class UserInit extends UserImpl {
     {
         // create default admin user
         def sus = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "su"]).execute().resourceSet
-        def su = sus.resources.size() > 0 ? sus.resources.get(0) : createSU()
+        def su = sus.getResources().size() > 0 ? sus.getResources().get(0) : createSU()
         def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resourceSet
-        if (admins.resources.size() == 0) {
+        if (admins.getResources().size() == 0) {
             createAdmin(su)
         }
     }

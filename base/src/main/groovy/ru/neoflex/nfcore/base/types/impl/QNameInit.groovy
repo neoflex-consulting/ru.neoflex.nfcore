@@ -21,7 +21,7 @@ class QNameInit {
                     def name = eObject.eGet(it) as String
                     Context.current.registry.getSubClasses(eClass).find {!it.abstract}.each {aClass->
                         def dup = DocFinder.create(Context.current.store, aClass, [(it.name): name])
-                                .execute().resourceSet.resources.findAll {EMFUtil.getId(it) != id}.size()
+                                .execute().resourceSet.getResources().findAll {EMFUtil.getId(it) != id}.size()
                         if (dup > 0) {
                             throw new IllegalArgumentException("Found ${dup} instance(s) of ${EcoreUtil.getURI(aClass)} with ${it.name}='${name}'")
                         }

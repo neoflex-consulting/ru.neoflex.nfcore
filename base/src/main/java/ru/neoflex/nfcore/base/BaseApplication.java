@@ -9,6 +9,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import ru.neoflex.meta.gitdb.TransactionClassLoader;
+import ru.neoflex.nfcore.base.filters.ContextFilter;
 import ru.neoflex.nfcore.base.filters.GitClasspathFilter;
 import ru.neoflex.nfcore.base.services.Workspace;
 import ru.neoflex.nfcore.base.util.FileUtils;
@@ -34,12 +35,23 @@ public class BaseApplication {
     }
 
     @Bean
-    public FilterRegistrationBean<GitClasspathFilter> loggingFilter(){
+    public FilterRegistrationBean<GitClasspathFilter> gitClasspathFilter(){
         FilterRegistrationBean<GitClasspathFilter> registrationBean
                 = new FilterRegistrationBean<>();
 
         registrationBean.setFilter(new GitClasspathFilter());
-        registrationBean.addUrlPatterns("/*");
+        registrationBean.addUrlPatterns("*");
+
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ContextFilter> contextFilter(){
+        FilterRegistrationBean<ContextFilter> registrationBean
+                = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new ContextFilter());
+        registrationBean.addUrlPatterns("/emf/*");
 
         return registrationBean;
     }

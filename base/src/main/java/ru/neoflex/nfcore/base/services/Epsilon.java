@@ -11,9 +11,7 @@ import org.eclipse.epsilon.egl.EglTemplate;
 import org.eclipse.epsilon.egl.EglTemplateFactory;
 import org.eclipse.epsilon.egl.exceptions.EglRuntimeException;
 import org.eclipse.epsilon.egl.execute.context.IEglContext;
-import org.eclipse.epsilon.emc.emf.CachedResourceSet;
 import org.eclipse.epsilon.emc.emf.EmfModel;
-import org.eclipse.epsilon.eol.AbstractModule;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.IEolModule;
 import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
@@ -29,10 +27,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -44,11 +46,11 @@ public class Epsilon {
     Context context;
 
     @PostConstruct
-    void init() {
+    void init() throws Exception {
     }
 
-    public EmfModel createModel(String name, URI uri) throws EolModelLoadingException {
-        return createModel(name, uri, context.getStore().getResourceSet());
+    public EmfModel createModel(String name, URI uri) throws EolModelLoadingException, IOException {
+        return createModel(name, uri, context.getStore().createResourceSet());
     }
 
     public EmfModel createModel(String name, Resource resource) throws EolModelLoadingException {
@@ -94,7 +96,7 @@ public class Epsilon {
         model.setName(name);
         model.setStoredOnDisposal(false);
         EcoreUtil.resolveAll(resourceSet);
-        model.setResource(context.getStore().getEmptyResource(resourceSet));
+        model.setResource(context.getStore().createEmptyResource(resourceSet));
         return model;
     }
 
@@ -196,7 +198,7 @@ public class Epsilon {
 
     public ResourceSet transform(String scriptPath, Map<String, Object> params, EObject eObject) throws Exception {
         IModel source = createModel("S", eObject);
-        Resource resource = context.getStore().getEmptyResource();
+        Resource resource = context.getStore().createEmptyResource();
         EmfModel target = createModel("T", resource);
         List<IModel> models = new ArrayList<IModel>(){{
             add(source);
@@ -204,11 +206,12 @@ public class Epsilon {
         }};
         EtlModule module = new EtlModule();
         ececuteScript(scriptPath, params, models, module);
-        ResourceSet resourceSet = context.getStore().getResourceSet();
+        ResourceSet resourceSet = context.getStore().createResourceSet();
         while (resource.getContents().size() > 0) {
-            EObject object = resource.getContents().get(0);
-            context.getStore().createEObject(object);
-            resourceSet.getResources().add(object.eResource());
+            Resource newResource = context.getStore().createEmptyResource(resourceSet);
+            EObject newObject = resource.getContents().get(0);
+            newResource.getContents().add(newObject);
+            context.getStore().saveResource(newResource);
         }
         return resourceSet;
     }

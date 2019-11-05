@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.logging.log4j.util.Strings;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -14,12 +15,12 @@ import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.util.DocFinder;
-import ru.neoflex.nfcore.base.util.EMFMapper;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping("/emf")
@@ -34,12 +35,12 @@ public class EMFController {
 
     @PostConstruct
     void init() {
-        mapper = EMFMapper.getMapper();
+        mapper = store.createMapper();
     }
 
     private ObjectNode resourceToTree(Resource resource) {
         ObjectNode result = mapper.createObjectNode();
-        result.put("uri", store.getRefByUri(resource.getURI()));
+        result.put("uri", store.getRef(resource));
         result.withArray("contents").add(mapper.valueToTree(resource.getContents().get(0)));
         return result;
     }
@@ -55,29 +56,36 @@ public class EMFController {
     }
 
     @GetMapping("/resource")
-    JsonNode getObject(@RequestParam String ref) throws IOException {
-        Resource resource = store.loadResource(ref);
-        ObjectNode result = resourceToTree(resource);
-        return result;
+    JsonNode getObject(@RequestParam String ref) throws Exception {
+        return store.withTransaction(true, tx -> {
+            Resource resource = store.loadResource(ref);
+            ObjectNode result = resourceToTree(resource);
+            return result;
+        });
     }
 
     @DeleteMapping("/resource")
-    JsonNode deleteObject(@RequestParam String ref) throws IOException {
-        store.deleteResource(ref);
-        return mapper.createObjectNode().put("result", "ok");
+    JsonNode deleteObject(@RequestParam String ref) throws Exception {
+        return store.withTransaction(false, tx -> {
+            store.deleteResource(ref);
+            store.commit("Delete " + ref);
+            return mapper.createObjectNode().put("result", "ok");
+        });
     }
 
     @PutMapping("/resource")
-    JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws IOException {
-        URI uri = store.getUriByRef(ref);
-        Resource resource = store.treeToResource(uri, contents);
-        resource.save(null);
-        return getObject(store.getRefByUri(resource.getURI()));
+    JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
+        return getObject(store.withTransaction(false, tx -> {
+            Resource resource = store.treeToResource(ref, contents);
+            store.saveResource(resource);
+            store.commit("Put " + ref);
+            return store.getRef(resource);
+        }));
     }
 
     @GetMapping("/packages")
     JsonNode getPackages() {
-        ArrayNode nodes = (new ObjectMapper()).createArrayNode();
+        ArrayNode nodes = mapper.createArrayNode();
         for (EPackage ePackage: registry.getEPackages()) {
             nodes.add(mapper.valueToTree(ePackage));
         }
@@ -85,7 +93,7 @@ public class EMFController {
     }
 
     @PostMapping("/find")
-    JsonNode find(@RequestBody JsonNode selector) throws IOException {
+    JsonNode find(@RequestBody ObjectNode selector) throws IOException {
         DocFinder docFinder = DocFinder.create(store)
                 .executionStats(true)
                 .selector(selector)
@@ -102,6 +110,17 @@ public class EMFController {
         Resource resource = store.loadResource(ref);
         Object result =  context.getGroovy().eval(resource.getContents().get(0), method, args);
         return mapper.valueToTree(result);
+    }
+
+    @PostMapping("/calltx")
+    JsonNode callTx(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
+        return store.withTransaction(false, tx -> {
+            Resource resource = store.loadResource(ref);
+            Object result =  context.getGroovy().eval(resource.getContents().get(0), method, args);
+            store.commit("Call with tx " + method + "(" + ref + ", " +
+                    args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");
+            return mapper.valueToTree(result);
+        });
     }
 }
 

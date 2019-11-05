@@ -137,7 +137,7 @@ class Calendar extends React.Component<WithTranslation, State> {
                                 report.map( (r: any) =>
                                     <Button
                                    onClick={() =>
-                                       context.changeActiveObject!(
+                                       context.changeURL!(
                                                 // "ru.neoflex.nfcore.reports",
                                                  "Report"
                                                 // r.eContents()[0].get('name')

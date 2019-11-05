@@ -1,4 +1,12 @@
 uibase/.vscode/launch.json
 /.idea
 /workspace
+HELP.md
+target/
+workspace/
+application/workspace
+base/workspace
+java-gen/
+.mvn/
+
 

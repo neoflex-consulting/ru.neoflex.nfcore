@@ -14,7 +14,6 @@ import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
-import ru.neoflex.nfcore.base.util.EMFMapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,7 +69,7 @@ public class GroovyTests {
     @Test
     public void invokeStatic() throws Exception {
         Role superAdmin = createSuperAdminRole();
-        ObjectMapper mapper = EMFMapper.getMapper();
+        ObjectMapper mapper = context.getStore().createMapper();
         ObjectNode args = mapper.createObjectNode();
         JsonNode superAdminNode = mapper.valueToTree(superAdmin);
         args.set("role", superAdminNode);
@@ -95,7 +94,7 @@ public class GroovyTests {
             Files.createDirectories(codePath.getParent());
             Files.write(codePath, code.getBytes());
             tx.commit("Created Test.groovy");
-            Object result =  context.withClassLoader(()->{
+            Object result =  context.inContextWithClassLoaderInTransaction(()->{
                 return groovy.eval("import ru.neoflex.meta.test.Test\nTest.add(*args)", new ArrayList() {{
                     add(1);
                     add(2);

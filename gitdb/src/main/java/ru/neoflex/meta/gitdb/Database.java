@@ -163,9 +163,14 @@ public class Database implements Closeable {
             @Override
             public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
                 ArrayList<IndexEntry> result = new ArrayList<>();
-                Map<EObject, Collection<EStructuralFeature.Setting>> cr = EcoreUtil.CrossReferencer.find(resource.getContents());
+                Map<EObject, Collection<EStructuralFeature.Setting>> cr = EcoreUtil.ExternalCrossReferencer.find(resource);
+                Set<String> rootIds = new HashSet<>();
                 for (EObject eObject : cr.keySet()) {
-                    String id = checkAndGetResourceId(eObject.eResource());
+                    EObject root = EcoreUtil.getRootContainer(eObject);
+                    String id = checkAndGetResourceId(root.eResource());
+                    rootIds.add(id);
+                }
+                for (String id: rootIds) {
                     IndexEntry entry = new IndexEntry();
                     entry.setPath(new String[]{id.substring(0, 2), id.substring(2), getId(resource.getURI())});
                     entry.setContent(new byte[0]);
@@ -204,13 +209,19 @@ public class Database implements Closeable {
     }
 
     public URI createURI(String id, String rev) {
-        URI uri = URI.createURI("http:/");
+        StringBuffer buffer = new StringBuffer("");
         if (id != null) {
-            uri = uri.appendSegment(id);
+            buffer.append(id);
         }
         if (rev != null) {
-            uri = uri.appendQuery("rev=" + rev);
+            buffer.append("?rev=");
+            buffer.append(rev);
         }
+        return createURIByRef(buffer.toString());
+    }
+
+    public URI createURIByRef(String ref) {
+        URI uri = URI.createURI("http:/" + ref);
         return uri;
     }
 
@@ -261,7 +272,7 @@ public class Database implements Closeable {
         return mapper;
     }
 
-    public static String getRev(URI uri) throws IOException {
+    public String getRev(URI uri) throws IOException {
         String query = uri.query();
         if (!query.contains("rev=")) {
             return null;

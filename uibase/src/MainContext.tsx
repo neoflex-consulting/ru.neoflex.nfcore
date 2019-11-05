@@ -8,5 +8,6 @@ export interface IMainContext {
     applicationReferenceTree?: Ecore.EObject
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
-    changeActiveObject?: (objectClass: string) => void;
+    // activeObject?: Ecore.EObject
+    changeURL?: (objectClass: string, objectName?: string, objectPackage?: string) => void;
 }

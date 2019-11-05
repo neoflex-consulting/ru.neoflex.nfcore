@@ -12,9 +12,12 @@ import ru.neoflex.nfcore.base.types.Date
 
 class Report {
 	QName name
+}
+
+class InstanceReport {
+    refers Report report
 	Date date
 	refers Dataset dataset
-	String description
 	refers ReportStatus status
 }
 

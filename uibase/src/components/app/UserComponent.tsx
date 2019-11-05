@@ -5,14 +5,14 @@ import MandatoryReportingTrans from "./MandatoryReporting";
 import ReportPivotTrans from "./ReportPivot";
 import ReportDiagramTrans from "./ReportDiagram";
 import ReportRichGridTrans from "./ReportRichGrid";
-
-
+import TestComponentLeftTrans from "./TestComponentLeft";
 
 const UserComponents: any = {
     MandatoryReportingTrans: MandatoryReportingTrans,
     ReportPivotTrans: ReportPivotTrans,
     ReportRichGridTrans: ReportRichGridTrans,
-    ReportDiagramTrans: ReportDiagramTrans
+    ReportDiagramTrans: ReportDiagramTrans,
+    TestComponentLeftTrans: TestComponentLeftTrans
 };
 
 export interface Props {
