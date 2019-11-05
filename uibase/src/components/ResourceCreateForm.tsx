@@ -73,12 +73,6 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 footer={this.state.selectedEClass && this.state.name ? <Button type="primary" onClick={this.handleCreateResource}>OK</Button> : null}
                 onCancel={()=>this.props.setModalVisible(false)}
             >
-                <Input 
-                    placeholder={translate('name')}
-                    value={this.state.name} 
-                    onChange={this.onChangeName}
-                    style={{ marginBottom: '10px' }}
-                />
                 <Select
                     showSearch
                     style={{ width: '100%' }}
@@ -94,6 +88,12 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                             null
                     )}
                 </Select>
+                <Input 
+                    placeholder={translate('name')}
+                    value={this.state.name} 
+                    onChange={this.onChangeName}
+                    style={{ marginBottom: '10px' }}
+                />
             </Modal>
         )
     }
