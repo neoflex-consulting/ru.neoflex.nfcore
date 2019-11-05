@@ -381,7 +381,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     key={key + "_date_" + idx}
                     defaultValue={moment(value)}
                     onChange={(value: any) => {
-                        const newValue = { [feature.get('name')]: value.format() }
+                        const newValue = { [feature.get('name')]: value ? value.format() : '' }
                         const updatedJSON = targetObject.updater(newValue);
                         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
