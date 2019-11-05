@@ -19,5 +19,6 @@
         "dynamiccomponent": " component cannot be downloaded from path ",
         "mandatoryreporting": "Mandatory Reporting",
         "legend": "Legend",
-        "closeall": "Close All"
+        "closeall": "Close All",
+        "eClass": "eClass"
 }
