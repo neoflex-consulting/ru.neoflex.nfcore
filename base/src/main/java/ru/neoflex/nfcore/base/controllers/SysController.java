@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import java.io.IOException;
@@ -37,8 +34,8 @@ public class SysController {
         return branchInfo;
     }
 
-    @PutMapping(value="/branch/:name", produces = "application/json; charset=utf-8")
-    public JsonNode setCurrentBranch(String name) throws IOException {
+    @PutMapping(value="/branch/{name}", produces = "application/json; charset=utf-8")
+    public JsonNode setCurrentBranch(@PathVariable String name) throws IOException {
         workspace.setCurrentBranch(name);
         return getBranchInfo();
     }

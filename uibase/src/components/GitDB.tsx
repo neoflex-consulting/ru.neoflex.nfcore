@@ -2,7 +2,9 @@ import * as React from "react";
 import {Row, Col, Table, Checkbox, Button, Tooltip} from 'antd';
 // import { Ecore } from "ecore";
 import { API } from "../modules/api";
-// import {Icon as IconFA} from 'react-fa';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import {Icon as IconFA} from 'react-fa';
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -40,7 +42,7 @@ class GitDB extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        this.fetchBranchInfo()
+        //this.fetchBranchInfo()
     }
 
     fetchBranchInfo = () => {
@@ -50,14 +52,25 @@ class GitDB extends React.Component<any, State> {
     }
 
     putCurrentBranch = (branch: string) => {
-        API.instance().fetchJson("/system/branch/" + branch).then(branchInfo => {
+        API.instance().fetchJson("/system/branch/" + branch, {
+            method: "PUT",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).then(branchInfo => {
             this.setState({branchInfo})
         })
     }
 
     render() {
         const {t} = this.props as Props & WithTranslation;
-        const branches = this.state.branchInfo.branches.map(branch => ({branch, isCurrent: branch === this.state.branchInfo.current, isDefault: this.state.branchInfo.default}))
+        const branches = this.state.branchInfo.branches.map(branch => ({
+            branch,
+            key: branch,
+            isCurrent: branch === this.state.branchInfo.current,
+            isDefault: branch === this.state.branchInfo.default
+        }))
         return (
             <Row>
                 <Col span={3}/>
@@ -75,12 +88,14 @@ class GitDB extends React.Component<any, State> {
                                 dataIndex={"isDefault"} key={"isDefault"}
                                 render={(text) => <Checkbox disabled={true} checked={text === true}/>}
                         />
-                        <Column key={"command"}
+                        <Column dataIndex={"branch"} key={"command"}
                                 render={branch=>(
                                     <ButtonGroup className="pull-right">
                                         <Tooltip title={"Set Current"}>
-                                            <Button type="dashed" size="small" >
-
+                                            <Button type="dashed" size="small" onClick={()=>{
+                                                this.putCurrentBranch(branch)
+                                            }}>
+                                                <FontAwesomeIcon icon={faCheckCircle}/>
                                             </Button>
                                         </Tooltip>
                                     </ButtonGroup>
