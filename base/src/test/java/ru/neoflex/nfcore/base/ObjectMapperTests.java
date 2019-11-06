@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"repo.name=testbase"})
 public class ObjectMapperTests {
     @Autowired
     Context context;
