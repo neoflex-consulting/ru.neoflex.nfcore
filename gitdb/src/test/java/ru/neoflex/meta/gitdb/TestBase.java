@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TestBase {
-    public static final String GITDB = "gitdbtest";
+    public static final String GITDB = "testgitdb";
     Database database;
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
@@ -23,11 +23,15 @@ public class TestBase {
     }
 
     public static Database getDatabase() throws IOException, GitAPIException {
-        return new Database(GITDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        return new Database(getDatabaseFile().getAbsolutePath(), new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+    }
+
+    public static File getDatabaseFile() throws IOException, GitAPIException {
+        return new File(System.getProperty("user.home") + "/.gitdb", GITDB);
     }
 
     public static Database refreshRatabase() throws IOException, GitAPIException {
-        deleteDirectory(new File(GITDB));
+        deleteDirectory(getDatabaseFile());
         return getDatabase();
     }
 }

@@ -14,6 +14,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
+import GitDB from "./components/GitDB";
 
 import ru from 'flag-icon-css/flags/1x1/ru.svg';
 import en from 'flag-icon-css/flags/1x1/us.svg';
@@ -166,7 +167,7 @@ class EcoreApp extends React.Component<any, State> {
     
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query']
+        let selectedKeys = ['metadata', 'data', 'query', 'gitdb']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
@@ -186,8 +187,14 @@ class EcoreApp extends React.Component<any, State> {
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'query'}>
                             <Link to={`/settings/query`}>
-                            <Icon type="database" style={{ color: '#7d7d7d' }} />  
-                            <span style={{ color: '#eeeeee' }}>{t('query')}</span>
+                                <Icon type="database" style={{ color: '#7d7d7d' }} />
+                                <span style={{ color: '#eeeeee' }}>{t('query')}</span>
+                            </Link>
+                        </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'gitdb'}>
+                            <Link to={`/settings/gitdb`}>
+                                <Icon type="database" style={{ color: '#7d7d7d' }} />
+                                <span style={{ color: '#eeeeee' }}>{t('gitdb')}</span>
                             </Link>
                         </Menu.Item>
                     </Menu>
@@ -199,6 +206,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route path='/settings/query' component={QueryRunnerTrans}/>
                             <Route exact={true} path='/settings/data' component={DataBrowser}/>
                             <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans}/>
+                            <Route path='/settings/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
                 </Layout>

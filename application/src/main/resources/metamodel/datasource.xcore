@@ -25,7 +25,7 @@ class JdbcDriver extends Driver {
 
 abstract class Datasource {
 	QName name
-	refers Driver[1] driver
+	refers Driver driver
 }
 
 class JdbcDatasource extends Datasource {

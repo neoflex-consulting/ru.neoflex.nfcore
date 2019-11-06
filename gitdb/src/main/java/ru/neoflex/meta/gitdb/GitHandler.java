@@ -17,6 +17,11 @@ public class GitHandler extends URIHandlerImpl {
         this.transaction = transaction;
     }
 
+    @Override
+    public boolean canHandle(URI uri) {
+        return Database.GITDB.equals(uri.scheme());
+    }
+
     public void delete(URI uri, Map<?, ?> options) throws IOException {
         Database db = transaction.getDatabase();
         String id = db.getId(uri);

@@ -162,7 +162,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     };
 
     handleDeleteResource = (event:any, record:any) => {
-        const ref:string = `${record.resource.get('uri')}?ref=${record.resource.rev}`;
+        const ref:string = `${record.resource.get('uri')}?rev=${record.resource.rev}`;
         ref && API.instance().deleteResource(ref).then((response) => {
             if (response.result === "ok") {
                 this.refDataSearchRef.refresh();

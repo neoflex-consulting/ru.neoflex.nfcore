@@ -69,17 +69,6 @@
   padding: 24px;
 }
 
-/*Design for img ERROR*/
-.error {
-  width: 73px;
-  height: 98px;
-  margin-left: -104px;
-  margin-top: -91px;
-
-}
-
-/*Design filds for login and password*/
-
 .input-login::placeholder{
   color: #dfdfdf;
 }
@@ -125,6 +114,38 @@
   margin-top: 85px;
   font-weight: lighter;
   cursor: pointer;
+}
+
+@media screen and (max-width: 700px){
+  .login-box{
+    width: 300px;
+    height: 215px;
+    padding: 0px;
+  }
+
+  .input-login {
+    margin-left: 15px;
+    width: 40%;
+  }
+
+  .login-form {
+    margin-top: 10px;
+    padding: 30px;
+  }
+
+  .login-button {
+    margin-top: 10px;
+    width: 100%;
+  }
+} 
+
+/*Design for img ERROR*/
+.error {
+  width: 73px;
+  height: 98px;
+  margin-left: -104px;
+  margin-top: -91px;
+
 }
 
 /*style for spinner*/

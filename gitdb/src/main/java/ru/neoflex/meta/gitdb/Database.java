@@ -47,6 +47,7 @@ public class Database implements Closeable {
     public static final String TYPE_NAME_IDX = "type_name";
     public static final String REF_IDX = "ref";
     public static final String QNAME = "name";
+    public static final String GITDB = "gitdb";
     private final Repository repository;
     private ObjectMapper mapper;
     private List<EPackage> packages;
@@ -55,6 +56,7 @@ public class Database implements Closeable {
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
+    private String repoName;
 
     {
         try {
@@ -65,6 +67,7 @@ public class Database implements Closeable {
     }
 
     public Database(String repoPath, List<EPackage> packages) throws IOException, GitAPIException {
+        this.repoName = new File(repoPath).getName();
         this.repository = openRepository(repoPath);
         this.mapper = createMapper();
         this.packages = packages;
@@ -221,7 +224,7 @@ public class Database implements Closeable {
     }
 
     public URI createURIByRef(String ref) {
-        URI uri = URI.createURI("http:/" + ref);
+        URI uri = URI.createURI(GITDB + "://" +repoName + "/" + (ref == null ? "" : ref));
         return uri;
     }
 
@@ -274,7 +277,7 @@ public class Database implements Closeable {
 
     public String getRev(URI uri) throws IOException {
         String query = uri.query();
-        if (!query.contains("rev=")) {
+        if (query == null || !query.contains("rev=")) {
             return null;
         }
         return query.split("rev=")[1];

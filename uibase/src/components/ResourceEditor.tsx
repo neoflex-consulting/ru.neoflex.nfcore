@@ -381,7 +381,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     key={key + "_date_" + idx}
                     defaultValue={moment(value)}
                     onChange={(value: any) => {
-                        const newValue = { [feature.get('name')]: value.format() }
+                        const newValue = { [feature.get('name')]: value ? value.format() : '' }
                         const updatedJSON = targetObject.updater(newValue);
                         const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
@@ -400,7 +400,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     }}
                 />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EEnum')) {
-                return <Select value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
+                return <Select mode={feature.get('upperBound') === -1 ? "multiple" : "default"} value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [feature.get('name')]: newValue });
                     const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
                     this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
@@ -675,7 +675,6 @@ export class ResourceEditor extends React.Component<any, State> {
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
-
                     <Splitter
                         ref={this.splitterRef}
                         position="horizontal"
@@ -711,7 +710,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                                                 {`${res.eContents()[0].eClass.get('name')}`}
                                                             </b>}
                                                             &nbsp;
-                                                                </span>
+                                                            </span>
                                                     </a>
                                                     <Button
                                                         className="item-close-button"

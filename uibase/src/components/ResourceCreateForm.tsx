@@ -2,7 +2,6 @@ import React from 'react'
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
 import { Modal, Select, Button, Input } from 'antd';
-import { Guid } from "guid-typescript";
 
 import {API} from './../modules/api'
 
@@ -36,9 +35,10 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         newResourceJSON._id = '/'
         newResourceJSON.name = this.state.name
 
-        const id:string = Guid.create().toString()
-        const resource = resourceSet.create({ uri: id }).parse(newResourceJSON as Ecore.EObject)
+        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
         
+        resource.set('uri', null)
+
         API.instance().saveResource(resource).then(() => {
             this.props.form.setFields({
                 selectEClass:{
@@ -73,12 +73,6 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 footer={this.state.selectedEClass && this.state.name ? <Button type="primary" onClick={this.handleCreateResource}>OK</Button> : null}
                 onCancel={()=>this.props.setModalVisible(false)}
             >
-                <Input 
-                    placeholder={translate('name')}
-                    value={this.state.name} 
-                    onChange={this.onChangeName}
-                    style={{ marginBottom: '10px' }}
-                />
                 <Select
                     showSearch
                     style={{ width: '100%' }}
@@ -94,6 +88,12 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                             null
                     )}
                 </Select>
+                <Input 
+                    placeholder={translate('name')}
+                    value={this.state.name} 
+                    onChange={this.onChangeName}
+                    style={{ marginBottom: '10px' }}
+                />
             </Modal>
         )
     }
