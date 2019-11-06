@@ -11,13 +11,8 @@ import org.springframework.context.annotation.ComponentScan;
 import ru.neoflex.meta.gitdb.TransactionClassLoader;
 import ru.neoflex.nfcore.base.filters.ContextFilter;
 import ru.neoflex.nfcore.base.filters.GitClasspathFilter;
-import ru.neoflex.nfcore.base.services.Workspace;
-import ru.neoflex.nfcore.base.util.FileUtils;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +20,10 @@ import java.util.Map;
 @ComponentScan("ru.neoflex.nfcore")
 public class BaseApplication {
 
-    @Value("${workspace.root:${user.dir}/workspace}")
-    String workspaceRoot;
+    @Value("${repo.base:${user.home}/.gitdb}")
+    String repoBase;
+    @Value("${repo.name:workspace}")
+    String repoName;
 
     public static void main(String[] args) {
         TransactionClassLoader.withClassLoader(()->{
@@ -60,8 +57,7 @@ public class BaseApplication {
     public ServletRegistrationBean servletRegistrationBean(){
         ServletRegistrationBean registration = new ServletRegistrationBean(new GitServlet(),"/git/*");
         Map<String,String> params = new HashMap<>();
-        File repo = new File(workspaceRoot);
-        params.put("base-path",repo.getParent());
+        params.put("base-path", repoBase);
         params.put("export-all", "1");
         registration.setInitParameters(params);
         return registration;

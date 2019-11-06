@@ -35,7 +35,7 @@ import java.util.HashMap;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"repo.name=testbase"})
 public class EpsilonTests {
     @Autowired
     Context context;

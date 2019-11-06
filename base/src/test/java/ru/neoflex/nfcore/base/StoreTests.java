@@ -13,7 +13,7 @@ import ru.neoflex.nfcore.base.services.Context;
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"repo.name=testbase"})
 public class StoreTests {
     @Autowired
     Context context;

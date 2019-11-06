@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"repo.name=testbase"})
 public class GroovyTests {
     @Autowired
     Groovy groovy;
