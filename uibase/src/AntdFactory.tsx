@@ -8,9 +8,8 @@ const { TabPane } = Tabs;
 
 abstract class ViewContainer extends View {
     renderChildren = () => {
-        let children = this.viewObject.get("children") as Ecore.EObject[];
+        let children = this.props.viewObject.get("children") as Ecore.EObject[];
         let childrenView = children.map(
-            // (c: Ecore.EObject) => this.viewFactory.createView(c, this.props, this.activeObject));
             (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
         return <div>{childrenView}</div>
 
@@ -91,14 +90,10 @@ class TabsViewReport_ extends ViewContainer {
 
 class ComponentElement_ extends ViewContainer {
     render = () => {
-        if (this.viewObject.eClass.get("name") === "ComponentElement" && this.viewObject.get('component')) {
-            const componentClassName = this.viewObject.get('component').get('componentClassName')
+        if (this.props.viewObject.eClass.get("name") === "ComponentElement" && this.props.viewObject.get('component')) {
+            const componentClassName = this.props.viewObject.get('component').get('componentClassName')
             return <UserComponent componentClassName={componentClassName}/>
         } else return <div>Not found</div>
-        // if (this.viewObject.eClass.get("name") === "ComponentElement" && (this.viewObject.get('component') || this.activeObject)) {
-        //     const componentClassName = this.viewObject.get('component').get('componentClassName') || this.activeObject.get('componentClassName')
-        //     return <UserComponent componentClassName={componentClassName}/>
-        // } else return <div>Not found</div>
     }
 }
 
@@ -119,7 +114,6 @@ class AntdFactory implements ViewFactory {
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
-    // createView(viewObject: Ecore.EObject, props: any): JSX.Element {
         let Component = this.components.get(viewObject.eClass.eURI());
         if (!Component) {
             Component = View

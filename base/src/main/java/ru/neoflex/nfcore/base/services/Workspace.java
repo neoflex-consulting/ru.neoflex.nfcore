@@ -19,6 +19,7 @@ import ru.neoflex.nfcore.base.types.TypesPackage;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
@@ -26,17 +27,21 @@ import java.util.concurrent.Callable;
 @Service
 public class Workspace {
     private final static Log logger = LogFactory.getLog(Workspace.class);
-    public static final String MASTER = "master";
     private static final ThreadLocal<String> tlCurrentBranch = new ThreadLocal<String>();
     public static final String BRANCH = "branch";
-    @Value("${workspace.root:${user.dir}/workspace}")
-    String workspaceRoot;
+    @Value("${gitdb.base:${user.home}/.gitdb}")
+    String repoBase;
+    @Value("${gitdb.name:workspace}")
+    String repoName;
+    @Value("${gitdb.branch:master}")
+    String defaultBranch;
     private Database database;
     @Autowired
     PackageRegistry registry;
 
     @PostConstruct
     void init() throws GitAPIException, IOException {
+        String workspaceRoot = new File(repoBase, repoName).getAbsolutePath();
         database = new Database(workspaceRoot, registry.getEPackages());
         database.setQualifiedNameDelegate(eClass -> {
             for (EAttribute eAttribute: eClass.getEAllAttributes()) {
@@ -57,7 +62,7 @@ public class Workspace {
         return database;
     }
 
-    public static String getCurrentBranch() {
+    public String getCurrentBranch() {
         String branch = null;
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
@@ -70,7 +75,7 @@ public class Workspace {
             branch = tlCurrentBranch.get();
         }
         if (branch == null) {
-            branch = MASTER;
+            branch = getDefaultBranch();
         }
         return branch;
     }
@@ -115,5 +120,9 @@ public class Workspace {
         try (Transaction tx = createTransaction(Transaction.LockType.DIRTY)) {
             return Files.exists(tx.getFileSystem().getPath(path));
         }
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
     }
 }
