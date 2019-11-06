@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.base.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,24 +25,21 @@ public class SysController {
         return principal;
     }
 
-    @GetMapping(value="/branches", produces = "application/json; charset=utf-8")
-    public JsonNode getBranches(Principal principal) throws IOException {
-        ArrayNode result = new ObjectMapper().createArrayNode();
-        for (String branch: workspace.getDatabase().getBranches()) {
-            result.add(branch);
-        }
-        return result;
-    }
-
     @GetMapping(value="/branch", produces = "application/json; charset=utf-8")
-    public String getCurrentBranch() throws IOException {
-        return Workspace.getCurrentBranch();
+    public JsonNode getBranchInfo() throws IOException {
+        ObjectNode branchInfo = new ObjectMapper().createObjectNode();
+        branchInfo.put("current", workspace.getCurrentBranch());
+        branchInfo.put("default", workspace.getDefaultBranch());
+        ArrayNode branches = branchInfo.withArray("branches");
+        for (String branch: workspace.getDatabase().getBranches()) {
+            branches.add(branch);
+        }
+        return branchInfo;
     }
 
-    @PutMapping(value="/branch", produces = "application/json; charset=utf-8")
-    public String setCurrentBranch(String name) throws IOException {
-        String prev = Workspace.getCurrentBranch();
+    @PutMapping(value="/branch/:name", produces = "application/json; charset=utf-8")
+    public JsonNode setCurrentBranch(String name) throws IOException {
         workspace.setCurrentBranch(name);
-        return prev;
+        return getBranchInfo();
     }
 }
