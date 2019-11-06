@@ -13,16 +13,14 @@ import update from 'immutability-helper'
 const FooterHeight = '2em';
 
 interface State {
-    objectName: string;
-    objectPackage: string;
-    objectClass: string;
+    appModuleName: string;
+    pathTree: string;
     context: IMainContext
     hideReferences: boolean
     currentTool?: string
     application?: Ecore.EObject
     objectApp?: Ecore.EObject
     path: Ecore.EObject[]
-    classComponents: Ecore.EObject[]
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -31,19 +29,17 @@ export class MainApp extends React.Component<any, State> {
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
 
     constructor(props: any) {
-        super(props)
+        super(props);
         const context: IMainContext = {
             updateContext: this.updateContext,
             changeURL: this.changeURL
         };
         this.state = {
-            objectName: props.objectName,
-            objectPackage: props.objectPackage,
-            objectClass: props.objectClass,
+            appModuleName: props.appModuleName,
+            pathTree: props.pathTree,
             hideReferences: false,
             path: [],
-            context,
-            classComponents: []
+            context
         }
     }
 
@@ -53,47 +49,26 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    //Зписать в URL id объекта (реального) не класс компоненты
-    changeURL = (objectClass: string, objectName?: string, objectPackage?: string) => {
-        // const {context} = this.state;
-        // // const {activeObject} = context;
-        // // if (!activeObject) return null;
-        //
-        // let readWithClassComponent = false;
-        // this.state.classComponents
-        //     .filter((c: any) => c.eContents()[0].get('aClass') && c.eContents()[0].get('aClass').get('name') === objectClass)
-        //     .map((c) =>
-        //     {
-        //         this.props.history.push(`/app/${c.eContents()[0].eClass.eContainer.get('nsURI')}/${c.eContents()[0].eClass.get('name')}/${c.eContents()[0].get('name')}`);
-        //         readWithClassComponent = true
-        //     });
-        // if (!readWithClassComponent && objectPackage && objectClass && objectName) {
-        //     this.props.history.push(`/app/${objectPackage}/${objectClass}/${objectName}`);
-        // }
+    changeURL = (appModuleName?: string, pathTree?: string) => {
+        if (pathTree && appModuleName) {
+            this.props.history.push(`/app/${appModuleName}/${pathTree}`);
+        }
+        else if (appModuleName) {
+            this.props.history.push(`/app/${appModuleName}`);
+        }
+        else {
+            this.props.history.push(`/app/${this.state.appModuleName}`);
+        }
     };
 
-    getAllClassComponents() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//ClassComponent");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((classComponent) => {
-                        console.log()
-                        this.setState({classComponents: classComponent})
-                    })
-            }
-        })
-    };
-
-    setViewObject = (viewObject: Ecore.EObject) => {
-        this.updateContext({viewObject})
-    };
-
-    setActiveObject = (activeObject: Ecore.EObject) => {
-        this.updateContext({activeObject})
-    };
-
-    loadObject = (objectPackage: string, objectClass: string, name: string) => {
+    loadObject = () => {
+        let name: string;
+        let objectPackage: string;
+        let objectClass: string;
+        if (this.state.appModuleName !== undefined) {
+        name = this.state.appModuleName;
+        objectPackage = "ru.neoflex.nfcore.application";
+        objectClass = "AppModule";
         API.instance().fetchPackages().then(packages => {
             const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
             if (ePackage) {
@@ -101,10 +76,13 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(eClass, name).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-                        this.setState({objectApp}, () => {
-                            if (objectApp.get('referenceTree'))
-                            this.updateContext(({applicationReferenceTree: objectApp.get('referenceTree')}))
-                            //NOT DELETE!
+                        const splitPath = this.state.pathTree.split('/');
+                        if (splitPath.length == 3) {
+                            this.setState({objectApp}, () => {
+                                this.updateContext(
+                                    ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
+                                )
+                                //NOT DELETE!
                                 // API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
                                 //     .then(referenceTree => {
                                 //     if (!!referenceTree) {
@@ -114,37 +92,47 @@ export class MainApp extends React.Component<any, State> {
                                 //     }
                                 // })
                                 //     .catch( ()=> {console.log("Reference Tree not exists")} )
-                        });
-                        this.setViewObject(objectApp.get('view'))
+
+                            });
+                        } else {
+                            let treeChildren = objectApp.get('referenceTree').eContents();
+                            for (let i = 2; i < splitPath.length; i++) {
+                                treeChildren
+                                    .filter( (t: any) => t.get('name') === splitPath[i])
+                                    .map( (t: any) => treeChildren = t.eContents());
+                            }
+                            this.updateContext(
+                                ({
+                                    viewObject: treeChildren[0],
+                                    applicationReferenceTree: objectApp.get('referenceTree')})
+                            )
+                        }
                     }
                 })
             }
-        })
+        })}
     };
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        if (prevState.objectPackage !== this.state.objectPackage ||
-            prevState.objectClass !== this.state.objectClass ||
-            prevState.objectName !== this.state.objectName)
+        if (
+            prevState.pathTree !== this.state.pathTree ||
+            prevState.appModuleName !== this.state.appModuleName)
         {
-            // this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+            this.loadObject()
         }
     }
 
     componentDidMount(): void {
-        this.getAllClassComponents();
-        // this.loadObject(this.state.objectPackage, this.state.objectClass, this.state.objectName)
+        this.loadObject()
     }
 
-
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        if (prevState.objectPackage !== nextProps.match.params.objectPackage ||
-            prevState.objectClass !== nextProps.match.params.objectClass ||
-            prevState.objectName !== nextProps.match.params.objectName) {
+        if (
+            prevState.pathTree !== nextProps.history.location.pathname ||
+            prevState.appModuleName !== nextProps.match.params.appModuleName) {
             return {
-                objectPackage: nextProps.match.params.objectPackage,
-                objectClass: nextProps.match.params.objectClass,
-                objectName: nextProps.match.params.objectName
+                pathTree: nextProps.history.location.pathname,
+                appModuleName: nextProps.match.params.appModuleName
             };
         }
     }
@@ -184,11 +172,8 @@ export class MainApp extends React.Component<any, State> {
 
     renderContent = () => {
         const {context} = this.state;
-        // const {viewObject, activeObject} = context;
         const {viewObject} = context;
         if (!viewObject) return null;
-        // if (!activeObject) return null;
-        // return this.viewFactory.createView(viewObject, this.props, activeObject)
         return this.viewFactory.createView(viewObject, this.props)
     };
 
@@ -203,14 +188,14 @@ export class MainApp extends React.Component<any, State> {
         };
         return !referenceTree ? null : (
             <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('root').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
+                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
             </Tree.DirectoryTree>
         )
     };
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
         const code = eObject.get('name');
-        const key = parentKey ? parentKey + '.' + code : code;
+        const key = parentKey ? parentKey + '/' + code : code;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')
@@ -220,25 +205,32 @@ export class MainApp extends React.Component<any, State> {
 
         const isLeaf = !eObject.isKindOf('CatalogNode');
 
-        if (eObject.isKindOf('EObjectNode')) {
+        if (eObject.isKindOf('AppModuleNode')) {
             cbs.set(key, () => {
-                if (eObject.get('eObject')) {
-                    const objectClass = eObject.get('eObject').eClass.get('name');
-                    const objectName = eObject.get('eObject').get('name');
-                    const objectPackage = eObject.get('eObject').eClass.eContainer.get('nsURI');
-                    this.setActiveObject(eObject.get('eObject'));
-                    this.changeURL(objectClass, objectName, objectPackage)
+                if (eObject.get('name')) {
+                    const appModuleName = eObject.get('name');
+                    this.changeURL(appModuleName)
                 }
             })
         }
-        else if (eObject.isKindOf('View')) {
+        else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {
                 if (eObject.get('view')) {
-                    const objectClass = eObject.get('view').get('component').eClass.get('name');
-                    const objectName = eObject.get('view').get('component').get('name');
-                    const objectPackage = eObject.get('view').get('component').eClass.eContainer.get('nsURI');
-                    this.setActiveObject(eObject.get('view').get('component'));
-                    this.changeURL(objectClass, objectName, objectPackage)
+                    this.changeURL(this.state.appModuleName, key);
+                }
+            })
+        }
+        else if (eObject.isKindOf('EClassNode')) {
+            cbs.set(key, () => {
+                if (eObject.get('aClass') && eObject.get('view')) {
+                    this.changeURL(this.state.appModuleName, key);
+                }
+            })
+        }
+        else if (eObject.isKindOf('DynamicNode')) {
+            cbs.set(key, () => {
+                if (eObject.get('methodName') && eObject.get('eObject')) {
+                    this.changeURL(this.state.appModuleName, key);
                 }
             })
         }
