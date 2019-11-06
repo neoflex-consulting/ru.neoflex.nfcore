@@ -17,7 +17,7 @@ import ru.neoflex.nfcore.locales.LocalesPackage;
 import java.nio.file.Files;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {"repo.name=testapp"})
 public class ApplicationTests {
     @Autowired
     Context context;

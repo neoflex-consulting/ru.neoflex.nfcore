@@ -19,6 +19,7 @@ import ru.neoflex.nfcore.base.types.TypesPackage;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
@@ -29,14 +30,17 @@ public class Workspace {
     public static final String MASTER = "master";
     private static final ThreadLocal<String> tlCurrentBranch = new ThreadLocal<String>();
     public static final String BRANCH = "branch";
-    @Value("${workspace.root:${user.dir}/workspace}")
-    String workspaceRoot;
+    @Value("${repo.base:${user.home}/.gitdb}")
+    String repoBase;
+    @Value("${repo.name:workspace}")
+    String repoName;
     private Database database;
     @Autowired
     PackageRegistry registry;
 
     @PostConstruct
     void init() throws GitAPIException, IOException {
+        String workspaceRoot = new File(repoBase, repoName).getAbsolutePath();
         database = new Database(workspaceRoot, registry.getEPackages());
         database.setQualifiedNameDelegate(eClass -> {
             for (EAttribute eAttribute: eClass.getEAllAttributes()) {
