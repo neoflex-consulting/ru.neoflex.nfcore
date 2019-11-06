@@ -400,14 +400,24 @@ export class ResourceEditor extends React.Component<any, State> {
                     }}
                 />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EEnum')) {
-                return <Select value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
-                    const updatedJSON = targetObject.updater({ [feature.get('name')]: newValue });
-                    const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
-                    this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
-                }}>
-                    {feature.get('eType').eContents().map((obj: Ecore.EObject) =>
-                        <Select.Option key={key + "_opt_" + obj.get('name') + "_" + targetObject.id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
-                </Select>
+                return feature.get('upperBound') === -1 ?
+                    <Select mode="multiple" value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
+                        const updatedJSON = targetObject.updater({ [feature.get('name')]: newValue });
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}>
+                        {feature.get('eType').eContents().map((obj: Ecore.EObject) =>
+                            <Select.Option key={key + "_opt_" + obj.get('name') + "_" + targetObject.id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
+                    </Select>
+                :
+                    <Select value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
+                        const updatedJSON = targetObject.updater({ [feature.get('name')]: newValue });
+                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+                    }}>
+                        {feature.get('eType').eContents().map((obj: Ecore.EObject) =>
+                            <Select.Option key={key + "_opt_" + obj.get('name') + "_" + targetObject.id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
+                    </Select>
             } else {
                 return <EditableTextArea
                     type="text"
@@ -675,7 +685,6 @@ export class ResourceEditor extends React.Component<any, State> {
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
-
                     <Splitter
                         ref={this.splitterRef}
                         position="horizontal"
@@ -711,7 +720,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                                                 {`${res.eContents()[0].eClass.get('name')}`}
                                                             </b>}
                                                             &nbsp;
-                                                                </span>
+                                                            </span>
                                                     </a>
                                                     <Button
                                                         className="item-close-button"
