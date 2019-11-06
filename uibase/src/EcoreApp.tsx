@@ -145,8 +145,8 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
-                    <Redirect from={'/app'} exact={true} to={'/app/ru.neoflex.nfcore.application/Application/ReportsApp'}/>
-                    <Route path='/app/:objectPackage/:objectClass/:objectName' component={this.renderStartPage}/>
+                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
+                    <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/settings' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
                 </Switch>

@@ -46,15 +46,41 @@ abstract class ViewContainer extends ViewElement {
 abstract class Icon extends ViewElement {	
 }
 
-class FAIcon extends Icon {
-	String iconCode
+class ClassFeature extends FormItem {
+	refers EStructuralFeature eStructuralFeature
+}
+
+class Column extends ViewContainer {
 }
 
 class ComponentElement extends ViewElement {
 	refers Component component
 }
 
-class Tools extends ViewContainer {
+class Div extends ViewContainer {
+}
+
+class EClassForm extends Form {
+	refers EClass aClass
+}
+
+class FAIcon extends Icon {
+	String iconCode
+}
+
+class Form extends ViewContainer {
+}
+
+class FormItem extends ViewContainer {
+}
+
+class Row extends ViewContainer {
+}
+
+class Span extends ViewContainer {
+}
+
+class TabsViewReport extends ViewContainer {
 }
 
 class Tool extends ViewContainer {
@@ -62,37 +88,11 @@ class Tool extends ViewContainer {
 	contains Icon icon
 }
 
+class Tools extends ViewContainer {
+}
+
 class Typography extends ViewElement {
 	Caption text
-}
-
-class Span extends ViewContainer {
-}
-
-class Div extends ViewContainer {
-}
-
-class Row extends ViewContainer {
-}
-
-class Column extends ViewContainer {
-}
-
-class TabsViewReport extends ViewContainer {
-}
-
-class Form extends ViewContainer {
-}
-
-class EClassForm extends Form {
-	refers EClass aClass
-}
-
-class FormItem extends ViewContainer {
-}
-
-class ClassFeature extends FormItem {
-	refers EStructuralFeature eStructuralFeature
 }
 
 /* Trees */
@@ -100,13 +100,13 @@ abstract class TreeNode{
     String name
 }
 
-class CatalogNode extends TreeNode {
-    contains TreeNode[] children
-}
-
-class TreeComponentNode extends TreeNode {
+class AppModuleNode extends TreeNode {
     refers AppModule componentWithTree
     refers EObject eObject
+}
+
+class CatalogNode extends TreeNode {
+    contains TreeNode[] children
 }
 
 class DynamicNode extends TreeNode {
@@ -114,13 +114,14 @@ class DynamicNode extends TreeNode {
     refers EObject eObject
 }
 
+class EClassNode extends ViewNode {
+    refers EClass aClass
+}
+
 class ViewNode extends TreeNode {
     contains ViewElement view
     refers EObject eObject
 }
 
-class EClassNode extends ViewNode {
-    refers EClass aClass
-}
 
 
