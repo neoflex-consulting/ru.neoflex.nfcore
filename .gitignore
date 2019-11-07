@@ -6,7 +6,7 @@ target/
 workspace/
 application/workspace
 base/workspace
-java-gen/
+**/java-gen/**
 .mvn/
 
 
