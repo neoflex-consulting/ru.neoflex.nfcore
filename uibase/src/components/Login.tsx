@@ -5,16 +5,8 @@ import logo from '../logo.png';
 import pony from '../pony.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
+import Ecore from "ecore";
 
-import ru from 'flag-icon-css/flags/1x1/ru.svg';
-import en from 'flag-icon-css/flags/1x1/us.svg';
-import cn from 'flag-icon-css/flags/1x1/cn.svg';
-
-const langIcon: {[key:string]: any} = {
-    'en': en,
-    'ru': ru,
-    'cn': cn
-}
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -27,6 +19,8 @@ interface State {
     waitMinute: boolean;
     count: number;
     images: any;
+    languages: Array<string>;
+    langIcons: { [key: string]: any };
 }
 
 export class Login extends React.Component<Props & WithTranslation, State> {
@@ -36,15 +30,10 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         password: undefined,
         waitMinute: true,
         count: 0,
-        images: logo
+        images: logo,
+        languages: [],
+        langIcons: {}
     };
-
-
-    componentDidMount(): void {
-        this.authenticate().catch(() => {
-            this.setState({ waitMinute: false })
-        })
-    }
 
     surprise = () => {
         this.state.count === undefined ?
@@ -54,16 +43,64 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                     this.setState({ count: 0 })
     };
 
+    authenticate = () => {
+        return API.instance().authenticate(this.state.userName, this.state.password)
+            .then((principal) => {
+                this.props.onLoginSucceed(principal)
+            })
+    };
+
+    authenticateIfEnterPress = (e: any) => {
+        if (e.keyCode === 13) {
+            this.authenticate()
+        }
+    };
+
+    getLanguages() {
+        const prepared: Array<string> = [];
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//Lang");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((resources) => {
+                        resources.map((r) => {
+                            prepared.push(r.eContents()[0].get('name'))
+                            this.importLangIcon(r.eContents()[0].get('name'))
+                        });
+                        this.setState({languages: prepared.sort()})
+                    })
+            }
+        })
+    }
+
+    importLangIcon(lang:string){
+        const langIcons: { [key: string]: any } = this.state.langIcons
+        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
+            langIcons[lang] = importedModule 
+            this.setState({ langIcons })
+        });
+    }
+
+    componentDidMount(): void {
+        if (!this.state.languages.length) this.getLanguages()
+        this.authenticate().catch(() => {
+            this.setState({ waitMinute: false })
+        })
+
+
+    }
+
     render() {
+        const langIcons: { [key: string]: any } = this.state.langIcons
         const { t, i18n } = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng);
         };
 
         const langMenu = () => <Menu>
-            {_map(langIcon, (iconRes:any, index:number)=>
+            {_map(this.state.languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
-                    <img style={{ borderRadius: '25px' }} alt='language' src={iconRes} />
+                    <img style={{ borderRadius: '25px' }} alt='li' src={langIcons[lang] && langIcons[lang].default} />
                 </Menu.Item>
             )}
         </Menu>
@@ -115,25 +152,14 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                         </div>
                     </div>
                     <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
+                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] || langIcons['us']} />
                     </Dropdown>
                 </div>
             )
         }
     }
 
-    authenticate = () => {
-        return API.instance().authenticate(this.state.userName, this.state.password)
-            .then((principal) => {
-                this.props.onLoginSucceed(principal)
-            })
-    };
-
-    authenticateIfEnterPress = (e: any) => {
-        if (e.keyCode === 13) {
-            this.authenticate()
-        }
-    };
+    
 }
 
 export default withTranslation()(Login)

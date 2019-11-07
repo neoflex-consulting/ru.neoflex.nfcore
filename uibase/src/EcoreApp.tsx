@@ -139,7 +139,7 @@ class EcoreApp extends React.Component<any, State> {
                         </Menu.SubMenu>
                     </Menu>
                     <Dropdown overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
+                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || en} />
                     </Dropdown>
                     <Icon className="bell-icon" type="bell" />
                 </Header>
@@ -213,7 +213,7 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
-        if (!this.state.languages.length) {this.getLanguages()}
+        if (!this.state.languages.length) this.getLanguages()
         const _this = this;
         let errorHandler : IErrorHandler = {
             handleError(error: Error): void {
