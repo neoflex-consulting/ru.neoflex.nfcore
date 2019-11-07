@@ -15,6 +15,8 @@ import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -122,8 +124,10 @@ class EcoreApp extends React.Component<any, State> {
                     </div>
                     <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
-                            <Menu.Item key={'logout'}><Icon type="logout" style={{ fontSize: '17px' }} />{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}><Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />{t('developer')}</Menu.Item>
+                            <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
+                            <Menu.Item key={'developer'}>
+                                <Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />
+                                {t('developer')}</Menu.Item>
                             <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
                             <Menu.Item key={'testComponent'}><Icon type="coffee" style={{ fontSize: '17px' }} />Test component</Menu.Item>
                             <Menu.SubMenu title={<span><Icon type="global" style={{ fontSize: '17px' }} />{t('language')}</span>}>
