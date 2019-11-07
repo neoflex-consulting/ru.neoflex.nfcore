@@ -1,9 +1,7 @@
 package ru.neoflex.meta.gitdb;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,13 +10,8 @@ import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExporterTests extends TestBase {
     User user;
@@ -100,7 +93,7 @@ public class ExporterTests extends TestBase {
                 Resource resource = resourceSet.createResource(database.createURI(entityId.getId(), null));
                 resource.load(null);
             }
-            exporter.zipResourceSet(resourceSet, Files.newOutputStream(path));
+            exporter.zip(resourceSet, Files.newOutputStream(path));
             tx.commit("Zip all objects");
             Assert.assertEquals(1, Files.walk(path).filter(Files::isRegularFile).count());
         }
