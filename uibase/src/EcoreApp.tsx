@@ -16,16 +16,6 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 
-import ru from 'flag-icon-css/flags/1x1/ru.svg';
-import en from 'flag-icon-css/flags/1x1/us.svg';
-import cn from 'flag-icon-css/flags/1x1/cn.svg';
-
-const langIcon: {[key:string]: any} = {
-    'en': en,
-    'ru': ru,
-    'ch': cn
-}
-
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
 
@@ -33,6 +23,7 @@ interface State {
     principal?: any;
     languages: string[];
     notifierDuration: number;
+    langIcons: { [key: string]: any };
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -42,7 +33,8 @@ class EcoreApp extends React.Component<any, State> {
         this.state = {
             principal: undefined,
             languages: [],
-            notifierDuration: 0
+            notifierDuration: 0,
+            langIcons: {}
         };
     }
 
@@ -83,26 +75,40 @@ class EcoreApp extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
-                        resources.map((r) =>
-                                prepared.push(r.eContents()[0].get('name'))
-                        );
+                        resources.forEach((r) => {
+                            prepared.push(r.eContents()[0].get('name'))
+                            this.importLangIcon(r.eContents()[0].get('name'))
+                        });
                         this.setState({languages: prepared.sort()})
                     })
             }
         })
     }
 
+    importLangIcon(lang:string){
+        const langIcons: { [key: string]: any } = this.state.langIcons
+        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
+            langIcons[lang] = importedModule 
+            this.setState({ langIcons })
+        });
+    }
+
     renderDev = () => {
+        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+        const langIcons: { [key: string]: any } = this.state.langIcons
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+
         const langMenu = () => <Menu>
-            {_map(langIcon, (iconRes:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
-                    <img style={{ borderRadius: '25px' }} alt='language' src={iconRes} />
+            {_map(this.state.languages, (lang:any, index:number)=>
+                <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
+                    <img 
+                        style={{ borderRadius: '25px' }} 
+                        alt='li' 
+                        src={langIcons[lang] ? langIcons[lang].default : ''} />
                 </Menu.Item>
             )}
         </Menu>
@@ -112,7 +118,7 @@ class EcoreApp extends React.Component<any, State> {
                 <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
                     <div className={window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"}>
                         <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                        <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
+                        <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                     </div>
                     <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
@@ -140,7 +146,7 @@ class EcoreApp extends React.Component<any, State> {
                         </Menu.SubMenu>
                     </Menu>
                     <Dropdown overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || en} />
+                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
                     </Dropdown>
                     <Icon className="bell-icon" type="bell" />
                 </Header>

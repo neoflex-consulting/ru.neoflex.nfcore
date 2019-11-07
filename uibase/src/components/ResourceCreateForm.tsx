@@ -75,7 +75,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
             >
                 <Select
                     showSearch
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', marginBottom: '10px' }}
                     placeholder={translate('selecteclass')}
                     onChange={this.handleSelectClass}
                 >
@@ -92,7 +92,6 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     placeholder={translate('name')}
                     value={this.state.name} 
                     onChange={this.onChangeName}
-                    style={{ marginBottom: '10px' }}
                 />
             </Modal>
         )

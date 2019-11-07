@@ -63,7 +63,7 @@ export class Login extends React.Component<Props & WithTranslation, State> {
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
-                        resources.map((r) => {
+                        resources.forEach((r) => {
                             prepared.push(r.eContents()[0].get('name'))
                             this.importLangIcon(r.eContents()[0].get('name'))
                         });
@@ -96,16 +96,20 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng);
         };
+        const storeLangValue = String(localStorage.getItem('i18nextLng'))
 
         const langMenu = () => <Menu>
             {_map(this.state.languages, (lang:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
-                    <img style={{ borderRadius: '25px' }} alt='li' src={langIcons[lang] && langIcons[lang].default} />
+                <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
+                    <img 
+                        style={{ borderRadius: '25px' }} 
+                        alt='li' 
+                        src={langIcons[lang] ? langIcons[lang].default : ''} />
                 </Menu.Item>
             )}
         </Menu>
 
-        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+        
 
         if (this.state.waitMinute) {
             return (
@@ -122,7 +126,7 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                     <div className="login-box">
                         <div className="app-logo" style={{ width: '100%', paddingRight: '20px', textAlign: 'center' }}>
                             <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                            <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
+                            <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                         </div>
                         <div className="login-form">
                             <input
@@ -151,9 +155,9 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                             </button>
                         </div>
                     </div>
-                    <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] || langIcons['us']} />
-                    </Dropdown>
+                    {this.state.languages.length && <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
+                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
+                    </Dropdown>}
                 </div>
             )
         }

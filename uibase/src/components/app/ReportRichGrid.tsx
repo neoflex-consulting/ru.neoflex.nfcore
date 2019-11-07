@@ -1,6 +1,6 @@
 import * as React from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
-import NfDataGrid from './../NfDataGrid'
+//import NfDataGrid from './../NfDataGrid'
  
 interface Props {
 }
