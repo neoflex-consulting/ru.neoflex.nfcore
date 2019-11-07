@@ -4,6 +4,7 @@ HELP.md
 gitdbtest/
 target/
 .mvn/
+**/java-gen/**
 !**/src/main/**
 !**/src/test/**
 

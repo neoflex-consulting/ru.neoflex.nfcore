@@ -140,9 +140,14 @@ public class Exporter {
         }
     }
 
-    public void zipResourceSet(ResourceSet resourceSet, OutputStream outputStream) throws IOException {
-        try (ZipOutputStream zipOutputStream = new java.util.zip.ZipOutputStream(outputStream);) {
-            for (Resource resource: resourceSet.getResources()) {
+    public void zip(ResourceSet resourceSet, OutputStream outputStream) throws IOException {
+        List<Resource> resources = resourceSet.getResources();
+        zip(resources, outputStream);
+    }
+
+    public void zip(List<Resource> resources, OutputStream outputStream) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
+            for (Resource resource: resources) {
                 for (EObject eObject: resource.getContents()) {
                     EClass eClass = eObject.eClass();
                     EPackage ePackage = eClass.getEPackage();
@@ -160,7 +165,7 @@ public class Exporter {
                     }
                 }
             }
-            for (Resource resource: resourceSet.getResources()) {
+            for (Resource resource: resources) {
                 for (EObject eObject: resource.getContents()) {
                     EClass eClass = eObject.eClass();
                     EPackage ePackage = eClass.getEPackage();

@@ -12,8 +12,8 @@ import {Button} from "antd";
 interface State {
     currentMonth: Date;
     selectedDate: Date;
-    Reports: Ecore.EObject[];
     ReportStatus: Ecore.EObject[];
+    InstanceReports: Ecore.EObject[];
     calendarLanguage: string;
 }
 
@@ -25,18 +25,18 @@ class Calendar extends React.Component<WithTranslation, State> {
     state = {
         currentMonth: new Date(),
         selectedDate: new Date(),
-        Reports: [],
         ReportStatus: [],
+        InstanceReports: [],
         calendarLanguage: ""
     };
 
-    getAllReports() {
+    getAllInstanceReports() {
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//Report");
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//InstanceReport");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((resources) => {
-                        this.setState({Reports: resources})
+                        this.setState({InstanceReports: resources})
                     })
             }
         })
@@ -114,7 +114,7 @@ class Calendar extends React.Component<WithTranslation, State> {
         let formattedDate = "";
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
-                let report = this.getReports(day);
+                let report = this.getInstanceReports(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
@@ -138,9 +138,7 @@ class Calendar extends React.Component<WithTranslation, State> {
                                     <Button
                                    onClick={() =>
                                        context.changeURL!(
-                                                // "ru.neoflex.nfcore.reports",
-                                                 "Report"
-                                                // r.eContents()[0].get('name')
+                                           // "Report"
                                             )
                                         }
                                          key={`${r.get('uri')}/${r.rev}`}
@@ -149,7 +147,7 @@ class Calendar extends React.Component<WithTranslation, State> {
                                        title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                    >
-                                    {r.eContents()[0].get('name')}
+                                    {r.eContents()[0].get('report').get('name')}
                                     </Button>
                                 )
                                 : ""}
@@ -172,16 +170,16 @@ class Calendar extends React.Component<WithTranslation, State> {
         )
     }
 
-    private getReports(day: any) {
+    private getInstanceReports(day: any) {
         let temp: any = [];
-        this.state.Reports.filter((r: any) =>
+        this.state.InstanceReports.filter((r: any) =>
             dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
             && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
             && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
         ).map((r) => temp.push(r));
         return temp;
     }
-
+    
     onDateClick = (day: any) => {
         this.setState({
             selectedDate: day
@@ -201,8 +199,8 @@ class Calendar extends React.Component<WithTranslation, State> {
     };
 
     componentDidMount(): void {
-        this.getAllReports();
         this.getAllStatuses();
+        this.getAllInstanceReports();
     }
 
     render() {

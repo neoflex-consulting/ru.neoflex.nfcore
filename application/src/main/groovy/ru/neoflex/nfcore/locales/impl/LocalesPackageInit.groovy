@@ -22,7 +22,7 @@ class LocalesPackageInit {
         Lang.metaClass.static.createLangIfNotExists = {String lang->
             createLangIfNotExists(lang)
         }
-        Lang.createLangIfNotExists("en")
+        Lang.createLangIfNotExists("us")
         Lang.createLangIfNotExists("ru")
         Lang.createLangIfNotExists("cn")
     }

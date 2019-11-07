@@ -27,13 +27,14 @@ import java.util.concurrent.Callable;
 @Service
 public class Workspace {
     private final static Log logger = LogFactory.getLog(Workspace.class);
-    public static final String MASTER = "master";
     private static final ThreadLocal<String> tlCurrentBranch = new ThreadLocal<String>();
     public static final String BRANCH = "branch";
-    @Value("${repo.base:${user.home}/.gitdb}")
+    @Value("${gitdb.base:${user.home}/.gitdb}")
     String repoBase;
-    @Value("${repo.name:workspace}")
+    @Value("${gitdb.name:workspace}")
     String repoName;
+    @Value("${gitdb.branch:master}")
+    String defaultBranch;
     private Database database;
     @Autowired
     PackageRegistry registry;
@@ -61,7 +62,7 @@ public class Workspace {
         return database;
     }
 
-    public static String getCurrentBranch() {
+    public String getCurrentBranch() {
         String branch = null;
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
@@ -74,7 +75,7 @@ public class Workspace {
             branch = tlCurrentBranch.get();
         }
         if (branch == null) {
-            branch = MASTER;
+            branch = getDefaultBranch();
         }
         return branch;
     }
@@ -119,5 +120,9 @@ public class Workspace {
         try (Transaction tx = createTransaction(Transaction.LockType.DIRTY)) {
             return Files.exists(tx.getFileSystem().getPath(path));
         }
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
     }
 }
