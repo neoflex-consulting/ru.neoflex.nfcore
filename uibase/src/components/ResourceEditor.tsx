@@ -764,13 +764,23 @@ export class ResourceEditor extends React.Component<any, State> {
                     >
                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) => {
                             const possibleTypes: Array<string> = this.state.addRefPossibleTypes
-                            return possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
-                                {<b>
-                                    {`${res.eContents()[0].eClass.get('name')}`}
-                                </b>}
-                                &nbsp;
-                                {`${res.eContents()[0].get('name')}`}
-                            </Select.Option>
+                            const isEObjectType: boolean = possibleTypes[0] === 'EObject'
+                            return isEObjectType ?
+                                <Select.Option key={index} value={res.eURI()}>
+                                    {<b>
+                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                    </b>}
+                                    &nbsp;
+                                    {`${res.eContents()[0].get('name')}`}
+                                </Select.Option>
+                                :
+                                possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
+                                    {<b>
+                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                    </b>}
+                                    &nbsp;
+                                    {`${res.eContents()[0].get('name')}`}
+                                </Select.Option>
                         })}
                     </Select>
                 </Modal>}
