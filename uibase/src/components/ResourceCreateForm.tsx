@@ -62,13 +62,12 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
     }
 
     render() {
-        const { translate } = this.props
-        
+        const {t} = this.props;
         return (
             <Modal
                 key="create_resource"
                 width={'400px'}
-                title={translate('createresource')}
+                title={t('createitem')}
                 visible={this.props.createResModalVisible}
                 footer={this.state.selectedEClass && this.state.name ? <Button type="primary" onClick={this.handleCreateResource}>OK</Button> : null}
                 onCancel={()=>this.props.setModalVisible(false)}
@@ -76,7 +75,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 <Select
                     showSearch
                     style={{ width: '100%', marginBottom: '10px' }}
-                    placeholder={translate('selecteclass')}
+                    placeholder={t('eClass')}
                     onChange={this.handleSelectClass}
                 >
                     {this.props.classes.map((eclass: Ecore.EObject) =>
@@ -89,7 +88,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     )}
                 </Select>
                 <Input 
-                    placeholder={translate('name')}
+                    placeholder={t('itemname')}
                     value={this.state.name} 
                     onChange={this.onChangeName}
                 />

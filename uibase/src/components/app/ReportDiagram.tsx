@@ -1,7 +1,6 @@
 import * as React from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
 
-
 interface Props {
 }
 
@@ -25,5 +24,4 @@ class ReportDiagram extends React.Component<Props & WithTranslation, State> {
     }
 }
 
-const ReportDiagramTrans = withTranslation()(ReportDiagram);
-export default ReportDiagramTrans;
+export default withTranslation()(ReportDiagram)

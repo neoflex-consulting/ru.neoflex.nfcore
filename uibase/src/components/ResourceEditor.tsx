@@ -9,8 +9,8 @@ import { API } from "../modules/api";
 import Splitter from './CustomSplitter'
 import update from 'immutability-helper';
 import EditableTextArea from './EditableTextArea'
-import SearchGridTrans from "./SearchGrid";
-import { WithTranslation } from "react-i18next";
+import SearchGrid from "./SearchGrid";
+import {withTranslation, WithTranslation} from "react-i18next";
 import moment from 'moment';
 import EClassSelection from './EClassSelection'
 
@@ -41,7 +41,7 @@ interface State {
     addRefPossibleTypes: Array<string>
 }
 
-export class ResourceEditor extends React.Component<any, State> {
+class ResourceEditor extends React.Component<any, State> {
 
     private splitterRef: React.RefObject<any>;
     private selectedRefUries: string[];
@@ -701,7 +701,7 @@ export class ResourceEditor extends React.Component<any, State> {
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </Col>
                                 <Col span={3} style={{ position: 'sticky', top: '0' }}>
-                                    <Button icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
+                                    <Button title={t('additem')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
                                     <div className="resource-container">
                                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
                                             this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }) =>
@@ -794,12 +794,14 @@ export class ResourceEditor extends React.Component<any, State> {
                 {this.state.modalResourceVisible && <Modal
                     key="add_resource_modal"
                     width={'1000px'}
-                    title={t('addresource')}
+                    title={t('addresources')}
                     visible={this.state.modalResourceVisible}
                     footer={null}
                     onCancel={this.handleResourceModalCancel}
                 >
-                    <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
+                    {/*<SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />*/}
+                    <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
+
                 </Modal>}
                 <EClassSelection
                     key="eclass_selection"
@@ -822,3 +824,5 @@ export class ResourceEditor extends React.Component<any, State> {
         );
     }
 }
+
+export default withTranslation()(ResourceEditor);

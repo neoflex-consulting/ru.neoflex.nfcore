@@ -126,5 +126,4 @@ class QueryRunner extends React.Component<any, State> {
     }
 }
 
-const QueryRunnerTrans = withTranslation()(QueryRunner);
-export default QueryRunnerTrans;
+export default withTranslation()(QueryRunner)

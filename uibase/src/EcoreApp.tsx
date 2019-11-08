@@ -3,10 +3,10 @@ import {Button, Icon, Layout, Menu, notification, Dropdown} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
-import MetaBrowserTrans from "./components/MetaBrowser";
-import {ResourceEditor} from "./components/ResourceEditor"
+import MetaBrowser from "./components/MetaBrowser";
+import ResourceEditor from "./components/ResourceEditor"
 import {Link, Redirect, Route, Switch} from "react-router-dom";
-import QueryRunnerTrans from "./components/QueryRunner";
+import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
@@ -16,11 +16,11 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt, faYinYang, faCannabis, faChess, faBullhorn } from '@fortawesome/free-solid-svg-icons'
+import {faSignOutAlt, faYinYang, faCannabis, faBullhorn, faTools, faEllipsisH} from '@fortawesome/free-solid-svg-icons'
 import { faClock, faEye, faUser, faBell } from '@fortawesome/free-regular-svg-icons'
+import {faBattleNet, faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 
 const { Header, Content, Sider } = Layout;
-const ResourceEditorTrans = withTranslation()(ResourceEditor);
 
 interface State {
     principal?: any;
@@ -127,9 +127,24 @@ class EcoreApp extends React.Component<any, State> {
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
                             <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}><FontAwesomeIcon icon={faYinYang} size="lg" style={{marginRight: "10px"}}/>{t('developer')}</Menu.Item>
-                            <Menu.Item key={'app'}><FontAwesomeIcon icon={faChess} size="lg"style={{marginRight: "10px"}}/>App</Menu.Item>
-                            <Menu.Item key={'testComponent'}><FontAwesomeIcon icon={faCannabis} size="lg"style={{marginRight: "10px"}}/>Test component</Menu.Item>
+                            <Menu.Item key={'developer'}>
+                                <Link to={`/settings/data`}>
+                                    <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
+                                    {t('developer')}
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key={'app'}>
+                                <Link to={`/app`}>
+                                    <FontAwesomeIcon icon={faSketch} size="lg"style={{marginRight: "10px"}}/>
+                                    App
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key={'testComponent'}>
+                                <Link to={`/test`}>
+                                    <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
+                                    Test component
+                                </Link>
+                            </Menu.Item>
                             <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"style={{marginRight: "10px"}}/>Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
                                     <Menu.Item key={'showNotifications'}>
@@ -180,7 +195,6 @@ class EcoreApp extends React.Component<any, State> {
                     <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
                         <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
                         <Link to={`/settings/metadata`}>
-                            <Icon type="compass" style={{ color: '#7d7d7d' }} />
                             <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
                         </Link>
                         </Menu.Item>
@@ -207,10 +221,10 @@ class EcoreApp extends React.Component<any, State> {
                 <Layout>
                     <Content className="app-content">
                         <Switch>
-                            <Route path='/settings/metadata' component={MetaBrowserTrans}/>
-                            <Route path='/settings/query' component={QueryRunnerTrans}/>
+                            <Route path='/settings/metadata' component={MetaBrowser}/>
+                            <Route path='/settings/query' component={QueryRunner}/>
                             <Route exact={true} path='/settings/data' component={DataBrowser}/>
-                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans}/>
+                            <Route path='/settings/data/:id/:ref' component={ResourceEditor}/>
                             <Route path='/settings/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
@@ -270,5 +284,5 @@ class EcoreApp extends React.Component<any, State> {
         )
     }
 }
-const EcoreAppTrans = withTranslation()(EcoreApp);
-export default EcoreAppTrans;
+
+export default withTranslation()(EcoreApp);

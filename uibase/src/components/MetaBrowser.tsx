@@ -153,5 +153,4 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
     }
 }
 
-const MetaBrowserTrans = withTranslation()(MetaBrowser);
-export default MetaBrowserTrans;
+export default withTranslation()(MetaBrowser)

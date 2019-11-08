@@ -1,12 +1,12 @@
 import React, {Suspense} from 'react';
 import './styles/App.css';
-import EcoreAppTrans from "./EcoreApp";
+import EcoreApp from "./EcoreApp";
 
 const App: React.FC = (props) => {
     return (
         <div className="App">
             <Suspense fallback={<div className="loader"/>}>
-                <EcoreAppTrans {...props} />
+                <EcoreApp {...props} />
             </Suspense>
         </div>
     );

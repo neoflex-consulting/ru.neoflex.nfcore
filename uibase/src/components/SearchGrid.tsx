@@ -5,8 +5,8 @@ import {API} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
 import {FormComponentProps} from "antd/lib/form";
-import DataSearchTrans from "./DataSearch";
-import SearchFilterTrans from "./SearchFilter";
+import DataSearch from "./DataSearch";
+import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 interface Props {
@@ -186,7 +186,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     //for FilterMenu
     getColumnSearchProps = (name: any, title: any) => ({
         filterDropdown: () =>
-                <SearchFilterTrans onName={name} onTitle={title} tableData={this.filteredData()}
+                <SearchFilter onName={name} onTitle={title} tableData={this.filteredData()}
                                      tableDataFilter={this.changeTableData}/>
     });
 
@@ -224,7 +224,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             return (
              <div style={{padding: '20px'}}>
                  <div>
-                     <DataSearchTrans 
+                     <DataSearch
                         onSearch={this.handleSearch}
                         specialEClass={this.props.specialEClass}
                         wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
@@ -240,7 +240,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                              ?
                              <div>
                                  <div>
-                                     <Button type="primary" onClick={this.handleSelect} disabled={!hasSelected} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
+                                     <Button title={t("select")} type="primary" onClick={this.handleSelect} disabled={!hasSelected} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
                                          <Icon type="select" />
                                     </Button>
                                  </div>
@@ -267,6 +267,4 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             );
         }}
 
-const WrappedSearchGrid = Form.create<Props & FormComponentProps & WithTranslation>()(SearchGrid);
-const SearchGridTrans = withTranslation()(WrappedSearchGrid);
-export default SearchGridTrans;
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchGrid))
