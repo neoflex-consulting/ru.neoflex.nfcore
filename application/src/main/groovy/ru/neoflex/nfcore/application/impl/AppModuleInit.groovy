@@ -87,24 +87,24 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def recreateReport(String name) {
-        def rs = DocFinder.create(Context.current.store, ReportsPackage.Literals.INSTANCE_REPORT, [name: name])
-                .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
-        if (rs.resources.empty) {
-            def instanceReport1 = ReportsFactory.eINSTANCE.createInstanceReport()
-            instanceReport1.date = new Date()
-//            def statusReport1 = findOrCreateEObject(ReportsPackage.Literals.REPORT_STATUS, "NOT_FOUND", "",true)
-//            instanceReport1.setStatus(statusReport1)
-//            def report1 = findOrCreateEObject(ReportsPackage.Literals.REPORT, "${name}", "",true)
-//            instanceReport1.report = report1
-
-            rs.resources.add(Context.current.store.createEObject(instanceReport1))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
+//    static def recreateReport(String name) {
+//        def rs = DocFinder.create(Context.current.store, ReportsPackage.Literals.INSTANCE_REPORT, [name: name])
+//                .execute().resourceSet
+//        while (!rs.resources.empty) {
+//            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
+//        }
+//        if (rs.resources.empty) {
+//            def instanceReport1 = ReportsFactory.eINSTANCE.createInstanceReport()
+//            instanceReport1.date = new Date()
+////            def statusReport1 = findOrCreateEObject(ReportsPackage.Literals.REPORT_STATUS, "NOT_FOUND", "",true)
+////            instanceReport1.setStatus(statusReport1)
+////            def report1 = findOrCreateEObject(ReportsPackage.Literals.REPORT, "${name}", "",true)
+////            instanceReport1.report = report1
+//
+//            rs.resources.add(Context.current.store.createEObject(instanceReport1))
+//        }
+//        return rs.resources.get(0).contents.get(0)
+//    }
 
     {
         recreateAppModule("ReportsApp")

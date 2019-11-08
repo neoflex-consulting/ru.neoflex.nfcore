@@ -5,16 +5,8 @@ import logo from '../logo.png';
 import pony from '../pony.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
+import Ecore from "ecore";
 
-import ru from 'flag-icon-css/flags/1x1/ru.svg';
-import en from 'flag-icon-css/flags/1x1/us.svg';
-import cn from 'flag-icon-css/flags/1x1/cn.svg';
-
-const langIcon: {[key:string]: any} = {
-    'en': en,
-    'ru': ru,
-    'cn': cn
-}
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -27,6 +19,8 @@ interface State {
     waitMinute: boolean;
     count: number;
     images: any;
+    languages: Array<string>;
+    langIcons: { [key: string]: any };
 }
 
 export class Login extends React.Component<Props & WithTranslation, State> {
@@ -36,15 +30,10 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         password: undefined,
         waitMinute: true,
         count: 0,
-        images: logo
+        images: logo,
+        languages: [],
+        langIcons: {}
     };
-
-
-    componentDidMount(): void {
-        this.authenticate().catch(() => {
-            this.setState({ waitMinute: false })
-        })
-    }
 
     surprise = () => {
         this.state.count === undefined ?
@@ -54,21 +43,73 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                     this.setState({ count: 0 })
     };
 
+    authenticate = () => {
+        return API.instance().authenticate(this.state.userName, this.state.password)
+            .then((principal) => {
+                this.props.onLoginSucceed(principal)
+            })
+    };
+
+    authenticateIfEnterPress = (e: any) => {
+        if (e.keyCode === 13) {
+            this.authenticate()
+        }
+    };
+
+    getLanguages() {
+        const prepared: Array<string> = [];
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//Lang");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((resources) => {
+                        resources.forEach((r) => {
+                            prepared.push(r.eContents()[0].get('name'))
+                            this.importLangIcon(r.eContents()[0].get('name'))
+                        });
+                        this.setState({languages: prepared.sort()})
+                    })
+            }
+        })
+    }
+
+    importLangIcon(lang:string){
+        const langIcons: { [key: string]: any } = this.state.langIcons
+        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
+            langIcons[lang] = importedModule 
+            this.setState({ langIcons })
+        });
+    }
+
+    componentDidMount(): void {
+        if (!this.state.languages.length) this.getLanguages()
+        this.authenticate().catch(() => {
+            this.setState({ waitMinute: false })
+        })
+
+
+    }
+
     render() {
+        const langIcons: { [key: string]: any } = this.state.langIcons
         const { t, i18n } = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng);
         };
+        const storeLangValue = String(localStorage.getItem('i18nextLng'))
 
         const langMenu = () => <Menu>
-            {_map(langIcon, (iconRes:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(index)} key={index} style={{ width: '60px' }}>
-                    <img style={{ borderRadius: '25px' }} alt='language' src={iconRes} />
+            {_map(this.state.languages, (lang:any, index:number)=>
+                <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
+                    <img 
+                        style={{ borderRadius: '25px' }} 
+                        alt='li' 
+                        src={langIcons[lang] ? langIcons[lang].default : ''} />
                 </Menu.Item>
             )}
         </Menu>
 
-        const storeLangValue = String(localStorage.getItem('i18nextLng'))
+        
 
         if (this.state.waitMinute) {
             return (
@@ -85,7 +126,7 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                     <div className="login-box">
                         <div className="app-logo" style={{ width: '100%', paddingRight: '20px', textAlign: 'center' }}>
                             <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                            <span style={{ fontVariantCaps: 'petite-caps' }}>Neoflex CORE</span>
+                            <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                         </div>
                         <div className="login-form">
                             <input
@@ -114,26 +155,15 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                             </button>
                         </div>
                     </div>
-                    <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='language' src={langIcon[storeLangValue] || 'en'} />
-                    </Dropdown>
+                    {this.state.languages.length && <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
+                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
+                    </Dropdown>}
                 </div>
             )
         }
     }
 
-    authenticate = () => {
-        return API.instance().authenticate(this.state.userName, this.state.password)
-            .then((principal) => {
-                this.props.onLoginSucceed(principal)
-            })
-    };
-
-    authenticateIfEnterPress = (e: any) => {
-        if (e.keyCode === 13) {
-            this.authenticate()
-        }
-    };
+    
 }
 
 export default withTranslation()(Login)

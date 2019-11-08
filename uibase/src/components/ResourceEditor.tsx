@@ -295,7 +295,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
 
-        const boolSelectionOption: { [key: string]: any } = { "null": null, "true": true, "false": false }
+        const boolSelectionOption: { [key: string]: any } = { "null": null, "true": true, "false": false, "undefined": false }
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
@@ -371,7 +371,7 @@ export class ResourceEditor extends React.Component<any, State> {
                     this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                 }}>
                     {Object.keys(boolSelectionOption).map((value: any) =>
-                        <Select.Option key={key + "_" + value + "_" + key} value={value}>{value}</Select.Option>)}
+                        value !== "undefined" && <Select.Option key={key + "_" + value + "_" + key} value={value}>{value}</Select.Option>)}
                 </Select>
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "Timestamp") {
                 return value
@@ -764,13 +764,23 @@ export class ResourceEditor extends React.Component<any, State> {
                     >
                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) => {
                             const possibleTypes: Array<string> = this.state.addRefPossibleTypes
-                            return possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
-                                {<b>
-                                    {`${res.eContents()[0].eClass.get('name')}`}
-                                </b>}
-                                &nbsp;
-                                {`${res.eContents()[0].get('name')}`}
-                            </Select.Option>
+                            const isEObjectType: boolean = possibleTypes[0] === 'EObject'
+                            return isEObjectType ?
+                                <Select.Option key={index} value={res.eURI()}>
+                                    {<b>
+                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                    </b>}
+                                    &nbsp;
+                                    {`${res.eContents()[0].get('name')}`}
+                                </Select.Option>
+                                :
+                                possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
+                                    {<b>
+                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                    </b>}
+                                    &nbsp;
+                                    {`${res.eContents()[0].get('name')}`}
+                                </Select.Option>
                         })}
                     </Select>
                 </Modal>}
