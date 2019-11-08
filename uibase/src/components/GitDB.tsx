@@ -1,15 +1,17 @@
 import * as React from "react";
-import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form} from 'antd';
+import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag} from 'antd';
 // import { Ecore } from "ecore";
 import { API } from "../modules/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import {Icon as IconFA} from 'react-fa';
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
 // import Splitter from './CustomSplitter'
 import {WithTranslation, withTranslation} from "react-i18next";
+import SearchGridTrans from "./SearchGrid";
+import Ecore from "ecore";
 const {Column} = Table;
 const ButtonGroup = Button.Group
 
@@ -17,6 +19,8 @@ interface Props {}
 
 interface State {
     fileName?: string,
+    modalResourceVisible: boolean,
+    resourceList: Ecore.Resource[],
     branchInfo: {
         current: string,
         default: string,
@@ -26,11 +30,9 @@ interface State {
 
 class GitDB extends React.Component<any, State> {
 
-    // constructor(props: any) {
-    //     super(props);
-    // }
-
     state: State = {
+        modalResourceVisible: false,
+        resourceList: [],
         branchInfo: {
             current: "master",
             default: 'master',
@@ -75,28 +77,24 @@ class GitDB extends React.Component<any, State> {
 
     downloadAll = () => {
         let filename = "export.zip";
-        return API.instance().fetch("/system/exportdb", {}).then(response => {
-            var disposition = response.headers.get('Content-Disposition');
-            if (disposition) {
-                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                var matches = filenameRegex.exec(disposition);
-                if (matches != null && matches[1]) {
-                    filename = matches[1].replace(/['"]/g, '');
-                }
-            }
-            return response.blob()
-        }).then((blob: any) => {
-            const a: HTMLAnchorElement = document.createElement("a");
-            document.body.appendChild(a);
-            a.setAttribute("style", "display: none");
-            let objectURL = URL.createObjectURL(blob)
-            a.href = objectURL;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(objectURL)
-            document.body.removeChild(a)
-        })
+        API.instance().download("/system/exportdb", {}, filename)
+    }
 
+    downloadSelected = () => {
+        let filename = "export.zip";
+        API.instance().download("/system/exportdb", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.state.resourceList.map(r=>r.get('uri')))
+        }, filename)
+    }
+
+    handleAddNewResource = (resources: Ecore.Resource[]): void => {
+        const {resourceList} = this.state
+        resourceList.push(...resources)
+        this.setState({ modalResourceVisible: false })
     }
 
     render() {
@@ -163,6 +161,46 @@ class GitDB extends React.Component<any, State> {
                             <FontAwesomeIcon icon={faCloudDownloadAlt}/>
                         </Button>
                     </Tooltip>
+                    <Divider orientation="left">Export Selected Objects</Divider>
+                    {this.state.modalResourceVisible && <Modal
+                        key="add_resource_modal"
+                        width={'1000px'}
+                        title={t('addresource')}
+                        visible={this.state.modalResourceVisible}
+                        footer={null}
+                        onCancel={() => this.setState({modalResourceVisible: false})}                    >
+                        <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
+                    </Modal>}
+                    <div>
+                        {this.state.resourceList.map(r=>
+                            <Tooltip title={r.eContents()[0].eClass.get('name')}>
+                                <Tag key={r.get("uri")} closable={true} onClose={() => {
+                                    const index = this.state.resourceList.indexOf(r);
+                                    this.state.resourceList.splice(index, 1)
+                                }}>
+                                    {r.eContents()[0].get('name') || r.eContents()[0]._id}
+                                </Tag>
+                            </Tooltip>
+                            )}
+                    </div>
+                    <Form layout={"inline"}>
+                        <Form.Item>
+                            <Tooltip title={"Add Resource"}>
+                                <Button type="dashed" size="small" onClick={()=>{
+                                    this.setState({modalResourceVisible: true})
+                                }}>
+                                    <FontAwesomeIcon icon={faPlusCircle}/>
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title={"Export Selected"}>
+                                <Button type="dashed" size="small" disabled={this.state.resourceList.length === 0} onClick={()=>{
+                                    this.downloadSelected()
+                                }}>
+                                    <FontAwesomeIcon icon={faCloudDownloadAlt}/>
+                                </Button>
+                            </Tooltip>
+                        </Form.Item>
+                    </Form>
                     <Divider orientation="left">Import Objects</Divider>
                     <Form layout={"inline"}>
                         <Form.Item>

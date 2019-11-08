@@ -21,9 +21,6 @@ import java.nio.file.Files;
 public class ApplicationTests {
     @Autowired
     Context context;
-    @Test
-    public void contextLoads() {
-    }
 
     @Test
     public void generateLocModule() throws Exception {

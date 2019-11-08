@@ -371,4 +371,30 @@ export class API implements IErrorHandler {
         }))
     }
 
+    download(input: RequestInfo, init?: RequestInit, filename?: string) {
+        let download = filename || "download"
+        return fetch(input, init).then(response => {
+            var disposition = response.headers.get('Content-Disposition');
+            if (disposition) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    download = matches[1].replace(/['"]/g, '');
+                }
+            }
+            return response.blob()
+        }).then((blob: any) => {
+            const a: HTMLAnchorElement = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute("style", "display: none");
+            let objectURL = URL.createObjectURL(blob)
+            a.href = objectURL;
+            a.download = download;
+            a.click();
+            URL.revokeObjectURL(objectURL)
+            document.body.removeChild(a)
+        })
+    }
+
+
 }
