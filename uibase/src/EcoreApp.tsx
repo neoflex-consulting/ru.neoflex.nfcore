@@ -16,8 +16,9 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt, faYinYang, faCannabis, faChess, faBullhorn } from '@fortawesome/free-solid-svg-icons'
+import {faSignOutAlt, faYinYang, faCannabis, faBullhorn, faTools, faEllipsisH} from '@fortawesome/free-solid-svg-icons'
 import { faClock, faEye, faUser, faBell } from '@fortawesome/free-regular-svg-icons'
+import {faBattleNet, faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 
 const { Header, Content, Sider } = Layout;
 
@@ -128,19 +129,19 @@ class EcoreApp extends React.Component<any, State> {
                             <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
                             <Menu.Item key={'developer'}>
                                 <Link to={`/settings/data`}>
-                                    <FontAwesomeIcon icon={faYinYang} size="lg" style={{marginRight: "10px"}}/>
+                                    <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
                                     {t('developer')}
                                 </Link>
                             </Menu.Item>
                             <Menu.Item key={'app'}>
                                 <Link to={`/app`}>
-                                    <FontAwesomeIcon icon={faChess} size="lg"style={{marginRight: "10px"}}/>
+                                    <FontAwesomeIcon icon={faSketch} size="lg"style={{marginRight: "10px"}}/>
                                     App
                                 </Link>
                             </Menu.Item>
                             <Menu.Item key={'testComponent'}>
                                 <Link to={`/test`}>
-                                    <FontAwesomeIcon icon={faCannabis} size="lg"style={{marginRight: "10px"}}/>
+                                    <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
                                     Test component
                                 </Link>
                             </Menu.Item>
@@ -194,7 +195,6 @@ class EcoreApp extends React.Component<any, State> {
                     <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
                         <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
                         <Link to={`/settings/metadata`}>
-                            <Icon type="compass" style={{ color: '#7d7d7d' }} />
                             <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
                         </Link>
                         </Menu.Item>
