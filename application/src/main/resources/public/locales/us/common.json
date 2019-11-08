@@ -13,13 +13,19 @@
         "notfound": "Not found",
         "regularexpression": "Regular expression",
         "search": "Search: ",
+        "searchsimple": "Search",
         "action": "Action",
         "edit": "Edit",
         "delete": "Delete",
-        "addresource": "Add resource",
+        "addresources": "Add resources",
         "dynamiccomponent": " component cannot be downloaded from path ",
         "mandatoryreporting": "Mandatory Reporting",
         "legend": "Legend",
         "closeall": "Close All",
-        "eClass": "eClass"
+        "eClass": "EClass",
+        "additem": "Add item",
+        "select": "Select",
+        "clear": "Clear",
+        "createitem": "Create item",
+        "itemname": "Item name"
 }

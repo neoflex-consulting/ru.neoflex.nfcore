@@ -3,22 +3,15 @@ import './../../styles/MandatoryReporting.css';
 import {Form} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 
-interface Props {
-}
-
-interface State {
-}
-
-class TestComponentLeft extends React.Component<WithTranslation, any> {
+class PageNotFound extends React.Component<WithTranslation, any> {
 
     render() {
         return (
             <Form>
-                TestComponentLeft
+                Page Not Found
             </Form>
         );
     }
 }
 
-const TestComponentLeftTrans = withTranslation()(TestComponentLeft);
-export default TestComponentLeftTrans;
+export default withTranslation()(PageNotFound)

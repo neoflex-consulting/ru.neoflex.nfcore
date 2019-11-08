@@ -13,13 +13,19 @@
         "notfound": "Не найдено",
         "regularexpression": "Регулярное выражение",
         "search": "Поиск: ",
+        "searchsimple": "Поиск",
         "action": "Действия",
         "edit": "Редактировать",
         "delete": "Удалить",
-        "addresource": "Добавить ресурсы",
+        "addresources": "Добавить ресурсы",
         "dynamiccomponent": " компонента не может быть загружена из ",
         "mandatoryreporting": "Обязательная отчетность",
         "legend": "Легенда",
         "closeall": "Закрыть все",
-        "eClass": "eClass"
+        "eClass": "EClass",
+        "additem": "Добавить элемент",
+        "select": "Выбрать",
+        "clear": "Очистить",
+        "createitem": "Созать элемент",
+        "itemname": "Название элемента"
 }

@@ -198,14 +198,15 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                 </Tabs>
                             )}
                             <FormItem>
-                                <Button type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
+                                <Button title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
                                     <Icon type="search" />
                                 </Button>
                             </FormItem>
                         </Form>
                     </Col>
                     <Col span={1}>
-                        <Button 
+                        <Button
+                            title={t("createitem")}
                             icon="plus" 
                             type="primary" 
                             style={{ display: 'block', margin: '0px 0px 10px auto' }} 
@@ -221,7 +222,5 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     }
 }
 
-const WrappedDataSearch = Form.create<Props & FormComponentProps & WithTranslation>()(DataSearch);
-const DataSearchTrans = withTranslation()(WrappedDataSearch);
-export default DataSearchTrans;
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(DataSearch))
 

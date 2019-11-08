@@ -3,10 +3,10 @@ import {Button, Icon, Layout, Menu, notification, Dropdown} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
-import MetaBrowserTrans from "./components/MetaBrowser";
-import {ResourceEditor} from "./components/ResourceEditor"
+import MetaBrowser from "./components/MetaBrowser";
+import ResourceEditor from "./components/ResourceEditor"
 import {Link, Redirect, Route, Switch} from "react-router-dom";
-import QueryRunnerTrans from "./components/QueryRunner";
+import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
@@ -20,7 +20,6 @@ import { faSignOutAlt, faYinYang, faCannabis, faChess, faBullhorn } from '@forta
 import { faClock, faEye, faUser, faBell } from '@fortawesome/free-regular-svg-icons'
 
 const { Header, Content, Sider } = Layout;
-const ResourceEditorTrans = withTranslation()(ResourceEditor);
 
 interface State {
     principal?: any;
@@ -222,10 +221,10 @@ class EcoreApp extends React.Component<any, State> {
                 <Layout>
                     <Content className="app-content">
                         <Switch>
-                            <Route path='/settings/metadata' component={MetaBrowserTrans}/>
-                            <Route path='/settings/query' component={QueryRunnerTrans}/>
+                            <Route path='/settings/metadata' component={MetaBrowser}/>
+                            <Route path='/settings/query' component={QueryRunner}/>
                             <Route exact={true} path='/settings/data' component={DataBrowser}/>
-                            <Route path='/settings/data/:id/:ref' component={ResourceEditorTrans}/>
+                            <Route path='/settings/data/:id/:ref' component={ResourceEditor}/>
                             <Route path='/settings/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
@@ -285,5 +284,5 @@ class EcoreApp extends React.Component<any, State> {
         )
     }
 }
-const EcoreAppTrans = withTranslation()(EcoreApp);
-export default EcoreAppTrans;
+
+export default withTranslation()(EcoreApp);

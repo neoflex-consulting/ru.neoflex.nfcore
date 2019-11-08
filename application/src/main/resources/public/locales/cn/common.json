@@ -12,14 +12,20 @@
         "run": "跑",
         "notfound": "未找到",
         "regularexpression": "正則表達式",
-        "search": "搜索 ",
+        "search": "搜索",
+        "searchsimple": "搜索",
         "action": "行動",
         "edit": "編輯",
         "delete": "刪除",
-        "addresource": "添加資源",
+        "addresources": "添加資源",
         "dynamiccomponent": " 組件無法加載 ",
         "mandatoryreporting": "強制性報告",
         "legend": "傳說",
         "closeall": "關閉所有",
-        "eClass": "eClass"
+        "eClass": "EClass",
+        "additem": "添加項目",
+        "select": "選擇",
+        "clear": "清除",
+        "createitem": "建立項目",
+        "itemname": "項目名稱"
 }

@@ -63,7 +63,6 @@ class EditableTextArea extends Component<Props, State>{
             </Fragment>
         )
     }
-
 }
 
 export default EditableTextArea
