@@ -16,7 +16,8 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSignOutAlt, faYinYang, faCannabis, faChess, faBullhorn } from '@fortawesome/free-solid-svg-icons'
+import { faClock, faEye, faUser, faBell } from '@fortawesome/free-regular-svg-icons'
 
 const { Header, Content, Sider } = Layout;
 const ResourceEditorTrans = withTranslation()(ResourceEditor);
@@ -123,36 +124,30 @@ class EcoreApp extends React.Component<any, State> {
                         <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                     </div>
                     <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
-                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                        <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
+                            <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}>
-                                <Icon type="setting" style={{ fontSize: '17px' }} theme="filled" />
-                                {t('developer')}</Menu.Item>
-                            <Menu.Item key={'app'}><Icon type="sketch" style={{ fontSize: '17px' }} />App</Menu.Item>
-                            <Menu.Item key={'testComponent'}><Icon type="coffee" style={{ fontSize: '17px' }} />Test component</Menu.Item>
-                            <Menu.SubMenu title={<span><Icon type="global" style={{ fontSize: '17px' }} />{t('language')}</span>}>
-                                {
-                                    this.state.languages.map((c: any) =>
-                                        <Menu.Item key={c} onClick={() =>
-                                            setLang(c)
-                                        }>
-                                            <Icon type="flag" style={{ fontSize: '17px' }} />
-                                            {c.toUpperCase()}
-                                        </Menu.Item>)
-                                }
-                            </Menu.SubMenu>
-                            <Menu.SubMenu title={<span><Icon type="notification" style={{ fontSize: '17px' }} />Notification</span>}>
+                            <Menu.Item key={'developer'}><FontAwesomeIcon icon={faYinYang} size="lg" style={{marginRight: "10px"}}/>{t('developer')}</Menu.Item>
+                            <Menu.Item key={'app'}><FontAwesomeIcon icon={faChess} size="lg"style={{marginRight: "10px"}}/>App</Menu.Item>
+                            <Menu.Item key={'testComponent'}><FontAwesomeIcon icon={faCannabis} size="lg"style={{marginRight: "10px"}}/>Test component</Menu.Item>
+                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"style={{marginRight: "10px"}}/>Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
-                                    <Menu.Item key={'showNotifications'}><Icon type="eye" style={{ fontSize: '17px' }} />Disable autohiding</Menu.Item>
+                                    <Menu.Item key={'showNotifications'}>
+                                    <FontAwesomeIcon icon={faEye} size="lg"style={{marginRight: "10px"}}/>
+                                        Disable autohiding</Menu.Item>
                                     :
-                                    <Menu.Item key={'autoHideNotifications'}><Icon type="clock-circle" style={{ fontSize: '17px' }} />Autohide</Menu.Item>}
+                                    <Menu.Item key={'autoHideNotifications'}>
+                                    <FontAwesomeIcon icon={faClock} size="lg"style={{marginRight: "10px"}}/>
+                                        Autohide</Menu.Item>}
                             </Menu.SubMenu>
                         </Menu.SubMenu>
                     </Menu>
                     <Dropdown overlay={langMenu} placement="bottomCenter">
                         <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
                     </Dropdown>
-                    <Icon className="bell-icon" type="bell" />
+                    <FontAwesomeIcon className="bell-icon" icon={faBell}/>
+
+                    {/*<Icon className="bell-icon" type="bell" />*/}
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>

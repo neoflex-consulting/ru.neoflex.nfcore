@@ -86,11 +86,11 @@
 }
 
 .bell-icon{
-	font-size: 26px;
+	font-size: x-large;
     color: #c5c5c5;
     float: right;
-    margin-top: 15px;
-    margin-right: 25px;
+    margin-top: 16px;
+    margin-right: 20px;
 }
 
 .ant-layout-sider-zero-width-trigger{
