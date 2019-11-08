@@ -127,9 +127,24 @@ class EcoreApp extends React.Component<any, State> {
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
                             <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
-                            <Menu.Item key={'developer'}><FontAwesomeIcon icon={faYinYang} size="lg" style={{marginRight: "10px"}}/>{t('developer')}</Menu.Item>
-                            <Menu.Item key={'app'}><FontAwesomeIcon icon={faChess} size="lg"style={{marginRight: "10px"}}/>App</Menu.Item>
-                            <Menu.Item key={'testComponent'}><FontAwesomeIcon icon={faCannabis} size="lg"style={{marginRight: "10px"}}/>Test component</Menu.Item>
+                            <Menu.Item key={'developer'}>
+                                <Link to={`/settings/data`}>
+                                    <FontAwesomeIcon icon={faYinYang} size="lg" style={{marginRight: "10px"}}/>
+                                    {t('developer')}
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key={'app'}>
+                                <Link to={`/app`}>
+                                    <FontAwesomeIcon icon={faChess} size="lg"style={{marginRight: "10px"}}/>
+                                    App
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Item key={'testComponent'}>
+                                <Link to={`/test`}>
+                                    <FontAwesomeIcon icon={faCannabis} size="lg"style={{marginRight: "10px"}}/>
+                                    Test component
+                                </Link>
+                            </Menu.Item>
                             <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"style={{marginRight: "10px"}}/>Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
                                     <Menu.Item key={'showNotifications'}>
