@@ -148,47 +148,73 @@ public class Exporter {
     public void zip(List<Resource> resources, OutputStream outputStream) throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
             for (Resource resource: resources) {
-                for (EObject eObject: resource.getContents()) {
-                    EClass eClass = eObject.eClass();
-                    EPackage ePackage = eClass.getEPackage();
-                    EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
-                    if (nameAttribute != null) {
-                        String name = (String) eObject.eGet(nameAttribute);
-                        if (name != null && name.length() > 0) {
-                            String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
-                            byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
-                            ZipEntry zipEntry = new ZipEntry(fileName + JSON);
-                            zipOutputStream.putNextEntry(zipEntry);
-                            zipOutputStream.write(bytes);
-                            zipOutputStream.closeEntry();
-                        }
-                    }
-                }
+                zipResource(zipOutputStream, resource);
             }
             for (Resource resource: resources) {
-                for (EObject eObject: resource.getContents()) {
-                    EClass eClass = eObject.eClass();
-                    EPackage ePackage = eClass.getEPackage();
-                    EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
-                    if (nameAttribute != null) {
-                        String name = (String) eObject.eGet(nameAttribute);
-                        if (name != null && name.length() > 0) {
-                            String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
-                            byte[] refsBytes = exportExternalRefs(eObject);
-                            if (refsBytes != null) {
-                                ZipEntry refsEntry = new ZipEntry(fileName + REFS);
-                                zipOutputStream.putNextEntry(refsEntry);
-                                zipOutputStream.write(refsBytes);
-                                zipOutputStream.closeEntry();
-                            }
-                        }
+                zipResourceReferences(zipOutputStream, resource);
+            }
+        }
+    }
+
+    public void zipAll(String branch, OutputStream outputStream) throws IOException {
+        database.withTransaction(branch, Transaction.LockType.DIRTY, tx -> {
+            List<EntityId> all = tx.all();
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
+                for (EntityId entityId: all) {
+                    Resource resource = database.loadResource(entityId.getId(), tx);
+                    zipResource(zipOutputStream, resource);
+                }
+                for (EntityId entityId: all) {
+                    Resource resource = database.loadResource(entityId.getId(), tx);
+                    zipResourceReferences(zipOutputStream, resource);
+                }
+            }
+            return null;
+        });
+    }
+
+    public void zipResourceReferences(ZipOutputStream zipOutputStream, Resource resource) throws IOException {
+        for (EObject eObject: resource.getContents()) {
+            EClass eClass = eObject.eClass();
+            EPackage ePackage = eClass.getEPackage();
+            EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
+            if (nameAttribute != null) {
+                String name = (String) eObject.eGet(nameAttribute);
+                if (name != null && name.length() > 0) {
+                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    byte[] refsBytes = exportExternalRefs(eObject);
+                    if (refsBytes != null) {
+                        ZipEntry refsEntry = new ZipEntry(fileName + REFS);
+                        zipOutputStream.putNextEntry(refsEntry);
+                        zipOutputStream.write(refsBytes);
+                        zipOutputStream.closeEntry();
                     }
                 }
             }
         }
     }
 
-    public void unzip(InputStream inputStream, Transaction tx) throws IOException {
+    public void zipResource(ZipOutputStream zipOutputStream, Resource resource) throws IOException {
+        for (EObject eObject: resource.getContents()) {
+            EClass eClass = eObject.eClass();
+            EPackage ePackage = eClass.getEPackage();
+            EStructuralFeature nameAttribute = database.getQNameFeature(eClass);
+            if (nameAttribute != null) {
+                String name = (String) eObject.eGet(nameAttribute);
+                if (name != null && name.length() > 0) {
+                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
+                    ZipEntry zipEntry = new ZipEntry(fileName + JSON);
+                    zipOutputStream.putNextEntry(zipEntry);
+                    zipOutputStream.write(bytes);
+                    zipOutputStream.closeEntry();
+                }
+            }
+        }
+    }
+
+    public int unzip(InputStream inputStream, Transaction tx) throws IOException {
+        int entityCount = 0;
         try (ZipInputStream zipInputStream = new ZipInputStream(inputStream);) {
             ZipEntry zipEntry = zipInputStream.getNextEntry();
             while (zipEntry != null) {
@@ -201,6 +227,7 @@ public class Exporter {
                     }
                     if (zipEntry.getName().endsWith(JSON)) {
                         importEObject(outputStream.toByteArray(), tx);
+                        ++entityCount;
                     }
                     else if (zipEntry.getName().endsWith(REFS)) {
                         importExternalRefs(outputStream.toByteArray(), tx);
@@ -209,6 +236,7 @@ public class Exporter {
                 zipEntry = zipInputStream.getNextEntry();
             }
         }
+        return entityCount;
     }
 
     public void unzip(Path zipFile, Transaction tx) throws IOException {
