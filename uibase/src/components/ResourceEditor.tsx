@@ -633,12 +633,19 @@ class ResourceEditor extends React.Component<any, State> {
     save = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
+        const targetObject: { [key: string]: any } = this.state.targetObject
 
         if (resource) {
             this.setState({ isSaving: true })
             API.instance().saveResource(resource).then((result: any) => {
-                this.getEObject()
-                this.setState({ isSaving: false })
+                const nestedJSON = this.nestUpdaters(result.eResource().to(), null)
+                const updatedTargetObject = this.findObjectById(nestedJSON, targetObject._id)
+                this.setState({ 
+                    isSaving: false, 
+                    mainEObject: result.eResource().eContents()[0], 
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject
+                })
             }).catch(() => {
                 this.setState({ isSaving: false })
             })
@@ -755,7 +762,7 @@ class ResourceEditor extends React.Component<any, State> {
                 >
                     <Select
                         mode="multiple"
-                        style={{ width: '93%' }}
+                        style={{ width: '100%' }}
                         placeholder="Please select"
                         defaultValue={[]}
                         onChange={(uriArray: string[]) => {
