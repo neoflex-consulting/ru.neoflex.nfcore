@@ -1,9 +1,9 @@
 import * as React from "react";
-import {Row, Col, Table, Checkbox, Button, Tooltip} from 'antd';
+import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form} from 'antd';
 // import { Ecore } from "ecore";
 import { API } from "../modules/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
 import {Icon as IconFA} from 'react-fa';
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
@@ -16,6 +16,7 @@ const ButtonGroup = Button.Group
 interface Props {}
 
 interface State {
+    fileName?: string,
     branchInfo: {
         current: string,
         default: string,
@@ -29,7 +30,7 @@ class GitDB extends React.Component<any, State> {
     //     super(props);
     // }
 
-    state = {
+    state: State = {
         branchInfo: {
             current: "master",
             default: 'master',
@@ -63,6 +64,41 @@ class GitDB extends React.Component<any, State> {
         })
     }
 
+    uploadFile = (file: any) => {
+        let form = new FormData()
+        form.append("file", file)
+        this.setState({fileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
+        API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json=>{
+            console.log(json)
+        })
+    }
+
+    downloadAll = () => {
+        let filename = "export.zip";
+        return API.instance().fetch("/system/exportdb", {}).then(response => {
+            var disposition = response.headers.get('Content-Disposition');
+            if (disposition) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+            return response.blob()
+        }).then((blob: any) => {
+            const a: HTMLAnchorElement = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute("style", "display: none");
+            let objectURL = URL.createObjectURL(blob)
+            a.href = objectURL;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(objectURL)
+            document.body.removeChild(a)
+        })
+
+    }
+
     render() {
         const {t} = this.props as Props & WithTranslation;
         const branches = this.state.branchInfo.branches.map(branch => ({
@@ -71,6 +107,23 @@ class GitDB extends React.Component<any, State> {
             isCurrent: branch === this.state.branchInfo.current,
             isDefault: branch === this.state.branchInfo.default
         }))
+        const fileInput = <Tooltip title={"Import"}>
+            <label>
+                <FontAwesomeIcon icon={faCloudUploadAlt}/>
+                <Input type="file" style={{display: "none"}}
+                       onChange={e => {
+                           const file = e!.target!.files![0]
+                           if (file) {
+                               this.uploadFile(file)
+                           }
+                       }}
+                       onClick={e => {
+                           this.setState({fileName: undefined})
+                       }}
+                />
+            </label>
+        </Tooltip>
+
         return (
             <Row>
                 <Col span={3}/>
@@ -102,6 +155,20 @@ class GitDB extends React.Component<any, State> {
                                 )}
                         />
                     </Table>
+                    <Divider orientation="left">Export All Objects</Divider>
+                    <Tooltip title={"Export"}>
+                        <Button type="dashed" size="small" onClick={()=>{
+                            this.downloadAll();
+                        }}>
+                            <FontAwesomeIcon icon={faCloudDownloadAlt}/>
+                        </Button>
+                    </Tooltip>
+                    <Divider orientation="left">Import Objects</Divider>
+                    <Form layout={"inline"}>
+                        <Form.Item>
+                            <Input addonBefore={fileInput} value={this.state!.fileName} readOnly={true}/>
+                        </Form.Item>
+                    </Form>
                 </Col>
                 <Col span={3}/>
             </Row>
