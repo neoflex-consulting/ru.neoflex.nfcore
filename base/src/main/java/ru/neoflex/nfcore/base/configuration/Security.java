@@ -61,7 +61,7 @@ public class Security extends WebSecurityConfigurerAdapter {
                     .authorizeRequests()
                     .antMatchers("/locales/**").permitAll()
                     .antMatchers("/emf/*").authenticated()
-                    .antMatchers("/system/user/**").authenticated()
+                    .antMatchers("/system/**").authenticated()
                     .antMatchers("/app/**").authenticated()
                     .antMatchers("/git/**").authenticated()
                 .and()
