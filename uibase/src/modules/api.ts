@@ -78,11 +78,11 @@ export class API implements IErrorHandler {
     }
 
     fetchJson(input: RequestInfo, init?: RequestInit): Promise<any> {
-        console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
         return this.fetch(input, this.getOpts(init)).then(response => response.json());
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<any> {
+        console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
         return fetch(input, init).then(response => {
             if (!response.ok) {
                 throw response;
@@ -373,7 +373,7 @@ export class API implements IErrorHandler {
 
     download(input: RequestInfo, init?: RequestInit, filename?: string) {
         let download = filename || "download"
-        return fetch(input, init).then(response => {
+        return this.fetch(input, init).then(response => {
             var disposition = response.headers.get('Content-Disposition');
             if (disposition) {
                 var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;

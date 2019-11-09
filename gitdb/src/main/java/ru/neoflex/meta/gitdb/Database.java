@@ -319,20 +319,55 @@ public class Database implements Closeable {
         return mapper.writeValueAsBytes(contentNode);
     }
 
-    public ResourceSet getDependentResources(Resource resource, Transaction tx) throws IOException {
+    public List<Resource> getDependentResources(Resource resource, Transaction tx) throws IOException {
         String id = checkAndGetResourceId(resource);
-        ResourceSet resourceSet = getDependentResources(id, tx);
-        return resourceSet;
+        List<Resource> resources = getDependentResources(id, tx);
+        return resources;
     }
 
-    public ResourceSet getDependentResources(String id, Transaction tx) throws IOException {
+    public List<Resource> getDependentResources(List<Resource> resources, Transaction tx) throws IOException {
+        List<Resource> result = new ArrayList<>(resources);
+        for (Resource resource: resources) {
+            for (Resource dep: getDependentResources(resource, tx)) {
+                if (!result.stream().anyMatch(r->r.getURI().equals(dep.getURI()))) {
+                    result.add(resource);
+                }
+            }
+        }
+        return result;
+    }
+
+    public List<Resource> getDependentResources(List<Resource> resources, Transaction tx, boolean recursive) throws IOException {
+        if (recursive) {
+            return getDependentResourcesRecursive(resources, tx);
+        }
+        else {
+            return getDependentResources(resources, tx);
+        }
+    }
+
+    public List<Resource> getDependentResourcesRecursive(List<Resource> resources, Transaction tx) throws IOException {
+        List<Resource> result = new ArrayList<>();
+        Queue<Resource> queue = new ArrayDeque<>(resources);
+        while (!queue.isEmpty()) {
+            Resource resource = queue.remove();
+            if (!result.stream().anyMatch(r->r.getURI().equals(resource.getURI()))) {
+                result.add(resource);
+                queue.addAll(getDependentResources(resource, tx));
+            }
+        }
+        return result;
+    }
+
+    public List<Resource> getDependentResources(String id, Transaction tx) throws IOException {
         ResourceSet resourceSet = createResourceSet(tx);
+        List<Resource> resources = new ArrayList<>();
         List<IndexEntry> refList = findByIndex(tx, REF_IDX, id.substring(0, 2), id.substring(2));
         for (IndexEntry entry : refList) {
             String refId = entry.getPath()[entry.getPath().length - 1];
-            loadResource(resourceSet, refId);
+            resources.add(loadResource(resourceSet, refId));
         }
-        return resourceSet;
+        return resources;
     }
 
     public ResourceSet findByEClass(EClass eClass, String name, Transaction tx) throws IOException {
@@ -489,7 +524,6 @@ public class Database implements Closeable {
                     }
                 }
             }
-
         }
     }
 

@@ -20,6 +20,9 @@ interface Props {}
 interface State {
     fileName?: string,
     modalResourceVisible: boolean,
+    withReferences: boolean,
+    withDependents: boolean,
+    recursiveDependents: boolean,
     resourceList: Ecore.Resource[],
     branchInfo: {
         current: string,
@@ -32,6 +35,9 @@ class GitDB extends React.Component<any, State> {
 
     state: State = {
         modalResourceVisible: false,
+        withReferences: false,
+        withDependents: false,
+        recursiveDependents: false,
         resourceList: [],
         branchInfo: {
             current: "master",
@@ -45,7 +51,6 @@ class GitDB extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        //this.fetchBranchInfo()
     }
 
     fetchBranchInfo = () => {
@@ -54,7 +59,7 @@ class GitDB extends React.Component<any, State> {
         })
     }
 
-    putCurrentBranch = (branch: string) => {
+    setCurrentBranch = (branch: string) => {
         API.instance().fetchJson("/system/branch/" + branch, {
             method: "PUT",
                 headers: {
@@ -82,7 +87,7 @@ class GitDB extends React.Component<any, State> {
 
     downloadSelected = () => {
         let filename = "export.zip";
-        API.instance().download("/system/exportdb", {
+        API.instance().download(`/system/exportdb?withReferences=${this.state.withReferences===true}&withDependents=${this.state.withDependents===true}&recursiveDependents=${this.state.recursiveDependents===true}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -144,7 +149,7 @@ class GitDB extends React.Component<any, State> {
                                     <ButtonGroup className="pull-right">
                                         <Tooltip title={"Set Current"}>
                                             <Button type="dashed" size="small" onClick={()=>{
-                                                this.putCurrentBranch(branch)
+                                                this.setCurrentBranch(branch)
                                             }}>
                                                 <FontAwesomeIcon icon={faCheckCircle}/>
                                             </Button>
@@ -178,19 +183,28 @@ class GitDB extends React.Component<any, State> {
                                     const index = this.state.resourceList.indexOf(r);
                                     this.state.resourceList.splice(index, 1)
                                 }}>
-                                    {r.eContents()[0].get('name') || r.eContents()[0]._id}
+                                    {r.eContents()[0].get('name') || r.get('uri')}
                                 </Tag>
                             </Tooltip>
                             )}
                     </div>
                     <Form layout={"inline"}>
                         <Form.Item>
-                            <Tooltip title={"Add Resource"}>
+                            <Tooltip title={"Add Objects"}>
                                 <Button type="dashed" size="small" onClick={()=>{
                                     this.setState({modalResourceVisible: true})
                                 }}>
                                     <FontAwesomeIcon icon={faPlusCircle}/>
                                 </Button>
+                            </Tooltip>
+                            <Tooltip title={"Export with all referenced objects"}>
+                                <Checkbox checked={this.state.withReferences} onChange={(e)=>this.setState({withReferences: e.target.checked})}>With References</Checkbox>
+                            </Tooltip>
+                            <Tooltip title={"Export with dependent objects"}>
+                                <Checkbox checked={this.state.withDependents} onChange={(e)=>this.setState({withDependents: e.target.checked})}>With Dependents</Checkbox>
+                            </Tooltip>
+                            <Tooltip title={"Collect dependent objects recursively"}>
+                                <Checkbox checked={this.state.recursiveDependents} onChange={(e)=>this.setState({recursiveDependents: e.target.checked})}>Recursive Dependents</Checkbox>
                             </Tooltip>
                             <Tooltip title={"Export Selected"}>
                                 <Button type="dashed" size="small" disabled={this.state.resourceList.length === 0} onClick={()=>{

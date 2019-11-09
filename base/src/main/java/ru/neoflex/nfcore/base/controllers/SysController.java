@@ -78,19 +78,33 @@ public class SysController {
     }
 
     @PostMapping(value="/exportdb", consumes={"application/json"})
-    public ResponseEntity exportDb(@RequestBody List<String> ids) throws IOException {
+    public ResponseEntity exportDb(
+            @RequestBody List<String> ids,
+            @RequestParam boolean withReferences,
+            @RequestParam boolean withDependents,
+            @RequestParam boolean recursiveDependents
+    ) throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
+        String branch = workspace.getCurrentBranch();
         new Thread(() -> {
             try {
-                workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.DIRTY, tx->{
+                workspace.getDatabase().withTransaction(branch, Transaction.LockType.DIRTY, tx->{
                     ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
+                    List<Resource> resources = new ArrayList<>();
                     for (String id: ids) {
-                        workspace.getDatabase().loadResource(rs, id);
+                        resources.add(workspace.getDatabase().loadResource(rs, id));
                     }
-                    List<Resource> toExport = new ArrayList<>(rs.getResources());
-                    //EcoreUtil.resolveAll(rs);
-                    new Exporter(workspace.getDatabase()).zip(toExport, pipedOutputStream);
+                    if (withDependents) {
+                        resources = workspace.getDatabase().getDependentResources(resources, tx, recursiveDependents);
+                    }
+                    if (withReferences) {
+                        ResourceSet wr = workspace.getDatabase().createResourceSet(tx);
+                        wr.getResources().addAll(resources);
+                        EcoreUtil.resolveAll(wr);
+                        resources = new ArrayList<>(wr.getResources());
+                    }
+                    new Exporter(workspace.getDatabase()).zip(resources, pipedOutputStream);
                     return null;
                 });
             } catch (IOException e) {
