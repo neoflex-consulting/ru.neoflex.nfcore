@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -77,26 +79,29 @@ public class SysController {
 
     @PostMapping(value="/exportdb", consumes={"application/json"})
     public ResponseEntity exportDb(@RequestBody List<String> ids) throws IOException {
-        return workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.DIRTY, tx->{
-            ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
-            for (String id: ids) {
-                workspace.getDatabase().loadResource(rs, id);
+        PipedInputStream pipedInputStream = new PipedInputStream();
+        PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
+        new Thread(() -> {
+            try {
+                workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.DIRTY, tx->{
+                    ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
+                    for (String id: ids) {
+                        workspace.getDatabase().loadResource(rs, id);
+                    }
+                    List<Resource> toExport = new ArrayList<>(rs.getResources());
+                    //EcoreUtil.resolveAll(rs);
+                    new Exporter(workspace.getDatabase()).zip(toExport, pipedOutputStream);
+                    return null;
+                });
+            } catch (IOException e) {
+                logger.error("Export DB", e);
             }
-            PipedInputStream pipedInputStream = new PipedInputStream();
-            PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-            new Thread(() -> {
-                try {
-                    new Exporter(workspace.getDatabase()).zip(new ArrayList<>(rs.getResources()), pipedOutputStream);
-                } catch (IOException e) {
-                    logger.error("Export DB", e);
-                }
 
-            }).start();
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/zip");
-            headers.set("Content-Disposition", "attachment; filename=\"database.zip\"");
-            return new ResponseEntity(new InputStreamResource(pipedInputStream), headers, HttpStatus.OK);
-        });
+        }).start();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/zip");
+        headers.set("Content-Disposition", "attachment; filename=\"database.zip\"");
+        return new ResponseEntity(new InputStreamResource(pipedInputStream), headers, HttpStatus.OK);
     }
 
     @PutMapping(value="/branch/{name}", produces = "application/json; charset=utf-8")
