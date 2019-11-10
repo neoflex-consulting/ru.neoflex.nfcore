@@ -28,7 +28,7 @@ public class ApplicationTests {
             LocModule locModule = (LocModule) context.getGroovy().eval(LocalesPackage.Literals.LOC_MODULE, "generatePackagesModule", Lists.emptyList());
             Assert.assertEquals(context.getRegistry().getEPackages().size(), locModule.getChildren().size());
             context.getGroovy().eval(LocalesPackage.Literals.LOC_MODULE, "generateLocales", Lists.emptyList());
-            Assert.assertTrue(Files.exists(Transaction.getCurrent().getFileSystem().getPath("public/locales/en/packages.json")));
+            Assert.assertTrue(Files.exists(Transaction.getCurrent().getFileSystem().getPath("public/locales/us/packages.json")));
             return 0;
         });
     }

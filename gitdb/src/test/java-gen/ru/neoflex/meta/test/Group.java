@@ -17,8 +17,7 @@ import org.eclipse.emf.ecore.EObject;
  * </ul>
  *
  * @see ru.neoflex.meta.test.TestPackage#getGroup()
- * @model annotation="http://www.eclipse.org/emf/2002/Ecore constraints='validateName'"
- *        annotation="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot validateName='self.name.size() &gt; 0'"
+ * @model
  * @generated
  */
 public interface Group extends EObject {
