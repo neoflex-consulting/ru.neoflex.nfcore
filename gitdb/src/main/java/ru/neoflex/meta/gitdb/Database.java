@@ -326,11 +326,14 @@ public class Database implements Closeable {
     }
 
     public List<Resource> getDependentResources(List<Resource> resources, Transaction tx) throws IOException {
-        List<Resource> result = new ArrayList<>(resources);
+        List<Resource> result = new ArrayList<>();
         for (Resource resource: resources) {
+            if (!result.stream().anyMatch(r->r.getURI().equals(resource.getURI()))) {
+                result.add(resource);
+            }
             for (Resource dep: getDependentResources(resource, tx)) {
                 if (!result.stream().anyMatch(r->r.getURI().equals(dep.getURI()))) {
-                    result.add(resource);
+                    result.add(dep);
                 }
             }
         }
