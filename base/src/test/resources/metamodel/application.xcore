@@ -13,18 +13,18 @@ abstract class ModuleContainer {
 }
 
 class Application extends ModuleContainer {
-    EString name
+    String name
     contains Form[] forms opposite application
     refers Application[] links
 }
 
 class Module extends ModuleContainer {
-    EString name
+    String name
     refers Form[] forms
 }
 
 abstract class Form {
-    EString name
+    String name
     container Application application opposite forms
 }
 

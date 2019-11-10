@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.emf.ecore.EcorePackage;
 
 import org.eclipse.emf.ecore.impl.EPackageImpl;
@@ -14,6 +15,8 @@ import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
+
+import ru.neoflex.meta.test.util.TestValidator;
 
 /**
  * <!-- begin-user-doc -->
@@ -91,6 +94,16 @@ public class TestPackageImpl extends EPackageImpl implements TestPackage {
 
 		// Initialize created meta-data
 		theTestPackage.initializePackageContents();
+
+		// Register package validator
+		EValidator.Registry.INSTANCE.put
+			(theTestPackage,
+			 new EValidator.Descriptor() {
+				 @Override
+				 public EValidator getEValidator() {
+					 return TestValidator.INSTANCE;
+				 }
+			 });
 
 		// Mark meta-data to indicate it can't be changed
 		theTestPackage.freeze();
@@ -229,6 +242,70 @@ public class TestPackageImpl extends EPackageImpl implements TestPackage {
 
 		// Create resource
 		createResource(eNS_URI);
+
+		// Create annotations
+		// http://www.eclipse.org/emf/2002/Ecore
+		createEcoreAnnotations();
+		// http://www.eclipse.org/emf/2011/Xcore
+		createXcoreAnnotations();
+		// http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot
+		createPivotAnnotations();
+	}
+
+	/**
+	 * Initializes the annotations for <b>http://www.eclipse.org/emf/2002/Ecore</b>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void createEcoreAnnotations() {
+		String source = "http://www.eclipse.org/emf/2002/Ecore";
+		addAnnotation
+		  (this,
+		   source,
+		   new String[] {
+			   "invocationDelegates", "http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot",
+			   "settingDelegates", "http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot",
+			   "validationDelegates", "http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"
+		   });
+		addAnnotation
+		  (groupEClass,
+		   source,
+		   new String[] {
+			   "constraints", "validateName"
+		   });
+	}
+
+	/**
+	 * Initializes the annotations for <b>http://www.eclipse.org/emf/2011/Xcore</b>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void createXcoreAnnotations() {
+		String source = "http://www.eclipse.org/emf/2011/Xcore";
+		addAnnotation
+		  (this,
+		   source,
+		   new String[] {
+			   "Pivot", "http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"
+		   });
+	}
+
+	/**
+	 * Initializes the annotations for <b>http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot</b>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void createPivotAnnotations() {
+		String source = "http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot";
+		addAnnotation
+		  (groupEClass,
+		   source,
+		   new String[] {
+			   "validateName", "self.name.size() > 0"
+		   });
 	}
 
 } //TestPackageImpl

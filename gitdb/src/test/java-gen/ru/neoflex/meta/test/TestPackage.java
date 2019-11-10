@@ -21,6 +21,8 @@ import org.eclipse.emf.ecore.EReference;
  * <!-- end-user-doc -->
  * @see ru.neoflex.meta.test.TestFactory
  * @model kind="package"
+ *        annotation="http://www.eclipse.org/emf/2002/Ecore invocationDelegates='http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot' settingDelegates='http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot' validationDelegates='http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot'"
+ *        annotation="http://www.eclipse.org/emf/2011/Xcore Pivot='http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot'"
  * @generated
  */
 public interface TestPackage extends EPackage {
