@@ -1,14 +1,8 @@
 import * as React from "react";
-import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag} from 'antd';
-// import { Ecore } from "ecore";
+import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag, notification} from 'antd';
 import { API } from "../modules/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
-import {Icon as IconFA} from 'react-fa';
-// import AceEditor from "react-ace";
-import 'brace/mode/json';
-import 'brace/theme/tomorrow';
-// import Splitter from './CustomSplitter'
 import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGridTrans from "./SearchGrid";
 import Ecore from "ecore";
@@ -76,7 +70,7 @@ class GitDB extends React.Component<any, State> {
         form.append("file", file)
         this.setState({fileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
         API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json=>{
-            console.log(json)
+            notification.success({message: JSON.stringify(json, undefined, 4)})
         })
     }
 
