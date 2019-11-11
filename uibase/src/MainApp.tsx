@@ -1,6 +1,6 @@
 import * as React from "react";
 import Splitter from './components/CustomSplitter'
-import {Tooltip} from "antd";
+import {Layout, Tooltip} from "antd";
 import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
@@ -10,6 +10,7 @@ import {Tree} from 'antd'
 import {IMainContext, MainContext} from './MainContext'
 import update from 'immutability-helper'
 const FooterHeight = '2em';
+const backgroundColor = "white";
 
 interface State {
     appModuleName: string;
@@ -84,7 +85,7 @@ export class MainApp extends React.Component<any, State> {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
                         const splitPath = this.state.pathFull.split('#');
-                        if (splitPath.length == 1) {
+                        if (splitPath.length === 1) {
                             this.setState({objectApp}, () => {
                                 this.updateContext(
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
@@ -109,9 +110,10 @@ export class MainApp extends React.Component<any, State> {
                                 treePath = splitPath[1].split('?')[1].split('/')
                             }
                             for (let i = 0; i < treePath.length; i++) {
-                                treeChildren
-                                    .filter( (t: any) => t.get('name') === decodeURI(treePath[i]))
-                                    .forEach( (t: any) => treeChildren = t.eContents());
+                                for (let t of treeChildren
+                                    .filter((t: any) => t.get('name') === decodeURI(treePath[i]))) {
+                                    treeChildren = t.eContents();
+                                }
                             }
                             this.updateContext(
                                 ({
@@ -203,10 +205,13 @@ export class MainApp extends React.Component<any, State> {
             const cb = cbs.get(keys[keys.length - 1]);
             if (cb) cb();
         };
+        const pathThis = decodeURI(this.props.history.location.hash).split('#')[1];
         return !referenceTree ? null : (
-            <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
-            </Tree.DirectoryTree>
+            <Layout style={{backgroundColor: backgroundColor}}>
+                <Tree.DirectoryTree defaultSelectedKeys={[pathThis]} defaultExpandAll onSelect={onSelect}>
+                    {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
+                </Tree.DirectoryTree>
+            </Layout>
         )
     };
 
@@ -251,7 +256,7 @@ export class MainApp extends React.Component<any, State> {
             })
         }
         return (
-                <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+            <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
         )
     };
 
@@ -284,10 +289,10 @@ export class MainApp extends React.Component<any, State> {
                             localStorage.setItem('mainapp_refsplitter_pos', size)
                         }}
                     >
-                        <div style={{flexGrow: 1, backgroundColor: "white", height: '100%', overflow: "auto"}}>
+                        <div style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
                             {this.renderReferences()}
                         </div>
-                        <div style={{backgroundColor: "white", height: '100%', overflow: 'auto'}}>
+                        <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
                             <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                                 <Splitter
                                     ref={this.toolsSplitterRef}
@@ -304,18 +309,18 @@ export class MainApp extends React.Component<any, State> {
                                         localStorage.setItem('mainapp_toolssplitter_pos', size)
                                     }}
                                 >
-                                    <div style={{zIndex: 10, backgroundColor: "white"}}>
+                                    <div style={{zIndex: 10, backgroundColor: backgroundColor}}>
                                         <div style={{
                                             height: '100%',
                                             width: '100%',
-                                            backgroundColor: "white"
+                                            backgroundColor: backgroundColor
                                         }}>{this.renderContent()}</div>
                                     </div>
                                     <div style={{
                                         height: '100%',
                                         width: '100%',
                                         overflow: 'auto',
-                                        backgroundColor: "white"
+                                        backgroundColor: backgroundColor
                                     }}>
                                         {this.renderToolbox()}
                                     </div>
