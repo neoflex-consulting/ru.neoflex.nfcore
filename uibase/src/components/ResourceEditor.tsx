@@ -38,7 +38,8 @@ interface State {
     treeRightClickNode: { [key: string]: any },
     addRefPropertyName: String,
     isSaving: Boolean,
-    addRefPossibleTypes: Array<string>
+    addRefPossibleTypes: Array<string>,
+    classes: Ecore.EObject[]
 }
 
 export class ResourceEditor extends React.Component<any, State> {
@@ -68,15 +69,50 @@ export class ResourceEditor extends React.Component<any, State> {
         treeRightClickNode: {},
         addRefPropertyName: "",
         isSaving: false,
-        addRefPossibleTypes: []
+        addRefPossibleTypes: [],
+        classes: []
+    }
+
+    generateEObject(): void {
+        const {selectedEClass, name} = this.props.location.state
+        const targetEClass: {[key:string]: any}|undefined = this.state.classes.find((eclass: Ecore.EClass) => eclass.get('name') === selectedEClass)
+        const resourceSet = Ecore.ResourceSet.create()
+        const newResourceJSON: { [key: string]: any } = {}
+
+
+        newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
+        newResourceJSON._id = '/'
+        newResourceJSON.name = name
+
+        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
+        
+        resource.set('uri', null)
+
+        const mainEObject = resource.eResource().eContents()[0]
+
+        this.setState({
+            mainEObject: mainEObject,
+            resourceJSON: this.nestUpdaters(mainEObject.eResource().to(), null)
+        })
     }
 
     getEObject(): void {
+        this.props.match.params.id !== "null" ?
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
                 resourceJSON: this.nestUpdaters(mainEObject.eResource().to(), null)
             })
+        })
+        :
+        this.generateEObject()
+    }
+
+    getEClasses(): void {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const filtered = classes.filter((c: Ecore.EObject) => !c.get('interface'))
+            this.setState({ classes: filtered })
+            this.getEObject()
         })
     }
 
@@ -295,7 +331,7 @@ export class ResourceEditor extends React.Component<any, State> {
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
 
-        const boolSelectionOption: { [key: string]: any } = { "null": null, "true": true, "false": false, "undefined": false }
+        const boolSelectionOption: { [key: string]: any } = { "true": true, "false": false, "undefined": false }
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
@@ -666,7 +702,7 @@ export class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getEObject()
+        this.getEClasses()
         window.addEventListener("click", this.hideRightClickMenu)
     }
 
@@ -679,6 +715,7 @@ export class ResourceEditor extends React.Component<any, State> {
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
+                    <Button className="panel-button" icon="reload" onClick={this.save} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}

@@ -207,7 +207,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 fixed: 'right',
                 width: 100,
                 render: (text:string, record:any) => {
-                    const editButton = <Link key={`edit${record.key}`} to={`/settings/data/${record.resource.get('uri')}/${record.resource.rev}`}>
+                    const editButton = <Link key={`edit${record.key}`} to={`/settings/data/editor/${record.resource.get('uri')}/${record.resource.rev}`}>
                         <span id="edit">{t('edit')}</span>
                     </Link>;
                     const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>{t('delete')}</span>;

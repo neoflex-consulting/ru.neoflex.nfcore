@@ -2,8 +2,9 @@ import React from 'react'
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
 import { Modal, Select, Button, Input } from 'antd';
+import { Link } from 'react-router-dom';
 
-import {API} from './../modules/api'
+//import {API} from './../modules/api'
 
 interface Props {
     classes: Ecore.EClass[]
@@ -26,33 +27,6 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         name: ''
     }
 
-    handleCreateResource = () => {
-        const targetEClass: {[key:string]: any}|undefined = this.props.classes.find((eclass: Ecore.EClass) => eclass.get('name') === this.state.selectedEClass)
-        const resourceSet = Ecore.ResourceSet.create()
-        const newResourceJSON: { [key: string]: any } = {}
-
-        newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
-        newResourceJSON._id = '/'
-        newResourceJSON.name = this.state.name
-
-        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
-        
-        resource.set('uri', null)
-
-        API.instance().saveResource(resource).then(() => {
-            this.props.form.setFields({
-                selectEClass:{
-                    value: `${targetEClass!.eContainer.get('name')}.${targetEClass!.get('name')}`
-                },
-                name:{
-                    value: this.state.name
-                }
-            })
-            this.props.refresh()
-            this.props.setModalVisible(false)
-        })
-    }
-
     handleSelectClass = (value: string) => {
         this.setState({ selectedEClass: value })
     }
@@ -70,7 +44,14 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 width={'400px'}
                 title={translate('createresource')}
                 visible={this.props.createResModalVisible}
-                footer={this.state.selectedEClass && this.state.name ? <Button type="primary" onClick={this.handleCreateResource}>OK</Button> : null}
+                footer={this.state.selectedEClass && this.state.name ? 
+                    <Button type="primary">
+                        <Link to={{ pathname: `/settings/data/editor/null/null`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
+                            <span id="edit">{translate('ok')}</span>
+                        </Link>
+                    </Button>
+                    : 
+                    null}
                 onCancel={()=>this.props.setModalVisible(false)}
             >
                 <Select
