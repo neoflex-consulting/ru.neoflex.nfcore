@@ -2,6 +2,10 @@ import * as React from "react";
 import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag, notification} from 'antd';
 import { API } from "../modules/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import AceEditor from "react-ace";
+import 'brace/mode/json';
+import 'brace/theme/tomorrow';
+// import Splitter from './CustomSplitter'
 import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGridTrans from "./SearchGrid";

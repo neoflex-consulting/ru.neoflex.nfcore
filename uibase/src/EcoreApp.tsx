@@ -15,10 +15,10 @@ import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faYinYang, faCannabis, faBullhorn, faTools, faEllipsisH} from '@fortawesome/free-solid-svg-icons'
-import { faClock, faEye, faUser, faBell } from '@fortawesome/free-regular-svg-icons'
-import {faBattleNet, faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faSignOutAlt, faBullhorn, faTools} from '@fortawesome/free-solid-svg-icons'
+import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
+import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 
 const { Header, Content, Sider } = Layout;
 
@@ -49,12 +49,12 @@ class EcoreApp extends React.Component<any, State> {
             this.props.history.push('')
         }
         else if (e.key === "developer") {
-            this.props.history.push('/settings/data');
+            this.props.history.push('/developer/data');
         }
         else if (e.key === "app") {
             this.props.history.push('/app');
         }
-        else if (e.key === "testComponent") {
+        else if (e.key === "test") {
             this.props.history.push('/test');
         }
         else if (e.key === "showNotifications"){
@@ -115,20 +115,22 @@ class EcoreApp extends React.Component<any, State> {
                 </Menu.Item>
             )}
         </Menu>
-
+        let selectedKeys = ['developer', 'app', 'test']
+            .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout style={{ height: '100vh' }}>
                 <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
-                    <div className={window.location.pathname.includes('settings') ? "app-logo-settings" : "app-logo"}>
+                    <div className={window.location.pathname.includes('developer' +
+                        '') ? "app-logo-settings" : "app-logo"}>
                         <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
                         <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                     </div>
-                    <Menu className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
+                    <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
                             <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
                             <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
                             <Menu.Item key={'developer'}>
-                                <Link to={`/settings/data`}>
+                                <Link to={`/developer/data`}>
                                     <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
                                     {t('developer')}
                                 </Link>
@@ -139,13 +141,13 @@ class EcoreApp extends React.Component<any, State> {
                                     App
                                 </Link>
                             </Menu.Item>
-                            <Menu.Item key={'testComponent'}>
+                            <Menu.Item key={'test'}>
                                 <Link to={`/test`}>
                                     <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
                                     Test component
                                 </Link>
                             </Menu.Item>
-                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"style={{marginRight: "10px"}}/>Notification</span>}>
+                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg" style={{marginRight: "10px"}}/>Notification</span>}>
                                 {localStorage.getItem('notifierDuration') === '3' ?
                                     <Menu.Item key={'showNotifications'}>
                                     <FontAwesomeIcon icon={faEye} size="lg"style={{marginRight: "10px"}}/>
@@ -160,15 +162,13 @@ class EcoreApp extends React.Component<any, State> {
                     <Dropdown overlay={langMenu} placement="bottomCenter">
                         <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
                     </Dropdown>
-                    <FontAwesomeIcon className="bell-icon" icon={faBell}/>
-
-                    {/*<Icon className="bell-icon" type="bell" />*/}
+                    <Icon className="bell-icon" type="bell" />
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
                     <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
-                    <Route path='/settings' component={this.renderSettings}/>
+                    <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
                 </Switch>
             </Layout>
@@ -194,24 +194,24 @@ class EcoreApp extends React.Component<any, State> {
                 <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
                     <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
                         <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
-                        <Link to={`/settings/metadata`}>
+                        <Link to={`/developer/metadata`}>
                             <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
                         </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'data'}>
-                            <Link to={`/settings/data`}>
+                            <Link to={`/developer/data`}>
                             <Icon type="shopping" style={{ color: '#7d7d7d' }} />  
                             <span style={{ color: '#eeeeee' }}>{t('data')}</span>
                             </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'query'}>
-                            <Link to={`/settings/query`}>
+                            <Link to={`/developer/query`}>
                                 <Icon type="database" style={{ color: '#7d7d7d' }} />
                                 <span style={{ color: '#eeeeee' }}>{t('query')}</span>
                             </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'gitdb'}>
-                            <Link to={`/settings/gitdb`}>
+                            <Link to={`/developer/gitdb`}>
                                 <Icon type="database" style={{ color: '#7d7d7d' }} />
                                 <span style={{ color: '#eeeeee' }}>{t('gitdb')}</span>
                             </Link>
@@ -221,11 +221,11 @@ class EcoreApp extends React.Component<any, State> {
                 <Layout>
                     <Content className="app-content">
                         <Switch>
-                            <Route path='/settings/metadata' component={MetaBrowser}/>
-                            <Route path='/settings/query' component={QueryRunner}/>
-                            <Route exact={true} path='/settings/data' component={DataBrowser}/>
-                            <Route path='/settings/data/:id/:ref' component={ResourceEditor}/>
-                            <Route path='/settings/gitdb' component={GitDB}/>
+                            <Route path='/developer/metadata' component={MetaBrowser}/>
+                            <Route path='/developer/query' component={QueryRunner}/>
+                            <Route exact={true} path='/developer/data' component={DataBrowser}/>
+                            <Route path='/developer/data/:id/:ref' component={ResourceEditor}/>
+                            <Route path='/developer/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
                 </Layout>
