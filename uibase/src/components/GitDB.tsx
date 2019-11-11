@@ -2,8 +2,6 @@ import * as React from "react";
 import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag, notification} from 'antd';
 import { API } from "../modules/api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
-// import {Icon as IconFA} from 'react-fa';
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
