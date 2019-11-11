@@ -78,11 +78,11 @@ export class API implements IErrorHandler {
     }
 
     fetchJson(input: RequestInfo, init?: RequestInit): Promise<any> {
-        console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
         return this.fetch(input, this.getOpts(init)).then(response => response.json());
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<any> {
+        console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
         return fetch(input, init).then(response => {
             if (!response.ok) {
                 throw response;
@@ -370,5 +370,31 @@ export class API implements IErrorHandler {
             method: "POST"
         }))
     }
+
+    download(input: RequestInfo, init?: RequestInit, filename?: string) {
+        let download = filename || "download"
+        return this.fetch(input, init).then(response => {
+            var disposition = response.headers.get('Content-Disposition');
+            if (disposition) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    download = matches[1].replace(/['"]/g, '');
+                }
+            }
+            return response.blob()
+        }).then((blob: any) => {
+            const a: HTMLAnchorElement = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute("style", "display: none");
+            let objectURL = URL.createObjectURL(blob)
+            a.href = objectURL;
+            a.download = download;
+            a.click();
+            URL.revokeObjectURL(objectURL)
+            document.body.removeChild(a)
+        })
+    }
+
 
 }

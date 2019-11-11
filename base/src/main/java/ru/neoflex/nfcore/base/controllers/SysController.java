@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +24,8 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController()
 @RequestMapping("/system")
@@ -61,6 +66,47 @@ public class SysController {
         new Thread(() -> {
             try {
                 new Exporter(workspace.getDatabase()).zipAll(workspace.getCurrentBranch(), pipedOutputStream);
+            } catch (IOException e) {
+                logger.error("Export DB", e);
+            }
+
+        }).start();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/zip");
+        headers.set("Content-Disposition", "attachment; filename=\"database.zip\"");
+        return new ResponseEntity(new InputStreamResource(pipedInputStream), headers, HttpStatus.OK);
+    }
+
+    @PostMapping(value="/exportdb", consumes={"application/json"})
+    public ResponseEntity exportDb(
+            @RequestBody List<String> ids,
+            @RequestParam boolean withReferences,
+            @RequestParam boolean withDependents,
+            @RequestParam boolean recursiveDependents
+    ) throws IOException {
+        PipedInputStream pipedInputStream = new PipedInputStream();
+        PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
+        String branch = workspace.getCurrentBranch();
+        new Thread(() -> {
+            try {
+                workspace.getDatabase().withTransaction(branch, Transaction.LockType.DIRTY, tx->{
+                    ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
+                    List<Resource> resources = new ArrayList<>();
+                    for (String id: ids) {
+                        resources.add(workspace.getDatabase().loadResource(rs, id));
+                    }
+                    if (withDependents) {
+                        resources = workspace.getDatabase().getDependentResources(resources, tx, recursiveDependents);
+                    }
+                    if (withReferences) {
+                        ResourceSet wr = workspace.getDatabase().createResourceSet(tx);
+                        wr.getResources().addAll(resources);
+                        EcoreUtil.resolveAll(wr);
+                        resources = new ArrayList<>(wr.getResources());
+                    }
+                    new Exporter(workspace.getDatabase()).zip(resources, pipedOutputStream);
+                    return null;
+                });
             } catch (IOException e) {
                 logger.error("Export DB", e);
             }
