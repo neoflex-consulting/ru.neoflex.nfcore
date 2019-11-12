@@ -45,7 +45,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 visible={this.props.createResModalVisible}
                 footer={this.state.selectedEClass && this.state.name ? 
                     <Button type="primary">
-                        <Link to={{ pathname: `/developer/data/editor/null/null`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
+                        <Link to={{ pathname: `/developer/data/editor/new/resource`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
                             <span id="edit">{t('ok')}</span>
                         </Link>
                     </Button>

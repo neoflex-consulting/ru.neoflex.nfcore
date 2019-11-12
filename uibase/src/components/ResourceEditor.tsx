@@ -5,14 +5,16 @@ import {
     Menu, Tag, Layout, DatePicker
 } from 'antd';
 import Ecore from "ecore";
-import { API } from "../modules/api";
-import Splitter from './CustomSplitter'
 import update from 'immutability-helper';
-import EditableTextArea from './EditableTextArea'
-import SearchGrid from "./SearchGrid";
 import {withTranslation, WithTranslation} from "react-i18next";
 import moment from 'moment';
-import EClassSelection from './EClassSelection'
+
+import { API } from "../modules/api";
+import Splitter from './CustomSplitter'
+
+import EClassSelection from './EClassSelection';
+import EditableTextArea from './EditableTextArea';
+import SearchGrid from "./SearchGrid";
 
 export interface Props {
 }
@@ -79,7 +81,6 @@ class ResourceEditor extends React.Component<any, State> {
         const resourceSet = Ecore.ResourceSet.create()
         const newResourceJSON: { [key: string]: any } = {}
 
-
         newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
         newResourceJSON._id = '/'
         newResourceJSON.name = name
@@ -89,15 +90,18 @@ class ResourceEditor extends React.Component<any, State> {
         resource.set('uri', null)
 
         const mainEObject = resource.eResource().eContents()[0]
+        const json = mainEObject.eResource().to()
+        const nestedJSON = this.nestUpdaters(json, null)
 
         this.setState({
             mainEObject: mainEObject,
-            resourceJSON: this.nestUpdaters(mainEObject.eResource().to(), null)
+            resourceJSON: nestedJSON,
+            targetObject: this.findObjectById(nestedJSON, '/')
         })
     }
 
     getEObject(): void {
-        this.props.match.params.id !== "null" ?
+        this.props.match.params.id !== 'new' ?
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
