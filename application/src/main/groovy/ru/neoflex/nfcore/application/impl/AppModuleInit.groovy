@@ -129,8 +129,8 @@ class AppModuleInit {
     }
 
     {
-        recreateAppModule("ReportsApp")
-        recreateInstanceReport("InstanceReport1")
-        recreateAppModule2("ReportSingle")
+//        recreateAppModule("ReportsApp")
+//        recreateInstanceReport("InstanceReport1")
+//        recreateAppModule2("ReportSingle")
     }
 }
