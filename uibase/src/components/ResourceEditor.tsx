@@ -21,6 +21,7 @@ export interface Props {
 
 interface State {
     mainEObject: Ecore.EObject,
+    resource: Ecore.Resource,
     resourceJSON: { [key: string]: any },
     currentNode: {
         [key: string]: any
@@ -41,7 +42,8 @@ interface State {
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
-    classes: Ecore.EObject[]
+    classes: Ecore.EObject[],
+    selectedKeys: Array<string>
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -57,6 +59,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     state = {
         mainEObject: {} as Ecore.EObject,
+        resource: {} as Ecore.Resource,
         resourceJSON: {},
         currentNode: {},
         tableData: [],
@@ -72,7 +75,23 @@ class ResourceEditor extends React.Component<any, State> {
         addRefPropertyName: "",
         isSaving: false,
         addRefPossibleTypes: [],
-        classes: []
+        classes: [],
+        selectedKeys: []
+    }
+
+    refresh = (): void => {
+        this.getEObject()
+    }
+
+    delete = (): void => {
+        const ref:string = `${this.state.resource.get('uri')}?rev=${this.state.resource.rev}`;
+        API.instance().deleteResource(ref).then(()=>{
+            this.props.history.push('/developer/data')
+        })
+    }
+
+    runAction = (): void => {
+
     }
 
     generateEObject(): void {
@@ -96,17 +115,28 @@ class ResourceEditor extends React.Component<any, State> {
         this.setState({
             mainEObject: mainEObject,
             resourceJSON: nestedJSON,
-            targetObject: this.findObjectById(nestedJSON, '/')
+            targetObject: this.findObjectById(nestedJSON, '/'),
+            resource: resource
         })
     }
 
     getEObject(): void {
+        const resourceSet = Ecore.ResourceSet.create();
         this.props.match.params.id !== 'new' ?
-        API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
-            this.setState({
+        API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 0, resourceSet, {}).then((resource: Ecore.Resource) => {
+            const mainEObject = resource.eResource().eContents()[0]
+            const nestedJSON = this.nestUpdaters(mainEObject.eResource().to(), null)
+            this.setState((state, props)=>({
                 mainEObject: mainEObject,
-                resourceJSON: this.nestUpdaters(mainEObject.eResource().to(), null)
-            })
+                resourceJSON: nestedJSON,
+                resource: resource,
+                selectedKeys: [],
+                //If we create a new sibling (without saving), when click on it, information appears in the property table.
+                //But if we click the refresh button, the new created sibling will disappear, but the property table still will
+                //show information from an old targetObject. To prevent those side effects we have to check targetObject.
+                targetObject: { eClass: "" },
+                tableData: []
+            }))
         })
         :
         this.generateEObject()
@@ -298,6 +328,7 @@ class ResourceEditor extends React.Component<any, State> {
                 switcherIcon={<Icon type="down" />}
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
+                selectedKeys={this.state.selectedKeys}
             >
                 <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={this.state.mainEObject._id}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
@@ -306,7 +337,7 @@ class ResourceEditor extends React.Component<any, State> {
         )
     }
 
-    onTreeSelect = (selectedKeys: Array<String>, e: any, imitateClick: boolean = false) => {
+    onTreeSelect = (selectedKeys: Array<string>, e: any, imitateClick: boolean = false) => {
         if (selectedKeys[0] && e.node.props.targetObject.eClass) {
             const targetObject = e.node.props.targetObject
             const uniqKey = e.node.props.eventKey
@@ -314,13 +345,15 @@ class ResourceEditor extends React.Component<any, State> {
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, uniqKey),
                 targetObject: targetObject,
                 currentNode: e.node.props,
-                uniqKey: uniqKey
+                uniqKey: uniqKey,
+                selectedKeys: selectedKeys
             })
         } else {
             this.setState({
                 tableData: [],
                 targetObject: { eClass: "" },
-                currentNode: {}
+                currentNode: {},
+                selectedKeys: selectedKeys
             })
         }
     }
@@ -593,11 +626,13 @@ class ResourceEditor extends React.Component<any, State> {
             const nestedJSON = this.nestUpdaters(updatedJSON, null);
             const updatedTargetObject = !targetObject._id ? targetObject : this.findObjectById(updatedJSON, targetObject._id)
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
-            this.setState({
+            this.setState((state, props)=>({
+                mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
-                mainEObject: resource.eContents()[0]
-            })
+                tableData: updatedTargetObject ? state.tableData : [],
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey)
+            }))
         }
     }
 
@@ -720,7 +755,9 @@ class ResourceEditor extends React.Component<any, State> {
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
-                    <Button className="panel-button" icon="reload" onClick={this.save} />
+                    <Button className="panel-button" icon="reload" onClick={this.refresh} />
+                    <Button className="panel-button" icon="bulb" onClick={this.runAction} />
+                    <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
