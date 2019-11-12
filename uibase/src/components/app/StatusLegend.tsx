@@ -88,5 +88,4 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
     }
 }
 
-const StatusLegendTrans = withTranslation()(StatusLegend);
-export default StatusLegendTrans;
+export default withTranslation()(StatusLegend)

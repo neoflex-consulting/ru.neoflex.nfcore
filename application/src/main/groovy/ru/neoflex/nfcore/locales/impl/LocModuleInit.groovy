@@ -169,16 +169,10 @@ class LocModuleInit extends LocModuleImpl {
             locModulesResources.each {lmrs->
                 LocModule locModule = lmrs.contents[0] as LocModule
                 String json = Context.current.epsilon.generate("LocModule2json.egl", [lang: lang.name], locModule)
-                Transaction tx = Context.current.workspace.createTransaction()
-                try {
-                    Path path = tx.fileSystem.getPath("/public/locales/${lang.name}/${locModule.name}.json")
-                    Files.createDirectories(path.parent)
-                    Files.write(path, json.getBytes())
-                    tx.commit("Generated " + path.toString())
-                }
-                finally {
-                    tx.close()
-                }
+                Transaction tx = Transaction.getCurrent()
+                Path path = tx.fileSystem.getPath("/public/locales/${lang.name}/${locModule.name}.json")
+                Files.createDirectories(path.parent)
+                Files.write(path, json.getBytes())
             }
         }
     }

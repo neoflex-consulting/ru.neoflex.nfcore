@@ -30,5 +30,4 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
     }
 }
 
-const ReportRichGridTrans = withTranslation()(ReportRichGrid);
-export default ReportRichGridTrans;
+export default withTranslation()(ReportRichGrid)

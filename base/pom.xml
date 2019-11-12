@@ -117,7 +117,6 @@
             <artifactId>org.eclipse.jgit.http.server</artifactId>
             <version>5.3.0.201903130848-r</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -138,6 +137,7 @@
                     <filesets>
                         <fileset>
                             <directory>src/main/java-gen</directory>
+                            <directory>src/test/java-gen</directory>
                         </fileset>
                     </filesets>
                 </configuration>
@@ -185,29 +185,57 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <languages>
+                                <language>
+                                    <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+                                </language>
+                                <language>
+                                    <setup>org.eclipse.emf.codegen.ecore.xtext.GenModelSupport</setup>
+                                </language>
+                                <language>
+                                    <setup>org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup</setup>
+                                    <outputConfigurations>
+                                        <outputConfiguration>
+                                            <outputDirectory>${project.basedir}/src/main/java-gen</outputDirectory>
+                                        </outputConfiguration>
+                                    </outputConfigurations>
+                                </language>
+                            </languages>
+                            <sourceRoots>
+                                <root>${basedir}/src/main/resources/metamodel</root>
+                            </sourceRoots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <languages>
+                                <language>
+                                    <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+                                </language>
+                                <language>
+                                    <setup>org.eclipse.emf.codegen.ecore.xtext.GenModelSupport</setup>
+                                </language>
+                                <language>
+                                    <setup>org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup</setup>
+                                    <outputConfigurations>
+                                        <outputConfiguration>
+                                            <outputDirectory>${project.basedir}/src/test/java-gen</outputDirectory>
+                                        </outputConfiguration>
+                                    </outputConfigurations>
+                                </language>
+                            </languages>
+                            <sourceRoots>
+                                <root>${basedir}/src/test/resources/metamodel</root>
+                            </sourceRoots>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <languages>
-                        <language>
-                            <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
-                        </language>
-                        <language>
-                            <setup>org.eclipse.emf.codegen.ecore.xtext.GenModelSupport</setup>
-                        </language>
-                        <language>
-                            <setup>org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup</setup>
-                            <outputConfigurations>
-                                <outputConfiguration>
-                                    <outputDirectory>${project.basedir}/src/main/java-gen</outputDirectory>
-                                </outputConfiguration>
-                            </outputConfigurations>
-                        </language>
-                    </languages>
-                    <sourceRoots>
-                        <root>${basedir}/src/main/resources/metamodel</root>
-                    </sourceRoots>
-                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.eclipse.text</groupId>

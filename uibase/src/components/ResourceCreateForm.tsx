@@ -36,18 +36,17 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
     }
 
     render() {
-        const { translate } = this.props
-        
+        const {t} = this.props;
         return (
             <Modal
                 key="create_resource"
                 width={'400px'}
-                title={translate('createresource')}
+                title={t('createitem')}
                 visible={this.props.createResModalVisible}
                 footer={this.state.selectedEClass && this.state.name ? 
                     <Button type="primary">
                         <Link to={{ pathname: `/settings/data/editor/null/null`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
-                            <span id="edit">{translate('ok')}</span>
+                            <span id="edit">{t('ok')}</span>
                         </Link>
                     </Button>
                     : 
@@ -57,7 +56,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 <Select
                     showSearch
                     style={{ width: '100%', marginBottom: '10px' }}
-                    placeholder={translate('selecteclass')}
+                    placeholder={t('eClass')}
                     onChange={this.handleSelectClass}
                 >
                     {this.props.classes.map((eclass: Ecore.EObject) =>
@@ -70,7 +69,7 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     )}
                 </Select>
                 <Input 
-                    placeholder={translate('name')}
+                    placeholder={t('itemname')}
                     value={this.state.name} 
                     onChange={this.onChangeName}
                 />

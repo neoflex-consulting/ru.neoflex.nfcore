@@ -91,5 +91,4 @@ class ReportPivot extends React.PureComponent<WithTranslation, IPivotGridProps> 
 
 }
 
-const ReportPivotTrans = withTranslation()(ReportPivot);
-export default ReportPivotTrans;
+export default withTranslation()(ReportPivot)

@@ -1,9 +1,9 @@
 import React from "react";
-import CalendarTrans from "./Calendar";
+import Calendar from "./Calendar";
 import './../../styles/MandatoryReporting.css';
 import {Form} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import StatusLegendTrans from "./StatusLegend";
+import StatusLegend from "./StatusLegend";
 
 interface Props {
 }
@@ -22,12 +22,11 @@ class MandatoryReporting extends React.Component<WithTranslation, any> {
                         {t('mandatoryreporting')}
                     </div>
                 </div>
-                <StatusLegendTrans />
-                <CalendarTrans />
+                <StatusLegend />
+                <Calendar />
             </Form>
         );
     }
 }
 
-const MandatoryReportingTrans = withTranslation()(MandatoryReporting);
-export default MandatoryReportingTrans;
+export default withTranslation()(MandatoryReporting)

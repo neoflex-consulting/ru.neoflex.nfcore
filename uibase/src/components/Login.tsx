@@ -2,7 +2,6 @@ import * as React from "react";
 import { Icon, Dropdown, Menu } from 'antd'
 import { API } from "../modules/api";
 import logo from '../logo.png';
-import pony from '../pony.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
 import Ecore from "ecore";
@@ -33,14 +32,6 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         images: logo,
         languages: [],
         langIcons: {}
-    };
-
-    surprise = () => {
-        this.state.count === undefined ?
-            this.setState({ count: 1 }) :
-            this.state.count < 10 ? this.setState({ count: this.state.count + 1 }) :
-                this.state.count === 10 ? this.setState({ images: pony, count: 0 }) :
-                    this.setState({ count: 0 })
     };
 
     authenticate = () => {

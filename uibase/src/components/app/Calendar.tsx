@@ -136,18 +136,16 @@ class Calendar extends React.Component<WithTranslation, State> {
                                 ?
                                 report.map( (r: any) =>
                                     <Button
-                                   onClick={() =>
-                                       context.changeURL!(
-                                           // "Report"
-                                            )
+                                        onClick={() =>
+                                            context.changeURL!()
                                         }
-                                         key={`${r.get('uri')}/${r.rev}`}
-                                       size="small"
+                                        key={`${r.get('uri')}/${r.rev}`}
+                                        size="small"
                                         style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
-                                       title={`${r.eContents()[0].get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                        title={`${r.eContents()[0].get('report').get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
-                                   >
-                                    {r.eContents()[0].get('report').get('name')}
+                                    >
+                                        {r.eContents()[0].get('report').get('name')}
                                     </Button>
                                 )
                                 : ""}
@@ -218,5 +216,4 @@ class Calendar extends React.Component<WithTranslation, State> {
     }
 }
 
-const CalendarTrans = withTranslation()(Calendar);
-export default CalendarTrans;
+export default withTranslation()(Calendar)

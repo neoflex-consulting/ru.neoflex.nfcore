@@ -2,10 +2,14 @@ package ru.neoflex.nfcore.base.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.Diagnostician;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +22,12 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Iterator;
 
 @Service
 public class Store {
+    private final static Log logger = LogFactory.getLog(Store.class);
+
     @Autowired
     private
     StoreSPI provider;
@@ -59,7 +66,26 @@ public class Store {
     }
 
     public Resource saveResource(Resource resource) throws IOException {
+        for (EObject eObject: resource.getContents()) {
+            Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
+            if (diagnostic.getSeverity() == Diagnostic.ERROR) {
+                String message = getDiagnosticMessage(diagnostic);
+                throw new RuntimeException(message);
+            }
+            if (diagnostic.getSeverity() == Diagnostic.WARNING) {
+                logger.warn(getDiagnosticMessage(diagnostic));
+            }
+        }
         return provider.saveResource(resource);
+    }
+
+    public String getDiagnosticMessage(Diagnostic diagnostic) {
+        String message = diagnostic.getMessage();
+        for (Iterator i = diagnostic.getChildren().iterator(); i.hasNext();) {
+            Diagnostic childDiagnostic = (Diagnostic)i.next();
+            message += "\n" + childDiagnostic.getMessage();
+        }
+        return message;
     }
 
     public Resource createEmptyResource() throws IOException {

@@ -1,0 +1,109 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.base/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.base.scheduler
+import org.eclipse.emf.ecore.EObject
+import ru.neoflex.nfcore.base.types.Timestamp
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Text
+import ru.neoflex.nfcore.base.types.Password
+import ru.neoflex.nfcore.base.auth.Audit
+
+abstract class BackOffPolicy {
+}
+
+class NoBackOffPolicy extends BackOffPolicy {
+}
+
+class FixedBackOffPolicy extends BackOffPolicy {
+    long backOffPeriod
+}
+
+class ExponentialBackOffPolicy extends BackOffPolicy {
+    long initialInterval
+    double multiplier
+    long maxInterval
+}
+
+class ExponentialRandomBackOffPolicy extends ExponentialBackOffPolicy {
+}
+
+class UniformRandomBackOffPolicy extends BackOffPolicy {
+    long minBackOffPeriod
+    long maxBackOffPeriod
+}
+
+abstract class Scheduler {
+}
+
+class OnceScheduler extends Scheduler {
+  Timestamp startTime
+  boolean disableAfterRun
+} 
+
+class CronScheduler extends Scheduler {
+  String cronExpression
+} 
+
+class DelayScheduler extends Scheduler {
+  Timestamp startTime
+  long delay
+} 
+
+class PeriodScheduler extends Scheduler {
+  Timestamp startTime
+  long period
+} 
+
+abstract class RetryPolicy {
+}
+
+class RetryableException {
+    String exceptionClass
+    boolean retryable
+}
+
+class SimpleRetryPolicy extends RetryPolicy {
+    int maxAttempts
+    contains RetryableException[] retryableExceptions
+} 
+
+class AlwaysRetryPolicy extends RetryPolicy {
+} 
+
+class NeverRetryPolicy extends RetryPolicy {
+} 
+
+class TimeoutRetryPolicy extends RetryPolicy {
+    long timeout
+} 
+
+class Parameter {
+	String name
+	String value
+}
+
+class ScheduledTask {
+  QName name
+  boolean enabled
+  refers EObject eObject
+  contains Parameter[] parameters
+  Text script
+  contains Scheduler scheduler
+  contains BackOffPolicy backOffPolicy
+  contains RetryPolicy retryPolicy
+  boolean imporsonate
+  String runAsUser
+  Password runAsPassword
+  Timestamp lastScheduleTime
+  Timestamp lastRunTime
+  Timestamp lastErrorTime
+  Text lastError
+  contains Audit audit
+
+  op void refreshScheduler()
+}

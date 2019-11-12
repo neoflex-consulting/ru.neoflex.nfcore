@@ -1,17 +1,18 @@
 import * as React from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
-import MandatoryReportingTrans from "./MandatoryReporting";
-import ReportPivotTrans from "./ReportPivot";
-import ReportDiagramTrans from "./ReportDiagram";
-import ReportRichGridTrans from "./ReportRichGrid";
-import TestComponentLeftTrans from "./TestComponentLeft";
+
+import MandatoryReporting from "./MandatoryReporting";
+import ReportPivot from "./ReportPivot";
+import ReportDiagram from "./ReportDiagram";
+import ReportRichGrid from "./ReportRichGrid";
+import PageNotFound from "./PageNotFound";
 
 const UserComponents: any = {
-    MandatoryReportingTrans: MandatoryReportingTrans,
-    ReportPivotTrans: ReportPivotTrans,
-    ReportRichGridTrans: ReportRichGridTrans,
-    ReportDiagramTrans: ReportDiagramTrans,
-    TestComponentLeftTrans: TestComponentLeftTrans
+    MandatoryReporting: MandatoryReporting,
+    ReportPivot: ReportPivot,
+    ReportDiagram: ReportDiagram,
+    ReportRichGrid: ReportRichGrid,
+    PageNotFound: PageNotFound
 };
 
 export interface Props {
@@ -25,7 +26,7 @@ class UserComponent extends React.Component<Props & WithTranslation, any> {
         if (UserComponents[`${this.props.componentClassName}`]) {
             Component = UserComponents[`${this.props.componentClassName}`]
         } else {
-            Component = <div>"{this.props.componentClassName}" not found</div>
+            Component = UserComponents['PageNotFound']
         }
         return (
             <Component/>

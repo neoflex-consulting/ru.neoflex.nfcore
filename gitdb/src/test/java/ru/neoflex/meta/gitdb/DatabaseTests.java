@@ -15,6 +15,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static ru.neoflex.meta.gitdb.Database.TYPE_NAME_IDX;
 import static ru.neoflex.meta.gitdb.Database.IDX_PATH;
@@ -102,21 +103,19 @@ public class DatabaseTests extends TestBase {
             Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
         }
         try (Transaction tx = database.createTransaction("users")){
-            ResourceSet dependent = database.getDependentResources(groupId, tx);
-            Assert.assertEquals(2, dependent.getResources().size());
+            List<Resource> dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(2, dependent.size());
             Assert.assertEquals(3, tx.all().size());
             Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
             Assert.assertEquals(1, database.findByEClass(group.eClass(), "masters", tx).getResources().size());
             Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
-            dependent = database.getDependentResources(groupId, tx);
-            Assert.assertEquals(2, dependent.getResources().size());
             Resource userResource = database.loadResource(userId, tx);
             userResource.delete(null);
             tx.commit("User Simanihin was deleted");
         }
         try (Transaction tx = database.createTransaction("users")){
-            ResourceSet dependent = database.getDependentResources(groupId, tx);
-            Assert.assertEquals(1, dependent.getResources().size());
+            List<Resource> dependent = database.getDependentResources(groupId, tx);
+            Assert.assertEquals(1, dependent.size());
         }
     }
 

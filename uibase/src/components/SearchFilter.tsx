@@ -111,6 +111,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         pagination={false}
                     />
                     <Button
+                        title={t('searchsimple')}
                         type="primary"
                         onClick={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
                         icon="search"
@@ -119,11 +120,13 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                     />
                     <Button
                         onClick={() => {
+
                             this.setState({selectedKeys: [], selectedRowKeys: []});
                             if (this.props.tableDataFilter) {
                                 this.props.tableDataFilter(this.props.tableData);
                             }
                         }}
+                        title={t('clear')}
                         size="small"
                         style={{ width: 90 }}
                         icon="rest"
@@ -132,6 +135,4 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             );
         }}
 
-const WrappedSearchFilter = Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter);
-const SearchFilterTrans = withTranslation()(WrappedSearchFilter);
-export default SearchFilterTrans;
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter))

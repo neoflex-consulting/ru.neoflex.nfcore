@@ -1,6 +1,6 @@
 import * as React from "react";
 import Splitter from './components/CustomSplitter'
-import {Tooltip} from "antd";
+import {Layout, Tooltip} from "antd";
 import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
@@ -9,12 +9,13 @@ import {ViewRegistry} from './ViewRegistry'
 import {Tree} from 'antd'
 import {IMainContext, MainContext} from './MainContext'
 import update from 'immutability-helper'
-
 const FooterHeight = '2em';
+const backgroundColor = "white";
 
 interface State {
     appModuleName: string;
-    pathTree: string;
+    pathFull: string;
+    objectID: string;
     context: IMainContext
     hideReferences: boolean
     currentTool?: string
@@ -36,7 +37,8 @@ export class MainApp extends React.Component<any, State> {
         };
         this.state = {
             appModuleName: props.appModuleName,
-            pathTree: props.pathTree,
+            pathFull: props.pathFull,
+            objectID: props.objectID,
             hideReferences: false,
             path: [],
             context
@@ -49,9 +51,15 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeURL = (appModuleName?: string, pathTree?: string) => {
-        if (pathTree && appModuleName) {
-            this.props.history.push(`/app/${appModuleName}/${pathTree}`);
+    changeURL = (appModuleName?: string, pathFull?: string, objectID?: string) => {
+        if (objectID && pathFull && appModuleName) {
+            this.props.history.push(`/app/${appModuleName}?objectID=${objectID}#${pathFull}`);
+        }
+        else if (objectID && appModuleName) {
+            this.props.history.push(`/app/${appModuleName}?objectID=${objectID}`);
+        }
+        else if (pathFull && appModuleName) {
+            this.props.history.push(`/app/${appModuleName}#${pathFull}`);
         }
         else if (appModuleName) {
             this.props.history.push(`/app/${appModuleName}`);
@@ -66,7 +74,7 @@ export class MainApp extends React.Component<any, State> {
         let objectPackage: string;
         let objectClass: string;
         if (this.state.appModuleName !== undefined) {
-        name = this.state.appModuleName;
+        name = decodeURI(this.state.appModuleName);
         objectPackage = "ru.neoflex.nfcore.application";
         objectClass = "AppModule";
         API.instance().fetchPackages().then(packages => {
@@ -76,8 +84,8 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(eClass, name).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-                        const splitPath = this.state.pathTree.split('/');
-                        if (splitPath.length == 3) {
+                        const splitPath = this.state.pathFull.split('#');
+                        if (splitPath.length === 1) {
                             this.setState({objectApp}, () => {
                                 this.updateContext(
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
@@ -92,14 +100,20 @@ export class MainApp extends React.Component<any, State> {
                                 //     }
                                 // })
                                 //     .catch( ()=> {console.log("Reference Tree not exists")} )
-
                             });
                         } else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
-                            for (let i = 2; i < splitPath.length; i++) {
-                                treeChildren
-                                    .filter( (t: any) => t.get('name') === splitPath[i])
-                                    .map( (t: any) => treeChildren = t.eContents());
+                            let treePath: string[];
+                            if (splitPath[1].split('?').length === 1) {
+                                treePath = splitPath[1].split('/');
+                            } else {
+                                treePath = splitPath[1].split('?')[1].split('/')
+                            }
+                            for (let i = 0; i < treePath.length; i++) {
+                                for (let t of treeChildren
+                                    .filter((t: any) => t.get('name') === decodeURI(treePath[i]))) {
+                                    treeChildren = t.eContents();
+                                }
                             }
                             this.updateContext(
                                 ({
@@ -115,7 +129,7 @@ export class MainApp extends React.Component<any, State> {
 
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (
-            prevState.pathTree !== this.state.pathTree ||
+            prevState.pathFull !== this.state.pathFull ||
             prevState.appModuleName !== this.state.appModuleName)
         {
             this.loadObject()
@@ -127,13 +141,18 @@ export class MainApp extends React.Component<any, State> {
     }
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        const pathFull = nextProps.history.location.pathname +
+            nextProps.history.location.search + nextProps.history.location.hash;
         if (
-            prevState.pathTree !== nextProps.history.location.pathname ||
+            prevState.pathFull !== pathFull ||
             prevState.appModuleName !== nextProps.match.params.appModuleName) {
             return {
-                pathTree: nextProps.history.location.pathname,
+                objectID: nextProps.history.location.search,
+                pathFull: pathFull,
                 appModuleName: nextProps.match.params.appModuleName
-            };
+            }
+        } else {
+            return null
         }
     }
 
@@ -186,10 +205,13 @@ export class MainApp extends React.Component<any, State> {
             const cb = cbs.get(keys[keys.length - 1]);
             if (cb) cb();
         };
+        const pathThis = decodeURI(this.props.history.location.hash).split('#')[1];
         return !referenceTree ? null : (
-            <Tree.DirectoryTree defaultExpandAll onSelect={onSelect}>
-                {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
-            </Tree.DirectoryTree>
+            <Layout style={{backgroundColor: backgroundColor}}>
+                <Tree.DirectoryTree defaultSelectedKeys={[pathThis]} defaultExpandAll onSelect={onSelect}>
+                    {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
+                </Tree.DirectoryTree>
+            </Layout>
         )
     };
 
@@ -207,35 +229,46 @@ export class MainApp extends React.Component<any, State> {
 
         if (eObject.isKindOf('AppModuleNode')) {
             cbs.set(key, () => {
-                if (eObject.get('name')) {
-                    const appModuleName = eObject.get('name');
-                    this.changeURL(appModuleName)
+                if (eObject.get('componentWithTree')) {
+                    this.setURL(eObject, key);
                 }
             })
         }
         else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {
                 if (eObject.get('view')) {
-                    this.changeURL(this.state.appModuleName, key);
+                    this.setURL(eObject, key);
                 }
             })
         }
         else if (eObject.isKindOf('EClassNode')) {
             cbs.set(key, () => {
                 if (eObject.get('aClass') && eObject.get('view')) {
-                    this.changeURL(this.state.appModuleName, key);
+                    this.setURL(eObject, key);
                 }
             })
         }
         else if (eObject.isKindOf('DynamicNode')) {
             cbs.set(key, () => {
                 if (eObject.get('methodName') && eObject.get('eObject')) {
-                    this.changeURL(this.state.appModuleName, key);
+                    this.setURL(eObject, key);
                 }
             })
         }
-        return <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+        return (
+            <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+        )
     };
+
+    private setURL(eObject: Ecore.EObject, key: any) {
+        const appModuleName = eObject.get('componentWithTree') ? eObject.get('componentWithTree').get('name') : this.state.appModuleName;
+        let pathFull = eObject.get('componentWithTree') ? undefined : key;
+        if (!eObject.get('eObject')) {
+            this.changeURL(appModuleName, pathFull);
+        } else {
+            this.changeURL(appModuleName, pathFull, eObject.get('eObject').eURI().split('#')[0]);
+        }
+    }
 
     render = () => {
         return (
@@ -256,10 +289,10 @@ export class MainApp extends React.Component<any, State> {
                             localStorage.setItem('mainapp_refsplitter_pos', size)
                         }}
                     >
-                        <div style={{flexGrow: 1, backgroundColor: "white", height: '100%', overflow: "auto"}}>
+                        <div style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
                             {this.renderReferences()}
                         </div>
-                        <div style={{backgroundColor: "white", height: '100%', overflow: 'auto'}}>
+                        <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
                             <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                                 <Splitter
                                     ref={this.toolsSplitterRef}
@@ -276,18 +309,18 @@ export class MainApp extends React.Component<any, State> {
                                         localStorage.setItem('mainapp_toolssplitter_pos', size)
                                     }}
                                 >
-                                    <div style={{zIndex: 10, backgroundColor: "white"}}>
+                                    <div style={{zIndex: 10, backgroundColor: backgroundColor}}>
                                         <div style={{
                                             height: '100%',
                                             width: '100%',
-                                            backgroundColor: "white"
+                                            backgroundColor: backgroundColor
                                         }}>{this.renderContent()}</div>
                                     </div>
                                     <div style={{
                                         height: '100%',
                                         width: '100%',
                                         overflow: 'auto',
-                                        backgroundColor: "white"
+                                        backgroundColor: backgroundColor
                                     }}>
                                         {this.renderToolbox()}
                                     </div>
