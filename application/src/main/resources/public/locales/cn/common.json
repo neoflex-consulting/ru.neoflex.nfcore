@@ -27,5 +27,6 @@
         "select": "選擇",
         "clear": "清除",
         "createitem": "建立項目",
-        "itemname": "項目名稱"
+        "itemname": "項目名稱",
+        "taxreporting": "稅務申報"
 }

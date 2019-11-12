@@ -146,7 +146,7 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                             </button>
                         </div>
                     </div>
-                    {this.state.languages.length && <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
+                    {this.state.languages.length !== 0 && <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
                         <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
                     </Dropdown>}
                 </div>

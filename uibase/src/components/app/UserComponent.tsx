@@ -6,13 +6,15 @@ import ReportPivot from "./ReportPivot";
 import ReportDiagram from "./ReportDiagram";
 import ReportRichGrid from "./ReportRichGrid";
 import PageNotFound from "./PageNotFound";
+import TaxReporting from "./TaxReporting";
 
 const UserComponents: any = {
     MandatoryReporting: MandatoryReporting,
     ReportPivot: ReportPivot,
     ReportDiagram: ReportDiagram,
     ReportRichGrid: ReportRichGrid,
-    PageNotFound: PageNotFound
+    PageNotFound: PageNotFound,
+    TaxReporting: TaxReporting
 };
 
 export interface Props {

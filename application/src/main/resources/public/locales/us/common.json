@@ -27,5 +27,6 @@
         "select": "Select",
         "clear": "Clear",
         "createitem": "Create item",
-        "itemname": "Item name"
+        "itemname": "Item name",
+        "taxreporting": "Tax Reporting"
 }

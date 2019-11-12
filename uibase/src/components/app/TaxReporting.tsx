@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import Calendar from "./Calendar";
 import './../../styles/MandatoryReporting.css';
 import {Form} from "antd";
@@ -11,7 +11,7 @@ interface Props {
 interface State {
 }
 
-class MandatoryReporting extends React.Component<WithTranslation, any> {
+class TaxReporting extends React.Component<WithTranslation, any> {
 
     render() {
         const {t} = this.props;
@@ -19,14 +19,14 @@ class MandatoryReporting extends React.Component<WithTranslation, any> {
             <Form>
                 <div className="headerCalendar col-text">
                     <div id="logo">
-                        {t('mandatoryreporting')}
+                        {t('taxreporting')}
                     </div>
                 </div>
                 <StatusLegend />
-                <Calendar reporting={1}/>
+                <Calendar reporting={2}/>
             </Form>
         );
     }
 }
 
-export default withTranslation()(MandatoryReporting)
+export default withTranslation()(TaxReporting)

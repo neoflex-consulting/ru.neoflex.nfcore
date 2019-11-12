@@ -5,14 +5,16 @@ import {
     Menu, Tag, Layout, DatePicker
 } from 'antd';
 import Ecore from "ecore";
-import { API } from "../modules/api";
-import Splitter from './CustomSplitter'
 import update from 'immutability-helper';
-import EditableTextArea from './EditableTextArea'
-import SearchGrid from "./SearchGrid";
 import {withTranslation, WithTranslation} from "react-i18next";
 import moment from 'moment';
-import EClassSelection from './EClassSelection'
+
+import { API } from "../modules/api";
+import Splitter from './CustomSplitter'
+
+import EClassSelection from './EClassSelection';
+import EditableTextArea from './EditableTextArea';
+import SearchGrid from "./SearchGrid";
 
 export interface Props {
 }
@@ -38,7 +40,8 @@ interface State {
     treeRightClickNode: { [key: string]: any },
     addRefPropertyName: String,
     isSaving: Boolean,
-    addRefPossibleTypes: Array<string>
+    addRefPossibleTypes: Array<string>,
+    classes: Ecore.EObject[]
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -68,15 +71,52 @@ class ResourceEditor extends React.Component<any, State> {
         treeRightClickNode: {},
         addRefPropertyName: "",
         isSaving: false,
-        addRefPossibleTypes: []
+        addRefPossibleTypes: [],
+        classes: []
+    }
+
+    generateEObject(): void {
+        const {selectedEClass, name} = this.props.location.state
+        const targetEClass: {[key:string]: any}|undefined = this.state.classes.find((eclass: Ecore.EClass) => eclass.get('name') === selectedEClass)
+        const resourceSet = Ecore.ResourceSet.create()
+        const newResourceJSON: { [key: string]: any } = {}
+
+        newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
+        newResourceJSON._id = '/'
+        newResourceJSON.name = name
+
+        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
+        
+        resource.set('uri', null)
+
+        const mainEObject = resource.eResource().eContents()[0]
+        const json = mainEObject.eResource().to()
+        const nestedJSON = this.nestUpdaters(json, null)
+
+        this.setState({
+            mainEObject: mainEObject,
+            resourceJSON: nestedJSON,
+            targetObject: this.findObjectById(nestedJSON, '/')
+        })
     }
 
     getEObject(): void {
+        this.props.match.params.id !== 'new' ?
         API.instance().fetchEObject(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`).then(mainEObject => {
             this.setState({
                 mainEObject: mainEObject,
                 resourceJSON: this.nestUpdaters(mainEObject.eResource().to(), null)
             })
+        })
+        :
+        this.generateEObject()
+    }
+
+    getEClasses(): void {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const filtered = classes.filter((c: Ecore.EObject) => !c.get('interface'))
+            this.setState({ classes: filtered })
+            this.getEObject()
         })
     }
 
@@ -295,7 +335,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
 
-        const boolSelectionOption: { [key: string]: any } = { "null": null, "true": true, "false": false, "undefined": false }
+        const boolSelectionOption: { [key: string]: any } = { "true": true, "false": false, "undefined": false }
         const getPrimitiveType = (value: string): any => boolSelectionOption[value]
         const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
@@ -427,7 +467,8 @@ class ResourceEditor extends React.Component<any, State> {
         const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
         featureList.forEach((feature: Ecore.EObject, idx: Number) => {
             const isContainment = Boolean(feature.get('containment'))
-            if (!isContainment) preparedData.push({
+            const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
+            if (!isContainment && !isContainer) preparedData.push({
                 property: feature.get('name'),
                 value: prepareValue(feature, targetObject[feature.get('name')], idx),
                 key: feature.get('name') + idx
@@ -666,7 +707,7 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.getEObject()
+        this.getEClasses()
         window.addEventListener("click", this.hideRightClickMenu)
     }
 
@@ -679,6 +720,7 @@ class ResourceEditor extends React.Component<any, State> {
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
+                    <Button className="panel-button" icon="reload" onClick={this.save} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
@@ -709,7 +751,7 @@ class ResourceEditor extends React.Component<any, State> {
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <a className="resource-link" href={`/settings/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                    <a className="resource-link" href={`/developer/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
                                                         <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
                                                             {`${res.eContents()[0].get('name')}`}
                                                             &nbsp;

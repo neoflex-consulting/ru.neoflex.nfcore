@@ -166,7 +166,7 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
-                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
+                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp#Mandatory%20Reporting'}/>
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
@@ -224,7 +224,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route path='/developer/metadata' component={MetaBrowser}/>
                             <Route path='/developer/query' component={QueryRunner}/>
                             <Route exact={true} path='/developer/data' component={DataBrowser}/>
-                            <Route path='/developer/data/:id/:ref' component={ResourceEditor}/>
+                            <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
                             <Route path='/developer/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
