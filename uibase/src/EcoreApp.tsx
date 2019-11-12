@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown, Breadcrumb, Col, Row, Avatar} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -27,6 +27,7 @@ interface State {
     languages: string[];
     notifierDuration: number;
     langIcons: { [key: string]: any };
+    breadcrumb: any;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -37,7 +38,8 @@ class EcoreApp extends React.Component<any, State> {
             principal: undefined,
             languages: [],
             notifierDuration: 0,
-            langIcons: {}
+            langIcons: {},
+            breadcrumb: undefined
         };
     }
 
@@ -95,7 +97,16 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({ langIcons })
         });
     }
-
+    setAppModuleName() {
+        const appModuleName = this.props.location.pathname.split('/')[2]
+        this.setState({breadcrumb:
+                this.state.breadcrumb !== undefined && !this.state.breadcrumb.split('/').includes(appModuleName)
+                    ?
+                    this.state.breadcrumb + "/" + appModuleName
+                    :
+                    appModuleName
+        })
+    }
     renderDev = () => {
         const storeLangValue = String(localStorage.getItem('i18nextLng'))
         const langIcons: { [key: string]: any } = this.state.langIcons
@@ -117,14 +128,49 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>
         let selectedKeys = ['developer', 'app', 'test']
             .filter(k => this.props.location.pathname.split('/').includes(k));
+
+
         return (
             <Layout style={{ height: '100vh' }}>
                 <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }}>
-                    <div className={window.location.pathname.includes('developer' +
-                        '') ? "app-logo-settings" : "app-logo"}>
-                        <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                        <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
-                    </div>
+                    <Row>
+                        <Col span={6}>
+                            <div className={window.location.pathname.includes('developer' +
+                                '') ? "app-logo-settings" : "app-logo"}>
+                                <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
+                                <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
+                            </div>
+                        </Col>
+
+
+
+
+                        <Col span={12}>
+                            {/*<Breadcrumb separator={">"}>*/}
+                            {/*{selectedKeys === ['app'] && this.state.breadcrumb ?*/}
+                            {this.state.breadcrumb ?
+                                this.state.breadcrumb.split('/').map( (m: any) => {
+                                    return (
+                                        <Breadcrumb.Item key={m}>
+                                            <Link to={m}>
+                                                {m}
+                                                {/*<Avatar src={"Hi"}*/}
+                                                {/*        size={"small"}/>&nbsp;{!m.hasOwnProperty('e_id') ? t((m.name) + '.caption', {ns: ['modules']}) : m.name}*/}
+                                            </Link>
+                                        </Breadcrumb.Item>)
+                            }) : ""
+                            // this.props.history.location.pathname.split('/').splice(1).map( (m: any) => {
+                            //     return (
+                            //         <Breadcrumb.Item key={m}>
+                            //             <Link to={m}>
+                            //                 {m}
+                            //             </Link>
+                            //         </Breadcrumb.Item>)
+                            // })
+                        }
+                        {/*</Breadcrumb>*/}
+                        </Col>
+                        <Col>
                     <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
                         <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
                             <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
@@ -163,6 +209,8 @@ class EcoreApp extends React.Component<any, State> {
                         <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
                     </Dropdown>
                     <Icon className="bell-icon" type="bell" />
+                    </Col>
+                    </Row>
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
@@ -239,6 +287,12 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
+        if (prevProps.location.pathname !== this.props.location.pathname) {
+            this.setAppModuleName()
+        }
+    }
+
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages()
         const _this = this;
@@ -270,7 +324,13 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
+
+        if (this.state.breadcrumb === undefined) {
+            this.setAppModuleName()
+        }
     }
+
+
 
     render = () => {
         return (

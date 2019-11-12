@@ -788,7 +788,7 @@ class ResourceEditor extends React.Component<any, State> {
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <a className="resource-link" href={`/developer/data/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                    <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
                                                         <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
                                                             {`${res.eContents()[0].get('name')}`}
                                                             &nbsp;
