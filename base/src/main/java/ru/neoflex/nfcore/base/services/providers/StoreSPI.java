@@ -26,6 +26,8 @@ public interface StoreSPI {
 
     String getRef(Resource resource);
 
+    String getId(Resource resource);
+
     ObjectMapper createMapper();
 
     Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws IOException;
