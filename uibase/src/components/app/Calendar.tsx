@@ -18,9 +18,10 @@ interface State {
 }
 
 interface Props {
+    reporting: number
 }
 
-class Calendar extends React.Component<WithTranslation, State> {
+class Calendar extends React.Component<Props & WithTranslation, State> {
 
     state = {
         currentMonth: new Date(),
@@ -114,7 +115,7 @@ class Calendar extends React.Component<WithTranslation, State> {
         let formattedDate = "";
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
-                let report = this.getInstanceReports(day);
+                let content = this.getContents(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
                 days.push(
@@ -132,12 +133,12 @@ class Calendar extends React.Component<WithTranslation, State> {
                         <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
                         <div>
-                            {report.length !== 0
+                            {content.length !== 0
                                 ?
-                                report.map( (r: any) =>
+                                content.map( (r: any) =>
                                     <Button
                                         onClick={() =>
-                                            context.changeURL!()
+                                            context.changeURL("ReportSingle")
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"
@@ -168,14 +169,19 @@ class Calendar extends React.Component<WithTranslation, State> {
         )
     }
 
-    private getInstanceReports(day: any) {
+    private getContents(day: any) {
         let temp: any = [];
-        this.state.InstanceReports.filter((r: any) =>
-            dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
-            && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
-            && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
-        ).map((r) => temp.push(r));
-        return temp;
+        if (this.props.reporting === 1) {
+            this.state.InstanceReports.filter((r: any) =>
+                dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
+                && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
+                && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
+            ).map((r) => temp.push(r))
+            return temp;
+        } else if (this.props.reporting === 2) {
+            //Тут написать, что будет в налоговой отчетности вместо отчетов
+            return []
+        }
     }
     
     onDateClick = (day: any) => {
