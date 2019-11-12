@@ -224,7 +224,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route path='/developer/metadata' component={MetaBrowser}/>
                             <Route path='/developer/query' component={QueryRunner}/>
                             <Route exact={true} path='/developer/data' component={DataBrowser}/>
-                            <Route path='/developer/data/:id/:ref' component={ResourceEditor}/>
+                            <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
                             <Route path='/developer/gitdb' component={GitDB}/>
                         </Switch>
                     </Content>
