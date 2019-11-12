@@ -467,7 +467,8 @@ class ResourceEditor extends React.Component<any, State> {
         const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
         featureList.forEach((feature: Ecore.EObject, idx: Number) => {
             const isContainment = Boolean(feature.get('containment'))
-            if (!isContainment) preparedData.push({
+            const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
+            if (!isContainment && !isContainer) preparedData.push({
                 property: feature.get('name'),
                 value: prepareValue(feature, targetObject[feature.get('name')], idx),
                 key: feature.get('name') + idx
