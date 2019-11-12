@@ -15,6 +15,7 @@ class Report {
 }
 
 class InstanceReport {
+    QName name
     refers Report report
 	Date date
 	refers Dataset dataset
