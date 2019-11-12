@@ -90,6 +90,10 @@ class ResourceEditor extends React.Component<any, State> {
         })
     }
 
+    runAction = (): void => {
+
+    }
+
     generateEObject(): void {
         const {selectedEClass, name} = this.props.location.state
         const targetEClass: {[key:string]: any}|undefined = this.state.classes.find((eclass: Ecore.EClass) => eclass.get('name') === selectedEClass)
@@ -752,6 +756,7 @@ class ResourceEditor extends React.Component<any, State> {
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
+                    <Button className="panel-button" icon="bulb" onClick={this.runAction} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
