@@ -6,7 +6,6 @@ import ru.neoflex.nfcore.base.components.Publisher
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.types.TypesPackage
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.base.util.EMFUtil
 
 class QNameInit {
     {

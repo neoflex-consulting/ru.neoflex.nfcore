@@ -13,6 +13,8 @@ import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 
+type Exception wraps java.lang.Exception
+
 abstract class BackOffPolicy {
 }
 
@@ -105,5 +107,5 @@ class ScheduledTask {
   Text lastError
   contains Audit audit
 
-  op void refreshScheduler()
+  op void refreshScheduler() throws Exception
 }
