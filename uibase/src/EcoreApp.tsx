@@ -97,19 +97,24 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({ langIcons })
         });
     }
-    setAppModuleName() {
-        const appModuleName = this.props.location.pathname.split('/')[2]
-        this.setState({breadcrumb:
-                this.state.breadcrumb !== undefined && !this.state.breadcrumb.split('/').includes(appModuleName)
-                    ?
-                    this.state.breadcrumb + "/" + appModuleName
-                    :
-                    appModuleName
-        })
+
+    setBreadcrumb() {
+        if (this.props.location.search !== "") {
+            const breadcrumb = this.props.location.search.split('?path=')[1];
+            this.setState({breadcrumb})
+        }
     }
+
+    onClickBreadcrumb(b: string) {
+        let indexBreadcrumb = this.state.breadcrumb.split('.').indexOf(b);
+        let breadcrumb = this.state.breadcrumb.split('.').slice(0, indexBreadcrumb + 1).join('.');
+        this.setState({breadcrumb});
+        this.props.history.push(`${b}?path=${breadcrumb}`)
+    }
+
     renderDev = () => {
-        const storeLangValue = String(localStorage.getItem('i18nextLng'))
-        const langIcons: { [key: string]: any } = this.state.langIcons
+        const storeLangValue = String(localStorage.getItem('i18nextLng'));
+        const langIcons: { [key: string]: any } = this.state.langIcons;
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
         const setLang = (lng: any) => {
@@ -141,34 +146,17 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
                             </div>
                         </Col>
-
-
-
-
                         <Col span={12}>
-                            {/*<Breadcrumb separator={">"}>*/}
-                            {/*{selectedKeys === ['app'] && this.state.breadcrumb ?*/}
-                            {this.state.breadcrumb ?
-                                this.state.breadcrumb.split('/').map( (m: any) => {
+                            <Breadcrumb separator={">"} style={{marginTop: "16px"}}>
+                            {selectedKeys[0] === 'app' && this.state.breadcrumb ?
+                                this.state.breadcrumb.split('.').map( (b: string) => {
                                     return (
-                                        <Breadcrumb.Item key={m}>
-                                            <Link to={m}>
-                                                {m}
-                                                {/*<Avatar src={"Hi"}*/}
-                                                {/*        size={"small"}/>&nbsp;{!m.hasOwnProperty('e_id') ? t((m.name) + '.caption', {ns: ['modules']}) : m.name}*/}
-                                            </Link>
+                                        <Breadcrumb.Item key={b} onClick={() => this.onClickBreadcrumb(b)}>
+                                            {b}
                                         </Breadcrumb.Item>)
                             }) : ""
-                            // this.props.history.location.pathname.split('/').splice(1).map( (m: any) => {
-                            //     return (
-                            //         <Breadcrumb.Item key={m}>
-                            //             <Link to={m}>
-                            //                 {m}
-                            //             </Link>
-                            //         </Breadcrumb.Item>)
-                            // })
                         }
-                        {/*</Breadcrumb>*/}
+                        </Breadcrumb>
                         </Col>
                         <Col>
                     <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
@@ -214,7 +202,7 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
-                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp#Mandatory%20Reporting'}/>
+                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp?path=ReportsApp'}/>
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
@@ -288,8 +276,8 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (prevProps.location.pathname !== this.props.location.pathname) {
-            this.setAppModuleName()
+        if (prevProps.location.search !== this.props.location.search) {
+            this.setBreadcrumb()
         }
     }
 
@@ -326,7 +314,7 @@ class EcoreApp extends React.Component<any, State> {
         localDuration && this.setState({notifierDuration: Number(localDuration) });
 
         if (this.state.breadcrumb === undefined) {
-            this.setAppModuleName()
+            this.setBreadcrumb()
         }
     }
 

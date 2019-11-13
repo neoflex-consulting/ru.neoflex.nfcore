@@ -15,13 +15,12 @@ const backgroundColor = "white";
 interface State {
     appModuleName: string;
     pathFull: string;
-    objectID: string;
+    path: string;
     context: IMainContext
     hideReferences: boolean
     currentTool?: string
     application?: Ecore.EObject
     objectApp?: Ecore.EObject
-    path: Ecore.EObject[]
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -38,9 +37,8 @@ export class MainApp extends React.Component<any, State> {
         this.state = {
             appModuleName: props.appModuleName,
             pathFull: props.pathFull,
-            objectID: props.objectID,
+            path: props.path,
             hideReferences: false,
-            path: [],
             context
         }
     }
@@ -51,21 +49,24 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeURL = (appModuleName?: string, pathFull?: string, objectID?: string) => {
-        if (objectID && pathFull && appModuleName) {
-            this.props.history.push(`/app/${appModuleName}?objectID=${objectID}#${pathFull}`);
+    changeURL = (appModuleName?: string, pathFull?: string) => {
+        let path;
+        let appModuleNameThis = appModuleName || this.state.appModuleName;
+        if (this.state.path !== undefined) {
+                if (this.state.path.split('.').includes(appModuleNameThis)) {
+                    path = '?path=' + this.state.path
+                } else {
+                    path = '?path=' + this.state.path + '.' + appModuleNameThis
+                }
+        } else {
+            path = '?path=' + appModuleNameThis
         }
-        else if (objectID && appModuleName) {
-            this.props.history.push(`/app/${appModuleName}?objectID=${objectID}`);
+
+        if (pathFull && appModuleNameThis) {
+            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
         }
-        else if (pathFull && appModuleName) {
-            this.props.history.push(`/app/${appModuleName}#${pathFull}`);
-        }
-        else if (appModuleName) {
-            this.props.history.push(`/app/${appModuleName}`);
-        }
-        else {
-            this.props.history.push(`/app/${this.state.appModuleName}`);
+        else if (appModuleNameThis) {
+            this.props.history.push(`/app/${appModuleNameThis}${path}`);
         }
     };
 
@@ -141,13 +142,22 @@ export class MainApp extends React.Component<any, State> {
     }
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        let indexBreadcrumb = prevState.path ? prevState.path.split('.').indexOf(nextProps.match.params.appModuleName) : 0
         const pathFull = nextProps.history.location.pathname +
             nextProps.history.location.search + nextProps.history.location.hash;
         if (
             prevState.pathFull !== pathFull ||
             prevState.appModuleName !== nextProps.match.params.appModuleName) {
             return {
-                objectID: nextProps.history.location.search,
+                path: prevState.path === undefined
+                    ?
+                    nextProps.match.params.appModuleName
+                    :
+                    prevState.path.split('.').includes(nextProps.match.params.appModuleName)
+                        ?
+                        prevState.path.split('.').slice(0, indexBreadcrumb + 1).join('.')
+                        :
+                        prevState.path + '.' + nextProps.match.params.appModuleName,
                 pathFull: pathFull,
                 appModuleName: nextProps.match.params.appModuleName
             }
@@ -229,7 +239,7 @@ export class MainApp extends React.Component<any, State> {
 
         if (eObject.isKindOf('AppModuleNode')) {
             cbs.set(key, () => {
-                if (eObject.get('componentWithTree')) {
+                if (eObject.get('AppModule')) {
                     this.setURL(eObject, key);
                 }
             })
@@ -261,13 +271,9 @@ export class MainApp extends React.Component<any, State> {
     };
 
     private setURL(eObject: Ecore.EObject, key: any) {
-        const appModuleName = eObject.get('componentWithTree') ? eObject.get('componentWithTree').get('name') : this.state.appModuleName;
-        let pathFull = eObject.get('componentWithTree') ? undefined : key;
-        if (!eObject.get('eObject')) {
-            this.changeURL(appModuleName, pathFull);
-        } else {
-            this.changeURL(appModuleName, pathFull, eObject.get('eObject').eURI().split('#')[0]);
-        }
+        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.state.appModuleName;
+        let pathFull = eObject.get('AppModule') ? undefined : key;
+        this.changeURL(appModuleName, pathFull);
     }
 
     render = () => {
