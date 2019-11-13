@@ -7,9 +7,8 @@ import ru.neoflex.nfcore.base.auth.GrantStatus
 
 class AllPermissionExt extends AllPermissionImpl {
     GrantStatus permitted(ActionType actionType, EObject eObject) {
-        AllPermission permission = (AllPermission) delegate;
-        if (permission.actionTypes.contains(ActionType.ALL) || permission.actionTypes.contains(actionType)) {
-            return permission.grantStatus
+        if (this.actionTypes.contains(ActionType.ALL) || this.actionTypes.contains(actionType)) {
+            return this.grantStatus
         }
         return GrantStatus.UNDEFINED
     }
