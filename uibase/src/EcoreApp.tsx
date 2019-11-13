@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown, Breadcrumb, Col, Row, Avatar} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown, Breadcrumb, Col, Row} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
