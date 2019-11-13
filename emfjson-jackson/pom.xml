@@ -1,10 +1,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <groupId>org.emfjson</groupId>
-    <artifactId>emfjson-couchdb</artifactId>
-    <version>0.3.0-arch7tect</version>
-    <packaging>jar</packaging>
+    <artifactId>emfjson-jackson</artifactId>
+    <packaging>bundle</packaging>
+    <version>1.3.1-arch7tect</version>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <licenses>
+        <license>
+            <name>EPL</name>
+            <url>www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/emfjson/emfjson-jackson/issues</url>
+    </issueManagement>
 
     <developers>
         <developer>
@@ -14,49 +32,52 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>scm:git:git@github.com:emfjson/emfjson-jackson.git</url>
+        <connection>scm:git:git@github.com:emfjson/emfjson-jackson.git</connection>
+        <developerConnection>scm:git:git@github.com:emfjson/emfjson-jackson.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
-        <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.fork>true</maven.compiler.fork>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <emf-version>2.18.0</emf-version>
-        <emf-xmi-version>2.16.0</emf-xmi-version>
+        <jackson-version>2.10.0</jackson-version>
+        <emf-version>2.19.0</emf-version>
         <emf-common-version>2.16.0</emf-common-version>
-        <emf-codegen-version>2.16.0</emf-codegen-version>
-        <emf-codegen-ecore-version>2.18.0</emf-codegen-ecore-version>
-        <xtext-version>2.18.0</xtext-version>
+        <emf-codegen-version>2.19.0</emf-codegen-version>
+        <xtext-version>2.19.0</xtext-version>
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
-        <ecore-xcore-version>1.7.0</ecore-xcore-version>
+        <ecore-xcore-version>1.11.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
     </properties>
 
     <dependencies>
+
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.9.9</version>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.common</artifactId>
+            <version>${emf-common-version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore</artifactId>
+            <version>${emf-version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.9</version>
+            <version>${jackson-version}</version>
         </dependency>
+
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.14.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.emfjson</groupId>
-            <artifactId>emfjson-jackson</artifactId>
-            <version>1.3.1-arch7tect</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
-            <version>${ecore-xcore-lib-version}</version>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
         </dependency>
 
         <!-- tests -->
@@ -67,6 +88,44 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+            <version>${emf-common-version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- xcore tests build -->
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
+            <version>${ecore-xcore-lib-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+            <version>${xtext-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -88,6 +147,59 @@
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
                     <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <argLine>-Xmx512M</argLine>
+                    <includes>
+                        <include>**/*TestSuite.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <version>3.0.0</version>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>org.emfjson.jackson</Bundle-SymbolicName>
+                        <Bundle-Name>emfjson-jackson</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            com.fasterxml.jackson.*;version="[2.6.0, 3.0.0)",
+                            *
+                        </Import-Package>
+                    </instructions>
                 </configuration>
             </plugin>
 
@@ -124,15 +236,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.eclipse.xtext</groupId>
                 <artifactId>xtext-maven-plugin</artifactId>
                 <version>${xtext-version}</version>
@@ -162,23 +265,33 @@
                         </language>
                     </languages>
                     <sourceRoots>
-                        <root>${basedir}/src/test/resources</root>
+                        <root>${basedir}/src/test/resources/model</root>
                     </sourceRoots>
                 </configuration>
                 <dependencies>
                     <dependency>
-                        <groupId>org.eclipse.text</groupId>
+                        <groupId>org.eclipse.platform</groupId>
                         <artifactId>org.eclipse.text</artifactId>
-                        <version>3.5.101</version>
+                        <version>3.8.200</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.eclipse.core</groupId>
+                        <groupId>org.eclipse.platform</groupId>
                         <artifactId>org.eclipse.core.resources</artifactId>
-                        <version>3.7.100</version>
+                        <version>3.13.400</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.xtext</groupId>
                         <artifactId>org.eclipse.xtext.ecore</artifactId>
+                        <version>${xtext-version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.xtext</groupId>
+                        <artifactId>org.eclipse.xtext.generator</artifactId>
+                        <version>${xtext-version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.xtext</groupId>
+                        <artifactId>org.eclipse.xtext.builder.standalone</artifactId>
                         <version>${xtext-version}</version>
                     </dependency>
                     <dependency>
@@ -199,17 +312,17 @@
                     <dependency>
                         <groupId>org.eclipse.emf</groupId>
                         <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-                        <version>${emf-xmi-version}</version>
+                        <version>${emf-common-version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.emf</groupId>
                         <artifactId>org.eclipse.emf.codegen</artifactId>
-                        <version>${emf-codegen-version}</version>
+                        <version>${emf-version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.emf</groupId>
                         <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
-                        <version>${emf-codegen-ecore-version}</version>
+                        <version>${emf-version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.emf</groupId>
@@ -223,7 +336,9 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
         </plugins>
+
     </build>
 
 </project>

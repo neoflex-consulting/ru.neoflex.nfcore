@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,16 +67,17 @@ public class Store {
     }
 
     public Resource saveResource(Resource resource) throws IOException {
-//        for (EObject eObject: resource.getContents()) {
-//            Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
-//            if (diagnostic.getSeverity() == Diagnostic.ERROR) {
-//                String message = getDiagnosticMessage(diagnostic);
-//                throw new RuntimeException(message);
-//            }
-//            if (diagnostic.getSeverity() == Diagnostic.WARNING) {
-//                logger.warn(getDiagnosticMessage(diagnostic));
-//            }
-//        }
+        EcoreUtil.resolveAll(resource);
+        for (EObject eObject: resource.getContents()) {
+            Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
+            if (diagnostic.getSeverity() == Diagnostic.ERROR) {
+                String message = getDiagnosticMessage(diagnostic);
+                throw new RuntimeException(message);
+            }
+            if (diagnostic.getSeverity() == Diagnostic.WARNING) {
+                logger.warn(getDiagnosticMessage(diagnostic));
+            }
+        }
         return provider.saveResource(resource);
     }
 

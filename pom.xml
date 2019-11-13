@@ -9,6 +9,7 @@
     <name>Neoflex EMF Framework Parent Project</name>
 
     <modules>
+        <module>emfjson-jackson</module>
         <module>emfjson-couchdb</module>
         <module>gitdb</module>
         <module>base</module>
