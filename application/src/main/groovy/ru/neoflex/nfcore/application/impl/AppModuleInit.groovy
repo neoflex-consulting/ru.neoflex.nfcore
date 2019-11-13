@@ -36,9 +36,9 @@ class AppModuleInit {
         }
         if (rs.resources.empty) {
 
-            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",true)
-            def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",true)
-            def userComponent6 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Tax Reporting", "TaxReporting",true)
+            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",false)
+            def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",false)
+            def userComponent6 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Tax Reporting", "TaxReporting",false)
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
@@ -68,6 +68,14 @@ class AppModuleInit {
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)
+    }
+
+    static def deletedAppModule2(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        while (!rs.resources.empty) {
+            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
+        }
     }
 
     static def recreateAppModule2(String name) {
@@ -101,9 +109,6 @@ class AppModuleInit {
             application.view = Tabs
 
             def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
-            def appModuleNode = ApplicationFactory.eINSTANCE.createAppModuleNode()
-            appModuleNode.name = "Mandatory Reporting"
-            referenceTree.children.add(appModuleNode)
             application.setReferenceTree(referenceTree)
 
             rs.resources.add(Context.current.store.createEObject(application))
@@ -121,7 +126,7 @@ class AppModuleInit {
             def instanceReport1 = ReportsFactory.eINSTANCE.createInstanceReport()
             instanceReport1.name = name
             instanceReport1.date = new Date()
-            def report = findOrCreateEObject(ReportsPackage.Literals.REPORT, "A 1993", "",true)
+            def report = findOrCreateEObject(ReportsPackage.Literals.REPORT, "A 1993", "",false)
             instanceReport1.report = report
             rs.resources.add(Context.current.store.createEObject(instanceReport1))
         }
@@ -129,8 +134,9 @@ class AppModuleInit {
     }
 
     {
+        deletedAppModule2("ReportSingle")
         recreateAppModule("ReportsApp")
-        recreateInstanceReport("InstanceReport1")
         recreateAppModule2("ReportSingle")
+        recreateInstanceReport("InstanceReport1")
     }
 }

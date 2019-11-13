@@ -712,14 +712,15 @@ class ResourceEditor extends React.Component<any, State> {
 
         if (resource) {
             this.setState({ isSaving: true })
-            API.instance().saveResource(resource).then((result: any) => {
-                const nestedJSON = this.nestUpdaters(result.eResource().to(), null)
+            API.instance().saveResource(resource).then((resource: any) => {
+                const nestedJSON = this.nestUpdaters(resource.eResource().to(), null)
                 const updatedTargetObject = this.findObjectById(nestedJSON, targetObject._id)
                 this.setState({ 
                     isSaving: false, 
-                    mainEObject: result.eResource().eContents()[0], 
+                    mainEObject: resource.eResource().eContents()[0], 
                     resourceJSON: nestedJSON,
-                    targetObject: updatedTargetObject
+                    targetObject: updatedTargetObject,
+                    resource: resource
                 })
             }).catch(() => {
                 this.setState({ isSaving: false })
