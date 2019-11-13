@@ -24,6 +24,6 @@ class InstanceReport {
 
 class ReportStatus {
 	QName name
-	String color
+	String[1] color
 	String description
 }
