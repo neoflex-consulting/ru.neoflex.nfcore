@@ -245,6 +245,13 @@ public class CouchDBStoreProvider implements StoreSPI {
         return getRefByUri(resource.getURI());
     }
 
+    @Override
+    public  String getId(Resource eResource) {
+        URI uri = eResource.getURI();
+        String id = uri.segmentCount() > 0 ? uri.segment(0) : "";
+        return id;
+    }
+    
     public String getRefByUri(URI uri) {
         String ref = uri.segment(0);
         String query = uri.query();

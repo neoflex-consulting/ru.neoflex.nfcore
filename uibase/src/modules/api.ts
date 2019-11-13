@@ -230,7 +230,9 @@ export class API implements IErrorHandler {
             let {id, rev} = API.parseRef(uri);
             let resource = resourceSet.create({uri: id});
             resource.rev = rev;
-            resource.load(jsonObject);
+            if (resource.eContents().length == 0) {
+                resource.load(jsonObject);
+            }
             return resource
         })
     }

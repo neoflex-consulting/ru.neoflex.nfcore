@@ -13,7 +13,7 @@ class QNameInit {
         Context.current.publisher.subscribe(new Publisher.BeforeSaveHandler<EObject>(null) {
             @Override
             EObject handleEObject(EObject eObject) {
-                def id = EMFUtil.getId(eObject.eResource())
+                def id = Context.current.store.getId(eObject.eResource())
                 def nameType = TypesPackage.Literals.QNAME;
                 def nameAttrs = eObject.eClass().EAllAttributes.findAll {it.EAttributeType == nameType && !it.isMany()}
                 nameAttrs.each {
@@ -21,7 +21,7 @@ class QNameInit {
                     def name = eObject.eGet(it) as String
                     Context.current.registry.getSubClasses(eClass).find {!it.abstract}.each {aClass->
                         def dup = DocFinder.create(Context.current.store, aClass, [(it.name): name])
-                                .execute().resourceSet.getResources().findAll {EMFUtil.getId(it) != id}.size()
+                                .execute().resourceSet.getResources().findAll {Context.current.store.getId(it) != id}.size()
                         if (dup > 0) {
                             throw new IllegalArgumentException("Found ${dup} instance(s) of ${EcoreUtil.getURI(aClass)} with ${it.name}='${name}'")
                         }

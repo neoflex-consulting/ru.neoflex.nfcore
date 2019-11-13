@@ -97,6 +97,10 @@ public class Store {
         return provider.getRef(resource);
     }
 
+    public String getId(Resource resource) {
+        return provider.getId(resource);
+    }
+
     public Resource loadResource(String ref) throws IOException {
         URI uri = provider.getUriByRef(ref);
         return provider.loadResource(uri, getCurrentTransaction());

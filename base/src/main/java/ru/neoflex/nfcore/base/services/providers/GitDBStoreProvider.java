@@ -79,6 +79,12 @@ public class GitDBStoreProvider implements StoreSPI {
     }
 
     @Override
+    public String getId(Resource resource) {
+        String id = workspace.getDatabase().getResourceId(resource);
+        return id;
+    }
+
+    @Override
     public ObjectMapper createMapper() {
         return workspace.getDatabase().getMapper();
     }
