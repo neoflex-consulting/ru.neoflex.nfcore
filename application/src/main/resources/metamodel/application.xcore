@@ -29,8 +29,8 @@ class UserComponent extends Component {
 class AppModule {
     QName name
     contains ViewElement view
-	contains Tools tools
-	contains CatalogNode referenceTree
+    contains Tools tools
+    contains CatalogNode referenceTree
 }
 
 /* Views */
@@ -101,7 +101,7 @@ abstract class TreeNode{
 }
 
 class AppModuleNode extends TreeNode {
-    refers AppModule componentWithTree
+    refers AppModule AppModule
     refers EObject eObject
 }
 
