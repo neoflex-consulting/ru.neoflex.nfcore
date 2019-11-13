@@ -133,7 +133,7 @@ class ResourceEditor extends React.Component<any, State> {
                 selectedKeys: [],
                 //If we create a new sibling (without saving), when click on it, information appears in the property table.
                 //But if we click the refresh button, the new created sibling will disappear, but the property table still will
-                //show information from an old targetObject. To prevent those side effects we have to check targetObject.
+                //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
                 targetObject: { eClass: "" },
                 tableData: []
             }))
@@ -403,8 +403,8 @@ class ResourceEditor extends React.Component<any, State> {
                             closable
                             key={value["$ref"]}
                         >
-                            {relatedResource && relatedResource.get('name')}&nbsp;
-                            {relatedResource && relatedResource.eClass.get('name')}&nbsp;
+                            {(relatedResource && relatedResource.get('name')) || (value.$ref && value.$ref.split('//')[1])}&nbsp;
+                            {(relatedResource && relatedResource.eClass.get('name')) || (value.eClass && value.eClass.split('//')[2])}&nbsp;
                         </Tag>
                     :
                     []
@@ -659,8 +659,6 @@ class ResourceEditor extends React.Component<any, State> {
         if (upperBound === -1) {
             refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
             resources.forEach((res) => {
-                //const isInArray = refsArray.findIndex((refObj: { [key: string]: any }) => res.eContents()[0].eURI() === refObj["$ref"])
-                //isInArray === -1 && refsArray.push({
                 refsArray.push({
                     $ref: res.eContents()[0].eURI(),
                     eClass: res.eContents()[0].eClass.eURI()
@@ -668,11 +666,12 @@ class ResourceEditor extends React.Component<any, State> {
             })
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
+            const firstResource = resources.find((res: Ecore.Resource) => res.eURI() === this.selectedRefUries[0])
             //if a user choose several resources for the adding, but upperBound === 1, we put only first resource
             updatedJSON = targetObject.updater({
                 [addRefPropertyName]: {
-                    $ref: resources[0].eContents()[0].eURI(),
-                    eClass: resources[0].eContents()[0].eClass.eURI()
+                    $ref: firstResource!.eContents()[0].eURI(),
+                    eClass: firstResource!.eContents()[0].eClass.eURI()
                 }
             })
         }
