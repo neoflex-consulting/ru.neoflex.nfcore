@@ -21,6 +21,9 @@ type ScheduledFuture wraps java.util.concurrent.ScheduledFuture<?>
 type Runnable wraps java.lang.Runnable
 type BackOffPolicy wraps org.springframework.retry.backoff.BackOffPolicy
 type RetryPolicy wraps org.springframework.retry.RetryPolicy
+type Integer wraps java.lang.Integer
+type Long wraps java.lang.Long
+type Double wraps java.lang.Double
 
 abstract class BackOffPolicyFactory {
 	op BackOffPolicy createPolicy()
@@ -30,21 +33,21 @@ class NoBackOffPolicyFactory extends BackOffPolicyFactory {
 }
 
 class FixedBackOffPolicyFactory extends BackOffPolicyFactory {
-    long backOffPeriod
+    Long backOffPeriod
 }
 
 class ExponentialBackOffPolicyFactory extends BackOffPolicyFactory {
-    long initialInterval
-    double multiplier
-    long maxInterval
+    Long initialInterval
+    Double multiplier
+    Long maxInterval
 }
 
 class ExponentialRandomBackOffPolicyFactory extends ExponentialBackOffPolicyFactory {
 }
 
 class UniformRandomBackOffPolicyFactory extends BackOffPolicyFactory {
-    long minBackOffPeriod
-    long maxBackOffPeriod
+    Long minBackOffPeriod
+    Long maxBackOffPeriod
 }
 
 abstract class SchedulingPolicy {
@@ -62,12 +65,12 @@ class CronSchedulingPolicy extends SchedulingPolicy {
 
 class DelaySchedulingPolicy extends SchedulingPolicy {
   Timestamp startTime
-  long delay
+  Long delay
 } 
 
 class PeriodSchedulingPolicy extends SchedulingPolicy {
   Timestamp startTime
-  long period
+  Long period
 } 
 
 abstract class RetryPolicyFactory {
@@ -80,7 +83,7 @@ class RetryableException {
 }
 
 class SimpleRetryPolicyFactory extends RetryPolicyFactory {
-    int maxAttempts
+    Integer maxAttempts
     contains RetryableException[] retryableExceptions
 } 
 
@@ -91,7 +94,7 @@ class NeverRetryPolicyFactory extends RetryPolicyFactory {
 } 
 
 class TimeoutRetryPolicyFactory extends RetryPolicyFactory {
-    long timeout
+    Long timeout
 } 
 
 class Parameter {

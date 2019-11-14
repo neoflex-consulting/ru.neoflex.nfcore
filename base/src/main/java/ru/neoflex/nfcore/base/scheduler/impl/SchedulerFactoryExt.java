@@ -1,14 +1,25 @@
 package ru.neoflex.nfcore.base.scheduler.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.*;
+import org.springframework.retry.policy.AlwaysRetryPolicy;
+import org.springframework.retry.policy.NeverRetryPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import ru.neoflex.nfcore.base.scheduler.*;
 import ru.neoflex.nfcore.base.services.Context;
 
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 public class SchedulerFactoryExt extends SchedulerFactoryImpl {
+    private static final Logger logger = LoggerFactory.getLogger(SchedulerFactoryExt.class);
+
     @Override
     public ScheduledTask createScheduledTask() {
         return new ScheduledTaskImpl() {
@@ -126,41 +137,121 @@ public class SchedulerFactoryExt extends SchedulerFactoryImpl {
 
     @Override
     public CronSchedulingPolicy createCronSchedulingPolicy() {
-        return super.createCronSchedulingPolicy();
+        return new CronSchedulingPolicyImpl() {
+            @Override
+            public ScheduledFuture<?> schedule(TaskScheduler taskScheduler, Runnable runnable) {
+                String cronExpression = getCronExpression();
+                if (StringUtils.isEmpty(cronExpression)) {
+                    logger.error("cronExpression undefined");
+                    return null;
+                }
+                return taskScheduler.schedule(runnable, new CronTrigger(cronExpression));
+            }
+        };
     }
 
     @Override
     public DelaySchedulingPolicy createDelaySchedulingPolicy() {
-        return super.createDelaySchedulingPolicy();
+        return new DelaySchedulingPolicyImpl() {
+            @Override
+            public ScheduledFuture<?> schedule(TaskScheduler taskScheduler, Runnable runnable) {
+                Date startTime = getStartTime();
+                Long delay = getDelay();
+                if (delay == null) {
+                    logger.error("Delay undefined");
+                    return null;
+                }
+                if (startTime == null) {
+                    return  taskScheduler.scheduleWithFixedDelay(runnable, delay);
+                } else {
+                    return taskScheduler.scheduleWithFixedDelay(runnable, startTime, delay);
+                }
+            }
+        };
     }
 
     @Override
     public PeriodSchedulingPolicy createPeriodSchedulingPolicy() {
-        return super.createPeriodSchedulingPolicy();
-    }
-
-    @Override
-    public RetryableException createRetryableException() {
-        return super.createRetryableException();
+        return new PeriodSchedulingPolicyImpl() {
+            @Override
+            public ScheduledFuture<?> schedule(TaskScheduler taskScheduler, Runnable runnable) {
+                Date startTime = getStartTime();
+                Long period = getPeriod();
+                if (period == null) {
+                    logger.error("Period undefined");
+                    return null;
+                }
+                if (startTime == null) {
+                    return taskScheduler.scheduleAtFixedRate(runnable, period);
+                } else {
+                    return taskScheduler.scheduleAtFixedRate(runnable, startTime, period);
+                }
+            }
+        };
     }
 
     @Override
     public SimpleRetryPolicyFactory createSimpleRetryPolicyFactory() {
-        return super.createSimpleRetryPolicyFactory();
+        return new SimpleRetryPolicyFactoryImpl() {
+            @Override
+            public RetryPolicy createPolicy() {
+                Integer maxAttempts = getMaxAttempts();
+                if (maxAttempts == null) {
+                    maxAttempts = SimpleRetryPolicy.DEFAULT_MAX_ATTEMPTS;
+                }
+                Map<Class<? extends Throwable>, Boolean> res = new HashMap<>();
+                List<RetryableException> retryableExceptions = getRetryableExceptions();
+                if (retryableExceptions.size() == 0) {
+                    res = Collections.singletonMap(Exception.class, true);
+                }
+                else {
+                    for (RetryableException re: retryableExceptions) {
+                        String exceptionClass = re.getExceptionClass();
+                        try {
+                            res.put((Class<? extends Throwable>) Class.forName(exceptionClass), re.isRetryable() == true);
+                        }
+                        catch (Throwable t) {
+                            logger.error("Throwable class " + exceptionClass + " not found", t);
+                        }
+                    }
+                }
+                return new SimpleRetryPolicy(maxAttempts, res);
+            }
+        };
     }
 
     @Override
     public AlwaysRetryPolicyFactory createAlwaysRetryPolicyFactory() {
-        return super.createAlwaysRetryPolicyFactory();
+        return new AlwaysRetryPolicyFactoryImpl() {
+            @Override
+            public RetryPolicy createPolicy() {
+                return new AlwaysRetryPolicy();
+            }
+        };
     }
 
     @Override
     public NeverRetryPolicyFactory createNeverRetryPolicyFactory() {
-        return super.createNeverRetryPolicyFactory();
+        return new NeverRetryPolicyFactoryImpl() {
+            @Override
+            public RetryPolicy createPolicy() {
+                return new NeverRetryPolicy();
+            }
+        };
     }
 
     @Override
     public TimeoutRetryPolicyFactory createTimeoutRetryPolicyFactory() {
-        return super.createTimeoutRetryPolicyFactory();
+        return new TimeoutRetryPolicyFactoryImpl() {
+            @Override
+            public RetryPolicy createPolicy() {
+                TimeoutRetryPolicy result = new TimeoutRetryPolicy();
+                Long timeout = getTimeout();
+                if (timeout != null) {
+                    result.setTimeout(timeout);
+                }
+                return result;
+            }
+        };
     }
 }
