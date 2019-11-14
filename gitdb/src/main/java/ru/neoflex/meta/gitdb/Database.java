@@ -170,8 +170,11 @@ public class Database implements Closeable {
                 Set<String> rootIds = new HashSet<>();
                 for (EObject eObject : cr.keySet()) {
                     EObject root = EcoreUtil.getRootContainer(eObject);
-                    String id = checkAndGetResourceId(root.eResource());
-                    rootIds.add(id);
+                    Resource rootResource = root.eResource();
+                    if (rootResource != null) {
+                        String id = checkAndGetResourceId(rootResource);
+                        rootIds.add(id);
+                    }
                 }
                 for (String id: rootIds) {
                     IndexEntry entry = new IndexEntry();

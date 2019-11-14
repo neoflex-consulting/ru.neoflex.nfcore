@@ -12,6 +12,13 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
+import org.springframework.scheduling.TaskScheduler
+import java.util.concurrent.ScheduledFuture
+
+type Exception wraps java.lang.Exception
+type TaskScheduler wraps org.springframework.scheduling.TaskScheduler
+type ScheduledFuture wraps java.util.concurrent.ScheduledFuture
+type Runnable wraps java.lang.Runnable
 
 abstract class BackOffPolicy {
 }
@@ -37,24 +44,25 @@ class UniformRandomBackOffPolicy extends BackOffPolicy {
     long maxBackOffPeriod
 }
 
-abstract class Scheduler {
+abstract class SchedulingPolicy {
+	op ScheduledFuture schedule(TaskScheduler taskScheduler, Runnable runnable)
 }
 
-class OnceScheduler extends Scheduler {
+class OnceSchedulingPolicy extends SchedulingPolicy {
   Timestamp startTime
   boolean disableAfterRun
 } 
 
-class CronScheduler extends Scheduler {
+class CronSchedulingPolicy extends SchedulingPolicy {
   String cronExpression
 } 
 
-class DelayScheduler extends Scheduler {
+class DelaySchedulingPolicy extends SchedulingPolicy {
   Timestamp startTime
   long delay
 } 
 
-class PeriodScheduler extends Scheduler {
+class PeriodSchedulingPolicy extends SchedulingPolicy {
   Timestamp startTime
   long period
 } 
@@ -93,7 +101,7 @@ class ScheduledTask {
   refers EObject eObject
   contains Parameter[] parameters
   Text script
-  contains Scheduler scheduler
+  contains SchedulingPolicy schedulingPolicy
   contains BackOffPolicy backOffPolicy
   contains RetryPolicy retryPolicy
   boolean imporsonate
@@ -105,5 +113,5 @@ class ScheduledTask {
   Text lastError
   contains Audit audit
 
-  op void refreshScheduler()
+  op void refreshScheduler() throws Exception
 }
