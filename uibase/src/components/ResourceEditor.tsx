@@ -2,19 +2,20 @@ import * as React from "react";
 import {
     Tree, Icon, Table, Modal,
     Button, Select, Row, Col,
-    Menu, Tag, Layout, DatePicker
+    Menu, Tag, DatePicker
 } from 'antd';
 import Ecore from "ecore";
-import update from 'immutability-helper';
 import {withTranslation, WithTranslation} from "react-i18next";
 import moment from 'moment';
 
 import { API } from "../modules/api";
 import Splitter from './CustomSplitter'
+import { nestUpdaters, findObjectById } from '../utils/resourceEditorUtils'
 
 import EClassSelection from './EClassSelection';
 import EditableTextArea from './EditableTextArea';
-import SearchGrid from "./SearchGrid";
+import SearchGrid from './SearchGrid';
+import ToolPanel from './ToolPanel';
 
 export interface Props {
 }
@@ -110,12 +111,12 @@ class ResourceEditor extends React.Component<any, State> {
 
         const mainEObject = resource.eResource().eContents()[0]
         const json = mainEObject.eResource().to()
-        const nestedJSON = this.nestUpdaters(json, null)
+        const nestedJSON = nestUpdaters(json, null)
 
         this.setState({
             mainEObject: mainEObject,
             resourceJSON: nestedJSON,
-            targetObject: this.findObjectById(nestedJSON, '/'),
+            targetObject: findObjectById(nestedJSON, '/'),
             resource: resource
         })
     }
@@ -125,7 +126,7 @@ class ResourceEditor extends React.Component<any, State> {
         this.props.match.params.id !== 'new' ?
         API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
             const mainEObject = resource.eResource().eContents()[0]
-            const nestedJSON = this.nestUpdaters(mainEObject.eResource().to(), null)
+            const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null)
             this.setState((state, props)=>({
                 mainEObject: mainEObject,
                 resourceJSON: nestedJSON,
@@ -148,117 +149,6 @@ class ResourceEditor extends React.Component<any, State> {
             this.setState({ classes: filtered })
             this.getEObject()
         })
-    }
-
-    /**
-     * Creates updaters for all levels of an object, including for objects in arrays.
-     */
-    nestUpdaters(json: any, parentObject: any = null, property?: String): Object {
-
-        const createUpdater = (data: Object, init_idx?: Number) => {
-            return (newValues: Object, indexForParentUpdater?: any, updaterProperty?: any, options?: any) => {
-                const currentObject: { [key: string]: any } = data;
-                const idx: any = init_idx;
-                const prop: any = property;
-                const parent = parentObject;
-                let updatedData;
-                if (updaterProperty) {
-                    if (indexForParentUpdater !== undefined) {
-                        updatedData = update(currentObject as any, { [updaterProperty]: { [indexForParentUpdater]: { $merge: newValues } } })
-                    } else {
-                        if (options && options.operation === "push") {
-                            //cause a property may not exist
-                            if (!currentObject[updaterProperty]) currentObject[updaterProperty] = []
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $push: [newValues] } })
-                        } else if (options && options.index && options.operation === "splice") {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
-                        } else if (options && options.operation === "set") {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: newValues } })
-                        } else if (options && options.operation === "unset") {
-                            updatedData = update(currentObject as any, { $unset: [updaterProperty] })
-                        } else {
-                            //if nothing from listed above, then merge updating the object by a property name
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
-                        }
-                    }
-                } else {
-                    updatedData = update(currentObject, { $merge: newValues })
-                }
-                let result = updatedData
-                if (parent && parent.updater) {
-                    result = parent.updater(updatedData, idx, prop)
-                }
-                return result
-            }
-        }
-
-        const walkThroughArray = (array: Array<any>) => {
-            array.forEach((obj, index) => {
-                //we have to check the type, cause it can be an array of strings, for e.g.
-                if (typeof obj === "object") {
-                    walkThroughObject(obj)
-                    obj.updater = createUpdater(obj, index)
-                }
-            })
-        };
-
-        const walkThroughObject = (obj: any) => {
-            obj.updater = createUpdater(obj);
-            Object.entries(obj).forEach(([key, value]) => {
-                if (Array.isArray(value)) {
-                    this.nestUpdaters(value, obj, key)
-                } else {
-                    if (value instanceof Object && typeof value === "object") this.nestUpdaters(value, obj, key)
-                }
-            })
-        };
-
-        if (Array.isArray(json)) {
-            walkThroughArray(json)
-        } else {
-            walkThroughObject(json)
-        }
-
-        return json
-    }
-
-    findObjectById(data: any, id: String): any {
-        const walkThroughArray = (array: Array<any>): any => {
-            for (var el of array) {
-                if (el._id && el._id === id) {
-                    return el
-                } else {
-                    const result = this.findObjectById(el, id);
-                    if (result) return result
-                }
-            }
-        };
-
-        const walkThroughObject = (obj: any): any => {
-            let result;
-
-            for (let prop in obj) {
-                if (result) {
-                    break
-                }
-                if (Array.isArray(obj[prop])) {
-                    result = this.findObjectById(obj[prop], id)
-                } else {
-                    if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
-                        result = this.findObjectById(obj[prop], id)
-                    }
-                }
-            }
-            if (result) return result
-        };
-
-        if (data._id === id) return data;
-
-        if (Array.isArray(data)) {
-            return walkThroughArray(data)
-        } else {
-            return walkThroughObject(data)
-        }
     }
 
     createTree() {
@@ -440,7 +330,7 @@ class ResourceEditor extends React.Component<any, State> {
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EDataType') && feature.get('eType').get('name') === "EBoolean") {
                 return <Select value={convertPrimitiveToString(value)} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [feature.get('name')]: getPrimitiveType(newValue) });
-                    const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                    const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                     this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                 }}>
                     {Object.keys(boolSelectionOption).map((value: any) =>
@@ -456,7 +346,7 @@ class ResourceEditor extends React.Component<any, State> {
                     onChange={(value: any) => {
                         const newValue = { [feature.get('name')]: value ? value.format() : '' }
                         const updatedJSON = targetObject.updater(newValue);
-                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
                 />
@@ -468,14 +358,14 @@ class ResourceEditor extends React.Component<any, State> {
                     value={value}
                     onChange={(newValue: Object) => {
                         const updatedJSON = targetObject.updater(newValue);
-                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
                 />
             } else if (feature.get('eType') && feature.get('eType').isKindOf('EEnum')) {
                 return <Select mode={feature.get('upperBound') === -1 ? "multiple" : "default"} value={value} key={key + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
                     const updatedJSON = targetObject.updater({ [feature.get('name')]: newValue });
-                    const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                    const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                     this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                 }}>
                     {feature.get('eType').eContents().map((obj: Ecore.EObject) =>
@@ -489,7 +379,7 @@ class ResourceEditor extends React.Component<any, State> {
                     value={value}
                     onChange={(newValue: Object) => {
                         const updatedJSON = targetObject.updater(newValue);
-                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
                 />
@@ -597,8 +487,8 @@ class ResourceEditor extends React.Component<any, State> {
             } else {
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
             }
-            const nestedJSON = this.nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = !targetObject._id ? targetObject : this.findObjectById(updatedJSON, targetObject._id)
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = !targetObject._id ? targetObject : findObjectById(updatedJSON, targetObject._id)
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
             this.setState({
                 resourceJSON: nestedJSON,
@@ -623,8 +513,8 @@ class ResourceEditor extends React.Component<any, State> {
             } else {
                 updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "set" })
             }
-            const nestedJSON = this.nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = !targetObject._id ? targetObject : this.findObjectById(updatedJSON, targetObject._id)
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = !targetObject._id ? targetObject : findObjectById(updatedJSON, targetObject._id)
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
             this.setState((state, props)=>({
                 mainEObject: resource.eContents()[0],
@@ -675,7 +565,7 @@ class ResourceEditor extends React.Component<any, State> {
                 }
             })
         }
-        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ modalRefVisible: false, resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
 
@@ -693,14 +583,14 @@ class ResourceEditor extends React.Component<any, State> {
         const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : []
         const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"])
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray })
-        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
 
     handleDeleteSingleRef = (deletedObject: any, addRefPropertyName: string) => {
         const targetObject: { [key: string]: any } = this.state.targetObject
         const updatedJSON = targetObject.updater({[addRefPropertyName]: null })
-        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id)
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
         delete updatedTargetObject[addRefPropertyName]
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
@@ -713,8 +603,8 @@ class ResourceEditor extends React.Component<any, State> {
         if (resource) {
             this.setState({ isSaving: true })
             API.instance().saveResource(resource).then((resource: any) => {
-                const nestedJSON = this.nestUpdaters(resource.eResource().to(), null)
-                const updatedTargetObject = this.findObjectById(nestedJSON, targetObject._id)
+                const nestedJSON = nestUpdaters(resource.eResource().to(), null)
+                const updatedTargetObject = findObjectById(nestedJSON, targetObject._id)
                 this.setState({ 
                     isSaving: false, 
                     mainEObject: resource.eResource().eContents()[0], 
@@ -733,9 +623,9 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
-        //that means resourceJSON was edited and updated
+        //if true that means resourceJSON was edited and updated
         if (this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
-            const nestedJSON = this.nestUpdaters(this.state.resourceJSON, null)
+            const nestedJSON = nestUpdaters(this.state.resourceJSON, null)
             const preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
             this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
         }
@@ -750,7 +640,7 @@ class ResourceEditor extends React.Component<any, State> {
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
-                <Layout.Header className="head-panel">
+                <ToolPanel>
                     {this.state.isSaving ?
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
@@ -758,7 +648,7 @@ class ResourceEditor extends React.Component<any, State> {
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
                     <Button className="panel-button" icon="bulb" onClick={this.runAction} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
-                </Layout.Header>
+                </ToolPanel>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
                     <Splitter
@@ -895,7 +785,7 @@ class ResourceEditor extends React.Component<any, State> {
                                 eClass: EClassObject.eClass.eURI()
                             }
                         })
-                        const updatedTargetObject = this.findObjectById(updatedJSON, targetObject._id);
+                        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
                 />
