@@ -137,6 +137,8 @@
                     <filesets>
                         <fileset>
                             <directory>src/main/java-gen</directory>
+                        </fileset>
+                        <fileset>
                             <directory>src/test/java-gen</directory>
                         </fileset>
                     </filesets>
