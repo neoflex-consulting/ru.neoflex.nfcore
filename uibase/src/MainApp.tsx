@@ -52,9 +52,10 @@ export class MainApp extends React.Component<any, State> {
     changeURL = (appModuleName?: string, pathFull?: string) => {
         let path;
         let appModuleNameThis = appModuleName || this.state.appModuleName;
+        let indexBreadcrumb = this.state.path ? this.state.path.split('.').indexOf(appModuleNameThis) : 0
         if (this.state.path !== undefined) {
                 if (this.state.path.split('.').includes(appModuleNameThis)) {
-                    path = '?path=' + this.state.path
+                    path = '?path=' + this.state.path.split('.').slice(0, indexBreadcrumb + 1).join('.')
                 } else {
                     path = '?path=' + this.state.path + '.' + appModuleNameThis
                 }
