@@ -123,7 +123,7 @@ class ResourceEditor extends React.Component<any, State> {
     getEObject(): void {
         const resourceSet = Ecore.ResourceSet.create();
         this.props.match.params.id !== 'new' ?
-        API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 0, resourceSet, {}).then((resource: Ecore.Resource) => {
+        API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
             const mainEObject = resource.eResource().eContents()[0]
             const nestedJSON = this.nestUpdaters(mainEObject.eResource().to(), null)
             this.setState((state, props)=>({
