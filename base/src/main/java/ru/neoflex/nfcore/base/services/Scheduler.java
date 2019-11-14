@@ -32,6 +32,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.scheduler.ScheduledTask;
 import ru.neoflex.nfcore.base.scheduler.SchedulerPackage;
+import ru.neoflex.nfcore.base.scheduler.SchedulingPolicy;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
 import javax.annotation.PostConstruct;
@@ -79,6 +80,9 @@ public class Scheduler {
             if (task.isEnabled()) {
                 String id = context.getStore().getId(resource);
                 ScheduledFuture scheduledFuture = scheduledTasks.get(id);
+                if (scheduledFuture == null) {
+                    SchedulingPolicy schedulingPolicy = task.getSchedulingPolicy();
+                }
             }
         }
         return result;

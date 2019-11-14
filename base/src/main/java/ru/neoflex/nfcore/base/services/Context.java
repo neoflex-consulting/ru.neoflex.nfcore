@@ -25,8 +25,9 @@ public class Context {
     @Autowired
     private Epsilon epsilon;
     @Autowired
-    private
-    PackageRegistry registry;
+    private PackageRegistry registry;
+    @Autowired
+    private Scheduler scheduler;
 
     private static final ThreadLocal<Context> tlContext = new ThreadLocal<Context>();
 
@@ -69,5 +70,9 @@ public class Context {
 
     public<R> R inContextWithClassLoaderInTransaction(Callable<R> f) throws Exception {
         return workspace.withClassLoaderInTransaction(true, ()->{return inContext(f);});
+    }
+
+    public Scheduler getScheduler() {
+        return scheduler;
     }
 }

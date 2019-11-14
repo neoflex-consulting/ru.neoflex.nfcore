@@ -9,7 +9,6 @@ package ru.neoflex.nfcore.base.auth
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EBoolean
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
