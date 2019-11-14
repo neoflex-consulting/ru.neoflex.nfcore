@@ -65,6 +65,10 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-ldap</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
         <!-- emf -->
         <dependency>
             <groupId>org.emfjson</groupId>

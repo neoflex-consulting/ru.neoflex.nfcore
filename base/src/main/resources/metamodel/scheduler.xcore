@@ -17,29 +17,32 @@ import java.util.concurrent.ScheduledFuture
 
 type Exception wraps java.lang.Exception
 type TaskScheduler wraps org.springframework.scheduling.TaskScheduler
-type ScheduledFuture wraps java.util.concurrent.ScheduledFuture
+type ScheduledFuture wraps java.util.concurrent.ScheduledFuture<?>
 type Runnable wraps java.lang.Runnable
+type BackOffPolicy wraps org.springframework.retry.backoff.BackOffPolicy
+type RetryPolicy wraps org.springframework.retry.RetryPolicy
 
-abstract class BackOffPolicy {
+abstract class BackOffPolicyFactory {
+	op BackOffPolicy createPolicy()
 }
 
-class NoBackOffPolicy extends BackOffPolicy {
+class NoBackOffPolicyFactory extends BackOffPolicyFactory {
 }
 
-class FixedBackOffPolicy extends BackOffPolicy {
+class FixedBackOffPolicyFactory extends BackOffPolicyFactory {
     long backOffPeriod
 }
 
-class ExponentialBackOffPolicy extends BackOffPolicy {
+class ExponentialBackOffPolicyFactory extends BackOffPolicyFactory {
     long initialInterval
     double multiplier
     long maxInterval
 }
 
-class ExponentialRandomBackOffPolicy extends ExponentialBackOffPolicy {
+class ExponentialRandomBackOffPolicyFactory extends ExponentialBackOffPolicyFactory {
 }
 
-class UniformRandomBackOffPolicy extends BackOffPolicy {
+class UniformRandomBackOffPolicyFactory extends BackOffPolicyFactory {
     long minBackOffPeriod
     long maxBackOffPeriod
 }
@@ -67,7 +70,8 @@ class PeriodSchedulingPolicy extends SchedulingPolicy {
   long period
 } 
 
-abstract class RetryPolicy {
+abstract class RetryPolicyFactory {
+	op RetryPolicy createPolicy()
 }
 
 class RetryableException {
@@ -75,18 +79,18 @@ class RetryableException {
     boolean retryable
 }
 
-class SimpleRetryPolicy extends RetryPolicy {
+class SimpleRetryPolicyFactory extends RetryPolicyFactory {
     int maxAttempts
     contains RetryableException[] retryableExceptions
 } 
 
-class AlwaysRetryPolicy extends RetryPolicy {
+class AlwaysRetryPolicyFactory extends RetryPolicyFactory {
 } 
 
-class NeverRetryPolicy extends RetryPolicy {
+class NeverRetryPolicyFactory extends RetryPolicyFactory {
 } 
 
-class TimeoutRetryPolicy extends RetryPolicy {
+class TimeoutRetryPolicyFactory extends RetryPolicyFactory {
     long timeout
 } 
 
@@ -102,13 +106,14 @@ class ScheduledTask {
   contains Parameter[] parameters
   Text script
   contains SchedulingPolicy schedulingPolicy
-  contains BackOffPolicy backOffPolicy
-  contains RetryPolicy retryPolicy
+  contains BackOffPolicyFactory backOffPolicyFactory
+  contains RetryPolicyFactory retryPolicyFactory
   boolean imporsonate
   String runAsUser
   Password runAsPassword
   Timestamp lastScheduleTime
   Timestamp lastRunTime
+  Text lastResult
   Timestamp lastErrorTime
   Text lastError
   contains Audit audit
