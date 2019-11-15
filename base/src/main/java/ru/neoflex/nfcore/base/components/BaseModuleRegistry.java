@@ -15,40 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class BaseModuleRegistry implements IModuleRegistry {
-    {
-        EPackage.Registry.INSTANCE.put(TypesPackage.eNS_URI, TypesPackage.eINSTANCE);
-        EPackage.Registry.INSTANCE.put(AuthPackage.eNS_URI, new EPackage.Descriptor() {
-            @Override
-            public EPackage getEPackage() {
-                return AuthPackage.eINSTANCE;
-            }
-
-            @Override
-            public EFactory getEFactory() {
-                return new AuthFactoryExt();
-            }
-        });
-        EPackage.Registry.INSTANCE.put(SchedulerPackage.eNS_URI, new EPackage.Descriptor() {
-            @Override
-            public EPackage getEPackage() {
-                return SchedulerPackage.eINSTANCE;
-            }
-
-            @Override
-            public EFactory getEFactory() {
-                return new SchedulerFactoryExt();
-            }
-        });
-    }
-    @Override
-    public List<EPackage> getEPackages() {
-        List<EPackage> result = new ArrayList<>();
-        result.add(TypesPackage.eINSTANCE);
-        //AuthPackage.eINSTANCE.setEFactoryInstance(new AuthFactoryExt());
-        result.add(AuthPackage.eINSTANCE);
-        //SchedulerPackage.eINSTANCE.setEFactoryInstance(new SchedulerFactoryExt());
-        result.add(SchedulerPackage.eINSTANCE);
-        return result;
+public class BaseModuleRegistry extends ModuleRegistryImpl {
+    BaseModuleRegistry() {
+        registerEPackage(TypesPackage.eINSTANCE);
+        registerEPackage(AuthPackage.eINSTANCE, new AuthFactoryExt());
+        registerEPackage(SchedulerPackage.eINSTANCE, new SchedulerFactoryExt());
     }
 }
