@@ -15,11 +15,10 @@ const backgroundColor = "white";
 interface State {
     appModuleName: string;
     pathFull: string;
-    path: string;
+    pathBreadcrumb: string[];
     context: IMainContext
     hideReferences: boolean
     currentTool?: string
-    application?: Ecore.EObject
     objectApp?: Ecore.EObject
 }
 
@@ -37,7 +36,7 @@ export class MainApp extends React.Component<any, State> {
         this.state = {
             appModuleName: props.appModuleName,
             pathFull: props.pathFull,
-            path: props.path,
+            pathBreadcrumb: [],
             hideReferences: false,
             context
         }
@@ -52,21 +51,25 @@ export class MainApp extends React.Component<any, State> {
     changeURL = (appModuleName?: string, pathFull?: string) => {
         let path;
         let appModuleNameThis = appModuleName || this.state.appModuleName;
-        let indexBreadcrumb = this.state.path ? this.state.path.split('.').indexOf(appModuleNameThis) : 0
-        if (this.state.path !== undefined) {
-                if (this.state.path.split('.').includes(appModuleNameThis)) {
-                    path = '?path=' + this.state.path.split('.').slice(0, indexBreadcrumb + 1).join('.')
+        if (this.state.pathBreadcrumb.length !== 0) {
+                if (this.state.pathBreadcrumb.includes(appModuleNameThis)) {
+                    path = '?path=' + JSON.stringify(this.state.pathBreadcrumb.slice(0, this.state.pathBreadcrumb.indexOf(appModuleNameThis) + 1))
                 } else {
-                    path = '?path=' + this.state.path + '.' + appModuleNameThis
+                    let pathBreadcrumb = this.state.pathBreadcrumb;
+                    pathBreadcrumb.push(appModuleNameThis);
+                    this.setState({pathBreadcrumb});
+                    path = '?path=' + JSON.stringify(pathBreadcrumb)
                 }
         } else {
             path = '?path=' + appModuleNameThis
         }
-
-        if (pathFull && appModuleNameThis) {
-            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
-        }
-        else if (appModuleNameThis) {
+        // if (pathFull && appModuleNameThis) {
+        //     this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
+        // }
+        // else if (appModuleNameThis) {
+        //     this.props.history.push(`/app/${appModuleNameThis}${path}`);
+        // }
+        if (appModuleNameThis) {
             this.props.history.push(`/app/${appModuleNameThis}${path}`);
         }
     };
@@ -130,10 +133,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        if (
-            prevState.pathFull !== this.state.pathFull ||
-            prevState.appModuleName !== this.state.appModuleName)
-        {
+        if (prevState.pathFull !== this.state.pathFull) {
             this.loadObject()
         }
     }
@@ -143,22 +143,21 @@ export class MainApp extends React.Component<any, State> {
     }
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        let indexBreadcrumb = prevState.path ? prevState.path.split('.').indexOf(nextProps.match.params.appModuleName) : 0
         const pathFull = nextProps.history.location.pathname +
-            nextProps.history.location.search + nextProps.history.location.hash;
+            decodeURI(nextProps.history.location.search) + nextProps.history.location.hash;
         if (
-            prevState.pathFull !== pathFull ||
-            prevState.appModuleName !== nextProps.match.params.appModuleName) {
+            prevState.pathFull !== pathFull
+           ) {
             return {
-                path: prevState.path === undefined
+                pathBreadcrumb: prevState.pathBreadcrumb.length === 0 ||  prevState.appModuleName !== nextProps.match.params.appModuleName
                     ?
-                    nextProps.match.params.appModuleName
+                    JSON.parse(decodeURI(nextProps.history.location.search.split('?path=')[1]))
                     :
-                    prevState.path.split('.').includes(nextProps.match.params.appModuleName)
+                    prevState.pathBreadcrumb.includes(nextProps.match.params.appModuleName)
                         ?
-                        prevState.path.split('.').slice(0, indexBreadcrumb + 1).join('.')
+                        prevState.pathBreadcrumb.slice(0, prevState.pathBreadcrumb.indexOf(nextProps.match.params.appModuleName) + 1)
                         :
-                        prevState.path + '.' + nextProps.match.params.appModuleName,
+                        prevState.pathBreadcrumb.push(nextProps.match.params.appModuleName),
                 pathFull: pathFull,
                 appModuleName: nextProps.match.params.appModuleName
             }
@@ -216,10 +215,10 @@ export class MainApp extends React.Component<any, State> {
             const cb = cbs.get(keys[keys.length - 1]);
             if (cb) cb();
         };
-        const pathThis = decodeURI(this.props.history.location.hash).split('#')[1];
+        const pathReferenceTree = decodeURI(this.props.history.location.hash).split('#')[1];
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
-                <Tree.DirectoryTree defaultSelectedKeys={[pathThis]} defaultExpandAll onSelect={onSelect}>
+                <Tree.DirectoryTree defaultSelectedKeys={[pathReferenceTree]} defaultExpandAll onSelect={onSelect}>
                     {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
                 </Tree.DirectoryTree>
             </Layout>
