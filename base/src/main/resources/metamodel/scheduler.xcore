@@ -121,5 +121,5 @@ class ScheduledTask {
   Text lastError
   contains Audit audit
 
-  op void refreshScheduler() throws Exception
+  op Object refreshScheduler() throws Exception
 }

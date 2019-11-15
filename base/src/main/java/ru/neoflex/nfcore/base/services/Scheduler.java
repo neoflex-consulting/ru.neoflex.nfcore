@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -57,9 +58,9 @@ public class Scheduler {
     public synchronized ObjectNode refreshScheduler() throws Exception {
         return context.inContextWithClassLoaderInTransaction(()->{
             ObjectNode result = refreshSchedulerInt();
+            String message = "refreshScheduler: " + new ObjectMapper().writeValueAsString(result);
+            logger.info(message);
             if (result.get(CANCELLED).intValue() + result.get(SCHEDULED).intValue() > 0) {
-                String message = "refreshScheduler: " + new ObjectMapper().writeValueAsString(result);
-                logger.info(message);
                 store.commit(message);
             }
             return result;
@@ -119,6 +120,10 @@ public class Scheduler {
                                                 logger.info(stringWriter.toString());
                                                 currTask.setLastRunTime(new Timestamp(new Date().getTime()));
                                                 currTask.setLastResult(stringWriter.toString());
+                                                if (currTask.getSchedulingPolicy() instanceof OnceSchedulingPolicy &&
+                                                        ((OnceSchedulingPolicy) currTask.getSchedulingPolicy()).isDisableAfterRun()) {
+                                                    currTask.setEnabled(false);
+                                                }
                                             }
                                             catch (Throwable e) {
                                                 logger.error(currTask.getName(), e);

@@ -69,7 +69,7 @@ public class Context {
     }
 
     public<R> R inContextWithClassLoaderInTransaction(Callable<R> f) throws Exception {
-        return workspace.withClassLoaderInTransaction(true, ()->{return inContext(f);});
+        return workspace.withClassLoaderInTransaction(false, ()->{return inContext(f);});
     }
 
     public Scheduler getScheduler() {

@@ -24,8 +24,8 @@ public class SchedulerFactoryExt extends SchedulerFactoryImpl {
     public ScheduledTask createScheduledTask() {
         return new ScheduledTaskImpl() {
             @Override
-            public void refreshScheduler() throws Exception {
-                Context.getCurrent().getScheduler().refreshSchedulerInt();
+            public Object refreshScheduler() throws Exception {
+                return Context.getCurrent().getScheduler().refreshScheduler();
             }
         };
     }
