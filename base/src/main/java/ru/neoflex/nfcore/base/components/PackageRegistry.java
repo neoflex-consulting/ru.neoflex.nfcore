@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Component("ru.neoflex.nfcore.base.components.PackageRegistry")
 public class PackageRegistry {
     @Autowired
     List<IModuleRegistry> moduleRegistryList = new ArrayList<>();

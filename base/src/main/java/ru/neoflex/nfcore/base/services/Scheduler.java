@@ -46,6 +46,8 @@ public class Scheduler {
     private TaskScheduler taskScheduler;
     @Autowired
     Context context;
+    @Autowired
+    Store store;
 
     @PostConstruct
     void init() throws Exception {
@@ -58,7 +60,7 @@ public class Scheduler {
             if (result.get(CANCELLED).intValue() + result.get(SCHEDULED).intValue() > 0) {
                 String message = "refreshScheduler: " + new ObjectMapper().writeValueAsString(result);
                 logger.info(message);
-                context.getStore().commit(message);
+                store.commit(message);
             }
             return result;
         });
@@ -68,13 +70,13 @@ public class Scheduler {
         ObjectNode result = new ObjectMapper().createObjectNode()
                 .put(CANCELLED, 0)
                 .put(SCHEDULED, 0);
-        List<Resource> resources = DocFinder.create(context.getStore(), SchedulerPackage.Literals.SCHEDULED_TASK).execute().getResources();
+        List<Resource> resources = DocFinder.create(store, SchedulerPackage.Literals.SCHEDULED_TASK).execute().getResources();
         Map<String, ScheduledFuture> newTasks = new HashMap<>();
         for (Resource resource: resources) {
             ScheduledTask task = (ScheduledTask) resource.getContents().get(0);
             if (task.isEnabled()) {
                 URI uri = resource.getURI();
-                String id = context.getStore().getId(resource);
+                String id = store.getId(resource);
                 ScheduledFuture scheduledFuture = scheduledTasks.get(id);
                 if (scheduledFuture == null) {
                     SchedulingPolicy schedulingPolicy = task.getSchedulingPolicy();

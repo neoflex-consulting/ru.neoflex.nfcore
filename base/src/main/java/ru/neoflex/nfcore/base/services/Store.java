@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,8 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
 
-@Service
+@Service("ru.neoflex.nfcore.base.services.Store")
+@DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
 public class Store {
     private final static Log logger = LogFactory.getLog(Store.class);
 

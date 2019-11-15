@@ -16,9 +16,10 @@ import java.util.List;
 
 @Component
 public class BaseModuleRegistry extends ModuleRegistryImpl {
-    BaseModuleRegistry() {
+    @PostConstruct
+    void init() {
         registerEPackage(TypesPackage.eINSTANCE);
-        registerEPackage(AuthPackage.eINSTANCE, new AuthFactoryExt());
-        registerEPackage(SchedulerPackage.eINSTANCE, new SchedulerFactoryExt());
+        registerEPackage(AuthPackage.eNS_URI, ()->AuthPackage.eINSTANCE, new AuthFactoryExt());
+        registerEPackage(SchedulerPackage.eNS_URI, ()->SchedulerPackage.eINSTANCE, new SchedulerFactoryExt());
     }
 }

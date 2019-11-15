@@ -11,6 +11,9 @@ import ru.neoflex.nfcore.base.types.TypesPackage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Component
 public class ModuleRegistryImpl implements IModuleRegistry {
@@ -26,12 +29,11 @@ public class ModuleRegistryImpl implements IModuleRegistry {
         ePackages.add(ePackage);
     }
 
-    public void registerEPackage(EPackage ePackage, EFactory eFactory) {
-        ePackage.setEFactoryInstance(eFactory);
-        EPackage.Registry.INSTANCE.put(SchedulerPackage.eNS_URI, new EPackage.Descriptor() {
+    public void registerEPackage(String uri, Supplier<EPackage> ePackageCB, EFactory eFactory) {
+        EPackage.Registry.INSTANCE.put(uri, new EPackage.Descriptor() {
             @Override
             public EPackage getEPackage() {
-                return ePackage;
+                return ePackageCB.get();
             }
 
             @Override
@@ -39,6 +41,7 @@ public class ModuleRegistryImpl implements IModuleRegistry {
                 return eFactory;
             }
         });
-        ePackages.add(ePackage);
+        ePackageCB.get().setEFactoryInstance(eFactory);
+        ePackages.add(ePackageCB.get());
     }
 }
