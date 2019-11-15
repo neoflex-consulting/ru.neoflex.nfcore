@@ -6,13 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.emf.ecore.EClassifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 
 import javax.annotation.PostConstruct;
 
-@Component
+@Component("ru.neoflex.nfcore.base.components.StartUp")
+@DependsOn({"ru.neoflex.nfcore.base.components.PackageRegistry"})
 public class StartUp {
     private static final Logger logger = LoggerFactory.getLogger(StartUp.class);
     @Autowired

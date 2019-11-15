@@ -1,6 +1,6 @@
-function copyIntoClipboard(text){
-    let copied = false
-    const modifyCopy = e => {
+function copyIntoClipboard(text: string){
+    let copied: boolean = false
+    const modifyCopy = (e: any) => {
         e.clipboardData.setData('text/plain', String(text));
         copied = true;
         e.preventDefault();
@@ -11,4 +11,5 @@ function copyIntoClipboard(text){
     document.addEventListener('copy', modifyCopy);
     document.execCommand('copy')
 }
+
 export {copyIntoClipboard}
