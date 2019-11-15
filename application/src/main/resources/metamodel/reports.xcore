@@ -14,8 +14,7 @@ class Report {
 	QName name
 }
 
-class InstanceReport {
-    QName name
+class InstanceReport extends Report{
     refers Report report
 	Date date
 	refers Dataset dataset

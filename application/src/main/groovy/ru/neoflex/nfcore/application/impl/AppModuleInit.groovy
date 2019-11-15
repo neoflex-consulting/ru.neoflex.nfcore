@@ -28,49 +28,61 @@ class AppModuleInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateAppModule(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+    static def recreateApplication(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
                 .execute().resourceSet
         while (!rs.resources.empty) {
             Context.current.store.deleteResource(rs.resources.remove(0).getURI())
         }
         if (rs.resources.empty) {
 
-            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",false)
-            def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",false)
-            def userComponent6 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Tax Reporting", "TaxReporting",false)
+            def application = ApplicationFactory.eINSTANCE.createApplication()
 
-            def application = ApplicationFactory.eINSTANCE.createAppModule()
-            application.name = name
+            if (name == "ApplicationForExample") {
+                application.name = name
 
-            def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
-            componentElement1.code = 'Mandatory Reporting'
-            componentElement1.setComponent(userComponent1)
-            application.view = componentElement1
+                def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",false)
 
-            def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
-            def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
-            componentElement3.code = 'Mandatory Reporting'
-            componentElement3.setComponent(userComponent1)
-            def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
-            viewNode1.name = 'Mandatory Reporting'
-            viewNode1.view = componentElement3
-            referenceTree.children.add(viewNode1)
-            def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
-            componentElement2.code = 'Tax Reporting'
-            componentElement2.setComponent(userComponent6)
-            def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
-            viewNode2.name = 'Tax Reporting'
-            viewNode2.view = componentElement2
-            referenceTree.children.add(viewNode2)
-            application.setReferenceTree(referenceTree)
+                def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
+                componentElement1.code = 'Mandatory Reporting'
+                componentElement1.setComponent(userComponent5)
+                application.view = componentElement1
+            }
+            else {
+                def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",false)
+                def userComponent6 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Tax Reporting", "TaxReporting",false)
+
+                application.name = name
+
+                def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
+                componentElement1.code = 'Mandatory Reporting'
+                componentElement1.setComponent(userComponent1)
+                application.view = componentElement1
+
+                def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
+                def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
+                componentElement3.code = 'Mandatory Reporting'
+                componentElement3.setComponent(userComponent1)
+                def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
+                viewNode1.name = 'Mandatory Reporting'
+                viewNode1.view = componentElement3
+                referenceTree.children.add(viewNode1)
+                def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
+                componentElement2.code = 'Tax Reporting'
+                componentElement2.setComponent(userComponent6)
+                def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
+                viewNode2.name = 'Tax Reporting'
+                viewNode2.view = componentElement2
+                referenceTree.children.add(viewNode2)
+                application.setReferenceTree(referenceTree)
+            }
 
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def deletedAppModule2(String name) {
+    static def deletedAppModule(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         while (!rs.resources.empty) {
@@ -94,6 +106,7 @@ class AppModuleInit {
             application.name = name
 
             def Tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
+            Tabs.code = 'View Report'
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
@@ -134,8 +147,9 @@ class AppModuleInit {
     }
 
     {
-        deletedAppModule2("ReportSingle")
-        recreateAppModule("ReportsApp")
+        deletedAppModule("ReportSingle")
+        recreateApplication("ReportsApp")
+        recreateApplication("ApplicationForExample")
         recreateAppModule2("ReportSingle")
         recreateInstanceReport("InstanceReport1")
     }
