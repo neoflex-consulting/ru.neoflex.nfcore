@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.TaskScheduler;
@@ -28,10 +29,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.*;
 
 @Service
+@DependsOn({"ru.neoflex.nfcore.base.configuration.Security"})
 public class Scheduler {
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
     public final static String CANCELLED = "cancelled";
@@ -48,8 +49,15 @@ public class Scheduler {
     private AuthenticationManager authenticationManager;
 
     @PostConstruct
-    void init() throws Exception {
-        refreshScheduler();
+    void init() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(() -> {
+            try {
+                refreshScheduler();
+            } catch (Exception e) {
+                logger.error("Scheduler: ", e);
+            }
+        }, 10, TimeUnit.SECONDS);
     }
 
     public synchronized ObjectNode refreshScheduler() throws Exception {
@@ -145,8 +153,8 @@ public class Scheduler {
 
     public Object execute(URI uri) throws Exception {
         return context.inContextWithClassLoaderInTransaction((Callable<Object>) () -> {
-            Resource currResource = Context.getCurrent().getStore().loadResource(uri);
-            ScheduledTask task = (ScheduledTask) currResource.getContents().get(0);
+            Resource resource = Context.getCurrent().getStore().loadResource(uri);
+            ScheduledTask task = (ScheduledTask) resource.getContents().get(0);
             if (task.isImporsonate()) {
                 login(task.getRunAsUser(), task.getRunAsPassword());
             }
@@ -165,7 +173,7 @@ public class Scheduler {
                 try {
                     result =  sh.evaluate(task.getScript());
                     printWriter.println("result: " + result.getClass().getTypeName() + " = " + result);
-                    logger.info(stringWriter.toString());
+                    logger.debug(stringWriter.toString());
                     task.setLastRunTime(new Timestamp(new Date().getTime()));
                     task.setLastResult(stringWriter.toString());
                     if (task.getSchedulingPolicy() instanceof OnceSchedulingPolicy &&
@@ -178,7 +186,7 @@ public class Scheduler {
                     task.setLastErrorTime(new Timestamp(new Date().getTime()));
                     task.setLastError(ExceptionUtils.getStackTrace(e));
                 }
-                Context.getCurrent().getStore().saveResource(currResource);
+                Context.getCurrent().getStore().saveResource(resource);
                 Context.getCurrent().getStore().commit("Task " + task.getName() + " executed");
                 return result;
             }

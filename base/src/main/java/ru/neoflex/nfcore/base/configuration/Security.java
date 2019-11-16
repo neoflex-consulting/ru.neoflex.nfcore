@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-@Configuration
+@Configuration("ru.neoflex.nfcore.base.configuration.Security")
 @EnableWebSecurity
 public class Security extends WebSecurityConfigurerAdapter {
     @Override
@@ -75,19 +75,13 @@ public class Security extends WebSecurityConfigurerAdapter {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
     }
 
-//    @Autowired
-//    private AuthenticationManagerBuilder auth;
-//    @Bean
-//    public AuthenticationManager authenticationManager() throws Exception {
-//        return auth.build();
-//    }
-
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception
     {
         return super.authenticationManagerBean();
     }
+
     @Configuration
     protected static class BaseConfiguration extends
             GlobalAuthenticationConfigurerAdapter {
