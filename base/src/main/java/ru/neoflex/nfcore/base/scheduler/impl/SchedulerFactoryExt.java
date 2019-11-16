@@ -27,6 +27,12 @@ public class SchedulerFactoryExt extends SchedulerFactoryImpl {
             public Object refreshScheduler() throws Exception {
                 return Context.getCurrent().getScheduler().refreshScheduler();
             }
+
+            @Override
+            public Object debugRescheduleAll() throws Exception {
+                return Context.getCurrent().getScheduler().debugRescheduleAll();
+            }
+
         };
     }
 

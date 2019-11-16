@@ -122,4 +122,5 @@ class ScheduledTask {
   contains Audit audit
 
   op Object refreshScheduler() throws Exception
+  op Object debugRescheduleAll() throws Exception
 }
