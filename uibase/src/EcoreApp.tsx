@@ -220,7 +220,6 @@ class EcoreApp extends React.Component<any, State> {
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
                     <Redirect from={'/app'} exact={true} to={`/app/ReportsApp?path=${JSON.stringify(["ReportsApp"])}`}/>
-                    {/*<Redirect from={'/app'} exact={true} to={`/app/ReportsApp`}/>*/}
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
@@ -236,11 +235,9 @@ class EcoreApp extends React.Component<any, State> {
                 selectedKeys.push(`app.${a.eContents()[0].get('name')}`));
         }
         if (this.props.location.search) {
-            selectedKeys = selectedKeys.filter(k => {
-                if (k.split('.').length > 1) {
-                    return JSON.parse(decodeURI(this.props.location.search.split('?path=')[1])).includes(k.slice(4))
-                }
-            })
+            selectedKeys = selectedKeys
+                .filter(k => k.split('.').length > 1)
+                .filter( k => JSON.parse(decodeURI(this.props.location.search.split('?path=')[1])).includes(k.slice(4)))
         } else {
             selectedKeys = selectedKeys.filter(k =>
                 this.props.location.pathname.split('/').includes(k));
