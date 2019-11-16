@@ -27,7 +27,7 @@ class EditableTextArea extends Component<Props, State>{
     }
 
     render() {
-        const splitedString = this.props.value ? this.props.value.split('\n') : []
+        const splitedString = this.props.value ? this.props.value.toString().split('\n') : []
         const lines = splitedString.length
         const Input = types[this.props.type]
 
