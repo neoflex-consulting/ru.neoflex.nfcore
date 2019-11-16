@@ -22,7 +22,7 @@ abstract class ViewComponent {
 }
 
 class UserComponent extends Component {
-    String componentClassName
+    String[1] componentClassName
 }
 
 /* Applications */
@@ -33,9 +33,12 @@ class AppModule {
     contains CatalogNode referenceTree
 }
 
+class Application extends AppModule {
+}
+
 /* Views */
 abstract class ViewElement {
-	String code
+	String[1] code
 	container ViewContainer parent opposite children
 }
 
