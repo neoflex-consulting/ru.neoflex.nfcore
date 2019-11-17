@@ -133,6 +133,7 @@ public class Scheduler {
                     if (scheduledFuture != null) {
                         result.put(SCHEDULED, result.get(SCHEDULED).intValue() + 1);
                         task.setLastScheduleTime(new Timestamp(new Date().getTime()));
+                        Context.getCurrent().getStore().saveResource(resource);
                     }
                 }
                 if (scheduledFuture != null) {

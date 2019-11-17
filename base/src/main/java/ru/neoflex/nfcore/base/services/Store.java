@@ -165,17 +165,8 @@ public class Store {
     }
 
     public void commit(String message) throws IOException {
-        String username = "";
         String email = "";
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof UserDetails) {
-                username = ((UserDetails)principal).getUsername();
-            } else {
-                username = principal.toString();
-            }
-        }
+        String username = Context.getUserName();
         getCurrentTransaction().commit(message, username, email);
     }
 }
