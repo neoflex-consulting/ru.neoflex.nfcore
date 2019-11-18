@@ -114,4 +114,8 @@ function findObjectById(data: any, id: String): any {
     }
 }
 
-export { nestUpdaters, findObjectById };
+const boolSelectionOption: { [key: string]: any } = { "true": true, "false": false, "undefined": false }
+const getPrimitiveType = (value: string): any => boolSelectionOption[value]
+const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
+
+export { nestUpdaters, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString };
