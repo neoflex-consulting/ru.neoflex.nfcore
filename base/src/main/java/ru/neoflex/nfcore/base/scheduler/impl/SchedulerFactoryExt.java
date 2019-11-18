@@ -33,6 +33,11 @@ public class SchedulerFactoryExt extends SchedulerFactoryImpl {
                 return Context.getCurrent().getScheduler().debugRescheduleAll();
             }
 
+            @Override
+            public Object debugExecute() throws Exception {
+                return Context.getCurrent().getScheduler().execute(this.eResource().getURI());
+            }
+
         };
     }
 

@@ -123,4 +123,5 @@ class ScheduledTask {
 
   op Object refreshScheduler() throws Exception
   op Object debugRescheduleAll() throws Exception
+  op Object debugExecute() throws Exception
 }

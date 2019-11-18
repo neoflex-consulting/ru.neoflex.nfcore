@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.meta.gitdb.Exporter;
 import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import java.io.IOException;
@@ -53,10 +54,13 @@ public class SysController {
 
     @PostMapping(value="/importdb", produces={"application/json"})
     public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws IOException {
-        int count = workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, (tx)->{
-            return new Exporter(workspace.getDatabase()).unzip(file.getInputStream(), tx);
+        return workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, (tx)->{
+            int count =  new Exporter(workspace.getDatabase()).unzip(file.getInputStream(), tx);
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode result = mapper.createObjectNode().put("count", count);
+            tx.commit("Import database: " + mapper.writeValueAsString(result), Context.getUserName(), "");
+            return result;
         });
-        return new ObjectMapper().createObjectNode().put("count", count);
     }
 
     @GetMapping(value="/exportdb")
