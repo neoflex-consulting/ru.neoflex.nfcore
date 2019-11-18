@@ -12,11 +12,10 @@ import Splitter from './CustomSplitter'
 import {
     nestUpdaters, findObjectById, getPrimitiveType
 } from '../utils/resourceEditorUtils'
-
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
-
 import FormComponentMapper from './FormComponentMapper';
+import Operations from './Operations';
 
 export interface Props {
 }
@@ -90,10 +89,6 @@ class ResourceEditor extends React.Component<any, State> {
         API.instance().deleteResource(ref).then(() => {
             this.props.history.push('/developer/data')
         })
-    }
-
-    runAction = (): void => {
-
     }
 
     generateEObject(): void {
@@ -271,8 +266,6 @@ class ResourceEditor extends React.Component<any, State> {
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: getPrimitiveType(newValue) })
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
-        } else if (componentName === 'BrowseRefObject') {
-
         } else {
             //EditableTextArea
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue })
@@ -292,7 +285,9 @@ class ResourceEditor extends React.Component<any, State> {
                 value: FormComponentMapper.getComponent({
                     value: targetObject[feature.get('name')],
                     targetObject: targetObject,
-                    EObject: feature,
+                    eObject: feature,
+                    eType: feature.get('eType'),
+                    upperBound: feature.get('upperBound'),
                     idx: idx,
                     ukey: key,
                     onChange: this.onTablePropertyChange,
@@ -576,7 +571,7 @@ class ResourceEditor extends React.Component<any, State> {
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
-                    <Button className="panel-button" icon="bulb" onClick={this.runAction} />
+                    <Operations translate={t} EObject={this.state.mainEObject} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>

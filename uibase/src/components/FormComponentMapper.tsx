@@ -11,7 +11,6 @@ interface EditableTextAreaProps {
     property?: string,
     onChange?: Function,
     type: any,
-    EObject?: Ecore.EObject,
     idx?: number,
     ukey?: string
 }
@@ -67,15 +66,16 @@ interface SelectRefObjectProps {
     ukey?: string,
     //the main object, where a sub EObject was retrived from.
     mainEObject: Ecore.EObject,
-    EObject: Ecore.EObject,
+    eObject: Ecore.EObject,
     handleDeleteRef?: Function,
     handleDeleteSingleRef?: Function,
     onEClassBrowse?: Function,
-    onBrowse?: Function
+    onBrowse?: Function,
+    upperBound: number,
 }
 
 function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
-    const { EObject, value, mainEObject, idx, ukey } = props
+    const { eObject, upperBound, value, mainEObject, idx, ukey } = props
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = mainEObject.eResource().eContainer.get('resources')
@@ -86,11 +86,11 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
 
     const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)
     const elements = value ?
-        EObject.get('upperBound') === -1 ?
+        upperBound === -1 ?
             value.map((el: { [key: string]: any }, idx: number) =>
                 <Tag
                     onClose={(e: any) => {
-                        props.handleDeleteRef && props.handleDeleteRef!(el, EObject.get('name'))
+                        props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
                     }}
                     closable
                     key={el["$ref"]}
@@ -101,7 +101,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             :
             <Tag
                 onClose={(e: any) => {
-                    props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, EObject.get('name'))
+                    props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
                 }}
                 closable
                 key={value["$ref"]}
@@ -113,12 +113,12 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
         []
     const component = <React.Fragment key={ukey + "_" + idx}>
         {elements}
-        {EObject.get('eType').get('name') === 'EClass' ?
+        {eObject.get('eType').get('name') === 'EClass' ?
             <Button 
                 style={{ display: "inline-block" }} 
                 key={ukey + "_" + idx} 
                 onClick={() => {
-                    props.onEClassBrowse && props.onEClassBrowse!(EObject)
+                    props.onEClassBrowse && props.onEClassBrowse!(eObject)
                 }}
             >...</Button>
             :
@@ -126,7 +126,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 style={{ display: "inline-block" }} 
                 key={ukey + "_" + idx} 
                 onClick={() => {
-                    props.onBrowse && props.onBrowse!(EObject)
+                    props.onBrowse && props.onBrowse!(eObject)
                 }}
             >...</Button>
         }
@@ -184,94 +184,98 @@ interface SelectComponentProps {
     onChange?: Function,
     idx?: number,
     ukey?: string,
-    EObject: Ecore.EObject,
-    targetObject: { [key: string]: any }
+    eType: any,
+    upperBound: number,
+    id: string
 }
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { EObject, value, idx, ukey, targetObject, onChange } = props
+    const { eType, value, idx, ukey, onChange, upperBound, id } = props
 
     return (
-        <Select mode={EObject.get('upperBound') === -1 ? "multiple" : "default"} value={value} key={ukey + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
+        <Select mode={upperBound === -1 ? "multiple" : "default"} value={value} key={ukey + "_" + idx} style={{ width: "300px" }} onChange={(newValue: any) => {
             onChange && onChange!(newValue)
         }}>
-            {EObject.get('eType').eContents().map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + targetObject.id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
+            {eType.eContents().map((obj: Ecore.EObject) =>
+                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
         </Select>
     )
 }
 
-
 interface Props {
     value: any,
     targetObject?: { [key: string]: any },
-    EObject: Ecore.EObject,
+    eObject: Ecore.EObject,
+    eType: any,
     onChange?: Function,
     type?: string,
     idx?: number,
-    ukey?: string
+    ukey?: string,
+    id?: string
 }
 
 export default class ComponentMapper extends React.Component<Props, any>{
 
     static getComponent(props: any) {
-        const { targetObject, EObject, value, ukey, idx } = props
-        if (EObject.isKindOf('EReference')) {
+        const { targetObject, eObject, eType, value, ukey, idx } = props
+        if (eObject && eObject.isKindOf('EReference')) {
             return <SelectRefObject
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                EObject={props.EObject}
+                eObject={props.eObject}
                 mainEObject={props.mainEObject}
                 handleDeleteRef={props.handleDeleteRef}
                 handleDeleteSingleRef={props.handleDeleteSingleRef}
                 onEClassBrowse={props.onEClassBrowse}
                 onBrowse={props.onBrowse}
+                upperBound={props.upperBound}
             />
-        } else if (EObject.get('eType') && EObject.get('eType').isKindOf('EDataType') && EObject.get('eType').get('name') === "EBoolean") {
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
             return <BooleanSelect
                 idx={idx}
                 ukey={ukey}
                 value={value}
                 onChange={(newValue: any) => {
-                    props.onChange && props.onChange!(newValue, 'BooleanSelect', targetObject, EObject)
+                    props.onChange && props.onChange!(newValue, 'BooleanSelect', targetObject, eObject)
                 }}
             />
-        } else if (EObject.get('eType') && EObject.get('eType').isKindOf('EDataType') && EObject.get('eType').get('name') === "Timestamp") {
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
             return value
-        } else if (EObject.get('eType') && EObject.get('eType').isKindOf('EDataType') && EObject.get('eType').get('name') === "Date") {
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', props.targetObject, props.EObject)}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', props.targetObject, props.eObject)}
             />
-        } else if (EObject.get('eType') && EObject.get('eType').isKindOf('EDataType') && EObject.get('eType').get('name') === "Password") {
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
             return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.EObject)}
-                type="text"
+                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.eObject)}
+                type="password"
             />
-        } else if (EObject.get('eType') && EObject.get('eType').isKindOf('EEnum')) {
+        } else if (eType && eType.isKindOf('EEnum')) {
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                EObject={EObject}
-                targetObject={targetObject}
+                eType={eType}
+                id={props.id}
                 onChange={(newValue: any) => {
-                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, EObject)
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
                 }}
+                upperBound={props.upperBound}
             />
         } else {
             return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.EObject)}
+                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.eObject)}
                 type="text"
             />
         }
