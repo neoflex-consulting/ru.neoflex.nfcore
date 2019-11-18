@@ -63,13 +63,10 @@ export class MainApp extends React.Component<any, State> {
         } else {
             path = '?path=' + appModuleNameThis
         }
-        // if (pathFull && appModuleNameThis) {
-        //     this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
-        // }
-        // else if (appModuleNameThis) {
-        //     this.props.history.push(`/app/${appModuleNameThis}${path}`);
-        // }
-        if (appModuleNameThis) {
+        if (pathFull && appModuleNameThis) {
+            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
+        }
+        else if (appModuleNameThis) {
             this.props.history.push(`/app/${appModuleNameThis}${path}`);
         }
     };
