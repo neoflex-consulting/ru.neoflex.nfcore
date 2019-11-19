@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.meta.gitdb.Exporter;
 import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Workspace;
 
@@ -58,7 +59,7 @@ public class SysController {
             int count =  new Exporter(workspace.getDatabase()).unzip(file.getInputStream(), tx);
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode().put("count", count);
-            tx.commit("Import database: " + mapper.writeValueAsString(result), Context.getUserName(), "");
+            tx.commit("Import database: " + mapper.writeValueAsString(result), Authorization.getUserName(), "");
             return result;
         });
     }

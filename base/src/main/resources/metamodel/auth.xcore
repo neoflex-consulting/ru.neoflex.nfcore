@@ -13,6 +13,7 @@ import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
+import org.eclipse.emf.ecore.EBoolean
 
 class Audit {
     String createdBy
@@ -103,4 +104,10 @@ class User extends Authority {
 }
 
 class Group extends Authority {
+}
+
+class Authorization {
+    QName name
+    op EBoolean isUserInRole(Role role) {true}
+    op EBoolean permitted(ActionType actionType, EObject eObject, Timestamp ts, String name) {false}
 }

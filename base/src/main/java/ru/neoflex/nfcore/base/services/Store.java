@@ -166,7 +166,7 @@ public class Store {
 
     public void commit(String message) throws IOException {
         String email = "";
-        String username = Context.getUserName();
+        String username = Authorization.getUserName();
         getCurrentTransaction().commit(message, username, email);
     }
 }

@@ -14,14 +14,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.neoflex.nfcore.base.auth.Authenticator;
-import ru.neoflex.nfcore.base.auth.Group;
-import ru.neoflex.nfcore.base.auth.PasswordAuthenticator;
-import ru.neoflex.nfcore.base.auth.Role;
+import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class UserDetail implements UserDetailsService {
@@ -40,20 +39,9 @@ public class UserDetail implements UserDetailsService {
                     return null;
                 }
 
-                DocFinder docFinder = DocFinder.create(store);
-                ObjectMapper objectMapper = new ObjectMapper();
-                ObjectNode selector = objectMapper.createObjectNode();
-                selector
-                        .with("contents")
-                        .put("eClass", "ru.neoflex.nfcore.base.auth#//User")
-                        .put("name", userName);
-
-                docFinder
-                        .executionStats(true)
-                        .selector(selector)
-                        .execute();
-
-                EList<Resource> resources = docFinder.getResourceSet().getResources();
+                DocFinder docFinder = DocFinder.create(store,
+                        AuthPackage.Literals.USER, new HashMap<String, String>() {{put("name", userName);}});
+                List<Resource> resources = docFinder.execute().getResources();
                 if (resources.isEmpty()) {
                     return null;
                 }
@@ -69,19 +57,14 @@ public class UserDetail implements UserDetailsService {
                     }
                 }
                 //add user Roles from Roles
-                if (!user.getRoles().isEmpty()) {
-                    EList<Role> userRoles = user.getRoles();
-                    for (Role userRole: userRoles) {
-                        au.add(new SimpleGrantedAuthority(userRole.getName()));
-                    }
+                for (Role userRole: user.getRoles()) {
+                    au.add(new SimpleGrantedAuthority(userRole.getName()));
                 }
 
                 //add user Roles from Groups
                 if (!user.getGroups().isEmpty()) {
-                    EList<Group> userGroups = user.getGroups();
-                    for (Group userGroup: userGroups) {
-                        EList<Role> userRolesGroups = userGroup.getRoles();
-                        for (Role userRoleGroup: userRolesGroups) {
+                    for (Group userGroup: user.getGroups()) {
+                        for (Role userRoleGroup: userGroup.getRoles()) {
                             au.add(new SimpleGrantedAuthority( userRoleGroup.getName() ));
                         }
                     }
