@@ -52,17 +52,24 @@ export class MainApp extends React.Component<any, State> {
         let path;
         let appModuleNameThis = appModuleName || this.state.appModuleName;
         if (this.state.pathBreadcrumb.length !== 0) {
-                if (this.state.pathBreadcrumb.includes(appModuleNameThis)) {
-                    path = '?path=' + JSON.stringify(this.state.pathBreadcrumb.slice(0, this.state.pathBreadcrumb.indexOf(appModuleNameThis) + 1))
+            if (this.state.pathBreadcrumb.includes(appModuleNameThis)) {
+                if (this.state.pathBreadcrumb[0] !== appModuleNameThis) {
+                    path = '?path=' + JSON.stringify(this.state.pathBreadcrumb.slice(0, this.state.pathBreadcrumb.indexOf(appModuleNameThis)))
                 } else {
-                    let pathBreadcrumb = this.state.pathBreadcrumb;
-                    pathBreadcrumb.push(appModuleNameThis);
-                    this.setState({pathBreadcrumb});
-                    path = '?path=' + JSON.stringify(pathBreadcrumb)
+                    path = ""
                 }
-        } else {
-            path = '?path=' + appModuleNameThis
+                } else {
+                let pathBreadcrumb = this.state.pathBreadcrumb;
+                if (appModuleName !== this.state.appModuleName) {
+                    pathBreadcrumb.push(this.state.appModuleName)
+                }
+                this.setState({pathBreadcrumb});
+                path = '?path=' + JSON.stringify(pathBreadcrumb)
+            }
         }
+        else if (this.state.appModuleName !== appModuleName) {
+            path = '?path=' + JSON.stringify([this.state.appModuleName])
+        } else {path = ""}
         if (pathFull && appModuleNameThis) {
             this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
         }
@@ -148,13 +155,18 @@ export class MainApp extends React.Component<any, State> {
             return {
                 pathBreadcrumb: prevState.pathBreadcrumb.length === 0 ||  prevState.appModuleName !== nextProps.match.params.appModuleName
                     ?
-                    JSON.parse(decodeURI(nextProps.history.location.search.split('?path=')[1]))
-                    :
-                    prevState.pathBreadcrumb.includes(nextProps.match.params.appModuleName)
+                    nextProps.history.location.search !== ""
                         ?
-                        prevState.pathBreadcrumb.slice(0, prevState.pathBreadcrumb.indexOf(nextProps.match.params.appModuleName) + 1)
+                        prevState.pathBreadcrumb.includes(nextProps.match.params.appModuleName)
+                            ?
+                            prevState.pathBreadcrumb.slice(0, prevState.pathBreadcrumb.indexOf(nextProps.match.params.appModuleName))
+                            :
+                            JSON.parse(decodeURI(nextProps.history.location.search.split('?path=')[1]))
                         :
-                        prevState.pathBreadcrumb.push(nextProps.match.params.appModuleName),
+                        ""
+                    :
+                    prevState.pathBreadcrumb.push(nextProps.match.params.appModuleName)
+                ,
                 pathFull: pathFull,
                 appModuleName: nextProps.match.params.appModuleName
             }

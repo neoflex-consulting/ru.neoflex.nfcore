@@ -21,6 +21,7 @@
     "ag-grid-community": "^21.2.2",
     "ag-grid-react": "^21.2.2",
     "antd": "3.20.2",
+    "brace": "^0.11.1",
     "ecore": "^0.12.0",
     "http-proxy-middleware": "^0.19.1",
     "i18next": "^17.0.11",
@@ -61,5 +62,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2"
   }
 }
