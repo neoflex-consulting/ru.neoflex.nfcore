@@ -56,7 +56,6 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                     .then((resources) => {
                         resources.forEach((r) => {
                             prepared.push(r.eContents()[0].get('name'))
-                            this.importLangIcon(r.eContents()[0].get('name'))
                         });
                         this.setState({languages: prepared.sort()})
                     })
@@ -64,25 +63,15 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         })
     }
 
-    importLangIcon(lang:string){
-        const langIcons: { [key: string]: any } = this.state.langIcons
-        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
-            langIcons[lang] = importedModule 
-            this.setState({ langIcons })
-        });
-    }
-
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages()
         this.authenticate().catch(() => {
             this.setState({ waitMinute: false })
         })
-
-
     }
 
     render() {
-        const langIcons: { [key: string]: any } = this.state.langIcons
+        const languages: { [key: string]: any } = this.state.languages
         const { t, i18n } = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng);
@@ -90,17 +79,12 @@ export class Login extends React.Component<Props & WithTranslation, State> {
         const storeLangValue = String(localStorage.getItem('i18nextLng'))
 
         const langMenu = () => <Menu>
-            {_map(this.state.languages, (lang:any, index:number)=>
+            {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
-                    <img 
-                        style={{ borderRadius: '25px' }} 
-                        alt='li' 
-                        src={langIcons[lang] ? langIcons[lang].default : ''} />
+                    <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
                 </Menu.Item>
             )}
         </Menu>
-
-        
 
         if (this.state.waitMinute) {
             return (
@@ -147,7 +131,9 @@ export class Login extends React.Component<Props & WithTranslation, State> {
                         </div>
                     </div>
                     {this.state.languages.length !== 0 && <Dropdown className="language-menu" overlay={langMenu} placement="bottomCenter">
-                        <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
+                        <div className="lang-label-login" style={{ fontVariantCaps: 'petite-caps' }}>
+                            {languages[storeLangValue] ? languages[storeLangValue] : 'EN'}
+                        </div>
                     </Dropdown>}
                 </div>
             )
