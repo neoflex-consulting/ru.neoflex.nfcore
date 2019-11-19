@@ -26,7 +26,6 @@ interface State {
     principal?: any;
     languages: string[];
     notifierDuration: number;
-    langIcons: { [key: string]: any };
     breadcrumb: string[];
     applications: Ecore.EObject[];
     requestСounter: number;
@@ -40,7 +39,6 @@ class EcoreApp extends React.Component<any, State> {
             principal: undefined,
             languages: [],
             notifierDuration: 0,
-            langIcons: {},
             breadcrumb: [],
             applications: [],
             requestСounter: 0
@@ -100,20 +98,11 @@ class EcoreApp extends React.Component<any, State> {
                     .then((resources) => {
                         resources.forEach((r) => {
                             prepared.push(r.eContents()[0].get('name'))
-                            this.importLangIcon(r.eContents()[0].get('name'))
                         });
                         this.setState({languages: prepared.sort()})
                     })
             }
         })
-    }
-
-    importLangIcon(lang:string){
-        const langIcons: { [key: string]: any } = this.state.langIcons
-        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
-            langIcons[lang] = importedModule 
-            this.setState({ langIcons })
-        });
     }
 
     setBreadcrumb() {
@@ -135,20 +124,17 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     renderDev = () => {
+        const languages: { [key: string]: any } = this.state.languages
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
-        const langIcons: { [key: string]: any } = this.state.langIcons;
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
         const langMenu = () => <Menu>
-            {_map(this.state.languages, (lang:any, index:number)=>
+            {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
-                    <img 
-                        style={{ borderRadius: '25px' }} 
-                        alt='li' 
-                        src={langIcons[lang] ? langIcons[lang].default : ''} />
+                    <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
                 </Menu.Item>
             )}
         </Menu>;
@@ -217,7 +203,9 @@ class EcoreApp extends React.Component<any, State> {
                                 </Menu.SubMenu>
                             </Menu>
                             <Dropdown overlay={langMenu} placement="bottomCenter" >
-                                <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
+                                <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
+                                    {languages[storeLangValue] ? languages[storeLangValue] : 'EN'}
+                                </div>
                             </Dropdown>
                             <Icon className="bell-icon" type="bell" />
                         </Col>

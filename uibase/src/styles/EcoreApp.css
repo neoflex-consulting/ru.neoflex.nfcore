@@ -82,13 +82,15 @@
 	padding-top: 7px;
 }
 
-.lang-icon{
-	width: 25px;
+.lang-label{
+	width: 35px;
+	height: 35px;
     float: right;
-    margin-top: 15px;
-    margin-right: 25px;
-	border-radius: 15px;
-	border: 1px solid #efefef;
+    margin-top: -2px;
+	margin-right: 25px;
+	color: #189dff;
+    text-shadow: 1px 1px 2px #d8d8d8;
+    font-weight: 100;
 }
 
 .bell-icon{
