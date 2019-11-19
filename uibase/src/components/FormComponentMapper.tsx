@@ -161,7 +161,7 @@ interface DatePickerComponentProps {
     value: any,
     onChange?: Function,
     idx?: number,
-    ukey?: string,
+    ukey?: string
 }
 
 function DatePickerComponent(props: DatePickerComponentProps): JSX.Element {
@@ -242,7 +242,12 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 }}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
-            return value
+            return <DatePickerComponent
+                idx={idx}
+                ukey={ukey}
+                value={value}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', targetObject, props.eObject)}
+            />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
             return <DatePickerComponent
                 idx={idx}

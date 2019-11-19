@@ -571,7 +571,8 @@ class ResourceEditor extends React.Component<any, State> {
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
-                    <Operations translate={t} EObject={this.state.mainEObject} />
+                    {this.state.resource.get && this.state.resource.get('uri') &&
+                        <Operations translate={t} EObject={this.state.mainEObject} />}
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
