@@ -3,6 +3,7 @@ import { Modal, Dropdown, Menu, Button } from 'antd'
 import Ecore from 'ecore';
 import i18next from 'i18next';
 
+import { API } from './../modules/api' 
 import FormComponentMapper from './FormComponentMapper';
 
 interface Props {
@@ -16,9 +17,16 @@ export default function Operations(props: Props): JSX.Element {
     const [ paramModalVisible, setParamModalVisible ] = useState<boolean>(false)
     const [ targetOperationObject, setTargetOperationObject ] = useState<Ecore.EObject|null>(null)
     const [ parameters, setParameters ] = useState<Object>({})
+    const [ methodName, setMethodName ] = useState<string>('')
 
     function runAction() {
-        return null
+        if(methodName){
+            const ref = `${props.EObject.eResource().get('uri')}?rev=${props.EObject.eResource().rev}`;
+            API.instance().call(ref, methodName, Object.values(parameters)).then(result => 
+                console.log(result)
+            )
+            setParamModalVisible(false)
+        }
     }
 
     function onMenuSelect(e:any){
@@ -27,12 +35,16 @@ export default function Operations(props: Props): JSX.Element {
         if(targetOperationObject && targetOperationObject.get('eParameters').size() > 0){
             setParamModalVisible(true)
             setTargetOperationObject(targetOperationObject)
+            setMethodName(e.key)
         }else{
 
         }
     }
 
     function onParameterChange(newValue: any, componentName: string, targetObject: any, EObject: Ecore.EObject){
+        if (componentName === 'DatePickerComponent') {
+            newValue = newValue ? newValue.format() : ''
+        }
         setParameters({...parameters, [EObject.get('name')]: newValue })
     }
 
