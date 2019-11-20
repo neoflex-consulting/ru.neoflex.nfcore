@@ -161,7 +161,7 @@ interface DatePickerComponentProps {
     value: any,
     onChange?: Function,
     idx?: number,
-    ukey?: string,
+    ukey?: string
 }
 
 function DatePickerComponent(props: DatePickerComponentProps): JSX.Element {
@@ -242,20 +242,25 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 }}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
-            return value
+            return <DatePickerComponent
+                idx={idx}
+                ukey={ukey}
+                value={value}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', targetObject, props.eObject)}
+            />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', props.targetObject, props.eObject)}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', targetObject, props.eObject)}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
             return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.eObject)}
+                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', targetObject, props.eObject)}
                 type="password"
             />
         } else if (eType && eType.isKindOf('EEnum')) {
@@ -275,7 +280,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', props.targetObject, props.eObject)}
+                onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', targetObject, props.eObject)}
                 type="text"
             />
         }

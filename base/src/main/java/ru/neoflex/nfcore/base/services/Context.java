@@ -2,6 +2,8 @@ package ru.neoflex.nfcore.base.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +17,7 @@ import java.util.concurrent.Callable;
 
 @Service
 public class Context {
-    private final static Log logger = LogFactory.getLog(Context.class);
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
 
     @Autowired
     private Store store;
@@ -31,6 +33,8 @@ public class Context {
     private PackageRegistry registry;
     @Autowired
     private Scheduler scheduler;
+    @Autowired
+    private Authorization authorization;
 
     private static final ThreadLocal<Context> tlContext = new ThreadLocal<Context>();
 
@@ -79,18 +83,7 @@ public class Context {
         return scheduler;
     }
 
-    public static String getUserName() {
-        String username = "";
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof UserDetails) {
-                username = ((UserDetails)principal).getUsername();
-            } else {
-                username = principal.toString();
-            }
-        }
-        return username;
+    public Authorization getAuthorization() {
+        return authorization;
     }
-
 }

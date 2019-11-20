@@ -3,6 +3,7 @@ import { Modal, Dropdown, Menu, Button } from 'antd'
 import Ecore from 'ecore';
 import i18next from 'i18next';
 
+import { API } from './../modules/api' 
 import FormComponentMapper from './FormComponentMapper';
 
 interface Props {
@@ -16,9 +17,16 @@ export default function Operations(props: Props): JSX.Element {
     const [ paramModalVisible, setParamModalVisible ] = useState<boolean>(false)
     const [ targetOperationObject, setTargetOperationObject ] = useState<Ecore.EObject|null>(null)
     const [ parameters, setParameters ] = useState<Object>({})
+    const [ methodName, setMethodName ] = useState<string>('')
 
-    function runAction() {
-        return null
+    function runAction(methodName: string) {
+        if(methodName){
+            const ref = `${props.EObject.eResource().get('uri')}?rev=${props.EObject.eResource().rev}`;
+            API.instance().call(ref, methodName, Object.values(parameters)).then(result => 
+                console.log(result)
+            )
+            setParamModalVisible(false)
+        }
     }
 
     function onMenuSelect(e:any){
@@ -27,12 +35,16 @@ export default function Operations(props: Props): JSX.Element {
         if(targetOperationObject && targetOperationObject.get('eParameters').size() > 0){
             setParamModalVisible(true)
             setTargetOperationObject(targetOperationObject)
-        }else{
-
+            setMethodName(e.key)
+        } else {
+            runAction(e.key)
         }
     }
 
     function onParameterChange(newValue: any, componentName: string, targetObject: any, EObject: Ecore.EObject){
+        if (componentName === 'DatePickerComponent') {
+            newValue = newValue ? newValue.format() : ''
+        }
         setParameters({...parameters, [EObject.get('name')]: newValue })
     }
 
@@ -50,8 +62,8 @@ export default function Operations(props: Props): JSX.Element {
                     value: paramList[param.get('name')]
                 })
                 return (
-                    <div style={{ marginBottom: '15px' }}>
-                        {param.get('name')}<br />{component}
+                    <div style={{ marginBottom: '5px' }}>
+                        <div style={{ marginBottom: '5px' }}>{param.get('name')}</div>{component}
                     </div>
                 )
             })
@@ -85,9 +97,8 @@ export default function Operations(props: Props): JSX.Element {
                 onCancel={()=>setParamModalVisible(false)}
                 onOk={() => {
                     setParamModalVisible(false)
-                    runAction()
+                    runAction(methodName)
                 }}
-                footer={<Button type="primary" onClick={runAction}>{t('run')}</Button>}
             >
                 {renderParameters()}
             </Modal>}

@@ -520,6 +520,18 @@ class ResourceEditor extends React.Component<any, State> {
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     }
 
+    cloneResource = () => {
+        this.state.mainEObject.eResource().clear()
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
+        resource.set('uri', null)
+
+        if (resource && this.props.match.params.id !== 'new') {
+            API.instance().saveResource(resource).then((resource: any) => {
+                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
+            })
+        }
+    }
+
     save = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
@@ -537,6 +549,8 @@ class ResourceEditor extends React.Component<any, State> {
                     targetObject: updatedTargetObject,
                     resource: resource
                 })
+                this.props.match.params.id === 'new' && 
+                    this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
             }).catch(() => {
                 this.setState({ isSaving: false })
             })
@@ -571,7 +585,9 @@ class ResourceEditor extends React.Component<any, State> {
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
-                    <Operations translate={t} EObject={this.state.mainEObject} />
+                    {this.state.resource.get && this.state.resource.get('uri') &&
+                        <Operations translate={t} EObject={this.state.mainEObject} />}
+                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>

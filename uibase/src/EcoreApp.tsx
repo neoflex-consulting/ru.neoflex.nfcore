@@ -27,7 +27,6 @@ interface State {
     principal?: any;
     languages: string[];
     notifierDuration: number;
-    langIcons: { [key: string]: any };
     breadcrumb: string[];
     applications: Ecore.EObject[];
     requestСounter: number;
@@ -41,7 +40,6 @@ class EcoreApp extends React.Component<any, State> {
             principal: undefined,
             languages: [],
             notifierDuration: 0,
-            langIcons: {},
             breadcrumb: [],
             applications: [],
             requestСounter: 0
@@ -101,20 +99,11 @@ class EcoreApp extends React.Component<any, State> {
                     .then((resources) => {
                         resources.forEach((r) => {
                             prepared.push(r.eContents()[0].get('name'))
-                            this.importLangIcon(r.eContents()[0].get('name'))
                         });
                         this.setState({languages: prepared.sort()})
                     })
             }
         })
-    }
-
-    importLangIcon(lang:string){
-        const langIcons: { [key: string]: any } = this.state.langIcons
-        import (`flag-icon-css/flags/1x1/${lang}.svg`).then((importedModule)=> { 
-            langIcons[lang] = importedModule 
-            this.setState({ langIcons })
-        });
     }
 
     setBreadcrumb() {
@@ -137,20 +126,17 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     renderDev = () => {
+        const languages: { [key: string]: any } = this.state.languages
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
-        const langIcons: { [key: string]: any } = this.state.langIcons;
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
         const langMenu = () => <Menu>
-            {_map(this.state.languages, (lang:any, index:number)=>
+            {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
-                    <img 
-                        style={{ borderRadius: '25px' }} 
-                        alt='li' 
-                        src={langIcons[lang] ? langIcons[lang].default : ''} />
+                    <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
                 </Menu.Item>
             )}
         </Menu>;
@@ -231,6 +217,63 @@ class EcoreApp extends React.Component<any, State> {
                                     </Dropdown>
                                     <Icon className="bell-icon" type="bell"/>
                                 </Col>
+                                <Col span={19} className="breadcrumb">
+                            <Breadcrumb separator={">"} style={{marginTop: "16px"}}>
+                                {selectedKeys[0] && selectedKeys[0].split('.').includes('app') && this.state.breadcrumb.length !== 0 ?
+                                    this.state.breadcrumb.map( (b: string) => {
+                                        return (
+                                            <Breadcrumb.Item key={b} onClick={() => this.onClickBreadcrumb(b)}>
+                                                {b === this.state.breadcrumb[0] ?
+                                                    <FontAwesomeIcon icon={faHome} size="lg"/>
+                                                    : b }
+                                            </Breadcrumb.Item>)
+                                    }) : ""
+                                }
+                            </Breadcrumb>
+                        </Col>
+                        <Col span={5}>
+                            <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
+                                <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
+                                    <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
+                                    <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
+                                    <Menu.Item key={'developer'}>
+                                        <Link to={`/developer/data`}>
+                                            <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
+                                            {t('developer')}
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"style={{marginRight: "10px"}}/>Applications</span>}>
+                                        {this.state.applications.map( (a: any) =>
+                                            <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
+                                                {a.eContents()[0].get('name')}
+                                            </Menu.Item>
+                                        )}
+                                    </Menu.SubMenu>
+                                    <Menu.Item key={'test'}>
+                                        <Link to={`/test`}>
+                                            <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
+                                            Test component
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg" style={{marginRight: "10px"}}/>Notification</span>}>
+                                        {localStorage.getItem('notifierDuration') === '3' ?
+                                            <Menu.Item key={'showNotifications'}>
+                                                <FontAwesomeIcon icon={faEye} size="lg"style={{marginRight: "10px"}}/>
+                                                Disable autohiding</Menu.Item>
+                                            :
+                                            <Menu.Item key={'autoHideNotifications'}>
+                                                <FontAwesomeIcon icon={faClock} size="lg"style={{marginRight: "10px"}}/>
+                                                Autohide</Menu.Item>}
+                                    </Menu.SubMenu>
+                                </Menu.SubMenu>
+                            </Menu>
+                            <Dropdown overlay={langMenu} placement="bottomCenter" >
+                                <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
+                                    {languages[storeLangValue] ? languages[storeLangValue] : 'EN'}
+                                </div>
+                            </Dropdown>
+                            <Icon className="bell-icon" type="bell" />
+                        </Col>
                             </Row>
                         </Col>
                     </Row>
