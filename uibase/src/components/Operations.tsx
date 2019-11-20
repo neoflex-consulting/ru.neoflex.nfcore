@@ -62,8 +62,8 @@ export default function Operations(props: Props): JSX.Element {
                     value: paramList[param.get('name')]
                 })
                 return (
-                    <div style={{ marginBottom: '15px' }}>
-                        {param.get('name')}<br />{component}
+                    <div style={{ marginBottom: '5px' }}>
+                        <div style={{ marginBottom: '5px' }}>{param.get('name')}</div>{component}
                     </div>
                 )
             })
