@@ -1,0 +1,83 @@
+/* BreadcrumbApp */
+
+@media only screen and (max-width: 700px){
+    .breadcrumb-visibility {
+        visibility: hidden;
+    }
+}
+
+.ul-breadcrumb {
+    margin-left: -41px;
+    display: inline-block;
+    list-style: none;
+    margin-top: 1px;
+}
+
+.ul-breadcrumb .li-breadcrumb {
+    float: right;
+    padding: 5px;
+    background-color: #eeeff0;
+    -moz-border-radius: 40px;
+    -webkit-border-radius: 40px;
+    border-radius: 40px;
+    position: relative;
+    margin-left: -40px;
+}
+
+.ul-breadcrumb .li-breadcrumb .a-breadcrumb {
+    overflow: hidden;
+    -moz-border-radius: 40px;
+    -webkit-border-radius: 40px;
+    border-radius: 40px;
+    -moz-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    text-decoration: none;
+    height: 40px;
+    color: rgb(27, 36, 48);
+    background-color: white;
+    text-align: center;
+    display: block;
+    line-height: 39px;
+    padding-left: 52px;
+    padding-right: 33.33333px;
+    width: 40px;
+}
+
+.ul-breadcrumb .li-breadcrumb .icon{
+    display: inline-block;
+    color: #777;
+    margin-right: 5px;
+    margin-top: -2px;
+}
+
+.ul-breadcrumb .li-breadcrumb .text{
+    display: none;
+    opacity: 0;
+}
+
+/*Последний элемент*/
+.ul-breadcrumb .li-breadcrumb:last-child .a-breadcrumb {
+    padding: 0;
+}
+
+.ul-breadcrumb .li-breadcrumb:last-child .icon {
+    margin-right: 0;
+}
+
+/*Изменния при наведении мыши*/
+.ul-breadcrumb .li-breadcrumb .a-breadcrumb:hover {
+    width: 250px;
+    color: #777;
+    background-color: white;
+}
+
+.ul-breadcrumb .li-breadcrumb .a-breadcrumb:hover .text{
+    display: contents;
+    opacity: 1;
+}
+
+.ul-breadcrumb .li-breadcrumb:last-child:hover .a-breadcrumb{
+    width: 40px;
+}

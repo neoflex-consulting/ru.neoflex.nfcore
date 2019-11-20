@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown, Breadcrumb, Col, Row} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown, Col, Row} from 'antd';
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -16,9 +16,10 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faBullhorn, faTools, faHome} from '@fortawesome/free-solid-svg-icons'
+import {faSignOutAlt, faBullhorn, faTools} from '@fortawesome/free-solid-svg-icons'
 import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
+import BreadcrumbApp from "./components/BreadcrumbApp";
 
 const { Header, Content, Sider } = Layout;
 
@@ -126,7 +127,8 @@ class EcoreApp extends React.Component<any, State> {
         } else if (this.props.location.pathname.split('/')[1] === 'app' && this.props.location.pathname.split('/').length > 2) {this.setState({breadcrumb: [decodeURI(  this.props.location.pathname.split('/')[2]  )]})}
     }
 
-    onClickBreadcrumb(b: string) {
+    onClickBreadcrumb = (b : string): void => {
+        this.setState({breadcrumb: this.state.breadcrumb.reverse()})
         let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
         let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
         if (breadcrumb.length > 1) {this.props.history.push(`${b}?path=${JSON.stringify(this.state.breadcrumb.slice(0, indexBreadcrumb))}`)}
@@ -154,80 +156,87 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>;
         let selectedKeys = this.setSelectedKeys();
         return (
-            <Layout style={{ height: '100vh' }}>
-                <Header className="app-header" style={{ height: '55px', padding: '0px', backgroundColor: 'white' }} >
+            <Layout style={{height: '100vh'}}>
+                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: 'white'}}>
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}>
-                                <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                                <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
+                                <Icon type='appstore'
+                                      style={{color: '#1890ff', marginRight: '2px', marginLeft: '10px'}}/>
+                                <span style={{fontVariantCaps: 'petite-caps'}}>{t('appname')}</span>
                             </div>
                         </Col>
-                        <Col style={{marginLeft: "291px"}} >
+                        <Col style={{marginLeft: "291px"}}>
                             <Row>
-                                <Col span={19} className="breadcrumb">
-                            <Breadcrumb separator={">"} style={{marginTop: "16px"}}>
-                                {selectedKeys[0] && selectedKeys[0].split('.').includes('app') && this.state.breadcrumb.length !== 0 ?
-                                    this.state.breadcrumb.map( (b: string) => {
-                                        return (
-                                            <Breadcrumb.Item key={b} onClick={() => this.onClickBreadcrumb(b)}>
-                                                {b === this.state.breadcrumb[0] ?
-                                                    <FontAwesomeIcon icon={faHome} size="lg"/>
-                                                    : b }
-                                            </Breadcrumb.Item>)
-                                    }) : ""
-                                }
-                            </Breadcrumb>
-                        </Col>
-                        <Col span={5}>
-                            <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
-                                <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
-                                    <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
-                                    <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
-                                    <Menu.Item key={'developer'}>
-                                        <Link to={`/developer/data`}>
-                                            <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
-                                            {t('developer')}
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"style={{marginRight: "10px"}}/>Applications</span>}>
-                                        {this.state.applications.map( (a: any) =>
-                                            <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
-                                                {a.eContents()[0].get('name')}
+                                <Col span={19}>
+                                    <BreadcrumbApp selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
+                                                   onClickBreadcrumb={this.onClickBreadcrumb}/>
+                                </Col>
+                                <Col span={5}>
+                                    <Menu selectedKeys={selectedKeys} className="header-menu" theme="light"
+                                          mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
+                                        <Menu.SubMenu title={<span style={{
+                                            fontVariantCaps: 'petite-caps',
+                                            fontSize: '18px',
+                                            lineHeight: '39px'
+                                        }}>
+                                    <FontAwesomeIcon icon={faUser} size="xs"
+                                                     style={{marginRight: "7px"}}/>{principal.name}</span>}
+                                                      style={{float: "right", height: '100%'}}>
+                                            <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg"
+                                                                                       flip="both"
+                                                                                       style={{marginRight: "10px"}}/>{t('logout')}
                                             </Menu.Item>
-                                        )}
-                                    </Menu.SubMenu>
-                                    <Menu.Item key={'test'}>
-                                        <Link to={`/test`}>
-                                            <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
-                                            Test component
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg" style={{marginRight: "10px"}}/>Notification</span>}>
-                                        {localStorage.getItem('notifierDuration') === '3' ?
-                                            <Menu.Item key={'showNotifications'}>
-                                                <FontAwesomeIcon icon={faEye} size="lg"style={{marginRight: "10px"}}/>
-                                                Disable autohiding</Menu.Item>
-                                            :
-                                            <Menu.Item key={'autoHideNotifications'}>
-                                                <FontAwesomeIcon icon={faClock} size="lg"style={{marginRight: "10px"}}/>
-                                                Autohide</Menu.Item>}
-                                    </Menu.SubMenu>
-                                </Menu.SubMenu>
-                            </Menu>
-                            <Dropdown overlay={langMenu} placement="bottomCenter" >
-                                <img className="lang-icon" alt='li' src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''} />
-                            </Dropdown>
-                            <Icon className="bell-icon" type="bell" />
-                        </Col>
+                                            <Menu.Item key={'developer'}>
+                                                <Link to={`/developer/data`}>
+                                                    <FontAwesomeIcon icon={faTools} size="lg"
+                                                                     style={{marginRight: "10px"}}/>
+                                                    {t('developer')}
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
+                                                                                        style={{marginRight: "10px"}}/>Applications</span>}>
+                                                {this.state.applications.map((a: any) =>
+                                                    <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
+                                                        {a.eContents()[0].get('name')}
+                                                    </Menu.Item>
+                                                )}
+                                            </Menu.SubMenu>
+                                            <Menu.Item key={'test'}>
+                                                <Link to={`/test`}>
+                                                    <FontAwesomeIcon icon={faBuffer} size="lg"
+                                                                     style={{marginRight: "10px"}}/>
+                                                    Test component
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
+                                                                                        style={{marginRight: "10px"}}/>Notification</span>}>
+                                                {localStorage.getItem('notifierDuration') === '3' ?
+                                                    <Menu.Item key={'showNotifications'}>
+                                                        <FontAwesomeIcon icon={faEye} size="lg"
+                                                                         style={{marginRight: "10px"}}/>
+                                                        Disable autohiding</Menu.Item>
+                                                    :
+                                                    <Menu.Item key={'autoHideNotifications'}>
+                                                        <FontAwesomeIcon icon={faClock} size="lg"
+                                                                         style={{marginRight: "10px"}}/>
+                                                        Autohide</Menu.Item>}
+                                            </Menu.SubMenu>
+                                        </Menu.SubMenu>
+                                    </Menu>
+                                    <Dropdown overlay={langMenu} placement="bottomCenter">
+                                        <img className="lang-icon" alt='li'
+                                             src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''}/>
+                                    </Dropdown>
+                                    <Icon className="bell-icon" type="bell"/>
+                                </Col>
                             </Row>
                         </Col>
                     </Row>
                 </Header>
                 <Switch>
                     <Redirect from={'/'} exact={true} to={'/app'}/>
-                    {/*<Redirect from={'/app'} exact={true} to={`/app/ReportsApp?path=${JSON.stringify(["ReportsApp"])}`}/>*/}
                     <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/developer' component={this.renderSettings}/>
@@ -319,11 +328,6 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-//     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-//         if (decodeURI(prevProps.location.search) !== decodeURI(this.props.location.search)) {
-//             this.setBreadcrumb()
-//         }
-// }
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
         if (decodeURI(prevProps.location.pathname + prevProps.location.search) !== decodeURI(this.props.location.pathname + this.props.location.search)) {
             this.setBreadcrumb()
