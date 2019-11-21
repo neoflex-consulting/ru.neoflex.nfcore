@@ -4,8 +4,6 @@ import Ecore from 'ecore';
 import { Modal, Select, Button, Input } from 'antd';
 import { Link } from 'react-router-dom';
 
-//import {API} from './../modules/api'
-
 interface Props {
     classes: Ecore.EClass[]
     createResModalVisible: boolean;
@@ -59,14 +57,15 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     placeholder={t('eClass')}
                     onChange={this.handleSelectClass}
                 >
-                    {this.props.classes.map((eclass: Ecore.EObject) =>
-                        !eclass.get('abstract') ?
-                            <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
+                    {this.props.classes.map((eclass: Ecore.EObject) => {
+                        const hasQName = eclass.eContents().find((feature: Ecore.EStructuralFeature) => feature.get('name') === 'name')
+                        if(!eclass.get('abstract') && hasQName){
+                            return <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
                                 {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
                             </Select.Option>
-                            :
-                            null
-                    )}
+                        }
+                        return null
+                    })}
                 </Select>
                 <Input 
                     placeholder={t('itemname')}

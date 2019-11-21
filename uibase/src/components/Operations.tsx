@@ -19,7 +19,7 @@ export default function Operations(props: Props): JSX.Element {
     const [ parameters, setParameters ] = useState<Object>({})
     const [ methodName, setMethodName ] = useState<string>('')
 
-    function runAction() {
+    function runAction(methodName: string) {
         if(methodName){
             const ref = `${props.EObject.eResource().get('uri')}?rev=${props.EObject.eResource().rev}`;
             API.instance().call(ref, methodName, Object.values(parameters)).then(result => 
@@ -36,8 +36,8 @@ export default function Operations(props: Props): JSX.Element {
             setParamModalVisible(true)
             setTargetOperationObject(targetOperationObject)
             setMethodName(e.key)
-        }else{
-
+        } else {
+            runAction(e.key)
         }
     }
 
@@ -62,8 +62,8 @@ export default function Operations(props: Props): JSX.Element {
                     value: paramList[param.get('name')]
                 })
                 return (
-                    <div style={{ marginBottom: '15px' }}>
-                        {param.get('name')}<br />{component}
+                    <div style={{ marginBottom: '5px' }}>
+                        <div style={{ marginBottom: '5px' }}>{param.get('name')}</div>{component}
                     </div>
                 )
             })
@@ -97,9 +97,8 @@ export default function Operations(props: Props): JSX.Element {
                 onCancel={()=>setParamModalVisible(false)}
                 onOk={() => {
                     setParamModalVisible(false)
-                    runAction()
+                    runAction(methodName)
                 }}
-                footer={<Button type="primary" onClick={runAction}>{t('run')}</Button>}
             >
                 {renderParameters()}
             </Modal>}
