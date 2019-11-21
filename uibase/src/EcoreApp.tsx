@@ -117,16 +117,15 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     onClickBreadcrumb = (b : string): void => {
-        this.setState({breadcrumb: this.state.breadcrumb.reverse()})
         let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
         let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
         if (breadcrumb.length > 1) {this.props.history.push(`${b}?path=${JSON.stringify(this.state.breadcrumb.slice(0, indexBreadcrumb))}`)}
         else {this.props.history.push(`${b}`)}
         this.setState({breadcrumb});
-    }
+    };
 
     renderDev = () => {
-        const languages: { [key: string]: any } = this.state.languages
+        const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
@@ -325,7 +324,7 @@ class EcoreApp extends React.Component<any, State> {
     }
     componentDidMount(): void {
         if (this.state.requestСounter < 2) {
-            if (!this.state.languages.length) this.getLanguages()
+            if (!this.state.languages.length) this.getLanguages();
             if (!this.state.applications.length) {this.getAllApplication()}
         }
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
