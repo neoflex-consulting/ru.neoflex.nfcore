@@ -70,9 +70,9 @@ public class UserDetail implements UserDetailsService {
                     }
                 }
 
-                PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+                //PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
-                UserDetails userDetails = new User(userName, encoder.encode(password), true, true, true, true,
+                UserDetails userDetails = new User(userName, /*encoder.encode(password)*/password, true, true, true, true,
                         au);
                 return userDetails;
             });

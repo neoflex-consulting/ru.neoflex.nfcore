@@ -1,11 +1,17 @@
 package ru.neoflex.nfcore.base.auth.impl
 
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
+import org.springframework.security.crypto.password.PasswordEncoder
+import ru.neoflex.meta.gitdb.Events
+import ru.neoflex.meta.gitdb.Transaction
 import ru.neoflex.nfcore.base.auth.ActionType
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.AuthFactory
 import ru.neoflex.nfcore.base.auth.AuthPackage
+import ru.neoflex.nfcore.base.auth.Authenticator
 import ru.neoflex.nfcore.base.auth.GrantStatus
 import ru.neoflex.nfcore.base.auth.PasswordAuthenticator
 import ru.neoflex.nfcore.base.auth.Permission
@@ -44,13 +50,58 @@ class UserInit extends UserImpl {
         return adminUser
     }
 
+    static void encodeUserPassword(EObject eObject, PasswordEncoder pencoder) {
+        if (eObject.eClass() == AuthPackage.Literals.USER) {
+            User user = (User) eObject
+            for (Authenticator a : user.getAuthenticators()) {
+                if (a instanceof PasswordAuthenticator) {
+                    PasswordAuthenticator pa = (PasswordAuthenticator) a
+                    if (pencoder.upgradeEncoding(pa.password)) {
+                        pa.password = pencoder.encode(pa.password)
+                    }
+                }
+            }
+        }
+    }
+
+
     {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
+        // encode password before save EObject
+        Context.current.publisher.subscribe(new Publisher.BeforeSaveHandler<EObject>(null) {
+            @Override
+            EObject handleEObject(EObject eObject) {
+                encodeUserPassword(eObject, encoder)
+                return eObject
+            }
+        })
+        // AuditInfo for gitdb
+        Context.current.workspace.database.events.registerBeforeInsert(new Events.BeforeInsert() {
+            @Override
+            void handle(Resource resource, Transaction tx) throws IOException {
+                if (resource.contents.isEmpty()) return
+                def eObject = resource.contents.get(0)
+                encodeUserPassword(eObject, encoder)
+            }
+        })
+        Context.current.workspace.database.events.registerBeforeUpdate(new Events.BeforeUpdate() {
+            @Override
+            void handle(Resource old, Resource resource, Transaction tx) throws IOException {
+                if (resource.contents.isEmpty()) return
+                def eObject = resource.contents.get(0)
+                encodeUserPassword(eObject, encoder)
+            }
+        })
+
         // create default admin user
-        def sus = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "su"]).execute().resourceSet
-        def su = sus.getResources().size() > 0 ? sus.getResources().get(0) : createSU()
-        def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resourceSet
-        if (admins.getResources().size() == 0) {
+        def sus = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "su"]).execute().resources
+        def su = sus.size() > 0 ? sus[0] : createSU()
+        def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resources
+        if (admins.size() == 0) {
             createAdmin(su)
+        }
+        else {
+            Context.current.store.saveResource(admins[0])
         }
     }
 }
