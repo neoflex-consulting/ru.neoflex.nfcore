@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.base.components;
 
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EValidator;
 import org.springframework.stereotype.Component;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
 import ru.neoflex.nfcore.base.auth.impl.AuthFactoryExt;
@@ -43,5 +44,10 @@ public class ModuleRegistryImpl implements IModuleRegistry {
         });
         ePackageCB.get().setEFactoryInstance(eFactory);
         ePackages.add(ePackageCB.get());
+    }
+
+    public void registerEPackage(String uri, Supplier<EPackage> ePackageCB, EFactory eFactory, EValidator eValidator) {
+        registerEPackage(uri, ePackageCB, eFactory);
+        EValidator.Registry.INSTANCE.put(ePackageCB.get(), eValidator);
     }
 }

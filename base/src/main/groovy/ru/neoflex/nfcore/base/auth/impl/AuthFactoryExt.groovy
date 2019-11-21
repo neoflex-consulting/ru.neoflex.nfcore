@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.base.auth.impl
 
 import ru.neoflex.nfcore.base.auth.AllPermission
+import ru.neoflex.nfcore.base.auth.Authorization
 import ru.neoflex.nfcore.base.auth.ClassPermission
 import ru.neoflex.nfcore.base.auth.ObjectPermission
 import ru.neoflex.nfcore.base.auth.ReferencePermission
@@ -30,5 +31,12 @@ class AuthFactoryExt extends AuthFactoryImpl{
     @Override
     ReferencePermission createReferencePermission() {
         return new ReferencePermissionExt()
+    }
+
+    @Override
+    Authorization createAuthorization() {
+        return new AuthorizationImpl() {
+
+        }
     }
 }
