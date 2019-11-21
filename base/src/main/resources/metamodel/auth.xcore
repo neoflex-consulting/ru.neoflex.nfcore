@@ -111,4 +111,5 @@ class Authorization {
     QName name
     op EBoolean isUserInRole(Role role) {true}
     op EBoolean permitted(ActionType actionType, EObject eObject, Timestamp ts, String name) {false}
+    op EBoolean test(String name) {false}
 }
