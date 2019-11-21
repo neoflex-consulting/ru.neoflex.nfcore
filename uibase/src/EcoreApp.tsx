@@ -133,9 +133,9 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const langMenu = () => <Menu>
+        const langMenu = () => <Menu style={{ marginTop: '24px' }}>
             {_map(languages, (lang:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(lang)} key={index} style={{ width: '60px' }}>
+                <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
                     <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
                 </Menu.Item>
             )}
@@ -212,68 +212,12 @@ class EcoreApp extends React.Component<any, State> {
                                         </Menu.SubMenu>
                                     </Menu>
                                     <Dropdown overlay={langMenu} placement="bottomCenter">
-                                        <img className="lang-icon" alt='li'
-                                             src={langIcons[storeLangValue] ? langIcons[storeLangValue].default : ''}/>
+                                        <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
+                                            {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
+                                        </div>
                                     </Dropdown>
                                     <Icon className="bell-icon" type="bell"/>
                                 </Col>
-                                <Col span={19} className="breadcrumb">
-                            <Breadcrumb separator={">"} style={{marginTop: "16px"}}>
-                                {selectedKeys[0] && selectedKeys[0].split('.').includes('app') && this.state.breadcrumb.length !== 0 ?
-                                    this.state.breadcrumb.map( (b: string) => {
-                                        return (
-                                            <Breadcrumb.Item key={b} onClick={() => this.onClickBreadcrumb(b)}>
-                                                {b === this.state.breadcrumb[0] ?
-                                                    <FontAwesomeIcon icon={faHome} size="lg"/>
-                                                    : b }
-                                            </Breadcrumb.Item>)
-                                    }) : ""
-                                }
-                            </Breadcrumb>
-                        </Col>
-                        <Col span={5}>
-                            <Menu selectedKeys={selectedKeys} className="header-menu" theme="light" mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
-                                <Menu.SubMenu title={<span style={{ fontVariantCaps: 'petite-caps', fontSize: '18px', lineHeight: '39px' }}>
-                                    <FontAwesomeIcon icon={faUser} size="xs"style={{marginRight: "7px"}}/>{principal.name}</span>} style={{ float: "right", height: '100%' }}>
-                                    <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg" flip="both" style={{marginRight: "10px"}}/>{t('logout')}</Menu.Item>
-                                    <Menu.Item key={'developer'}>
-                                        <Link to={`/developer/data`}>
-                                            <FontAwesomeIcon icon={faTools} size="lg" style={{marginRight: "10px"}}/>
-                                            {t('developer')}
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"style={{marginRight: "10px"}}/>Applications</span>}>
-                                        {this.state.applications.map( (a: any) =>
-                                            <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
-                                                {a.eContents()[0].get('name')}
-                                            </Menu.Item>
-                                        )}
-                                    </Menu.SubMenu>
-                                    <Menu.Item key={'test'}>
-                                        <Link to={`/test`}>
-                                            <FontAwesomeIcon icon={faBuffer} size="lg"style={{marginRight: "10px"}}/>
-                                            Test component
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg" style={{marginRight: "10px"}}/>Notification</span>}>
-                                        {localStorage.getItem('notifierDuration') === '3' ?
-                                            <Menu.Item key={'showNotifications'}>
-                                                <FontAwesomeIcon icon={faEye} size="lg"style={{marginRight: "10px"}}/>
-                                                Disable autohiding</Menu.Item>
-                                            :
-                                            <Menu.Item key={'autoHideNotifications'}>
-                                                <FontAwesomeIcon icon={faClock} size="lg"style={{marginRight: "10px"}}/>
-                                                Autohide</Menu.Item>}
-                                    </Menu.SubMenu>
-                                </Menu.SubMenu>
-                            </Menu>
-                            <Dropdown overlay={langMenu} placement="bottomCenter" >
-                                <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
-                                    {languages[storeLangValue] ? languages[storeLangValue] : 'EN'}
-                                </div>
-                            </Dropdown>
-                            <Icon className="bell-icon" type="bell" />
-                        </Col>
                             </Row>
                         </Col>
                     </Row>
@@ -298,11 +242,14 @@ class EcoreApp extends React.Component<any, State> {
         if (this.props.location.search) {
             selectedKeys = selectedKeys
                 .filter(k => k.split('.').length > 1)
-                .filter( k => JSON.parse(decodeURI(this.props.location.search.split('?path=')[1])).includes(k.slice(4)))
+                .filter( k =>
+                    JSON.parse(decodeURI(this.props.location.search.split('?path=')[1])).includes(k.slice(4))
+                )
         } else {
             selectedKeys = selectedKeys.filter(k =>
                 this.props.location.pathname.split('/').includes(k) ||
-                this.props.location.pathname.split('/').includes(k.slice(4) !== "" && k.slice(4)));
+                this.props.location.pathname.split('/').includes(k.slice(4) !== "" && k.slice(4))
+            )
         }
         return selectedKeys;
     }
