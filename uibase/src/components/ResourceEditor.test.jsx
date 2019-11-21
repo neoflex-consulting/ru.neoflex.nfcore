@@ -1,7 +1,5 @@
-import {ResourceEditor} from './ResourceEditor';
 import cloneDeep from 'lodash/cloneDeep'
-
-const resourceEditor = new ResourceEditor();
+import { findObjectById, nestUpdaters } from './../utils/resourceEditorUtils'
 
 const testJSONData = { 
     "eClass": "ru.neoflex.nfcore.base.auth#//User", 
@@ -31,20 +29,20 @@ describe("function findObjectById", () => {
 
     it("should return a found object from shallow", () => {
         expextedFoundObject = Object.assign({}, testJSONData)
-        result = resourceEditor.findObjectById(testJSONData, '/');
+        result = findObjectById(testJSONData, '/');
         expect(result).toEqual(expextedFoundObject);
     });
 
     it("should not return any object", () => {
         expextedFoundObject = undefined
 
-        result = resourceEditor.findObjectById(testJSONData, '/qwerty');
+        result = findObjectById(testJSONData, '/qwerty');
         expect(result).toEqual(expextedFoundObject);
 
-        result = resourceEditor.findObjectById({}, '/qwerty');
+        result = findObjectById({}, '/qwerty');
         expect(result).toEqual(expextedFoundObject);
 
-        result = resourceEditor.findObjectById(testJSONData, '');
+        result = findObjectById(testJSONData, '');
         expect(result).toEqual(expextedFoundObject);
     });
 
@@ -54,7 +52,7 @@ describe("function findObjectById", () => {
             "_id": "//@authenticators.0", 
             "password": "admin"
         }
-        result = resourceEditor.findObjectById(testJSONData, '//@authenticators.0');
+        result = findObjectById(testJSONData, '//@authenticators.0');
         expect(result).toEqual(expextedFoundObject);
     });
 
@@ -64,7 +62,7 @@ describe("function findObjectById", () => {
             "eClass": "ru.neoflex.nfcore.base.test#//Test",
             "_id": "//@test.0",
         }
-        result = resourceEditor.findObjectById(testJSONData, '//@test.0');
+        result = findObjectById(testJSONData, '//@test.0');
         expect(result).toEqual(expextedFoundObject);
     });
 
@@ -72,7 +70,7 @@ describe("function findObjectById", () => {
 
 {
     const copyOfJSONData = cloneDeep(testJSONData)
-    const nestedJSON = resourceEditor.nestUpdaters(copyOfJSONData)
+    const nestedJSON = nestUpdaters(copyOfJSONData)
 
     describe("function nestUpdaters", () => {
         it("should return an object with updaters, particular checking for existing of some updaters", () => {
@@ -102,7 +100,7 @@ describe("function findObjectById", () => {
         })
         it("should return an object with fresh updaters without any lost data", () => {
             let updatedJSON = nestedJSON.updater({ newFeature: 'value' })
-            const newNested = resourceEditor.nestUpdaters(updatedJSON)
+            const newNested = nestUpdaters(updatedJSON)
             updatedJSON = newNested.updater({ name: 'admin1' })
             expect(updatedJSON).toHaveProperty('newFeature')
             expect(updatedJSON.name).toEqual('admin1')
