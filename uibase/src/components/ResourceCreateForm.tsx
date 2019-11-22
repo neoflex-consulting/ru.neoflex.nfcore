@@ -57,15 +57,17 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                     placeholder={t('eClass')}
                     onChange={this.handleSelectClass}
                 >
-                    {this.props.classes.map((eclass: Ecore.EObject) => {
-                        const hasQName = eclass.get('eAllStructuralFeatures').find((feature: Ecore.EStructuralFeature) => feature.get('eType')!.get('name') === 'QName')
-                        if(!eclass.get('abstract') && hasQName){
-                            return <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
+                    {this.props.classes
+                        .filter((eclass: Ecore.EObject) => !eclass.get('abstract')
+                            && eclass.get('eAllStructuralFeatures')
+                                .find((feature: Ecore.EStructuralFeature) =>
+                                    feature.get('eType').get('name') === 'QName'))
+                        .map((eclass: Ecore.EObject) =>
+                            <Select.Option key={eclass.get('name')}
+                                           value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
                                 {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                            </Select.Option>
-                        }
-                        return null
-                    })}
+                            </Select.Option>)
+                    }
                 </Select>
                 <Input 
                     placeholder={t('itemname')}

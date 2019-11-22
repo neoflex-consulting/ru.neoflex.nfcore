@@ -93,7 +93,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     generateEObject(): void {
         const { selectedEClass, name } = this.props.location.state
-        const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => eclass.get('name') === selectedEClass)
+        const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => `${eclass.eContainer.get('name')}.${eclass.get('name')}` === selectedEClass)
         const resourceSet = Ecore.ResourceSet.create()
         const newResourceJSON: { [key: string]: any } = {}
 
