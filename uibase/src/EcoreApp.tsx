@@ -29,7 +29,6 @@ interface State {
     notifierDuration: number;
     breadcrumb: string[];
     applications: Ecore.EObject[];
-    requestСounter: number;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -42,7 +41,6 @@ class EcoreApp extends React.Component<any, State> {
             notifierDuration: 0,
             breadcrumb: [],
             applications: [],
-            requestСounter: 0
         }
     }
 
@@ -74,10 +72,10 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
+        this.props.history.push('/app')
     };
 
     getAllApplication() {
-        this.setState({requestСounter: 1});
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
             if (temp !== undefined) {
@@ -90,7 +88,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     getLanguages() {
-        this.setState({requestСounter: 2});
         const prepared: Array<string> = [];
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Lang");
@@ -222,7 +219,6 @@ class EcoreApp extends React.Component<any, State> {
                     </Row>
                 </Header>
                 <Switch>
-                    <Redirect from={'/'} exact={true} to={'/app'}/>
                     <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
                     <Route path='/app/:appModuleName' component={this.renderStartPage}/>
                     <Route path='/developer' component={this.renderSettings}/>
@@ -323,10 +319,8 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
     componentDidMount(): void {
-        if (this.state.requestСounter < 2) {
-            if (!this.state.languages.length) this.getLanguages();
-            if (!this.state.applications.length) {this.getAllApplication()}
-        }
+        if (!this.state.languages.length) this.getLanguages();
+        if (!this.state.applications.length) {this.getAllApplication()}
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;
         let errorHandler : IErrorHandler = {
@@ -361,13 +355,13 @@ class EcoreApp extends React.Component<any, State> {
 
     render = () => {
         return (
-                <Layout>
-                    {this.state.principal === undefined ?
-                            <Login onLoginSucceed={this.setPrincipal}/>
-                        :
-                            this.renderDev()
-                    }
-                </Layout>
+            <Layout>
+                {this.state.principal === undefined ?
+                    <Login onLoginSucceed={this.setPrincipal}/>
+                    :
+                    this.renderDev()
+                }
+            </Layout>
         )
     }
 }
