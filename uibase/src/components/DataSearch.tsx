@@ -91,7 +91,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     render() {
-        const { Option } = Select;
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
         const { t } = this.props;
@@ -134,7 +133,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                     placeholder="EClass">
                                                     {
                                                         this.state.classes.map((eclass: Ecore.EObject) => {
-                                                            const hasQName = eclass.get('eAllStructuralFeatures').find((feature: Ecore.EStructuralFeature) => feature.get('name') === 'name')
+                                                            const hasQName = eclass.get('eAllStructuralFeatures').find((feature: Ecore.EStructuralFeature) => feature.get('eType')!.get('name') === 'QName')
                                                             if(!eclass.get('abstract') && hasQName){
                                                                 return <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
                                                                     {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
