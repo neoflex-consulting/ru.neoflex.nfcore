@@ -51,12 +51,6 @@ export default function Operations(props: Props): JSX.Element {
         const paramList:{[key: string]: any} = parameters
         const filteredParameters = paramList[propertyName].filter((refObj: any) => refObj.$ref !== deletedObject.$ref)
         setParameters({ ...parameters, [propertyName]: filteredParameters })
-        /*const targetObject: { [key: string]: any } = this.state.targetObject
-        const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : []
-        const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"])
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray })
-        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
-        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })*/
     }
 
     function handleDeleteSingleRef(deletedObject: any, propertyName: string) {
