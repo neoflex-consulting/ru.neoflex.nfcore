@@ -133,10 +133,15 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                     autoFocus
                                                     placeholder="EClass">
                                                     {
-                                                        this.state.classes.map((c: Ecore.EObject, i: Number) =>
-                                                            <Option value={`${c.eContainer.get('name')}.${c.get('name')}`} key={`${i}${c.get('name')}`}>
-                                                                {`${c.eContainer.get('name')}.${c.get('name')}`}
-                                                            </Option>)
+                                                        this.state.classes.map((eclass: Ecore.EObject) => {
+                                                            const hasQName = eclass.get('eAllStructuralFeatures').find((feature: Ecore.EStructuralFeature) => feature.get('name') === 'name')
+                                                            if(!eclass.get('abstract') && hasQName){
+                                                                return <Select.Option key={eclass.get('name')} value={eclass.get('name')}>
+                                                                    {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
+                                                                </Select.Option>
+                                                            }
+                                                            return null
+                                                        })
                                                     }
                                                 </Select>
                                             )}
