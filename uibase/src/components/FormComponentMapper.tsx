@@ -219,7 +219,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx } = props
-        if (eObject && eObject.isKindOf('EReference')) {
+        if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
             return <SelectRefObject
                 idx={idx}
                 ukey={ukey}

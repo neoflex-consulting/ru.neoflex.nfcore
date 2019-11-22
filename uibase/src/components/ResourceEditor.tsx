@@ -586,7 +586,7 @@ class ResourceEditor extends React.Component<any, State> {
                         <Button className="panel-button" icon="save" onClick={this.save} />}
                     <Button className="panel-button" icon="reload" onClick={this.refresh} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
-                        <Operations translate={t} EObject={this.state.mainEObject} />}
+                        <Operations translate={t} mainEObject={this.state.mainEObject} />}
                     <Button className="panel-button" icon="copy" onClick={this.cloneResource} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
                 </Layout.Header>
@@ -620,10 +620,13 @@ class ResourceEditor extends React.Component<any, State> {
                                                     key={res.eURI()}
                                                 >
                                                     <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
-                                                        <span title={`${res.eContents()[0].get('name')} ${res.eContents()[0].eClass.get('name')}`} className="item-title">
+                                                        <span 
+                                                            title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`} 
+                                                            className="item-title"
+                                                        >
                                                             {`${res.eContents()[0].get('name')}`}
                                                             &nbsp;
-                                                                    {<b>
+                                                            {<b>
                                                                 {`${res.eContents()[0].eClass.get('name')}`}
                                                             </b>}
                                                             &nbsp;
