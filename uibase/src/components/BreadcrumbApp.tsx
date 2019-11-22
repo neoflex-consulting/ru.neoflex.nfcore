@@ -17,6 +17,7 @@ interface State {
 class BreadcrumbApp extends React.Component<Props & WithTranslation, any> {
 
     render() {
+        const { t } = this.props as Props & WithTranslation;
         return (
             this.props.selectedKeys[0] &&
             this.props.selectedKeys[0].split('.').includes('app') &&
@@ -28,7 +29,7 @@ class BreadcrumbApp extends React.Component<Props & WithTranslation, any> {
                                 <Breadcrumb.Item separator="" key={b} onClick={() => this.props.onClickBreadcrumb(b)}>
                                     <FontAwesomeIcon className="breadcrumbIcon" icon={b !== this.props.breadcrumb[0] ? faEllipsisH : faHome}/>
                                     <span className="text">
-                                        {b}
+                                        {t(`${b}`)}
                                     </span>
                                 </Breadcrumb.Item>
                             </li>
