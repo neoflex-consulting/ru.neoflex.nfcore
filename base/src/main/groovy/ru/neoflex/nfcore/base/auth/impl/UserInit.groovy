@@ -75,16 +75,8 @@ class UserInit extends UserImpl {
                 return eObject
             }
         })
-        // AuditInfo for gitdb
-        Context.current.workspace.database.events.registerBeforeInsert(new Events.BeforeInsert() {
-            @Override
-            void handle(Resource resource, Transaction tx) throws IOException {
-                if (resource.contents.isEmpty()) return
-                def eObject = resource.contents.get(0)
-                encodeUserPassword(eObject, encoder)
-            }
-        })
-        Context.current.workspace.database.events.registerBeforeUpdate(new Events.BeforeUpdate() {
+        // encode password for gitdb
+        Context.current.workspace.database.events.registerBeforeSave(new Events.BeforeSave() {
             @Override
             void handle(Resource old, Resource resource, Transaction tx) throws IOException {
                 if (resource.contents.isEmpty()) return

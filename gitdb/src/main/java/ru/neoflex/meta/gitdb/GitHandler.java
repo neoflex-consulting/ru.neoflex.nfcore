@@ -25,11 +25,6 @@ public class GitHandler extends URIHandlerImpl {
     public void delete(URI uri, Map<?, ?> options) throws IOException {
         Database db = transaction.getDatabase();
         String id = db.getId(uri);
-        List<IndexEntry> refList = db.findByIndex(transaction, "ref", id.substring(0, 2), id.substring(2));
-        if (!refList.isEmpty()) {
-            String[] path = refList.get(0).getPath();
-            throw new IOException("Object " + id + " is referenced by " + path[path.length - 1]);
-        }
         String rev = db.getRev(uri);
         EntityId entityId = new EntityId(id, rev);
         Entity old = transaction.load(entityId);

@@ -20,56 +20,30 @@ public class Events {
         afterLoadList.add(handler);
     }
 
-    public interface BeforeInsert {
-        void handle(Resource resource, Transaction tx) throws IOException;
-    }
-    private List<BeforeInsert> beforeInsertList = new ArrayList<>();
-    public void fireBeforeInsert(Resource resource, Transaction tx) throws IOException {
-        for (BeforeInsert handler: beforeInsertList) {
-            handler.handle(resource, tx);
-        }
-    }
-    public void registerBeforeInsert(BeforeInsert handler) {
-        beforeInsertList.add(handler);
-    }
-
-    public interface AfterInsert {
-        void handle(Resource resource, Transaction tx) throws IOException;
-    }
-    private List<AfterInsert> afterInsertList = new ArrayList<>();
-    public void fireAfterInsert(Resource resource, Transaction tx) throws IOException {
-        for (AfterInsert handler: afterInsertList) {
-            handler.handle(resource, tx);
-        }
-    }
-    public void registerAfterInsert(AfterInsert handler) {
-        afterInsertList.add(handler);
-    }
-
-    public interface BeforeUpdate {
+    public interface BeforeSave {
         void handle(Resource old, Resource resource, Transaction tx) throws IOException;
     }
-    private List<BeforeUpdate> beforeUpdateList = new ArrayList<>();
-    public void fireBeforeUpdate(Resource old, Resource resource, Transaction tx) throws IOException {
-        for (BeforeUpdate handler: beforeUpdateList) {
+    private List<BeforeSave> beforeSaveList = new ArrayList<>();
+    public void fireBeforeSave(Resource old, Resource resource, Transaction tx) throws IOException {
+        for (BeforeSave handler: beforeSaveList) {
             handler.handle(old, resource, tx);
         }
     }
-    public void registerBeforeUpdate(BeforeUpdate handler) {
-        beforeUpdateList.add(handler);
+    public void registerBeforeSave(BeforeSave handler) {
+        beforeSaveList.add(handler);
     }
 
-    public interface AfterUpdate {
+    public interface AfterSave {
         void handle(Resource old, Resource resource, Transaction tx) throws IOException;
     }
-    private List<AfterUpdate> afterUpdateList = new ArrayList<>();
-    public void fireAfterUpdate(Resource old, Resource resource, Transaction tx) throws IOException {
-        for (AfterUpdate handler: afterUpdateList) {
+    private List<AfterSave> afterSaveList = new ArrayList<>();
+    public void fireAfterSave(Resource old, Resource resource, Transaction tx) throws IOException {
+        for (AfterSave handler: afterSaveList) {
             handler.handle(old, resource, tx);
         }
     }
-    public void registerAfterUpdate(AfterUpdate handler) {
-        afterUpdateList.add(handler);
+    public void registerAfterSave(AfterSave handler) {
+        afterSaveList.add(handler);
     }
 
     public interface BeforeDelete {

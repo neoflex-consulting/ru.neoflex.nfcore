@@ -42,27 +42,7 @@ class AuditInit extends AuditImpl {
             }
         })
         // AuditInfo for gitdb
-        Context.current.workspace.database.events.registerBeforeInsert(new Events.BeforeInsert() {
-            @Override
-            void handle(Resource resource, Transaction tx) throws IOException {
-                if (resource.contents.isEmpty()) return
-                def eObject = resource.contents.get(0)
-                def auditClass = AuthPackage.Literals.AUDIT;
-                def auditRefs = eObject.eClass().EAllReferences.findAll {it.EReferenceType == auditClass && !it.isMany() && it.containment}
-                auditRefs.each {
-                    def audit = eObject.eGet(it) as Audit
-                    if (audit == null) {
-                        audit = AuthFactory.eINSTANCE.createAudit()
-                        eObject.eSet(it, audit)
-                    }
-                    def userName = SecurityContextHolder?.context?.authentication?.name
-                    def now = new Timestamp(new Date().time)
-                    audit.setCreated(now)
-                    audit.setCreatedBy(userName)
-                }
-            }
-        })
-        Context.current.workspace.database.events.registerBeforeUpdate(new Events.BeforeUpdate() {
+        Context.current.workspace.database.events.registerBeforeSave(new Events.BeforeSave() {
             @Override
             void handle(Resource old, Resource resource, Transaction tx) throws IOException {
                 if (resource.contents.isEmpty()) return
@@ -77,8 +57,14 @@ class AuditInit extends AuditImpl {
                     }
                     def userName = SecurityContextHolder?.context?.authentication?.name
                     def now = new Timestamp(new Date().time)
-                    audit.setModified(now)
-                    audit.setModifiedBy(userName)
+                    if (old == null) {
+                        audit.setCreated(now)
+                        audit.setCreatedBy(userName)
+                    }
+                    else {
+                        audit.setModified(now)
+                        audit.setModifiedBy(userName)
+                    }
                 }
             }
         })

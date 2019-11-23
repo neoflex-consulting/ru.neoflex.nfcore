@@ -103,11 +103,10 @@ public class Database implements Closeable {
     }
 
     private void registerEvents() {
-        events.registerBeforeInsert(this::checkUniqueQNameBeforeInsert);
-        events.registerBeforeUpdate(this::checkUniqueQNameBeforeUpdate);
+        events.registerBeforeSave(this::checkUniqueQName);
+        events.registerAfterSave(this::updateResourceIndexes);
+        events.registerBeforeDelete(this::checkDependencies);
         events.registerBeforeDelete(this::deleteResourceIndexes);
-        events.registerAfterInsert(this::createResourceIndexes);
-        events.registerAfterUpdate(this::updateResourceIndexes);
     }
 
     public EStructuralFeature getQNameFeature(EClass eClass) {
@@ -418,6 +417,15 @@ public class Database implements Closeable {
         return packages;
     }
 
+    private void checkDependencies(Resource old, Transaction tx) throws IOException {
+        String id = getId(old.getURI());
+        List<IndexEntry> refList = findByIndex(tx, "ref", id.substring(0, 2), id.substring(2));
+        if (!refList.isEmpty()) {
+            String[] path = refList.get(0).getPath();
+            throw new IOException("Object " + id + " is referenced by " + path[path.length - 1]);
+        }
+    }
+
     private void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
         GitFileSystem gfs = tx.getFileSystem();
         for (String indexName : getIndexes().keySet()) {
@@ -429,19 +437,21 @@ public class Database implements Closeable {
         }
     }
 
-    private void updateResourceIndexes(Resource old, Resource entity, Transaction tx) throws IOException {
+    private void updateResourceIndexes(Resource oldResource, Resource newResource, Transaction tx) throws IOException {
         GitFileSystem gfs = tx.getFileSystem();
         Set<String> toDelete = new HashSet<>();
-        for (String indexName : getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry : getIndexes().get(indexName).getEntries(old, tx)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                toDelete.add(indexValuePath.toString());
+        if (oldResource != null) {
+            for (String indexName : getIndexes().keySet()) {
+                GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
+                for (IndexEntry entry : getIndexes().get(indexName).getEntries(oldResource, tx)) {
+                    GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
+                    toDelete.add(indexValuePath.toString());
+                }
             }
         }
         for (String indexName : getIndexes().keySet()) {
             GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry : getIndexes().get(indexName).getEntries(entity, tx)) {
+            for (IndexEntry entry : getIndexes().get(indexName).getEntries(newResource, tx)) {
                 GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
                 if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
                     throw new IOException("Index file " + indexValuePath.toString() + " already exists");
@@ -463,7 +473,7 @@ public class Database implements Closeable {
         for (EntityId entityId : tx.all()) {
             Entity entity = tx.load(entityId);
             Resource resource = entityToResource(tx, entity);
-            createResourceIndexes(resource, tx);
+            updateResourceIndexes(null, resource, tx);
         }
     }
 
@@ -478,29 +488,6 @@ public class Database implements Closeable {
         for (Path path : pathsToDelete) {
             Files.deleteIfExists(path);
         }
-    }
-
-    private void createResourceIndexes(Resource entity, Transaction tx) throws IOException {
-        GitFileSystem gfs = tx.getFileSystem();
-        for (String indexName : getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry : getIndexes().get(indexName).getEntries(entity, tx)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                if (Files.exists(indexValuePath)) {
-                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
-                }
-                Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, entry.getContent());
-            }
-        }
-    }
-
-    private void checkUniqueQNameBeforeInsert(Resource resource, Transaction tx) throws IOException {
-        checkUniqueQName(null, resource, tx);
-    }
-
-    private void checkUniqueQNameBeforeUpdate(Resource resourceOld, Resource resource, Transaction tx) throws IOException {
-        checkUniqueQName(resourceOld, resource, tx);
     }
 
     private void checkUniqueQName(Resource resourceOld, Resource resource, Transaction tx) throws IOException {
@@ -523,7 +510,7 @@ public class Database implements Closeable {
                 List<IndexEntry> ieList = findEClassIndexEntries(descendant, name, tx);
                 for (IndexEntry ie : ieList) {
                     String oldId = new String(ie.getContent());
-                    if (id == null || !oldId.equals(id)) {
+                    if (id == null || !id.equals(oldId)) {
                         throw new IllegalArgumentException(String.format(
                                 "Duplicate qualified name eClass: %s, feature: %s, id: %s",
                                 EcoreUtil.getURI(eClass), name, oldId));
