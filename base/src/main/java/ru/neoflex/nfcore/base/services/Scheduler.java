@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -103,6 +104,8 @@ public class Scheduler {
             ScheduledTask task = (ScheduledTask) resource.getContents().get(0);
             URI uri = resource.getURI();
             if (task.isEnabled()) {
+                String branch = StringUtils.isNotEmpty(task.getBranch()) ?
+                        task.getBranch() : context.getWorkspace().getCurrentBranch();
                 ScheduledFuture scheduledFuture = scheduledTasks.get(id);
                 if (scheduledFuture == null) {
                     SchedulingPolicy schedulingPolicy = task.getSchedulingPolicy();
@@ -122,6 +125,7 @@ public class Scheduler {
                             retryTemplate.setRetryPolicy(retryPolicyFactory.createPolicy());
                             retryTemplate.execute((RetryCallback<Void, RuntimeException>) ctx -> {
                                 try {
+                                    context.getWorkspace().setCurrentBranch(branch);
                                     execute(uri);
                                 } catch (Exception e) {
                                     logger.error(task.getName(), e);
@@ -156,6 +160,7 @@ public class Scheduler {
         return context.inContextWithClassLoaderInTransaction((Callable<Object>) () -> {
             Resource resource = Context.getCurrent().getStore().loadResource(uri);
             ScheduledTask task = (ScheduledTask) resource.getContents().get(0);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (task.isImporsonate()) {
                 login(task.getRunAsUser(), task.getRunAsPassword());
             }
@@ -192,7 +197,9 @@ public class Scheduler {
                 return result;
             }
             finally {
-                logout();
+                if (task.isImporsonate()) {
+                    logout(authentication);
+                }
             }
         });
     }
@@ -203,9 +210,9 @@ public class Scheduler {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public void logout() {
+    public void logout(Authentication old) {
         SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(null);
-        SecurityContextHolder.clearContext();
+        context.setAuthentication(old);
+        //SecurityContextHolder.clearContext();
     }
 }

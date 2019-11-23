@@ -105,6 +105,7 @@ class Parameter {
 class ScheduledTask {
   QName name
   boolean enabled
+  String branch
   refers EObject eObject
   contains Parameter[] parameters
   Text script
