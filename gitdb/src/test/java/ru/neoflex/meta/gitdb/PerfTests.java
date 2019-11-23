@@ -73,18 +73,21 @@ public class PerfTests extends TestBase {
                 public void run() {
                     Random rand = new Random();
                     for (int j = 0; j < nUpdates; ++j) {
-                        try (Transaction tx = database.createTransaction("users")) {
-                            String groupId = groupIds.get(rand.nextInt(groupIds.size()));
-                            Resource groupResource = database.loadResource(groupId, tx);
-                            Group group = (Group) groupResource.getContents().get(0);
-                            String userId = userIds.get(rand.nextInt(userIds.size()));
-                            Resource userResource = database.loadResource(userId, tx);
-                            User user = (User) userResource.getContents().get(0);
-                            String name = "User_" + index + "_" + j;
-                            user.setName(name);
-                            user.setGroup(group);
-                            userResource.save(null);
-                            tx.commit("User " + name + " updated", "orlov", "");
+                        String name = "User_" + index + "_" + j;
+                        String groupId = groupIds.get(rand.nextInt(groupIds.size()));
+                        String userId = userIds.get(rand.nextInt(userIds.size()));
+                        try {
+                            database.inTransaction("users", Transaction.LockType.WRITE, tx -> {
+                                Resource groupResource = database.loadResource(groupId, tx);
+                                Group group = (Group) groupResource.getContents().get(0);
+                                Resource userResource = database.loadResource(userId, tx);
+                                User user = (User) userResource.getContents().get(0);
+                                user.setName(name);
+                                user.setGroup(group);
+                                userResource.save(null);
+                                tx.commit("User " + name + " updated", "orlov", "");
+                                return null;
+                            });
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                             eCount.incrementAndGet();

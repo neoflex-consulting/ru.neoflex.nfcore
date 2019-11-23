@@ -129,7 +129,7 @@ public class DatabaseTests extends TestBase {
             Files.write(path, content.getBytes());
             txw.commit("written test resource");
         }
-        try(Transaction tx = database.createTransaction("master", Transaction.LockType.DIRTY)) {
+        try(Transaction tx = database.createTransaction("master", Transaction.LockType.READ)) {
             byte[] data = tx.withClassLoader(() -> {
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                 URI uri = classLoader.getResource(name).toURI();

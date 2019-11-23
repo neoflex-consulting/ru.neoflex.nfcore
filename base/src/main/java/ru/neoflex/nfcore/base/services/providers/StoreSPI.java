@@ -34,9 +34,11 @@ public interface StoreSPI {
 
     FinderSPI createFinderProvider();
 
-    TransactionSPI createTransaction(boolean readOnly)  throws IOException;
-
     TransactionSPI getCurrentTransaction() throws IOException;
 
-    TransactionSPI setCurrentTransaction(TransactionSPI tx) throws IOException;
+    public interface Transactional<R> {
+        public R call(TransactionSPI tx) throws Exception;
+    }
+
+    public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception;
 }

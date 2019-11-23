@@ -4,6 +4,8 @@ import com.beijunyi.parallelgit.filesystem.GitFileSystem;
 import com.beijunyi.parallelgit.filesystem.GitPath;
 import com.beijunyi.parallelgit.utils.BranchUtils;
 import com.beijunyi.parallelgit.utils.RepositoryUtils;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
+import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +34,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,7 +55,7 @@ public class Database implements Closeable {
     private List<EPackage> packages;
     private Map<String, Index> indexes = new HashMap<>();
     private Events events = new Events();
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private Lock lock = new ReentrantLock();
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
     private String repoName;
@@ -558,9 +560,36 @@ public class Database implements Closeable {
         return new Transaction(this, branch, lockType);
     }
 
-    public <R> R withTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws IOException {
-        try (Transaction tx = createTransaction(branch, lockType)) {
-            return f.call(tx);
+    public <R> R inTransaction(String branch, Transaction.LockType lockType, Transactional<R> f) throws Exception {
+        return inTransaction(() -> createTransaction(branch, lockType), f);
+    }
+
+    public interface TxSupplier<T> {
+        T get() throws Exception;
+    }
+
+    public <R> R inTransaction(TxSupplier<Transaction> transactionSupplier, Transactional<R> f) throws Exception {
+        int delay = 1;
+        int maxDelay = 1000;
+        int maxTry = 100;
+        int i = 0;
+        while (true) {
+            try (Transaction tx = transactionSupplier.get()) {
+                return f.call(tx);
+            }
+            catch (RefUpdateLockFailureException | RefUpdateRejectedException e) {
+                if (++i >= maxTry) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ex) {
+                }
+                if (delay < maxDelay) {
+                    delay *= 2;
+                }
+                continue;
+            }
         }
     }
 
@@ -594,7 +623,7 @@ public class Database implements Closeable {
         getIndexes().put(index.getName(), index);
     }
 
-    public ReadWriteLock getLock() {
+    public Lock getLock() {
         return lock;
     }
 
@@ -611,6 +640,6 @@ public class Database implements Closeable {
     }
 
     public interface Transactional<R> {
-        public R call(Transaction tx) throws IOException;
+        public R call(Transaction tx) throws Exception;
     }
 }

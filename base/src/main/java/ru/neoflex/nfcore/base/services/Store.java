@@ -13,12 +13,8 @@ import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
-import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.base.services.providers.StoreSPI;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
@@ -148,20 +144,8 @@ public class Store {
         return provider;
     }
 
-    public interface Transactional<R> {
-        public R call(TransactionSPI tx) throws Exception;
-    }
-    public <R> R withTransaction(boolean readOnly, Transactional<R> f) throws Exception {
-        try (TransactionSPI tx = provider.createTransaction(readOnly)) {
-            TransactionSPI old = provider.getCurrentTransaction();
-            provider.setCurrentTransaction(tx);
-            try {
-                return f.call(tx);
-            }
-            finally {
-                provider.setCurrentTransaction(old);
-            }
-        }
+    public <R> R withTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
+        return provider.inTransaction(readOnly, f);
     }
 
     public void commit(String message) throws IOException {

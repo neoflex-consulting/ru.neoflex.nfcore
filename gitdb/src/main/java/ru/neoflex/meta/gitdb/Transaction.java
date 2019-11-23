@@ -28,7 +28,7 @@ public class Transaction implements Closeable {
     private Database database;
     private String branch;
     private GitFileSystem gfs;
-    public enum LockType {DIRTY, READ, WRITE}
+    public enum LockType {READ, WRITE, EXCLUSIVE}
     private LockType lockType;
     private static final ThreadLocal<Transaction> tlTransaction = new ThreadLocal<>();
 
@@ -44,11 +44,8 @@ public class Transaction implements Closeable {
         this.database = database;
         this.branch = branch;
         this.lockType = lockType;
-        if (lockType == LockType.WRITE) {
-            database.getLock().writeLock().lock();
-        }
-        else if (lockType == LockType.READ) {
-            database.getLock().readLock().lock();
+        if (lockType == LockType.EXCLUSIVE) {
+            database.getLock().lock();
         }
         this.gfs =  Gfs.newFileSystem(branch, database.getRepository());
     }
@@ -60,11 +57,8 @@ public class Transaction implements Closeable {
     @Override
     public void close() throws IOException {
         gfs.close();
-        if (lockType == LockType.WRITE) {
-            database.getLock().writeLock().unlock();
-        }
-        else if (lockType == LockType.READ) {
-            database.getLock().readLock().unlock();
+        if (lockType == LockType.EXCLUSIVE) {
+            database.getLock().unlock();
         }
     }
 
@@ -89,7 +83,7 @@ public class Transaction implements Closeable {
     }
 
     public void commit(String message, String author, String email) throws IOException {
-        if (lockType != LockType.WRITE) {
+        if (lockType == LockType.READ) {
             throw new IOException("Can't commit readonly transaction");
         }
         GfsCommit commit = Gfs.commit(gfs).message(message);

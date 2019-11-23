@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.meta.gitdb.Exporter;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.services.Authorization;
-import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import java.io.IOException;
@@ -54,8 +53,8 @@ public class SysController {
     }
 
     @PostMapping(value="/importdb", produces={"application/json"})
-    public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws IOException {
-        return workspace.getDatabase().withTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, (tx)->{
+    public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, (tx)->{
             int count =  new Exporter(workspace.getDatabase()).unzip(file.getInputStream(), tx);
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode().put("count", count);
@@ -71,7 +70,7 @@ public class SysController {
         new Thread(() -> {
             try {
                 new Exporter(workspace.getDatabase()).zipAll(workspace.getCurrentBranch(), pipedOutputStream);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Export DB", e);
             }
 
@@ -94,7 +93,7 @@ public class SysController {
         String branch = workspace.getCurrentBranch();
         new Thread(() -> {
             try {
-                workspace.getDatabase().withTransaction(branch, Transaction.LockType.DIRTY, tx->{
+                workspace.getDatabase().inTransaction(branch, Transaction.LockType.READ, tx->{
                     ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
                     List<Resource> resources = new ArrayList<>();
                     for (String id: ids) {
@@ -112,7 +111,7 @@ public class SysController {
                     new Exporter(workspace.getDatabase()).zip(resources, pipedOutputStream);
                     return null;
                 });
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Export DB", e);
             }
 

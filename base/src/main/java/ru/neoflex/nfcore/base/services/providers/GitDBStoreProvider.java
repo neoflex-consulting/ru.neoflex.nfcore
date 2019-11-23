@@ -1,6 +1,5 @@
 package ru.neoflex.nfcore.base.services.providers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.emf.common.util.URI;
@@ -100,12 +99,11 @@ public class GitDBStoreProvider implements StoreSPI {
         return new GitDBFinderProvider();
     }
 
-    @Override
-    public TransactionSPI createTransaction(boolean readOnly) throws IOException {
+    public Transaction createTransaction(boolean readOnly) throws IOException {
         return new GitDBTransactionProvider(
                 workspace.getDatabase(),
                 workspace.getCurrentBranch(),
-                readOnly ? Transaction.LockType.DIRTY : Transaction.LockType.WRITE
+                readOnly ? Transaction.LockType.READ : Transaction.LockType.WRITE
         );
     }
 
@@ -117,13 +115,24 @@ public class GitDBStoreProvider implements StoreSPI {
         }
     }
 
-    @Override
     public TransactionSPI setCurrentTransaction(TransactionSPI tx) throws IOException {
-        if (tx != null && !(tx instanceof Transaction)) {
-            throw new IllegalArgumentException("Not a git Transaction");
-        }
         Transaction current = Transaction.getCurrent();
         Transaction.setCurrent((Transaction)tx);
         return current instanceof TransactionSPI ? (TransactionSPI)current : null;
+    }
+
+    @Override
+    public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception {
+        return workspace.getDatabase().inTransaction(
+                () -> createTransaction(readOnly),
+                tx -> {
+                    TransactionSPI old = getCurrentTransaction();
+                    setCurrentTransaction((TransactionSPI) tx);
+                    try {
+                        return f.call((TransactionSPI) tx);
+                    } finally {
+                        setCurrentTransaction(old);
+                    }
+                });
     }
 }

@@ -24,7 +24,7 @@ public class ApplicationTests {
 
     @Test
     public void generateLocModule() throws Exception {
-        context.getWorkspace().withClassLoaderInTransaction(true, ()->{
+        context.inContextWithClassLoaderInTransaction(true, ()->{
             LocModule locModule = (LocModule) context.getGroovy().eval(LocalesPackage.Literals.LOC_MODULE, "generatePackagesModule", Lists.emptyList());
             Assert.assertEquals(context.getRegistry().getEPackages().size(), locModule.getChildren().size());
             context.getGroovy().eval(LocalesPackage.Literals.LOC_MODULE, "generateLocales", Lists.emptyList());

@@ -102,22 +102,12 @@ public class Workspace {
         return createTransaction(Transaction.LockType.WRITE);
     }
 
-    public<R> R inTransaction(boolean readOnly, Callable<R> f) throws Exception {
-        try (GitDBTransactionProvider tx = createTransaction(readOnly ? Transaction.LockType.DIRTY : Transaction.LockType.WRITE)) {
-            return tx.withCurrent(f);
-        }
-    }
-
     public<R> R withClassLoader(Callable<R> f) throws Exception {
         return TransactionClassLoader.withClassLoader(f);
     }
 
-    public<R> R withClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
-        return withClassLoader(()-> inTransaction(readOnly, f));
-    }
-
     public boolean pathExists(String path) throws IOException {
-        try (Transaction tx = createTransaction(Transaction.LockType.DIRTY)) {
+        try (Transaction tx = createTransaction(Transaction.LockType.READ)) {
             return Files.exists(tx.getFileSystem().getPath(path));
         }
     }

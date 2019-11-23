@@ -156,8 +156,8 @@ public class Exporter {
         }
     }
 
-    public void zipAll(String branch, OutputStream outputStream) throws IOException {
-        database.withTransaction(branch, Transaction.LockType.DIRTY, tx -> {
+    public void zipAll(String branch, OutputStream outputStream) throws Exception {
+        database.inTransaction(branch, Transaction.LockType.READ, tx -> {
             List<EntityId> all = tx.all();
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
                 for (EntityId entityId: all) {
@@ -250,10 +250,10 @@ public class Exporter {
         importPath(root, tx);
     }
 
-    public void exportAll(String branch, Path path) throws IOException {
-        List<EntityId> all = database.withTransaction(branch, Transaction.LockType.DIRTY, Transaction::all);
+    public void exportAll(String branch, Path path) throws Exception {
+        List<EntityId> all = database.inTransaction(branch, Transaction.LockType.READ, Transaction::all);
         for (EntityId entityId: all) {
-            database.withTransaction(branch, Transaction.LockType.DIRTY, tx -> {
+            database.inTransaction(branch, Transaction.LockType.READ, tx -> {
                 Resource resource = database.loadResource(entityId.getId(), tx);
                 for (EObject eObject: resource.getContents()) {
                     exportEObject(eObject, path);

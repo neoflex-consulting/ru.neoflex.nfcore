@@ -44,7 +44,7 @@ public class StartUp {
                         Thread.currentThread().getContextClassLoader().loadClass(initClassName).getDeclaredConstructor().newInstance();
                         logger.info(String.format("%s: instantiated", initClassName));
                     }
-                    catch (ClassNotFoundException e) {
+                    catch (ClassNotFoundException|NoSuchMethodException|InstantiationException e) {
                     }
                 }
                 store.commit("StartUp");

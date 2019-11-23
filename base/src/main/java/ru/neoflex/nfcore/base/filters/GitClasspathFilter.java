@@ -17,7 +17,7 @@ public class GitClasspathFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         Context context = SpringContext.getBean(Context.class);
         try {
-            context.getWorkspace().inTransaction(true, ()->{
+            context.getStore().withTransaction(true, tx->{
                 filterChain.doFilter(servletRequest, servletResponse);
                 return 0;
             });
