@@ -24,7 +24,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
         password: Password
     }
 
-    const splitedString = props.value ? props.value.split('\n') : []
+    const splitedString = props.value ? props.value.toString().split('\n') : []
     const lines = splitedString.length
     const InputComponent = types[props.type];
     const [isEdited, setIsEdited] = useState<boolean>(false);
