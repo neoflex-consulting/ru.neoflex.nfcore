@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.Assert;
 import org.junit.Test;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
@@ -20,8 +21,8 @@ public class PerfTests extends TestBase {
     Database database;
     int nGroups = 5;
     int nUsers = 10;
-    int nThreads = 3;
-    int nUpdates = 10;
+    int nThreads = 2;
+    int nUpdates = 30;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
@@ -107,6 +108,7 @@ public class PerfTests extends TestBase {
         System.out.println("Created " + nUsers + " users  in " + (created2 - created1)/1000 + " sec");
         System.out.println("Updated " + (nUpdates*nThreads) + " users in " + nThreads + " threads in " + (finish - created2)/1000 + " sec");
         System.out.println("Errors found: " + eCount.get());
+        Assert.assertEquals(0, eCount.get());
     }
 
     public void updateTest() throws IOException, InterruptedException, GitAPIException {

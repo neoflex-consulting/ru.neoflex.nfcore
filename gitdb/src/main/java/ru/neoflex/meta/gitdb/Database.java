@@ -26,6 +26,8 @@ import org.emfjson.jackson.databind.EMFContext;
 import org.emfjson.jackson.module.EMFModule;
 import org.emfjson.jackson.resource.JsonResourceFactory;
 import org.emfjson.jackson.utils.ValueWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
@@ -43,6 +45,7 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 import static org.eclipse.jgit.lib.Constants.DOT_GIT;
 
 public class Database implements Closeable {
+    private static final Logger logger = LoggerFactory.getLogger(Database.class);
     final public static String DB_PATH = "db";
     final public static String IDS_PATH = DB_PATH + "/ids";
     final public static String IDX_PATH = DB_PATH + "/idx";
@@ -571,14 +574,16 @@ public class Database implements Closeable {
     public <R> R inTransaction(TxSupplier<Transaction> transactionSupplier, Transactional<R> f) throws Exception {
         int delay = 1;
         int maxDelay = 1000;
-        int maxTry = 100;
-        int i = 0;
+        int maxAttempts = 100;
+        int attempt = 1;
         while (true) {
             try (Transaction tx = transactionSupplier.get()) {
                 return f.call(tx);
             }
-            catch (RefUpdateLockFailureException | RefUpdateRejectedException e) {
-                if (++i >= maxTry) {
+            catch (IOException|RefUpdateLockFailureException|RefUpdateRejectedException e) {
+                String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt;
+                logger.debug(message);
+                if (++attempt > maxAttempts) {
                     throw e;
                 }
                 try {
