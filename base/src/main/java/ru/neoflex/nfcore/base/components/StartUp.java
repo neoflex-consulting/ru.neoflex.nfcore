@@ -24,7 +24,7 @@ public class StartUp {
     void init() throws Exception {
         context.inContext(() -> {
             Store store = context.getStore();
-            return store.withTransaction(false, tx -> {
+            return store.inTransaction(false, tx -> {
                 for (EPackage ePackage: context.getRegistry().getEPackages()) {
                     String nsURI = ePackage.getNsURI();
                     String name = StringUtils.capitalize(ePackage.getName());

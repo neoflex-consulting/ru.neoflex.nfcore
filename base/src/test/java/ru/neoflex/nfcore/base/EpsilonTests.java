@@ -7,26 +7,20 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.epsilon.emc.emf.EmfModel;
-import org.eclipse.epsilon.eol.exceptions.models.EolModelElementTypeNotFoundException;
-import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.neoflex.meta.gitdb.Database;
 import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.meta.gitdb.TransactionClassLoader;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
 import ru.neoflex.nfcore.base.auth.User;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Epsilon;
-import ru.neoflex.nfcore.base.services.Workspace;
-import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,7 +36,7 @@ public class EpsilonTests {
 
     @Test
     public void testCreateModelByURI() throws Exception {
-        EmfModel model = context.getStore().withTransaction(true, tx -> {
+        EmfModel model = context.getStore().inTransaction(true, tx -> {
             JsonNode result = getUserFinder().execute().getResult();
             JsonNode doc = result.withArray("docs").get(0);
             String id = doc.get("_id").textValue();
@@ -62,7 +56,7 @@ public class EpsilonTests {
 
     @Test
     public void testCreateModelByResourceSet() throws Exception {
-        EmfModel model = context.getStore().withTransaction(true, tx -> {
+        EmfModel model = context.getStore().inTransaction(true, tx -> {
             ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
             return context.getEpsilon().createModel("s", resourceSet);
         });
@@ -72,7 +66,7 @@ public class EpsilonTests {
 
     @Test
     public void testModels() throws Exception {
-        String text  = context.getStore().withTransaction(true, tx -> {
+        String text  = context.getStore().inTransaction(true, tx -> {
             ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
             String template = "[%=User.all().select(u|u.name=='admin').first().name%]!";
             for (Resource resource: resourceSet.getResources()) {
@@ -92,7 +86,7 @@ public class EpsilonTests {
 
     @Test
     public void testImport() throws Exception {
-        String text  = context.getStore().withTransaction(true, tx -> {
+        String text  = context.getStore().inTransaction(true, tx -> {
             ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
             return context.getEpsilon().generate("ToValid.egl", null, resourceSet);
         });
@@ -109,7 +103,7 @@ public class EpsilonTests {
     @Test
     public void testClassLoader() throws Exception {
         TransactionClassLoader.withClassLoader(()->{
-            String text = context.getStore().withTransaction(false, (transaction)->{
+            String text = context.getStore().inTransaction(false, (transaction)->{
                 Transaction tx = (Transaction)transaction;
                 ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
                 Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
@@ -138,7 +132,7 @@ public class EpsilonTests {
 
     @Test
     public void testUserToGroup() throws Exception {
-        context.getStore().withTransaction(true, tx -> {
+        context.getStore().inTransaction(true, tx -> {
             ResourceSet inputSet = getUserFinder().execute().getResourceSet();
             EObject eObject = inputSet.getResources().get(0).getContents().get(0);
             context.getStore().createEmptyResource().getContents().add(eObject);

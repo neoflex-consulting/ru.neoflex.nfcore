@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.logging.log4j.util.Strings;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -57,7 +55,7 @@ public class EMFController {
 
     @GetMapping("/resource")
     JsonNode getObject(@RequestParam String ref) throws Exception {
-        return store.withTransaction(true, tx -> {
+        return store.inTransaction(true, tx -> {
             Resource resource = store.loadResource(ref);
             ObjectNode result = resourceToTree(resource);
             return result;
@@ -66,7 +64,7 @@ public class EMFController {
 
     @DeleteMapping("/resource")
     JsonNode deleteObject(@RequestParam String ref) throws Exception {
-        return store.withTransaction(false, tx -> {
+        return store.inTransaction(false, tx -> {
             store.deleteResource(ref);
             store.commit("Delete " + ref);
             return mapper.createObjectNode().put("result", "ok");
@@ -75,7 +73,7 @@ public class EMFController {
 
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
-        return getObject(store.withTransaction(false, tx -> {
+        return getObject(store.inTransaction(false, tx -> {
             Resource resource = store.treeToResource(ref, contents);
             store.saveResource(resource);
             store.commit("Put " + ref);
@@ -114,7 +112,7 @@ public class EMFController {
 
     @PostMapping("/calltx")
     JsonNode callTx(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
-        return store.withTransaction(false, tx -> {
+        return store.inTransaction(false, tx -> {
             Resource resource = store.loadResource(ref);
             Object result =  context.getGroovy().eval(resource.getContents().get(0), method, args);
             store.commit("Call with tx " + method + "(" + ref + ", " +

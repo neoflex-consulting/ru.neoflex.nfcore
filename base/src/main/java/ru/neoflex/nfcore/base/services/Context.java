@@ -1,15 +1,9 @@
 package ru.neoflex.nfcore.base.services;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
 
@@ -80,7 +74,7 @@ public class Context {
     }
 
     public<R> R inContextWithClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
-        return inContext(()->workspace.withClassLoader(()->store.withTransaction(readOnly, tx -> f.call())));
+        return inContext(()->workspace.withClassLoader(()->store.inTransaction(readOnly, tx -> f.call())));
     }
 
     public Scheduler getScheduler() {

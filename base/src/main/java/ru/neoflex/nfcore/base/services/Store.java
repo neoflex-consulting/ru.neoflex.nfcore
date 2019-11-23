@@ -144,7 +144,7 @@ public class Store {
         return provider;
     }
 
-    public <R> R withTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
+    public <R> R inTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
         return provider.inTransaction(readOnly, f);
     }
 

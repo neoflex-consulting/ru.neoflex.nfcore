@@ -10,8 +10,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.services.Context;
 
-import java.io.IOException;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"repo.name=testbase"})
 public class StoreTests {
@@ -20,7 +18,7 @@ public class StoreTests {
 
     @Test
     public void loadAndStore() throws Exception {
-        context.getStore().withTransaction(true, tx -> {
+        context.getStore().inTransaction(true, tx -> {
             Role superAdminRole = createSuperAdminRole();
             User superAdminUser = createSuperAdminUser();
             superAdminUser.getRoles().add(superAdminRole);
