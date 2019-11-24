@@ -309,7 +309,10 @@ public class Finder {
             String fieldName = it.next();
             JsonNode queryNode = query.get(fieldName);
             if (fieldName.startsWith("$")) {
-                return matchOp(fieldName, object, queryNode);
+                if (!matchOp(fieldName, object, queryNode)) {
+                    return false;
+                }
+                continue;
             }
             JsonNode objectNode = object.get(unescape(fieldName));
             if (!matchNodes(objectNode, queryNode)) {
