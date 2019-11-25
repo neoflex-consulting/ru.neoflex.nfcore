@@ -1,18 +1,18 @@
 /* BreadcrumbApp */
 
-@media only screen and (max-width: 800px){
-    .breadcrumb-visibility {
-        visibility: hidden;
-    }
-}
+/*@media only screen and (max-width: 600px){*/
+/*    .breadcrumb-visibility {*/
+/*        visibility: hidden;*/
+/*    }*/
+/*}*/
 
-@media only screen and (max-width: 1750px) {
+@media only screen and (max-width: 900px) {
     .ul-breadcrumb .li-breadcrumb .text {
         display: none;
     }
 }
 
-@media only screen and (min-width: 1750px) {
+@media only screen and (min-width: 900px) {
     .ul-breadcrumb .li-breadcrumb .breadcrumbIcon {
         display: none;
     }

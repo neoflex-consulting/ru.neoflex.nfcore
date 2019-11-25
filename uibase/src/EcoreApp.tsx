@@ -16,7 +16,7 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faBullhorn, faTools} from '@fortawesome/free-solid-svg-icons'
+import {faSignOutAlt, faBullhorn, faTools, faDatabase, faList, faEquals} from '@fortawesome/free-solid-svg-icons'
 import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
@@ -72,7 +72,9 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
-        this.props.history.push('/app')
+        if (this.props.history.location.pathname === "/") {
+            this.props.history.push('/app')
+        }
     };
 
     getAllApplication() {
@@ -268,25 +270,26 @@ class EcoreApp extends React.Component<any, State> {
                 <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
                     <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
                         <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
-                        <Link to={`/developer/metadata`}>
-                            <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
-                        </Link>
+                            <Link to={`/developer/metadata`}>
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee' }}/>
+                                <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
+                            </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'data'}>
                             <Link to={`/developer/data`}>
-                            <Icon type="shopping" style={{ color: '#7d7d7d' }} />  
-                            <span style={{ color: '#eeeeee' }}>{t('data')}</span>
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee' }}/>
+                                <span style={{ color: '#eeeeee' }}>{t('data')}</span>
                             </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'query'}>
                             <Link to={`/developer/query`}>
-                                <Icon type="database" style={{ color: '#7d7d7d' }} />
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
                                 <span style={{ color: '#eeeeee' }}>{t('query')}</span>
                             </Link>
                         </Menu.Item>
                         <Menu.Item style={{ fontSize: 14 }} key={'gitdb'}>
                             <Link to={`/developer/gitdb`}>
-                                <Icon type="database" style={{ color: '#7d7d7d' }} />
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
                                 <span style={{ color: '#eeeeee' }}>{t('gitdb')}</span>
                             </Link>
                         </Menu.Item>
