@@ -134,13 +134,7 @@
             <version>9.4.1211</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.teneo.hibernate</artifactId>
-            <version>2.1.0.v201602010922</version>
-        </dependency>
-
-        <!--        <dependency>-->
+<!--        <dependency>-->
 <!--            <groupId>com.oracle</groupId>-->
 <!--            <artifactId>ojdbc6</artifactId>-->
 <!--            <version>11.2.0.2.0</version>-->
