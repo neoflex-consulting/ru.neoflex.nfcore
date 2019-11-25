@@ -10,47 +10,72 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
-import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EStringToStringMapEntry
 
-abstract class Driver {
-	QName name
-	String[] extLibraries
-}
-
-class JdbcDriver extends Driver {
-	String driverClassName
+/*JdbcDriver*/
+class JdbcDriver {
+    QName name
+    String[1] driverClassName
+	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
 }
 
-abstract class Datasource {
-	QName name
-	refers Driver driver
+/*JdbcConnection*/
+class JdbcConnection {
+    QName name
+    refers JdbcDriver driver
+    String[1] url
+    String[1] userName
+    Password[1] password
 }
 
-class JdbcDatasource extends Datasource {
-	String url
-	String userName
-	Password password
+/*Dataset*/
+abstract class Dataset {
+    QName name
+    contains DatasetColumn[] columns opposite dataset
+    op JSON runQuery(EStringToStringMapEntry[] parameters)
 }
 
+class JdbcDataset extends Dataset {
+    refers JdbcConnection connection
+    Text[1] query
+    contains QueryParameter[] parameters opposite dataset
+}
+
+class QueryDataset extends Dataset {
+}
+
+class MetadataDataset extends Dataset {
+	contains Row[] rows
+}
+
+/*ValueType*/
+@Ecore(constraints="DomainDataType")
 abstract class ValueType {
-	String name
-	refers EDataType dataType
-	String caption
-	Text description
-	String defaultValue
-	// TODO: validate domain.dataType == dataType
-	refers DatasetColumn domain
+    String[1] name
+    DataType dataType
+    Text description
+    String[1] defaultValue
+    // TODO: validate domain.dataType == dataType
+    refers DatasetColumn domain
 }
 
 class DatasetColumn extends ValueType {
-	container Dataset dataset opposite columns
+    container Dataset dataset opposite columns
 }
 
-abstract class Dataset {
-	QName name
-	contains DatasetColumn[] columns opposite dataset
+class QueryParameter extends ValueType {
+    container JdbcDataset dataset opposite parameters
+}
+
+/*other*/
+enum DataType {
+    STRING
+    BOOLEAN
+    DATE
+    TIMESTAMP
+    INTEGER
+    DECIMAL
 }
 
 class ColumnValue {
@@ -60,19 +85,4 @@ class ColumnValue {
 
 class Row {
 	contains ColumnValue[] values
-}
-
-class MetadataDataset extends Dataset {
-	contains Row[] rows
-}
-
-class QueryParameter extends ValueType {
-	container QueryDataset dataset opposite parameters
-}
-
-class QueryDataset extends Dataset {
-	refers Datasource datasource
-	String query
-	contains QueryParameter[] parameters opposite dataset
-	op JSON runQuery(EStringToStringMapEntry[] parameters)
 }
