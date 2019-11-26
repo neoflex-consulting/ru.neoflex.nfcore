@@ -13,32 +13,36 @@ import ru.neoflex.nfcore.base.types.Password
 import org.eclipse.emf.ecore.EStringToStringMapEntry
 
 /*JdbcDriver*/
+@Ecore(constraints="IsValid")
 class JdbcDriver {
     QName name
-    String[1] driverClassName
+    String driverClassName
 	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
 }
 
 /*JdbcConnection*/
+@Ecore(constraints="IsValid")
 class JdbcConnection {
     QName name
     refers JdbcDriver driver
-    String[1] url
-    String[1] userName
-    Password[1] password
+    String url
+    String userName
+    Password password
 }
 
 /*Dataset*/
+@Ecore(constraints="IsValid")
 abstract class Dataset {
     QName name
     contains DatasetColumn[] columns opposite dataset
     op JSON runQuery(EStringToStringMapEntry[] parameters)
 }
 
+@Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
     refers JdbcConnection connection
-    Text[1] query
+    Text query
     contains QueryParameter[] parameters opposite dataset
 }
 
@@ -50,12 +54,12 @@ class MetadataDataset extends Dataset {
 }
 
 /*ValueType*/
-@Ecore(constraints="DomainDataType")
+@Ecore(constraints="IsValid")
 abstract class ValueType {
-    String[1] name
+    String name
     DataType dataType
     Text description
-    String[1] defaultValue
+    String defaultValue
     // TODO: validate domain.dataType == dataType
     refers DatasetColumn domain
 }
@@ -70,6 +74,7 @@ class QueryParameter extends ValueType {
 
 /*other*/
 enum DataType {
+    UNDEFINED
     STRING
     BOOLEAN
     DATE
