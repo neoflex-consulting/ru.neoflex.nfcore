@@ -16,7 +16,7 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import GitDB from "./components/GitDB";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faBullhorn, faTools, faDatabase, faList, faEquals} from '@fortawesome/free-solid-svg-icons'
+import {faSignOutAlt, faBullhorn, faTools, faEquals} from '@fortawesome/free-solid-svg-icons'
 import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";

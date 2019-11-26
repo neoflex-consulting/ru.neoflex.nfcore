@@ -153,8 +153,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                     message: 'Please enter name'
                                                 }]
                                             })(
-                                                <Input placeholder={t("datasource.eClasses.Driver.eStructuralFeatures.name.caption",
-                                                    { ns: 'packages' })} style={{ width: '270px' }} type="text" />
+                                                <Input placeholder={t("name")} style={{ width: '270px' }} type="text" />
                                             )}
                                         </FormItem>
                                         <FormItem style={{ display: 'inline-block' }}>
