@@ -296,8 +296,7 @@ export class MainApp extends React.Component<any, State> {
                         position="vertical"
                         primaryPaneMaxWidth="50%"
                         primaryPaneMinWidth={0}
-                        // primaryPaneWidth={localStorage.getItem('mainapp_refsplitter_pos') || "233px"}
-                        primaryPaneWidth={"233px"}
+                        primaryPaneWidth={localStorage.getItem('mainapp_refsplitter_pos') || "233px"}
                         dispatchResize={true}
                         postPoned={false}
                         onDragFinished={() => {
