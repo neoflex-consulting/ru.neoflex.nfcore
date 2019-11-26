@@ -1,32 +1,43 @@
 {
+        "action": "Действия",
+        "additem": "Добавить элемент",
+        "addresources": "Добавить ресурсы",
         "appname": "Неофлекс ЯДРО",
+        "clear": "Очистить",
+        "closeall": "Закрыть все",
+        "createitem": "Созать элемент",
+        "data": "Данные",
+        "datatype": "Тип данных",
+        "delete": "Удалить",
+        "developer": "Разработчик",
+        "dynamiccomponent": " компонента не может быть загружена из ",
+        "edit": "Редактировать",
+        "eClass": "EClass",
+        "itemname": "Название элемента",
+        "language": "Язык",
+        "legend": "Легенда",
         "login": "Войти",
         "logout": "Выход",
-        "username": "Имя пользователя",
-        "password": "Пароль",
-        "developer": "Разработчик",
-        "language": "Язык",
+        "mandatoryreporting": "Обязательная отчетность",
         "metadata": "Метаданные",
-        "data": "Данные",
-        "query": "Запрос",
-        "run": "Старт",
+        "name": "Наименование",
         "notfound": "Не найдено",
+        "password": "Пароль",
+        "query": "Запрос",
         "regularexpression": "Регулярное выражение",
+        "run": "Старт",
         "search": "Поиск: ",
         "searchsimple": "Поиск",
-        "action": "Действия",
-        "edit": "Редактировать",
-        "delete": "Удалить",
-        "addresources": "Добавить ресурсы",
-        "dynamiccomponent": " компонента не может быть загружена из ",
-        "mandatoryreporting": "Обязательная отчетность",
-        "legend": "Легенда",
-        "closeall": "Закрыть все",
-        "eClass": "EClass",
-        "additem": "Добавить элемент",
         "select": "Выбрать",
-        "clear": "Очистить",
-        "createitem": "Созать элемент",
-        "itemname": "Название элемента",
-        "taxreporting": "Налоговая Отчетность"
+        "taxreporting": "Налоговая Отчетность",
+        "username": "Имя пользователя"
 }
+
+
+
+
+
+
+
+
+
