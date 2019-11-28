@@ -1,0 +1,93 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.datasource/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.dataset
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.JSON
+import ru.neoflex.nfcore.base.types.Text
+import ru.neoflex.nfcore.base.types.Password
+import org.eclipse.emf.ecore.EStringToStringMapEntry
+
+/*JdbcDriver*/
+@Ecore(constraints="IsValid")
+class JdbcDriver {
+    QName name
+    String driverClassName
+	String[] extLibraries /*доп. jar файлы*/
+	String urlPattern
+}
+
+/*JdbcConnection*/
+@Ecore(constraints="IsValid")
+class JdbcConnection {
+    QName name
+    refers JdbcDriver driver
+    String url
+    String userName
+    Password password
+}
+
+/*Dataset*/
+@Ecore(constraints="IsValid")
+abstract class Dataset {
+    QName name
+    contains DatasetColumn[] columns opposite dataset
+    op JSON runQuery(EStringToStringMapEntry[] parameters)
+}
+
+@Ecore(constraints="IsValid")
+class JdbcDataset extends Dataset {
+    refers JdbcConnection connection
+    Text query
+    contains QueryParameter[] parameters opposite dataset
+}
+
+class QueryDataset extends Dataset {
+}
+
+class MetadataDataset extends Dataset {
+	contains Row[] rows
+}
+
+/*ValueType*/
+@Ecore(constraints="IsValid")
+abstract class ValueType {
+    String name
+    DataType dataType
+    Text description
+    String defaultValue
+    // TODO: validate domain.dataType == dataType
+    refers DatasetColumn domain
+}
+
+class DatasetColumn extends ValueType {
+    container Dataset dataset opposite columns
+}
+
+class QueryParameter extends ValueType {
+    container JdbcDataset dataset opposite parameters
+}
+
+/*other*/
+enum DataType {
+    UNDEFINED
+    STRING
+    BOOLEAN
+    DATE
+    TIMESTAMP
+    INTEGER
+    DECIMAL
+}
+
+class ColumnValue {
+	refers DatasetColumn[1] column
+	String value
+}
+
+class Row {
+	contains ColumnValue[] values
+}

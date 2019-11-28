@@ -140,10 +140,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 <Col span={1}/>
                 <Col span={22}>
                     <Table dataSource={data} pagination={false}>
-                        <Table.Column title={t("datasource.eClasses.Driver.eStructuralFeatures.name.caption",
-                            {ns: 'packages'})} dataIndex="name" key="name"/>
-                        <Table.Column title={t("datasource.eClasses.ValueType.eStructuralFeatures.dataType.caption",
-                            {ns: 'packages'})} dataIndex="type" key="type"/>
+                        <Table.Column title={t("name")} dataIndex="name" key="name"/>
+                        <Table.Column title={t("datatype")} dataIndex="type" key="type"/>
                         <Table.Column title="URI" dataIndex="key" key="key"/>
                     </Table>
                 </Col>
