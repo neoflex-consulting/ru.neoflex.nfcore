@@ -28,10 +28,6 @@ public interface StoreSPI {
 
     String getId(Resource resource);
 
-    ObjectMapper createMapper();
-
-    Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws IOException;
-
     FinderSPI createFinderProvider();
 
     TransactionSPI getCurrentTransaction() throws IOException;

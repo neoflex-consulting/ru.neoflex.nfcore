@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -13,6 +14,7 @@ import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.util.DocFinder;
+import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -33,7 +35,7 @@ public class EMFController {
 
     @PostConstruct
     void init() {
-        mapper = store.createMapper();
+        mapper = EmfJson.createMapper();
     }
 
     private ObjectNode resourceToTree(Resource resource) {
@@ -74,7 +76,8 @@ public class EMFController {
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
         return getObject(store.inTransaction(false, tx -> {
-            Resource resource = store.treeToResource(ref, contents);
+            URI uri = store.getUriByRef(ref);
+            Resource resource = EmfJson.treeToResource(store.createResourceSet(), uri, contents);
             store.saveResource(resource);
             store.commit("Put " + ref);
             return store.getRef(resource);

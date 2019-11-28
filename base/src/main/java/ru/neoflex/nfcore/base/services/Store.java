@@ -11,16 +11,24 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.emfjson.jackson.annotations.EcoreIdentityInfo;
+import org.emfjson.jackson.annotations.EcoreTypeInfo;
+import org.emfjson.jackson.databind.EMFContext;
+import org.emfjson.jackson.module.EMFModule;
+import org.emfjson.jackson.utils.ValueWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
 import ru.neoflex.nfcore.base.services.providers.StoreSPI;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
+import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
+
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 @Service("ru.neoflex.nfcore.base.services.Store")
 @DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
@@ -121,7 +129,7 @@ public class Store {
 
     public Resource treeToResource(String ref, JsonNode contents) throws IOException {
         URI uri = getUriByRef(ref);
-        return provider.treeToResource(provider.createResourceSet(getCurrentTransaction()), uri, contents);
+        return EmfJson.treeToResource(provider.createResourceSet(getCurrentTransaction()), uri, contents);
     }
 
     public URI getUriByIdAndRev(String id, String rev) {
@@ -130,10 +138,6 @@ public class Store {
 
     public URI getUriByRef(String ref) {
         return provider.getUriByRef(ref);
-    }
-
-    public ObjectMapper createMapper() {
-        return provider.createMapper();
     }
 
     public FinderSPI createFinderProvider () {

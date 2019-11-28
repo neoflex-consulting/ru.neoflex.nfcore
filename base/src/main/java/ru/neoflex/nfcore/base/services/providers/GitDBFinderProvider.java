@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import ru.neoflex.meta.gitdb.Database;
-import ru.neoflex.meta.gitdb.Finder;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Database;
+import ru.neoflex.meta.emfgit.Finder;
+import ru.neoflex.meta.emfgit.Transaction;
+import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class GitDBFinderProvider extends Finder implements FinderSPI {
     @Override
     public JsonNode getResult() throws IOException {
         Database db = lastTx.getDatabase();
-        ObjectMapper mapper = db.getMapper();
+        ObjectMapper mapper = EmfJson.createMapper();
         ObjectNode root = mapper.createObjectNode();
         ArrayNode docs = root.withArray("docs");
         for (Resource resource: new ArrayList<>(getResourceSet().getResources())) {

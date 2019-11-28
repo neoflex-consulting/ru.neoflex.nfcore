@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class CouchDBFinderProvider implements FinderSPI {
                 JsonNode contents = doc.get("contents");
                 if (!contents.isNull()) {
                     URI uri = store.getUriByIdAndRev(id, rev);
-                    store.treeToResource(resourceSet, uri, contents);
+                    EmfJson.treeToResource(resourceSet, uri, contents);
                 }
             }
         }

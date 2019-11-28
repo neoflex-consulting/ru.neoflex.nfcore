@@ -1,7 +1,7 @@
 package ru.neoflex.nfcore.base.services.providers;
 
-import ru.neoflex.meta.gitdb.Database;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Database;
+import ru.neoflex.meta.emfgit.Transaction;
 
 import java.io.IOException;
 

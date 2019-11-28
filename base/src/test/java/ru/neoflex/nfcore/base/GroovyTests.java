@@ -10,10 +10,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
+import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,7 +70,7 @@ public class GroovyTests {
     @Test
     public void invokeStatic() throws Exception {
         Role superAdmin = createSuperAdminRole();
-        ObjectMapper mapper = context.getStore().createMapper();
+        ObjectMapper mapper = EmfJson.createMapper();
         ObjectNode args = mapper.createObjectNode();
         JsonNode superAdminNode = mapper.valueToTree(superAdmin);
         args.set("role", superAdminNode);

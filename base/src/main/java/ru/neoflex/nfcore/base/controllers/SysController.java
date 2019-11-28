@@ -16,8 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.neoflex.meta.gitdb.Exporter;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Exporter;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Workspace;
 

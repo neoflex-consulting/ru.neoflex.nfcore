@@ -265,44 +265,22 @@ public class CouchDBStoreProvider implements StoreSPI {
         return ref;
     }
 
-    public EMFModule getModule() {
+    public ObjectMapper createMapper() {
+        ObjectMapper mapper = new ObjectMapper();
         EMFModule emfModule = new EMFModule();
         emfModule.configure(EMFModule.Feature.OPTION_USE_ID, true);
         emfModule.setTypeInfo(new EcoreTypeInfo("eClass"));
         emfModule.setIdentityInfo(new EcoreIdentityInfo("_id",
-                new ValueWriter<EObject, Object>() {
-                    @Override
-                    public Object writeValue(EObject eObject, SerializerProvider context) {
-                        URI eObjectURI = EMFContext.getURI(context, eObject);
-                        if (eObjectURI == null) {
-                            return null;
-                        }
-                        return eObjectURI.fragment();
+                (ValueWriter<EObject, Object>) (eObject, context) -> {
+                    URI eObjectURI = EMFContext.getURI(context, eObject);
+                    if (eObjectURI == null) {
+                        return null;
                     }
+                    return eObjectURI.fragment();
                 }));
-        return emfModule;
-    }
-
-    @Override
-    public ObjectMapper createMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(getModule());
+        mapper.registerModule(emfModule);
         mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper;
-    }
-
-    @Override
-    public Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws JsonProcessingException {
-        Resource resource = resourceSet.createResource(uri);
-        ContextAttributes attributes = ContextAttributes
-                .getEmpty()
-                .withSharedAttribute("resourceSet", resourceSet)
-                .withSharedAttribute("resource", resource);
-        createMapper().reader()
-                .with(attributes)
-                .withValueToUpdate(resource)
-                .treeToValue(contents, Resource.class);
-        return resource;
     }
 
     @Override
