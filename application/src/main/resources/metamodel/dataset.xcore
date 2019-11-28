@@ -10,7 +10,6 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
-import org.eclipse.emf.ecore.EStringToStringMapEntry
 
 /*JdbcDriver*/
 @Ecore(constraints="IsValid")
@@ -36,7 +35,7 @@ class JdbcConnection {
 abstract class Dataset {
     QName name
     contains DatasetColumn[] columns opposite dataset
-    op JSON runQuery(EStringToStringMapEntry[] parameters)
+    op JSON runQuery()
 }
 
 @Ecore(constraints="IsValid")

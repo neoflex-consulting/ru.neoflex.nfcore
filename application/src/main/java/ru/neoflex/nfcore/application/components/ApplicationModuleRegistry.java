@@ -17,7 +17,6 @@ import ru.neoflex.nfcore.dataset.impl.DatasetValidatorExt;
 public class ApplicationModuleRegistry extends ModuleRegistryImpl {
     ApplicationModuleRegistry() {
         registerEPackage(ApplicationPackage.eINSTANCE);
-//        registerEPackage(DatasetPackage.eINSTANCE);
         registerEPackage(DatasetPackage.eNS_URI, ()->DatasetPackage.eINSTANCE, new DatasetFactoryExt(), new DatasetValidatorExt());
         registerEPackage(LocalesPackage.eINSTANCE);
         registerEPackage(ReportsPackage.eINSTANCE);
