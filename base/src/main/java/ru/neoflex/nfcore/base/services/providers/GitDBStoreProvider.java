@@ -8,8 +8,8 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import ru.neoflex.meta.gitdb.Database;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Database;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import java.io.IOException;
@@ -81,17 +81,6 @@ public class GitDBStoreProvider implements StoreSPI {
     public String getId(Resource resource) {
         String id = workspace.getDatabase().getResourceId(resource);
         return id;
-    }
-
-    @Override
-    public ObjectMapper createMapper() {
-        return workspace.getDatabase().getMapper();
-    }
-
-    @Override
-    public Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws IOException {
-        Resource resource = resourceSet.createResource(uri);
-        return workspace.getDatabase().loadResource(contents, resource);
     }
 
     @Override

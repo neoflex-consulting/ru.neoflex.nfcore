@@ -6,11 +6,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import ru.neoflex.meta.gitdb.Transaction;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
-import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
-import ru.neoflex.nfcore.base.services.providers.NullTransactionProvider;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import java.io.IOException;

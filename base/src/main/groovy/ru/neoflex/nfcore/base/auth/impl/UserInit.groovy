@@ -5,8 +5,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
-import ru.neoflex.meta.gitdb.Events
-import ru.neoflex.meta.gitdb.Transaction
+import ru.neoflex.meta.emfgit.Events
+import ru.neoflex.meta.emfgit.Transaction
 import ru.neoflex.nfcore.base.auth.ActionType
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.AuthFactory

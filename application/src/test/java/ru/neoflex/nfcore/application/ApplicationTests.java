@@ -7,10 +7,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.neoflex.meta.gitdb.Transaction;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Context;
-import ru.neoflex.nfcore.base.services.Workspace;
-import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
 import ru.neoflex.nfcore.locales.LocModule;
 import ru.neoflex.nfcore.locales.LocalesPackage;
 

@@ -8,7 +8,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import ru.neoflex.meta.gitdb.TransactionClassLoader;
+import ru.neoflex.meta.emfgit.TransactionClassLoader;
 import ru.neoflex.nfcore.base.filters.ContextFilter;
 import ru.neoflex.nfcore.base.filters.GitClasspathFilter;
 

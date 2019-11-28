@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>ru.neoflex.meta</groupId>
-            <artifactId>gitdb</artifactId>
+            <artifactId>emf-git</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

@@ -3,7 +3,7 @@ package ru.neoflex.nfcore.locales.impl
 import org.apache.commons.lang3.StringUtils
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.resource.ResourceSet
-import ru.neoflex.meta.gitdb.Transaction
+import ru.neoflex.meta.emfgit.Transaction
 import ru.neoflex.nfcore.locales.LocalesFactory
 import ru.neoflex.nfcore.locales.LocalesPackage
 import ru.neoflex.nfcore.locales.Lang
