@@ -4,10 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EContentsEList;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
@@ -21,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.neoflex.nfcore.base.util.EmfJson.createEOperationArguments;
 
 @RestController()
 @RequestMapping("/emf")
@@ -109,18 +118,37 @@ public class EMFController {
     @PostMapping("/call")
     JsonNode call(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
         Resource resource = store.loadResource(ref);
-        Object result =  context.getGroovy().eval(resource.getContents().get(0), method, args);
-        return mapper.valueToTree(result);
+        EObject eObject = resource.getContents().get(0);
+        EClass eClass = eObject.eClass();
+        for (EOperation eOperation: eClass.getEAllOperations()) {
+            if (eOperation.getName().equals(method)) {
+                EList<?> arguments = createEOperationArguments(eOperation, args);
+                Object result = eObject.eInvoke(eOperation, arguments);
+                return mapper.valueToTree(result);
+            }
+        }
+        throw new RuntimeException("call: EOperation " + method + " not found in " + EcoreUtil.getURI(eClass));
+//        Object result =  context.getGroovy().eval(eObject, method, args);
+//        return mapper.valueToTree(result);
     }
 
     @PostMapping("/calltx")
     JsonNode callTx(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
         return store.inTransaction(false, tx -> {
             Resource resource = store.loadResource(ref);
-            Object result =  context.getGroovy().eval(resource.getContents().get(0), method, args);
-            store.commit("Call with tx " + method + "(" + ref + ", " +
-                    args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");
-            return mapper.valueToTree(result);
+            EObject eObject = resource.getContents().get(0);
+//            Object result =  context.getGroovy().eval(eObject, method, args);
+            EClass eClass = eObject.eClass();
+            for (EOperation eOperation: eClass.getEAllOperations()) {
+                if (eOperation.getName().equals(method)) {
+                    EList<?> arguments = createEOperationArguments(eOperation, args);
+                    Object result = eObject.eInvoke(eOperation, arguments);
+                    store.commit("Call with tx " + method + "(" + ref + ", " +
+                            args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");
+                    return mapper.valueToTree(result);
+                }
+            }
+            throw new RuntimeException("calltx: EOperation " + method + " not found in " + EcoreUtil.getURI(eClass));
         });
     }
 }

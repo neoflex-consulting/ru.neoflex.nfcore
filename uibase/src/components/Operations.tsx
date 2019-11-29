@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Modal, Dropdown, Menu, Button, Select } from 'antd'
+import {Modal, Dropdown, Menu, Button, Select, notification} from 'antd'
 import Ecore from 'ecore';
 import i18next from 'i18next';
 
@@ -23,25 +23,37 @@ export default function Operations(props: Props): JSX.Element {
     const [ parameters, setParameters ] = useState<Object>({})
     const [ methodName, setMethodName ] = useState<string>('')
 
-    function runAction(methodName: string) {
+    function runAction(methodName: string, eOperation: Ecore.EObject|null = null) {
+        const paramList:{[key: string]: any} = parameters
+        const targetOperation = eOperation || targetOperationObject
         if(methodName){
             const ref = `${props.mainEObject.eResource().get('uri')}?rev=${props.mainEObject.eResource().rev}`;
-            API.instance().call(ref, methodName, Object.values(parameters)).then(result => 
-                console.log(result)
-            )
+            API.instance().call(ref, methodName, targetOperation!.get('eParameters').map((p: any)=>paramList[p.get('name')])).then(result => {
+                const obj = JSON.parse(result)
+                notification.info({message: JSON.stringify(obj, null, 4), duration: null})
+            })
             setParamModalVisible(false)
         }
     }
 
+    function eAllOperations(eClass: Ecore.EClass): any[] {
+        var eOperations = eClass.get('eOperations').array();
+        var superTypes = eClass.get('eAllSuperTypes');
+        return (eOperations || []).concat((superTypes || []).flatMap((c: Ecore.EClass)=>eAllOperations(c)))
+    }
+
     function onMenuSelect(e:any){
-        const operations = props.mainEObject.eClass.get('eOperations').array()
-        const targetOperationObject = operations.find((op:any) => op.get('name') === e.key)
-        if(targetOperationObject && targetOperationObject.get('eParameters').size() > 0){
-            setParamModalVisible(true)
-            setTargetOperationObject(targetOperationObject)
-            setMethodName(e.key)
-        } else {
-            runAction(e.key)
+        const operations = eAllOperations(props.mainEObject.eClass)
+        const eOperation = operations.find((op:any) => op.get('name') === e.key)
+        if(eOperation) {
+            setTargetOperationObject(eOperation)
+            if(eOperation.get('eParameters').size() > 0){
+                setParamModalVisible(true)
+                setMethodName(e.key)
+            } else {
+                runAction(e.key, eOperation)
+            }
+
         }
     }
 
@@ -144,7 +156,7 @@ export default function Operations(props: Props): JSX.Element {
     function renderMenu(){
         const menu = () => {
             return <Menu onClick={onMenuSelect}> 
-                {props.mainEObject.eClass.get('eOperations').map((oper: Ecore.EObject)=>{
+                {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
                     return <Menu.Item key={oper.get('name')}>
                         {oper.get('name')}
                     </Menu.Item>
@@ -159,7 +171,7 @@ export default function Operations(props: Props): JSX.Element {
 
     return (
         <Fragment>
-            {props.mainEObject.eClass && props.mainEObject.eClass.get('eOperations').size() > 0 && renderMenu()}
+            {props.mainEObject.eClass && eAllOperations(props.mainEObject.eClass).length > 0 && renderMenu()}
             {paramModalVisible && <Modal
                 key="run_param_modal"
                 width={'500px'}
@@ -168,7 +180,7 @@ export default function Operations(props: Props): JSX.Element {
                 onCancel={()=>setParamModalVisible(false)}
                 onOk={() => {
                     setParamModalVisible(false)
-                    runAction(methodName)
+                    runAction(methodName, targetOperationObject)
                 }}
             >
                 {renderParameters()}
