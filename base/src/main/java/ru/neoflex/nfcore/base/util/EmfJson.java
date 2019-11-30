@@ -7,20 +7,20 @@ import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EOperation;
-import org.eclipse.emf.ecore.EParameter;
+import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.emfjson.jackson.annotations.EcoreIdentityInfo;
 import org.emfjson.jackson.annotations.EcoreTypeInfo;
 import org.emfjson.jackson.databind.EMFContext;
 import org.emfjson.jackson.module.EMFModule;
 import org.emfjson.jackson.utils.ValueWriter;
+import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -62,7 +62,24 @@ public class EmfJson {
         return resource;
     }
 
-    public static EList<?> createEOperationArguments(EOperation eOperation, List<Object> args) {
+    public static Object fromJson(Store store, EClassifier eType, Object arg) throws IOException {
+        if (arg == null) {
+            return null;
+        }
+        if (eType instanceof EClass) {
+            Map node = (Map) arg;
+            String ref = (String) node.get("$ref");
+            Resource resource = store.loadResource(ref);
+            return resource.getContents().get(0);
+        }
+        if (eType instanceof EDataType) {
+            EDataType eDataType = (EDataType) eType;
+            return EcoreUtil.createFromString(eDataType, arg.toString());
+        }
+        return arg;
+    }
+
+    public static EList<?> createEOperationArguments(Store store, EOperation eOperation, List<Object> args) {
         return ECollections.toEList(IntStream.range(0, eOperation.getEParameters().size()).mapToObj(i -> {
             if (i >= args.size()) {
                 return null;
@@ -70,10 +87,11 @@ public class EmfJson {
             Object arg = args.get(i);
             EParameter eParameter = eOperation.getEParameters().get(i);
             EClassifier eType = eParameter.getEType();
-            if (eType.getInstanceClass().isAssignableFrom(String.class)) {
-                return arg;
+            try {
+                return fromJson(store, eType, arg);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            return arg;
         }).collect(Collectors.toList()));
     }
 }

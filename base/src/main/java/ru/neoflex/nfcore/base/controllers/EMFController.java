@@ -122,7 +122,7 @@ public class EMFController {
         EClass eClass = eObject.eClass();
         for (EOperation eOperation: eClass.getEAllOperations()) {
             if (eOperation.getName().equals(method)) {
-                EList<?> arguments = createEOperationArguments(eOperation, args);
+                EList<?> arguments = createEOperationArguments(store, eOperation, args);
                 Object result = eObject.eInvoke(eOperation, arguments);
                 return mapper.valueToTree(result);
             }
@@ -141,7 +141,7 @@ public class EMFController {
             EClass eClass = eObject.eClass();
             for (EOperation eOperation: eClass.getEAllOperations()) {
                 if (eOperation.getName().equals(method)) {
-                    EList<?> arguments = createEOperationArguments(eOperation, args);
+                    EList<?> arguments = createEOperationArguments(store, eOperation, args);
                     Object result = eObject.eInvoke(eOperation, arguments);
                     store.commit("Call with tx " + method + "(" + ref + ", " +
                             args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");

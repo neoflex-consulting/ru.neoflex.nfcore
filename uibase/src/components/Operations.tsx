@@ -119,9 +119,9 @@ export default function Operations(props: Props): JSX.Element {
     }
 
     function onParameterChange(newValue: any, componentName: string, targetObject: any, EObject: Ecore.EObject){
-        if (componentName === 'DatePickerComponent') {
-            newValue = newValue ? newValue.format() : ''
-        }
+        // if (componentName === 'DatePickerComponent') {
+        //     newValue = newValue ? newValue.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : ''
+        // }
         setParameters({...parameters, [EObject.get('name')]: newValue })
     }
 

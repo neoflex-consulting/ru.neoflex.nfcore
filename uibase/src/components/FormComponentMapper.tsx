@@ -246,14 +246,14 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', targetObject, props.eObject)}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DDTHH:mm:ss.SSSZZ'), 'DatePickerComponent', targetObject, props.eObject)}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={value}
-                onChange={(newValue: any) => props.onChange && props.onChange!(newValue, 'DatePickerComponent', targetObject, props.eObject)}
+                onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DD'), 'DatePickerComponent', targetObject, props.eObject)}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
             return <EditableTextArea
