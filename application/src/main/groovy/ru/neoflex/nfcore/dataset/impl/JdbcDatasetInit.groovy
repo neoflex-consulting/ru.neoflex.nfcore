@@ -20,7 +20,7 @@ class JdbcDatasetInit {
         if (rs.resources.empty) {
             def jdbcDataset = DatasetFactory.eINSTANCE.createJdbcDataset()
             jdbcDataset.name = name
-            jdbcDataset.query = "SELECT * FROM public.person"
+            jdbcDataset.query = "SELECT * FROM public.sse_workspace"
             def jdbcConnection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, "JdbcConnectionPostgresqlTest")
             jdbcDataset.setConnection(jdbcConnection)
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))

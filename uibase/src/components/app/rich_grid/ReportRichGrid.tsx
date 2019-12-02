@@ -5,7 +5,6 @@ import Ecore from "ecore";
 import NfDataGrid from "./NfDataGrid";
 
 interface Props {
-
 }
 
 interface State {
@@ -75,9 +74,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     render() {
         return (
-            <div style={{width: "800px"}}>
-                <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData}/>
-            </div>
+            <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData}/>
         )
     }
 }

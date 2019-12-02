@@ -20,7 +20,7 @@ class JdbcConnectionInit {
         if (rs.resources.empty) {
             def jdbcConnection = DatasetFactory.eINSTANCE.createJdbcConnection()
             jdbcConnection.name = name
-            jdbcConnection.url = "jdbc:postgresql://cloud.neoflex.ru:5432/test"
+            jdbcConnection.url = "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev"
             jdbcConnection.userName = "postgres"
             jdbcConnection.password = "ne0f1ex"
 

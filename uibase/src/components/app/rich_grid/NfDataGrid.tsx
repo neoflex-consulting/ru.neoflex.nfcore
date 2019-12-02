@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import "ag-grid-community/dist/styles/ag-theme-material.css";
-import "ag-grid-community/dist/styles/ag-theme-fresh.css";
-import "ag-grid-community/dist/styles/ag-theme-blue.css";
-import "ag-grid-community/dist/styles/ag-theme-bootstrap.css";
+import {AgGridReact} from '@ag-grid-community/react';
+import {AllCommunityModules} from '@ag-grid-community/all-modules';
+import "@ag-grid-community/core/dist/styles/ag-grid.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-balham.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-material.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
+import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
-import {AllModules} from "@ag-grid-enterprise/all-modules";
+import DateComponent from "./DateComponent";
+import {ChangeDetectionStrategyType} from "@ag-grid-community/react/lib/changeDetectionService";
 
 interface Props {
     onCtrlA?: Function,
@@ -37,17 +39,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 "ag-theme-bootstrap"
             ],
             theme: "ag-theme-balham",
-            icons: {
-                columnRemoveFromGroup: '<i class="fa fa-times"/>',
-                filter: '<i class="fa fa-filter"/>',
-                sortAscending: '<i class="fa fa-long-arrow-alt-down"/>',
-                sortDescending: '<i class="fa fa-long-arrow-alt-up"/>',
-                groupExpanded: '<i class="far fa-minus-square"/>',
-                groupContracted: '<i class="far fa-plus-square"/>'
-            },
-            rowCount: null,
-            quickFilterText: null,
-            sideBar: false
+            rowCount: null
         };
 
         this.grid = React.createRef();
@@ -92,6 +84,24 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
         this.grid.current.api.exportDataAsCsv({ fileName: name })
     }
 
+    onGridReady = (params: any) => {
+        this.grid.current.api = params.api;
+        this.grid.current.columnApi = params.columnApi;
+
+        this.calculateRowCount();
+    };
+
+    calculateRowCount = () => {
+        if (this.grid.current.api && this.state.rowData) {
+            const model = this.grid.current.api.getModel();
+            const totalRows = this.state.rowData.length;
+            const processedRows = model.getRowCount();
+            this.setState({
+                rowCount: processedRows.toLocaleString() + ' / ' + totalRows.toLocaleString()
+            });
+        }
+    };
+
     render() {
         const { columnDefs, rowData, gridOptions, t } = this.props
 
@@ -124,15 +134,24 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         ref={this.grid}
                         columnDefs={columnDefs}
                         rowData={rowData}
-
+                        modules={AllCommunityModules}
                         pagination //странички
                         rowSelection="multiple" //выделение строки
-                        animateRows //анимация при сотртировке
+                        onGridReady={this.onGridReady} //инициализация грида
+                       //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
+                        rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
+                        suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
+                        suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
+                        allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
+                        headerHeight={40} //высота header в px (25 по умолчанию)
+                        suppressRowClickSelection //строки не выделяются при нажатии на них
+
+                        dateComponentFramework={DateComponent} // setting grid wide date component
 
                         enableColResize={true}
-                        //pivotHeaderHeight={true}
+                        // //pivotHeaderHeight={true}
                         enableSorting={true}
-                        //sortingOrder={["desc", "asc", null]}
+                        // //sortingOrder={["desc", "asc", null]}
                         enableFilter={true}
                         gridAutoHeight={true}
                         {...gridOptions}
