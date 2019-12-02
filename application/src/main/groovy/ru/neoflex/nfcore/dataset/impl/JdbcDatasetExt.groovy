@@ -34,31 +34,33 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         }
 
         /*Execute query*/
-//        PreparedStatement ps = connection.createStatement()
         Statement st = connection.createStatement()
         ResultSet rs = st.executeQuery(query)
 
-        def rows = []
+        def result = []
+        def columnDefs = []
         def columnCount = rs.metaData.columnCount
 
         //Add columns name as first row
-        def row = []
         for (int i = 1; i <= columnCount; ++i) {
             def object = rs.metaData.getColumnName(i)
-            row.add(object == null ? null : object.toString())
+            columnDefs.add([
+                    headerName: object == null ? null : object.toString().substring(0,1).toUpperCase() + object.toString().substring(1),
+                    field: object == null ? null : object.toString()
+            ])
         }
-        rows.add(row)
-
+        result.add([columnDefs: columnDefs])
         //Add row with data
+        def rowData = []
         while (rs.next()) {
-            row = []
+            def map = [:]
             for (int i = 1; i <= columnCount; ++i) {
                 def object = rs.getObject(i)
-                row.add(object == null ? null : object.toString())
+                map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
             }
-            rows.add(row)
+            rowData.add(map)
         }
-        return JsonOutput.toJson(rows)
+        result.add([rowData: rowData])
+        return JsonOutput.toJson(result)
     }
 }
-

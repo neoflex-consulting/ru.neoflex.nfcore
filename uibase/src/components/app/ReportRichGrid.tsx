@@ -2,26 +2,30 @@ import * as React from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
 import {API} from "../../modules/api";
 import Ecore from "ecore";
-//import NfDataGrid from './../NfDataGrid'
- 
+import NfDataGrid from "../NfDataGrid";
+
 interface Props {
+
 }
 
 interface State {
     jdbcDatasets: Ecore.EObject[];
     operations: Ecore.EOperation[];
     queryResult: any[];
-    
+    columnDefs: any[];
+    rowData: any[];
 }
 
 class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     constructor(props: any) {
-        super(props)
+        super(props);
         this.state = {
             jdbcDatasets: [],
             operations: [],
-            queryResult: []
+            queryResult: [],
+            columnDefs: [],
+            rowData: []
         }
     }
 
@@ -58,7 +62,10 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         const methodName: string = 'runQuery';
         const parameters: any[] = [];
         API.instance().call(ref, methodName, parameters).then( result => {
-            this.setState({queryResult: JSON.parse(result)})
+            this.setState({
+                columnDefs: JSON.parse(result)[0].columnDefs,
+                rowData: JSON.parse(result)[1].rowData
+            });
         })
     }
 
@@ -66,11 +73,10 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         this.getAlljdbcDatasets();
     }
 
-
     render() {
         return (
-            <div style={{ width: '100%' }}>
-               
+            <div style={{width: "800px"}}>
+                <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData}/>
             </div>
         )
     }
