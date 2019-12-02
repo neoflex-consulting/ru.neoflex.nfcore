@@ -6,9 +6,10 @@ import "ag-grid-community/dist/styles/ag-theme-material.css";
 import "ag-grid-community/dist/styles/ag-theme-fresh.css";
 import "ag-grid-community/dist/styles/ag-theme-blue.css";
 import "ag-grid-community/dist/styles/ag-theme-bootstrap.css";
-import { copyIntoClipboard } from './../utils/clipboard';
+import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
+import {AllModules} from "@ag-grid-enterprise/all-modules";
 
 interface Props {
     onCtrlA?: Function,
@@ -35,7 +36,18 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 "ag-theme-blue",
                 "ag-theme-bootstrap"
             ],
-            theme: "ag-theme-balham"
+            theme: "ag-theme-balham",
+            icons: {
+                columnRemoveFromGroup: '<i class="fa fa-times"/>',
+                filter: '<i class="fa fa-filter"/>',
+                sortAscending: '<i class="fa fa-long-arrow-alt-down"/>',
+                sortDescending: '<i class="fa fa-long-arrow-alt-up"/>',
+                groupExpanded: '<i class="far fa-minus-square"/>',
+                groupContracted: '<i class="far fa-plus-square"/>'
+            },
+            rowCount: null,
+            quickFilterText: null,
+            sideBar: false
         };
 
         this.grid = React.createRef();
@@ -112,6 +124,11 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         ref={this.grid}
                         columnDefs={columnDefs}
                         rowData={rowData}
+
+                        pagination //странички
+                        rowSelection="multiple" //выделение строки
+                        animateRows //анимация при сотртировке
+
                         enableColResize={true}
                         //pivotHeaderHeight={true}
                         enableSorting={true}

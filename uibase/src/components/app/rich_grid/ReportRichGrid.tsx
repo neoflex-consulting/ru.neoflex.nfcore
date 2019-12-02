@@ -1,8 +1,8 @@
 import * as React from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
-import {API} from "../../modules/api";
+import {API} from "../../../modules/api";
 import Ecore from "ecore";
-import NfDataGrid from "../NfDataGrid";
+import NfDataGrid from "./NfDataGrid";
 
 interface Props {
 
