@@ -165,7 +165,7 @@ export default function Operations(props: Props): JSX.Element {
         }
 
         return <Dropdown placement="bottomCenter" overlay={menu}>
-            <Button className="panel-button" icon="bulb" />
+            <Button className="panel-button" icon="bulb" title={"Operations"} />
         </Dropdown>
     }
 

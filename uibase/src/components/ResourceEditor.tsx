@@ -586,12 +586,12 @@ class ResourceEditor extends React.Component<any, State> {
                     {this.state.isSaving ?
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
-                        <Button className="panel-button" icon="save" onClick={this.save} />}
-                    <Button className="panel-button" icon="reload" onClick={this.refresh} />
+                        <Button className="panel-button" icon="save" onClick={this.save} title={"Save"}/>}
+                    <Button className="panel-button" icon="reload" onClick={this.refresh} title={"Reload"} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
                         <Operations translate={t} mainEObject={this.state.mainEObject} />}
-                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} />
-                    <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} />
+                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={"Copy"} />
+                    <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} title={"Delete"} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
