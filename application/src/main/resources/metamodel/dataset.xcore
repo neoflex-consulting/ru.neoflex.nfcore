@@ -85,26 +85,26 @@ enum Theme {
 }
 
 enum Aggregate {
-    UNDEFINED
-    SUM
-    AVERAGE
-    COUNT
-    COUNT_DISTINCT
-    MINIMUM
-    MAXIMUM
-    MEDIAN
+    undefined
+    sum
+    average
+    count
+    countDistinct
+    minimum
+    maximum
+    median
 }
 
 enum Sort {
-    UNDEFINED
-    FROM_A_TO_Z
-    FROM_Z_TO_A
+    undefined
+    from_A_to_Z
+    from_Z_to_A
 }
 
 enum Access {
-    UNDEFINED
-    PUBLIC //A Number Filter for number comparisons.
-    PRIVATE //A Text Filter for string comparisons.
+    undefined
+    public //A Number Filter for number comparisons.
+    private //A Text Filter for string comparisons.
 }
 
 enum Filter {
@@ -114,19 +114,19 @@ enum Filter {
 }
 
 enum Pinned {
-    OFF
-    LEFT
-    RIGHT
+    undefined
+    left
+    right
 }
 
 enum DataType {
-    UNDEFINED
-    STRING
-    BOOLEAN
-    DATE
-    TIMESTAMP
-    INTEGER
-    DECIMAL
+    undefined
+    string
+    boolean
+    date
+    timestamp
+    integer
+    decimal
 }
 
 
