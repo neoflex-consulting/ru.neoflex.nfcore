@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.JdbcDriver
 import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
-import ru.neoflex.nfcore.dataset.ValueType
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
 
@@ -51,21 +50,21 @@ class DatasetValidatorExt extends DatasetValidator {
         }
     }
 
-    @Override
-    boolean validateValueType_IsValid(ValueType valueType, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (valueType.name == null || valueType.name.length() < 3) {
-            return validate(valueType, diagnostics, context, "name - must contain more than two characters")
-        }
-        if (valueType.defaultValue == null || valueType.defaultValue.length() == 0) {
-            return validate(valueType, diagnostics, context, "defaultValue - must be set")
-        }
-        if (valueType.dataType.toString() == "UNDEFINED") {
-            return validate(valueType, diagnostics, context, "dataType - must be set")
-        }
-        if (valueType.domain != null && valueType.domain.dataType.toString() != valueType.dataType.toString()) {
-            return validate(valueType, diagnostics, context, "domain dataType - must be equal field dataType")
-        }
-    }
+//    @Override
+//    boolean validateValueType_IsValid(ValueType valueType, DiagnosticChain diagnostics, Map<Object, Object> context) {
+//        if (valueType.name == null || valueType.name.length() < 3) {
+//            return validate(valueType, diagnostics, context, "name - must contain more than two characters")
+//        }
+//        if (valueType.defaultValue == null || valueType.defaultValue.length() == 0) {
+//            return validate(valueType, diagnostics, context, "defaultValue - must be set")
+//        }
+//        if (valueType.dataType.toString() == "UNDEFINED") {
+//            return validate(valueType, diagnostics, context, "dataType - must be set")
+//        }
+//        if (valueType.domain != null && valueType.domain.dataType.toString() != valueType.dataType.toString()) {
+//            return validate(valueType, diagnostics, context, "domain dataType - must be equal field dataType")
+//        }
+//    }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {
         if (diagnostics != null) {

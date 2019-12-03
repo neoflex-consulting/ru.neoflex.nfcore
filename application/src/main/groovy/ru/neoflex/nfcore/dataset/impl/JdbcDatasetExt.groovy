@@ -44,9 +44,12 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         //Add columns name as first row
         for (int i = 1; i <= columnCount; ++i) {
             def object = rs.metaData.getColumnName(i)
+            def columnType = rs.metaData.getColumnTypeName(i)
             columnDefs.add([
-                    headerName: object == null ? null : object.toString().substring(0,1).toUpperCase() + object.toString().substring(1),
-                    field: object == null ? null : object.toString()
+                    //headerName: object == null ? null : object.toString().substring(0,1).toUpperCase() + object.toString().substring(1),
+                    field: object == null ? null : object.toString(),
+                    type: object == null ? null : columnType.toString()
+
             ])
         }
         result.add([columnDefs: columnDefs])

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {AgGridReact} from '@ag-grid-community/react';
+import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import "@ag-grid-community/core/dist/styles/ag-grid.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-balham.css";
@@ -12,6 +12,7 @@ import {Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import DateComponent from "./DateComponent";
 import {ChangeDetectionStrategyType} from "@ag-grid-community/react/lib/changeDetectionService";
+import CustomFilter from "./CustomFilter";
 
 interface Props {
     onCtrlA?: Function,
@@ -102,8 +103,15 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
         }
     };
 
+
     render() {
         const { columnDefs, rowData, gridOptions, t } = this.props
+        let CustomFilterThis
+        if (rowData !== undefined) {
+            CustomFilterThis = <CustomFilter {...this.props}/>
+        } else {
+            CustomFilterThis = <div title={"Not found"}/>
+        }
 
         return (
             <div
@@ -132,7 +140,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 <div style={{marginTop: "30px"}}>
                     <AgGridReact
                         ref={this.grid}
-                        columnDefs={columnDefs}
+                        //columnDefs={columnDefs}
                         rowData={rowData}
                         modules={AllCommunityModules}
                         pagination //странички
@@ -148,6 +156,8 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
 
                         dateComponentFramework={DateComponent} // setting grid wide date component
 
+                       // filterFramework={CustomFilterThis}
+
                         enableColResize={true}
                         // //pivotHeaderHeight={true}
                         enableSorting={true}
@@ -155,7 +165,37 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         enableFilter={true}
                         gridAutoHeight={true}
                         {...gridOptions}
-                    />
+                    >
+                        <AgGridColumn
+                            headerName="#"
+                            width={30}
+                            checkboxSelection
+                            sortable={false}
+                            suppressMenu //скрыть меню с фильтрами и пр.
+                            filter={false}
+                            pinned //закрепить стобец (слево, справо, отмена)
+                        >
+                        </AgGridColumn>
+                        <AgGridColumn
+                            headerName="Name"
+                            field="name"
+                            hide={false}
+                            pinned
+                        >
+                        </AgGridColumn>
+                            {
+                                columnDefs !== undefined ?
+                                    columnDefs.map((col: any) =>
+                                        <AgGridColumn
+                                            headerName={col.field.toString().substring(0,1).toUpperCase() + col.field.toString().substring(1)}
+                                            field={col.field}
+                                            headerTooltip={"type: " + col.type}
+                                        />
+                                    )
+                                    : null
+
+                            }
+                    </AgGridReact>
                 </div>
             </div>
         )

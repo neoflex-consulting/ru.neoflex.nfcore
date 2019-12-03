@@ -36,7 +36,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((jdbcDatasets) => {
                         this.setState({jdbcDatasets})
-                        this.runQuery(this.state.jdbcDatasets[0] as Ecore.Resource);
+                        this.runQuery(jdbcDatasets[0] as Ecore.Resource);
                     })
             }
         })
