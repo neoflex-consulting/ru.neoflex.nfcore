@@ -16,6 +16,7 @@ import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
 import Operations from './Operations';
+import moment from 'moment';
 
 export interface Props {
 }
@@ -258,7 +259,7 @@ class ResourceEditor extends React.Component<any, State> {
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
         } else if (componentName === 'DatePickerComponent') {
-            const value = { [EObject.get('name')]: newValue ? newValue.format() : '' }
+            const value = { [EObject.get('name')]: newValue ? moment(newValue).format() : '' }
             const updatedJSON = targetObject.updater(value);
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
@@ -276,31 +277,33 @@ class ResourceEditor extends React.Component<any, State> {
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
         const preparedData: Array<Object> = []
-        const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
-        featureList.forEach((feature: Ecore.EObject, idx: Number) => {
-            const isContainment = Boolean(feature.get('containment'))
-            const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
-            if (!isContainment && !isContainer) preparedData.push({
-                property: feature.get('name'),
-                value: FormComponentMapper.getComponent({
-                    value: targetObject[feature.get('name')],
-                    targetObject: targetObject,
-                    eObject: feature,
-                    eType: feature.get('eType'),
-                    upperBound: feature.get('upperBound'),
-                    idx: idx,
-                    ukey: key,
-                    onChange: this.onTablePropertyChange,
-                    handleDeleteSingleRef: this.handleDeleteSingleRef,
-                    handleDeleteRef: this.handleDeleteRef,
-                    onEClassBrowse: this.onEClassBrowse,
-                    onBrowse: this.onBrowse,
-                    mainEObject: mainEObject 
-                }),
-                key: feature.get('name') + idx
+        if (mainEObject.eContainer.getEObject(targetObject._id) !== null) {
+            const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+            featureList.forEach((feature: Ecore.EObject, idx: Number) => {
+                const isContainment = Boolean(feature.get('containment'))
+                const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
+                if (!isContainment && !isContainer) preparedData.push({
+                    property: feature.get('name'),
+                    value: FormComponentMapper.getComponent({
+                        value: targetObject[feature.get('name')],
+                        targetObject: targetObject,
+                        eObject: feature,
+                        eType: feature.get('eType'),
+                        upperBound: feature.get('upperBound'),
+                        idx: idx,
+                        ukey: key,
+                        onChange: this.onTablePropertyChange,
+                        handleDeleteSingleRef: this.handleDeleteSingleRef,
+                        handleDeleteRef: this.handleDeleteRef,
+                        onEClassBrowse: this.onEClassBrowse,
+                        onBrowse: this.onBrowse,
+                        mainEObject: mainEObject
+                    }),
+                    key: feature.get('name') + idx
+                })
             })
-        })
-
+            return preparedData
+        }
         return preparedData
     }
 
@@ -565,7 +568,7 @@ class ResourceEditor extends React.Component<any, State> {
         //if true that means resourceJSON was edited and updated
         if (this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null)
-            const preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
+            let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
             this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
         }
     }
