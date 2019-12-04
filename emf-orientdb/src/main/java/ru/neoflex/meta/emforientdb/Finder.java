@@ -13,7 +13,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.*;
 
 import static java.lang.Integer.min;
@@ -68,10 +67,8 @@ public class Finder {
         int startIndex = skip <= 0 ? 0 : min(skip, ids.size());
         int length = limit <= 0 ? ids.size() - startIndex : min(limit, ids.size() - startIndex);
         for (EntityId entityId: ids.subList(startIndex, startIndex + length)) {
-            Entity entity = tx.load(entityId);
-            Resource resource = database.createResourceSet(tx).createResource(database.createURI(entity.getId(), entity.getRev()));
-            database.loadResource(entity.getContent(), resource);
-            if (match(entity, resource.getContents().get(0), selector)) {
+            Resource resource = database.createResourceSet(tx).getResource(database.createURI(entityId.getId()), true);
+            if (match(entityId, resource.getContents().get(0), selector)) {
                 resourceSet.getResources().add(resource);
             }
         }
@@ -362,10 +359,7 @@ public class Finder {
         if (query.has("id")) {
             String id = query.get("id").asText();
             EntityId entityId = new EntityId(id, null);
-            if (Files.exists(tx.getIdPath(entityId))) {
-                return Collections.singletonList(entityId);
-            }
-            return Collections.emptyList();
+            return Collections.singletonList(entityId);
         }
         JsonNode contents = query.get("contents");
         if (contents != null && contents instanceof ObjectNode) {

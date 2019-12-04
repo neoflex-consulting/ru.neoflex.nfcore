@@ -7,7 +7,6 @@ import com.beijunyi.parallelgit.filesystem.commands.GfsCommit;
 import com.beijunyi.parallelgit.filesystem.io.DirectoryNode;
 import com.beijunyi.parallelgit.filesystem.io.Node;
 import com.github.marschall.pathclassloader.PathClassLoader;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;

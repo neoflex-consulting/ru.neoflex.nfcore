@@ -24,8 +24,8 @@
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
         <ecore-xcore-version>1.7.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
+<!--        <argLine>-XX:MaxDirectMemorySize=512g</argLine>-->
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

@@ -2,13 +2,8 @@ package ru.neoflex.meta.emforientdb;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 public class Transaction implements Closeable {
     private Database database;
@@ -26,6 +21,7 @@ public class Transaction implements Closeable {
     }
 
     public Transaction(Database database, String branch, LockType lockType) throws IOException {
+        this.database = database;
     }
 
     public Transaction(Database database, String branch) throws IOException {
@@ -47,15 +43,18 @@ public class Transaction implements Closeable {
     }
 
     public Entity load(EntityId entityId) throws IOException {
+        return null;
     }
 
     public Entity update(Entity entity) throws IOException {
+        return null;
     }
 
     public void delete(EntityId entityId) throws IOException {
     }
 
     public List<EntityId> all() throws IOException {
+        return null;
     }
 
     public Database getDatabase() {

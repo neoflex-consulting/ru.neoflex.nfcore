@@ -28,11 +28,6 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
         boolean isNew = id == null || id.length() == 0;
         String rev = isNew ? null : db.checkAndGetRev(uri);
         Resource oldResource = null;
-        if (!isNew) {
-            EntityId oldEntityId = new EntityId(id, rev);
-            Entity oldEntity = transaction.load(oldEntityId);
-            oldResource = db.entityToResource(transaction, oldEntity);
-        }
         db.getEvents().fireBeforeSave(oldResource, resource, transaction);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ((XMIResourceImpl) resource).doSave(os, options);
@@ -46,7 +41,7 @@ public class GitOutputStream extends ByteArrayOutputStream implements URIConvert
             transaction.update(entity);
         }
         rev = entity.getRev();
-        URI newURI = db.createURI(id, rev);
+        URI newURI = db.createURI(id);
         resource.setURI(newURI);
         db.getEvents().fireAfterSave(oldResource, resource, transaction);
     }

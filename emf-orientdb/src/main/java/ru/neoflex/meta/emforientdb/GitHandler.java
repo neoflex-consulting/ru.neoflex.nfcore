@@ -1,19 +1,13 @@
 package ru.neoflex.meta.emforientdb;
 
-import com.beijunyi.parallelgit.filesystem.GitPath;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
-import org.eclipse.jgit.lib.ObjectId;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.util.Map;
-
-import static java.nio.file.StandardOpenOption.*;
 
 public class GitHandler extends URIHandlerImpl {
     private Transaction transaction;
@@ -24,7 +18,7 @@ public class GitHandler extends URIHandlerImpl {
 
     @Override
     public boolean canHandle(URI uri) {
-        return Database.GITDB.equals(uri.scheme());
+        return Database.ORIENTDB.equals(uri.scheme());
     }
 
     public void delete(URI uri, Map<?, ?> options) throws IOException {

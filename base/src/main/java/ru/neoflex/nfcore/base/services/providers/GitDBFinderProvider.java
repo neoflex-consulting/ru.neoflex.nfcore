@@ -13,7 +13,6 @@ import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class GitDBFinderProvider extends Finder implements FinderSPI {
     private Transaction lastTx;

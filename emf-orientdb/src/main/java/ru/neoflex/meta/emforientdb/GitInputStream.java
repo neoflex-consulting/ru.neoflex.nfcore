@@ -38,7 +38,7 @@ public class GitInputStream extends InputStream implements URIConverter.Loadable
             resource.getContents().clear();
         }
         ((XMIResourceImpl) resource).doLoad(new ByteArrayInputStream(entity.getContent()), options);
-        URI newURI = db.createURI(id, rev);
+        URI newURI = db.createURI(id);
         resource.setURI(newURI);
         db.getEvents().fireAfterLoad(resource, transaction);
     }

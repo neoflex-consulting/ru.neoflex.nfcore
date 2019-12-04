@@ -12,7 +12,6 @@ import ru.neoflex.meta.emfgit.TransactionClassLoader;
 import ru.neoflex.nfcore.base.filters.ContextFilter;
 import ru.neoflex.nfcore.base.filters.GitClasspathFilter;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 

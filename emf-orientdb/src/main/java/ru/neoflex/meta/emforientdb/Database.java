@@ -6,51 +6,33 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.XMLParserPool;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMLParserPoolImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.neoflex.meta.emfgit.Events;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.eclipse.emf.ecore.xmi.XMLResource.*;
 
 public class Database implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(Database.class);
+    public final static String QNAME = "name";
+    public final static String ORIENTDB = "orientdb";
     private List<EPackage> packages;
     private Map<String, Index> indexes = new HashMap<>();
     private Events events = new Events();
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
     private String repoName;
     private XMLParserPool xmlParserPool = new XMLParserPoolImpl();
 
-    {
-        try {
-            GitURLStreamHandler.registerFactory();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Database(String repoPath, List<EPackage> packages) throws IOException, GitAPIException {
+    public Database(String repoPath, List<EPackage> packages) {
         this.repoName = new File(repoPath).getName();
-        this.repository = openRepository(repoPath);
         this.packages = packages;
         preCalcDescendants();
         createTypeNameIndex();
@@ -84,10 +66,6 @@ public class Database implements Closeable {
     }
 
     private void registerEvents() {
-        events.registerBeforeSave(this::checkUniqueQName);
-        events.registerAfterSave(this::updateResourceIndexes);
-        events.registerBeforeDelete(this::checkDependencies);
-        events.registerBeforeDelete(this::deleteResourceIndexes);
     }
 
     public EStructuralFeature getQNameFeature(EClass eClass) {
@@ -108,94 +86,32 @@ public class Database implements Closeable {
 
 
     private void createTypeNameIndex() {
-        createIndex(new Index() {
-            @Override
-            public String getName() {
-                return TYPE_NAME_IDX;
-            }
-
-            @Override
-            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
-                ArrayList<IndexEntry> result = new ArrayList<>();
-                EObject eObject = resource.getContents().get(0);
-                EClass eClass = eObject.eClass();
-                EStructuralFeature nameSF = getQNameFeature(eClass);
-                if (nameSF != null) {
-                    String name = (String) eObject.eGet(nameSF);
-                    if (name == null || name.length() == 0) {
-                        throw new IOException("Empty feature name");
-                    }
-                    EPackage ePackage = eClass.getEPackage();
-                    IndexEntry entry = new IndexEntry();
-                    entry.setPath(new String[]{ePackage.getNsURI(), eClass.getName(), name});
-                    entry.setContent(getResourceId(resource).getBytes("utf-8"));
-                    result.add(entry);
-                }
-                return result;
-            }
-        });
     }
 
     private void createRefIndex() {
-        createIndex(new Index() {
-            @Override
-            public String getName() {
-                return REF_IDX;
-            }
-
-            @Override
-            public List<IndexEntry> getEntries(Resource resource, Transaction transaction) throws IOException {
-                ArrayList<IndexEntry> result = new ArrayList<>();
-                Map<EObject, Collection<EStructuralFeature.Setting>> cr = EcoreUtil.ExternalCrossReferencer.find(resource);
-                Set<String> rootIds = new HashSet<>();
-                for (EObject eObject : cr.keySet()) {
-                    EObject root = EcoreUtil.getRootContainer(eObject);
-                    Resource rootResource = root.eResource();
-                    if (rootResource != null) {
-                        String id = checkAndGetResourceId(rootResource);
-                        rootIds.add(id);
-                    }
-                }
-                for (String id: rootIds) {
-                    IndexEntry entry = new IndexEntry();
-                    entry.setPath(new String[]{id.substring(0, 2), id.substring(2), getId(resource.getURI())});
-                    entry.setContent(new byte[0]);
-                    result.add(entry);
-                }
-                return result;
-            }
-        });
     }
 
-    public Resource loadResource(byte[] content, Resource resource) throws IOException {
-        ((XMIResourceImpl) resource).doLoad(new ByteArrayInputStream(content), null);
-        return resource;
-    }
-
-    public Resource createResource(Transaction tx, String id, String rev) {
+    public Resource createResource(Transaction tx, String id) {
         ResourceSet resourceSet = createResourceSet(tx);
-        return createResource(resourceSet, id, rev);
+        return createResource(resourceSet, id);
     }
 
-    public Resource createResource(ResourceSet resourceSet, String id, String rev) {
-        URI uri = createURI(id, rev);
+    public Resource createResource(ResourceSet resourceSet, String id) {
+        URI uri = createURI(id);
         return resourceSet.createResource(uri);
     }
 
-    public URI createURI(String id, String rev) {
+    public URI createURI(String id) {
         StringBuffer buffer = new StringBuffer("");
         if (id != null) {
             buffer.append(id);
         }
-        if (rev != null) {
-            buffer.append("?rev=");
-            buffer.append(rev);
-        }
+        buffer.append("?rev=-1");
         return createURIByRef(buffer.toString());
     }
 
     public URI createURIByRef(String ref) {
-        URI uri = URI.createURI(GITDB + "://" +repoName + "/" + (ref == null ? "" : ref));
+        URI uri = URI.createURI(ORIENTDB + "://" +repoName + "/" + (ref == null ? "" : ref));
         return uri;
     }
 
@@ -322,13 +238,8 @@ public class Database implements Closeable {
     }
 
     public List<Resource> getDependentResources(String id, Transaction tx) throws IOException {
-        ResourceSet resourceSet = createResourceSet(tx);
         List<Resource> resources = new ArrayList<>();
-        List<IndexEntry> refList = findByIndex(tx, REF_IDX, id.substring(0, 2), id.substring(2));
-        for (IndexEntry entry : refList) {
-            String refId = entry.getPath()[entry.getPath().length - 1];
-            resources.add(loadResource(resourceSet, refId));
-        }
+        // TODO: to implement
         return resources;
     }
 
@@ -345,17 +256,17 @@ public class Database implements Closeable {
     public List<IndexEntry> findEClassIndexEntries(EClass eClass, String name, Transaction tx) throws IOException {
         String nsURI = eClass.getEPackage().getNsURI();
         String className = eClass.getName();
-        List<IndexEntry> ieList;
+        List<IndexEntry> ieList = null;
         if (name == null || name.length() == 0) {
-            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className);
+            // TODO: to implement
         } else {
-            ieList = findByIndex(tx, TYPE_NAME_IDX, nsURI, className, name);
+            // TODO: to implement
         }
         return ieList;
     }
 
     public Resource loadResource(ResourceSet resourceSet, String id) throws IOException {
-        URI uri = createURI(id, null);
+        URI uri = createURI(id);
         Resource resource = resourceSet.createResource(uri);
         resource.load(null);
         return resource;
@@ -368,139 +279,6 @@ public class Database implements Closeable {
 
     public List<EPackage> getPackages() {
         return packages;
-    }
-
-    private void checkDependencies(Resource old, Transaction tx) throws IOException {
-        String id = getId(old.getURI());
-        List<IndexEntry> refList = findByIndex(tx, "ref", id.substring(0, 2), id.substring(2));
-        if (!refList.isEmpty()) {
-            String[] path = refList.get(0).getPath();
-            throw new IOException("Object " + id + " is referenced by " + path[path.length - 1]);
-        }
-    }
-
-    private void deleteResourceIndexes(Resource old, Transaction tx) throws IOException {
-        GitFileSystem gfs = tx.getFileSystem();
-        for (String indexName : getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry : getIndexes().get(indexName).getEntries(old, tx)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                Files.delete(indexValuePath);
-            }
-        }
-    }
-
-    private void updateResourceIndexes(Resource oldResource, Resource newResource, Transaction tx) throws IOException {
-        GitFileSystem gfs = tx.getFileSystem();
-        Set<String> toDelete = new HashSet<>();
-        if (oldResource != null) {
-            for (String indexName : getIndexes().keySet()) {
-                GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-                for (IndexEntry entry : getIndexes().get(indexName).getEntries(oldResource, tx)) {
-                    GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                    toDelete.add(indexValuePath.toString());
-                }
-            }
-        }
-        for (String indexName : getIndexes().keySet()) {
-            GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-            for (IndexEntry entry : getIndexes().get(indexName).getEntries(newResource, tx)) {
-                GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", entry.getPath()).normalize());
-                if (!toDelete.remove(indexValuePath.toString()) && Files.exists(indexValuePath)) {
-                    throw new IOException("Index file " + indexValuePath.toString() + " already exists");
-                }
-                Files.createDirectories(indexValuePath.getParent());
-                Files.write(indexValuePath, entry.getContent());
-            }
-        }
-        for (String indexValuePathString : toDelete) {
-            GitPath indexValuePath = gfs.getPath(indexValuePathString);
-            Files.delete(indexValuePath);
-        }
-    }
-
-    public void reindex(Transaction tx) throws IOException {
-        GitFileSystem gfs = tx.getFileSystem();
-        GitPath indexRootPath = gfs.getPath("/", IDX_PATH);
-        deleteRecursive(indexRootPath);
-        for (EntityId entityId : tx.all()) {
-            Entity entity = tx.load(entityId);
-            Resource resource = entityToResource(tx, entity);
-            updateResourceIndexes(null, resource, tx);
-        }
-    }
-
-    public Resource entityToResource(Transaction tx, Entity entity) throws IOException {
-        Resource resource = createResource(tx, entity.getId(), entity.getRev());
-        loadResource(entity.getContent(), resource);
-        return resource;
-    }
-
-    public void deleteRecursive(Path indexRootPath) throws IOException {
-        List<Path> pathsToDelete = Files.walk(indexRootPath).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-        for (Path path : pathsToDelete) {
-            Files.deleteIfExists(path);
-        }
-    }
-
-    private void checkUniqueQName(Resource resourceOld, Resource resource, Transaction tx) throws IOException {
-        if (resource.getContents().isEmpty()) {
-            return;
-        }
-        EObject eObject = resource.getContents().get(0);
-        EClass eClass = eObject.eClass();
-        EStructuralFeature sf = getQNameFeature(eClass);
-        if (sf != null) {
-            String name = (String) eObject.eGet(sf);
-            if (resourceOld != null && resourceOld.getContents().size() > 0) {
-                String oldName = (String) resource.getContents().get(0).eGet(sf);
-                if (Objects.equals(oldName, name)) {
-                    return;
-                }
-            }
-            String id = resourceOld == null ? null : checkAndGetResourceId(resourceOld);
-            for (EClass descendant : getConcreteDescendants(eClass)) {
-                List<IndexEntry> ieList = findEClassIndexEntries(descendant, name, tx);
-                for (IndexEntry ie : ieList) {
-                    String oldId = new String(ie.getContent());
-                    if (id == null || !id.equals(oldId)) {
-                        throw new IllegalArgumentException(String.format(
-                                "Duplicate qualified name eClass: %s, feature: %s, id: %s",
-                                EcoreUtil.getURI(eClass), name, oldId));
-                    }
-                }
-            }
-        }
-    }
-
-    public List<IndexEntry> findByIndex(Transaction tx, String indexName, String... path) throws IOException {
-        GitFileSystem gfs = tx.getFileSystem();
-        GitPath indexPath = gfs.getPath("/", IDX_PATH, indexName);
-        GitPath indexValuePath = indexPath.resolve(gfs.getPath(".", path).normalize());
-        try {
-            return Files.walk(indexValuePath).filter(Files::isRegularFile).map(file -> {
-                IndexEntry entry = new IndexEntry();
-                Path relPath = indexPath.relativize(file);
-                entry.setPath(relPath.toString().split("/"));
-                try {
-                    byte[] content = Files.readAllBytes(file);
-                    entry.setContent(content);
-                    return entry;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList());
-        } catch (NoSuchFileException e) {
-            return new ArrayList<>();
-        }
-    }
-
-    public Set<String> getBranches() throws IOException {
-        return BranchUtils.getBranches(repository).keySet();
-    }
-
-    public void createBranch(String branch, String from) throws IOException {
-        BranchUtils.createBranch(branch, from, repository);
     }
 
     public Transaction createTransaction(String branch) throws IOException {
@@ -528,7 +306,7 @@ public class Database implements Closeable {
             try (Transaction tx = transactionSupplier.get()) {
                 return f.call(tx);
             }
-            catch (IOException|RefUpdateLockFailureException|RefUpdateRejectedException e) {
+            catch (Exception e) {
                 String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt;
                 logger.debug(message);
                 if (++attempt > maxAttempts) {
@@ -548,36 +326,10 @@ public class Database implements Closeable {
 
     @Override
     public void close() throws IOException {
-        repository.close();
-    }
-
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public Repository openRepository(String repoPath) throws IOException, GitAPIException {
-        File repoFile = new File(repoPath);
-        Repository repository = new File(repoFile, DOT_GIT).exists() ?
-                RepositoryUtils.openRepository(repoFile, false) :
-                RepositoryUtils.createRepository(repoFile, false);
-        if (BranchUtils.getBranches(repository).size() == 0) {
-            try (Git git = new Git(repository);) {
-                git.commit().setMessage("Initial commit").setAllowEmpty(true).call();
-            }
-        }
-        return repository;
     }
 
     public Map<String, Index> getIndexes() {
         return indexes;
-    }
-
-    public void createIndex(Index index) {
-        getIndexes().put(index.getName(), index);
-    }
-
-    public ReadWriteLock getLock() {
-        return lock;
     }
 
     public Events getEvents() {
