@@ -1,4 +1,4 @@
-package ru.neoflex.meta.emfgit;
+package ru.neoflex.meta.emforientdb;
 
 public class IndexEntry {
     private String[] path;

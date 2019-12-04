@@ -1,4 +1,4 @@
-package ru.neoflex.meta.emfgit;
+package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;

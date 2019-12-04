@@ -1,11 +1,5 @@
-package ru.neoflex.meta.emfgit;
+package ru.neoflex.meta.emforientdb;
 
-import com.beijunyi.parallelgit.filesystem.GitFileSystem;
-import com.beijunyi.parallelgit.filesystem.GitPath;
-import com.beijunyi.parallelgit.utils.BranchUtils;
-import com.beijunyi.parallelgit.utils.RepositoryUtils;
-import com.beijunyi.parallelgit.utils.exceptions.RefUpdateLockFailureException;
-import com.beijunyi.parallelgit.utils.exceptions.RefUpdateRejectedException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -17,11 +11,9 @@ import org.eclipse.emf.ecore.xmi.XMLParserPool;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMLParserPoolImpl;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.neoflex.meta.emfgit.Events;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -36,18 +28,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.eclipse.emf.ecore.xmi.XMLResource.*;
-import static org.eclipse.jgit.lib.Constants.DOT_GIT;
 
 public class Database implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(Database.class);
-    final public static String DB_PATH = "db";
-    final public static String IDS_PATH = DB_PATH + "/ids";
-    final public static String IDX_PATH = DB_PATH + "/idx";
-    public static final String TYPE_NAME_IDX = "type_name";
-    public static final String REF_IDX = "ref";
-    public static final String QNAME = "name";
-    public static final String GITDB = "gitdb";
-    private final Repository repository;
     private List<EPackage> packages;
     private Map<String, Index> indexes = new HashMap<>();
     private Events events = new Events();

@@ -1,4 +1,4 @@
-package ru.neoflex.meta.emfgit;
+package ru.neoflex.meta.emforientdb;
 
 import com.beijunyi.parallelgit.filesystem.GitPath;
 import org.eclipse.emf.common.util.URI;
