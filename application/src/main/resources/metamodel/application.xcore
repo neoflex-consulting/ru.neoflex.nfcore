@@ -11,6 +11,8 @@ import ru.neoflex.nfcore.base.types.Caption
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import ru.neoflex.nfcore.dataset.JdbcDataset
+import ru.neoflex.nfcore.dataset.DatasetView
 
 /* Components */
 abstract class Component {
@@ -26,19 +28,29 @@ class UserComponent extends Component {
 }
 
 /* Applications */
+//Добавлены Dataset-ы в AppModule, для этого добавлен класс AppDataset
+//Нужна проверка, чтобы не было в одном AppModule два и более одинаковых JdbcDataset
+//На CompnentDid(Mount && Update) в AppModule будут начитывться все AppDataset, если они уже ранее не были начитаны
 class AppModule {
     QName name
     contains ViewElement view
     contains Tools tools
     contains CatalogNode referenceTree
+    contains AppDataset[] appDataset
 }
 
 class Application extends AppModule {
 }
 
+//Добавлен
+class AppDataset {
+    String name
+    refers JdbcDataset jdbcDataset
+}
+
 /* Views */
 abstract class ViewElement {
-	String[1] code
+	String[1] name
 	container ViewContainer parent opposite children
 }
 
@@ -71,10 +83,23 @@ class FAIcon extends Icon {
 	String iconCode
 }
 
+//Не стала делать панель элементов, просто есть формочка с возможностью добавления заголовка в ней.
 class Form extends ViewContainer {
+    String headerName
 }
 
+//В FormItem также добавла возможность заголовка
 class FormItem extends ViewContainer {
+    String headerName
+}
+
+//GridView включен в набор стандартных инструментов view в AppModule
+//Есть свой заголовок и Dataset, который он отображает +
+//View (по умолчнию = default (стандартные настройки) без скрытых столбцов, сортировок и пр.)
+class GridView extends ViewElement {
+    String headerName
+    refers JdbcDataset jdbcDataset
+    refers DatasetView datasetView
 }
 
 class Row extends ViewContainer {

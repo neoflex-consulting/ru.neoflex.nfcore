@@ -566,8 +566,8 @@ class ResourceEditor extends React.Component<any, State> {
 
     componentDidUpdate(prevProps: Props, prevState: State) {
         //if true that means resourceJSON was edited and updated
-        if (this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
-            const nestedJSON = nestUpdaters(this.state.resourceJSON, null)
+        if (this.state.targetObject !== undefined && this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
+            const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
             this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
         }

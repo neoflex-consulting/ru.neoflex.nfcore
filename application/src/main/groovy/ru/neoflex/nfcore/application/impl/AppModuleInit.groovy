@@ -44,7 +44,7 @@ class AppModuleInit {
                 def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",false)
 
                 def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement1.code = 'Mandatory Reporting'
+                componentElement1.name = 'Page Not Found'
                 componentElement1.setComponent(userComponent5)
                 application.view = componentElement1
             }
@@ -55,20 +55,20 @@ class AppModuleInit {
                 application.name = name
 
                 def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement1.code = 'Mandatory Reporting'
+                componentElement1.name = 'Mandatory Reporting'
                 componentElement1.setComponent(userComponent1)
                 application.view = componentElement1
 
                 def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
                 def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement3.code = 'Mandatory Reporting'
+                componentElement3.name = 'Mandatory Reporting'
                 componentElement3.setComponent(userComponent1)
                 def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
                 viewNode1.name = 'Mandatory Reporting'
                 viewNode1.view = componentElement3
                 referenceTree.children.add(viewNode1)
                 def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement2.code = 'Tax Reporting'
+                componentElement2.name = 'Tax Reporting'
                 componentElement2.setComponent(userComponent6)
                 def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
                 viewNode2.name = 'Tax Reporting'
@@ -106,13 +106,13 @@ class AppModuleInit {
             application.name = name
 
             def Tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
-            Tabs.code = 'View Report'
+            Tabs.name = 'View Report'
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
-            componentElement1.code = 'Pivot'
-            componentElement2.code = 'Rich Grid'
-            componentElement3.code = 'Diagram'
+            componentElement1.name = 'Pivot'
+            componentElement2.name = 'Rich Grid'
+            componentElement3.name = 'Diagram'
             componentElement1.setComponent(userComponent1)
             componentElement2.setComponent(userComponent2)
             componentElement3.setComponent(userComponent3)

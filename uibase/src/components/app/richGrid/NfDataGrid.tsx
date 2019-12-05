@@ -10,9 +10,7 @@ import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
-import DateComponent from "./DateComponent";
-import {ChangeDetectionStrategyType} from "@ag-grid-community/react/lib/changeDetectionService";
-import CustomFilter from "./CustomFilter";
+import './../../../styles/RichGrid.css';
 
 interface Props {
     onCtrlA?: Function,
@@ -33,14 +31,24 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
 
         this.state = {
             themes: [
-                "ag-theme-balham",
-                "ag-theme-material",
-                "ag-theme-fresh",
-                "ag-theme-blue",
-                "ag-theme-bootstrap"
+                "balham",
+                "blue",
+                "bootstrap",
+                "fresh",
+                "material"
             ],
-            theme: "ag-theme-balham",
-            rowCount: null
+            theme: "balham",
+            paginationPageSizes: [
+                1,
+                10,
+                20,
+                50,
+                100,
+                500,
+                1000,
+                "All"
+            ],
+            paginationPageSize: 20,
         };
 
         this.grid = React.createRef();
@@ -88,73 +96,70 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
     onGridReady = (params: any) => {
         this.grid.current.api = params.api;
         this.grid.current.columnApi = params.columnApi;
-
-        this.calculateRowCount();
     };
 
-    calculateRowCount = () => {
-        if (this.grid.current.api && this.state.rowData) {
-            const model = this.grid.current.api.getModel();
-            const totalRows = this.state.rowData.length;
-            const processedRows = model.getRowCount();
-            this.setState({
-                rowCount: processedRows.toLocaleString() + ' / ' + totalRows.toLocaleString()
-            });
-        }
-    };
-
+    onPageSizeChanged(newPageSize: any) {
+        this.grid.current.api.paginationSetPageSize(Number(newPageSize));
+    }
 
     render() {
         const { columnDefs, rowData, gridOptions, t } = this.props
-        let CustomFilterThis
-        if (rowData !== undefined) {
-            CustomFilterThis = <CustomFilter {...this.props}/>
-        } else {
-            CustomFilterThis = <div title={"Not found"}/>
-        }
-
-        return (
+         return (
             <div
                 onKeyDown={this.handleKeyDown}
                 style={{ boxSizing: 'border-box', height: '100%', width: '100%' }}
-                className={this.state.theme}
+                className={"ag-theme-" + this.state.theme}
             >
                 <Select
                     notFoundContent={t('notfound')}
                     allowClear={true}
                     showSearch={true}
-                    style={{ width: '180px' }}
-                    autoFocus
-                    placeholder="Theme"
+                    style={{ width: '180px', marginLeft: '10px' }}
                     onSelect={ (e:string) => this.setState({theme: e})}
-                    defaultValue={"ag-theme-balham"}
+                    defaultValue={"Theme: " + this.state.themes[0]}
                 >
                     {
                         this.state.themes
                             .map((theme: string) =>
                                 <Select.Option key={theme} value={theme}>
-                                    {theme}
+                                    {"Theme: " + theme}
                                 </Select.Option>)
                     }
                 </Select>
-                <div style={{marginTop: "30px"}}>
+                <Select
+                    notFoundContent={t('notfound')}
+                    allowClear={true}
+                    showSearch={true}
+                    style={{ width: '180px', marginLeft: '10px' }}
+                    placeholder="Show rows"
+                    // onSelect={ (e:string) => this.setState({rowCount: e})}
+                    defaultValue={"Show rows: " + this.state.paginationPageSize}
+                    onChange={this.onPageSizeChanged.bind(this)}
+                >
+                    {
+                        this.state.paginationPageSizes
+                            .map((paginationPageSize: string) =>
+                                <Select.Option key={paginationPageSize} value={paginationPageSize}>
+                                    {"Show rows: " + paginationPageSize}
+                                </Select.Option>)
+                    }
+                </Select>
+                <div style={{ marginTop: "30px", marginLeft: '10px'}}>
                     <AgGridReact
                         ref={this.grid}
                         //columnDefs={columnDefs}
                         rowData={rowData}
                         modules={AllCommunityModules}
-                        pagination //странички
+                        //pagination //странички
                         rowSelection="multiple" //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
-                        rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
+                        //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
                         suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
                         suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                         allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
                         headerHeight={40} //высота header в px (25 по умолчанию)
                         suppressRowClickSelection //строки не выделяются при нажатии на них
-
-                        dateComponentFramework={DateComponent} // setting grid wide date component
 
                        // filterFramework={CustomFilterThis}
 
@@ -165,6 +170,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         enableFilter={true}
                         gridAutoHeight={true}
                         {...gridOptions}
+                        paginationPageSize={this.state.paginationPageSize}
                     >
                         <AgGridColumn
                             headerName="#"
@@ -181,6 +187,9 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                             field="name"
                             hide={false}
                             pinned
+                            headerTooltip={"headerTooltip"}
+                            filter="agDateColumnFilter"
+                            sort={"DESC"}
                         >
                         </AgGridColumn>
                             {

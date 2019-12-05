@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.JdbcDriver
 import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
-import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
 
 class DatasetValidatorExt extends DatasetValidator {
@@ -37,14 +36,10 @@ class DatasetValidatorExt extends DatasetValidator {
     }
 
     @Override
-    boolean validateDataset_IsValid(Dataset dataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (dataset.name == null || dataset.name.length() < 3) {
+    boolean validateJdbcDataset_IsValid(JdbcDataset jdbcDataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (jdbcDataset.name == null || jdbcDataset.name.length() < 3) {
             return validate(dataset, diagnostics, context, "name - must contain more than two characters")
         }
-    }
-
-    @Override
-    boolean validateJdbcDataset_IsValid(JdbcDataset jdbcDataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (jdbcDataset.query == null || jdbcDataset.query.length() == 0) {
             return validate(jdbcDataset, diagnostics, context, "query - must be set")
         }

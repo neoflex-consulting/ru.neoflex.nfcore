@@ -4,7 +4,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import MandatoryReporting from "./MandatoryReporting";
 import ReportPivot from "./ReportPivot";
 import ReportDiagram from "./ReportDiagram";
-import ReportRichGrid from "./rich_grid/ReportRichGrid";
+import ReportRichGrid from "./richGrid/ReportRichGrid";
 import PageNotFound from "./PageNotFound";
 import TaxReporting from "./TaxReporting";
 
