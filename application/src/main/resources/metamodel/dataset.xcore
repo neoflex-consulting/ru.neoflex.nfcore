@@ -42,15 +42,21 @@ abstract class Dataset {
 class JdbcDataset extends Dataset {
     refers JdbcConnection connection
     Text query
-    contains DatasetView[] view
+    contains AppDatasetColumn[] datasetColumn
+    contains AppDatasetView[] view
+}
+
+class AppDatasetView {
+    String name
+    refers DatasetView datasetView
 }
 
 /*View*/
 class DatasetView {
+    //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
+    contains DatasetColumnView[] column
     QName name //default сделать по умолчанию (не редактируемый)
     int rowCount //сколько строк показывать
-    //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
-    contains DatasetColumn[] column
     String markRow //При условии таком-то, строки заливаются таким-то цветом
     Access access //Публичный, закрытый доступ
     String owner //Не редактируемое поле. Создатель вью
@@ -58,8 +64,19 @@ class DatasetView {
     Date date //дата на которую подгружается отчет
 }
 
+class AppDatasetColumn {
+    String name
+    refers DatasetColumn datasetColumn
+}
+
 class DatasetColumn {
-    String field //название поля с сервера
+    String fieldName //название поля с сервера
+    String servertDataType //сопоставляет пришедший тип из базы со списком доступных DataType в enum
+    DataType domainDataType //тип, который приходит с сервера (не редактирумое поле)
+}
+
+class DatasetColumnView {
+    refers DatasetColumn datasetColumn
     String headerName //название столбца
     String headerTooltip //всплывающая подсказка
     boolean hide //скрытый ли столбец. По умолчанию false

@@ -7,17 +7,18 @@
 )
 package ru.neoflex.nfcore.reports
 import ru.neoflex.nfcore.base.types.QName
-import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.application.AppModule
 
 class Report {
 	QName name
+	refers AppModule AppModule
 }
 
-class InstanceReport extends Report{
+class InstanceReport{
+    QName name
     refers Report report
 	Date date
-	refers Dataset dataset
 	refers ReportStatus status
 }
 

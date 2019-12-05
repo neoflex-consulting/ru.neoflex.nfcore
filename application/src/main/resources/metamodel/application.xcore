@@ -11,6 +11,8 @@ import ru.neoflex.nfcore.base.types.Caption
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.dataset.JdbcDataset
 
 /* Components */
 abstract class Component {
@@ -31,9 +33,15 @@ class AppModule {
     contains ViewElement view
     contains Tools tools
     contains CatalogNode referenceTree
+    contains AppDataset[] appDataset
 }
 
 class Application extends AppModule {
+}
+
+class AppDataset {
+    String name
+    refers JdbcDataset jdbcDataset
 }
 
 /* Views */
@@ -84,6 +92,16 @@ class Span extends ViewContainer {
 }
 
 class TabsViewReport extends ViewContainer {
+}
+
+class PanelElement extends ViewContainer {
+    String headerName
+    contains GridView gridView
+}
+
+class GridView {
+    String name
+    refers Dataset dataset
 }
 
 class Tool extends ViewContainer {

@@ -1,6 +1,7 @@
 {
         "action": "Action",
         "additem": "Add item",
+        "addreference": "Add reference",
         "addresources": "Add resources",
         "appname": "Neoflex CORE",
         "clear": "Clear",
