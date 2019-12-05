@@ -77,7 +77,7 @@ class TabsViewReport_ extends ViewContainer {
             <Tabs>
                 {
                     children.map((c: Ecore.EObject) =>
-                        <TabPane tab={c.get('code')} key={c.get('code')} >
+                        <TabPane tab={c.get('name')} key={c.get('name')} >
                             {/*{this.viewFactory.createView(c, this.props, this.activeObject)}*/}
                             {this.viewFactory.createView(c, this.props)}
                         </TabPane>
