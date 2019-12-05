@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TestBase {
-    public static final String GITDB = "test-emf-orientdb";
+    public static final String DBNAME = "test-emf-orientdb";
     Database database;
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
@@ -26,7 +26,7 @@ public class TestBase {
     }
 
     public static File getDatabaseFile() throws IOException {
-        return new File(System.getProperty("user.home") + "/.orientdb", GITDB);
+        return new File(System.getProperty("user.home") + "/.orientdb", DBNAME);
     }
 
     public static Database refreshRatabase() throws IOException {
