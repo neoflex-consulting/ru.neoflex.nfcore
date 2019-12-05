@@ -133,8 +133,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                     placeholder="EClass">
                                                     {
                                                         this.state.classes
-                                                            .filter((eclass: Ecore.EObject) => !eclass.get('abstract')
-                                                                && eclass.get('eAllStructuralFeatures')
+                                                            .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')
+                                                                && */eclass.get('eAllStructuralFeatures')
                                                                     .find((feature: Ecore.EStructuralFeature) =>
                                                                         feature.get('eType').get('name') === 'QName'))
                                                             .map((eclass: Ecore.EObject) =>
