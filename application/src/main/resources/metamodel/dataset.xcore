@@ -10,7 +10,7 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
-import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.base.auth.Audit
 
 /*JdbcDriver*/
 @Ecore(constraints="IsValid")
@@ -32,39 +32,39 @@ class JdbcConnection {
 }
 
 /*Dataset*/
-@Ecore(constraints="IsValid")
-class JdbcDataset {
+abstract class Dataset {
     QName name
     op JSON runQuery()
-    refers JdbcConnection connection
-    Text query
     contains DatasetColumn[] datasetColumn
-    contains AppDatasetView[] view
 }
 
-class AppDatasetView {
-    String name
-    refers DatasetView datasetView
+@Ecore(constraints="IsValid")
+class JdbcDataset extends Dataset {
+    refers JdbcConnection connection
+    Text query
 }
 
 /*View*/
-class DatasetView {
-    //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
-    contains DatasetColumnView[] column
-    QName name //default сделать по умолчанию (не редактируемый)
-    String rowCount//сколько строк показывать (выбрать из списка)
-    String markRow //При условии таком-то, строки заливаются таким-то цветом
-    Access access //Публичный, закрытый доступ
-    String owner //Не редактируемое поле. Создатель вью
-    Theme theme //Выбранная тема грида
-    Date date //дата на которую подгружается отчет
+abstract class DatasetView {
+     refers Dataset dataset
+     QName name //default сделать по умолчанию (не редактируемый)
+     contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
+     Access access //Публичный, закрытый доступ
 }
-/*
-class AppDatasetColumn {
-    String name
-    refers DatasetColumn datasetColumn
+
+class DatasetViewGrid extends DatasetView {
+     //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
+     contains DatasetColumnView[] column
+     String rowCount//сколько строк показывать (выбрать из списка)
+     String markRow //При условии таком-то, строки заливаются таким-то цветом
+     Theme theme //Выбранная тема грида
 }
-*/
+
+class DatasetViewPivot extends DatasetView {
+}
+
+class DatasetViewDiagram extends DatasetView {
+}
 
 class DatasetColumn {  //не редактирумый класс, информативный. Отвечает на вопрос: что пришло с сервера?
     String rdbmsFieldName //название поля с сервера
@@ -72,7 +72,7 @@ class DatasetColumn {  //не редактирумый класс, информ�
     //сопоставляет пришедший тип из базы со списком доступных DataType в enum и показывает возможные варианты
     //Например: все поля могут быть стринг + универсальный тип (дата, время, число)
     DataType convertDataType
-    }
+}
 
 //Количество столбцов в DatasetColumn в JdbcDataset (пришедшее с сервера),
 //должно быть равно количеству столбцов во вью. Если нет, то писать каких не хватает и ошибка
@@ -86,7 +86,8 @@ class DatasetColumnView {
     boolean calculatedColumn //вычисляемый столбец
     String calculatedExpression //выражение в вычисляемом столбце
     Filter filter //выбор типа фильтра. Зависит от типа данных, но можно изменить.
-    String filterExpression //выражение в фильтре
+    String serverFilterExpression //выражение в фильтре
+    String clientFilterExpression //выражение в фильтре
     Sort sort //тип сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)

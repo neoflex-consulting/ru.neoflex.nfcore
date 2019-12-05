@@ -11,8 +11,8 @@ import ru.neoflex.nfcore.base.types.Caption
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
-import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.DatasetView
+import ru.neoflex.nfcore.dataset.Dataset
 
 /* Components */
 abstract class Component {
@@ -36,16 +36,10 @@ class AppModule {
     contains ViewElement view
     contains Tools tools
     contains CatalogNode referenceTree
-    contains AppDataset[] appDataset
+    refers Dataset[] dataset
 }
 
 class Application extends AppModule {
-}
-
-//Добавлен
-class AppDataset {
-    String name
-    refers JdbcDataset jdbcDataset
 }
 
 /* Views */
@@ -98,7 +92,6 @@ class FormItem extends ViewContainer {
 //View (по умолчнию = default (стандартные настройки) без скрытых столбцов, сортировок и пр.)
 class GridView extends ViewElement {
     String headerName
-    refers JdbcDataset jdbcDataset
     refers DatasetView datasetView
 }
 
