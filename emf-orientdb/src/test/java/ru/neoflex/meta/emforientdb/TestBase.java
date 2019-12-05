@@ -21,15 +21,15 @@ public class TestBase {
         return directoryToBeDeleted.delete();
     }
 
-    public static Database getDatabase() throws IOException {
-        return new Database(getDatabaseFile().getAbsolutePath(), new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+    public static Database getDatabase() throws Exception {
+        return new Database(getDatabaseFile().getAbsolutePath(), new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}}).start();
     }
 
     public static File getDatabaseFile() throws IOException {
         return new File(System.getProperty("user.home") + "/.orientdb", DBNAME);
     }
 
-    public static Database refreshRatabase() throws IOException {
+    public static Database refreshRatabase() throws Exception {
         deleteDirectory(getDatabaseFile());
         return getDatabase();
     }

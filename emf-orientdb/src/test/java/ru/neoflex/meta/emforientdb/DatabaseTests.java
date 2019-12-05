@@ -12,11 +12,15 @@ import java.io.IOException;
 
 public class DatabaseTests extends TestBase {
     @Before
-    public void startUp() throws IOException {
+    public void startUp() throws Exception {
         database = refreshRatabase();
     }
 
     @Test
+    public void emptyTest() {
+
+    }
+
     public void createEMFObject() throws IOException {
         String userId;
         String groupId;

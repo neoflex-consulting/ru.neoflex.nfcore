@@ -1,5 +1,8 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.orient.server.OServer;
+import com.orientechnologies.orient.server.OServerMain;
+import com.orientechnologies.orient.server.config.OServerConfiguration;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -14,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -30,14 +34,32 @@ public class Database implements Closeable {
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
     private String repoName;
     private XMLParserPool xmlParserPool = new XMLParserPoolImpl();
+    OServer server;
+    OServerConfiguration configuration;
 
-    public Database(String repoPath, List<EPackage> packages) {
-        this.repoName = new File(repoPath).getName();
+    public Database(String dbPath, List<EPackage> packages) throws Exception {
+        //String orientdbHome = new File("").getAbsolutePath(); //Set OrientDB home to current directory
+        System.setProperty("ORIENTDB_HOME", dbPath);
+        this.server = OServerMain.create();
+        this.configuration = new OServerConfiguration();
+        this.repoName = new File(dbPath).getName();
         this.packages = packages;
         preCalcDescendants();
         createTypeNameIndex();
         createRefIndex();
         registerEvents();
+    }
+
+    @Override
+    public void close() throws IOException {
+        server.shutdown();
+    }
+
+    public Database start() throws NoSuchMethodException, IOException, InvocationTargetException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+        //server.startup(configuration);
+        server.startup(Thread.currentThread().getContextClassLoader().getResourceAsStream("ru/neoflex/meta/emforientdb/db.config.xml"));
+        server.activate();
+        return this;
     }
 
     private void preCalcDescendants() {
@@ -322,10 +344,6 @@ public class Database implements Closeable {
                 continue;
             }
         }
-    }
-
-    @Override
-    public void close() throws IOException {
     }
 
     public Map<String, Index> getIndexes() {
