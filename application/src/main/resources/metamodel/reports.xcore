@@ -10,19 +10,21 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.application.AppModule
 
+//Добавлена ссылка на AppModule (только на один, что логично? У одного отчета 1 отображене?)
 class Report {
 	QName name
 	refers AppModule AppModule
 }
 
+//Название InstanceReport автогенериться из названия отчета + дата
 class InstanceReport{
     QName name
     refers Report report
 	Date date
-	refers ReportStatus status
+	refers StatusReport status
 }
 
-class ReportStatus {
+class StatusReport {
 	QName name
 	String[1] color
 	String description

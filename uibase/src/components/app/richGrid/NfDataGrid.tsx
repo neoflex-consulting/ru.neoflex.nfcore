@@ -44,8 +44,9 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 20,
                 50,
                 100,
+                500,
                 1000,
-                "ALL"
+                "All"
             ],
             paginationPageSize: 20,
         };
@@ -149,7 +150,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         //columnDefs={columnDefs}
                         rowData={rowData}
                         modules={AllCommunityModules}
-                        pagination //странички
+                        //pagination //странички
                         rowSelection="multiple" //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные

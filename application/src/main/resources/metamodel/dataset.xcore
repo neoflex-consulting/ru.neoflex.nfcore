@@ -33,16 +33,12 @@ class JdbcConnection {
 
 /*Dataset*/
 @Ecore(constraints="IsValid")
-abstract class Dataset {
+class JdbcDataset {
     QName name
     op JSON runQuery()
-}
-
-@Ecore(constraints="IsValid")
-class JdbcDataset extends Dataset {
     refers JdbcConnection connection
     Text query
-    contains AppDatasetColumn[] datasetColumn
+    contains DatasetColumn[] datasetColumn
     contains AppDatasetView[] view
 }
 
@@ -56,28 +52,34 @@ class DatasetView {
     //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
     contains DatasetColumnView[] column
     QName name //default сделать по умолчанию (не редактируемый)
-    int rowCount //сколько строк показывать
+    String rowCount//сколько строк показывать (выбрать из списка)
     String markRow //При условии таком-то, строки заливаются таким-то цветом
     Access access //Публичный, закрытый доступ
     String owner //Не редактируемое поле. Создатель вью
     Theme theme //Выбранная тема грида
     Date date //дата на которую подгружается отчет
 }
-
+/*
 class AppDatasetColumn {
     String name
     refers DatasetColumn datasetColumn
 }
+*/
 
-class DatasetColumn {
-    String fieldName //название поля с сервера
-    String servertDataType //сопоставляет пришедший тип из базы со списком доступных DataType в enum
-    DataType domainDataType //тип, который приходит с сервера (не редактирумое поле)
-}
+class DatasetColumn {  //не редактирумый класс, информативный. Отвечает на вопрос: что пришло с сервера?
+    String rdbmsFieldName //название поля с сервера
+    String rdbmsDataType //тип, который приходит с сервера (не измененный)
+    //сопоставляет пришедший тип из базы со списком доступных DataType в enum и показывает возможные варианты
+    //Например: все поля могут быть стринг + универсальный тип (дата, время, число)
+    DataType convertDataType
+    }
 
+//Количество столбцов в DatasetColumn в JdbcDataset (пришедшее с сервера),
+//должно быть равно количеству столбцов во вью. Если нет, то писать каких не хватает и ошибка
 class DatasetColumnView {
-    refers DatasetColumn datasetColumn
     String headerName //название столбца
+    //тип столбца в grid. Валидация: Если он входит в перечень допустимых типов в convertDataType, то ОК
+    DataType gridDataType
     String headerTooltip //всплывающая подсказка
     boolean hide //скрытый ли столбец. По умолчанию false
     Pinned pinned //зафиксированный ли столбец (слева, справа)
@@ -85,8 +87,6 @@ class DatasetColumnView {
     String calculatedExpression //выражение в вычисляемом столбце
     Filter filter //выбор типа фильтра. Зависит от типа данных, но можно изменить.
     String filterExpression //выражение в фильтре
-    op String getDataType() //сопоставляет пришедший тип из базы со списком доступных DataType в enum
-    DataType domainDataType //тип, который приходит с сервера (не редактирумое поле)
     Sort sort //тип сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
@@ -119,7 +119,6 @@ enum Sort {
 }
 
 enum Access {
-    undefined
     public //A Number Filter for number comparisons.
     private //A Text Filter for string comparisons.
 }
@@ -146,14 +145,7 @@ enum DataType {
     decimal
 }
 
-
 /*NOT USE*/
-class QueryDataset extends Dataset {
-}
-
-class MetadataDataset extends Dataset {
-	contains Row[] rows
-}
 
 class ColumnValue {
 	refers DatasetColumn[1] column
