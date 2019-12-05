@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.neoflex.meta</groupId>
-    <artifactId>emf-git</artifactId>
+    <artifactId>emf-orientdb</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>emf-git</name>
-    <description>Git storage for EMF objects</description>
+    <name>emf-orientdb</name>
+    <description>OrientDB storage for EMF objects</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -24,8 +24,8 @@
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
         <ecore-xcore-version>1.7.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
+<!--        <argLine>-XX:MaxDirectMemorySize=512g</argLine>-->
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -60,9 +60,44 @@
             <version>${jackson-version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.3.0.201903130848-r</version>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-client</artifactId>
+            <version>3.0.25</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-core</artifactId>
+            <version>3.0.25</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-server</artifactId>
+            <version>3.0.25</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-tools</artifactId>
+            <version>3.0.25</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orient-commons</artifactId>
+            <version>1.7.10</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
+            <artifactId>concurrentlinkedhashmap-lru</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.6.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

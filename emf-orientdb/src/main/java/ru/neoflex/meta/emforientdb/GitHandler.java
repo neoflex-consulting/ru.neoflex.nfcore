@@ -1,4 +1,4 @@
-package ru.neoflex.meta.emfgit;
+package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -18,7 +18,7 @@ public class GitHandler extends URIHandlerImpl {
 
     @Override
     public boolean canHandle(URI uri) {
-        return Database.GITDB.equals(uri.scheme());
+        return Database.ORIENTDB.equals(uri.scheme());
     }
 
     public void delete(URI uri, Map<?, ?> options) throws IOException {
