@@ -38,7 +38,7 @@ public class Database implements Closeable {
     OrientDB orientDB;
 
     public Database(String dbPath, String dbName, List<EPackage> packages) throws Exception {
-        System.setProperty("ORIENTDB_HOME", dbPath);
+        //System.setProperty("ORIENTDB_HOME", dbPath);
         this.dbName = dbName;
         this.server = OServerMain.create();
         this.configuration = new OServerConfiguration();
@@ -84,6 +84,7 @@ public class Database implements Closeable {
                 new OServerEntryConfiguration("log.console.level", "info"),
                 new OServerEntryConfiguration("log.console.level", "info"),
                 new OServerEntryConfiguration("log.file.level", "fine"),
+                new OServerEntryConfiguration("server.database.path", dbPath),
         };
         server.startup(configuration);
         server.activate();
