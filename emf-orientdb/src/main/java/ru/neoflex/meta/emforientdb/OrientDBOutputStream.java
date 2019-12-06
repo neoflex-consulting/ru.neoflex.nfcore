@@ -9,12 +9,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
-public class GitOutputStream extends ByteArrayOutputStream implements URIConverter.Saveable {
-    private GitHandler handler;
+public class OrientDBOutputStream extends ByteArrayOutputStream implements URIConverter.Saveable {
+    private OrientDBHandler handler;
     private URI uri;
     private Map<?, ?> options;
 
-    public GitOutputStream(GitHandler handler, URI uri, Map<?, ?> options) {
+    public OrientDBOutputStream(OrientDBHandler handler, URI uri, Map<?, ?> options) {
         this.handler = handler;
         this.uri = uri;
         this.options = options;

@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class GitInputStream extends InputStream implements URIConverter.Loadable {
-    private GitHandler handler;
+public class OrientDBInputStream extends InputStream implements URIConverter.Loadable {
+    private OrientDBHandler handler;
     private URI uri;
     private Map<?, ?> options;
 
-    public GitInputStream(GitHandler handler, URI uri, Map<?, ?> options) {
+    public OrientDBInputStream(OrientDBHandler handler, URI uri, Map<?, ?> options) {
         this.handler = handler;
         this.uri = uri;
         this.options = options;

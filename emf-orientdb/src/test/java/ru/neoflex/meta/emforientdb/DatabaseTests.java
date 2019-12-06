@@ -2,6 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import ru.neoflex.meta.test.Group;
@@ -14,6 +15,11 @@ public class DatabaseTests extends TestBase {
     @Before
     public void startUp() throws Exception {
         database = refreshRatabase();
+    }
+
+    @After
+    public void tearDown() {
+        database.close();
     }
 
     @Test

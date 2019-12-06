@@ -1,27 +1,27 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.orient.core.db.ODatabaseType;
+import com.orientechnologies.orient.core.db.OrientDB;
+import com.orientechnologies.orient.core.db.OrientDBConfig;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
-import com.orientechnologies.orient.server.config.OServerConfiguration;
+import com.orientechnologies.orient.server.config.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.xmi.XMLParserPool;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMLParserPoolImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
-
-import static org.eclipse.emf.ecore.xmi.XMLResource.*;
 
 public class Database implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(Database.class);
@@ -32,17 +32,73 @@ public class Database implements Closeable {
     private Events events = new Events();
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
-    private String repoName;
-    private XMLParserPool xmlParserPool = new XMLParserPoolImpl();
+    private String dbName;
     OServer server;
     OServerConfiguration configuration;
+    OrientDB orientDB;
 
-    public Database(String dbPath, List<EPackage> packages) throws Exception {
-        //String orientdbHome = new File("").getAbsolutePath(); //Set OrientDB home to current directory
-        System.setProperty("ORIENTDB_HOME", dbPath);
+    public Database(String dbPath, String dbName, List<EPackage> packages) throws Exception {
+        //System.setProperty("ORIENTDB_HOME", dbPath);
+        this.dbName = dbName;
         this.server = OServerMain.create();
         this.configuration = new OServerConfiguration();
-        this.repoName = new File(dbPath).getName();
+        configuration.network = new OServerNetworkConfiguration();
+        configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>() {{
+            add(new OServerNetworkProtocolConfiguration("binary",
+                    "com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary"));
+            add(new OServerNetworkProtocolConfiguration("http",
+                    "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb"));
+        }};
+        configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>() {{
+            add(new OServerNetworkListenerConfiguration() {{
+                protocol = "binary";
+                ipAddress = "0.0.0.0";
+                portRange = "2424-2430";
+            }});
+            add(new OServerNetworkListenerConfiguration() {{
+                protocol = "http";
+                ipAddress = "0.0.0.0";
+                portRange = "2480-2490";
+                commands = new OServerCommandConfiguration[] {new OServerCommandConfiguration() {{
+                    implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
+                    pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
+                    parameters = new OServerEntryConfiguration[] {
+                            new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache"),
+                            new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120"),
+                    };
+                }}};
+                parameters = new OServerParameterConfiguration[] {
+                        new OServerParameterConfiguration("network.http.charset","UTF-8"),
+                        new OServerParameterConfiguration("network.http.jsonResponseError","true")
+                };
+            }});
+        }};
+        configuration.users = new OServerUserConfiguration[] {
+                new OServerUserConfiguration("root", "ne0f1ex", "*"),
+                new OServerUserConfiguration("admin", "admin", "*"),
+        };
+        configuration.properties = new OServerEntryConfiguration[] {
+//                new OServerEntryConfiguration("orientdb.www.path", "C:/work/dev/orientechnologies/orientdb/releases/1.0rc1-SNAPSHOT/www/"),
+//                new OServerEntryConfiguration("orientdb.config.file", "C:/work/dev/orientechnologies/orientdb/releases/1.0rc1-SNAPSHOT/config/orientdb-server-config.xml"),
+                new OServerEntryConfiguration("server.cache.staticResources", "false"),
+                new OServerEntryConfiguration("log.console.level", "info"),
+                new OServerEntryConfiguration("log.console.level", "info"),
+                new OServerEntryConfiguration("log.file.level", "fine"),
+                new OServerEntryConfiguration("server.database.path", dbPath),
+        };
+        server.startup(configuration);
+        server.activate();
+        if (!server.existsDatabase(dbName)) {
+            server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        }
+        ODatabaseDocument databaseDocument = server.openDatabase(dbName);
+        databaseDocument.createClassIfNotExist("ecore_EObject");
+        OClass oClass = databaseDocument.createClassIfNotExist("etl_Project");
+        oClass.addSuperClass(databaseDocument.getClass("ecore_EObject"));
+        databaseDocument.close();
+        orientDB = new OrientDB("embedded:/" + dbPath, OrientDBConfig.defaultConfig());
+        orientDB.createIfNotExists(dbName, ODatabaseType.PLOCAL);
+
         this.packages = packages;
         preCalcDescendants();
         createTypeNameIndex();
@@ -51,15 +107,9 @@ public class Database implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
+        orientDB.close();
         server.shutdown();
-    }
-
-    public Database start() throws NoSuchMethodException, IOException, InvocationTargetException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        //server.startup(configuration);
-        server.startup(Thread.currentThread().getContextClassLoader().getResourceAsStream("ru/neoflex/meta/emforientdb/db.config.xml"));
-        server.activate();
-        return this;
     }
 
     private void preCalcDescendants() {
@@ -133,7 +183,7 @@ public class Database implements Closeable {
     }
 
     public URI createURIByRef(String ref) {
-        URI uri = URI.createURI(ORIENTDB + "://" +repoName + "/" + (ref == null ? "" : ref));
+        URI uri = URI.createURI(ORIENTDB + "://" +dbName + "/" + (ref == null ? "" : ref));
         return uri;
     }
 
@@ -147,16 +197,20 @@ public class Database implements Closeable {
         }
         resourceSet.getResourceFactoryRegistry()
                 .getExtensionToFactoryMap()
-                .put("*", new XMIResourceFactoryImpl() {
+                .put("*", new ResourceFactoryImpl() {
                     @Override
                     public Resource createResource(URI uri) {
-                        XMIResourceImpl resource = new XMIResourceImpl(uri);
-                        resource.getDefaultSaveOptions().put(OPTION_ENCODING, "UTF-8");
-                        resource.getDefaultSaveOptions().put(OPTION_CONFIGURATION_CACHE, true);
-                        resource.getDefaultLoadOptions().put(OPTION_USE_PARSER_POOL, xmlParserPool);
-                        resource.getDefaultLoadOptions().put(OPTION_USE_DEPRECATED_METHODS, false);
-                        resource.getDefaultLoadOptions().put(OPTION_DEFER_ATTACHMENT, true);
-                        resource.getDefaultLoadOptions().put(OPTION_DEFER_IDREF_RESOLUTION, true);
+                        Resource resource = new ResourceImpl(uri) {
+                            @Override
+                            public void load(Map<?, ?> options) throws IOException {
+                                super.load(options);
+                            }
+
+                            @Override
+                            public void save(Map<?, ?> options) throws IOException {
+                                super.save(options);
+                            }
+                        };
                         return resource;
                     }
                 });
@@ -167,7 +221,7 @@ public class Database implements Closeable {
         ResourceSet resourceSet = createResourceSet();
         resourceSet.getURIConverter()
                 .getURIHandlers()
-                .add(0, new GitHandler(tx));
+                .add(0, new OrientDBHandler(tx));
         return resourceSet;
     }
 
