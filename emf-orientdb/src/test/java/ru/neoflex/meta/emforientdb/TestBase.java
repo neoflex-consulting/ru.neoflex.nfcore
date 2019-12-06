@@ -22,11 +22,11 @@ public class TestBase {
     }
 
     public static Database getDatabase() throws Exception {
-        return new Database(getDatabaseFile().getAbsolutePath(), new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}}).start();
+        return new Database(getDatabaseFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
     }
 
     public static File getDatabaseFile() throws IOException {
-        return new File(System.getProperty("user.home") + "/.orientdb", DBNAME);
+        return new File(System.getProperty("user.home"), ".orientdb/home");
     }
 
     public static Database refreshRatabase() throws Exception {

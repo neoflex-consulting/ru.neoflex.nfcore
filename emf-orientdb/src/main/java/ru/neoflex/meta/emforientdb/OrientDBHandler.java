@@ -9,10 +9,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-public class GitHandler extends URIHandlerImpl {
+public class OrientDBHandler extends URIHandlerImpl {
     private Transaction transaction;
 
-    public GitHandler(Transaction transaction) {
+    public OrientDBHandler(Transaction transaction) {
         this.transaction = transaction;
     }
 
@@ -35,12 +35,12 @@ public class GitHandler extends URIHandlerImpl {
 
     @Override
     public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
-        return new GitInputStream(this, uri, options);
+        return new OrientDBInputStream(this, uri, options);
     }
 
     @Override
     public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
-        return new GitOutputStream(this, uri, options);
+        return new OrientDBOutputStream(this, uri, options);
     }
 
 
