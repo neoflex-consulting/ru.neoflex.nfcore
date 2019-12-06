@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
+import ru.neoflex.nfcore.application.Typography
 
 /*JdbcDriver*/
 @Ecore(constraints="IsValid")
@@ -34,64 +35,112 @@ class JdbcConnection {
 /*Dataset*/
 abstract class Dataset {
     QName name
-    op JSON runQuery()
+    Text query
+    op JSON runQuery() //Запуск query. При запуске runQuery будут начитываться все уникальные значения в каждом столбце и возвращаться (для фильтров)
     contains DatasetColumn[] datasetColumn
 }
 
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
     refers JdbcConnection connection
-    Text query
 }
 
 /*View*/
-abstract class DatasetView {
-     refers Dataset dataset
+abstract class DatasetSettings {
      QName name //default сделать по умолчанию (не редактируемый)
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
-}
-
-class DatasetViewGrid extends DatasetView {
-     //при запуске runQuery начитывать колонки в массив с мапами. Не в деволтной версии, если меняется порядок, то сохраняем его тут
+     //Созать все колонки в DatasetSettings, которые есть в Dataset. В параметрах (можно удалить все имеющиеся перед добавлением новых)
+     op JSON createAllColumns(boolean deleteAllColumns)
+     boolean FirstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
+     refers Dataset dataset
      contains DatasetColumnView[] column
+}
+
+class DatasetSettingsGrid extends DatasetSettings {
      String rowCount//сколько строк показывать (выбрать из списка)
-     String markRow //При условии таком-то, строки заливаются таким-то цветом
+     contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
+     boolean showUniqRow//Показывать только уникальные строки
+     contains Conditions[] serverFilter //Состав серверного фильтра
+     String clientFilterExpression //выражение в клиентском фильтре
 }
 
-class DatasetViewPivot extends DatasetView {
+class DatasetSettingsPivot extends DatasetSettings {
 }
 
-class DatasetViewDiagram extends DatasetView {
+class DatasetSettingsDiagram extends DatasetSettings {
+}
+
+class Highlight {
+    QName name
+    HighlightType highlightType
+    Colors backgroundColor
+    Colors textColor
+    refers DatasetColumnView datasetColumnView
+    Operations operation
+    String value
 }
 
 class DatasetColumn {  //не редактирумый класс, информативный. Отвечает на вопрос: что пришло с сервера?
-    String rdbmsFieldName //название поля с сервера
+    String name //rdbmsFieldName название поля с сервера
     String rdbmsDataType //тип, который приходит с сервера (не измененный)
-    //сопоставляет пришедший тип из базы со списком доступных DataType в enum и показывает возможные варианты
-    //Например: все поля могут быть стринг + универсальный тип (дата, время, число)
-    DataType convertDataType
+    DataType convertDataType //rdbmsDataType преобразованный в какой-то из enum DataType
 }
 
-//Количество столбцов в DatasetColumn в JdbcDataset (пришедшее с сервера),
-//должно быть равно количеству столбцов во вью. Если нет, то писать каких не хватает и ошибка
-class DatasetColumnView {
-    String headerName //название столбца
-    //тип столбца в grid. Валидация: Если он входит в перечень допустимых типов в convertDataType, то ОК
-    DataType gridDataType
+abstract class DatasetColumnView {
+    QName fieldName
+    contains Typography headerName //название столбца
+    refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     String headerTooltip //всплывающая подсказка
     boolean hide //скрытый ли столбец. По умолчанию false
     Pinned pinned //зафиксированный ли столбец (слева, справа)
-    boolean calculatedColumn //вычисляемый столбец
-    String calculatedExpression //выражение в вычисляемом столбце
-    Filter filter //выбор типа фильтра. Зависит от типа данных, но можно изменить.
-    String serverFilterExpression //выражение в фильтре
-    String clientFilterExpression //выражение в фильтре
-    Sort sort //тип сортировки
+    Filter filter //выбор типа фильтра клиентского на столбце. Зависит от типа данных, но можно изменить.
+    Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
-    boolean GroupBy //Группировать по этому стобцу или нет
+}
+
+class RdbmsColumn extends DatasetColumnView {
+    refers DatasetColumn datasetColumn
+}
+
+class CustomColumn extends DatasetColumnView {
+    String customColumnExpression //выражение в вычисляемом столбце
+}
+
+class FormatMask {
+    QName name
+    String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
+}
+
+class Conditions {
+    refers DatasetColumnView column //в списке все столбцы в текущем объекте (DatasetSettingsGrid)
+    Operations operation
+    String value
+}
+
+enum HighlightType {
+    row
+    column
+}
+
+enum Colors {
+    undefined
+    yellow
+    green
+    blue
+    orange
+    red
+}
+
+enum Operations {
+    equal
+    notEqual
+    greaterThan
+    lessThan
+    greaterThenOrEqual
+    lessThenOrEqual
 }
 
 enum Theme {
@@ -125,9 +174,9 @@ enum Access {
 }
 
 enum Filter {
-    agTextColumnFilter //A Text Filter for string comparisons.
-    agNumberColumnFilter //A Number Filter for number comparisons.
-    agDateColumnFilter //A Date Filter for date comparisons.
+    TextColumnFilter //A Text Filter for string comparisons.
+    NumberColumnFilter //A Number Filter for number comparisons.
+    DateColumnFilter //A Date Filter for date comparisons.
 }
 
 enum Pinned {
@@ -144,15 +193,4 @@ enum DataType {
     timestamp
     integer
     decimal
-}
-
-/*NOT USE*/
-
-class ColumnValue {
-	refers DatasetColumn[1] column
-	String value
-}
-
-class Row {
-	contains ColumnValue[] values
 }

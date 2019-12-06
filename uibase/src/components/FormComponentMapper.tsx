@@ -78,10 +78,10 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
     const { eObject, upperBound, value, mainEObject, idx, ukey } = props
 
     const getRelatedResourceByRef = (reference: string) => {
-        const refObject = mainEObject.eResource().eContainer.get('resources')
-            .find((res: Ecore.Resource) => res.eContents()[0].eURI() === reference)
+        const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
+            .find((object: Ecore.EObject) => object.eURI() === reference)
 
-        return (refObject && refObject.eContents()[0]) || null
+        return refObject || null
     }
 
     const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)

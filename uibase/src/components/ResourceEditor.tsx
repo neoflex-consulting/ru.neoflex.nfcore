@@ -149,9 +149,8 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     createTree() {
-
         const getTitle = (object: { [key: string]: any }) => {
-            const possibleTitles: Array<string> = ["name", "qname", "caption", "createdBy", "code", "field"]
+            const possibleTitles: Array<string> = ["name", "qname", "createdBy", "code", "rdbmsFieldName", "fieldName"];
             let result = null
             for (let title of possibleTitles) {
                 if (object[title]) {
@@ -460,7 +459,7 @@ class ResourceEditor extends React.Component<any, State> {
         this.forceUpdate()
     }
 
-    addRef = (resources: Ecore.Resource[]): void => {
+    addRef = (eObjects: Ecore.EObject[]): void => {
         const targetObject: { [key: string]: any } = this.state.targetObject
         const { addRefPropertyName } = this.state
         let updatedJSON: Object = {}
@@ -471,22 +470,24 @@ class ResourceEditor extends React.Component<any, State> {
         //res.eContents()[0] may not be null, I hope
         if (upperBound === -1) {
             refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
-            resources.forEach((res) => {
+            eObjects.forEach((eObject) => {
                 refsArray.push({
-                    $ref: res.eContents()[0].eURI(),
-                    eClass: res.eContents()[0].eClass.eURI()
+                    $ref: eObject.eURI(),
+                    eClass: eObject.eClass.eURI()
                 })
             })
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
-            const firstResource = resources.find((res: Ecore.Resource) => res.eURI() === this.state.selectedRefUries[0])
+            const firstEObject = eObjects.find((eObject: Ecore.EObject) => eObject.eURI() === this.state.selectedRefUries[0])
             //if a user choose several resources for the adding, but upperBound === 1, we put only first resource
-            updatedJSON = targetObject.updater({
-                [addRefPropertyName]: {
-                    $ref: firstResource!.eContents()[0].eURI(),
-                    eClass: firstResource!.eContents()[0].eClass.eURI()
-                }
-            })
+            if (firstEObject !== undefined) {
+                updatedJSON = targetObject.updater({
+                    [addRefPropertyName]: {
+                        $ref: firstEObject.eURI(),
+                        eClass: firstEObject.eClass.eURI()
+                    }
+                })
+            }
         }
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ 
@@ -498,12 +499,12 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     handleAddNewRef = () => {
-        const resources: any = []
-        this.state.mainEObject.eResource().eContainer.get('resources').each((res: { [key: string]: any }) => {
-            const isFound = this.state.selectedRefUries.indexOf(res.eURI() as never)
-            isFound !== -1 && resources.push(res)
+        let eObjects: Ecore.EObject[] = [];
+        (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements().forEach((eObject: Ecore.EObject) => {
+            const isFound = this.state.selectedRefUries.indexOf(eObject.eURI() as never)
+            isFound !== -1 && eObjects.push(eObject)
         })
-        this.addRef(resources)
+        this.addRef(eObjects)
     }
 
     handleDeleteRef = (deletedObject: any, addRefPropertyName: string) => {
@@ -542,7 +543,7 @@ class ResourceEditor extends React.Component<any, State> {
 
         if (resource) {
             this.setState({ isSaving: true })
-            API.instance().saveResource(resource).then((resource: any) => {
+            API.instance().saveResource(resource, 99999).then((resource: any) => {
                 const nestedJSON = nestUpdaters(resource.eResource().to(), null)
                 const updatedTargetObject = findObjectById(nestedJSON, targetObject._id)
                 this.setState({
@@ -686,24 +687,27 @@ class ResourceEditor extends React.Component<any, State> {
                             this.setState({ selectedRefUries: uriArray })
                         }}
                     >
-                        {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) => {
+                        {
+                            this.state.mainEObject.eClass &&
+                            (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
+                                .map((eObject: Ecore.EObject, index: number) => {
                             const possibleTypes: Array<string> = this.state.addRefPossibleTypes
                             const isEObjectType: boolean = possibleTypes[0] === 'EObject'
                             return isEObjectType ?
-                                <Select.Option key={index} value={res.eURI()}>
+                                <Select.Option key={index} value={eObject.eURI()}>
                                     {<b>
-                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                        {`${eObject.eClass.get('name')}`}
                                     </b>}
                                     &nbsp;
-                                    {`${res.eContents()[0].get('name')}`}
+                                    {`${eObject.get('name')}`}
                                 </Select.Option>
                                 :
-                                possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
+                                possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={index} value={eObject.eURI()}>
                                     {<b>
-                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                        {`${eObject.eClass.get('name')}`}
                                     </b>}
                                     &nbsp;
-                                    {`${res.eContents()[0].get('name')}`}
+                                    {`${eObject.get('name')}`}
                                 </Select.Option>
                         })}
                     </Select>
@@ -716,7 +720,6 @@ class ResourceEditor extends React.Component<any, State> {
                     footer={null}
                     onCancel={this.handleResourceModalCancel}
                 >
-                    {/*<SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />*/}
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
 
                 </Modal>}
