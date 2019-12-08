@@ -86,7 +86,7 @@ public class Server extends SessionFactory implements Closeable {
         pluginDir.mkdirs();
         File studioJar = new File(pluginDir, ORIENTDB_STUDIO_JAR);
         if (!studioJar.exists()) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(ORIENTDB_STUDIO_JAR);
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("plugins/" + ORIENTDB_STUDIO_JAR);
             if (is != null) {
                 Files.copy(is, studioJar.toPath());
                 is.close();

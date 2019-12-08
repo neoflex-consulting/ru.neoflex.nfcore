@@ -1,6 +1,6 @@
 @GenModel(
     bundleManifest="false",
-    //modelDirectory="gitdb/src/test/java-gen",
+    modelDirectory="emf-orientdb/src/test/java-gen",
     rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
     complianceLevel="7.0"
 )
@@ -10,9 +10,9 @@ abstract class Authority {
     String name
 }
 
-class Group {
+class Group extends Authority {
 }
 
-class User {
+class User extends Authority {
     refers Group group
 }

@@ -1,12 +1,11 @@
 package ru.neoflex.meta.emforientdb;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.id.ORecordId;
-import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.record.ORecord;
 import com.orientechnologies.orient.core.tx.OTransaction;
-import com.orientechnologies.orient.core.tx.OTransactionOptimistic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -22,12 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import static java.lang.Math.abs;
 
 public abstract class SessionFactory {
     public final static String ORIENTDB = "orientdb";
@@ -71,9 +67,16 @@ public abstract class SessionFactory {
         }
     }
 
+    public URI createURI() {
+        return createURI("");
+    }
+
     public URI createURI(String ref) {
         URI uri = URI.createURI(ORIENTDB + "://" +dbName + "/" + (ref == null ? "" : ref));
-        return uri.appendFragment("/");
+        if (!uri.hasFragment()) {
+            uri = uri.appendFragment("/");
+        }
+        return uri;
     }
 
     public URI createURI(ORecord oElement) {
@@ -176,38 +179,47 @@ public abstract class SessionFactory {
         R call(Session session) throws Exception;
     }
 
-    public <R> R inTransaction(boolean readOnly, SessionFunction<R> f) throws Exception {
+    public<R> R withSession(SessionFunction<R> f) throws Exception {
+        try (Session session = createSession()) {
+            return f.call(session);
+        }
+    }
+
+    public <R> R inTransaction(SessionFunction<R> f) throws Exception {
         int delay = 1;
         int maxDelay = 1000;
         int maxAttempts = 100;
         int attempt = 1;
         while (true) {
-            try (Session session = createSession()) {
-                session.getDatabaseDocument().begin(OTransaction.TXTYPE.OPTIMISTIC);
-                try {
-                    R result = f.call(session);
-                    if (!readOnly) {
-                        session.getDatabaseDocument().commit();
-                    } else {
-                        session.getDatabaseDocument().rollback();
-                    }
-                    return result;
-                }
-                catch (Exception e) {
-                    String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt;
-                    logger.info(message);
-                    if (++attempt > maxAttempts) {
-                        throw e;
-                    }
+            try {
+                return withSession(session -> {
+                    session.getDatabaseDocument().begin(OTransaction.TXTYPE.OPTIMISTIC);
                     try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException ex) {
+                        return f.call(session);
                     }
-                    if (delay < maxDelay) {
-                        delay *= 2;
+                    catch (Throwable tx) {
+                        session.getDatabaseDocument().rollback();
+                        throw tx;
                     }
-                    continue;
+                    finally {
+                        session.getDatabaseDocument().commit(true);
+                    }
+                });
+            }
+            catch (OConcurrentModificationException e) {
+                String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt;
+                logger.debug(message);
+                if (++attempt > maxAttempts) {
+                    throw e;
                 }
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ex) {
+                }
+                if (delay < maxDelay) {
+                    delay *= 2;
+                }
+                continue;
             }
         }
     }

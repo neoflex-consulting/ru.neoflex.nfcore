@@ -29,8 +29,15 @@ public class TestBase {
         return new File(System.getProperty("user.home"), ".orientdb/home");
     }
 
-    public static Server refreshRatabase() throws Exception {
+    public static Server refreshDatabase() throws Exception {
         deleteDirectory(new File(getHomeFile(), "databases"));
         return getDatabase();
+    }
+
+    public static void sleepForever() {
+        try {
+            Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException e) {
+        }
     }
 }

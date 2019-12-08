@@ -16,14 +16,13 @@ import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ServerTests extends TestBase {
     @Before
     public void startUp() throws Exception {
-        server = refreshRatabase();
+        server = refreshDatabase();
     }
 
     @After
@@ -63,28 +62,24 @@ public class ServerTests extends TestBase {
         Assert.assertEquals(2, elements.size());
         rs.close();
         db.close();
-        try {
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-        }
     }
 
     @Test
     public void createEMFObject() throws Exception {
-        String userRef = server.inTransaction(false, session -> {
+        String userRef = server.inTransaction(session -> {
             String userId;
             String groupId;
             Group group = TestFactory.eINSTANCE.createGroup();
             group.setName("masters");
             ResourceSet resourceSet = session.createResourceSet();
-            Resource groupResource = resourceSet.createResource(server.createURI(""));
+            Resource groupResource = resourceSet.createResource(server.createURI());
             groupResource.getContents().add(group);
             groupResource.save(null);
             groupId = server.getId(groupResource.getURI());
             User user = TestFactory.eINSTANCE.createUser();
             user.setName("Orlov");
             user.setGroup(group);
-            Resource userResource = resourceSet.createResource(server.createURI(""));
+            Resource userResource = resourceSet.createResource(server.createURI());
             userResource.getContents().add(user);
             userResource.save(null);
             userId = server.getId(userResource.getURI());
@@ -92,16 +87,13 @@ public class ServerTests extends TestBase {
             Assert.assertNotNull(groupId);
             return userId;
         });
-        server.inTransaction(false, session -> {
+        server.withSession(session -> {
             List<Resource> users = session.query("select * from test_User where name=?", "Orlov");
             User user = (User) users.get(0).getContents().get(0);
             Assert.assertEquals("Orlov", user.getName());
             return null;
         });
-//        try {
-//            Thread.sleep(Long.MAX_VALUE);
-//        } catch (InterruptedException e) {
-//        }
+//        sleepForever();
 //        try (Transaction tx = database.createTransaction("users")){
 //            ResourceSet resourceSet = database.createResourceSet(tx);
 //            Resource userResource = resourceSet.createResource(database.createURI(userId));
