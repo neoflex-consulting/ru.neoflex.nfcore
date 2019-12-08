@@ -3,44 +3,29 @@ package ru.neoflex.meta.emforientdb;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OProperty;
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.OEdge;
-import com.orientechnologies.orient.core.record.OElement;
-import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.*;
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.*;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.emf.ecore.EPackage;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server extends SessionFactory implements Closeable {
+    public static final String ORIENTDB_STUDIO_JAR = "orientdb-studio-3.0.26.jar";
     OServer server;
     OServerConfiguration configuration;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
-        String dbPath = new File(home, "databases").getAbsolutePath();
         System.setProperty("ORIENTDB_HOME", home);
+        installStudioJar(home);
+        String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create();
         this.configuration = new OServerConfiguration();
         configuration.network = new OServerNetworkConfiguration();
@@ -94,6 +79,19 @@ public class Server extends SessionFactory implements Closeable {
             server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
         }
         createSchema();
+    }
+
+    public void installStudioJar(String home) throws IOException {
+        File pluginDir = new File(home, "plugins");
+        pluginDir.mkdirs();
+        File studioJar = new File(pluginDir, ORIENTDB_STUDIO_JAR);
+        if (!studioJar.exists()) {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(ORIENTDB_STUDIO_JAR);
+            if (is != null) {
+                Files.copy(is, studioJar.toPath());
+                is.close();
+            }
+        }
     }
 
     @Override

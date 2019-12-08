@@ -121,6 +121,10 @@ public class Session implements Closeable {
                     }
                 }
             }
+            EStructuralFeature sf = factory.getQNameFeature(eClass);
+            if (sf != null) {
+                oClass.createIndex(oClass.getName() + "_" + sf.getName() + "_ak", OClass.INDEX_TYPE.UNIQUE, sf.getName());
+            }
         }
     }
 
