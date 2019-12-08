@@ -11,12 +11,12 @@ import java.io.InputStream;
 import java.util.Map;
 
 public class OrientDBInputStream extends InputStream implements URIConverter.Loadable {
-    private OrientDBHandler handler;
+    private Session session;
     private URI uri;
     private Map<?, ?> options;
 
-    public OrientDBInputStream(OrientDBHandler handler, URI uri, Map<?, ?> options) {
-        this.handler = handler;
+    public OrientDBInputStream(Session session, URI uri, Map<?, ?> options) {
+        this.session = session;
         this.uri = uri;
         this.options = options;
     }
@@ -28,18 +28,6 @@ public class OrientDBInputStream extends InputStream implements URIConverter.Loa
 
     @Override
     public void loadResource(Resource resource) throws IOException {
-        Transaction transaction = handler.getTransaction();
-        Database db = transaction.getDatabase();
-        String id = db.checkAndGetId(uri);
-        EntityId entityId = new EntityId(id, null);
-        Entity entity = transaction.load(entityId);
-        String rev = entity.getRev();
-        if (!resource.getContents().isEmpty()) {
-            resource.getContents().clear();
-        }
-        ((XMIResourceImpl) resource).doLoad(new ByteArrayInputStream(entity.getContent()), options);
-        URI newURI = db.createURI(id);
-        resource.setURI(newURI);
-        db.getEvents().fireAfterLoad(resource, transaction);
+        session.load(resource);
     }
 }

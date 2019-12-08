@@ -46,7 +46,7 @@ ResourceSet resourceSet = new ResourceSetImpl();
 resourceSet.getURIConverter().getURIHandlers().add(0, new CouchDBHandler());
 ```
 
-When you create a Resource, use the URI of the CouchDB server (e.g. http://127.0.0.1:5984/), as shown below. The first segment of the URI (here users) is the name of the database that will be used to store the JSON document corresponding to your EMF model.
+When you create a Resource, use the URI of the CouchDB server (e.g. http://127.0.0.1:5984/), as shown below. The first segment of the URI (here users) is the name of the server that will be used to store the JSON document corresponding to your EMF model.
 
 ```java
 Resource resource = resourceSet.createResource(URI.createURI("http://127.0.0.1:5984/users"));
@@ -77,7 +77,7 @@ Resulting document:
 }
 ```
 
-Note that when you set only one fragment to the Resource URI, it will create a new document in the corresponding database. After calling save, the Resource URI is updated with the ID of the newly created document.
+Note that when you set only one fragment to the Resource URI, it will create a new document in the corresponding server. After calling save, the Resource URI is updated with the ID of the newly created document.
 For example:
 
 ```java
