@@ -14,25 +14,25 @@ class User {
 
 ```
 
-Now, ctreate database and save objects:
+Now, ctreate server and save objects:
 ```java
-Database database = new Database("gitdb", new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
-try (Transaction tx = database.createTransaction("users")) {
+Database server = new Database("gitdb", new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+try (Transaction tx = server.createTransaction("users")) {
     Group group = TestFactory.eINSTANCE.createGroup();
     group.setName("masters");
-    ResourceSet resourceSet = database.createResourceSet(tx);
-    Resource groupResource = resourceSet.createResource(database.createURI(null, null));
+    ResourceSet resourceSet = server.createResourceSet(tx);
+    Resource groupResource = resourceSet.createResource(server.createURI(null, null));
     groupResource.getContents().add(group);
     groupResource.save(null);
-    String groupId = database.getResourceId(groupResource);
+    String groupId = server.getResourceId(groupResource);
     User user = TestFactory.eINSTANCE.createUser();
     user.setName("arch7tect");
     user.setGroup(group);
-    Resource userResource = resourceSet.createResource(database.createURI(null, null));
+    Resource userResource = resourceSet.createResource(server.createURI(null, null));
     userResource.getContents().add(user);
     userResource.save(null);
     tx.commit("User arch7tect and group masters created", "arch7tect", "");
-    String userId = database.getResourceId(userResource);
+    String userId = server.getResourceId(userResource);
 }
 ```
 
@@ -55,9 +55,9 @@ Output:
 ```
 Load resource by id
 ```java
-try (Transaction tx = database.createTransaction("users")){
-    ResourceSet resourceSet = database.createResourceSet(tx);
-    Resource userResource = resourceSet.createResource(database.createURI(userId, null));
+try (Transaction tx = server.createTransaction("users")){
+    ResourceSet resourceSet = server.createResourceSet(tx);
+    Resource userResource = resourceSet.createResource(server.createURI(userId, null));
     userResource.load(null);
     User user = (User) userResource.getContents().get(0);
     Assert.assertEquals("masters", user.getGroup().getName*());
@@ -65,16 +65,16 @@ try (Transaction tx = database.createTransaction("users")){
 ```
 Find resource
 ```java
-try (Transaction tx = database.createTransaction("users")){
-    Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
-    Assert.assertEquals(1, database.findByEClass(group.eClass(), "masters", tx).getResources().size());
-    Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
+try (Transaction tx = server.createTransaction("users")){
+    Assert.assertEquals(1, server.findByEClass(group.eClass(), null, tx).getResources().size());
+    Assert.assertEquals(1, server.findByEClass(group.eClass(), "masters", tx).getResources().size());
+    Assert.assertEquals(0, server.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
 }
 ```
 More find resources
 ```java
-try (Transaction tx = database.createTransaction("users")) {
-    List<Resource> dependent = database.getDependentResources(groupId, tx);
+try (Transaction tx = server.createTransaction("users")) {
+    List<Resource> dependent = server.getDependentResources(groupId, tx);
     Assert.assertEquals(1, dependent.size());
 
     Assert.assertEquals(2, tx.all().size());
@@ -87,8 +87,8 @@ try (Transaction tx = database.createTransaction("users")) {
 ```
 Delete resource
 ```java
-try (Transaction tx = database.createTransaction("users")){
-    Resource userResource = database.loadResource(userId, tx);
+try (Transaction tx = server.createTransaction("users")){
+    Resource userResource = server.loadResource(userId, tx);
     userResource.delete(null);
     tx.commit("User arch7tect was deleted");
 }
@@ -100,21 +100,21 @@ with existing one we can not rely on internal ids. But,
 if top level objects contains unique qualified name feature,
 we can do it as simple as
 ```java
-Exporter exporter = new Exporter(database);
-try (Transaction tx = database.createTransaction("users")) {
+Exporter exporter = new Exporter(server);
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/export");
     Files.createDirectories(path);
     exporter.exportAll("users", path);
     tx.commit("Export all objects");
     Assert.assertEquals(3, Files.walk(path).filter(Files::isRegularFile).count());
 }
-try (Transaction tx = database.createTransaction("users")) {
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/db");
-    database.deleteRecursive(path);
+    server.deleteRecursive(path);
     tx.commit("Database was deleted");
     Assert.assertEquals(0, tx.all().size());
 }
-try (Transaction tx = database.createTransaction("users")) {
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/export");
     exporter.importPath(path, tx);
     tx.commit("Database was restored");
@@ -123,25 +123,25 @@ try (Transaction tx = database.createTransaction("users")) {
 ```
 or use zipped stream/file
 ```java
-try (Transaction tx = database.createTransaction("users")) {
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/zip/all.zip");
     Files.createDirectories(path.getParent());
-    ResourceSet resourceSet = database.createResourceSet(tx);
+    ResourceSet resourceSet = server.createResourceSet(tx);
     for (EntityId entityId: tx.all()) {
-        Resource resource = resourceSet.createResource(database.createURI(entityId.getId(), null));
+        Resource resource = resourceSet.createResource(server.createURI(entityId.getId(), null));
         resource.load(null);
     }
     exporter.zip(resourceSet, Files.newOutputStream(path));
     tx.commit("Zip all objects");
     Assert.assertEquals(1, Files.walk(path).filter(Files::isRegularFile).count());
 }
-try (Transaction tx = database.createTransaction("users")) {
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/db");
-    database.deleteRecursive(path);
+    server.deleteRecursive(path);
     tx.commit("Database was deleted");
     Assert.assertEquals(0, tx.all().size());
 }
-try (Transaction tx = database.createTransaction("users")) {
+try (Transaction tx = server.createTransaction("users")) {
     Path path = tx.getFileSystem().getPath("/zip/all.zip");
     exporter.unzip(Files.newInputStream(path), tx);
     tx.commit("Database was restored from zip archive");
@@ -153,14 +153,14 @@ try (Transaction tx = database.createTransaction("users")) {
 // create resource
 String content = "test content";
 String name = "/ru/neoflex/meta/test/test.txt";
-try(Transaction txw = database.createTransaction("master")) {
+try(Transaction txw = server.createTransaction("master")) {
     Path path = txw.getFileSystem().getPath(name);
     Files.createDirectories(path.getParent());
     Files.write(path, content.getBytes());
     txw.commit("written test resource");
 }
 // load resource
-try(Transaction tx = database.createTransaction("master", Transaction.LockType.READ)) {
+try(Transaction tx = server.createTransaction("master", Transaction.LockType.READ)) {
     byte[] data = tx.withClassLoader(() -> {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URI uri = classLoader.getResource(name).toURI();
@@ -171,22 +171,22 @@ try(Transaction tx = database.createTransaction("master", Transaction.LockType.R
 ```
 # Concurrency/locking
 Where are 3 types of transactions:
-* READ - works with the version of the database that was current at the time the transaction was created; 
+* READ - works with the version of the server that was current at the time the transaction was created; 
   commit is prohibited
 * WRITE (default) - before starting, it waits for the completion of transactions with type EXCLUSIVE; 
-  run competitively, so errors may occur when the GIT database changes; 
+  run competitively, so errors may occur when the GIT server changes; 
   To eliminate such errors, you need to use the Database.inTransaction (...) function, which, 
   when an error occurs, tries to repeat the action 
 * EXCLUSIVE - before starting, it waits for the completion of transactions with types EXCLUSIVE & WRITE;
   after start, transactions with EXCLUSIVE and WRITE types are waiting for its completion;
   inprocess locking mechanisms are used, 
-  so external programs working with the same database may conflict with this transaction;
+  so external programs working with the same server may conflict with this transaction;
   for reliability, you must use the Database.inTransaction(...) mechanism
  ```java
-database.inTransaction("users", Transaction.LockType.WRITE, tx -> {
-    Resource groupResource = database.loadResource(groupId, tx);
+server.inTransaction("users", Transaction.LockType.WRITE, tx -> {
+    Resource groupResource = server.loadResource(groupId, tx);
     Group group = (Group) groupResource.getContents().get(0);
-    Resource userResource = database.loadResource(userId, tx);
+    Resource userResource = server.loadResource(userId, tx);
     User user = (User) userResource.getContents().get(0);
     user.setName(name);
     user.setGroup(group);

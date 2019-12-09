@@ -7,42 +7,26 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
-public class OrientDBOutputStream extends ByteArrayOutputStream implements URIConverter.Saveable {
-    private OrientDBHandler handler;
+public class OrientDBOutputStream extends OutputStream implements URIConverter.Saveable {
+    private Session session;
     private URI uri;
     private Map<?, ?> options;
 
-    public OrientDBOutputStream(OrientDBHandler handler, URI uri, Map<?, ?> options) {
-        this.handler = handler;
+    public OrientDBOutputStream(Session session, URI uri, Map<?, ?> options) {
+        this.session = session;
         this.uri = uri;
         this.options = options;
     }
 
     @Override
     public void saveResource(Resource resource) throws IOException {
-        Transaction transaction = handler.getTransaction();
-        Database db = transaction.getDatabase();
-        String id = db.getResourceId(resource);
-        boolean isNew = id == null || id.length() == 0;
-        String rev = isNew ? null : db.checkAndGetRev(uri);
-        Resource oldResource = null;
-        db.getEvents().fireBeforeSave(oldResource, resource, transaction);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ((XMIResourceImpl) resource).doSave(os, options);
-        byte[] content = os.toByteArray();
-        Entity entity = new Entity(id, rev, content);
-        if (isNew) {
-            transaction.create(entity);
-            id = entity.getId();
-        }
-        else {
-            transaction.update(entity);
-        }
-        rev = entity.getRev();
-        URI newURI = db.createURI(id);
-        resource.setURI(newURI);
-        db.getEvents().fireAfterSave(oldResource, resource, transaction);
+        session.save(resource);
+    }
+
+    @Override
+    public void write(int b) throws IOException {
     }
 }

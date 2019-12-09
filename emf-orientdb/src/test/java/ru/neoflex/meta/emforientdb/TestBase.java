@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class TestBase {
     public static final String DBNAME = "test-emf-orientdb";
-    Database database;
+    Server server;
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
@@ -21,16 +21,23 @@ public class TestBase {
         return directoryToBeDeleted.delete();
     }
 
-    public static Database getDatabase() throws Exception {
-        return new Database(getDatabaseFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+    public static Server getDatabase() throws Exception {
+        return new Server(getHomeFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
     }
 
-    public static File getDatabaseFile() throws IOException {
+    public static File getHomeFile() throws IOException {
         return new File(System.getProperty("user.home"), ".orientdb/home");
     }
 
-    public static Database refreshRatabase() throws Exception {
-        deleteDirectory(getDatabaseFile());
+    public static Server refreshDatabase() throws Exception {
+        deleteDirectory(new File(getHomeFile(), "databases"));
         return getDatabase();
+    }
+
+    public static void sleepForever() {
+        try {
+            Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException e) {
+        }
     }
 }
