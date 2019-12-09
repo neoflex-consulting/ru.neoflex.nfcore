@@ -16,3 +16,39 @@ class Group extends Authority {
 class User extends Authority {
     refers Group group
 }
+
+class Column {
+	String name
+	String dbType
+}
+
+abstract class DBKey {
+	String name
+	refers Column[] columns
+}
+
+class PKey extends DBKey {}
+
+class IEKey extends DBKey {
+	boolean isUnique
+}
+
+class FKey extends DBKey {
+	refers DBTable table
+}
+
+abstract class DBEntity {
+	String name
+}
+
+class DBTable extends DBEntity {
+	contains Column[] columns
+	contains PKey pKey
+	contains IEKey[] indexes
+	contains FKey[] fKeys
+}
+
+class DBView extends DBEntity {
+	refers Column[] columns
+	boolean isMaterialized
+}

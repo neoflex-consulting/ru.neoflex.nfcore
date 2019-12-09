@@ -91,7 +91,7 @@ public abstract class SessionFactory {
     }
 
     public String getId(ORID orid) {
-        return String.format("%d-%d", orid.getClusterId(), orid.getClusterPosition());
+        return String.format("%d_%d", orid.getClusterId(), orid.getClusterPosition());
     }
 
     public String getId(URI uri) {
@@ -106,7 +106,7 @@ public abstract class SessionFactory {
         if (id == null) {
             return null;
         }
-        String[] ids = id.split("-", 2);
+        String[] ids = id.split("_", 2);
         if (ids.length != 2) {
             return null;
         }

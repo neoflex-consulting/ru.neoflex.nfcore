@@ -85,9 +85,7 @@ public class Session implements Closeable {
                 OClass refOClass = eReference.isContainment() ?
                         getOrCreateOClass(eReference.getEReferenceType()):
                         null;
-                OType oType = eReference.isContainment() ?
-                        (eReference.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED) :
-                        (eReference.isMany() ? OType.LINKLIST : OType.LINK);
+                OType oType = (eReference.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED);
                 oClass.createProperty(sf.getName(), oType, refOClass);
             }
         }
@@ -145,19 +143,19 @@ public class Session implements Closeable {
     }
 
     private OElement createOReference(EObject eObject, EObject toObject) {
+        EObject root = EcoreUtil.getRootContainer(eObject);
         EObject toRoot = EcoreUtil.getRootContainer(toObject);
+        String fragment = EcoreUtil.getRelativeURIFragmentPath(toRoot, toObject);
+        OElement element = db.newElement();
+        if (fragment == null || fragment.isEmpty() || fragment.equals("/")) {
+            element.setProperty("fragment", fragment);
+        }
+        if (root.equals(toRoot)) {
+            return element;
+        }
         URI uri = toRoot.eResource().getURI();
         OElement toElement = loadElementOrThrow(uri);
-        String fragment = EcoreUtil.getRelativeURIFragmentPath(toRoot, toObject);
-        if (fragment == null || fragment.isEmpty() || fragment.equals("/")) {
-            return toElement;
-        }
-        EObject root = EcoreUtil.getRootContainer(eObject);
-        OElement element = db.newElement();
-        if (!root.equals(toRoot)) {
-            element.setProperty("element", toElement);
-        }
-        element.setProperty("fragment", fragment);
+        element.setProperty("element", toElement);
         return element;
     }
 
