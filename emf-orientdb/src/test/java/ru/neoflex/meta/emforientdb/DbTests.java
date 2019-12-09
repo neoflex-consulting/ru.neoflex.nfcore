@@ -84,8 +84,9 @@ public class DbTests extends TestBase {
             List<Resource> views = session.query("select from test_DBView");
             DBView user_group = (DBView) views.get(0).getContents().get(0);
             Assert.assertEquals("ID", user_group.getColumns().get(0).getName());
+            Assert.assertEquals(4, user_group.getColumns().size());
             return null;
         });
-        sleepForever();
+        //sleepForever();
     }
 }
