@@ -13,7 +13,7 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.application.Typography
 
-/*JdbcDriver*/
+/*Driver*/
 @Ecore(constraints="IsValid")
 class JdbcDriver {
     QName name
@@ -22,7 +22,7 @@ class JdbcDriver {
 	String urlPattern
 }
 
-/*JdbcConnection*/
+/*Connection*/
 @Ecore(constraints="IsValid")
 class JdbcConnection {
     QName name
@@ -45,14 +45,14 @@ class JdbcDataset extends Dataset {
     refers JdbcConnection connection
 }
 
-/*View*/
+/*Dataset Settings*/
 abstract class DatasetSettings {
      QName name //default сделать по умолчанию (не редактируемый)
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
      //Созать все колонки в DatasetSettings, которые есть в Dataset. В параметрах (можно удалить все имеющиеся перед добавлением новых)
      op JSON createAllColumns(boolean deleteAllColumns)
-     boolean FirstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
+     boolean endCheckBoxColumn //есть ли в последнем столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
 }
@@ -82,6 +82,7 @@ class Highlight {
     String value
 }
 
+/*Dataset Columns*/
 class DatasetColumn {  //не редактирумый класс, информативный. Отвечает на вопрос: что пришло с сервера?
     String name //rdbmsFieldName название поля с сервера
     String rdbmsDataType //тип, который приходит с сервера (не измененный)
@@ -89,7 +90,7 @@ class DatasetColumn {  //не редактирумый класс, информ�
 }
 
 abstract class DatasetColumnView {
-    QName fieldName
+    QName name
     contains Typography headerName //название столбца
     refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     String headerTooltip //всплывающая подсказка
@@ -115,7 +116,8 @@ class FormatMask {
 }
 
 class Conditions {
-    refers DatasetColumnView column //в списке все столбцы в текущем объекте (DatasetSettingsGrid)
+    String name
+    refers DatasetColumn datasetColumn //в списке все столбцы только из dataset
     Operations operation
     String value
 }
@@ -174,9 +176,9 @@ enum Access {
 }
 
 enum Filter {
-    TextColumnFilter //A Text Filter for string comparisons.
-    NumberColumnFilter //A Number Filter for number comparisons.
-    DateColumnFilter //A Date Filter for date comparisons.
+    textColumnFilter //A Text Filter for string comparisons.
+    numberColumnFilter //A Number Filter for number comparisons.
+    dateColumnFilter //A Date Filter for date comparisons.
 }
 
 enum Pinned {
