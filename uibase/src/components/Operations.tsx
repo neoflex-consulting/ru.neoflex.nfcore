@@ -30,7 +30,27 @@ export default function Operations(props: Props): JSX.Element {
             const ref = `${props.mainEObject.eResource().get('uri')}?rev=${props.mainEObject.eResource().rev}`;
             API.instance().call(ref, methodName, targetOperation!.get('eParameters').map((p: any)=>paramList[p.get('name')])).then(result => {
                 const obj = JSON.parse(result)
-                notification.info({message: JSON.stringify(obj, null, 4), duration: null})
+                let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+                    Close All
+                </Button>);
+                let key
+                if (JSON.stringify(obj, null, 4).length > 1000) {
+                    key = JSON.stringify(obj, null, 4).slice(0, 1000) + "..."
+                } else {
+                    key = JSON.stringify(obj, null, 4)
+                }
+                notification.info({
+                    btn,
+                    key,
+                    message: key,
+                    duration: null,
+                    style: {
+                        width: 400,
+                        marginLeft: -10,
+                        marginTop: 16,
+                        wordWrap: "break-word"
+                    },
+                })
             })
             setParamModalVisible(false)
         }
@@ -175,7 +195,7 @@ export default function Operations(props: Props): JSX.Element {
             {paramModalVisible && <Modal
                 key="run_param_modal"
                 width={'500px'}
-                title={t('runparameters')}
+                title={t('operationsettings')}
                 visible={paramModalVisible}
                 onCancel={()=>setParamModalVisible(false)}
                 onOk={() => {
