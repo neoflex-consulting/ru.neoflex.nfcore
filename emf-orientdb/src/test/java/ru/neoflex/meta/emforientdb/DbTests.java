@@ -60,7 +60,7 @@ public class DbTests extends TestBase {
             user.setPKey(user_pk);
             FKey user_group_fk = TestFactory.eINSTANCE.createFKey();
             user_group_fk.getColumns().add(user_group_id);
-            user_group_fk.setTable(group);
+            user_group_fk.setEntity(group);
             user.getFKeys().add(user_group_fk);
             DBView user_group = TestFactory.eINSTANCE.createDBView();
             user_group.setName("USER_GROUP");

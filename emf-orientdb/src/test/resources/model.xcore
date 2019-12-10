@@ -34,16 +34,16 @@ class IEKey extends DBKey {
 }
 
 class FKey extends DBKey {
-	refers DBTable table
+	refers DBEntity entity
 }
 
 abstract class DBEntity {
 	String name
+	contains PKey pKey
 }
 
 class DBTable extends DBEntity {
 	contains Column[] columns
-	contains PKey pKey
 	contains IEKey[] indexes
 	contains FKey[] fKeys
 }
