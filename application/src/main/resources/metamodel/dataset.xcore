@@ -36,7 +36,9 @@ class JdbcConnection {
 abstract class Dataset {
     QName name
     Text query
-    op JSON runQuery() //Запуск query. При запуске runQuery будут начитываться все уникальные значения в каждом столбце и возвращаться (для фильтров)
+    op JSON runQuery()
+    op JSON loadAllColumns()
+    op JSON deleteAllColumns()
     contains DatasetColumn[] datasetColumn
 }
 
@@ -51,7 +53,7 @@ abstract class DatasetSettings {
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
      //Созать все колонки в DatasetSettings, которые есть в Dataset. В параметрах (можно удалить все имеющиеся перед добавлением новых)
-     op JSON createAllColumns(boolean deleteAllColumns)
+     //op JSON createAllColumns(boolean deleteAllColumns)
      boolean FirstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
@@ -145,21 +147,21 @@ enum Operations {
 
 enum Theme {
     balham
-    material
-    fresh
     blue
     bootstrap
+    fresh
+    material
 }
 
 enum Aggregate {
     undefined
-    sum
     average
     count
     countDistinct
-    minimum
     maximum
     median
+    minimum
+    sum
 }
 
 enum Sort {
@@ -174,9 +176,9 @@ enum Access {
 }
 
 enum Filter {
-    TextColumnFilter //A Text Filter for string comparisons.
-    NumberColumnFilter //A Number Filter for number comparisons.
-    DateColumnFilter //A Date Filter for date comparisons.
+    textColumnFilter //A Text Filter for string comparisons.
+    numberColumnFilter //A Number Filter for number comparisons.
+    dateColumnFilter //A Date Filter for date comparisons.
 }
 
 enum Pinned {
@@ -187,10 +189,10 @@ enum Pinned {
 
 enum DataType {
     undefined
-    string
     boolean
     date
-    timestamp
-    integer
     decimal
+    integer
+    string
+    timestamp
 }

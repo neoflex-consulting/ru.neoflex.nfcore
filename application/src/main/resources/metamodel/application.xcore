@@ -91,7 +91,7 @@ class FormItem extends ViewContainer {
 //View (по умолчнию = default (стандартные настройки) без скрытых столбцов, сортировок и пр.)
 class DatasetView extends ViewElement {
     contains Typography headerName
-    contains DateField dateField
+    DatePicker datePicker
     refers DatasetSettings datasetSettings
 }
 
@@ -140,12 +140,6 @@ class EClassNode extends ViewNode {
 class ViewNode extends TreeNode {
     contains ViewElement view
     refers EObject eObject
-}
-
-class DateField {
-    QName name
-    contains Typography headerName
-    DatePicker datePicker
 }
 
 enum DatePicker {
