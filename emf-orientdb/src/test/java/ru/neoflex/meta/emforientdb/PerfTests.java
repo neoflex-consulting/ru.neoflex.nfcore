@@ -19,7 +19,7 @@ public class PerfTests extends TestBase {
     int nGroups = 20;
     int nUsers = 100;
     int nThreads = 8;
-    int nUpdates = 4000;
+    int nUpdates = 40/*00*/;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 

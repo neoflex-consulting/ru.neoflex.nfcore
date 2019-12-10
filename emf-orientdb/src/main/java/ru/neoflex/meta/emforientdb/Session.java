@@ -85,9 +85,7 @@ public class Session implements Closeable {
                 OClass refOClass = eReference.isContainment() ?
                         getOrCreateOClass(eReference.getEReferenceType()):
                         null;
-                OType oType = eReference.isContainment() ?
-                        (eReference.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED) :
-                        (eReference.isMany() ? OType.LINKLIST : OType.LINK);
+                OType oType = (eReference.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED);
                 oClass.createProperty(sf.getName(), oType, refOClass);
             }
         }
@@ -144,20 +142,23 @@ public class Session implements Closeable {
         return oElement;
     }
 
-    private OElement createOReference(EObject eObject, EObject toObject) {
+    private OElement createOReference(EObject eObject, EStructuralFeature sf, EObject toObject) {
+        EObject root = EcoreUtil.getRootContainer(eObject);
         EObject toRoot = EcoreUtil.getRootContainer(toObject);
+        String fragment = EcoreUtil.getRelativeURIFragmentPath(toRoot, toObject);
+        OElement element = db.newElement();
+        if (fragment != null && !fragment.isEmpty()) {
+            element.setProperty("fragment", fragment);
+        }
+        if (root.equals(toRoot)) {
+            return element;
+        }
         URI uri = toRoot.eResource().getURI();
         OElement toElement = loadElementOrThrow(uri);
-        String fragment = EcoreUtil.getRelativeURIFragmentPath(toRoot, toObject);
-        if (fragment == null || fragment.isEmpty() || fragment.equals("/")) {
-            return toElement;
+        element.setProperty("element", toElement);
+        if (!sf.getEType().equals(toObject.eClass())) {
+            element.setProperty("eClass", EcoreUtil.getURI(toObject.eClass()).toString());
         }
-        EObject root = EcoreUtil.getRootContainer(eObject);
-        OElement element = db.newElement();
-        if (!root.equals(toRoot)) {
-            element.setProperty("element", toElement);
-        }
-        element.setProperty("fragment", fragment);
         return element;
     }
 
@@ -187,7 +188,7 @@ public class Session implements Closeable {
                         EList<EObject> eList = (EList<EObject>) value;
                         List<OElement> elements = ((EReference) sf).isContainment() ?
                                 eList.stream().map(e-> createAdnPopulateOElement(e)).collect(Collectors.toList()) :
-                                eList.stream().map(e-> createOReference(eObject, e)).collect(Collectors.toList());
+                                eList.stream().map(e-> createOReference(eObject, sf, e)).collect(Collectors.toList());
                         oElement.setProperty(sf.getName(), elements);
                     }
                     else {
@@ -195,7 +196,7 @@ public class Session implements Closeable {
                             oElement.setProperty(sf.getName(), createAdnPopulateOElement((EObject) value));
                         }
                         else {
-                            oElement.setProperty(sf.getName(), createOReference(eObject, (EObject) value));
+                            oElement.setProperty(sf.getName(), createOReference(eObject, sf, (EObject) value));
                         }
                     }
                 }
@@ -274,25 +275,66 @@ public class Session implements Closeable {
         if (eClassifier == null || !(eClassifier instanceof EClass)) {
             throw new IllegalArgumentException("EClass " + parts[1] + " not found in EPackage " + parts[0]);
         }
-        return EcoreUtil.create((EClass) eClassifier);
+        EObject eObject = EcoreUtil.create((EClass) eClassifier);
+        return eObject;
     }
 
+    static class RefHolder {
+        public EObject eObject;
+        EStructuralFeature sf;
+        OElement oElement;
+
+        RefHolder(EObject e, EStructuralFeature f, OElement o) {
+            eObject = e;
+            sf = f;
+            oElement = o;
+        }
+    }
     private void populateEObject(ResourceSet rs, OElement oElement, EObject eObject) {
+        List<RefHolder> refs = new ArrayList<>();
+        populateEObject(rs, oElement, eObject, refs);
+        refs.forEach(r -> {
+            EObject e = createReference(rs, r.eObject, r.sf, r.oElement);
+            if (r.sf.isMany()) {
+                ((List) r.eObject.eGet(r.sf)).add(e);
+            }
+            else {
+                r.eObject.eSet(r.sf, e);
+            }
+        });
+    }
+
+    private void populateEObject(ResourceSet rs, OElement oElement, EObject eObject, List<RefHolder> refs) {
         EClass eClass = eObject.eClass();
         Set<String> propertyNames = oElement.getPropertyNames();
         for (EStructuralFeature sf: eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient() && propertyNames.contains(sf.getName())) {
                 Object value = oElement.getProperty(sf.getName());
                 if (sf instanceof EReference) {
-                    boolean isContainment = ((EReference) sf).isContainment();
                     if (sf.isMany()) {
                         List<OElement> oObjects = (List) value;
-                        List<EObject> eObjects = oObjects.stream().
-                                map(o->createReference(rs, eObject, o, isContainment)).collect(Collectors.toList());
-                        eObject.eSet(sf, eObjects);
+                        if (((EReference) sf).isContainment()) {
+                            oObjects.forEach(o-> {
+                                EObject e = createEObject(o);
+                                ((List) eObject.eGet(sf)).add(e);
+                                populateEObject(rs, o, e, refs);
+                            });
+                        }
+                        else {
+                            oObjects.forEach(o-> {
+                                refs.add(new RefHolder(eObject, sf, o));
+                            });
+                        }
                     }
                     else {
-                        eObject.eSet(sf, createReference(rs, eObject, (OElement) value, isContainment));
+                        if (((EReference) sf).isContainment()) {
+                            EObject contained = createEObject((OElement) value);
+                            eObject.eSet(sf, contained);
+                            populateEObject(rs, (OElement) value, contained, refs);
+                        }
+                        else {
+                            refs.add(new RefHolder(eObject, sf, (OElement) value));
+                        }
                     }
                 }
                 else if (sf instanceof EAttribute) {
@@ -311,30 +353,31 @@ public class Session implements Closeable {
         }
     }
 
-    private EObject getEObject(ResourceSet rs, OElement oElement, boolean populate) {
-        URI uri = factory.createURI(oElement);
-        EObject eObject = rs.getEObject(uri, true);
-        if (populate) {
-            populateEObject(rs, oElement, eObject);
-        }
-        return eObject;
-    }
-
-    private EObject createReference(ResourceSet rs, EObject fromObject, OElement value, boolean populate) {
-        if (value.getSchemaType().isPresent()) {
-            return getEObject(rs, value, populate);
-        }
+    private EObject createReference(ResourceSet rs, EObject fromObject, EStructuralFeature sf, OElement value) {
         OElement element = value.getProperty("element");
+        String eClassURI = value.getProperty("eClass");
+        String fragment = value.getProperty("fragment");
         EObject eObject = null;
         if (element == null) {
             eObject = EcoreUtil.getRootContainer(fromObject);
+            if (fragment != null && !fragment.isEmpty()) {
+                eObject = EcoreUtil.getEObject(eObject, fragment);
+                if (eObject == null) {
+                    throw new RuntimeException("Can not resolve local fragment " + fragment);
+                }
+            }
         }
         else {
-            eObject = getEObject(rs, element, true);
-        }
-        String fragment = value.getProperty("fragment");
-        if (fragment != null) {
-            eObject = EcoreUtil.getEObject(eObject, fragment);
+            URI elementURI = factory.createURI(element);
+            if (fragment != null && !fragment.isEmpty()) {
+                elementURI = elementURI.appendFragment(fragment);
+            }
+            EClass eClass = (EClass) sf.getEType();
+            if (eClassURI != null && !eClassURI.isEmpty()) {
+                eClass = (EClass) rs.getEObject(URI.createURI(eClassURI), false);
+            }
+            eObject = EcoreUtil.create(eClass);
+            ((InternalEObject) eObject).eSetProxyURI(elementURI);
         }
         return eObject;
     }
@@ -375,8 +418,11 @@ public class Session implements Closeable {
             Optional<OElement> oElementOpt = oResult.getElement();
             if (oElementOpt.isPresent()) {
                 OElement oElement = oElementOpt.get();
-                EObject eObject = getEObject(resourceSet, oElement, true);
-                result.add(eObject.eResource());
+                EObject eObject = createEObject(oElement);
+                Resource resource = resourceSet.createResource(factory.createURI(oElement));
+                resource.getContents().add(eObject);
+                populateEObject(resourceSet, oElement, eObject);
+                result.add(resource);
             }
         }
         return result;
