@@ -24,6 +24,7 @@
         "name": "名",
         "notfound": "未找到",
         "password": "密碼",
+        "operationsettings": "操作設定",
         "query": "詢問",
         "regularexpression": "正則表達式",
         "run": "跑",
