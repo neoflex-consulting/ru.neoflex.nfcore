@@ -2,10 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import ru.neoflex.meta.test.*;
 
 import java.util.ArrayList;
@@ -15,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DbTests extends TestBase {
 
-    @Before
-    public void startUp() throws Exception {
+    @BeforeClass
+    public static void startUp() throws Exception {
         server = refreshDatabase();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         server.close();
     }
 
@@ -98,6 +95,6 @@ public class DbTests extends TestBase {
             }
             return null;
         });
-        //sleepForever();
+//        sleepForever();
     }
 }

@@ -2,10 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
@@ -23,13 +20,13 @@ public class PerfTests extends TestBase {
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
-    @Before
-    public void startUp() throws Exception {
+    @BeforeClass
+    public static void startUp() throws Exception {
         server = refreshDatabase();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         server.close();
     }
 

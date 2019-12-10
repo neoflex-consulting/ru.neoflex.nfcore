@@ -184,6 +184,9 @@ public class Session implements Closeable {
             if (!sf.isDerived() && !sf.isTransient() && eObject.eIsSet(sf)) {
                 Object value = eObject.eGet(sf);
                 if (sf instanceof EReference) {
+                    if (((EReference) sf).isContainer()) {
+                        continue;
+                    }
                     if (sf.isMany()) {
                         EList<EObject> eList = (EList<EObject>) value;
                         List<OElement> elements = ((EReference) sf).isContainment() ?
