@@ -234,7 +234,14 @@ public class Session implements Closeable {
     }
 
     public void delete(URI uri) {
-        db.delete(factory.getORID(uri), factory.getVersion(uri));
+        ORID orid = factory.getORID(uri);
+        try (OResultSet rs = db.query("select count(referredBy) as ref_count from (FIND REFERENCES " + orid + ")")) {
+            Long count = rs.next().getProperty("ref_count");
+            if (count > 0) {
+                throw new IllegalArgumentException("OElement " + orid.toString() + " referenced by " + count + " times");
+            }
+        }
+        db.delete(orid, factory.getVersion(uri));
     }
 
     public void save(Resource resource) {
@@ -429,12 +436,14 @@ public class Session implements Closeable {
     }
 
     public List<Resource> query(String sql, Object... args) {
-        OResultSet rs = db.query(sql, args);
-        return getResourceList(rs);
+        try (OResultSet rs = db.query(sql, args);) {
+            return getResourceList(rs);
+        }
     }
 
     public List<Resource> query(String sql, Map args) {
-        OResultSet rs = db.query(sql, args);
-        return getResourceList(rs);
+        try (OResultSet rs = db.query(sql, args);) {
+            return getResourceList(rs);
+        }
     }
 }

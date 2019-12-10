@@ -28,7 +28,7 @@ import java.util.function.Function;
 public abstract class SessionFactory {
     public final static String ORIENTDB = "orientdb";
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
-    public final static String QNAME = "name";
+    public final static String QNAME = "qName";
 
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     protected final String dbName;
@@ -163,7 +163,11 @@ public abstract class SessionFactory {
         if (qualifiedNameDelegate != null) {
             return qualifiedNameDelegate.apply(eClass);
         }
-        return eClass.getEStructuralFeature(QNAME);
+        EStructuralFeature sf = eClass.getEStructuralFeature(QNAME);
+        if (sf == null || !sf.getEContainingClass().equals(eClass)) {
+            return null;
+        }
+        return sf;
     }
 
 

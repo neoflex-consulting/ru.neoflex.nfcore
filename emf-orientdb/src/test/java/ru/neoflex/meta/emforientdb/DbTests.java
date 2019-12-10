@@ -28,8 +28,10 @@ public class DbTests extends TestBase {
     @Test
     public void dbTest() throws Exception {
         server.inTransaction(session -> {
+            ResourceSet rs = session.createResourceSet();
+
             DBTable group = TestFactory.eINSTANCE.createDBTable();
-            group.setName("GROUP");
+            group.setQName("GROUP");
             Column group_id = TestFactory.eINSTANCE.createColumn();
             group_id.setName("ID");
             group_id.setDbType("INTEGER");
@@ -41,8 +43,12 @@ public class DbTests extends TestBase {
             PKey group_pk = TestFactory.eINSTANCE.createPKey();
             group_pk.getColumns().add(group_id);
             group.setPKey(group_pk);
+            Resource group_res = rs.createResource(server.createURI());
+            group_res.getContents().add(group);
+            group_res.save(null);
+
             DBTable user = TestFactory.eINSTANCE.createDBTable();
-            user.setName("USER");
+            user.setQName("USER");
             Column user_id = TestFactory.eINSTANCE.createColumn();
             user_id.setName("ID");
             user_id.setDbType("INTEGER");
@@ -62,19 +68,16 @@ public class DbTests extends TestBase {
             user_group_fk.getColumns().add(user_group_id);
             user_group_fk.setEntity(group);
             user.getFKeys().add(user_group_fk);
+            Resource user_res = rs.createResource(server.createURI());
+            user_res.getContents().add(user);
+            user_res.save(null);
+
             DBView user_group = TestFactory.eINSTANCE.createDBView();
-            user_group.setName("USER_GROUP");
+            user_group.setQName("USER_GROUP");
             user_group.getColumns().add(user_id);
             user_group.getColumns().add(user_name);
             user_group.getColumns().add(group_id);
             user_group.getColumns().add(group_name);
-            ResourceSet rs = session.createResourceSet();
-            Resource group_res = rs.createResource(server.createURI());
-            group_res.getContents().add(group);
-            group_res.save(null);
-            Resource user_res = rs.createResource(server.createURI());
-            user_res.getContents().add(user);
-            user_res.save(null);
             Resource user_group_res = rs.createResource(server.createURI());
             user_group_res.getContents().add(user_group);
             user_group_res.save(null);
@@ -85,6 +88,14 @@ public class DbTests extends TestBase {
             DBView user_group = (DBView) views.get(0).getContents().get(0);
             Assert.assertEquals("ID", user_group.getColumns().get(0).getName());
             Assert.assertEquals(4, user_group.getColumns().size());
+            Resource table_User = session.query("select from test_DBTable where qName=?", "USER").get(0);
+            try {
+                table_User.delete(null);
+                Assert.fail("Can't delete referenced Resource");
+            }
+            catch (IllegalArgumentException e) {
+                Assert.assertTrue(e.getMessage().startsWith("OElement"));
+            }
             return null;
         });
         //sleepForever();
