@@ -370,7 +370,7 @@ public class Session implements Closeable {
         else {
             URI elementURI = factory.createURI(element);
             if (fragment != null && !fragment.isEmpty()) {
-                elementURI = elementURI.appendFragment(fragment);
+                elementURI = elementURI.trimFragment().appendFragment("//" + fragment);
             }
             EClass eClass = (EClass) sf.getEType();
             if (eClassURI != null && !eClassURI.isEmpty()) {
