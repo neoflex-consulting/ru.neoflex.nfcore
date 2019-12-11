@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Session implements Closeable {
-    public static final String EXTERNAL_REFERENCE = "ecore_ExternalReference";
-    public static final String ECORE_EOBJECT = "ecore_EObject";
+    public static final String REFERENCE = "Reference";
+    public static final String EOBJECT = "EObject";
     private final SessionFactory factory;
     private final ODatabaseDocument db;
 
@@ -51,21 +51,21 @@ public class Session implements Closeable {
     private OClass getOrCreateOClass(String oClassName, boolean isAbstract) {
         OClass oClass = db.getClass(oClassName);
         if (oClass == null) {
-            oClass = db.createVertexClass(oClassName);
-        }
-        if (isAbstract) {
-            oClass.setAbstract(true);
+            oClass = db.createClass(oClassName);
+            if (isAbstract) {
+                oClass.setAbstract(true);
+            }
         }
         return oClass;
     }
 
     private OClass getOrCreateReferenceClass() {
-        OClass oClass = db.getClass(EXTERNAL_REFERENCE);
+        OClass oClass = db.getClass(REFERENCE);
         if (oClass == null) {
-            oClass = db.createEdgeClass(EXTERNAL_REFERENCE);
+            oClass = db.createEdgeClass(REFERENCE);
             oClass.createProperty("name", OType.STRING);
             oClass.createProperty("fromFragment", OType.STRING);
-            oClass.createProperty("fromReature", OType.STRING);
+            oClass.createProperty("fromFeature", OType.STRING);
             oClass.createProperty("fromIndex", OType.INTEGER);
             oClass.createProperty("toFragment", OType.STRING);
             oClass.createProperty("isExternal", OType.BOOLEAN);
@@ -75,7 +75,12 @@ public class Session implements Closeable {
     }
 
     private OClass getOrCreateEObjectClass() {
-        return getOrCreateOClass(ECORE_EOBJECT, true);
+        OClass oClass = db.getClass(EOBJECT);
+        if (oClass == null) {
+            oClass = db.createVertexClass(EOBJECT);
+            oClass.setAbstract(true);
+        }
+        return oClass;
     }
 
     private String getOClassName(EClass eClass) {
@@ -390,8 +395,8 @@ public class Session implements Closeable {
                         throw new RuntimeException("Can not resolve local fromFragment " + fromFragment);
                     }
                 }
-                String fromReature = oEdge.getProperty("fromFeature");
-                EStructuralFeature sf = localObject.eClass().getEStructuralFeature(fromReature);
+                String fromFeature = oEdge.getProperty("fromFeature");
+                EStructuralFeature sf = localObject.eClass().getEStructuralFeature(fromFeature);
                 if (sf.isMany()) {
                     ((EList) localObject.eGet(sf)).add(crObject);
                 }

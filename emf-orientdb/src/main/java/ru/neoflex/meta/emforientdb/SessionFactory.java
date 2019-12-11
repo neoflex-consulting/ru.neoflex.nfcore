@@ -73,9 +73,6 @@ public abstract class SessionFactory {
 
     public URI createURI(String ref) {
         URI uri = URI.createURI(ORIENTDB + "://" +dbName + "/" + (ref == null ? "" : ref));
-        if (!uri.hasFragment()) {
-            uri = uri.appendFragment("/");
-        }
         return uri;
     }
 

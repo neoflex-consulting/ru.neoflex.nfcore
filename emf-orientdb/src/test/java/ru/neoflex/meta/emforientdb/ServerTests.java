@@ -116,7 +116,7 @@ public class ServerTests extends TestBase {
             view_class.setSuperClasses(Collections.singletonList(entity_class));
             view_class.createProperty("name", OType.STRING);
 
-            OClass reference_class = db.createEdgeClass("Reference");
+            OClass reference_class = db.createEdgeClass("_Reference");
             reference_class.createProperty("fromFragment", OType.STRING);
             reference_class.createProperty("feature", OType.STRING);
             reference_class.createProperty("index", OType.INTEGER);
