@@ -2,10 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
@@ -17,19 +14,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
     int nGroups = 20;
-    int nUsers = 100;
-    int nThreads = 8;
-    int nUpdates = 40/*00*/;
+    int nUsers = 10000;
+    int nThreads = Runtime.getRuntime().availableProcessors();
+    int nUpdates = 1000/*00*/;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
-    @Before
-    public void startUp() throws Exception {
+    @BeforeClass
+    public static void startUp() throws Exception {
         server = refreshDatabase();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         server.close();
     }
 
@@ -40,7 +37,7 @@ public class PerfTests extends TestBase {
             String name = "group_" + i;
             server.inTransaction(session -> {
                 Group group = TestFactory.eINSTANCE.createGroup();
-                group.setName(name);
+                group.setQName(name);
                 ResourceSet resourceSet = session.createResourceSet();
                 Resource groupResource = resourceSet.createResource(server.createURI(""));
                 groupResource.getContents().add(group);
@@ -66,7 +63,7 @@ public class PerfTests extends TestBase {
                 groupResource.load(null);
                 Group group = (Group) groupResource.getContents().get(0);
                 User user = TestFactory.eINSTANCE.createUser();
-                user.setName(name);
+                user.setQName(name);
                 user.setGroup(group);
                 Resource userResource = rs.createResource(server.createURI());
                 userResource.getContents().add(user);
@@ -100,7 +97,7 @@ public class PerfTests extends TestBase {
                                 Group group = (Group) groupResource.getContents().get(0);
                                 Resource userResource = rs.getResource(server.createURI(userId), true);
                                 User user = (User) userResource.getContents().get(0);
-                                user.setName(name);
+                                user.setQName(name);
                                 user.setGroup(group);
                                 userResource.save(null);
                                 return null;

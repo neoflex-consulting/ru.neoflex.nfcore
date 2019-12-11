@@ -3,30 +3,34 @@ package ru.neoflex.meta.emforientdb;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.ODirection;
+import com.orientechnologies.orient.core.record.OEdge;
 import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.orientechnologies.orient.core.tx.OTransaction;
+import org.checkerframework.common.value.qual.StaticallyExecutable;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class ServerTests extends TestBase {
-    @Before
-    public void startUp() throws Exception {
+    @BeforeClass
+    public static void startUp() throws Exception {
         server = refreshDatabase();
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         server.close();
     }
 
@@ -70,14 +74,14 @@ public class ServerTests extends TestBase {
             String userId;
             String groupId;
             Group group = TestFactory.eINSTANCE.createGroup();
-            group.setName("masters");
+            group.setQName("masters");
             ResourceSet resourceSet = session.createResourceSet();
             Resource groupResource = resourceSet.createResource(server.createURI());
             groupResource.getContents().add(group);
             groupResource.save(null);
             groupId = server.getId(groupResource.getURI());
             User user = TestFactory.eINSTANCE.createUser();
-            user.setName("Orlov");
+            user.setQName("Orlov");
             user.setGroup(group);
             Resource userResource = resourceSet.createResource(server.createURI());
             userResource.getContents().add(user);
@@ -88,71 +92,69 @@ public class ServerTests extends TestBase {
             return userId;
         });
         server.withSession(session -> {
-            List<Resource> users = session.query("select * from test_User where name=?", "Orlov");
+            List<Resource> users = session.query("select * from test_User where qName=?", "Orlov");
             User user = (User) users.get(0).getContents().get(0);
-            Assert.assertEquals("Orlov", user.getName());
+            Assert.assertEquals("Orlov", user.getQName());
             return null;
         });
 //        sleepForever();
-//        try (Transaction tx = database.createTransaction("users")){
-//            ResourceSet resourceSet = database.createResourceSet(tx);
-//            Resource userResource = resourceSet.createResource(database.createURI(userId));
-//            userResource.load(null);
-//            User user = (User) userResource.getContents().get(0);
-//            user.setName("Simanihin");
-//            userResource.save(null);
-//            tx.commit("User Orlov was renamed to Simanihin", "orlov", "");
-//        }
-//        try (Transaction tx = database.createTransaction("users")) {
-//            User user = TestFactory.eINSTANCE.createUser();
-//            user.setName("Orlov");
-//            user.setGroup(group);
-//            Resource userResource = database.createResource(tx, null);
-//            userResource.getContents().add(user);
-//            userResource.save(null);
-//            tx.commit("User Orlov created", "orlov", "");
-//        }
-//        try (Transaction tx = database.createTransaction("users")) {
-//            User user = TestFactory.eINSTANCE.createUser();
-//            user.setName("Orlov");
-//            user.setGroup(group);
-//            Resource userResource = database.createResource(tx, null);
-//            userResource.getContents().add(user);
-//            try {
-//                userResource.save(null);
-//                tx.commit("User Orlov created", "orlov", "");
-//                //Assert.assertTrue(false);
-//            }
-//            catch (IllegalArgumentException e) {
-//                //Assert.assertTrue(e.getMessage().startsWith("Duplicate"));
-//            }
-//        }
-//        try (Transaction tx = database.createTransaction("users")){
-//            ResourceSet resourceSet = database.createResourceSet(tx);
-//            Resource groupResource = resourceSet.createResource(database.createURI(groupId));
-//            groupResource.load(null);
-//            try {
-//                groupResource.delete(null);
-//                //Assert.assertTrue(false);
-//            }
-//            catch (IOException e) {
-//                //Assert.assertTrue(e.getMessage().startsWith("Object "));
-//            }
-//        }
-//        try (Transaction tx = database.createTransaction("users")){
-//            List<Resource> dependent = database.getDependentResources(groupId, tx);
-////            Assert.assertEquals(2, dependent.size());
-////            Assert.assertEquals(3, tx.all().size());
-////            Assert.assertEquals(1, database.findByEClass(group.eClass(), null, tx).getResources().size());
-////            Assert.assertEquals(1, database.findByEClass(group.eClass(), "masters", tx).getResources().size());
-////            Assert.assertEquals(0, database.findByEClass(group.eClass(), "UNKNOWN", tx).getResources().size());
-//            Resource userResource = database.loadResource(userId, tx);
-//            userResource.delete(null);
-//            tx.commit("User Simanihin was deleted");
-//        }
-//        try (Transaction tx = database.createTransaction("users")){
-//            List<Resource> dependent = database.getDependentResources(groupId, tx);
-////            Assert.assertEquals(1, dependent.size());
-//        }
+    }
+
+    @Test
+    public void vertexEdgesTest() throws Exception {
+        server.withSession(session -> {
+            ODatabaseDocument db = session.getDatabaseDocument();
+            OClass entity_class = db.createVertexClass("Entity");
+            OClass table_class = db.createClass("Table");
+            table_class.createProperty("name", OType.STRING);
+            table_class.setSuperClasses(Collections.singletonList(entity_class));
+            table_class.createProperty("columns", OType.EMBEDDEDLIST);
+            OClass column_class = db.createClass("Column");
+            column_class.setSuperClasses(Collections.singletonList(entity_class));
+            column_class.createProperty("name", OType.STRING);
+            OClass view_class = db.createClass("View");
+            view_class.setSuperClasses(Collections.singletonList(entity_class));
+            view_class.createProperty("name", OType.STRING);
+
+            OClass reference_class = db.createEdgeClass("Reference");
+            reference_class.createProperty("fromFragment", OType.STRING);
+            reference_class.createProperty("feature", OType.STRING);
+            reference_class.createProperty("index", OType.INTEGER);
+            reference_class.createProperty("toFragment", OType.STRING);
+
+            OVertex table = db.newVertex(table_class);
+            table.setProperty("name", "GROUP");
+            List<OVertex> columns = new ArrayList<>();
+            table.setProperty("columns", columns);
+            OVertex column0 = db.newVertex("Column");
+            column0.setProperty("name", "ID");
+            columns.add(column0);
+            OVertex column1 = db.newVertex("Column");
+            column1.setProperty("name", "NAME");
+            columns.add(column1);
+            table.save();
+
+            OVertex view = db.newVertex(view_class);
+            view.setProperty("name", "GROUP_V");
+            view.save();
+
+            OEdge r1 = db.newEdge(view, table, reference_class);
+            r1.setProperty("fromFragment", "");
+            r1.setProperty("feature", "columns");
+            r1.setProperty("index", 0);
+            r1.setProperty("toFragment", "@columns.0");
+            r1.save();
+
+            OEdge r2 = db.newEdge(view, table, reference_class);
+            r2.setProperty("fromFragment", "");
+            r2.setProperty("feature", "columns");
+            r2.setProperty("index", 1);
+            r2.setProperty("toFragment", "@columns.1");
+            r2.save();
+
+            Assert.assertEquals(2, StreamSupport.stream(view.getEdges(ODirection.OUT, reference_class).spliterator(), false).count());
+            return null;
+        });
+//        sleepForever();
     }
 }

@@ -7,7 +7,7 @@
 package ru.neoflex.meta.test
 
 abstract class Authority {
-    String name
+    String qName
 }
 
 class Group extends Authority {
@@ -38,7 +38,7 @@ class FKey extends DBKey {
 }
 
 abstract class DBEntity {
-	String name
+	String qName
 	contains PKey pKey
 }
 
