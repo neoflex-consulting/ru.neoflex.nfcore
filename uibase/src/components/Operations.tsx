@@ -1,19 +1,21 @@
-import React, { Fragment, useState } from 'react';
-import {Modal, Dropdown, Menu, Button, Select, notification} from 'antd'
+import React, {Fragment, useState} from 'react';
+import {Button, Dropdown, Menu, Modal, notification, Select} from 'antd'
 import Ecore from 'ecore';
 import i18next from 'i18next';
 
-import { API } from './../modules/api' 
+import {API} from './../modules/api'
 import FormComponentMapper from './FormComponentMapper';
 
 interface Props {
     translate: i18next.TFunction,
-    mainEObject: Ecore.EObject
+    mainEObject: Ecore.EObject,
+    refresh: (refresh: boolean) => void;
 }
 
 export default function Operations(props: Props): JSX.Element {
 
     const t  = props.translate
+    const refresh = props.refresh
     const [ paramModalVisible, setParamModalVisible ] = useState<boolean>(false)
     const [ refModalVisible, setRefModalVisible ] = useState<boolean>(false)
     const [ selectedRefUries, setSelectedRefUries ] = useState<string[]>([])
@@ -51,7 +53,9 @@ export default function Operations(props: Props): JSX.Element {
                         wordWrap: "break-word"
                     },
                 })
+                refresh(true)
             })
+                .catch( ()=> refresh(false) )
             setParamModalVisible(false)
         }
     }

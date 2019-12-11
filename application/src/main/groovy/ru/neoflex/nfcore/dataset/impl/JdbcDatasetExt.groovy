@@ -5,10 +5,11 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.Dataset
+
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.DataType
+import ru.neoflex.nfcore.dataset.JdbcDataset
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -61,8 +62,8 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
             Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
                 @Override
                 Object call(TransactionSPI tx) throws Exception {
-                    def datasetRef = Context.current.store.getRef(resource.resources)
-                    def dataset = resource.resources.get(0).contents.get(0) as Dataset
+                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources)
+                    def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
                     def columnCount = resultSet.metaData.columnCount
                     if (columnCount > 0) {
                         for (int i = 1; i <= columnCount; ++i) {
@@ -73,15 +74,15 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                             datasetColumn.name = object.toString()
                             datasetColumn.rdbmsDataType = columnType.toString()
                             datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
-                            dataset.datasetColumn.add(datasetColumn)
+                            jdbcDataset.datasetColumn.add(datasetColumn)
                         }
-                        Context.current.store.updateEObject(datasetRef, dataset)
-                        Context.current.store.commit("Entity was updated " + datasetRef)
+                        Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
+                        Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
 
-                        return JsonOutput.toJson("Columns in entity " + dataset.name + " was loaded. Please, run function Reload.")
+                        return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were loaded")
                     }
                     else {
-                        return JsonOutput.toJson("Entity " + dataset.name + " was not updated.")
+                        return JsonOutput.toJson("Entity " + jdbcDataset.name + " was not updated")
                     }
                 }
             })
@@ -96,13 +97,12 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
             Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
                 @Override
                 Object call(TransactionSPI tx) throws Exception {
-                    def datasetRef = Context.current.store.getRef(resource.resources)
-                    def dataset = resource.resources.get(0).contents.get(0) as Dataset
-                    dataset.datasetColumn.clear()
-                    Context.current.store.updateEObject(datasetRef, dataset)
-                    Context.current.store.commit("Entity was updated " + datasetRef)
-
-                    return JsonOutput.toJson("Columns in entity " + dataset.name + " was deleted. Please, run function Reload.")
+                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources)
+                    def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
+                    jdbcDataset.datasetColumn.clear()
+                    Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
+                    Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
+                    return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were deleted")
                 }
             })
         }
@@ -112,11 +112,11 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         try {
             Class.forName(getConnection().driver.driverClassName)
         } catch (ClassNotFoundException e) {
-            System.out.println("JDBC Driver " + getConnection().driver.driverClassName + " is not found")
+            System.out.println("Driver " + getConnection().driver.driverClassName + " is not found")
             e.printStackTrace()
             return
         }
-        System.out.println("JDBC Driver successfully connected")
+        System.out.println("Driver successfully connected")
         Connection connection = null
         try {
             connection = DriverManager.getConnection(getConnection().url, getConnection().userName, getConnection().password)
