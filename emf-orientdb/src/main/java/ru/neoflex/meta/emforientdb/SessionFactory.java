@@ -79,6 +79,10 @@ public abstract class SessionFactory {
         return uri;
     }
 
+    public URI createURI(ORID orid) {
+        return createURI(getId(orid));
+    }
+
     public URI createURI(ORecord oElement) {
         String ref = getRef(oElement);
         return createURI(ref);
