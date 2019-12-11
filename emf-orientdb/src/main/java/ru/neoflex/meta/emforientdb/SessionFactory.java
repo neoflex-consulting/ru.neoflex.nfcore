@@ -163,11 +163,7 @@ public abstract class SessionFactory {
         if (qualifiedNameDelegate != null) {
             return qualifiedNameDelegate.apply(eClass);
         }
-        EStructuralFeature sf = eClass.getEStructuralFeature(QNAME);
-        if (sf == null || !sf.getEContainingClass().equals(eClass)) {
-            return null;
-        }
-        return sf;
+        return eClass.getEStructuralFeature(QNAME);
     }
 
 

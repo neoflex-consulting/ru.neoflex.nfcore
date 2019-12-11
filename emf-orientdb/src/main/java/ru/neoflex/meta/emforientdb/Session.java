@@ -50,11 +50,25 @@ public class Session implements Closeable {
     private OClass getOrCreateOClass(String oClassName, boolean isAbstract) {
         OClass oClass = db.getClass(oClassName);
         if (oClass == null) {
-            oClass = db.createClass(oClassName);
+            oClass = db.createVertexClass(oClassName);
         }
         if (isAbstract) {
             oClass.setAbstract(true);
         }
+        return oClass;
+    }
+
+    private OClass getOrCreateReferenceClass() {
+        OClass oClass = db.getClass("ecore_ExternalReference");
+        if (oClass == null) {
+            oClass = db.createEdgeClass("ecore_ExternalReference");
+        }
+        oClass.createProperty("name", OType.STRING);
+        oClass.createProperty("fromFragment", OType.STRING);
+        oClass.createProperty("fromReature", OType.STRING);
+        oClass.createProperty("fromIndex", OType.INTEGER);
+        oClass.createProperty("toFragment", OType.STRING);
+        oClass.createProperty("isCrossReference", OType.BOOLEAN);
         return oClass;
     }
 
@@ -81,10 +95,8 @@ public class Session implements Closeable {
     private void createProperty(OClass oClass, EStructuralFeature sf) {
         if (sf instanceof EReference) {
             EReference eReference = (EReference) sf;
-            if (!eReference.isContainer()) {
-                OClass refOClass = eReference.isContainment() ?
-                        getOrCreateOClass(eReference.getEReferenceType()):
-                        null;
+            if (eReference.isContainment()) {
+                OClass refOClass = getOrCreateOClass(eReference.getEReferenceType());
                 OType oType = (eReference.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED);
                 oClass.createProperty(sf.getName(), oType, refOClass);
             }
@@ -102,6 +114,7 @@ public class Session implements Closeable {
 
     public void createSchema() {
         OClass oEcoreEObjectClass = getOrCreateEObjectClass();
+        getOrCreateReferenceClass();
         for (EClass eClass: factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
             if (eClass.getESuperTypes().size() == 0) {
@@ -120,7 +133,7 @@ public class Session implements Closeable {
                 }
             }
             EStructuralFeature sf = factory.getQNameFeature(eClass);
-            if (sf != null) {
+            if (sf != null && sf.getEContainingClass().equals(eClass)) {
                 oClass.createIndex(oClass.getName() + "_" + sf.getName() + "_ak", OClass.INDEX_TYPE.UNIQUE, sf.getName());
             }
         }
