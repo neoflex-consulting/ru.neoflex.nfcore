@@ -229,7 +229,7 @@ public class Session implements Closeable {
                     String fromFeature = sf.getName();
                     String toFragment = crURI.hasFragment() ? crURI.fragment() : "";
                     String name = fromFragment + "@" + fromFeature +
-                            (fromIndex >= 0 ? "." + fromIndex : "") + "->" + toFragment;
+                            (fromIndex >= 0 ? "." + fromIndex : "") + "->" + crVertex.getIdentity() + toFragment;
                     OEdge oEdge = oEdgeMap.remove(name);
                     if (oEdge == null) {
                         oEdge = ((OVertex) oElement).addEdge(crVertex, getOrCreateReferenceClass());
@@ -356,7 +356,12 @@ public class Session implements Closeable {
             }
         }
         if (top && oElement instanceof OVertex) {
+            List<OEdge> oEdges = new ArrayList<>();
             for (OEdge oEdge: ((OVertex) oElement).getEdges(ODirection.OUT, getOrCreateReferenceClass())) {
+                oEdges.add(oEdge);
+            }
+            oEdges.sort(Comparator.comparingInt(o -> ((int) o.getProperty("fromIndex"))));
+            for (OEdge oEdge: oEdges) {
                 String toFragment = oEdge.getProperty("toFragment");
                 boolean isExternal = oEdge.getProperty("isExternal");
                 EObject crObject = null;
@@ -388,8 +393,6 @@ public class Session implements Closeable {
                 String fromReature = oEdge.getProperty("fromFeature");
                 EStructuralFeature sf = localObject.eClass().getEStructuralFeature(fromReature);
                 if (sf.isMany()) {
-                    // TODO: do something with sort order
-                    // int index = oEdge.getProperty("index");
                     ((EList) localObject.eGet(sf)).add(crObject);
                 }
                 else {
