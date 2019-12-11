@@ -180,9 +180,19 @@ public abstract class SessionFactory {
         R call(Session session) throws Exception;
     }
 
+    public interface SessionProcedure {
+        void call(Session session) throws Exception;
+    }
+
     public<R> R withSession(SessionFunction<R> f) throws Exception {
         try (Session session = createSession()) {
             return f.call(session);
+        }
+    }
+
+    public void withSession(SessionProcedure f) throws Exception {
+        try (Session session = createSession()) {
+            f.call(session);
         }
     }
 
@@ -194,6 +204,7 @@ public abstract class SessionFactory {
         while (true) {
             try {
                 return withSession(session -> {
+                    session.getSavedResources().clear();
                     session.getDatabaseDocument().begin(OTransaction.TXTYPE.OPTIMISTIC);
                     try {
                         return f.call(session);
@@ -204,6 +215,9 @@ public abstract class SessionFactory {
                     }
                     finally {
                         session.getDatabaseDocument().commit(true);
+                        for (Resource resource: session.getSavedResources().keySet()) {
+                            resource.setURI(createURI(session.getSavedResources().get(resource)));
+                        }
                     }
                 });
             }
@@ -225,4 +239,10 @@ public abstract class SessionFactory {
         }
     }
 
+    public void inTransaction(SessionProcedure f) throws Exception {
+        inTransaction(session -> {
+            f.call(session);
+            return null;
+        });
+    }
 }

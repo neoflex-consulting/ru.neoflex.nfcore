@@ -29,8 +29,9 @@ public class Session implements Closeable {
     public static final String EOBJECT = "EObject";
     private final SessionFactory factory;
     private final ODatabaseDocument db;
+    private final Map<Resource, ORecord> savedResources = new HashMap<Resource, ORecord>();
 
-    public Session(SessionFactory factory, ODatabaseDocument db) {
+    Session(SessionFactory factory, ODatabaseDocument db) {
         this.factory = factory;
         this.db = db;
     }
@@ -44,7 +45,7 @@ public class Session implements Closeable {
         return db;
     }
 
-    public SessionFactory getSessionFactory() {
+    public SessionFactory getFactory() {
         return factory;
     }
 
@@ -270,10 +271,14 @@ public class Session implements Closeable {
 
     public void delete(URI uri) {
         ORID orid = factory.getORID(uri);
-        try (OResultSet rs = db.query("select count(referredBy) as ref_count from (FIND REFERENCES " + orid + ")")) {
-            Long count = rs.next().getProperty("ref_count");
-            if (count > 0) {
-                throw new IllegalArgumentException("OElement " + orid.toString() + " referenced by " + count + " times");
+        OVertex oVertex = db.load(orid);
+        if (oVertex == null) {
+            return;
+        }
+        for (OEdge oEdge: oVertex.getEdges(ODirection.IN, getOrCreateReferenceClass())) {
+            boolean isExternal = oEdge.getProperty("isExternal");
+            if (!isExternal) {
+                throw new IllegalArgumentException("OElement " + orid.toString() + " referenced by " + oEdge + " edge");
             }
         }
         db.delete(orid, factory.getVersion(uri));
@@ -292,8 +297,16 @@ public class Session implements Closeable {
         if (oElement == null) {
             oElement = createOElement(eObject);
         }
+        else {
+            if (oElement.getVersion() != factory.getVersion(resource.getURI())) {
+                throw new ConcurrentModificationException("OElement " + factory.getORID(resource.getURI()) +
+                        " has modified database version " + oElement.getVersion() + ", while record version is " +
+                        factory.getVersion(resource.getURI()));
+            }
+        }
         populateOElement(eObject, oElement, true);
         ORecord oRecord = oElement.save();
+        savedResources.put(resource, oRecord);
         resource.setURI(factory.createURI(oRecord));
     }
 
@@ -463,5 +476,9 @@ public class Session implements Closeable {
         try (OResultSet rs = db.query(sql, args);) {
             return getResourceList(rs);
         }
+    }
+
+    public Map<Resource, ORecord> getSavedResources() {
+        return savedResources;
     }
 }

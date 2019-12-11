@@ -78,7 +78,6 @@ public class DbTests extends TestBase {
             Resource user_group_res = rs.createResource(server.createURI());
             user_group_res.getContents().add(user_group);
             user_group_res.save(null);
-            return null;
         });
         server.withSession(session -> {
             List<Resource> views = session.query("select from test_DBView");
@@ -94,7 +93,6 @@ public class DbTests extends TestBase {
             catch (IllegalArgumentException e) {
                 Assert.assertTrue(e.getMessage().startsWith("OElement"));
             }
-            return null;
         });
 //        sleepForever();
     }
