@@ -29,7 +29,7 @@ public class Session implements Closeable {
     public static final String EOBJECT = "EObject";
     private final SessionFactory factory;
     private final ODatabaseDocument db;
-    private final Map<Resource, ORecord> savedResources = new HashMap<Resource, ORecord>();
+    final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
 
     Session(SessionFactory factory, ODatabaseDocument db) {
         this.factory = factory;
@@ -120,17 +120,22 @@ public class Session implements Closeable {
         }
     }
 
+    public void enshureSuperClass(OClass oClass, OClass oSuperClass) {
+        if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
+            oClass.addSuperClass(oSuperClass);
+        }
+    }
     public void createSchema() {
         OClass oEcoreEObjectClass = getOrCreateEObjectClass();
         getOrCreateReferenceClass();
         for (EClass eClass: factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
             if (eClass.getESuperTypes().size() == 0) {
-                oClass.addSuperClass(oEcoreEObjectClass);
+                enshureSuperClass(oClass, oEcoreEObjectClass);
             }
             for (EClass eSuperClass: eClass.getESuperTypes()) {
                 OClass oSuperClass = getOrCreateOClass(eSuperClass);
-                oClass.addSuperClass(oSuperClass);
+                enshureSuperClass(oClass, oSuperClass);
             }
             for (EStructuralFeature sf: eClass.getEAllStructuralFeatures()) {
                 if (!sf.isDerived() && !sf.isTransient()) {
@@ -142,7 +147,10 @@ public class Session implements Closeable {
             }
             EStructuralFeature sf = factory.getQNameFeature(eClass);
             if (sf != null && sf.getEContainingClass().equals(eClass)) {
-                oClass.createIndex(oClass.getName() + "_" + sf.getName() + "_ak", OClass.INDEX_TYPE.UNIQUE, sf.getName());
+                String name = oClass.getName() + "_" + sf.getName() + "_ak";
+                if (oClass.getClassIndex(name) == null) {
+                    oClass.createIndex(name, OClass.INDEX_TYPE.UNIQUE, sf.getName());
+                }
             }
         }
     }
@@ -277,7 +285,7 @@ public class Session implements Closeable {
         }
         for (OEdge oEdge: oVertex.getEdges(ODirection.IN, getOrCreateReferenceClass())) {
             boolean isExternal = oEdge.getProperty("isExternal");
-            if (!isExternal) {
+            if (isExternal) {
                 throw new IllegalArgumentException("OElement " + orid.toString() + " referenced by " + oEdge + " edge");
             }
         }
@@ -300,13 +308,13 @@ public class Session implements Closeable {
         else {
             if (oElement.getVersion() != factory.getVersion(resource.getURI())) {
                 throw new ConcurrentModificationException("OElement " + factory.getORID(resource.getURI()) +
-                        " has modified database version " + oElement.getVersion() + ", while record version is " +
+                        " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
                         factory.getVersion(resource.getURI()));
             }
         }
         populateOElement(eObject, oElement, true);
         ORecord oRecord = oElement.save();
-        savedResources.put(resource, oRecord);
+        savedResourcesMap.put(resource, oRecord);
         resource.setURI(factory.createURI(oRecord));
     }
 
@@ -478,7 +486,7 @@ public class Session implements Closeable {
         }
     }
 
-    public Map<Resource, ORecord> getSavedResources() {
-        return savedResources;
+    public Set<Resource> getSavedResources() {
+        return savedResourcesMap.keySet();
     }
 }

@@ -215,8 +215,8 @@ public abstract class SessionFactory {
                     }
                     finally {
                         session.getDatabaseDocument().commit(true);
-                        for (Resource resource: session.getSavedResources().keySet()) {
-                            resource.setURI(createURI(session.getSavedResources().get(resource)));
+                        for (Resource resource: session.savedResourcesMap.keySet()) {
+                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
                         }
                     }
                 });

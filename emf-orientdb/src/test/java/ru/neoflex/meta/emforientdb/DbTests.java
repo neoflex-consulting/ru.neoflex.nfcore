@@ -1,5 +1,6 @@
 package ru.neoflex.meta.emforientdb;
 
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.junit.*;
@@ -95,5 +96,30 @@ public class DbTests extends TestBase {
             }
         });
 //        sleepForever();
+    }
+
+    @Test
+    public void databaseTest() throws Exception {
+        try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}})) {
+            Resource roleResource = db.inTransaction(session -> {
+                ResourceSet rs = session.createResourceSet();
+                DBTable role = TestFactory.eINSTANCE.createDBTable();
+                role.setQName("ROLE");
+                Column role_id = TestFactory.eINSTANCE.createColumn();
+                role_id.setName("ID");
+                role_id.setDbType("INTEGER");
+                role.getColumns().add(role_id);
+                PKey role_pk = TestFactory.eINSTANCE.createPKey();
+                role_pk.getColumns().add(role_id);
+                role.setPKey(role_pk);
+                Resource resource = rs.createResource(db.createURI());
+                resource.getContents().add(role);
+                resource.save(null);
+                return resource;
+            });
+            db.inTransaction(session -> {
+                roleResource.delete(null);
+            });
+        }
     }
 }

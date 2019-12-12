@@ -22,7 +22,7 @@ public class TestBase {
     }
 
     public static Server getDatabase() throws Exception {
-        return new Server(getHomeFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
+        return new Server(getHomeFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}}).open();
     }
 
     public static File getHomeFile() throws IOException {
