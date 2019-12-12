@@ -73,10 +73,11 @@ public abstract class SessionFactory {
 
     public URI createURI(String ref) {
         URI uri = URI.createURI(ORIENTDB + "://" +dbName + "/" + (ref == null ? "" : ref));
-        if (!uri.hasFragment()) {
-            uri = uri.appendFragment("/");
-        }
         return uri;
+    }
+
+    public URI createURI(ORID orid) {
+        return createURI(getId(orid));
     }
 
     public URI createURI(ORecord oElement) {
@@ -163,11 +164,7 @@ public abstract class SessionFactory {
         if (qualifiedNameDelegate != null) {
             return qualifiedNameDelegate.apply(eClass);
         }
-        EStructuralFeature sf = eClass.getEStructuralFeature(QNAME);
-        if (sf == null || !sf.getEContainingClass().equals(eClass)) {
-            return null;
-        }
-        return sf;
+        return eClass.getEStructuralFeature(QNAME);
     }
 
 
@@ -183,9 +180,19 @@ public abstract class SessionFactory {
         R call(Session session) throws Exception;
     }
 
+    public interface SessionProcedure {
+        void call(Session session) throws Exception;
+    }
+
     public<R> R withSession(SessionFunction<R> f) throws Exception {
         try (Session session = createSession()) {
             return f.call(session);
+        }
+    }
+
+    public void withSession(SessionProcedure f) throws Exception {
+        try (Session session = createSession()) {
+            f.call(session);
         }
     }
 
@@ -197,6 +204,7 @@ public abstract class SessionFactory {
         while (true) {
             try {
                 return withSession(session -> {
+                    session.getSavedResources().clear();
                     session.getDatabaseDocument().begin(OTransaction.TXTYPE.OPTIMISTIC);
                     try {
                         return f.call(session);
@@ -207,6 +215,9 @@ public abstract class SessionFactory {
                     }
                     finally {
                         session.getDatabaseDocument().commit(true);
+                        for (Resource resource: session.savedResourcesMap.keySet()) {
+                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
+                        }
                     }
                 });
             }
@@ -228,4 +239,10 @@ public abstract class SessionFactory {
         }
     }
 
+    public void inTransaction(SessionProcedure f) throws Exception {
+        inTransaction(session -> {
+            f.call(session);
+            return null;
+        });
+    }
 }

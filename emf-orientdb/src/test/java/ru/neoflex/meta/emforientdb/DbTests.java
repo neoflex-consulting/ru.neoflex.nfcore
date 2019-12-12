@@ -1,5 +1,6 @@
 package ru.neoflex.meta.emforientdb;
 
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.junit.*;
@@ -78,12 +79,12 @@ public class DbTests extends TestBase {
             Resource user_group_res = rs.createResource(server.createURI());
             user_group_res.getContents().add(user_group);
             user_group_res.save(null);
-            return null;
         });
         server.withSession(session -> {
             List<Resource> views = session.query("select from test_DBView");
             DBView user_group = (DBView) views.get(0).getContents().get(0);
             Assert.assertEquals("ID", user_group.getColumns().get(0).getName());
+            Assert.assertEquals("NAME", user_group.getColumns().get(1).getName());
             Assert.assertEquals(4, user_group.getColumns().size());
             Resource table_User = session.query("select from test_DBTable where qName=?", "USER").get(0);
             try {
@@ -93,8 +94,32 @@ public class DbTests extends TestBase {
             catch (IllegalArgumentException e) {
                 Assert.assertTrue(e.getMessage().startsWith("OElement"));
             }
-            return null;
         });
 //        sleepForever();
+    }
+
+    @Test
+    public void databaseTest() throws Exception {
+        try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}})) {
+            Resource roleResource = db.inTransaction(session -> {
+                ResourceSet rs = session.createResourceSet();
+                DBTable role = TestFactory.eINSTANCE.createDBTable();
+                role.setQName("ROLE");
+                Column role_id = TestFactory.eINSTANCE.createColumn();
+                role_id.setName("ID");
+                role_id.setDbType("INTEGER");
+                role.getColumns().add(role_id);
+                PKey role_pk = TestFactory.eINSTANCE.createPKey();
+                role_pk.getColumns().add(role_id);
+                role.setPKey(role_pk);
+                Resource resource = rs.createResource(db.createURI());
+                resource.getContents().add(role);
+                resource.save(null);
+                return resource;
+            });
+            db.inTransaction(session -> {
+                roleResource.delete(null);
+            });
+        }
     }
 }

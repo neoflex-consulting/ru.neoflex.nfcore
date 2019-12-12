@@ -12,6 +12,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,23 @@ public class Server extends SessionFactory implements Closeable {
         System.setProperty("ORIENTDB_HOME", home);
         installStudioJar(home);
         String dbPath = new File(home, "databases").getAbsolutePath();
-        this.server = OServerMain.create();
-        this.configuration = new OServerConfiguration();
+        this.server = OServerMain.create(false);
+        this.configuration = createDefaultServerConfiguration(dbPath);
+        open();
+    }
+
+    public Server open() throws InvocationTargetException, NoSuchMethodException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        server.startup(configuration);
+        server.activate();
+        if (!server.existsDatabase(dbName)) {
+            server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        }
+        createSchema();
+        return this;
+    }
+
+    public OServerConfiguration createDefaultServerConfiguration(String dbPath) {
+        OServerConfiguration configuration = new OServerConfiguration();
         configuration.network = new OServerNetworkConfiguration();
         configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>() {{
             add(new OServerNetworkProtocolConfiguration("binary",
@@ -73,12 +89,7 @@ public class Server extends SessionFactory implements Closeable {
                 new OServerEntryConfiguration("server.database.path", dbPath),
                 new OServerEntryConfiguration("plugin.dynamic", "true"),
         };
-        server.startup(configuration);
-        server.activate();
-        if (!server.existsDatabase(dbName)) {
-            server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
-        }
-        createSchema();
+        return configuration;
     }
 
     public void installStudioJar(String home) throws IOException {
