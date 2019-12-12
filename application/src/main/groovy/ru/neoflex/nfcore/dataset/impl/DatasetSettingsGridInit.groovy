@@ -8,11 +8,11 @@ import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.DatasetSettingsGrid
 
 class DatasetSettingsGridInit {
-    static def findEObject(EClass eClass, String name) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
+//    static def findEObject(EClass eClass, String name) {
+//        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
+//                .execute().resourceSet
+//        return resources.resources.get(0).contents.get(0)
+//    }
 
     static def recreateDatasetSettingsGrid(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_SETTINGS_GRID, [name: name])

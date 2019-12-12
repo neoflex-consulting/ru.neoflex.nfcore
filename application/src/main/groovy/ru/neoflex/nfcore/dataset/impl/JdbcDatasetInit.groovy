@@ -21,7 +21,9 @@ class JdbcDatasetInit {
             def jdbcDataset = DatasetFactory.eINSTANCE.createJdbcDataset()
             jdbcDataset.name = name
             jdbcDataset.query = "SELECT * FROM public.sse_workspace"
-            def connection = findOrCreateEObject(DatasetPackage.Literals.CONNECTION, "JdbcConnectionPostgresqlTest")
+            jdbcDataset.tableName = "sse_workspace"
+            jdbcDataset.schemaName = "public"
+            def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, "JdbcConnectionPostgresqlTest")
             jdbcDataset.setConnection(connection)
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))
         }
