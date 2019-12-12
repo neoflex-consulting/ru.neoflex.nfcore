@@ -47,10 +47,11 @@ export default function Operations(props: Props): JSX.Element {
                     message: key,
                     duration: null,
                     style: {
-                        width: 400,
-                        marginLeft: -10,
+                        width: 450,
+                        marginLeft: -52,
                         marginTop: 16,
-                        wordWrap: "break-word"
+                        wordWrap: "break-word",
+                        fontWeight: 350
                     },
                 })
                 refresh(true)

@@ -73,10 +73,11 @@ class StatusLegend extends React.Component<Props & WithTranslation, State> {
                             key: "single",
                             btn: [btnEdit, btnCloseAll],
                             style: {
-                                width: 400,
-                                marginLeft: -10,
+                                width: 450,
+                                marginLeft: -52,
                                 marginTop: 16,
-                                wordWrap: "break-word"
+                                wordWrap: "break-word",
+                                fontWeight: 350
                             },
                         })}}
                     style={{width: "300px"}}

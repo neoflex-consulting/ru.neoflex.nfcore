@@ -342,10 +342,11 @@ class EcoreApp extends React.Component<any, State> {
                         description: error.message,
                         key,
                         style: {
-                            width: 400,
-                            marginLeft: -10,
+                            width: 450,
+                            marginLeft: -52,
                             marginTop: 16,
-                            wordWrap: "break-word"
+                            wordWrap: "break-word",
+                            fontWeight: 350
                         },
                     })
             }
