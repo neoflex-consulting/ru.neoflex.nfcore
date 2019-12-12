@@ -117,8 +117,14 @@ public class DbTests extends TestBase {
                 resource.save(null);
                 return resource;
             });
+            db.withSession(session -> {
+                Assert.assertEquals(1, session.query("select from test_DBTable where qName=?", "ROLE").size());
+            });
             db.inTransaction(session -> {
                 roleResource.delete(null);
+            });
+            db.withSession(session -> {
+                Assert.assertEquals(0, session.query("select from test_DBTable where qName=?", "ROLE").size());
             });
         }
     }
