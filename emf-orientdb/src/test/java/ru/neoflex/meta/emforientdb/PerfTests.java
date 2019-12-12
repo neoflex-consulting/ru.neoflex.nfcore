@@ -43,14 +43,12 @@ public class PerfTests extends TestBase {
                 groupResource.getContents().add(group);
                 groupResource.save(null);
                 server.getId(groupResource.getURI());
-                return null;
             });
         }
         server.withSession(session -> {
             session.query("select * from test_Group").forEach(resource -> {
                 groupIds.add(server.getId(resource.getURI()));
             });
-            return null;
         });
         long created1 = System.currentTimeMillis();
         for (int i = 0; i < nUsers; ++i) {
@@ -68,14 +66,12 @@ public class PerfTests extends TestBase {
                 Resource userResource = rs.createResource(server.createURI());
                 userResource.getContents().add(user);
                 userResource.save(null);
-                return null;
             });
         }
         server.withSession(session -> {
             session.query("select * from test_User").forEach(resource -> {
                 userIds.add(server.getId(resource.getURI()));
             });
-            return null;
         });
         long created2 = System.currentTimeMillis();
         List<Thread> threads = new ArrayList<>();
@@ -100,7 +96,6 @@ public class PerfTests extends TestBase {
                                 user.setQName(name);
                                 user.setGroup(group);
                                 userResource.save(null);
-                                return null;
                             });
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
