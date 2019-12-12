@@ -110,11 +110,11 @@ public class Session implements Closeable {
             }
         }
         else if (sf instanceof EAttribute) {
+            OType oType = convertEDataType(((EAttribute) sf).getEAttributeType());
             if (sf.isMany()) {
-                oClass.createProperty(sf.getName(), OType.EMBEDDEDLIST);
+                oClass.createProperty(sf.getName(), OType.EMBEDDEDLIST, oType);
             }
             else {
-                OType oType = convertEDataType(((EAttribute) sf).getEAttributeType());
                 oClass.createProperty(sf.getName(), oType);
             }
         }
