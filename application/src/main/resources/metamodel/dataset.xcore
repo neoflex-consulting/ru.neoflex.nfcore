@@ -13,20 +13,20 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.application.Typography
 
-/*JdbcDriver*/
+/*Driver*/
 @Ecore(constraints="IsValid")
-class JdbcDriver {
+class Driver {
     QName name
     String driverClassName
 	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
 }
 
-/*JdbcConnection*/
+/*Connection*/
 @Ecore(constraints="IsValid")
-class JdbcConnection {
+class Connection {
     QName name
-    refers JdbcDriver driver
+    refers Driver driver
     String url
     String userName
     Password password
@@ -35,6 +35,7 @@ class JdbcConnection {
 /*Dataset*/
 abstract class Dataset {
     QName name
+    refers Connection connection
     Text query
     op JSON runQuery()
     op JSON loadAllColumns()
@@ -44,7 +45,15 @@ abstract class Dataset {
 
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
-    refers JdbcConnection connection
+}
+
+class HiveDataset extends Dataset {
+}
+
+class ImpalaDataset extends Dataset {
+}
+
+class OdbcDataset extends Dataset {
 }
 
 /*View*/
@@ -53,7 +62,8 @@ abstract class DatasetSettings {
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
      //Созать все колонки в DatasetSettings, которые есть в Dataset. В параметрах (можно удалить все имеющиеся перед добавлением новых)
-     //op JSON createAllColumns(boolean deleteAllColumns)
+     op JSON createAllColumns()
+     op JSON deleteAllColumns()
      boolean FirstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
@@ -91,7 +101,7 @@ class DatasetColumn {  //не редактирумый класс, информ�
 }
 
 abstract class DatasetColumnView {
-    QName fieldName
+    QName name
     contains Typography headerName //название столбца
     refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     String headerTooltip //всплывающая подсказка

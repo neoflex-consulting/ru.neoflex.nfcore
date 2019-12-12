@@ -81,8 +81,12 @@ class ResourceEditor extends React.Component<any, State> {
         selectedRefUries: []
     }
 
-    refresh = (): void => {
-        this.getEObject()
+  //      = (resources : Ecore.Resource[]): void => {
+
+    refresh = (refresh: boolean): void => {
+        if (refresh) {
+            this.getEObject()
+        }
     }
 
     delete = (): void => {
@@ -588,9 +592,13 @@ class ResourceEditor extends React.Component<any, State> {
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
                         :
                         <Button className="panel-button" icon="save" onClick={this.save} title={"Save"}/>}
-                    <Button className="panel-button" icon="reload" onClick={this.refresh} title={"Reload"} />
+                    <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={"Refresh"} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
-                        <Operations translate={t} mainEObject={this.state.mainEObject} />}
+                        <Operations
+                            translate={t}
+                            mainEObject={this.state.mainEObject}
+                            refresh={this.refresh}
+                        />}
                     <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={"Copy"} />
                     <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} title={"Delete"} />
                 </Layout.Header>
@@ -624,8 +632,8 @@ class ResourceEditor extends React.Component<any, State> {
                                                     key={res.eURI()}
                                                 >
                                                     <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
-                                                        <span 
-                                                            title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`} 
+                                                        <span
+                                                            title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
                                                             className="item-title"
                                                         >
                                                             {`${res.eContents()[0].get('name')}`}
@@ -675,7 +683,7 @@ class ResourceEditor extends React.Component<any, State> {
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={this.state.selectedRefUries.length > 0 ? 
+                    footer={this.state.selectedRefUries.length > 0 ?
                         <Button type="primary" onClick={this.handleAddNewRef}>OK</Button>: null}
                 >
                     <Select
