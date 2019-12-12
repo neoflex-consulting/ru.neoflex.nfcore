@@ -13,20 +13,20 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.application.Typography
 
-/*Driver*/
+/*JdbcDriver*/
 @Ecore(constraints="IsValid")
-class Driver {
+class JdbcDriver {
     QName name
     String driverClassName
 	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
 }
 
-/*Connection*/
+/*JdbcConnection*/
 @Ecore(constraints="IsValid")
-class Connection {
+class JdbcConnection {
     QName name
-    refers Driver driver
+    refers JdbcDriver driver
     String url
     String userName
     Password password
@@ -35,25 +35,20 @@ class Connection {
 /*Dataset*/
 abstract class Dataset {
     QName name
-    refers Connection connection
-    Text query
-    op JSON runQuery()
-    op JSON loadAllColumns()
     op JSON deleteAllColumns()
+    op JSON loadAllColumns()
+    op JSON runQuery() //??
     contains DatasetColumn[] datasetColumn
 }
 
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
-}
-
-class HiveDataset extends Dataset {
-}
-
-class ImpalaDataset extends Dataset {
-}
-
-class OdbcDataset extends Dataset {
+    refers JdbcConnection connection
+    QueryType queryType
+    Text query //тут, так как для каждого dataset своя валидаия
+    Text schemaName
+    Text tableName
+    op JSON showAllTables()
 }
 
 /*View*/
@@ -61,12 +56,12 @@ abstract class DatasetSettings {
      QName name //default сделать по умолчанию (не редактируемый)
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
-     //Созать все колонки в DatasetSettings, которые есть в Dataset. В параметрах (можно удалить все имеющиеся перед добавлением новых)
      op JSON createAllColumns()
      op JSON deleteAllColumns()
-     boolean FirstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
+     boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
+     op JSON runQueryWithServerFilters()
 }
 
 class DatasetSettingsGrid extends DatasetSettings {
@@ -127,82 +122,88 @@ class FormatMask {
 }
 
 class Conditions {
-    refers DatasetColumnView column //в списке все столбцы в текущем объекте (DatasetSettingsGrid)
+    String name
+    refers DatasetColumn datasetColumn
     Operations operation
     String value
+    boolean enable //включен ли фильтр
+}
+
+enum QueryType {
+    UseTableName
+    UseQuery
 }
 
 enum HighlightType {
-    row
-    column
+    Row
+    Column
 }
 
 enum Colors {
-    undefined
-    yellow
-    green
-    blue
-    orange
-    red
+    Yellow
+    Green
+    Blue
+    Orange
+    Red
 }
 
 enum Operations {
-    equal
-    notEqual
-    greaterThan
-    lessThan
-    greaterThenOrEqual
-    lessThenOrEqual
+    EqualTo
+    GreaterThan
+    GreaterThenOrEqualTo
+    IncludeIn
+    LessThan
+    LessThenOrEqualTo
+    NotEqual
 }
 
 enum Theme {
-    balham
-    blue
-    bootstrap
-    fresh
-    material
+    Balham
+    Blue
+    Bootstrap
+    Fresh
+    Material
 }
 
 enum Aggregate {
-    undefined
-    average
-    count
-    countDistinct
-    maximum
-    median
-    minimum
-    sum
+    Average
+    Count
+    CountDistinct
+    Maximum
+    Median
+    Minimum
+    Sum
 }
 
 enum Sort {
-    undefined
-    from_A_to_Z
-    from_Z_to_A
+    Undefined
+    FromAtoZ
+    FromZtoA
 }
 
 enum Access {
-    public //A Number Filter for number comparisons.
-    private //A Text Filter for string comparisons.
+    Public //A Number Filter for number comparisons.
+    Private //A Text Filter for string comparisons.
 }
 
 enum Filter {
-    textColumnFilter //A Text Filter for string comparisons.
-    numberColumnFilter //A Number Filter for number comparisons.
-    dateColumnFilter //A Date Filter for date comparisons.
+    TextColumnFilter //A Text Filter for string comparisons.
+    NumberColumnFilter //A Number Filter for number comparisons.
+    DateColumnFilter //A Date Filter for date comparisons.
 }
 
 enum Pinned {
-    undefined
-    left
-    right
+    Undefined
+    Left
+    Right
 }
 
 enum DataType {
-    undefined
-    boolean
-    date
-    decimal
-    integer
-    string
-    timestamp
+    Undefined
+    Boolean
+    Date
+    Decimal
+    Integer
+    String
+    Timestamp
 }

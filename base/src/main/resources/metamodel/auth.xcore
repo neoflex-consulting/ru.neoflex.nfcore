@@ -65,16 +65,16 @@ class ObjectPermission extends Permission {
 }
 
 enum GrantStatus {
-    UNDEFINED
-    GRANTED
-    REVOKED
+    Undefined
+    Granted
+    Revoked
 }
 
 enum ActionType {
-    ALL
-    READ
-    WRITE
-    CALL
+    All
+    Read
+    Write
+    Call
 }
 
 class GrantPermission {

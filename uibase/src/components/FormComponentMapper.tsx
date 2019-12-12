@@ -267,7 +267,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={value || eType.eContents()[0].get('name')}
                 eType={eType}
                 id={props.id}
                 onChange={(newValue: any) => {

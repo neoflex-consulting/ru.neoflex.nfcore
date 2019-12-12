@@ -10,6 +10,7 @@ import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.JdbcDataset
+import ru.neoflex.nfcore.dataset.QueryType
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -25,19 +26,19 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         ResultSet rs = connectionToDB()
 
         def result = []
-        def columnDefs = []
+        //def columnDefs = []
         def columnCount = rs.metaData.columnCount
 
         //Add columns name as first row
-        for (int i = 1; i <= columnCount; ++i) {
-            def object = rs.metaData.getColumnName(i)
-            def columnType = rs.metaData.getColumnTypeName(i)
-            columnDefs.add([
-                    field: object == null ? null : object.toString(),
-                    type: object == null ? null : columnType.toString()
-            ])
-        }
-        result.add([columnDefs: columnDefs])
+//        for (int i = 1; i <= columnCount; ++i) {
+//            def object = rs.metaData.getColumnName(i)
+//            def columnType = rs.metaData.getColumnTypeName(i)
+//            columnDefs.add([
+//                    field: object == null ? null : object.toString(),
+//                    type: object == null ? null : columnType.toString()
+//            ])
+//        }
+//        result.add([columnDefs: columnDefs])
         //Add row with data
         def rowData = []
         while (rs.next()) {
@@ -50,7 +51,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         }
         result.add([rowData: rowData])
 
-        return JsonOutput.toJson(result)
+        return JsonOutput.toJson(rowData)
     }
 
     @Override
@@ -110,28 +111,37 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     ResultSet connectionToDB() {
         try {
-            Class.forName(getConnection().driver.driverClassName)
+            Class.forName(connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
-            System.out.println("Driver " + getConnection().driver.driverClassName + " is not found")
+            System.out.println("Driver " + connection.driver.driverClassName + " is not found")
             e.printStackTrace()
             return
         }
         System.out.println("Driver successfully connected")
-        Connection connection = null
+        Connection jdbcConnection = null
         try {
-            connection = DriverManager.getConnection(getConnection().url, getConnection().userName, getConnection().password)
+            jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
         } catch (SQLException e) {
-            System.out.println("Connection to database " + getConnection().url + " failed")
+            System.out.println("Connection to database " + connection.url + " failed")
             e.printStackTrace()
             return
         }
-        if (connection != null) {
-            System.out.println("You successfully connected to database " + getConnection().url)
+        if (jdbcConnection != null) {
+            System.out.println("You successfully connected to database " + connection.url)
         }
 
         /*Execute query*/
-        Statement st = connection.createStatement()
-        ResultSet rs = st.executeQuery(query)
+        String currentQuery = ""
+        if (queryType == QueryType.USE_TABLE_NAME) {
+            currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
+        }
+        else if (queryType == QueryType.USE_QUERY) {
+            currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
+        }
+
+
+        Statement st = jdbcConnection.createStatement()
+        ResultSet rs = st.executeQuery(currentQuery)
         return rs
     }
 
