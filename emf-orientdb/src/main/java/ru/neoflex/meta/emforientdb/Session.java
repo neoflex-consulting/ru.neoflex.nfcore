@@ -120,7 +120,7 @@ public class Session implements Closeable {
         }
     }
 
-    public void enshureSuperClass(OClass oClass, OClass oSuperClass) {
+    public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
         if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
             oClass.addSuperClass(oSuperClass);
         }
@@ -131,11 +131,11 @@ public class Session implements Closeable {
         for (EClass eClass: factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
             if (eClass.getESuperTypes().size() == 0) {
-                enshureSuperClass(oClass, oEcoreEObjectClass);
+                ensureSuperClass(oClass, oEcoreEObjectClass);
             }
             for (EClass eSuperClass: eClass.getESuperTypes()) {
                 OClass oSuperClass = getOrCreateOClass(eSuperClass);
-                enshureSuperClass(oClass, oSuperClass);
+                ensureSuperClass(oClass, oSuperClass);
             }
             for (EStructuralFeature sf: eClass.getEAllStructuralFeatures()) {
                 if (!sf.isDerived() && !sf.isTransient()) {
@@ -241,7 +241,7 @@ public class Session implements Closeable {
                     }
                     String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, localObject);
                     String fromFeature = sf.getName();
-                    String toFragment = crURI.hasFragment() ? crURI.fragment() : "";
+                    String toFragment = EcoreUtil.getRelativeURIFragmentPath(null, crObject);
                     String name = fromFragment + "@" + fromFeature +
                             (fromIndex >= 0 ? "." + fromIndex : "") + "->" + crVertex.getIdentity() + toFragment;
                     OEdge oEdge = oEdgeMap.remove(name);
@@ -406,13 +406,11 @@ public class Session implements Closeable {
                     crObject = EcoreUtil.create(crClass);
                     ORID orid = oEdge.getTo().getIdentity();
                     URI crURI = factory.createURI(orid);
-                    if (toFragment != null) {
-                        crURI = crURI.trimFragment().appendFragment(toFragment);
-                    }
+                    crURI = crURI.trimFragment().appendFragment("//" + toFragment);
                     ((InternalEObject) crObject).eSetProxyURI(crURI);
                 }
                 else {
-                    crObject = eObject.eResource().getEObject(toFragment);
+                    crObject = EcoreUtil.getEObject(eObject, toFragment);
                     if (crObject == null) {
                         throw new RuntimeException("Can not resolve local toFragment " + toFragment);
                     }
