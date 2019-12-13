@@ -20,7 +20,7 @@ import java.util.List;
 public class Server extends SessionFactory implements Closeable {
     public static final String ORIENTDB_STUDIO_JAR = "orientdb-studio-3.0.26.jar";
     OServer server;
-    OServerConfiguration configuration;
+    private OServerConfiguration configuration;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
@@ -29,7 +29,6 @@ public class Server extends SessionFactory implements Closeable {
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
-        open();
     }
 
     public Server open() throws InvocationTargetException, NoSuchMethodException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -113,5 +112,13 @@ public class Server extends SessionFactory implements Closeable {
     @Override
     public ODatabaseDocument createDatabaseDocument() {
         return server.openDatabase(dbName);
+    }
+
+    public OServerConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(OServerConfiguration configuration) {
+        this.configuration = configuration;
     }
 }

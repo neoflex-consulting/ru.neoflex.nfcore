@@ -110,17 +110,17 @@ public class Session implements Closeable {
             }
         }
         else if (sf instanceof EAttribute) {
+            OType oType = convertEDataType(((EAttribute) sf).getEAttributeType());
             if (sf.isMany()) {
-                oClass.createProperty(sf.getName(), OType.EMBEDDEDLIST);
+                oClass.createProperty(sf.getName(), OType.EMBEDDEDLIST, oType);
             }
             else {
-                OType oType = convertEDataType(((EAttribute) sf).getEAttributeType());
                 oClass.createProperty(sf.getName(), oType);
             }
         }
     }
 
-    public void enshureSuperClass(OClass oClass, OClass oSuperClass) {
+    public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
         if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
             oClass.addSuperClass(oSuperClass);
         }
@@ -131,11 +131,11 @@ public class Session implements Closeable {
         for (EClass eClass: factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
             if (eClass.getESuperTypes().size() == 0) {
-                enshureSuperClass(oClass, oEcoreEObjectClass);
+                ensureSuperClass(oClass, oEcoreEObjectClass);
             }
             for (EClass eSuperClass: eClass.getESuperTypes()) {
                 OClass oSuperClass = getOrCreateOClass(eSuperClass);
-                enshureSuperClass(oClass, oSuperClass);
+                ensureSuperClass(oClass, oSuperClass);
             }
             for (EStructuralFeature sf: eClass.getEAllStructuralFeatures()) {
                 if (!sf.isDerived() && !sf.isTransient()) {
@@ -241,7 +241,7 @@ public class Session implements Closeable {
                     }
                     String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, localObject);
                     String fromFeature = sf.getName();
-                    String toFragment = crURI.hasFragment() ? crURI.fragment() : "";
+                    String toFragment = EcoreUtil.getRelativeURIFragmentPath(null, crObject);
                     String name = fromFragment + "@" + fromFeature +
                             (fromIndex >= 0 ? "." + fromIndex : "") + "->" + crVertex.getIdentity() + toFragment;
                     OEdge oEdge = oEdgeMap.remove(name);
@@ -283,13 +283,18 @@ public class Session implements Closeable {
         if (oVertex == null) {
             return;
         }
+        checkVersion(uri, oVertex);
+        checkInReferences(oVertex);
+        db.delete(orid, factory.getVersion(uri));
+    }
+
+    public void checkInReferences(OVertex oVertex) {
         for (OEdge oEdge: oVertex.getEdges(ODirection.IN, getOrCreateReferenceClass())) {
             boolean isExternal = oEdge.getProperty("isExternal");
             if (isExternal) {
-                throw new IllegalArgumentException("OElement " + orid.toString() + " referenced by " + oEdge + " edge");
+                throw new IllegalArgumentException("OElement " + oVertex.getIdentity() + " referenced by " + oEdge.getIdentity() + " edge");
             }
         }
-        db.delete(orid, factory.getVersion(uri));
     }
 
     public void save(Resource resource) {
@@ -301,21 +306,25 @@ public class Session implements Closeable {
             throw new IllegalArgumentException("Can not save resource with multiple EObjects");
         }
         EObject eObject = resource.getContents().get(0);
-        OVertex oElement = loadElement(resource.getURI());
-        if (oElement == null) {
-            oElement = createOElement(eObject);
+        OVertex oVertex = loadElement(resource.getURI());
+        if (oVertex == null) {
+            oVertex = createOElement(eObject);
         }
         else {
-            if (oElement.getVersion() != factory.getVersion(resource.getURI())) {
-                throw new ConcurrentModificationException("OElement " + factory.getORID(resource.getURI()) +
-                        " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
-                        factory.getVersion(resource.getURI()));
-            }
+            checkVersion(resource.getURI(), oVertex);
         }
-        populateOElement(eObject, oElement, true);
-        ORecord oRecord = oElement.save();
+        populateOElement(eObject, oVertex, true);
+        ORecord oRecord = oVertex.save();
         savedResourcesMap.put(resource, oRecord);
         resource.setURI(factory.createURI(oRecord));
+    }
+
+    public void checkVersion(URI uri, OVertex oElement) {
+        if (oElement.getVersion() != factory.getVersion(uri)) {
+            throw new ConcurrentModificationException("OElement " + factory.getORID(uri) +
+                    " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
+                    factory.getVersion(uri));
+        }
     }
 
     public void load(Resource resource) {
@@ -397,13 +406,11 @@ public class Session implements Closeable {
                     crObject = EcoreUtil.create(crClass);
                     ORID orid = oEdge.getTo().getIdentity();
                     URI crURI = factory.createURI(orid);
-                    if (toFragment != null) {
-                        crURI = crURI.trimFragment().appendFragment(toFragment);
-                    }
+                    crURI = crURI.trimFragment().appendFragment("//" + toFragment);
                     ((InternalEObject) crObject).eSetProxyURI(crURI);
                 }
                 else {
-                    crObject = eObject.eResource().getEObject(toFragment);
+                    crObject = EcoreUtil.getEObject(eObject, toFragment);
                     if (crObject == null) {
                         throw new RuntimeException("Can not resolve local toFragment " + toFragment);
                     }
