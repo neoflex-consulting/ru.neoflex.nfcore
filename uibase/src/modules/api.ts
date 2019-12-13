@@ -363,7 +363,7 @@ export class API implements IErrorHandler {
             return this.fetch('/system/user', this.getOpts({
                 method: "GET",
                 headers: {
-                    'Authorization': "Basic " + btoa(login + ":" + password)
+                    'Authorization': "Basic " + btoa(unescape(encodeURIComponent(login + ":" + password)))
                 }
             })).then(response => response.json())
         }
