@@ -72,24 +72,10 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
     }
 
     @Override
-    String runQueryWithServerFilters() {
+    String runQueryDatasetSettings() {
+
         ResultSet rs = connectionToDB()
-
-        def result = []
-        //def columnDefs = []
         def columnCount = rs.metaData.columnCount
-
-        //Add columns name as first row
-//        for (int i = 1; i <= columnCount; ++i) {
-//            def object = rs.metaData.getColumnName(i)
-//            def columnType = rs.metaData.getColumnTypeName(i)
-//            columnDefs.add([
-//                    field: object == null ? null : object.toString(),
-//                    type: object == null ? null : columnType.toString()
-//            ])
-//        }
-//        result.add([columnDefs: columnDefs])
-        //Add row with data
         def rowData = []
         while (rs.next()) {
             def map = [:]
@@ -99,8 +85,6 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
             }
             rowData.add(map)
         }
-        result.add(rowData)
-
         return JsonOutput.toJson(rowData)
     }
 
@@ -113,7 +97,7 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
             return
         }
         System.out.println("Driver successfully connected")
-        Connection jdbcConnection = null
+        Connection jdbcConnection
         try {
             jdbcConnection = DriverManager.getConnection(dataset.connection.url, dataset.connection.userName, dataset.connection.password)
         } catch (SQLException e) {
@@ -126,18 +110,58 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
         }
 
         /*Execute query*/
-        String operator = getConvertOperator(serverFilter[0].operation.toString().toLowerCase())
+        def queryColumns = []
+        if (column != []) {
+            for (int i = 0; i <= column.size() - 1; ++i) {
+                if (column[i].class.toString().toLowerCase().contains('rdbms')) {
+                    if (queryColumns.contains("${column[i].datasetColumn.name}")) {
+                        queryColumns.add("\"${column[i].datasetColumn.name}_${i}\"")
+                    } else {
+                        queryColumns.add("\"${column[i].datasetColumn.name}\"")
+                    }
+                } else {
+                    def valueCustomColumn
+                    if (column[i].customColumnExpression == null || column[i].customColumnExpression == "" && column[i].defaultValue != null && column[i].defaultValue != "") {
+                        valueCustomColumn = column[i].defaultValue
+                    } else if (column[i].customColumnExpression == null || column[i].customColumnExpression == "" && column[i].defaultValue == null ||  column[i].defaultValue == "") {
+                        valueCustomColumn = null
+                    } else {
+                        valueCustomColumn = column[i].customColumnExpression
+                    }
 
-        String currentQuery =
-                "SELECT * FROM ${dataset.schemaName}.${dataset.tableName} WHERE ${serverFilter[0].datasetColumn.name} ${operator} ${serverFilter[0].value}"
-//                "SELECT * FROM " + dataset.schemaName + "." + dataset.tableName + " WHERE " +
-//                        serverFilter[0].datasetColumn.name + " " +
-//                        operator + " " + serverFilter[0].value
+                    if (queryColumns.contains(" \"${column[i].headerName.name}\"")) {
+                        queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"_${i}")
+                    } else {
+                        queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"")
+                    }
+                }
+            }
+        }
+
+        def serverFilters = []
+        if (serverFilter) {
+            for (int i = 0; i <= serverFilter.size() - 1; ++i) {
+                if (serverFilter[i].enable) {
+                    def operator = getConvertOperator(serverFilter[i].operation.toString().toLowerCase())
+                    serverFilters.add("t.${serverFilter[0].datasetColumn.name} ${operator} ${serverFilter[0].value}")
+                }
+            }
+        }
+
+        String currentQuery
+        if (serverFilters) {
+            currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t" +
+                    "WHERE ${serverFilters.join(', ')}"
+        }
+        else {
+            currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
+        }
+
         Statement st = jdbcConnection.createStatement()
         ResultSet rs = st.executeQuery(currentQuery)
         return rs
     }
-//на LIKE нужны кавычки
+    //на LIKE нужны кавычки (указать это в валидации)
     String getConvertOperator(String operator) {
         if (operator == Operations.LESS_THAN.toString().toLowerCase()) {return '<'}
         else if (operator == Operations.LESS_THEN_OR_EQUAL_TO.toString().toLowerCase()) {return '<='}

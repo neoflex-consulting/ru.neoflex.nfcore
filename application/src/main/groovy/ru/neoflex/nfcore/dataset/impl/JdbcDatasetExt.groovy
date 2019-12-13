@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.dataset.impl
 
 import groovy.json.JsonOutput
+import org.eclipse.emf.ecore.util.EObjectContainmentEList
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
@@ -14,7 +15,6 @@ import ru.neoflex.nfcore.dataset.QueryType
 
 import java.sql.Connection
 import java.sql.DriverManager
-//import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
@@ -22,41 +22,34 @@ import java.sql.Statement
 class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
-    String runQuery() {
-        ResultSet rs = connectionToDB()
-
-        def result = []
-        //def columnDefs = []
-        def columnCount = rs.metaData.columnCount
-
-        //Add columns name as first row
-//        for (int i = 1; i <= columnCount; ++i) {
-//            def object = rs.metaData.getColumnName(i)
-//            def columnType = rs.metaData.getColumnTypeName(i)
-//            columnDefs.add([
-//                    field: object == null ? null : object.toString(),
-//                    type: object == null ? null : columnType.toString()
-//            ])
-//        }
-//        result.add([columnDefs: columnDefs])
-        //Add row with data
-        def rowData = []
-        while (rs.next()) {
-            def map = [:]
-            for (int i = 1; i <= columnCount; ++i) {
-                def object = rs.getObject(i)
-                map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+    String runQueryDataset() {
+        if (datasetColumn) {
+            Connection jdbcConnection = connectionToDB()
+            ResultSet resultSet = getResultSet(jdbcConnection, false)
+            def columnCount = resultSet.metaData.columnCount
+            def rowData = []
+            while (resultSet.next()) {
+                def map = [:]
+                for (int i = 1; i <= columnCount; ++i) {
+                    def object = resultSet.getObject(i)
+                    if (map.keySet().contains(resultSet.metaData.getColumnName(i))) {
+                        map["${resultSet.metaData.getColumnName(i)}_${i}"] = (object == null ? null : object.toString())
+                    } else {
+                        map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+                    }
+                }
+                rowData.add(map)
             }
-            rowData.add(map)
+            return JsonOutput.toJson(rowData)
+        } else {
+            return JsonOutput.toJson("Please, run operation _loadAllColumns_")
         }
-        result.add([rowData: rowData])
-
-        return JsonOutput.toJson(rowData)
     }
 
     @Override
     String loadAllColumns() {
-        ResultSet resultSet = connectionToDB()
+        Connection jdbcConnection = connectionToDB()
+        ResultSet resultSet = getResultSet(jdbcConnection, false)
         def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
                 .execute().resourceSet
         if (!resource.resources.empty) {
@@ -66,16 +59,26 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                     def jdbcDatasetRef = Context.current.store.getRef(resource.resources)
                     def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
                     def columnCount = resultSet.metaData.columnCount
+                    def changeQuery = false
                     if (columnCount > 0) {
                         for (int i = 1; i <= columnCount; ++i) {
                             def object = resultSet.metaData.getColumnName(i)
                             def columnType = resultSet.metaData.getColumnTypeName(i)
-
                             def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
-                            datasetColumn.name = object.toString()
                             datasetColumn.rdbmsDataType = columnType.toString()
                             datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
+                            datasetColumn.name = object.toString()
+                            jdbcDataset.datasetColumn.each { c->
+                                if (c.name == object.toString()) {
+                                    datasetColumn.name = object.toString() + "_" + i
+                                    changeQuery = true
+                                }
+                            }
                             jdbcDataset.datasetColumn.add(datasetColumn)
+                        }
+                        if (changeQuery) {
+                            def newQuery = changeQueryRun(jdbcDataset.datasetColumn)
+                            jdbcDataset.setQuery(newQuery)
                         }
                         Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
                         Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
@@ -88,6 +91,20 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 }
             })
         }
+    }
+
+    String changeQueryRun(EObjectContainmentEList columnNames) {
+        def result = []
+        query.split(',').each { t->
+            def index = query.split(',').findIndexOf {it == t}
+            def changeStatement = t.split(" ")[-1].toLowerCase().replace("\"", '') != columnNames[index].name.replace("\"", '')
+            if (changeStatement) {
+                result.add("${t} \"${columnNames[index].name}\"")
+            } else {
+                result.add(t)
+            }
+        }
+        return result.join(",")
     }
 
     @Override
@@ -109,7 +126,24 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         }
     }
 
-    ResultSet connectionToDB() {
+    @Override
+    String showAllTables() {
+        Connection jdbcConnection = connectionToDB()
+        ResultSet resultSet = getResultSet(jdbcConnection, true)
+        def columnCount = resultSet.metaData.columnCount
+        def rowData = []
+        while (resultSet.next()) {
+            def map = [:]
+            for (int i = 1; i <= columnCount; ++i) {
+                def object = resultSet.getObject(i)
+                map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+            }
+            rowData.add(map)
+        }
+        return JsonOutput.toJson(rowData)
+    }
+
+    Connection connectionToDB() {
         try {
             Class.forName(connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -118,7 +152,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
             return
         }
         System.out.println("Driver successfully connected")
-        Connection jdbcConnection = null
+        Connection jdbcConnection
         try {
             jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
         } catch (SQLException e) {
@@ -129,20 +163,26 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         if (jdbcConnection != null) {
             System.out.println("You successfully connected to database " + connection.url)
         }
+        return jdbcConnection
+    }
 
+    ResultSet getResultSet(Connection jdbcConnection, boolean showAllTables) {
         /*Execute query*/
         String currentQuery = ""
-        if (queryType == QueryType.USE_TABLE_NAME) {
-            currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
+        if (showAllTables) {
+            currentQuery = "SELECT table_schema, table_name FROM information_schema.tables ORDER BY table_schema, table_name ASC"
         }
-        else if (queryType == QueryType.USE_QUERY) {
-            currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
+        else {
+            if (queryType == QueryType.USE_TABLE_NAME) {
+                currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
+            }
+            else if (queryType == QueryType.USE_QUERY) {
+                currentQuery = "SELECT * FROM (${query}) t"
+            }
         }
-
-
         Statement st = jdbcConnection.createStatement()
-        ResultSet rs = st.executeQuery(currentQuery)
-        return rs
+        ResultSet resultSet = st.executeQuery(currentQuery)
+        return resultSet
     }
 
     Object getConvertDataType(String rdbmsDataType) {
@@ -163,5 +203,4 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
         else {return DataType.STRING}
     }
-
 }

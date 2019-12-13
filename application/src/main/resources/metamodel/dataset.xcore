@@ -37,7 +37,7 @@ abstract class Dataset {
     QName name
     op JSON deleteAllColumns()
     op JSON loadAllColumns()
-    op JSON runQuery() //??
+    op JSON runQueryDataset()
     contains DatasetColumn[] datasetColumn
 }
 
@@ -61,7 +61,7 @@ abstract class DatasetSettings {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQueryWithServerFilters()
+     op JSON runQueryDatasetSettings()
 }
 
 class DatasetSettingsGrid extends DatasetSettings {
