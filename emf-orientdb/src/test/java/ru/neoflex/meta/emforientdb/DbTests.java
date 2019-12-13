@@ -92,7 +92,7 @@ public class DbTests extends TestBase {
                 Assert.fail("Can't delete referenced Resource");
             }
             catch (IllegalArgumentException e) {
-                Assert.assertTrue(e.getMessage().startsWith("OElement"));
+                Assert.assertTrue(e.getMessage().startsWith("Can not delete"));
             }
         });
 //        sleepForever();

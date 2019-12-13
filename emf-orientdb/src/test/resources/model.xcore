@@ -2,6 +2,7 @@
     bundleManifest="false",
     modelDirectory="emf-orientdb/src/test/java-gen",
     rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    containmentProxies="true",
     complianceLevel="7.0"
 )
 package ru.neoflex.meta.test
