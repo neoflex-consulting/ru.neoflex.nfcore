@@ -15,7 +15,7 @@ class Test {
     static GrantStatus permitted(ObjectNode jsonNode) {
         def mapper = EmfJson.createMapper()
         def role = mapper.reader().treeToValue(jsonNode.get("role"), Role.class)
-        def actionType = new ObjectMapper().reader().treeToValue(jsonNode.get("actionType"), ActionType.class)
+        def actionType = mapper.reader().treeToValue(jsonNode.get("actionType"), ActionType.class)
         def eObject = mapper.reader().treeToValue(jsonNode.get("eObject"), EObject.class)
         return role.permitted(actionType, eObject)
     }
