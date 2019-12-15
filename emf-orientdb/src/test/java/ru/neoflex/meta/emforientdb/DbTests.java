@@ -1,12 +1,15 @@
 package ru.neoflex.meta.emforientdb;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.*;
 import ru.neoflex.meta.test.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -95,12 +98,30 @@ public class DbTests extends TestBase {
                 Assert.assertTrue(e.getMessage().startsWith("Can not delete"));
             }
         });
+        DBView extView = server.inTransaction(session -> {
+            List<Resource> users = session.query("select from test_DBTable where qName=?", "USER");
+            DBTable user = (DBTable) users.get(0).getContents().get(0);
+            Column group_id = user.getColumns().stream().filter(column -> column.getName().equals("GROUP_ID")).findFirst().get();
+            List<Resource> views = session.query("select from test_DBView");
+            DBView user_group = (DBView) views.get(0).getContents().get(0);
+            user_group.getColumns().add(0, group_id);
+            user_group.eResource().save(null);
+            return user_group;
+        });
+        URI extURI = EcoreUtil.getURI(extView);
+        server.withSession(session -> {
+            List<Resource> views = session.query("select from test_DBView");
+            DBView user_group = (DBView) views.get(0).getContents().get(0);
+            Assert.assertEquals("GROUP_ID", user_group.getColumns().get(0).getName());
+            Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
+            Assert.assertEquals(5, user_group.getColumns().size());
+        });
 //        sleepForever();
     }
 
     @Test
     public void databaseTest() throws Exception {
-        try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}})) {
+        try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", Collections.singletonList(TestPackage.eINSTANCE))) {
             Resource roleResource = db.inTransaction(session -> {
                 ResourceSet rs = session.createResourceSet();
                 DBTable role = TestFactory.eINSTANCE.createDBTable();

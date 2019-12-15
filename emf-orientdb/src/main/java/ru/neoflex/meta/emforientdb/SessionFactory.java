@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -96,10 +97,13 @@ public abstract class SessionFactory {
     }
 
     public String getId(URI uri) {
-        if (uri.segmentCount() < 1) {
-            return null;
+        if (uri.hasFragment() && !uri.fragment().startsWith("/")) {
+            return uri.fragment();
         }
-        return uri.segment(0);
+        if (uri.segmentCount() >= 1) {
+            return uri.segment(0);
+        }
+        return null;
     }
 
     public ORID getORID(URI uri) {
@@ -139,22 +143,13 @@ public abstract class SessionFactory {
             resourceSet.getPackageRegistry()
                     .put(ePackage.getNsURI(), ePackage);
         }
+        ((ResourceSetImpl) resourceSet).setURIResourceMap(new HashMap<>());
         resourceSet.getResourceFactoryRegistry()
                 .getProtocolToFactoryMap()
                 .put(ORIENTDB, new ResourceFactoryImpl() {
                     @Override
                     public Resource createResource(URI uri) {
-                        return new ResourceImpl(uri) {
-                            @Override
-                            protected void doSave(OutputStream outputStream, Map<?, ?> options) throws IOException {
-                                ((URIConverter.Saveable)outputStream).saveResource(this);
-                            }
-
-                            @Override
-                            protected void doLoad(InputStream inputStream, Map<?, ?> options) throws IOException {
-                                ((URIConverter.Loadable)inputStream).loadResource(this);
-                            }
-                        };
+                        return new OrientDBResource(uri, SessionFactory.this);
                     }
                 });
         return resourceSet;
@@ -216,7 +211,7 @@ public abstract class SessionFactory {
                     finally {
                         session.getDatabaseDocument().commit(true);
                         for (Resource resource: session.savedResourcesMap.keySet()) {
-                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
+                            resource.setURI(createURI(session.savedResourcesMap.get(resource)).appendFragment("/"));
                         }
                     }
                 });
