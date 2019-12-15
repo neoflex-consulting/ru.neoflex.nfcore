@@ -290,11 +290,11 @@ public class CouchDBStoreProvider implements StoreSPI {
 
     @Override
     public TransactionSPI getCurrentTransaction() throws IOException {
-        return new NullTransactionProvider();
+        return new NullTransactionProvider(this);
     }
 
     @Override
     public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception {
-        return f.call(new NullTransactionProvider());
+        return f.call(new NullTransactionProvider(this));
     }
 }

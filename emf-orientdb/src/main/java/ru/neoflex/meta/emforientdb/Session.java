@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -85,7 +87,7 @@ public class Session implements Closeable {
         return oClass;
     }
 
-    private String getOClassName(EClass eClass) {
+    public String getOClassName(EClass eClass) {
         EPackage ePackage = eClass.getEPackage();
         return ePackage.getNsPrefix() + "_" + eClass.getName();
     }
@@ -447,33 +449,49 @@ public class Session implements Closeable {
         return resourceSet;
     }
 
-    private List<Resource> getResourceList(OResultSet rs) {
+    private void getResourceList(OResultSet rs, Consumer<Supplier<Resource>> consumer) {
         ResourceSet resourceSet = createResourceSet();
-        List<Resource> result = new ArrayList<>();
         while (rs.hasNext()) {
             OResult oResult = rs.next();
             Optional<OElement> oElementOpt = oResult.getElement();
             if (oElementOpt.isPresent()) {
                 OElement oElement = oElementOpt.get();
-                EObject eObject = createEObject(oElement);
-                Resource resource = resourceSet.createResource(factory.createURI(oElement).appendFragment("/"));
-                resource.getContents().add(eObject);
-                populateEObject(resourceSet, (OVertex) oElement, eObject);
-                result.add(resource);
+                consumer.accept(() -> {
+                    EObject eObject = createEObject(oElement);
+                    Resource resource = resourceSet.createResource(factory.createURI(oElement).appendFragment("/"));
+                    resource.getContents().add(eObject);
+                    populateEObject(resourceSet, (OVertex) oElement, eObject);
+                    return resource;
+                });
             }
         }
-        return result;
     }
 
     public List<Resource> query(String sql, Object... args) {
-        try (OResultSet rs = db.query(sql, args);) {
-            return getResourceList(rs);
-        }
+        List<Resource> result = new ArrayList<>();
+        query(sql, resourceSupplier -> {
+            result.add(resourceSupplier.get());
+        }, args);
+        return result;
     }
 
     public List<Resource> query(String sql, Map args) {
+        List<Resource> result = new ArrayList<>();
+        query(sql, resourceSupplier -> {
+            result.add(resourceSupplier.get());
+        }, args);
+        return result;
+    }
+
+    public void query(String sql, Consumer<Supplier<Resource>> consumer, Object... args) {
         try (OResultSet rs = db.query(sql, args);) {
-            return getResourceList(rs);
+            getResourceList(rs, consumer);
+        }
+    }
+
+    public void query(String sql, Consumer<Supplier<Resource>> consumer, Map args) {
+        try (OResultSet rs = db.query(sql, args);) {
+            getResourceList(rs, consumer);
         }
     }
 

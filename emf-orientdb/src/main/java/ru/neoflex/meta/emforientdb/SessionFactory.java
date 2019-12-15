@@ -111,6 +111,10 @@ public abstract class SessionFactory {
         if (id == null) {
             return null;
         }
+        return getORID(id);
+    }
+
+    public ORID getORID(String id) {
         String[] ids = id.split("_", 2);
         if (ids.length != 2) {
             return null;

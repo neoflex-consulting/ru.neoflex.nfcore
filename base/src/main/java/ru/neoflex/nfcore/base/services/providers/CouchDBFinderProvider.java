@@ -104,7 +104,7 @@ public class CouchDBFinderProvider implements FinderSPI {
 
     @Override
     public ResourceSet getResourceSet() throws IOException {
-        ResourceSet resourceSet = store.createResourceSet(new NullTransactionProvider());
+        ResourceSet resourceSet = store.createResourceSet(new NullTransactionProvider(store));
         if (result != null) {
             for (JsonNode doc: result.withArray("docs")) {
                 String id = doc.get("_id").textValue();
