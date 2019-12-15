@@ -13,10 +13,10 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
-    int nGroups = 5;
-    int nUsers = 25;
+    int nGroups = 10;
+    int nUsers = 250;
     int nThreads = Runtime.getRuntime().availableProcessors()/2;
-    int nUpdates = 100;
+    int nUpdates = 400;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
