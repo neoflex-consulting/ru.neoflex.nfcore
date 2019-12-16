@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.dataset.impl
 
+import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
@@ -92,21 +93,21 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
-            System.out.println("Driver " + dataset.connection.driver.driverClassName + " is not found")
+            logger("connectionToDB", "Driver " + dataset.connection.driver.driverClassName + " is not found")
             e.printStackTrace()
             return
         }
-        System.out.println("Driver successfully connected")
+        logger("connectionToDB", "Driver successfully connected")
         Connection jdbcConnection
         try {
             jdbcConnection = DriverManager.getConnection(dataset.connection.url, dataset.connection.userName, dataset.connection.password)
         } catch (SQLException e) {
-            System.out.println("Connection to database " + dataset.connection.url + " failed")
+            logger("connectionToDB", "Connection to database " + dataset.connection.url + " failed")
             e.printStackTrace()
             return
         }
         if (jdbcConnection != null) {
-            System.out.println("You successfully connected to database " + dataset.connection.url)
+            logger("connectionToDB", "You successfully connected to database " + dataset.connection.url)
         }
 
         /*Execute query*/
@@ -171,4 +172,7 @@ class DatasetSettingsGridExt extends DatasetSettingsGridImpl {
         else if (operator == Operations.NOT_EQUAL.toString().toLowerCase()) {return '!='}
         else if (operator == Operations.INCLUDE_IN.toString().toLowerCase()) {return 'LIKE'}
     }
+
+    private static final ClassLogger logger =
+            new ClassLogger("javax.management.remote.misc", "EnvHelp")
 }

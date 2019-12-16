@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.dataset.impl
 
+import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import org.eclipse.emf.ecore.util.EObjectContainmentEList
 import ru.neoflex.nfcore.base.services.Context
@@ -147,21 +148,21 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         try {
             Class.forName(connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
-            System.out.println("Driver " + connection.driver.driverClassName + " is not found")
+            logger.info("connectionToDB", "Driver " + connection.driver.driverClassName + " is not found")
             e.printStackTrace()
             return
         }
-        System.out.println("Driver successfully connected")
+        logger.info("connectionToDB", "Driver successfully connected")
         Connection jdbcConnection
         try {
             jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
         } catch (SQLException e) {
-            System.out.println("Connection to database " + connection.url + " failed")
+            logger.info("connectionToDB", "Connection to database " + connection.url + " failed")
             e.printStackTrace()
             return
         }
         if (jdbcConnection != null) {
-            System.out.println("You successfully connected to database " + connection.url)
+            logger.info("connectionToDB", "You successfully connected to database " + connection.url)
         }
         return jdbcConnection
     }
@@ -203,4 +204,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
         else {return DataType.STRING}
     }
+
+    private static final ClassLogger logger =
+            new ClassLogger("javax.management.remote.misc", "EnvHelp")
 }
