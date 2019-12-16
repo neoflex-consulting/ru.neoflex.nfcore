@@ -22,7 +22,9 @@ import org.emfjson.jackson.utils.ValueWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
+import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 import ru.neoflex.nfcore.base.services.providers.StoreSPI;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 import ru.neoflex.nfcore.base.types.TypesPackage;
@@ -39,6 +41,8 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 @DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
 public class Store {
     private final static Log logger = LogFactory.getLog(Store.class);
+    @Autowired
+    Workspace workspace;
 
     public final static Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> {
         for (EAttribute eAttribute: eClass.getEAllAttributes()) {
@@ -46,7 +50,7 @@ public class Store {
                 return eAttribute;
             }
         }
-        return eClass.getEStructuralFeature("name");
+        return null;
     };
 
     @Autowired
@@ -162,7 +166,15 @@ public class Store {
     }
 
     public <R> R inTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
-        return provider.inTransaction(readOnly, f);
+        return provider.inTransaction(readOnly, tx -> {
+            if (provider instanceof GitDBStoreProvider) {
+                return f.call(tx);
+            }
+            return workspace.getDatabase().inTransaction(
+                    workspace.getCurrentBranch(),
+                    readOnly? Transaction.LockType.READ: Transaction.LockType.WRITE,
+                    tx1 -> tx1.withCurrent(()->f.call(tx)));
+        });
     }
 
     public void commit(String message) throws IOException {
