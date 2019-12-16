@@ -173,7 +173,7 @@ public class Store {
             return workspace.getDatabase().inTransaction(
                     workspace.getCurrentBranch(),
                     readOnly? Transaction.LockType.READ: Transaction.LockType.WRITE,
-                    tx1 -> tx1.withCurrent(()->f.call(tx)));
+                    wtx -> f.call(tx));
         });
     }
 

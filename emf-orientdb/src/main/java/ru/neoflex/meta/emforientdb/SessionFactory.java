@@ -1,5 +1,7 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORID;
@@ -195,8 +197,16 @@ public abstract class SessionFactory {
     }
 
     public void withSession(SessionProcedure f) throws Exception {
-        try (Session session = createSession()) {
-            f.call(session);
+        ODatabaseDocumentInternal dbOld = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        try {
+            try (Session session = createSession()) {
+                f.call(session);
+            }
+        }
+        finally {
+            if (dbOld != null) {
+                dbOld.activateOnCurrentThread();
+            }
         }
     }
 
