@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -181,6 +182,9 @@ public class Session implements Closeable {
         OType oType = convertEDataType(eDataType);
         if (oType == OType.STRING) {
             return EcoreUtil.createFromString(eDataType, value.toString());
+        }
+        if (eDataType.getInstanceClass().isAssignableFrom(Timestamp.class)) {
+            return new Timestamp(((Date)value).getTime());
         }
         return value;
     }

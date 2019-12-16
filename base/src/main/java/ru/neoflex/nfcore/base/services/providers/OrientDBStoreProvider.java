@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Database;
 import ru.neoflex.meta.emforientdb.Server;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
+import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.types.TypesPackage;
 
@@ -20,11 +21,13 @@ import java.io.IOException;
 
 @Service
 @ConditionalOnProperty(name = "dbtype", havingValue = "orientdb", matchIfMissing = false)
-public class OrientDBStoreProvider implements StoreSPI {
+public class OrientDBStoreProvider extends AbstractStoreSPI {
     @Value("${orientdb.home:${user.home}/.orientdb/home}")
     String home;
     @Value("${orientdb.dbname:models}")
     String dbName;
+    @Autowired
+    Publisher publisher;
     @Autowired
     PackageRegistry registry;
 
@@ -48,12 +51,6 @@ public class OrientDBStoreProvider implements StoreSPI {
     }
 
     @Override
-    public Resource saveResource(Resource resource) throws IOException {
-        resource.save(null);
-        return resource;
-    }
-
-    @Override
     public URI getUriByRef(String ref) {
         return server.createURI(ref).appendFragment("/");
     }
@@ -66,19 +63,6 @@ public class OrientDBStoreProvider implements StoreSPI {
     @Override
     public Resource createEmptyResource(ResourceSet resourceSet) {
         return resourceSet.createResource(server.createURI());
-    }
-
-    @Override
-    public Resource loadResource(URI uri, TransactionSPI tx) throws IOException {
-        Resource resource = ((OrientDBTransactionProvider) tx).getSession().createResourceSet().createResource(uri);
-        ((OrientDBTransactionProvider) tx).getSession().load(resource);
-        return resource;
-    }
-
-    @Override
-    public void deleteResource(URI uri, TransactionSPI tx) throws IOException {
-        Resource resource = ((OrientDBTransactionProvider) tx).getSession().createResourceSet().createResource(uri);
-        resource.delete(null);
     }
 
     @Override
