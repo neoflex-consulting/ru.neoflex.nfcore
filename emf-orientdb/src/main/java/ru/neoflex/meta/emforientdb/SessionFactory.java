@@ -91,7 +91,7 @@ public abstract class SessionFactory {
     public String getRef(ORecord oElement) {
         ORID orid = oElement.getIdentity();
         String id = getId(orid);
-        return String.format("%s?rev=%d", id, oElement.getVersion());
+        return String.format("%s?rev=%d#%s", id, oElement.getVersion(), id);
     }
 
     public String getId(ORID orid) {

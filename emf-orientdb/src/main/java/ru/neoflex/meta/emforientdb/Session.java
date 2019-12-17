@@ -26,10 +26,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Session implements Closeable {
-    public static final String EREFERENCES = "EReferences";
+    public static final String EREFERES = "EReferes";
     public static final String ECONTAINS = "EContains";
     public static final String EOBJECT = "EObject";
     private final SessionFactory factory;
@@ -66,9 +65,9 @@ public class Session implements Closeable {
     }
 
     private OClass getOrCreateEReferencesEdge() {
-        OClass oClass = db.getClass(EREFERENCES);
+        OClass oClass = db.getClass(EREFERES);
         if (oClass == null) {
-            oClass = db.createEdgeClass(EREFERENCES);
+            oClass = db.createEdgeClass(EREFERES);
             oClass.createProperty("name", OType.STRING);
             oClass.createProperty("index", OType.INTEGER);
             oClass.createProperty("isExternal", OType.BOOLEAN);
@@ -332,7 +331,7 @@ public class Session implements Closeable {
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
             savedResourcesMap.put(resource, oRecord);
-            resource.setURI(factory.createURI(oRecord).appendFragment("/"));
+            resource.setURI(factory.createURI(oRecord));
         }
     }
 
@@ -349,7 +348,7 @@ public class Session implements Closeable {
         EObject eObject = createEObject(oElement);
         resource.getContents().clear();
         resource.getContents().add(eObject);
-        resource.setURI(factory.createURI(oElement).appendFragment("/"));
+        resource.setURI(factory.createURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
     }
 
@@ -401,10 +400,9 @@ public class Session implements Closeable {
             String name = oEdge.getProperty("name");
             EReference sf = (EReference) eClass.getEStructuralFeature(name);
             OVertex crVertex = oEdge.getTo();
-            ORID orid = crVertex.getIdentity();
             EObject crObject = createEObject(crVertex);
             if (!sf.isContainment() || sf.isResolveProxies()) {
-                URI crURI = factory.createURI(orid).appendFragment("/");
+                URI crURI = factory.createURI(crVertex);
                 ((InternalEObject) crObject).eSetProxyURI(crURI);
             }
             if (sf.isMany()) {
@@ -456,7 +454,7 @@ public class Session implements Closeable {
                 OElement oElement = oElementOpt.get();
                 consumer.accept(() -> {
                     EObject eObject = createEObject(oElement);
-                    Resource resource = resourceSet.createResource(factory.createURI(oElement).appendFragment("/"));
+                    Resource resource = resourceSet.createResource(factory.createURI(oElement));
                     resource.getContents().add(eObject);
                     populateEObject(resourceSet, (OVertex) oElement, eObject);
                     return resource;
