@@ -542,7 +542,7 @@ public class Database implements Closeable {
             try (Transaction tx = transactionSupplier.get()) {
                 return tx.withCurrent(() -> f.call(tx));
             }
-            catch (IOException|RefUpdateLockFailureException|RefUpdateRejectedException e) {
+            catch (RefUpdateLockFailureException|RefUpdateRejectedException e) {
                 String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt;
                 logger.debug(message);
                 if (++attempt > maxAttempts) {
