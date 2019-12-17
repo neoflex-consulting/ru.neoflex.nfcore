@@ -230,7 +230,7 @@ public abstract class SessionFactory {
                     finally {
                         session.getDatabaseDocument().commit(true);
                         for (Resource resource: session.savedResourcesMap.keySet()) {
-                            resource.setURI(createURI(session.savedResourcesMap.get(resource)).appendFragment("/"));
+                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
                         }
                     }
                 });

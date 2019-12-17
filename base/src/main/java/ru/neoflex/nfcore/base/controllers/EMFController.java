@@ -84,13 +84,14 @@ public class EMFController {
 
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
-        return getObject(store.inTransaction(false, tx -> {
+        Resource created = store.inTransaction(false, tx -> {
             URI uri = store.getUriByRef(ref);
             Resource resource = EmfJson.treeToResource(store.createResourceSet(), uri, contents);
             store.saveResource(resource);
             store.commit("Put " + ref);
-            return store.getRef(resource);
-        }));
+            return resource;
+        });
+        return getObject(store.getRef(created));
     }
 
     @GetMapping("/packages")
