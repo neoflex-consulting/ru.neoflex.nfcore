@@ -6,7 +6,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
@@ -19,14 +22,18 @@ import org.emfjson.jackson.utils.ValueWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.providers.FinderSPI;
+import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 import ru.neoflex.nfcore.base.services.providers.StoreSPI;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
+import ru.neoflex.nfcore.base.types.TypesPackage;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.function.Function;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
@@ -34,10 +41,20 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 @DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
 public class Store {
     private final static Log logger = LogFactory.getLog(Store.class);
+    @Autowired
+    Workspace workspace;
+
+    public final static Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> {
+        for (EAttribute eAttribute: eClass.getEAllAttributes()) {
+            if (eAttribute.getEAttributeType() == TypesPackage.Literals.QNAME) {
+                return eAttribute;
+            }
+        }
+        return null;
+    };
 
     @Autowired
-    private
-    StoreSPI provider;
+    private StoreSPI provider;
 
     public TransactionSPI getCurrentTransaction() throws IOException {
         TransactionSPI tx = provider.getCurrentTransaction();
@@ -149,7 +166,15 @@ public class Store {
     }
 
     public <R> R inTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
-        return provider.inTransaction(readOnly, f);
+        return provider.inTransaction(readOnly, tx -> {
+            if (provider instanceof GitDBStoreProvider) {
+                return f.call(tx);
+            }
+            return workspace.getDatabase().inTransaction(
+                    workspace.getCurrentBranch(),
+                    readOnly? Transaction.LockType.READ: Transaction.LockType.WRITE,
+                    wtx -> f.call(tx));
+        });
     }
 
     public void commit(String message) throws IOException {

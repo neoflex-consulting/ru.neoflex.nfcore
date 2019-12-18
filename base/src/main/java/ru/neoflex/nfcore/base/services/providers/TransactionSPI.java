@@ -5,4 +5,5 @@ import java.io.IOException;
 
 public interface TransactionSPI extends Closeable {
     void commit(String message, String author, String email) throws IOException;
+    StoreSPI getStore();
 }

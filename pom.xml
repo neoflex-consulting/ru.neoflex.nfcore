@@ -24,6 +24,7 @@
         <module>application</module>
         <module>uibase</module>
         <module>uireport</module>
+        <module>emf-orientdb</module>
     </modules>
 
 </project>

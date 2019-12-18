@@ -20,13 +20,15 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Session implements Closeable {
-    public static final String EREFERENCES = "EReferences";
+    public static final String EREFERES = "EReferes";
     public static final String ECONTAINS = "EContains";
     public static final String EOBJECT = "EObject";
     private final SessionFactory factory;
@@ -63,12 +65,11 @@ public class Session implements Closeable {
     }
 
     private OClass getOrCreateEReferencesEdge() {
-        OClass oClass = db.getClass(EREFERENCES);
+        OClass oClass = db.getClass(EREFERES);
         if (oClass == null) {
-            oClass = db.createEdgeClass(EREFERENCES);
-            oClass.createProperty("feature", OType.STRING);
+            oClass = db.createEdgeClass(EREFERES);
+            oClass.createProperty("name", OType.STRING);
             oClass.createProperty("index", OType.INTEGER);
-            oClass.createProperty("eClass", OType.STRING);
             oClass.createProperty("isExternal", OType.BOOLEAN);
         }
         return oClass;
@@ -78,14 +79,13 @@ public class Session implements Closeable {
         OClass oClass = db.getClass(ECONTAINS);
         if (oClass == null) {
             oClass = db.createEdgeClass(ECONTAINS);
-            oClass.createProperty("feature", OType.STRING);
+            oClass.createProperty("name", OType.STRING);
             oClass.createProperty("index", OType.INTEGER);
-            oClass.createProperty("eClass", OType.STRING);
         }
         return oClass;
     }
 
-    private String getOClassName(EClass eClass) {
+    public String getOClassName(EClass eClass) {
         EPackage ePackage = eClass.getEPackage();
         return ePackage.getNsPrefix() + "_" + eClass.getName();
     }
@@ -180,6 +180,9 @@ public class Session implements Closeable {
         if (oType == OType.STRING) {
             return EcoreUtil.createFromString(eDataType, value.toString());
         }
+        if (eDataType.getInstanceClass().isAssignableFrom(Timestamp.class)) {
+            return new Timestamp(((Date)value).getTime());
+        }
         return value;
     }
 
@@ -229,9 +232,8 @@ public class Session implements Closeable {
                         }
                         populateOElementContainment(cObject, cVertex);
                         OEdge oEdge = oElement.addEdge(cVertex, getOrCreateEContainsEdge());
-                        oEdge.setProperty("feature", sf.getName());
+                        oEdge.setProperty("name", sf.getName());
                         oEdge.setProperty("index", index);
-                        oEdge.setProperty("eClass", EcoreUtil.getURI(cObject.eClass()).toString());
                         cVertex.save();
                         ((OrientDBResource) cObject.eResource()).setID(cObject, factory.getId(cVertex.getIdentity()));
                     }
@@ -286,9 +288,8 @@ public class Session implements Closeable {
                             OVertex crVertex = db.load(orid);
                             OEdge oEdge = oElement.addEdge(crVertex, getOrCreateEReferencesEdge());
                             oEdge.setProperty("isExternal", isExternal);
-                            oEdge.setProperty("feature", sf.getName());
+                            oEdge.setProperty("name", sf.getName());
                             oEdge.setProperty("index", index);
-                            oEdge.setProperty("eClass", EcoreUtil.getURI(crObject.eClass()).toString());
                         }
                     }
                 }
@@ -330,7 +331,7 @@ public class Session implements Closeable {
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
             savedResourcesMap.put(resource, oRecord);
-            resource.setURI(factory.createURI(oRecord).appendFragment("/"));
+            resource.setURI(factory.createURI(oRecord));
         }
     }
 
@@ -347,7 +348,7 @@ public class Session implements Closeable {
         EObject eObject = createEObject(oElement);
         resource.getContents().clear();
         resource.getContents().add(eObject);
-        resource.setURI(factory.createURI(oElement).appendFragment("/"));
+        resource.setURI(factory.createURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
     }
 
@@ -396,15 +397,12 @@ public class Session implements Closeable {
         }
         oEdges.sort(Comparator.comparingInt(o -> ((int) o.getProperty("index"))));
         for (OEdge oEdge: oEdges) {
-            String feature = oEdge.getProperty("feature");
-            String eClassURI = oEdge.getProperty("eClass");
-            EClass crClass = (EClass) rs.getEObject(URI.createURI(eClassURI), false);
-            EReference sf = (EReference) eClass.getEStructuralFeature(feature);
+            String name = oEdge.getProperty("name");
+            EReference sf = (EReference) eClass.getEStructuralFeature(name);
             OVertex crVertex = oEdge.getTo();
-            ORID orid = crVertex.getIdentity();
-            EObject crObject = EcoreUtil.create(crClass);
+            EObject crObject = createEObject(crVertex);
             if (!sf.isContainment() || sf.isResolveProxies()) {
-                URI crURI = factory.createURI(orid).appendFragment("/");
+                URI crURI = factory.createURI(crVertex);
                 ((InternalEObject) crObject).eSetProxyURI(crURI);
             }
             if (sf.isMany()) {
@@ -447,33 +445,49 @@ public class Session implements Closeable {
         return resourceSet;
     }
 
-    private List<Resource> getResourceList(OResultSet rs) {
+    private void getResourceList(OResultSet rs, Consumer<Supplier<Resource>> consumer) {
         ResourceSet resourceSet = createResourceSet();
-        List<Resource> result = new ArrayList<>();
         while (rs.hasNext()) {
             OResult oResult = rs.next();
             Optional<OElement> oElementOpt = oResult.getElement();
             if (oElementOpt.isPresent()) {
                 OElement oElement = oElementOpt.get();
-                EObject eObject = createEObject(oElement);
-                Resource resource = resourceSet.createResource(factory.createURI(oElement).appendFragment("/"));
-                resource.getContents().add(eObject);
-                populateEObject(resourceSet, (OVertex) oElement, eObject);
-                result.add(resource);
+                consumer.accept(() -> {
+                    EObject eObject = createEObject(oElement);
+                    Resource resource = resourceSet.createResource(factory.createURI(oElement));
+                    resource.getContents().add(eObject);
+                    populateEObject(resourceSet, (OVertex) oElement, eObject);
+                    return resource;
+                });
             }
         }
-        return result;
     }
 
     public List<Resource> query(String sql, Object... args) {
-        try (OResultSet rs = db.query(sql, args);) {
-            return getResourceList(rs);
-        }
+        List<Resource> result = new ArrayList<>();
+        query(sql, resourceSupplier -> {
+            result.add(resourceSupplier.get());
+        }, args);
+        return result;
     }
 
     public List<Resource> query(String sql, Map args) {
+        List<Resource> result = new ArrayList<>();
+        query(sql, resourceSupplier -> {
+            result.add(resourceSupplier.get());
+        }, args);
+        return result;
+    }
+
+    public void query(String sql, Consumer<Supplier<Resource>> consumer, Object... args) {
         try (OResultSet rs = db.query(sql, args);) {
-            return getResourceList(rs);
+            getResourceList(rs, consumer);
+        }
+    }
+
+    public void query(String sql, Consumer<Supplier<Resource>> consumer, Map args) {
+        try (OResultSet rs = db.query(sql, args);) {
+            getResourceList(rs, consumer);
         }
     }
 

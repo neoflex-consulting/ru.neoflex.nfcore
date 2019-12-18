@@ -1,5 +1,7 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORID;
@@ -89,7 +91,7 @@ public abstract class SessionFactory {
     public String getRef(ORecord oElement) {
         ORID orid = oElement.getIdentity();
         String id = getId(orid);
-        return String.format("%s?rev=%d", id, oElement.getVersion());
+        return String.format("%s?rev=%d#%s", id, oElement.getVersion(), id);
     }
 
     public String getId(ORID orid) {
@@ -97,8 +99,13 @@ public abstract class SessionFactory {
     }
 
     public String getId(URI uri) {
-        if (uri.hasFragment() && !uri.fragment().startsWith("/")) {
-            return uri.fragment();
+        if (uri.hasFragment()) {
+            if (!uri.fragment().startsWith("/")) {
+                return uri.fragment();
+            }
+            if (!uri.fragment().equals("/")) {
+                return null;
+            }
         }
         if (uri.segmentCount() >= 1) {
             return uri.segment(0);
@@ -111,6 +118,10 @@ public abstract class SessionFactory {
         if (id == null) {
             return null;
         }
+        return getORID(id);
+    }
+
+    public ORID getORID(String id) {
         String[] ids = id.split("_", 2);
         if (ids.length != 2) {
             return null;
@@ -186,8 +197,16 @@ public abstract class SessionFactory {
     }
 
     public void withSession(SessionProcedure f) throws Exception {
-        try (Session session = createSession()) {
-            f.call(session);
+        ODatabaseDocumentInternal dbOld = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        try {
+            try (Session session = createSession()) {
+                f.call(session);
+            }
+        }
+        finally {
+            if (dbOld != null) {
+                dbOld.activateOnCurrentThread();
+            }
         }
     }
 
@@ -211,7 +230,7 @@ public abstract class SessionFactory {
                     finally {
                         session.getDatabaseDocument().commit(true);
                         for (Resource resource: session.savedResourcesMap.keySet()) {
-                            resource.setURI(createURI(session.savedResourcesMap.get(resource)).appendFragment("/"));
+                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
                         }
                     }
                 });
