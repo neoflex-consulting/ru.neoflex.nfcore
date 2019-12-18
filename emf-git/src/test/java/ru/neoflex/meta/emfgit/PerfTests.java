@@ -21,7 +21,7 @@ public class PerfTests extends TestBase {
     Database database;
     int nGroups = 5;
     int nUsers = 10;
-    int nThreads = 2;
+    int nThreads = 1;
     int nUpdates = 30;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
