@@ -84,13 +84,14 @@ public class EMFController {
 
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
-        return getObject(store.inTransaction(false, tx -> {
+        Resource created = store.inTransaction(false, tx -> {
             URI uri = store.getUriByRef(ref);
             Resource resource = EmfJson.treeToResource(store.createResourceSet(), uri, contents);
             store.saveResource(resource);
             store.commit("Put " + ref);
-            return store.getRef(resource);
-        }));
+            return resource;
+        });
+        return getObject(store.getRef(created));
     }
 
     @GetMapping("/packages")
@@ -103,41 +104,34 @@ public class EMFController {
     }
 
     @PostMapping("/find")
-    JsonNode find(@RequestBody ObjectNode selector) throws IOException {
-        DocFinder docFinder = DocFinder.create(store)
-                .executionStats(true)
-                .selector(selector)
-                .execute();
-        ObjectNode resourceSetNode = resourceSetToTree(docFinder.getResourceSet());
-        resourceSetNode.set("executionStats", docFinder.getExecutionStats());
-        resourceSetNode.put("warning", docFinder.getWarning());
-        resourceSetNode.put("bookmark", docFinder.getBookmark());
-        return resourceSetNode;
+    JsonNode find(@RequestBody ObjectNode selector) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store)
+                    .executionStats(true)
+                    .selector(selector)
+                    .execute();
+            ObjectNode resourceSetNode = resourceSetToTree(docFinder.getResourceSet());
+            resourceSetNode.set("executionStats", docFinder.getExecutionStats());
+            resourceSetNode.put("warning", docFinder.getWarning());
+            resourceSetNode.put("bookmark", docFinder.getBookmark());
+            return resourceSetNode;
+        });
     }
 
     @PostMapping("/call")
     JsonNode call(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
-        Resource resource = store.loadResource(ref);
-        EObject eObject = resource.getContents().get(0);
-        EClass eClass = eObject.eClass();
-        for (EOperation eOperation: eClass.getEAllOperations()) {
-            if (eOperation.getName().equals(method)) {
-                EList<?> arguments = createEOperationArguments(store, eOperation, args);
-                Object result = eObject.eInvoke(eOperation, arguments);
-                return mapper.valueToTree(result);
-            }
-        }
-        throw new RuntimeException("call: EOperation " + method + " not found in " + EcoreUtil.getURI(eClass));
-//        Object result =  context.getGroovy().eval(eObject, method, args);
-//        return mapper.valueToTree(result);
+        return callImpl(true, ref, method, args);
     }
 
     @PostMapping("/calltx")
     JsonNode callTx(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
-        return store.inTransaction(false, tx -> {
+        return callImpl(false, ref, method, args);
+    }
+
+    private JsonNode callImpl(boolean readOnly, String ref, String method, List<Object> args) throws Exception {
+        return store.inTransaction(readOnly, tx -> {
             Resource resource = store.loadResource(ref);
             EObject eObject = resource.getContents().get(0);
-//            Object result =  context.getGroovy().eval(eObject, method, args);
             EClass eClass = eObject.eClass();
             for (EOperation eOperation: eClass.getEAllOperations()) {
                 if (eOperation.getName().equals(method)) {

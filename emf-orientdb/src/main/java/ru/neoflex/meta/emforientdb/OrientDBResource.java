@@ -34,33 +34,33 @@ public class OrientDBResource extends ResourceImpl {
         return id != null ? id : super.getURIFragment(eObject);
     }
 
-//    @Override
-//    protected boolean isAttachedDetachedHelperRequired() {
-//        return true;
-//    }
-//
-//    @Override
-//    protected void attachedHelper(EObject eObject) {
-//        super.attachedHelper(eObject);
-//        String id = eObjectToIDMap.get(eObject);
-//        if (id == null) {
-//            id = factory.getId(EcoreUtil.getURI(eObject));
-//        }
-//        if (id != null) {
-//            idToEObjectMap.put(id, eObject);
-//            eObjectToIDMap.put(eObject, id);
-//        }
-//    }
-//
-//    @Override
-//    protected void detachedHelper(EObject eObject) {
-//        String oldID = eObjectToIDMap.remove(eObject);
-//        if (oldID != null) {
-//            idToEObjectMap.remove(oldID);
-//        }
-//        super.detachedHelper(eObject);
-//    }
-//
+    @Override
+    protected boolean isAttachedDetachedHelperRequired() {
+        return true;
+    }
+
+    @Override
+    protected void attachedHelper(EObject eObject) {
+        super.attachedHelper(eObject);
+        String id = eObjectToIDMap.get(eObject);
+        if (id == null) {
+            id = factory.getId(EcoreUtil.getURI(eObject));
+        }
+        if (id != null) {
+            idToEObjectMap.put(id, eObject);
+            eObjectToIDMap.put(eObject, id);
+        }
+    }
+
+    @Override
+    protected void detachedHelper(EObject eObject) {
+        String oldID = eObjectToIDMap.remove(eObject);
+        if (oldID != null) {
+            idToEObjectMap.remove(oldID);
+        }
+        super.detachedHelper(eObject);
+    }
+
     public void setID(EObject eObject, String id) {
          String oldID = id != null ?
                 eObjectToIDMap.put(eObject, id):

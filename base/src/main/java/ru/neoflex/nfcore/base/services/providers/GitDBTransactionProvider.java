@@ -9,4 +9,9 @@ public class GitDBTransactionProvider extends Transaction implements Transaction
     public GitDBTransactionProvider(Database database, String branch, LockType lockType) throws IOException {
         super(database, branch, lockType);
     }
+
+    @Override
+    public StoreSPI getStore() {
+        return (StoreSPI) getDatabase();
+    }
 }

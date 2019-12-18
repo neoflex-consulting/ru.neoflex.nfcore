@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
 
+import static ru.neoflex.nfcore.base.services.Store.qualifiedNameDelegate;
+
 @Service
 public class Workspace {
     private final static Log logger = LogFactory.getLog(Workspace.class);
@@ -43,14 +45,7 @@ public class Workspace {
     void init() throws GitAPIException, IOException {
         String workspaceRoot = new File(repoBase, repoName).getAbsolutePath();
         database = new Database(workspaceRoot, registry.getEPackages());
-        database.setQualifiedNameDelegate(eClass -> {
-            for (EAttribute eAttribute: eClass.getEAllAttributes()) {
-                if (eAttribute.getEAttributeType() == TypesPackage.Literals.QNAME) {
-                    return eAttribute;
-                }
-            }
-            return eClass.getEStructuralFeature("name");
-        });
+        database.setQualifiedNameDelegate(qualifiedNameDelegate);
     }
 
     @PreDestroy
