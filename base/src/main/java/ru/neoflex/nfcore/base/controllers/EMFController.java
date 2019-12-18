@@ -137,8 +137,10 @@ public class EMFController {
                 if (eOperation.getName().equals(method)) {
                     EList<?> arguments = createEOperationArguments(store, eOperation, args);
                     Object result = eObject.eInvoke(eOperation, arguments);
-                    store.commit("Call with tx " + method + "(" + ref + ", " +
-                            args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");
+                    if (!readOnly) {
+                        store.commit("Call with tx " + method + "(" + ref + ", " +
+                                args.stream().map(Object::toString).collect(Collectors.joining(", ")) + ")");
+                    }
                     return mapper.valueToTree(result);
                 }
             }
