@@ -191,16 +191,10 @@ public abstract class SessionFactory {
     }
 
     public<R> R withSession(SessionFunction<R> f) throws Exception {
-        try (Session session = createSession()) {
-            return f.call(session);
-        }
-    }
-
-    public void withSession(SessionProcedure f) throws Exception {
         ODatabaseDocumentInternal dbOld = ODatabaseRecordThreadLocal.instance().getIfDefined();
         try {
             try (Session session = createSession()) {
-                f.call(session);
+                return f.call(session);
             }
         }
         finally {
@@ -208,6 +202,13 @@ public abstract class SessionFactory {
                 dbOld.activateOnCurrentThread();
             }
         }
+    }
+
+    public void withSession(SessionProcedure f) throws Exception {
+        withSession(session -> {
+            f.call(session);
+            return null;
+        });
     }
 
     public <R> R inTransaction(SessionFunction<R> f) throws Exception {
