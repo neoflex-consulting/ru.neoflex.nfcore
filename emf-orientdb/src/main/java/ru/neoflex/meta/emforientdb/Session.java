@@ -131,16 +131,26 @@ public class Session implements Closeable {
                 OClass oSuperClass = getOrCreateOClass(eSuperClass);
                 ensureSuperClass(oClass, oSuperClass);
             }
-            for (EAttribute sf: eClass.getEAllAttributes()) {
+            EAttribute id = null;
+            for (EAttribute sf: eClass.getEAttributes()) {
                 if (!sf.isDerived() && !sf.isTransient()) {
                     OProperty oProperty = oClass.getProperty(sf.getName());
                     if (oProperty == null) {
                         createProperty(oClass, sf);
                     }
+                    if (sf.isID()) {
+                        id = sf;
+                    }
+                }
+            }
+            if (id != null) {
+                String name = oClass.getName() + "_" + id.getName() + "_pk";
+                if (oClass.getClassIndex(name) == null) {
+                    oClass.createIndex(name, OClass.INDEX_TYPE.UNIQUE, id.getName());
                 }
             }
             EStructuralFeature sf = factory.getQNameFeature(eClass);
-            if (sf != null && sf.getEContainingClass().equals(eClass)) {
+            if (sf != null && id != sf && sf.getEContainingClass().equals(eClass)) {
                 String name = oClass.getName() + "_" + sf.getName() + "_ak";
                 if (oClass.getClassIndex(name) == null) {
                     oClass.createIndex(name, OClass.INDEX_TYPE.UNIQUE, sf.getName());

@@ -49,7 +49,7 @@ public class DbTests extends TestBase {
         });
         EPackage ePackage = (EPackage) testPackageResource.getContents().get(0);
         Assert.assertEquals(TestPackage.eINSTANCE.getNsURI(), ePackage.getNsURI());
-//        sleepForever();
+        sleepForever();
     }
 
     @Test
