@@ -282,6 +282,9 @@ public class Session implements Closeable {
                             boolean isExternal = !EcoreUtil.isAncestor(rootContainer, crObject);
                             URI crURI = EcoreUtil.getURI(crObject);
                             ORID orid = factory.getORID(crURI);
+                            if (orid == null) {
+                                throw new IllegalArgumentException("Can't load referenced object with URI " + crURI);
+                            }
                             OVertex crVertex = db.load(orid);
                             OEdge oEdge = oElement.addEdge(crVertex, getOrCreateEReferencesEdge());
                             oEdge.setProperty("isExternal", isExternal);

@@ -6,20 +6,20 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import ru.neoflex.meta.test.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DbTests extends TestBase {
 
     @BeforeClass
     public static void startUp() throws Exception {
-        server = refreshDatabase();
     }
 
     @AfterClass
@@ -28,12 +28,35 @@ public class DbTests extends TestBase {
     }
 
     @Test
-    public void dbTest() throws Exception {
+    public void testMetadata() throws Exception {
+        server = refreshDatabase(new ArrayList<EPackage>() {{
+            add(EcorePackage.eINSTANCE);
+            add(TestPackage.eINSTANCE);
+        }});
         server.inTransaction(session -> {
             ResourceSet rs = session.createResourceSet();
-            Resource dbCoreResource = rs.createResource(server.createURI());
-            dbCoreResource.getContents().add(EcoreUtil.copy(EcorePackage.eINSTANCE));
-            dbCoreResource.save(null);
+            EcoreUtil.copyAll(server.getPackages());
+            for (EPackage ePackage: EcoreUtil.copyAll(server.getPackages())) {
+                if (session.query("select from ecore_EPackage where name=?", ePackage.getNsPrefix()).isEmpty()) {
+                    Resource ePackageResource = rs.createResource(server.createURI());
+                    ePackageResource.getContents().add(ePackage);
+                    ePackageResource.save(null);
+                }
+            }
+        });
+        Resource testPackageResource = server.inTransaction(session -> {
+            return session.query("select from ecore_EPackage where name=?", TestPackage.eINSTANCE.getNsPrefix()).get(0);
+        });
+        EPackage ePackage = (EPackage) testPackageResource.getContents().get(0);
+        Assert.assertEquals(TestPackage.eINSTANCE.getNsURI(), ePackage.getNsURI());
+//        sleepForever();
+    }
+
+    @Test
+    public void dbTest() throws Exception {
+        server = refreshDatabase(null);
+        server.inTransaction(session -> {
+            ResourceSet rs = session.createResourceSet();
 
             DBTable group = TestFactory.eINSTANCE.createDBTable();
             group.setQName("GROUP");
@@ -120,11 +143,12 @@ public class DbTests extends TestBase {
             Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
             Assert.assertEquals(5, user_group.getColumns().size());
         });
-        sleepForever();
+//        sleepForever();
     }
 
     @Test
     public void databaseTest() throws Exception {
+        server = refreshDatabase(null);
         try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", Collections.singletonList(TestPackage.eINSTANCE))) {
             Resource roleResource = db.inTransaction(session -> {
                 ResourceSet rs = session.createResourceSet();
