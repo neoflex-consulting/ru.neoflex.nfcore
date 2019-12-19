@@ -69,7 +69,6 @@ public class Session implements Closeable {
         if (oClass == null) {
             oClass = db.createEdgeClass(EREFERES);
             oClass.createProperty("name", OType.STRING);
-            oClass.createProperty("index", OType.INTEGER);
             oClass.createProperty("isExternal", OType.BOOLEAN);
         }
         return oClass;
@@ -80,7 +79,6 @@ public class Session implements Closeable {
         if (oClass == null) {
             oClass = db.createEdgeClass(ECONTAINS);
             oClass.createProperty("name", OType.STRING);
-            oClass.createProperty("index", OType.INTEGER);
         }
         return oClass;
     }
@@ -233,7 +231,6 @@ public class Session implements Closeable {
                         populateOElementContainment(cObject, cVertex);
                         OEdge oEdge = oElement.addEdge(cVertex, getOrCreateEContainsEdge());
                         oEdge.setProperty("name", sf.getName());
-                        oEdge.setProperty("index", index);
                         cVertex.save();
                         ((OrientDBResource) cObject.eResource()).setID(cObject, factory.getId(cVertex.getIdentity()));
                     }
@@ -289,7 +286,6 @@ public class Session implements Closeable {
                             OEdge oEdge = oElement.addEdge(crVertex, getOrCreateEReferencesEdge());
                             oEdge.setProperty("isExternal", isExternal);
                             oEdge.setProperty("name", sf.getName());
-                            oEdge.setProperty("index", index);
                         }
                     }
                 }
@@ -391,12 +387,7 @@ public class Session implements Closeable {
                 }
             }
         }
-        List<OEdge> oEdges = new ArrayList<>();
         for (OEdge oEdge: oElement.getEdges(ODirection.OUT)) {
-            oEdges.add(oEdge);
-        }
-        oEdges.sort(Comparator.comparingInt(o -> ((int) o.getProperty("index"))));
-        for (OEdge oEdge: oEdges) {
             String name = oEdge.getProperty("name");
             EReference sf = (EReference) eClass.getEStructuralFeature(name);
             OVertex crVertex = oEdge.getTo();
