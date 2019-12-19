@@ -2,6 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -30,6 +31,9 @@ public class DbTests extends TestBase {
     public void dbTest() throws Exception {
         server.inTransaction(session -> {
             ResourceSet rs = session.createResourceSet();
+            Resource dbCoreResource = rs.createResource(server.createURI());
+            dbCoreResource.getContents().add(EcoreUtil.copy(EcorePackage.eINSTANCE));
+            dbCoreResource.save(null);
 
             DBTable group = TestFactory.eINSTANCE.createDBTable();
             group.setQName("GROUP");
@@ -116,7 +120,7 @@ public class DbTests extends TestBase {
             Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
             Assert.assertEquals(5, user_group.getColumns().size());
         });
-//        sleepForever();
+        sleepForever();
     }
 
     @Test

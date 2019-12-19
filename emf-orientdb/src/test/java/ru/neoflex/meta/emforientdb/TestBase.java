@@ -1,6 +1,7 @@
 package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EcorePackage;
 import ru.neoflex.meta.test.TestPackage;
 
 import java.io.File;
@@ -22,7 +23,10 @@ public class TestBase {
     }
 
     public static Server getDatabase() throws Exception {
-        return new Server(getHomeFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}}).open();
+        return new Server(getHomeFile().getAbsolutePath(), DBNAME, new ArrayList<EPackage>(){{
+            add(EcorePackage.eINSTANCE);
+            add(TestPackage.eINSTANCE);
+        }}).open();
     }
 
     public static File getHomeFile() throws IOException {
