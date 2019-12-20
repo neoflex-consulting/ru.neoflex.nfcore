@@ -184,7 +184,7 @@ public class DbTests extends TestBase {
             Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
             Assert.assertEquals(5, user_group.getColumns().size());
         });
-//        sleepForever();
+        sleepForever();
     }
 
     @Test

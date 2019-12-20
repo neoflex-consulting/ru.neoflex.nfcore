@@ -12,20 +12,14 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public abstract class SessionFactory {
@@ -77,10 +71,6 @@ public abstract class SessionFactory {
     public URI createURI(String ref) {
         URI uri = URI.createURI(ORIENTDB + "://" +dbName + "/" + (ref == null ? "" : ref));
         return uri;
-    }
-
-    public URI createURI(ORID orid) {
-        return createURI(getId(orid));
     }
 
     public URI createURI(ORecord oElement) {
@@ -147,14 +137,14 @@ public abstract class SessionFactory {
     }
 
     public ResourceSet createResourceSet() {
-        ResourceSet resourceSet = new ResourceSetImpl();
+        ResourceSetImpl resourceSet = new ResourceSetImpl();
         resourceSet.getPackageRegistry()
                 .put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
         for (EPackage ePackage : packages) {
             resourceSet.getPackageRegistry()
                     .put(ePackage.getNsURI(), ePackage);
         }
-        ((ResourceSetImpl) resourceSet).setURIResourceMap(new HashMap<>());
+        resourceSet.setURIResourceMap(new HashMap<>());
         resourceSet.getResourceFactoryRegistry()
                 .getProtocolToFactoryMap()
                 .put(ORIENTDB, new ResourceFactoryImpl() {
