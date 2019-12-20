@@ -29,3 +29,9 @@ class StatusReport {
 	String[1] color
 	String description
 }
+
+enum DatasetSettingsType {
+    Grid
+    Pivot
+    Diagram
+}

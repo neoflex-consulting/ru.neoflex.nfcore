@@ -10,6 +10,10 @@ import ru.neoflex.nfcore.base.types.QName
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import ru.neoflex.nfcore.dataset.DatasetSettingsGrid
+import ru.neoflex.nfcore.dataset.DatasetSettingsPivot
+import ru.neoflex.nfcore.dataset.DatasetSettingsDiagram
+
 import ru.neoflex.nfcore.dataset.DatasetSettings
 import ru.neoflex.nfcore.dataset.Dataset
 
@@ -27,15 +31,15 @@ class UserComponent extends Component {
 }
 
 /* Applications */
-//Добавлены Dataset-ы в AppModule, для этого добавлен класс AppDataset
 //Нужна проверка, чтобы не было в одном AppModule два и более одинаковых JdbcDataset
 //На CompnentDid(Mount && Update) в AppModule будут начитывться все AppDataset, если они уже ранее не были начитаны
 class AppModule {
     QName name
+    refers DatasetSettings[] datasetSettings
+    refers Dataset[] dataset
     contains ViewElement view
     contains Tools tools
     contains CatalogNode referenceTree
-    refers Dataset[] dataset
 }
 
 class Application extends AppModule {
@@ -92,7 +96,10 @@ class FormItem extends ViewContainer {
 class DatasetView extends ViewElement {
     contains Typography headerName
     DatePicker datePicker
-    refers DatasetSettings datasetSettings
+    DatasetSettingsType datasetSettingsType
+    refers DatasetSettingsGrid datasetSettingsGrid
+    refers DatasetSettingsPivot datasetSettingsPivot
+    refers DatasetSettingsDiagram datasetSettingsDiagram
 }
 
 class Row extends ViewContainer {
@@ -142,7 +149,14 @@ class ViewNode extends TreeNode {
     refers EObject eObject
 }
 
+enum DatasetSettingsType {
+    Grid
+    Pivot
+    Diagram
+}
+
 enum DatePicker {
+    Undefined
     Single
     FromTo
 }
