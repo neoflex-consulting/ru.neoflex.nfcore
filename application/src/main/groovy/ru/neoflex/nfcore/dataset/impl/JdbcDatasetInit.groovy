@@ -43,7 +43,7 @@ class JdbcDatasetInit {
 
     {
         recreateJdbcDatasetInit("JdbcDatasetTest")
-        //loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
+        loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
     }
 
     JdbcDatasetInit() {}
