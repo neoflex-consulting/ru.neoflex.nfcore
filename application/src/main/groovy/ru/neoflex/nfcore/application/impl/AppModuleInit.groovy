@@ -5,8 +5,10 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
+import ru.neoflex.nfcore.application.DatasetSettingsType
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.reports.ReportsFactory
 import ru.neoflex.nfcore.reports.ReportsPackage
 
@@ -105,8 +107,18 @@ class AppModuleInit {
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
 
-            def Tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
-            Tabs.name = 'View Report'
+            def tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
+            tabs.name = 'View Report'
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = 'Dataset View Grid'
+            datasetView.datasetSettingsType = DatasetSettingsType.GRID
+            def datasetSettingsGrid = findOrCreateEObject(DatasetPackage.Literals.DATASET_SETTINGS_GRID, "DatasetSettingsGridTest", "",true)
+            datasetView.setDatasetSettingsGrid(datasetSettingsGrid)
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = 'Header name Dataset View'
+            datasetView.headerName = typography
+
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
@@ -116,10 +128,11 @@ class AppModuleInit {
             componentElement1.setComponent(userComponent1)
             componentElement2.setComponent(userComponent2)
             componentElement3.setComponent(userComponent3)
-            Tabs.children.add(componentElement1)
-            Tabs.children.add(componentElement2)
-            Tabs.children.add(componentElement3)
-            application.view = Tabs
+            tabs.children.add(componentElement1)
+            tabs.children.add(componentElement2)
+            tabs.children.add(componentElement3)
+            tabs.children.add(datasetView)
+            application.view = tabs
 
             def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
             application.setReferenceTree(referenceTree)

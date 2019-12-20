@@ -30,8 +30,20 @@ class JdbcDatasetInit {
         return rs.resources.get(0).contents.get(0) as JdbcDataset
     }
 
+    static def loadAllColumnsJdbcDatasetInit(String name) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
+                .execute().resourceSet
+        if (!rs.resources.empty) {
+            def jdbcDataset = rs.resources.get(0).contents.get(0) as JdbcDataset
+            if(jdbcDataset.connection && jdbcDataset.datasetColumn.size() == 0) {
+                jdbcDataset.loadAllColumns()
+            }
+        }
+    }
+
     {
         recreateJdbcDatasetInit("JdbcDatasetTest")
+        //loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
     }
 
     JdbcDatasetInit() {}
