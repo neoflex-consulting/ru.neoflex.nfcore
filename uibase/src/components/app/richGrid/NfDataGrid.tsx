@@ -11,6 +11,7 @@ import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
+import {EObject} from "ecore";
 
 interface Props {
     onCtrlA?: Function,
@@ -19,7 +20,8 @@ interface Props {
     onHeaderSelection?: Function,
     columnDefs?: Array<any>,
     rowData?: Array<any>,
-    gridOptions?: { [ key:string ]: any }
+    gridOptions?: { [ key:string ]: any },
+    serverFilters:  Array<EObject>
 }
 
 class NfDataGrid extends Component<Props & WithTranslation, any> {
@@ -48,7 +50,8 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 1000,
                 "All"
             ],
-            paginationPageSize: 20,
+            paginationPageSize: 10,
+            selectedServerFilters: []
         };
 
         this.grid = React.createRef();
@@ -132,7 +135,6 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                     showSearch={true}
                     style={{ width: '180px', marginLeft: '10px' }}
                     placeholder="Show rows"
-                    // onSelect={ (e:string) => this.setState({rowCount: e})}
                     defaultValue={"Show rows: " + this.state.paginationPageSize}
                     onChange={this.onPageSizeChanged.bind(this)}
                 >
@@ -141,6 +143,31 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                             .map((paginationPageSize: string) =>
                                 <Select.Option key={paginationPageSize} value={paginationPageSize}>
                                     {"Show rows: " + paginationPageSize}
+                                </Select.Option>)
+                    }
+                </Select>
+                <Select
+
+                    //selectedServerFilters
+                    notFoundContent={t('notfound')}
+                    //allowClear={true}
+                    showSearch={true}
+                    style={{ width: '400px', marginLeft: '10px' }}
+                    //onSelect={ (e:any) => this.setState({serverFilters: e})}
+                    mode="multiple"
+                    defaultValue={
+                        this.props.serverFilters
+                            .filter((f: EObject) => f.get('enable') === true)
+                            .map((f: EObject) =>
+                                f.get('name'))
+
+                    }
+                >
+                    {
+                        this.props.serverFilters
+                            .map((f: EObject) =>
+                                <Select.Option key={f.get('name')} value={f.get('name')}>
+                                    {f.get('name')}
                                 </Select.Option>)
                     }
                 </Select>
@@ -161,7 +188,6 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         headerHeight={40} //высота header в px (25 по умолчанию)
                         suppressRowClickSelection //строки не выделяются при нажатии на них
 
-                       // filterFramework={CustomFilterThis}
 
                         enableColResize={true}
                         // //pivotHeaderHeight={true}
@@ -179,11 +205,12 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                             sortable={false}
                             suppressMenu //скрыть меню с фильтрами и пр.
                             filter={false}
+                            hide={false}
                             pinned //закрепить стобец (слево, справо, отмена)
                         >
                         </AgGridColumn>
                         <AgGridColumn
-                            headerName="Name"
+                            headerName="Name_agDateColumnFilter"
                             field="name"
                             hide={false}
                             pinned
@@ -196,9 +223,14 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                                 columnDefs !== undefined ?
                                     columnDefs.map((col: any) =>
                                         <AgGridColumn
-                                            headerName={col.field.toString().substring(0,1).toUpperCase() + col.field.toString().substring(1)}
-                                            field={col.field}
-                                            headerTooltip={"type: " + col.type}
+                                            field={col.get("field")}
+                                            headerName={col.get("headerName").toString().substring(0,1).toUpperCase() + col.get("headerName").toString().substring(1)}
+                                            headerTooltip={col.get("headerTooltip")}
+                                            hide={col.get("hide")}
+                                            pinned={col.get("pinned") === 'Left' ? 'left' : col.get("pinned") === 'Right' ? 'right' : false}
+                                            filter={col.get("filter") === 'NumberColumnFilter'
+                                                ? 'agNumberColumnFilter' : col.get("filter") === 'DateColumnFilter' ?
+                                                    'agDateColumnFilter' : 'agTextColumnFilter'}
                                         />
                                     )
                                     : null

@@ -70,7 +70,7 @@ class DatasetSettingsGrid extends DatasetSettings {
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
      contains Conditions[] serverFilter //Состав серверного фильтра
-     String clientFilterExpression //выражение в клиентском фильтре
+     //String clientFilterExpression //выражение в клиентском фильтре
 }
 
 class DatasetSettingsPivot extends DatasetSettings {

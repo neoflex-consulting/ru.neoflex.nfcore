@@ -2,7 +2,6 @@ package ru.neoflex.nfcore.dataset.impl
 
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
-import org.eclipse.emf.ecore.util.EObjectContainmentEList
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
@@ -33,17 +32,13 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 def map = [:]
                 for (int i = 1; i <= columnCount; ++i) {
                     def object = resultSet.getObject(i)
-                    if (map.keySet().contains(resultSet.metaData.getColumnName(i))) {
-                        map["${resultSet.metaData.getColumnName(i)}_${i}"] = (object == null ? null : object.toString())
-                    } else {
-                        map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
-                    }
+                    map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
                 }
                 rowData.add(map)
             }
             return JsonOutput.toJson(rowData)
         } else {
-            return JsonOutput.toJson("Please, run operation _loadAllColumns_")
+            return JsonOutput.toJson("Please, run operation loadAllColumns in this object")
         }
     }
 
@@ -51,16 +46,15 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
     String loadAllColumns() {
         Connection jdbcConnection = connectionToDB()
         ResultSet resultSet = getResultSet(jdbcConnection, false)
-        def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
-                .execute().resourceSet
-        if (!resource.resources.empty) {
-            Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
-                @Override
-                Object call(TransactionSPI tx) throws Exception {
-                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources)
+        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
+            @Override
+            Object call(TransactionSPI tx) throws Exception {
+                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
+                        .execute().resourceSet
+                if (!resource.resources.empty) {
+                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources.get(0))
                     def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
                     def columnCount = resultSet.metaData.columnCount
-                    def changeQuery = false
                     if (columnCount > 0) {
                         for (int i = 1; i <= columnCount; ++i) {
                             def object = resultSet.metaData.getColumnName(i)
@@ -71,60 +65,40 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                             datasetColumn.name = object.toString()
                             jdbcDataset.datasetColumn.each { c->
                                 if (c.name == object.toString()) {
-                                    datasetColumn.name = object.toString() + "_" + i
-                                    changeQuery = true
+                                    throw new IllegalArgumentException("Please, change your query. It has similar column`s name")
                                 }
                             }
                             jdbcDataset.datasetColumn.add(datasetColumn)
                         }
-                        if (changeQuery) {
-                            def newQuery = changeQueryRun(jdbcDataset.datasetColumn)
-                            jdbcDataset.setQuery(newQuery)
-                        }
                         Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
                         Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
-
                         return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were loaded")
                     }
                     else {
                         return JsonOutput.toJson("Entity " + jdbcDataset.name + " was not updated")
                     }
                 }
-            })
-        }
-    }
-
-    String changeQueryRun(EObjectContainmentEList columnNames) {
-        def result = []
-        query.split(',').each { t->
-            def index = query.split(',').findIndexOf {it == t}
-            def changeStatement = t.split(" ")[-1].toLowerCase().replace("\"", '') != columnNames[index].name.replace("\"", '')
-            if (changeStatement) {
-                result.add("${t} \"${columnNames[index].name}\"")
-            } else {
-                result.add(t)
             }
-        }
-        return result.join(",")
+        })
     }
 
     @Override
     String deleteAllColumns() {
-        def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
-                .execute().resourceSet
-        if (!resource.resources.empty) {
-            Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
-                @Override
-                Object call(TransactionSPI tx) throws Exception {
-                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources)
+        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
+            @Override
+            Object call(TransactionSPI tx) throws Exception {
+                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
+                        .execute().resourceSet
+                if (!resource.resources.empty) {
+                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources.get(0))
                     def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
                     jdbcDataset.datasetColumn.clear()
                     Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
                     Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
                     return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were deleted")
                 }
-            })
-        }
+            }
+        })
     }
 
     @Override
@@ -181,6 +155,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 currentQuery = "SELECT * FROM (${query}) t"
             }
         }
+        logger.info("connectionToDB", currentQuery)
         Statement st = jdbcConnection.createStatement()
         ResultSet resultSet = st.executeQuery(currentQuery)
         return resultSet
