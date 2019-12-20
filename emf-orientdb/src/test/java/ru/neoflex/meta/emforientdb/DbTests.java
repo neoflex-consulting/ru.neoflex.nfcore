@@ -1,6 +1,5 @@
 package ru.neoflex.meta.emforientdb;
 
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -176,7 +175,6 @@ public class DbTests extends TestBase {
             user_group.eResource().save(null);
             return user_group;
         });
-        URI extURI = EcoreUtil.getURI(extView);
         server.withSession(session -> {
             List<Resource> views = session.query("select from test_DBView");
             DBView user_group = (DBView) views.get(0).getContents().get(0);
@@ -184,7 +182,7 @@ public class DbTests extends TestBase {
             Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
             Assert.assertEquals(5, user_group.getColumns().size());
         });
-        sleepForever();
+//        sleepForever();
     }
 
     @Test
