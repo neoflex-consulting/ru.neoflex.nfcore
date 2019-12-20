@@ -22,7 +22,6 @@ public class PerfTests extends TestBase {
 
     @BeforeClass
     public static void startUp() throws Exception {
-        server = refreshDatabase();
     }
 
     @AfterClass
@@ -32,6 +31,7 @@ public class PerfTests extends TestBase {
 
     @Test
     public void fullTest() throws Exception {
+        server = refreshDatabase(null);
         long start = System.currentTimeMillis();
         for (int i = 0; i < nGroups; ++i) {
             String name = "group_" + i;

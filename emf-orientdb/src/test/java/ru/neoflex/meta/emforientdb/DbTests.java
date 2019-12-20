@@ -2,32 +2,88 @@ package ru.neoflex.meta.emforientdb;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import ru.neoflex.meta.test.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DbTests extends TestBase {
 
     @BeforeClass
     public static void startUp() throws Exception {
-        server = refreshDatabase();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         server.close();
     }
 
     @Test
+    public void testMetaView() throws Exception {
+        server = refreshDatabase(null);
+        DBTable aObject = server.inTransaction(session -> {
+            ResourceSet rs = session.createResourceSet();
+            DBTable testTable = TestFactory.eINSTANCE.createDBTable();
+            testTable.setQName("TEST_TABLE");
+            Resource testRes = rs.createResource(server.createURI());
+            testRes.getContents().add(testTable);
+            testRes.save(null);
+            MetaView metaView = TestFactory.eINSTANCE.createMetaView();
+            metaView.setQName("My Meta View");
+            metaView.setAPackage(TestPackage.eINSTANCE);
+            metaView.setAClass(EcorePackage.eINSTANCE.getEAnnotation());
+            metaView.setAObject(testTable);
+            Resource metaRes = rs.createResource(server.createURI());
+            metaRes.getContents().add(metaView);
+            metaRes.save(null);
+            return testTable;
+        });
+        Resource metaViewRes = server.inTransaction(session -> {
+            return session.query("select from test_MetaView where qName=?", "My Meta View").get(0);
+        });
+        MetaView metaView = (MetaView) metaViewRes.getContents().get(0);
+        Assert.assertEquals(EcorePackage.eINSTANCE.getEAnnotation(), metaView.getAClass());
+        Assert.assertEquals(TestPackage.eINSTANCE, metaView.getAPackage());
+        Assert.assertEquals(aObject.getQName(), ((DBTable) metaView.getAObject()).getQName());
+//        sleepForever();
+    }
+
+    @Test
+    public void testMetadata() throws Exception {
+        server = refreshDatabase(new ArrayList<EPackage>() {{
+            add(EcorePackage.eINSTANCE);
+            add(TestPackage.eINSTANCE);
+        }});
+        server.inTransaction(session -> {
+            ResourceSet rs = session.createResourceSet();
+            for (EPackage ePackage: EcoreUtil.copyAll(server.getPackages())) {
+                if (session.query("select from ecore_EPackage where name=?", ePackage.getNsPrefix()).isEmpty()) {
+                    Resource ePackageResource = rs.createResource(server.createURI());
+                    ePackageResource.getContents().add(ePackage);
+                    ePackageResource.save(null);
+                }
+            }
+        });
+        Resource testPackageResource = server.inTransaction(session -> {
+            return session.query("select from ecore_EPackage where name=?", TestPackage.eINSTANCE.getNsPrefix()).get(0);
+        });
+        EPackage ePackage = (EPackage) testPackageResource.getContents().get(0);
+        Assert.assertEquals(TestPackage.eINSTANCE.getNsURI(), ePackage.getNsURI());
+//        sleepForever();
+    }
+
+    @Test
     public void dbTest() throws Exception {
+        server = refreshDatabase(null);
         server.inTransaction(session -> {
             ResourceSet rs = session.createResourceSet();
 
@@ -121,6 +177,7 @@ public class DbTests extends TestBase {
 
     @Test
     public void databaseTest() throws Exception {
+        server = refreshDatabase(null);
         try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", Collections.singletonList(TestPackage.eINSTANCE))) {
             Resource roleResource = db.inTransaction(session -> {
                 ResourceSet rs = session.createResourceSet();

@@ -1,19 +1,16 @@
 package ru.neoflex.nfcore.base.services.providers;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import ru.neoflex.meta.emfgit.Database;
 import ru.neoflex.meta.emforientdb.Server;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.services.Store;
-import ru.neoflex.nfcore.base.types.TypesPackage;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -111,13 +108,14 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
         }
         else {
             return server.inTransaction(session -> {
+                OrientDBTransactionProvider oldTx = OrientDBTransactionProvider.getCurrent();
                 OrientDBTransactionProvider tx = new OrientDBTransactionProvider(this, session);
                 OrientDBTransactionProvider.setCurrent(tx);
                 try {
                     return f.call(tx);
                 }
                 finally {
-                    OrientDBTransactionProvider.setCurrent(null);
+                    OrientDBTransactionProvider.setCurrent(oldTx);
                 }
             });
         }

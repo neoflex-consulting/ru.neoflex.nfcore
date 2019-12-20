@@ -5,6 +5,9 @@
     complianceLevel="7.0"
 )
 package ru.neoflex.meta.test
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EClass
 
 abstract class Authority {
     String qName
@@ -51,4 +54,11 @@ class DBTable extends DBEntity {
 class DBView extends DBEntity {
 	refers Column[] columns
 	boolean isMaterialized
+}
+
+class MetaView {
+	id String qName
+	refers EPackage aPackage
+	refers EClass aClass
+	refers EObject aObject
 }
