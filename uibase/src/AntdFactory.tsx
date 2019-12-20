@@ -3,6 +3,7 @@ import Ecore from "ecore";
 import * as React from "react";
 import {Col, Form, Row, Tabs} from "antd";
 import UserComponent from "./components/app/UserComponent";
+import ReportRichGrid from "./components/app/richGrid/ReportRichGrid";
 
 const { TabPane } = Tabs;
 
@@ -97,6 +98,17 @@ class ComponentElement_ extends ViewContainer {
     }
 }
 
+class DatasetView_ extends ViewContainer {
+    render = () => {
+        //if (this.props.viewObject.get("datasetSettingsType") === "Grid" && this.props.viewObject.get('datasetSettingsGrid')) {
+            return <ReportRichGrid
+                headerName={this.props.viewObject.get("headerName").get("name")}
+                datasetSettingsGridName={this.props.viewObject.get('datasetSettingsGrid').get('name')}
+            />
+        //} else return <div>Not found</div>
+    }
+}
+
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof View>();
@@ -111,6 +123,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
+        this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
