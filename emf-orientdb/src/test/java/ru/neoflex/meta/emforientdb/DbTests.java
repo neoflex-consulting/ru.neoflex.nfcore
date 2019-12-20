@@ -6,7 +6,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,9 +22,39 @@ public class DbTests extends TestBase {
     public static void startUp() throws Exception {
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         server.close();
+    }
+
+    @Test
+    public void testMetaView() throws Exception {
+        server = refreshDatabase(null);
+        DBTable aObject = server.inTransaction(session -> {
+            ResourceSet rs = session.createResourceSet();
+            DBTable testTable = TestFactory.eINSTANCE.createDBTable();
+            testTable.setQName("TEST_TABLE");
+            Resource testRes = rs.createResource(server.createURI());
+            testRes.getContents().add(testTable);
+            testRes.save(null);
+            MetaView metaView = TestFactory.eINSTANCE.createMetaView();
+            metaView.setQName("My Meta View");
+            metaView.setAPackage(TestPackage.eINSTANCE);
+            metaView.setAClass(EcorePackage.eINSTANCE.getEAnnotation());
+            metaView.setAObject(testTable);
+            Resource metaRes = rs.createResource(server.createURI());
+            metaRes.getContents().add(metaView);
+            metaRes.save(null);
+            return testTable;
+        });
+        Resource metaViewRes = server.inTransaction(session -> {
+            return session.query("select from test_MetaView where qName=?", "My Meta View").get(0);
+        });
+        MetaView metaView = (MetaView) metaViewRes.getContents().get(0);
+        Assert.assertEquals(EcorePackage.eINSTANCE.getEAnnotation(), metaView.getAClass());
+        Assert.assertEquals(TestPackage.eINSTANCE, metaView.getAPackage());
+        Assert.assertEquals(aObject.getQName(), ((DBTable) metaView.getAObject()).getQName());
+//        sleepForever();
     }
 
     @Test
@@ -35,7 +65,6 @@ public class DbTests extends TestBase {
         }});
         server.inTransaction(session -> {
             ResourceSet rs = session.createResourceSet();
-            EcoreUtil.copyAll(server.getPackages());
             for (EPackage ePackage: EcoreUtil.copyAll(server.getPackages())) {
                 if (session.query("select from ecore_EPackage where name=?", ePackage.getNsPrefix()).isEmpty()) {
                     Resource ePackageResource = rs.createResource(server.createURI());
@@ -49,7 +78,7 @@ public class DbTests extends TestBase {
         });
         EPackage ePackage = (EPackage) testPackageResource.getContents().get(0);
         Assert.assertEquals(TestPackage.eINSTANCE.getNsURI(), ePackage.getNsURI());
-        sleepForever();
+//        sleepForever();
     }
 
     @Test
