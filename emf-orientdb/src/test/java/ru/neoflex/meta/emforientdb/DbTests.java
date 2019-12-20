@@ -54,6 +54,18 @@ public class DbTests extends TestBase {
         Assert.assertEquals(EcorePackage.eINSTANCE.getEAnnotation(), metaView.getAClass());
         Assert.assertEquals(TestPackage.eINSTANCE, metaView.getAPackage());
         Assert.assertEquals(aObject.getQName(), ((DBTable) metaView.getAObject()).getQName());
+        server.inTransaction(session -> {
+            metaView.setAClass(EcorePackage.eINSTANCE.getEOperation());
+            ResourceSet rs = session.createResourceSet();
+            Resource resource = rs.createResource(metaViewRes.getURI());
+            resource.getContents().add(metaView);
+            resource.save(null);
+        });
+        Resource metaViewRes2 = server.inTransaction(session -> {
+            return session.query("select from test_MetaView where qName=?", "My Meta View").get(0);
+        });
+        MetaView metaView2 = (MetaView) metaViewRes2.getContents().get(0);
+        Assert.assertEquals(EcorePackage.eINSTANCE.getEOperation(), metaView2.getAClass());
 //        sleepForever();
     }
 
