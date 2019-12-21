@@ -182,7 +182,13 @@ public class DbTests extends TestBase {
             Assert.assertEquals("ID", user_group.getColumns().get(1).getName());
             Assert.assertEquals(5, user_group.getColumns().size());
         });
-//        sleepForever();
+        server.inTransaction(session -> {
+            List<Resource> users = session.query("select from test_DBTable where qName=?", "USER");
+            Resource userRes = users.get(0);
+            List<Resource> refs = session.getDependentResources(userRes);
+            Assert.assertEquals(1, refs.size());
+        });
+        sleepForever();
     }
 
     @Test

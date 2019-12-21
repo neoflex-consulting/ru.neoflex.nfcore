@@ -528,4 +528,16 @@ public class Session implements Closeable {
     public Set<Resource> getSavedResources() {
         return savedResourcesMap.keySet();
     }
+
+    public List<Resource> getDependentResources(Resource resource) {
+        ORID orid = factory.getORID(resource.getURI());
+        return query("select distinct * from (\n" +
+                "  traverse in('EContains') from (\n" +
+                "    select expand(in('ERefers')) from (\n" +
+                "      traverse out('EContains') from ?\n" +
+                "    )\n" +
+                "  )\n" +
+                ")\n" +
+                "where in('EContains').size() == 0 and @rid != ?", orid, orid);
+    }
 }
