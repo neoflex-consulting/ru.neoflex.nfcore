@@ -188,7 +188,7 @@ public class DbTests extends TestBase {
             List<Resource> refs = session.getDependentResources(userRes);
             Assert.assertEquals(1, refs.size());
         });
-        sleepForever();
+//        sleepForever();
     }
 
     @Test

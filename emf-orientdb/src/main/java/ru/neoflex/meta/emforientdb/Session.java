@@ -529,15 +529,24 @@ public class Session implements Closeable {
         return savedResourcesMap.keySet();
     }
 
-    public List<Resource> getDependentResources(Resource resource) {
+    public void getDependentResources(Resource resource, Consumer<Supplier<Resource>> consumer) {
         ORID orid = factory.getORID(resource.getURI());
-        return query("select distinct * from (\n" +
+        query("select distinct * from (\n" +
                 "  traverse in('EContains') from (\n" +
                 "    select expand(in('ERefers')) from (\n" +
                 "      traverse out('EContains') from ?\n" +
                 "    )\n" +
                 "  )\n" +
                 ")\n" +
-                "where in('EContains').size() == 0 and @rid != ?", orid, orid);
+                "where in('EContains').size() == 0 and @rid != ?", consumer, orid, orid);
     }
+
+    public List<Resource> getDependentResources(Resource resource) {
+        List<Resource> result = new ArrayList<>();
+        getDependentResources(resource, resourceSupplier -> {
+            result.add(resourceSupplier.get());
+        });
+        return result;
+    }
+
 }
