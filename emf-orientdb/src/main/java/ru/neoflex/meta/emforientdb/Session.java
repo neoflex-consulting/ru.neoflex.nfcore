@@ -70,7 +70,6 @@ public class Session implements Closeable {
         if (oClass == null) {
             oClass = db.createEdgeClass(EREFERS);
             oClass.createProperty("name", OType.STRING);
-            oClass.createProperty("isExternal", OType.BOOLEAN);
         }
         return oClass;
     }
@@ -220,12 +219,6 @@ public class Session implements Closeable {
         }
     }
     private void deleteRecursive(OVertex oElement) {
-        for (OEdge oEdge: oElement.getEdges(ODirection.IN, EREFERS)) {
-            if (oEdge.getProperty("isExternal")) {
-                throw new IllegalArgumentException(String.format("Can not delete element %s with reference from %s",
-                        oElement.getIdentity(), oEdge.getFrom().getIdentity()));
-            }
-        }
         clearContents(oElement);
         oElement.delete();
     }
@@ -294,7 +287,6 @@ public class Session implements Closeable {
             oEdge.delete();
         }
         EClass eClass = eObject.eClass();
-        EObject rootContainer = EcoreUtil.getRootContainer(eObject);
         for (EStructuralFeature sf: eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient() && eObject.eIsSet(sf)) {
                 Object value = eObject.eGet(sf);
@@ -310,12 +302,10 @@ public class Session implements Closeable {
                     }
                     else {
                         for (EObject crObject: eObjects) {
-                            boolean isExternal = !EcoreUtil.isAncestor(rootContainer, crObject);
                             URI crURI = EcoreUtil.getURI(crObject);
                             ORID orid = factory.getORID(crURI);
                             OVertex crVertex = orid != null ? db.load(orid) : createProxyOElement(crObject.eClass(), crURI);
                             OEdge oEdge = oElement.addEdge(crVertex, EREFERS);
-                            oEdge.setProperty("isExternal", isExternal);
                             oEdge.setProperty("name", sf.getName());
                         }
                     }
@@ -344,6 +334,12 @@ public class Session implements Closeable {
             return;
         }
         checkVersion(uri, oVertex);
+        List<Resource> dependent = getDependentResources(uri);
+        if (dependent.size() > 0) {
+            String ids = dependent.stream().map(resource -> factory.getORID(resource.getURI()).toString()).collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
+                    oVertex.getIdentity(), ids));
+        }
         deleteRecursive(oVertex);
     }
 
@@ -529,8 +525,7 @@ public class Session implements Closeable {
         return savedResourcesMap.keySet();
     }
 
-    public void getDependentResources(Resource resource, Consumer<Supplier<Resource>> consumer) {
-        ORID orid = factory.getORID(resource.getURI());
+    public void getDependentResources(ORID orid, Consumer<Supplier<Resource>> consumer) {
         query("select distinct * from (\n" +
                 "  traverse in('EContains') from (\n" +
                 "    select expand(in('ERefers')) from (\n" +
@@ -542,11 +537,18 @@ public class Session implements Closeable {
     }
 
     public List<Resource> getDependentResources(Resource resource) {
-        List<Resource> result = new ArrayList<>();
-        getDependentResources(resource, resourceSupplier -> {
-            result.add(resourceSupplier.get());
-        });
-        return result;
+        return getDependentResources(resource.getURI());
     }
 
+    public List<Resource> getDependentResources(URI uri) {
+        return getDependentResources(factory.getORID(uri));
+    }
+
+    public List<Resource> getDependentResources(ORID orid) {
+        List<Resource> resources = new ArrayList<>();
+        getDependentResources(orid, resourceSupplier -> {
+            resources.add(resourceSupplier.get());
+        });
+        return resources;
+    }
 }

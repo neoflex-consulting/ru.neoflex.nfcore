@@ -121,4 +121,16 @@ public class Server extends SessionFactory implements Closeable {
     public void setConfiguration(OServerConfiguration configuration) {
         this.configuration = configuration;
     }
+
+    public static void main(String[] args) {
+        String home = System.getProperty("orientdb.home", new File(System.getProperty("user.home"), ".orientdb/home").getAbsolutePath());
+        String dbName = System.getProperty("orientdb.dbname", "models");
+        try {
+            try (Server server = new Server(home, dbName, new ArrayList<>()).open()) {
+                server.server.waitForShutdown();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
