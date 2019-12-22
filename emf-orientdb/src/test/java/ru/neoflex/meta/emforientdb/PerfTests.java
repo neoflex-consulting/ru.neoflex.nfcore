@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
     int nGroups = 10;
-    int nUsers = 250;
+    int nUsers = 50;
     int nThreads = Runtime.getRuntime().availableProcessors()/2;
-    int nUpdates = 400;
+    int nUpdates = 100;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
