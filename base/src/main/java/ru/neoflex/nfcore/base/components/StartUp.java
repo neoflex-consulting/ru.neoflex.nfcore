@@ -35,6 +35,9 @@ public class StartUp {
                     }
                     catch (ClassNotFoundException e) {
                     }
+                    catch (Throwable e) {
+                        logger.error(initClassName, e);
+                    }
                 }
                 for (EClassifier eClassifier: context.getRegistry().getEClassifiers()) {
                     String nsURI = eClassifier.getEPackage().getNsURI();
@@ -45,6 +48,9 @@ public class StartUp {
                         logger.info(String.format("%s: instantiated", initClassName));
                     }
                     catch (ClassNotFoundException|NoSuchMethodException|InstantiationException e) {
+                    }
+                    catch (Throwable e) {
+                        logger.error(initClassName, e);
                     }
                 }
                 store.commit("StartUp");

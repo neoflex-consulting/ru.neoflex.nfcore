@@ -139,7 +139,11 @@ export class API implements IErrorHandler {
         }
     }
 
-    static collectReferences(object: any, found: Set<string>): Set<string> {
+    static collectExtReferences(object: any) {
+        const ids = API.collectIds(object, new Set<string>());
+        return API.collectReferences(object, new Set<string>(), ids, object._id);
+    }
+    static collectReferences(object: any, found: Set<string>, ids: Set<string>, rootId: string): Set<string> {
         if (!object || typeof object !== 'object') {
             return found;
         }
@@ -147,13 +151,34 @@ export class API implements IErrorHandler {
         if (ref) {
             let {id, fragment} = API.parseRef(ref);
             if (id) {
-                object.$ref = id + '#' + fragment;
-                found.add(object.$ref);
+                if (!ids.has(fragment)) {
+                    object.$ref = id + '#' + fragment;
+                    found.add(object.$ref);
+                }
+                else {
+                    object.$ref = rootId + "#" + fragment;
+                }
             }
         }
         for (var i in object) {
             if (object.hasOwnProperty(i)) {
-                API.collectReferences(object[i], found);
+                API.collectReferences(object[i], found, ids, rootId);
+            }
+        }
+        return found;
+    }
+
+    static collectIds(object: any, found: Set<string>): Set<string> {
+        if (!object || typeof object !== 'object') {
+            return found;
+        }
+        let id = object._id;
+        if (id) {
+            found.add(id);
+        }
+        for (var i in object) {
+            if (object.hasOwnProperty(i)) {
+                API.collectIds(object[i], found);
             }
         }
         return found;
@@ -225,7 +250,7 @@ export class API implements IErrorHandler {
     loadEObjectWithRefs(level: number, jsonObject: any, resourceSet: Ecore.ResourceSet, loading: any, uri: string): Promise<Ecore.Resource> {
         let refEObjects: Promise<any>[] = []
         if (level > 0) {
-            let refs = Array.from(API.collectReferences(jsonObject, new Set<string>()).values());
+            let refs = Array.from(API.collectExtReferences(jsonObject).values());
             refEObjects = refs.map(ref => {
                 let resid: string|undefined, fragment: string|undefined;
                 [resid, fragment] = ref.split('#', 2);

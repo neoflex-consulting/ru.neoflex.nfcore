@@ -263,7 +263,7 @@ public class Session implements Closeable {
                             }
                         }
                         populateOElementContainment(cObject, cVertex);
-                        OEdge oEdge = oElement.addEdge(cVertex, getEdgeName((EReference) sf));
+                        oElement.addEdge(cVertex, getEdgeName((EReference) sf));
                         cVertex.save();
                         ((OrientDBResource) cObject.eResource()).setID(cObject, factory.getId(cVertex.getIdentity()));
                     }
@@ -432,6 +432,57 @@ public class Session implements Closeable {
     }
 
     private void populateEObject(ResourceSet rs, OVertex oElement, EObject eObject) {
+        populateEObjectContains(rs, oElement, eObject);
+        populateEObjectRefers(rs, oElement, eObject);
+    }
+
+    private void populateEObjectRefers(ResourceSet rs, OVertex oElement, EObject eObject) {
+        for (OEdge oEdge: oElement.getEdges(ODirection.OUT, ECONTAINS)) {
+            if (!oEdge.getSchemaType().isPresent()) {
+                continue;
+            }
+            String name = oEdge.getSchemaType().get().getName();
+            EReference sf = getReference(name);
+            if (sf == null) {
+                continue;
+            }
+            if (!sf.isContainment()) {
+                continue;
+            }
+            OVertex crVertex = oEdge.getTo();
+            EObject crObject = ((OrientDBResource) eObject.eResource()).getEObjectByID(factory.getId(crVertex.getIdentity()));
+            if (crObject != null) {
+                populateEObjectRefers(rs, crVertex, crObject);
+            }
+        }
+        for (OEdge oEdge: oElement.getEdges(ODirection.OUT, EREFERS)) {
+            if (!oEdge.getSchemaType().isPresent()) {
+                continue;
+            }
+            String name = oEdge.getSchemaType().get().getName();
+            EReference sf = getReference(name);
+            if (sf == null) {
+                continue;
+            }
+            if (sf.isContainment()) {
+                continue;
+            }
+            OVertex crVertex = oEdge.getTo();
+            EObject crObject = createEObject(rs, crVertex);
+            if (!crObject.eIsProxy()) {
+                URI crURI = factory.createURI(crVertex);
+                ((InternalEObject) crObject).eSetProxyURI(crURI);
+            }
+            if (sf.isMany()) {
+                ((EList) eObject.eGet(sf)).add(crObject);
+            }
+            else {
+                eObject.eSet(sf, crObject);
+            }
+        }
+    }
+
+    private void populateEObjectContains(ResourceSet rs, OVertex oElement, EObject eObject) {
         ((OrientDBResource) eObject.eResource()).setID(eObject, factory.getId(oElement.getIdentity()));
         EClass eClass = eObject.eClass();
         Set<String> propertyNames = oElement.getPropertyNames();
@@ -455,7 +506,7 @@ public class Session implements Closeable {
                 }
             }
         }
-        for (OEdge oEdge: oElement.getEdges(ODirection.OUT)) {
+        for (OEdge oEdge: oElement.getEdges(ODirection.OUT, ECONTAINS)) {
             if (!oEdge.getSchemaType().isPresent()) {
                 continue;
             }
@@ -464,9 +515,12 @@ public class Session implements Closeable {
             if (sf == null) {
                 continue;
             }
+            if (!sf.isContainment()) {
+                continue;
+            }
             OVertex crVertex = oEdge.getTo();
             EObject crObject = createEObject(rs, crVertex);
-            if (!crObject.eIsProxy() && (!sf.isContainment() || sf.isResolveProxies())) {
+            if (!crObject.eIsProxy() && sf.isResolveProxies()) {
                 URI crURI = factory.createURI(crVertex);
                 ((InternalEObject) crObject).eSetProxyURI(crURI);
             }
@@ -476,8 +530,8 @@ public class Session implements Closeable {
             else {
                 eObject.eSet(sf, crObject);
             }
-            if (sf.isContainment() && !sf.isResolveProxies()) {
-                populateEObject(rs, crVertex, crObject);
+            if (!sf.isResolveProxies()) {
+                populateEObjectContains(rs, crVertex, crObject);
             }
         }
     }

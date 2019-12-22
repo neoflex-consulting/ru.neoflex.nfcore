@@ -79,7 +79,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
-            .find((object: Ecore.EObject) => object.eURI() === reference)
+            .find((object: Ecore.EObject) => object.eURI() === reference || object._id === reference)
 
         return refObject || null
     }
