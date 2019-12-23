@@ -94,7 +94,9 @@ public class Session implements Closeable {
     private OClass getOrCreateOClass(EClass eClass) {
         String oClassName = getOClassName(eClass);
         boolean isAbstract = eClass.isAbstract();
-        return getOrCreateOClass(oClassName, isAbstract);
+        OClass oClass = getOrCreateOClass(oClassName, isAbstract);
+        oClass.setCustom("uri", EcoreUtil.getURI(eClass).toString());
+        return oClass;
     }
 
     private OType convertEDataType(EDataType eDataType) {
@@ -388,8 +390,8 @@ public class Session implements Closeable {
     }
 
     public EObject createEObject(ResourceSet rs, OElement oElement) {
-        String oClassName = oElement.getSchemaType().get().getName();
-        if (oClassName.equals(EPROXY)) {
+        OClass oClass = oElement.getSchemaType().get();
+        if (oClass.isSubClassOf(EPROXY)) {
             String eClassURI = oElement.getProperty("eClass");
             EClass eClass = (EClass) rs.getEObject(URI.createURI(eClassURI), false);
             EObject eObject = EcoreUtil.create(eClass);
@@ -398,16 +400,9 @@ public class Session implements Closeable {
             return eObject;
         }
         else {
-            String[] parts = oClassName.split("_", 2);
-            EPackage ePackage = factory.getEPackage(parts[0]);
-            if (ePackage == null) {
-                throw new IllegalArgumentException("EPackage " + parts[0] + " not found");
-            }
-            EClassifier eClassifier = ePackage.getEClassifier(parts[1]);
-            if (eClassifier == null || !(eClassifier instanceof EClass)) {
-                throw new IllegalArgumentException("EClass " + parts[1] + " not found in EPackage " + parts[0]);
-            }
-            EObject eObject = EcoreUtil.create((EClass) eClassifier);
+            String eClassURI = oClass.getCustom("uri");
+            EClass eClass = (EClass) rs.getEObject(URI.createURI(eClassURI), false);
+            EObject eObject = EcoreUtil.create(eClass);
             return eObject;
         }
     }
