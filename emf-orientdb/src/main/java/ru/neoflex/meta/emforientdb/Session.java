@@ -419,14 +419,8 @@ public class Session implements Closeable {
 
     private void populateEObjectRefers(ResourceSet rs, OVertex oElement, EObject eObject) {
         for (OEdge oEdge: oElement.getEdges(ODirection.OUT, ECONTAINS)) {
-            if (!oEdge.getSchemaType().isPresent()) {
-                continue;
-            }
             EReference sf = getEReference(eObject, oEdge);
-            if (sf == null) {
-                continue;
-            }
-            if (!sf.isContainment()) {
+            if (sf == null || !sf.isContainment()) {
                 continue;
             }
             OVertex crVertex = oEdge.getTo();
@@ -436,14 +430,8 @@ public class Session implements Closeable {
             }
         }
         for (OEdge oEdge: oElement.getEdges(ODirection.OUT, EREFERS)) {
-            if (!oEdge.getSchemaType().isPresent()) {
-                continue;
-            }
             EReference sf = getEReference(eObject, oEdge);
-            if (sf == null) {
-                continue;
-            }
-            if (sf.isContainment()) {
+            if (sf == null || sf.isContainment()) {
                 continue;
             }
             OVertex crVertex = oEdge.getTo();
@@ -486,17 +474,11 @@ public class Session implements Closeable {
             }
         }
         for (OEdge oEdge: oElement.getEdges(ODirection.OUT, ECONTAINS)) {
-            if (!oEdge.getSchemaType().isPresent()) {
-                continue;
-            }
             EReference sf = getEReference(eObject, oEdge);
-            if (sf == null) {
+            if (sf == null || !sf.isContainment()) {
                 continue;
             }
-            if (!sf.isContainment()) {
-                continue;
-            }
-            OVertex crVertex = oEdge.getTo();
+           OVertex crVertex = oEdge.getTo();
             EObject crObject = createEObject(rs, crVertex);
             if (!crObject.eIsProxy() && sf.isResolveProxies()) {
                 URI crURI = factory.createURI(crVertex);
@@ -515,6 +497,9 @@ public class Session implements Closeable {
     }
 
     private EReference getEReference(EObject eObject, OEdge oEdge) {
+        if (!oEdge.getSchemaType().isPresent()) {
+            return null;
+        }
         OClass oClass = oEdge.getSchemaType().get();
         String feature = oClass.getCustom("feature");
         if (feature == null) {
