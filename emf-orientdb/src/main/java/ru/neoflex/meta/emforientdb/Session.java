@@ -183,7 +183,8 @@ public class Session implements Closeable {
                 if (!sf.isDerived() && !sf.isTransient() && !sf.isContainer()) {
                     String edgeName = getEdgeName(sf);
                     if (db.getClass(edgeName) == null) {
-                        db.createClass(edgeName, sf.isContainment() ? ECONTAINS : EREFERS);
+                        OClass edgeClass = db.createClass(edgeName, sf.isContainment() ? ECONTAINS : EREFERS);
+                        edgeClass.setCustom("feature", sf.getName());
                     }
                 }
             }
@@ -411,26 +412,6 @@ public class Session implements Closeable {
         }
     }
 
-    public EReference getReference(String edgeName) {
-        String[] parts = edgeName.split("_", 3);
-        if (parts.length != 3) {
-            return null;
-        }
-        EPackage ePackage = factory.getEPackage(parts[0]);
-        if (ePackage == null) {
-            return null;
-        }
-        EClassifier eClassifier = ePackage.getEClassifier(parts[1]);
-        if (eClassifier == null || !(eClassifier instanceof EClass)) {
-            return null;
-        }
-        EStructuralFeature sf = ((EClass) eClassifier).getEStructuralFeature(parts[2]);
-        if (sf == null || !(sf instanceof EReference)) {
-            return null;
-        }
-        return (EReference) sf;
-    }
-
     private void populateEObject(ResourceSet rs, OVertex oElement, EObject eObject) {
         populateEObjectContains(rs, oElement, eObject);
         populateEObjectRefers(rs, oElement, eObject);
@@ -441,8 +422,7 @@ public class Session implements Closeable {
             if (!oEdge.getSchemaType().isPresent()) {
                 continue;
             }
-            String name = oEdge.getSchemaType().get().getName();
-            EReference sf = getReference(name);
+            EReference sf = getEReference(eObject, oEdge);
             if (sf == null) {
                 continue;
             }
@@ -459,8 +439,7 @@ public class Session implements Closeable {
             if (!oEdge.getSchemaType().isPresent()) {
                 continue;
             }
-            String name = oEdge.getSchemaType().get().getName();
-            EReference sf = getReference(name);
+            EReference sf = getEReference(eObject, oEdge);
             if (sf == null) {
                 continue;
             }
@@ -510,8 +489,7 @@ public class Session implements Closeable {
             if (!oEdge.getSchemaType().isPresent()) {
                 continue;
             }
-            String name = oEdge.getSchemaType().get().getName();
-            EReference sf = getReference(name);
+            EReference sf = getEReference(eObject, oEdge);
             if (sf == null) {
                 continue;
             }
@@ -534,6 +512,19 @@ public class Session implements Closeable {
                 populateEObjectContains(rs, crVertex, crObject);
             }
         }
+    }
+
+    private EReference getEReference(EObject eObject, OEdge oEdge) {
+        OClass oClass = oEdge.getSchemaType().get();
+        String feature = oClass.getCustom("feature");
+        if (feature == null) {
+            return null;
+        }
+        EStructuralFeature sf = eObject.eClass().getEStructuralFeature(feature);
+        if (sf == null || !(sf instanceof EReference)) {
+            return null;
+        }
+        return (EReference) sf;
     }
 
     public ResourceSet createResourceSet() {
