@@ -32,9 +32,5 @@ class JdbcConnectionInit {
         return rs.resources.get(0).contents.get(0) as JdbcConnection
     }
 
-    {
-        recreateConnection("JdbcConnectionPostgresqlTest")
-    }
-
     JdbcConnectionInit() {}
 }

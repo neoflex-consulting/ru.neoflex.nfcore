@@ -5,12 +5,11 @@ import Ecore from "ecore";
 import NfDataGrid from "./NfDataGrid";
 
 interface Props {
-    headerName: string
-    datasetSettingsGridName: string
+    datasetGridName: string
 }
 
 interface State {
-    datasetSettings: Ecore.Resource[];
+    datasetComponents: Ecore.Resource[];
     columnDefs: any[];
     rowData: any[];
     queryCount: number;
@@ -20,20 +19,20 @@ interface State {
 class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     state = {
-        datasetSettings: [],
+        datasetComponents: [],
         columnDefs: [],
         rowData: [],
         queryCount: 0,
         serverFilters: []
     };
 
-    getDatasetSettings() {
+    getDatasetComponents() {
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//DatasetSettings")
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//DatasetComponent")
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
-                    .then((datasetSettings: Ecore.Resource[]) => {
-                        this.setState({datasetSettings})
+                    .then((datasetComponents: Ecore.Resource[]) => {
+                        this.setState({datasetComponents})
                     })
             }
         })
@@ -42,7 +41,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
     runQuery(resource: Ecore.Resource) {
         this.setState({queryCount: 1})
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'runQueryDatasetSettings';
+        const methodName: string = 'runQuery';
         const parameters: any[] = [];
         API.instance().call(ref, methodName, parameters).then( result => {
             this.setState({rowData: JSON.parse(result)});
@@ -76,9 +75,9 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
     }
 
     componentDidUpdate(): void {
-        if (this.state.datasetSettings) {
-            let resource = this.state.datasetSettings.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('name') === this.props.datasetSettingsGridName
+        if (this.state.datasetComponents) {
+            let resource = this.state.datasetComponents.find( (d:Ecore.Resource) =>
+                d.eContents()[0].get('dataset').get('name') === this.props.datasetGridName
             );
             if (resource) {
                 if (this.state.queryCount === 0) {
@@ -93,23 +92,18 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
     }
 
     componentDidMount(): void {
-        this.getDatasetSettings()
+        this.getDatasetComponents()
     }
 
     render() {
         return (
-            this.props.headerName !== undefined && this.state.rowData.length > 0 && this.state.columnDefs.length > 0
+            this.state.rowData.length > 0 && this.state.columnDefs.length > 0 && this.state.serverFilters !== undefined
                 ?
-                <div>
-                    {this.props.headerName && this.state.serverFilters !== undefined}
-                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} serverFilters={this.state.serverFilters}/>
-                </div>
+                <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} serverFilters={this.state.serverFilters}/>
                 :
-                this.props.headerName === undefined && this.state.rowData.length > 0 && this.state.columnDefs.length > 0 && this.state.serverFilters !== undefined
-                ?
-                    <div>
-                        <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} serverFilters={this.state.serverFilters}/>
-                    </div>
+                this.state.rowData.length > 0 && this.state.columnDefs.length > 0 && this.state.serverFilters === undefined
+                    ?
+                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData}/>
                     :
                     <div>
                         NOT found

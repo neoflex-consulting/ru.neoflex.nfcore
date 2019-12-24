@@ -5,7 +5,6 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
-import ru.neoflex.nfcore.application.DatasetSettingsType
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -111,14 +110,10 @@ class AppModuleInit {
             def tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
             tabs.name = 'View Report'
 
-            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
-            datasetView.name = 'Dataset View Grid'
-            datasetView.datasetSettingsType = DatasetSettingsType.GRID
-            def datasetSettingsGrid = findOrCreateEObject(DatasetPackage.Literals.DATASET_SETTINGS_GRID, "DatasetSettingsGridTest", "",true)
-            datasetView.setDatasetSettingsGrid(datasetSettingsGrid)
-            def typography = ApplicationFactory.eINSTANCE.createTypography()
-            typography.name = 'Header name Dataset View'
-            datasetView.headerName = typography
+            def datasetGridView = ApplicationFactory.eINSTANCE.createDatasetGridView()
+            datasetGridView.name = 'Dataset View Grid'
+            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
+            datasetGridView.setDataset(jdbcDataset)
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
@@ -132,7 +127,7 @@ class AppModuleInit {
             tabs.children.add(componentElement1)
             tabs.children.add(componentElement2)
             tabs.children.add(componentElement3)
-            tabs.children.add(datasetView)
+            tabs.children.add(datasetGridView)
             application.view = tabs
 
             def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
@@ -154,19 +149,13 @@ class AppModuleInit {
             instanceReport1.name = name
             instanceReport1.date = new Date()
             def report = findOrCreateEObject(ReportsPackage.Literals.REPORT, "A 1993", "",false) as Report
-            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle", "",false)
-            report.appModule = appModule1
+//NOT WOrk
+//            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle", "",false)
+//            report.appModule = appModule1
             instanceReport1.report = report
             rs.resources.add(Context.current.store.createEObject(instanceReport1))
         }
         return rs.resources.get(0).contents.get(0)
     }
 
-    {
-        deletedAppModule("ReportSingle")
-        recreateApplication("ReportsApp")
-        recreateApplication("ApplicationForExample")
-        recreateAppModule2("ReportSingle")
-        recreateInstanceReport("InstanceReport1")
-    }
 }

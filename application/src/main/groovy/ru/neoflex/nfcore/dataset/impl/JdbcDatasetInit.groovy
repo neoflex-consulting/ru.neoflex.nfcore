@@ -41,10 +41,5 @@ class JdbcDatasetInit {
         }
     }
 
-    {
-        recreateJdbcDatasetInit("JdbcDatasetTest")
-        loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
-    }
-
     JdbcDatasetInit() {}
 }

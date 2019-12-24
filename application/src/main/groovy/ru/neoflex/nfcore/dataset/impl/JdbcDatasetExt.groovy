@@ -46,40 +46,30 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
     String loadAllColumns() {
         Connection jdbcConnection = connectionToDB()
         ResultSet resultSet = getResultSet(jdbcConnection, false)
-        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
-            @Override
-            Object call(TransactionSPI tx) throws Exception {
-                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
-                        .execute().resourceSet
-                if (!resource.resources.empty) {
-                    def jdbcDatasetRef = Context.current.store.getRef(resource.resources.get(0))
-                    def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
-                    def columnCount = resultSet.metaData.columnCount
-                    if (columnCount > 0) {
-                        for (int i = 1; i <= columnCount; ++i) {
-                            def object = resultSet.metaData.getColumnName(i)
-                            def columnType = resultSet.metaData.getColumnTypeName(i)
-                            def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
-                            datasetColumn.rdbmsDataType = columnType.toString()
-                            datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
-                            datasetColumn.name = object.toString()
-                            jdbcDataset.datasetColumn.each { c->
-                                if (c.name == object.toString()) {
-                                    throw new IllegalArgumentException("Please, change your query. It has similar column`s name")
-                                }
-                            }
-                            jdbcDataset.datasetColumn.add(datasetColumn)
+        def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
+                .execute().resourceSet
+        if (!resource.resources.empty) {
+            def jdbcDatasetRef = Context.current.store.getRef(resource.resources.get(0))
+            def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
+            def columnCount = resultSet.metaData.columnCount
+            if (columnCount > 0) {
+                for (int i = 1; i <= columnCount; ++i) {
+                    def object = resultSet.metaData.getColumnName(i)
+                    def columnType = resultSet.metaData.getColumnTypeName(i)
+                    def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
+                    datasetColumn.rdbmsDataType = columnType.toString()
+                    datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
+                    datasetColumn.name = object.toString()
+                    jdbcDataset.datasetColumn.each { c->
+                        if (c.name == object.toString()) {
+                            throw new IllegalArgumentException("Please, change your query. It has similar column`s name")
                         }
-                        Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
-                        Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
-                        return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were loaded")
                     }
-                    else {
-                        return JsonOutput.toJson("Entity " + jdbcDataset.name + " was not updated")
-                    }
+                    jdbcDataset.datasetColumn.add(datasetColumn)
                 }
+                Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
             }
-        })
+        }
     }
 
     @Override

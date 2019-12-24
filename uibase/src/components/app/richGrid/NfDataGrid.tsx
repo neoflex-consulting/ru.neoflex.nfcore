@@ -21,7 +21,7 @@ interface Props {
     columnDefs?: Array<any>,
     rowData?: Array<any>,
     gridOptions?: { [ key:string ]: any },
-    serverFilters:  Array<EObject>
+    serverFilters?:  Array<EObject>
 }
 
 class NfDataGrid extends Component<Props & WithTranslation, any> {
@@ -156,15 +156,14 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                     //onSelect={ (e:any) => this.setState({serverFilters: e})}
                     mode="multiple"
                     defaultValue={
-                        this.props.serverFilters
-                            .filter((f: EObject) => f.get('enable') === true)
-                            .map((f: EObject) =>
-                                f.get('name'))
-
+                        this.props.serverFilters!
+                        .filter((f: EObject) => f.get('enable') === true)
+                        .map((f: EObject) =>
+                        f.get('name'))
                     }
                 >
                     {
-                        this.props.serverFilters
+                        this.props.serverFilters!
                             .map((f: EObject) =>
                                 <Select.Option key={f.get('name')} value={f.get('name')}>
                                     {f.get('name')}

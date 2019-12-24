@@ -52,7 +52,7 @@ class JdbcDataset extends Dataset {
 }
 
 /*View*/
-abstract class DatasetSettings {
+abstract class DatasetComponent {
      QName name //default сделать по умолчанию (не редактируемый)
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
@@ -61,10 +61,10 @@ abstract class DatasetSettings {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQueryDatasetSettings()
+     op JSON runQuery()
 }
 
-class DatasetSettingsGrid extends DatasetSettings {
+class DatasetGrid extends DatasetComponent {
      String rowCount//сколько строк показывать (выбрать из списка)
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
@@ -73,10 +73,10 @@ class DatasetSettingsGrid extends DatasetSettings {
      //String clientFilterExpression //выражение в клиентском фильтре
 }
 
-class DatasetSettingsPivot extends DatasetSettings {
+class DatasetPivot extends DatasetComponent {
 }
 
-class DatasetSettingsDiagram extends DatasetSettings {
+class DatasetDiagram extends DatasetComponent {
 }
 
 class Highlight {
