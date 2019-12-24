@@ -11,9 +11,7 @@ import ru.neoflex.nfcore.base.services.providers.FinderSPI;
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DocFinder {
     Store store;
@@ -135,4 +133,59 @@ public class DocFinder {
         provider.setExecutionStats(value);
         return this;
     }
+
+    public List<Resource> getDependentResources(Resource resource) throws IOException {
+        List<Resource> resources = new ArrayList<>();
+        provider.getDependentResources(resource, store.getCurrentTransaction(), resourceSupplier -> {
+            resources.add(resourceSupplier.get());
+        });
+        return resources;
+    }
+
+    public List<Resource> getAllResources() throws IOException {
+        List<Resource> resources = new ArrayList<>();
+        provider.findAll(store.getCurrentTransaction(), resourceSupplier -> {
+            resources.add(resourceSupplier.get());
+        });
+        return resources;
+    }
+
+    public List<Resource> getDependentResources(List<Resource> resources) throws IOException {
+        List<Resource> result = new ArrayList<>();
+        for (Resource resource: resources) {
+            if (!result.stream().anyMatch(r->r.getURI().equals(resource.getURI()))) {
+                result.add(resource);
+            }
+            provider.getDependentResources(resource, store.getCurrentTransaction(), resourceSupplier -> {
+                Resource dep = resourceSupplier.get();
+                if (!result.stream().anyMatch(r->r.getURI().equals(dep.getURI()))) {
+                    result.add(dep);
+                }
+            });
+        }
+        return result;
+    }
+
+    public List<Resource> getDependentResources(List<Resource> resources, boolean recursive) throws IOException {
+        if (recursive) {
+            return getDependentResourcesRecursive(resources);
+        }
+        else {
+            return getDependentResources(resources);
+        }
+    }
+
+    public List<Resource> getDependentResourcesRecursive(List<Resource> resources) throws IOException {
+        List<Resource> result = new ArrayList<>();
+        Queue<Resource> queue = new ArrayDeque<>(resources);
+        while (!queue.isEmpty()) {
+            Resource resource = queue.remove();
+            if (!result.stream().anyMatch(r->r.getURI().equals(resource.getURI()))) {
+                result.add(resource);
+                queue.addAll(getDependentResources(resource));
+            }
+        }
+        return result;
+    }
+
 }

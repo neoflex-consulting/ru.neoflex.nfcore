@@ -16,10 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.neoflex.meta.emfgit.Exporter;
-import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Authorization;
+import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
+import ru.neoflex.nfcore.base.util.DocFinder;
+import ru.neoflex.nfcore.base.util.Exporter;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -34,6 +35,8 @@ public class SysController {
     private final static Log logger = LogFactory.getLog(SysController.class);
     @Autowired
     Workspace workspace;
+    @Autowired
+    Store store;
 
     @GetMapping(value="/user", produces = "application/json; charset=utf-8")
     public Principal getUser(Principal principal) {
@@ -54,8 +57,8 @@ public class SysController {
 
     @PostMapping(value="/importdb", produces={"application/json"})
     public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws Exception {
-        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, (tx)->{
-            int count =  new Exporter(workspace.getDatabase()).unzip(file.getInputStream(), tx);
+        return store.inTransaction(false, (tx)->{
+            int count = new Exporter(store).unzip(file.getInputStream());
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode().put("count", count);
             tx.commit("Import database: " + mapper.writeValueAsString(result), Authorization.getUserName(), "");
@@ -69,7 +72,7 @@ public class SysController {
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
             try {
-                new Exporter(workspace.getDatabase()).zipAll(workspace.getCurrentBranch(), pipedOutputStream);
+                new Exporter(store).zipAll(pipedOutputStream);
             } catch (Exception e) {
                 logger.error("Export DB", e);
             }
@@ -93,22 +96,21 @@ public class SysController {
         String branch = workspace.getCurrentBranch();
         new Thread(() -> {
             try {
-                workspace.getDatabase().inTransaction(branch, Transaction.LockType.READ, tx->{
-                    ResourceSet rs = workspace.getDatabase().createResourceSet(tx);
+                store.inTransaction(true, tx->{
                     List<Resource> resources = new ArrayList<>();
                     for (String id: ids) {
-                        resources.add(workspace.getDatabase().loadResource(rs, id));
+                        resources.add(store.loadResource(store.getUriByIdAndRev(id, null)));
                     }
                     if (withDependents) {
-                        resources = workspace.getDatabase().getDependentResources(resources, tx, recursiveDependents);
+                        resources = DocFinder.create(store).getDependentResources(resources, recursiveDependents);
                     }
                     if (withReferences) {
-                        ResourceSet wr = workspace.getDatabase().createResourceSet(tx);
+                        ResourceSet wr = store.createResourceSet();
                         wr.getResources().addAll(resources);
                         EcoreUtil.resolveAll(wr);
                         resources = new ArrayList<>(wr.getResources());
                     }
-                    new Exporter(workspace.getDatabase()).zip(resources, pipedOutputStream);
+                    new Exporter(store).zip(resources, pipedOutputStream);
                     return null;
                 });
             } catch (Exception e) {

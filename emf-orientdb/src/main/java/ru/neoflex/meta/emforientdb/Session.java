@@ -368,7 +368,7 @@ public class Session implements Closeable {
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
             savedResourcesMap.put(resource, oRecord);
-            resource.setURI(factory.createURI(oRecord));
+            resource.setURI(factory.createURI(oRecord).trimFragment());
         }
     }
 
@@ -385,7 +385,7 @@ public class Session implements Closeable {
         EObject eObject = createEObject(resource.getResourceSet(), oElement);
         resource.getContents().clear();
         resource.getContents().add(eObject);
-        resource.setURI(factory.createURI(oElement));
+        resource.setURI(factory.createURI(oElement).trimFragment());
         populateEObject(resource.getResourceSet(), oElement, eObject);
     }
 
@@ -544,10 +544,9 @@ public class Session implements Closeable {
                 OElement oElement = oElementOpt.get();
                 consumer.accept(() -> {
                     EObject eObject = createEObject(rs, oElement);
-                    Resource resource = rs.createResource(factory.createURI(oElement));
+                    Resource resource = rs.createResource(factory.createURI(oElement).trimFragment());
                     resource.getContents().add(eObject);
                     populateEObject(rs, (OVertex) oElement, eObject);
-                    EcoreUtil.resolveAll(resource);
                     return resource;
                 });
             }
@@ -597,12 +596,12 @@ public class Session implements Closeable {
                 "where in('EContains').size() == 0 and @rid != ?", consumer, orid, orid);
     }
 
-    public List<Resource> getDependentResources(Resource resource) {
-        return getDependentResources(resource.getURI());
+    public void getDependentResources(Resource resource, Consumer<Supplier<Resource>> consumer) {
+        getDependentResources(resource.getURI(), consumer);
     }
 
-    public List<Resource> getDependentResources(URI uri) {
-        return getDependentResources(factory.getORID(uri));
+    public void getDependentResources(URI uri, Consumer<Supplier<Resource>> consumer) {
+        getDependentResources(factory.getORID(uri), consumer);
     }
 
     public List<Resource> getDependentResources(ORID orid) {
@@ -611,6 +610,10 @@ public class Session implements Closeable {
             resources.add(resourceSupplier.get());
         });
         return resources;
+    }
+
+    public List<Resource> getDependentResources(Resource resource) {
+        return getDependentResources(factory.getORID(resource.getURI()));
     }
 
     public void getAll(Consumer<Supplier<Resource>> consumer) {
