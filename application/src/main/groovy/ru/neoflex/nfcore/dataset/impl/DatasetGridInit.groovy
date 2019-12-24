@@ -104,11 +104,11 @@ class DatasetGridInit {
             datasetGrid.serverFilter.add(serverFilter2)
 
             def serverFilter3 = DatasetFactory.eINSTANCE.createConditions()
-            serverFilter3.name = "EnableFirstServerFilter_nameInclude_M"
+            serverFilter3.name = "EnableFirstServerFilter_nameInclude_Test"
             def datasetColumn3 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COLUMN, "name")
             serverFilter3.setDatasetColumn(datasetColumn3)
             serverFilter3.operation = Operations.INCLUDE_IN
-            serverFilter3.value = "m"
+            serverFilter3.value = "test"
             serverFilter3.enable = true
             datasetGrid.serverFilter.add(serverFilter3)
 
