@@ -163,10 +163,10 @@ class DatasetGridExt extends DatasetGridImpl {
                     def operator = getConvertOperator(serverFilter[i].operation.toString().toLowerCase())
                     if (operator == 'LIKE') {
                         serverFilters.add(
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') OR " +
+                                "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') OR " +
                                         "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') OR " +
                                         "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') OR " +
-                                        "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%')"
+                                        "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
                         )
                     } else {
                         serverFilters.add("t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}")
