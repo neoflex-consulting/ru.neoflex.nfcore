@@ -79,7 +79,9 @@ class DatasetGridInit {
     static def createServerFilters(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
                 .execute().resourceSet
-        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0) {
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0
+        && !rs.resources.get(0).getURI().toString().contains('git')
+        ) {
             def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
             def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
 
