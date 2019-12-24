@@ -14,14 +14,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfTests extends TestBase {
     int nGroups = 10;
-    int nUsers = 250;
+    int nUsers = 50;
     int nThreads = Runtime.getRuntime().availableProcessors()/2;
-    int nUpdates = 400;
+    int nUpdates = 100;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
     @BeforeClass
     public static void startUp() throws Exception {
+        server = refreshDatabase(null);
     }
 
     @AfterClass
@@ -31,7 +32,6 @@ public class PerfTests extends TestBase {
 
     @Test
     public void fullTest() throws Exception {
-        server = refreshDatabase(null);
         long start = System.currentTimeMillis();
         for (int i = 0; i < nGroups; ++i) {
             String name = "group_" + i;

@@ -36,7 +36,7 @@ public class TestBase {
     }
 
     public static Server refreshDatabase(List<EPackage> ePackageList) throws Exception {
-        deleteDirectory(new File(getHomeFile(), "databases"));
+        deleteDirectory(new File(getHomeFile(), "databases/" + DBNAME));
         return getDatabase(ePackageList);
     }
 
