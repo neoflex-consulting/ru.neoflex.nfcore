@@ -98,14 +98,14 @@ class ComponentElement_ extends ViewContainer {
     }
 }
 
-class DatasetView_ extends ViewContainer {
+class DatasetGridView_ extends ViewContainer {
     render = () => {
-        //if (this.props.viewObject.get("datasetSettingsType") === "Grid" && this.props.viewObject.get('datasetSettingsGrid')) {
-            return <ReportRichGrid
-                headerName={this.props.viewObject.get("headerName").get("name")}
-                datasetSettingsGridName={this.props.viewObject.get('datasetSettingsGrid').get('name')}
-            />
-        //} else return <div>Not found</div>
+        if (this.props.viewObject.get('dataset') !== null) {
+            return <ReportRichGrid datasetGridName={this.props.viewObject.get('dataset').get('name')}/>
+        }
+        else {
+            return <div> DatasetGrid not found </div>
+        }
     }
 }
 
@@ -123,7 +123,9 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);
+        this.components.set('ru.neoflex.nfcore.application#//DatasetGridView', DatasetGridView_);
+        //this.components.set('ru.neoflex.nfcore.application#//DatasetPivotView', DatasetPivotView_);
+        //this.components.set('ru.neoflex.nfcore.application#//DatasetDiagramView', DatasetDiagramView_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

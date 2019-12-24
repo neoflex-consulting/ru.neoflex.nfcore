@@ -10,12 +10,11 @@ import ru.neoflex.nfcore.base.types.QName
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
-import ru.neoflex.nfcore.dataset.DatasetSettingsGrid
-import ru.neoflex.nfcore.dataset.DatasetSettingsPivot
-import ru.neoflex.nfcore.dataset.DatasetSettingsDiagram
-
-import ru.neoflex.nfcore.dataset.DatasetSettings
+import ru.neoflex.nfcore.dataset.DatasetGrid
+import ru.neoflex.nfcore.dataset.DatasetPivot
+import ru.neoflex.nfcore.dataset.DatasetDiagram
 import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.base.types.JSON
 
 /* Components */
 abstract class Component {
@@ -35,8 +34,6 @@ class UserComponent extends Component {
 //На CompnentDid(Mount && Update) в AppModule будут начитывться все AppDataset, если они уже ранее не были начитаны
 class AppModule {
     QName name
-    refers DatasetSettings[] datasetSettings
-    refers Dataset[] dataset
     contains ViewElement view
     contains Tools tools
     contains CatalogNode referenceTree
@@ -90,16 +87,26 @@ class FormItem extends ViewContainer {
     contains Typography headerName
 }
 
-//DatasetView включен в набор стандартных инструментов view в AppModule
-//Есть свой заголовок и Dataset, который он отображает +
-//View (по умолчнию = default (стандартные настройки) без скрытых столбцов, сортировок и пр.)
-class DatasetView extends ViewElement {
-    contains Typography headerName
-    DatePicker datePicker
-    DatasetSettingsType datasetSettingsType
-    refers DatasetSettingsGrid datasetSettingsGrid
-    refers DatasetSettingsPivot datasetSettingsPivot
-    refers DatasetSettingsDiagram datasetSettingsDiagram
+abstract class DatasetView extends ViewElement {
+    refers Dataset dataset
+}
+
+class DatasetGridView extends DatasetView {
+    op JSON getDatasetGrids()
+    contains DatasetGrid[] datasetGrid
+    refers DatasetGrid defaultDatasetGrid
+}
+
+class DatasetPivotView extends DatasetView {
+    op JSON getDatasetPivots()
+    contains DatasetPivot[] datasetPivot
+    refers DatasetPivot defaultDatasetPivot
+}
+
+class DatasetDiagramView extends DatasetView {
+    op JSON getDatasetDiagrams()
+    contains DatasetDiagram[] datasetDiagram
+    refers DatasetDiagram defaultDatasetDiagram
 }
 
 class Row extends ViewContainer {
@@ -148,17 +155,3 @@ class ViewNode extends TreeNode {
     contains ViewElement view
     refers EObject eObject
 }
-
-enum DatasetSettingsType {
-    Grid
-    Pivot
-    Diagram
-}
-
-enum DatePicker {
-    Undefined
-    Single
-    FromTo
-}
-
-
