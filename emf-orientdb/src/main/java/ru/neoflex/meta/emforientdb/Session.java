@@ -612,4 +612,16 @@ public class Session implements Closeable {
         });
         return resources;
     }
+
+    public void getAll(Consumer<Supplier<Resource>> consumer) {
+        query("select from EObject where in('EContains').size() == 0", consumer);
+    }
+
+    public List<Resource> getAll() {
+        List<Resource> resources = new ArrayList<>();
+        getAll(resourceSupplier -> {
+            resources.add(resourceSupplier.get());
+        });
+        return resources;
+    }
 }
