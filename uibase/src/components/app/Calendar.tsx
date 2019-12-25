@@ -35,7 +35,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//InstanceReport");
             if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}, 999)
                     .then((resources) => {
                         this.setState({InstanceReports: resources})
                     })
@@ -138,7 +138,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                 content.map( (r: any) =>
                                     <Button
                                         onClick={() =>
-                                            context.changeURL("ReportSingle")
+                                            context.changeURL(r.eContents()[0].get('report').get('AppModule').get('name'))
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"

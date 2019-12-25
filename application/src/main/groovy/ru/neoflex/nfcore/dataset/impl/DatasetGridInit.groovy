@@ -9,6 +9,7 @@ import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.DatasetGrid
 import ru.neoflex.nfcore.dataset.Filter
+import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.Operations
 
 class DatasetGridInit {
@@ -79,15 +80,15 @@ class DatasetGridInit {
     static def createServerFilters(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
                 .execute().resourceSet
-        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0
-        && !rs.resources.get(0).getURI().toString().contains('git')
-        ) {
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0) {
             def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
             def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
 
+            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest") as JdbcDataset
+
             def serverFilter1 = DatasetFactory.eINSTANCE.createConditions()
             serverFilter1.name = "EnableFirstServerFilter_eidLessThen100000"
-            def datasetColumn1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COLUMN, "e_id")
+            def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter1.setDatasetColumn(datasetColumn1)
             serverFilter1.operation = Operations.LESS_THAN
             serverFilter1.value = 100000
@@ -96,7 +97,7 @@ class DatasetGridInit {
 
             def serverFilter2 = DatasetFactory.eINSTANCE.createConditions()
             serverFilter2.name = "DisableFirstServerFilter_eidLessThen4000"
-            def datasetColumn2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COLUMN, "e_id")
+            def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter2.setDatasetColumn(datasetColumn2)
             serverFilter2.operation = Operations.LESS_THAN
             serverFilter2.value = 4000
@@ -105,12 +106,14 @@ class DatasetGridInit {
 
             def serverFilter3 = DatasetFactory.eINSTANCE.createConditions()
             serverFilter3.name = "EnableFirstServerFilter_nameInclude_Test"
-            def datasetColumn3 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COLUMN, "name")
+            def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
             serverFilter3.setDatasetColumn(datasetColumn3)
             serverFilter3.operation = Operations.INCLUDE_IN
             serverFilter3.value = "test"
             serverFilter3.enable = true
             datasetGrid.serverFilter.add(serverFilter3)
+
+            datasetGrid.useServerFilter = true
 
             Context.current.store.updateEObject(datasetGridRef, datasetGrid)
         }

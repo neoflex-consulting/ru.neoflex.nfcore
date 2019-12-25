@@ -1,6 +1,9 @@
 package ru.neoflex.nfcore.dataset.impl
 
 import ru.neoflex.nfcore.application.impl.AppModuleInit
+import ru.neoflex.nfcore.application.impl.ApplicationInit
+import ru.neoflex.nfcore.application.impl.InstanceReportInit
+import ru.neoflex.nfcore.application.impl.ReportInit
 
 class DatasetPackageInit {
 
@@ -15,11 +18,14 @@ class DatasetPackageInit {
         DatasetGridInit.createServerFilters("DatasetGridTest")
 
         /*ApplicationPackage*/
+        InstanceReportInit.deleteInstanceReport("InstanceReport1")
+        ReportInit.deleteReport("A 1993")
         AppModuleInit.deletedAppModule("ReportSingle")
-        AppModuleInit.recreateApplication("ReportsApp")
-        AppModuleInit.recreateApplication("ApplicationForExample")
-        AppModuleInit.recreateAppModule2("ReportSingle")
-        AppModuleInit.recreateInstanceReport("InstanceReport1")
+        ApplicationInit.recreateApplication("ReportsApp")
+        ApplicationInit.recreateApplication("ApplicationForExample")
+        AppModuleInit.recreateAppModule("ReportSingle")
+        ReportInit.recreateReport("A 1993")
+        InstanceReportInit.recreateInstanceReport("InstanceReport1")
 
     }
 }
