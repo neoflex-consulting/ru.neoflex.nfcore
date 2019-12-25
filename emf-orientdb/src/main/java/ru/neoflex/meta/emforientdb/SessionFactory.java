@@ -73,15 +73,11 @@ public abstract class SessionFactory {
         return uri;
     }
 
-    public URI createURI(ORecord oElement) {
-        String ref = getRef(oElement);
-        return createURI(ref);
-    }
-
-    public String getRef(ORecord oElement) {
+    public URI createResourceURI(ORecord oElement) {
         ORID orid = oElement.getIdentity();
         String id = getId(orid);
-        return String.format("%s?rev=%d#%s", id, oElement.getVersion(), id);
+        String ref = String.format("%s?rev=%d", id, oElement.getVersion());
+        return createURI(ref);
     }
 
     public String getId(ORID orid) {
@@ -221,7 +217,7 @@ public abstract class SessionFactory {
                     finally {
                         session.getDatabaseDocument().commit(true);
                         for (Resource resource: session.savedResourcesMap.keySet()) {
-                            resource.setURI(createURI(session.savedResourcesMap.get(resource)));
+                            resource.setURI(createResourceURI(session.savedResourcesMap.get(resource)));
                         }
                     }
                 });
