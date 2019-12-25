@@ -193,6 +193,19 @@ public class Session implements Closeable {
         }
     }
 
+    private OVertex loadElement(EObject eObject) {
+        EClass eClass = eObject.eClass();
+        EAttribute eIDAttribute = eClass.getEIDAttribute();
+        if (eIDAttribute != null) {
+            return (OVertex) queryElement(
+                    "select from " + getOClassName(eClass) +
+                            " where " + eIDAttribute.getName() + "=?",
+                    eObject.eGet(eIDAttribute));
+        }
+        URI uri = EcoreUtil.getURI(eObject);
+        return loadElement(uri);
+    }
+
     private OVertex loadElement(URI uri) {
         ORID orid = factory.getORID(uri);
         if (orid == null) {
@@ -255,7 +268,7 @@ public class Session implements Closeable {
                 if (sf instanceof EReference && ((EReference) sf).isContainment()) {
                     List<EObject> eObjects = sf.isMany() ? (List<EObject>) value : Collections.singletonList((EObject) value);
                     for (EObject cObject: eObjects) {
-                        OVertex cVertex = loadElement(EcoreUtil.getURI(cObject));
+                        OVertex cVertex = loadElement(cObject);
                         if (cVertex == null) {
                             cVertex = createOElement(cObject);
                         }
@@ -358,7 +371,7 @@ public class Session implements Closeable {
 
     public void save(Resource resource) {
         for (EObject eObject: resource.getContents()) {
-            OVertex oVertex = loadElement(resource.getURI());
+            OVertex oVertex = loadElement(eObject);
             if (oVertex == null) {
                 oVertex = createOElement(eObject);
             }
@@ -446,21 +459,24 @@ public class Session implements Closeable {
     }
 
     private OElement getTopElement(OVertex crVertex) {
-        OElement top = null;
-        try (OResultSet oResultSet = db.query(
-                "select from (traverse in('EContains') from ?)" +
-                        " where in('EContains').size() == 0", crVertex.getIdentity());) {
+        return queryElement("select from (traverse in('EContains') from ?)" +
+                " where in('EContains').size() == 0", crVertex.getIdentity());
+    }
+
+    private OElement queryElement(String sql, Object... args) {
+        OElement oElement = null;
+        try (OResultSet oResultSet = db.query(sql, args);) {
             while (oResultSet.hasNext()) {
                 OResult oResult = oResultSet.next();
                 Optional<OElement> oElementOpt = oResult.getElement();
                 if (oElementOpt.isPresent()) {
-                    top = oElementOpt.get();
+                    oElement = oElementOpt.get();
                     break;
                 }
             }
 
         }
-        return top;
+        return oElement;
     }
 
     private void populateEObjectContains(ResourceSet rs, OVertex oElement, EObject eObject) {
