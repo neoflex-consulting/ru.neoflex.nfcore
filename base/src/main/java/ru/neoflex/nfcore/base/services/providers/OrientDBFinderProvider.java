@@ -1,12 +1,8 @@
 package ru.neoflex.nfcore.base.services.providers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 import ru.neoflex.meta.emforientdb.Session;
 import ru.neoflex.nfcore.base.services.Store;
 
@@ -16,8 +12,9 @@ import java.util.function.Supplier;
 public class OrientDBFinderProvider extends AbstractSimpleFinderProvider {
 
     @Override
-    protected void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
-        execQuery(tx, "select from EObject", consumer);
+    public void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
+        Session session = ((OrientDBTransactionProvider)  tx).getSession();
+        session.getAll(consumer);
     }
 
     private void execQuery(TransactionSPI tx, String sql, Consumer<Supplier<Resource>> consumer, Object... args) {
@@ -44,5 +41,11 @@ public class OrientDBFinderProvider extends AbstractSimpleFinderProvider {
         Session session = ((OrientDBTransactionProvider)  tx).getSession();
         String sql = "select from EObject where @orid=?";
         execQuery(tx, "select from EObject where @orid=?", consumer, session.getFactory().getORID(id));
+    }
+
+    @Override
+    public void getDependentResources(Resource resource, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
+        Session session = ((OrientDBTransactionProvider)  tx).getSession();
+        session.getDependentResources(resource, consumer);
     }
 }

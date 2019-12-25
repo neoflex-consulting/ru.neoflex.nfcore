@@ -7,12 +7,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import ru.neoflex.meta.emfgit.Database;
+import ru.neoflex.meta.emfgit.EntityId;
 import ru.neoflex.meta.emfgit.Finder;
 import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GitDBFinderProvider extends Finder implements FinderSPI {
     private Transaction lastTx;
@@ -99,5 +102,22 @@ public class GitDBFinderProvider extends Finder implements FinderSPI {
     @Override
     public void setExecutionStats(boolean value) {
 
+    }
+
+    @Override
+    public void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
+        lastTx = (GitDBTransactionProvider) tx;
+        for (EntityId entityId: lastTx.all()) {
+            Resource resource = lastTx.getDatabase().loadResource(entityId.getId(), lastTx);
+            consumer.accept(() -> resource);
+        }
+    }
+
+    @Override
+    public void getDependentResources(Resource resource, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
+        lastTx = (GitDBTransactionProvider) tx;
+        for (Resource dep: lastTx.getDatabase().getDependentResources(resource, lastTx)) {
+            consumer.accept(() -> dep);
+        }
     }
 }

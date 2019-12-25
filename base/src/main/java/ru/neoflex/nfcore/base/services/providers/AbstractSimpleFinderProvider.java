@@ -11,10 +11,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import ru.neoflex.meta.emfgit.Database;
-import ru.neoflex.meta.emfgit.Entity;
-import ru.neoflex.meta.emfgit.EntityId;
-import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
@@ -26,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import static java.lang.Integer.min;
 
 public abstract class AbstractSimpleFinderProvider implements FinderSPI {
     protected TransactionSPI lastTx;
@@ -107,7 +101,7 @@ public abstract class AbstractSimpleFinderProvider implements FinderSPI {
 
     }
 
-    void findResources(ObjectNode query, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
+    void findResources(ObjectNode query, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
         if (query.has("id")) {
             String id = query.get("id").asText();
             findResourcesById(id, tx, consumer);
@@ -491,8 +485,6 @@ public abstract class AbstractSimpleFinderProvider implements FinderSPI {
     public void setExecutionStats(boolean value) {
 
     }
-
-    protected abstract void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer);
 
     protected abstract void findResourcesByClass(EClass eClass, String name, TransactionSPI tx, Consumer<Supplier<Resource>> consumer);
 

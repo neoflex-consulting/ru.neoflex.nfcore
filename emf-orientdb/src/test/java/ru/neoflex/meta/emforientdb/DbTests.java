@@ -3,6 +3,7 @@ package ru.neoflex.meta.emforientdb;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -43,17 +44,18 @@ public class DbTests extends TestBase {
             metaRes.save(null);
             return testTable;
         });
-        Resource metaViewRes = server.inTransaction(session -> {
-            return session.query("select from test_MetaView where qName=?", "My Meta View").get(0);
+        MetaView metaView = server.inTransaction(session -> {
+            Resource metaViewRes = session.query("select from test_MetaView where qName=?", "My Meta View").get(0);
+            EcoreUtil.resolveAll(metaViewRes);
+            return (MetaView) metaViewRes.getContents().get(0);
         });
-        MetaView metaView = (MetaView) metaViewRes.getContents().get(0);
         Assert.assertEquals(EcorePackage.eINSTANCE.getEAnnotation(), metaView.getAClass());
         Assert.assertEquals(TestPackage.eINSTANCE, metaView.getAPackage());
         Assert.assertEquals(aObject.getQName(), ((DBTable) metaView.getAObject()).getQName());
         server.inTransaction(session -> {
             metaView.setAClass(EcorePackage.eINSTANCE.getEOperation());
             ResourceSet rs = session.createResourceSet();
-            Resource resource = rs.createResource(metaViewRes.getURI());
+            Resource resource = rs.createResource(metaView.eResource().getURI());
             resource.getContents().add(metaView);
             resource.save(null);
         });

@@ -6,7 +6,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public interface FinderSPI {
     enum SortOrder {
@@ -49,4 +50,8 @@ public interface FinderSPI {
     void setUpdate(boolean value);
 
     void setExecutionStats(boolean value);
+
+    void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException;
+
+    public void getDependentResources(Resource resource, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException;
 }

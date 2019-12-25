@@ -10,8 +10,8 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class CouchDBFinderProvider implements FinderSPI {
     protected ObjectNode result;
@@ -137,6 +137,19 @@ public class CouchDBFinderProvider implements FinderSPI {
     @Override
     public void setExecutionStats(boolean value) {
         rootNode.put("execution_stats", value);
+    }
+
+    @Override
+    public void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
+        execute(tx);
+        for (Resource resource: getResourceSet().getResources()) {
+            consumer.accept(() -> resource);
+        }
+    }
+
+    @Override
+    public void getDependentResources(Resource resource, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
+
     }
 
 }
