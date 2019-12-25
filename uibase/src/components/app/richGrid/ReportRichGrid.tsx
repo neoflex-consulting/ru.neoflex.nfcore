@@ -13,7 +13,8 @@ interface State {
     columnDefs: any[];
     rowData: any[];
     queryCount: number;
-    serverFilters: any[]
+    serverFilters: any[];
+    useServerFilter: boolean
 }
 
 class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
@@ -23,7 +24,8 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         columnDefs: [],
         rowData: [],
         queryCount: 0,
-        serverFilters: []
+        serverFilters: [],
+        useServerFilter: false
     };
 
     getDatasetComponents() {
@@ -71,7 +73,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         resource.eContents()[0].get('serverFilter')._internal.forEach( (f: Ecore.Resource) => {
             serverFilters.push(f)
         });
-        this.setState({serverFilters});
+        this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter')});
     }
 
     componentDidUpdate(): void {
@@ -97,17 +99,15 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
 
     render() {
         return (
-            this.state.rowData.length > 0 && this.state.columnDefs.length > 0 && this.state.serverFilters !== undefined
+            this.state.columnDefs.length > 0
                 ?
-                <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} serverFilters={this.state.serverFilters}/>
-                :
-                this.state.rowData.length > 0 && this.state.columnDefs.length > 0 && this.state.serverFilters === undefined
+                this.state.rowData.length > 0
                     ?
-                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData}/>
+                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} useServerFilter={this.state.useServerFilter} serverFilters={this.state.serverFilters} />
                     :
-                    <div>
-                        NOT found
-                    </div>
+                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={[]} useServerFilter={this.state.useServerFilter} serverFilters={this.state.serverFilters} />
+                    :
+                "No columns found"
         )
     }
 }

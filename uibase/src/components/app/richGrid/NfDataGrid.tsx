@@ -22,7 +22,8 @@ interface Props {
     columnDefs?: Array<any>,
     rowData?: Array<any>,
     gridOptions?: { [ key:string ]: any },
-    serverFilters?:  Array<EObject>
+    serverFilters:  Array<EObject>,
+    useServerFilter: boolean
 }
 
 class NfDataGrid extends Component<Props & WithTranslation, any> {
@@ -112,7 +113,14 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
     }
 
     render() {
-        const { columnDefs, rowData, gridOptions, t } = this.props
+        const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
+        let defaultFilter: any[] = []
+        if (serverFilters !== undefined) {
+            defaultFilter = serverFilters
+                .filter((f: EObject) => f.get('enable') === true)
+                .map((f: EObject) =>
+                    f.get('name'))
+        }
          return (
             <div
                 onKeyDown={this.handleKeyDown}
@@ -152,47 +160,52 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                                 </Select.Option>)
                     }
                 </Select>
-                <Select
-                    //selectedServerFilters
-                    notFoundContent={t('notfound')}
-                    //allowClear={true}
-                    showSearch={true}
-                    style={{ width: '400px', marginLeft: '10px' }}
-                    //onSelect={ (e:any) => this.setState({serverFilters: e})}
-                    mode="multiple"
-                    placeholder="No Filters Selected"
-                    defaultValue={
-                        this.props.serverFilters!
-                        .filter((f: EObject) => f.get('enable') === true)
-                        .map((f: EObject) =>
-                        f.get('name'))
-                    }
-                >
-                    {
-                        this.props.serverFilters!
-                            .map((f: EObject) =>
-                                <Select.Option key={f.get('name')} value={f.get('name')}>
-                                    {f.get('name')}
-                                </Select.Option>)
-                    }
-                </Select>
-                <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"
-                        onClick={() => this.setState({ modalResourceVisible: true })}/>
-                {this.state.modalResourceVisible && <Modal
-                    width={'1000px'}
-                    title={t('addFilters')}
-                    visible={this.state.modalResourceVisible}
-                    footer={null}
-                    onCancel={this.handleResourceModalCancel}
-                >
-                    {
-                        this.props.serverFilters
-                            ?
-                            <ServerFilter serverFilters={this.props.serverFilters}/>
-                            :
-                            <ServerFilter/>
-                    }
-                </Modal>}
+
+
+                {this.props.useServerFilter &&
+                <div style={{display: "inline"}}>
+                    <Select
+                        //selectedServerFilters
+                        notFoundContent={t('notfound')}
+                        //allowClear={true}
+                        showSearch={true}
+                        style={{ width: '400px', marginLeft: '10px' }}
+                        //onSelect={ (e:any) => this.setState({serverFilters: e})}
+                        mode="multiple"
+                        placeholder="No Filters Selected"
+                        defaultValue={defaultFilter}
+                    >
+                        {
+                            this.props.serverFilters !== undefined ?
+                                this.props.serverFilters
+                                    .map((f: EObject) =>
+                                        <Select.Option key={f.get('name')} value={f.get('name')}>
+                                            {f.get('name')}
+                                        </Select.Option>)
+                                :
+                                undefined
+                        }
+                    </Select>
+                    <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"
+                            onClick={() => this.setState({ modalResourceVisible: true })}/>
+                    {this.state.modalResourceVisible && <Modal
+                        width={'1000px'}
+                        title={t('addFilters')}
+                        visible={this.state.modalResourceVisible}
+                        footer={null}
+                        onCancel={this.handleResourceModalCancel}
+                    >
+                        {
+                            this.props.serverFilters
+                                ?
+                                <ServerFilter serverFilters={this.props.serverFilters}/>
+                                :
+                                <ServerFilter/>
+                        }
+                    </Modal>}
+                </div>
+                }
+
                 <div style={{ marginTop: "30px", marginLeft: '10px'}}>
                     <AgGridReact
                         ref={this.grid}

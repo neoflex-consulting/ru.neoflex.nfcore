@@ -69,6 +69,7 @@ class DatasetGrid extends DatasetComponent {
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
+     boolean useServerFilter
      contains Conditions[] serverFilter //Состав серверного фильтра
      //String clientFilterExpression //выражение в клиентском фильтре
 }

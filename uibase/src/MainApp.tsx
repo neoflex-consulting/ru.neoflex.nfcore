@@ -48,7 +48,7 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeURL = (appModuleName?: string, pathFull?: string) => {
+    changeURL = (appModuleName?: string, pathTree?: string) => {
         let path;
         let appModuleNameThis = appModuleName || this.state.appModuleName;
         if (this.state.pathBreadcrumb.length !== 0) {
@@ -69,9 +69,13 @@ export class MainApp extends React.Component<any, State> {
         }
         else if (this.state.appModuleName !== appModuleName) {
             path = '?path=' + JSON.stringify([this.state.appModuleName])
-        } else {path = ""}
-        if (pathFull && appModuleNameThis) {
-            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathFull}`);
+        }
+        else {
+            path = ""
+        }
+
+        if (pathTree && appModuleNameThis) {
+            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathTree}`);
         }
         else if (appModuleNameThis) {
             this.props.history.push(`/app/${appModuleNameThis}${path}`);
@@ -99,16 +103,6 @@ export class MainApp extends React.Component<any, State> {
                                 this.updateContext(
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
                                 )
-                                //NOT DELETE!
-                                // API.instance().call(objectApp.eURI(), "generateReferenceTree", [])
-                                //     .then(referenceTree => {
-                                //     if (!!referenceTree) {
-                                //         API.instance().loadEObjectWithRefs(999, referenceTree, Ecore.ResourceSet.create(), {}, objectApp.eURI() + referenceTree._id).then(r => {
-                                //             this.updateContext(({applicationReferenceTree: r.eContents()[0]}))
-                                //         })
-                                //     }
-                                // })
-                                //     .catch( ()=> {console.log("Reference Tree not exists")} )
                             });
                         } else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
@@ -281,8 +275,8 @@ export class MainApp extends React.Component<any, State> {
 
     private setURL(eObject: Ecore.EObject, key: any) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.state.appModuleName;
-        let pathFull = eObject.get('AppModule') ? undefined : key;
-        this.changeURL(appModuleName, pathFull);
+        let pathTree = eObject.get('AppModule') ? undefined : key;
+        this.changeURL(appModuleName, pathTree);
     }
 
     render = () => {
