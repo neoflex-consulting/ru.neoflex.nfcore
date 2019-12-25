@@ -8,10 +8,11 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Select} from "antd";
+import {Button, Col, Modal, Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import {EObject} from "ecore";
+import ServerFilter from "./ServerFilter";
 
 interface Props {
     onCtrlA?: Function,
@@ -51,7 +52,8 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 "All"
             ],
             paginationPageSize: 10,
-            selectedServerFilters: []
+            selectedServerFilters: [],
+            modalResourceVisible: false
         };
 
         this.grid = React.createRef();
@@ -105,6 +107,10 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
         this.grid.current.api.paginationSetPageSize(Number(newPageSize));
     }
 
+    handleResourceModalCancel = () => {
+        this.setState({ modalResourceVisible: false })
+    }
+
     render() {
         const { columnDefs, rowData, gridOptions, t } = this.props
          return (
@@ -147,7 +153,6 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                     }
                 </Select>
                 <Select
-
                     //selectedServerFilters
                     notFoundContent={t('notfound')}
                     //allowClear={true}
@@ -155,6 +160,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                     style={{ width: '400px', marginLeft: '10px' }}
                     //onSelect={ (e:any) => this.setState({serverFilters: e})}
                     mode="multiple"
+                    placeholder="No Filters Selected"
                     defaultValue={
                         this.props.serverFilters!
                         .filter((f: EObject) => f.get('enable') === true)
@@ -170,6 +176,23 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                                 </Select.Option>)
                     }
                 </Select>
+                <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"
+                        onClick={() => this.setState({ modalResourceVisible: true })}/>
+                {this.state.modalResourceVisible && <Modal
+                    width={'1000px'}
+                    title={t('addFilters')}
+                    visible={this.state.modalResourceVisible}
+                    footer={null}
+                    onCancel={this.handleResourceModalCancel}
+                >
+                    {
+                        this.props.serverFilters
+                            ?
+                            <ServerFilter serverFilters={this.props.serverFilters}/>
+                            :
+                            <ServerFilter/>
+                    }
+                </Modal>}
                 <div style={{ marginTop: "30px", marginLeft: '10px'}}>
                     <AgGridReact
                         ref={this.grid}
