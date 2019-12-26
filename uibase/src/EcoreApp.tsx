@@ -20,6 +20,7 @@ import {faSignOutAlt, faBullhorn, faTools, faEquals} from '@fortawesome/free-sol
 import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
+import {StartPage} from "./components/StartPage";
 
 const { Header, Content, Sider } = Layout;
 
@@ -73,7 +74,7 @@ class EcoreApp extends React.Component<any, State> {
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
         if (this.props.history.location.pathname === "/") {
-            this.props.history.push('/app')
+            this.props.history.push('/home')
         }
     };
 
@@ -222,7 +223,8 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
-                    <Route path='/app/:appModuleName' component={this.renderStartPage}/>
+                    <Route path='/home' component={this.renderStartPage}/>
+                    <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
                 </Switch>
@@ -310,9 +312,15 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-    renderStartPage = (props: any)=>{
+    renderApplication = (props: any)=>{
         return (
             <MainApp {...props}/>
+        )
+    };
+
+    renderStartPage = (props: any) => {
+        return (
+            <StartPage {...props} applications={this.state.applications} />
         )
     };
 

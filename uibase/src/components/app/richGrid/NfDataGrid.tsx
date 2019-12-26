@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import "@ag-grid-community/core/dist/styles/ag-grid.css";
@@ -26,7 +26,7 @@ interface Props {
     useServerFilter: boolean
 }
 
-class NfDataGrid extends Component<Props & WithTranslation, any> {
+class NfDataGrid extends React.Component<Props & WithTranslation, any> {
 
     private grid: React.RefObject<any>;
 
@@ -52,7 +52,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                 1000,
                 "All"
             ],
-            paginationPageSize: 10,
+            paginationPageSize: 7,
             selectedServerFilters: [],
             modalResourceVisible: false
         };
@@ -114,14 +114,14 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
 
     render() {
         const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
-        let defaultFilter: any[] = []
+        let defaultFilter: any[] = [];
         if (serverFilters !== undefined) {
             defaultFilter = serverFilters
                 .filter((f: EObject) => f.get('enable') === true)
                 .map((f: EObject) =>
                     f.get('name'))
         }
-         return (
+        return (
             <div
                 onKeyDown={this.handleKeyDown}
                 style={{ boxSizing: 'border-box', height: '100%', width: '100%' }}
@@ -160,8 +160,6 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                                 </Select.Option>)
                     }
                 </Select>
-
-
                 {this.props.useServerFilter &&
                 <div style={{display: "inline"}}>
                     <Select
@@ -205,7 +203,6 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                     </Modal>}
                 </div>
                 }
-
                 <div style={{ marginTop: "30px", marginLeft: '10px'}}>
                     <AgGridReact
                         ref={this.grid}
@@ -222,7 +219,7 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
                         headerHeight={40} //высота header в px (25 по умолчанию)
                         suppressRowClickSelection //строки не выделяются при нажатии на них
-
+                        pagination={true}
 
                         enableColResize={true}
                         // //pivotHeaderHeight={true}
@@ -230,8 +227,8 @@ class NfDataGrid extends Component<Props & WithTranslation, any> {
                         // //sortingOrder={["desc", "asc", null]}
                         enableFilter={true}
                         gridAutoHeight={true}
-                        {...gridOptions}
                         paginationPageSize={this.state.paginationPageSize}
+                        {...gridOptions}
                     >
                         <AgGridColumn
                             headerName="#"
