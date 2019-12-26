@@ -93,7 +93,7 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     }
 
     @Override
-    public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception {
+    public <R> R inTransaction(boolean readOnly, TransactionalFunction<R> f) throws Exception {
         if (readOnly) {
             return server.withSession(session -> {
                 OrientDBTransactionProvider tx = new OrientDBTransactionProvider(this, session);

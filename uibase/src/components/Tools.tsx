@@ -29,7 +29,7 @@ interface State {
     }
 }
 
-class GitDB extends React.Component<any, State> {
+class Tools extends React.Component<any, State> {
 
     state: State = {
         modalResourceVisible: false,
@@ -226,4 +226,4 @@ class GitDB extends React.Component<any, State> {
     }
 }
 
-export default withTranslation()(GitDB);
+export default withTranslation()(Tools);

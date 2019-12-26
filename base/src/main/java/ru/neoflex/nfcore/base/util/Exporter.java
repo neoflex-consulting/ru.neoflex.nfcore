@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.*;
@@ -222,12 +223,13 @@ public class Exporter {
         }
     }
 
-    public int unzip(InputStream inputStream) throws IOException {
+    public int unzip(InputStream inputStream) throws Exception {
         int entityCount = 0;
         try (ZipInputStream zipInputStream = new ZipInputStream(inputStream);) {
             ZipEntry zipEntry = zipInputStream.getNextEntry();
             while (zipEntry != null) {
                 if (!zipEntry.isDirectory()) {
+                    String entryName = zipEntry.getName();
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[4096];
                     int length;
@@ -235,11 +237,17 @@ public class Exporter {
                         outputStream.write(buffer, 0, length);
                     }
                     if (zipEntry.getName().endsWith(XMI)) {
-                        importEObject(outputStream.toByteArray());
+                        store.inTransaction(false, tx -> {
+                            importEObject(outputStream.toByteArray());
+                            tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
+                        });
                         ++entityCount;
                     }
                     else if (zipEntry.getName().endsWith(REFS)) {
-                        importExternalRefs(outputStream.toByteArray());
+                        store.inTransaction(false, tx -> {
+                            importExternalRefs(outputStream.toByteArray());
+                            tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
+                        });
                     }
                 }
                 zipEntry = zipInputStream.getNextEntry();

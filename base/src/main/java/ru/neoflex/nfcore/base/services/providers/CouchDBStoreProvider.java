@@ -1,10 +1,7 @@
 package ru.neoflex.nfcore.base.services.providers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -27,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
-import ru.neoflex.nfcore.base.components.Publisher;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -231,7 +227,7 @@ public class CouchDBStoreProvider extends AbstractStoreSPI {
     }
 
     @Override
-    public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception {
+    public <R> R inTransaction(boolean readOnly, TransactionalFunction<R> f) throws Exception {
         return f.call(new NullTransactionProvider(this));
     }
 }

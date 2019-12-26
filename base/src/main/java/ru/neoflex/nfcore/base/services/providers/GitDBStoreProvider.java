@@ -109,7 +109,7 @@ public class GitDBStoreProvider implements StoreSPI {
     }
 
     @Override
-    public <R> R inTransaction(boolean readOnly, Transactional<R> f) throws Exception {
+    public <R> R inTransaction(boolean readOnly, TransactionalFunction<R> f) throws Exception {
         return workspace.getDatabase().inTransaction(
                 () -> createTransaction(readOnly),
                 tx -> {

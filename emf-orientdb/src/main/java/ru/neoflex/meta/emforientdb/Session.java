@@ -445,7 +445,8 @@ public class Session implements Closeable {
             OVertex crVertex = oEdge.getTo();
             EObject crObject = createEObject(rs, crVertex);
             if (!crObject.eIsProxy()) {
-                OElement top = getTopElement(crVertex);
+                //OElement top = getTopElement(crVertex);
+                OElement top = crVertex;
                 URI crURI = factory.createResourceURI(top).appendFragment(factory.getId(crVertex.getIdentity()));
                 ((InternalEObject) crObject).eSetProxyURI(crURI);
             }
@@ -459,8 +460,8 @@ public class Session implements Closeable {
     }
 
     private OElement getTopElement(OVertex crVertex) {
-        return queryElement("select from (traverse in('EContains') from ?)" +
-                " where in('EContains').size() == 0", crVertex.getIdentity());
+        return queryElement("select * from (traverse in('EContains') from ?) where in('EContains').size() == 0",
+                crVertex.getIdentity());
     }
 
     private OElement queryElement(String sql, Object... args) {

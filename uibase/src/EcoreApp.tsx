@@ -14,7 +14,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
-import GitDB from "./components/GitDB";
+import Tools from "./components/Tools";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faSignOutAlt, faBullhorn, faTools, faEquals} from '@fortawesome/free-solid-svg-icons'
 import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
@@ -263,7 +263,7 @@ class EcoreApp extends React.Component<any, State> {
     
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query', 'gitdb']
+        let selectedKeys = ['metadata', 'data', 'query', 'tools']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
@@ -287,10 +287,10 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ color: '#eeeeee' }}>{t('query')}</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'gitdb'}>
-                            <Link to={`/developer/gitdb`}>
+                        <Menu.Item style={{ fontSize: 14 }} key={'tools'}>
+                            <Link to={`/developer/tools`}>
                                 <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
-                                <span style={{ color: '#eeeeee' }}>{t('gitdb')}</span>
+                                <span style={{ color: '#eeeeee' }}>{t('tools')}</span>
                             </Link>
                         </Menu.Item>
                     </Menu>
@@ -302,7 +302,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route path='/developer/query' component={QueryRunner}/>
                             <Route exact={true} path='/developer/data' component={DataBrowser}/>
                             <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
-                            <Route path='/developer/gitdb' component={GitDB}/>
+                            <Route path='/developer/tools' component={Tools}/>
                         </Switch>
                     </Content>
                 </Layout>
