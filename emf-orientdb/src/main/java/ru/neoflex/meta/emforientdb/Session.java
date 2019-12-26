@@ -193,6 +193,19 @@ public class Session implements Closeable {
         }
     }
 
+    private OVertex loadElement(EObject eObject) {
+        EClass eClass = eObject.eClass();
+        EAttribute eIDAttribute = eClass.getEIDAttribute();
+        if (eIDAttribute != null) {
+            return (OVertex) queryElement(
+                    "select from " + getOClassName(eClass) +
+                            " where " + eIDAttribute.getName() + "=?",
+                    eObject.eGet(eIDAttribute));
+        }
+        URI uri = EcoreUtil.getURI(eObject);
+        return loadElement(uri);
+    }
+
     private OVertex loadElement(URI uri) {
         ORID orid = factory.getORID(uri);
         if (orid == null) {
@@ -255,7 +268,7 @@ public class Session implements Closeable {
                 if (sf instanceof EReference && ((EReference) sf).isContainment()) {
                     List<EObject> eObjects = sf.isMany() ? (List<EObject>) value : Collections.singletonList((EObject) value);
                     for (EObject cObject: eObjects) {
-                        OVertex cVertex = loadElement(EcoreUtil.getURI(cObject));
+                        OVertex cVertex = loadElement(cObject);
                         if (cVertex == null) {
                             cVertex = createOElement(cObject);
                         }
@@ -358,7 +371,7 @@ public class Session implements Closeable {
 
     public void save(Resource resource) {
         for (EObject eObject: resource.getContents()) {
-            OVertex oVertex = loadElement(resource.getURI());
+            OVertex oVertex = loadElement(eObject);
             if (oVertex == null) {
                 oVertex = createOElement(eObject);
             }
@@ -368,7 +381,7 @@ public class Session implements Closeable {
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
             savedResourcesMap.put(resource, oRecord);
-            resource.setURI(factory.createURI(oRecord).trimFragment());
+            resource.setURI(factory.createResourceURI(oRecord));
         }
     }
 
@@ -385,7 +398,7 @@ public class Session implements Closeable {
         EObject eObject = createEObject(resource.getResourceSet(), oElement);
         resource.getContents().clear();
         resource.getContents().add(eObject);
-        resource.setURI(factory.createURI(oElement).trimFragment());
+        resource.setURI(factory.createResourceURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
     }
 
@@ -432,7 +445,8 @@ public class Session implements Closeable {
             OVertex crVertex = oEdge.getTo();
             EObject crObject = createEObject(rs, crVertex);
             if (!crObject.eIsProxy()) {
-                URI crURI = factory.createURI(crVertex);
+                OElement top = getTopElement(crVertex);
+                URI crURI = factory.createResourceURI(top).appendFragment(factory.getId(crVertex.getIdentity()));
                 ((InternalEObject) crObject).eSetProxyURI(crURI);
             }
             if (sf.isMany()) {
@@ -442,6 +456,27 @@ public class Session implements Closeable {
                 eObject.eSet(sf, crObject);
             }
         }
+    }
+
+    private OElement getTopElement(OVertex crVertex) {
+        return queryElement("select from (traverse in('EContains') from ?)" +
+                " where in('EContains').size() == 0", crVertex.getIdentity());
+    }
+
+    private OElement queryElement(String sql, Object... args) {
+        OElement oElement = null;
+        try (OResultSet oResultSet = db.query(sql, args);) {
+            while (oResultSet.hasNext()) {
+                OResult oResult = oResultSet.next();
+                Optional<OElement> oElementOpt = oResult.getElement();
+                if (oElementOpt.isPresent()) {
+                    oElement = oElementOpt.get();
+                    break;
+                }
+            }
+
+        }
+        return oElement;
     }
 
     private void populateEObjectContains(ResourceSet rs, OVertex oElement, EObject eObject) {
@@ -473,19 +508,20 @@ public class Session implements Closeable {
             if (sf == null || !sf.isContainment()) {
                 continue;
             }
-           OVertex crVertex = oEdge.getTo();
+            OVertex crVertex = oEdge.getTo();
             EObject crObject = createEObject(rs, crVertex);
-            if (!crObject.eIsProxy() && sf.isResolveProxies()) {
-                URI crURI = factory.createURI(crVertex);
-                ((InternalEObject) crObject).eSetProxyURI(crURI);
-            }
             if (sf.isMany()) {
                 ((EList) eObject.eGet(sf)).add(crObject);
             }
             else {
                 eObject.eSet(sf, crObject);
             }
-            if (!sf.isResolveProxies()) {
+            if (crObject.eIsProxy()) {
+                if (!sf.isResolveProxies()) {
+                    crObject = EcoreUtil.resolve(crObject, rs);
+                }
+            }
+            else {
                 populateEObjectContains(rs, crVertex, crObject);
             }
         }
@@ -544,7 +580,7 @@ public class Session implements Closeable {
                 OElement oElement = oElementOpt.get();
                 consumer.accept(() -> {
                     EObject eObject = createEObject(rs, oElement);
-                    Resource resource = rs.createResource(factory.createURI(oElement).trimFragment());
+                    Resource resource = rs.createResource(factory.createResourceURI(oElement));
                     resource.getContents().add(eObject);
                     populateEObject(rs, (OVertex) oElement, eObject);
                     return resource;
