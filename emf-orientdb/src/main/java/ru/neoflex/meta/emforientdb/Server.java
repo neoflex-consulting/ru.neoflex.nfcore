@@ -63,9 +63,11 @@ public class Server extends SessionFactory implements Closeable {
             }
         };
         final OServerNetworkListener httpListener = server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
-        final OServerCommandGetStaticContent command = (OServerCommandGetStaticContent) httpListener
-                .getCommand(OServerCommandGetStaticContent.class);
-        command.registerVirtualFolder("studio", oCallable);
+        if (httpListener != null) {
+            final OServerCommandGetStaticContent command = (OServerCommandGetStaticContent) httpListener
+                    .getCommand(OServerCommandGetStaticContent.class);
+            command.registerVirtualFolder("studio", oCallable);
+        }
     }
 
     public OServerConfiguration createDefaultServerConfiguration(String dbPath) {
@@ -153,8 +155,8 @@ public class Server extends SessionFactory implements Closeable {
         String home = System.getProperty("orientdb.home", new File(System.getProperty("user.home"), ".orientdb/home").getAbsolutePath());
         String dbName = System.getProperty("orientdb.dbname", "models");
         try {
-            try (Server server = new Server(home, dbName, new ArrayList<>()).open()) {
-                server.server.waitForShutdown();
+            try (Server orientdb = new Server(home, dbName, new ArrayList<>()).open()) {
+                orientdb.server.waitForShutdown();
             }
         } catch (Exception e) {
             e.printStackTrace();
