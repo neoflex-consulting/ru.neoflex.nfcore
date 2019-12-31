@@ -74,7 +74,7 @@ public class Context {
     }
 
     public<R> R inContextWithClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
-        return inContext(()->workspace.withClassLoader(()->store.inTransaction(readOnly, tx -> f.call())));
+        return inContext(()->workspace.withClassLoader(()->store.inTransaction(readOnly, tx -> {return f.call();})));
     }
 
     public Scheduler getScheduler() {

@@ -24,7 +24,7 @@ class DatasetGridExt extends DatasetGridImpl {
 
     @Override
     String createAllColumns() {
-        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
+        return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
             @Override
             Object call(TransactionSPI tx) throws Exception {
                 def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: this.name])
@@ -67,7 +67,7 @@ class DatasetGridExt extends DatasetGridImpl {
 
     @Override
     String deleteAllColumns() {
-        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
+        return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
             @Override
             Object call(TransactionSPI tx) throws Exception {
                 def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: this.name])

@@ -1,18 +1,20 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.common.util.OCallable;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.*;
+import com.orientechnologies.orient.server.network.OServerNetworkListener;
+import com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpAbstract;
+import com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent;
 import org.eclipse.emf.ecore.EPackage;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ public class Server extends SessionFactory implements Closeable {
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
         System.setProperty("ORIENTDB_HOME", home);
-        installStudioJar(home);
+        //installStudioJar(home);
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
@@ -34,11 +36,38 @@ public class Server extends SessionFactory implements Closeable {
     public Server open() throws InvocationTargetException, NoSuchMethodException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         server.startup(configuration);
         server.activate();
+        registerWwwAsStudio();
         if (!server.existsDatabase(dbName)) {
             server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
         }
         createSchema();
         return this;
+    }
+
+    public void registerWwwAsStudio() {
+        OCallable oCallable = new OCallable<Object, String>() {
+            @Override
+            public Object call(final String iArgument) {
+                String fileName = "www/" + iArgument;
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                final URL url = classLoader.getResource(fileName);
+
+                if (url != null) {
+                    final OServerCommandGetStaticContent.OStaticContent content = new OServerCommandGetStaticContent.OStaticContent();
+                    content.is = new BufferedInputStream(classLoader.getResourceAsStream(fileName));
+                    content.contentSize = -1;
+                    content.type = OServerCommandGetStaticContent.getContentType(url.getFile());
+                    return content;
+                }
+                return null;
+            }
+        };
+        final OServerNetworkListener httpListener = server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
+        if (httpListener != null) {
+            final OServerCommandGetStaticContent command = (OServerCommandGetStaticContent) httpListener
+                    .getCommand(OServerCommandGetStaticContent.class);
+            command.registerVirtualFolder("studio", oCallable);
+        }
     }
 
     public OServerConfiguration createDefaultServerConfiguration(String dbPath) {
@@ -126,8 +155,8 @@ public class Server extends SessionFactory implements Closeable {
         String home = System.getProperty("orientdb.home", new File(System.getProperty("user.home"), ".orientdb/home").getAbsolutePath());
         String dbName = System.getProperty("orientdb.dbname", "models");
         try {
-            try (Server server = new Server(home, dbName, new ArrayList<>()).open()) {
-                server.server.waitForShutdown();
+            try (Server orientdb = new Server(home, dbName, new ArrayList<>()).open()) {
+                orientdb.server.waitForShutdown();
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -74,7 +74,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String deleteAllColumns() {
-        return Context.current.store.inTransaction(false, new StoreSPI.Transactional() {
+        return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
             @Override
             Object call(TransactionSPI tx) throws Exception {
                 def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])

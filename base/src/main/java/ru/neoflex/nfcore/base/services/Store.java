@@ -1,7 +1,6 @@
 package ru.neoflex.nfcore.base.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -14,11 +13,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.emfjson.jackson.annotations.EcoreIdentityInfo;
-import org.emfjson.jackson.annotations.EcoreTypeInfo;
-import org.emfjson.jackson.databind.EMFContext;
-import org.emfjson.jackson.module.EMFModule;
-import org.emfjson.jackson.utils.ValueWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -34,8 +28,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Function;
-
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
 @Service("ru.neoflex.nfcore.base.services.Store")
 @DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
@@ -165,7 +157,7 @@ public class Store {
         return provider;
     }
 
-    public <R> R inTransaction(boolean readOnly, StoreSPI.Transactional<R> f) throws Exception {
+    public <R> R inTransaction(boolean readOnly, StoreSPI.TransactionalFunction<R> f) throws Exception {
         return provider.inTransaction(readOnly, tx -> {
             if (provider instanceof GitDBStoreProvider) {
                 return f.call(tx);
@@ -174,6 +166,17 @@ public class Store {
                     workspace.getCurrentBranch(),
                     readOnly? Transaction.LockType.READ: Transaction.LockType.WRITE,
                     wtx -> f.call(tx));
+        });
+    }
+
+    public interface TransactionalProcedure {
+        public void call(TransactionSPI tx) throws Exception;
+    }
+
+    public void inTransaction(boolean readOnly, TransactionalProcedure f) throws Exception {
+        inTransaction(readOnly, tx -> {
+            f.call(tx);
+            return null;
         });
     }
 

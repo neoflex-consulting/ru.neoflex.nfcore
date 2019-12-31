@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
 import ru.neoflex.nfcore.base.util.DocFinder;
@@ -57,13 +56,10 @@ public class SysController {
 
     @PostMapping(value="/importdb", produces={"application/json"})
     public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws Exception {
-        return store.inTransaction(false, (tx)->{
-            int count = new Exporter(store).unzip(file.getInputStream());
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode result = mapper.createObjectNode().put("count", count);
-            tx.commit("Import database: " + mapper.writeValueAsString(result), Authorization.getUserName(), "");
-            return result;
-        });
+        int count = new Exporter(store).unzip(file.getInputStream());
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode().put("count", count);
+        return result;
     }
 
     @GetMapping(value="/exportdb")
