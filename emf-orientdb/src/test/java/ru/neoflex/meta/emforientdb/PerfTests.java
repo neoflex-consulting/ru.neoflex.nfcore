@@ -39,7 +39,7 @@ public class PerfTests extends TestBase {
                 Group group = TestFactory.eINSTANCE.createGroup();
                 group.setQName(name);
                 ResourceSet resourceSet = session.createResourceSet();
-                Resource groupResource = resourceSet.createResource(server.createURI());
+                Resource groupResource = resourceSet.createResource(server.createURI(""));
                 groupResource.getContents().add(group);
                 groupResource.save(null);
                 server.getId(groupResource.getURI());
