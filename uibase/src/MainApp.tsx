@@ -14,7 +14,7 @@ const backgroundColor = "white";
 
 interface State {
     appModuleName: string;
-    pathFull: string;
+    pathFull: any[];
     pathBreadcrumb: string[];
     context: IMainContext
     hideReferences: boolean
@@ -35,7 +35,7 @@ export class MainApp extends React.Component<any, State> {
         };
         this.state = {
             appModuleName: props.appModuleName,
-            pathFull: props.pathFull,
+            pathFull: [],
             pathBreadcrumb: [],
             hideReferences: false,
             context
@@ -48,38 +48,41 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeURL = (appModuleName?: string, pathTree?: string) => {
-        let path;
+    changeURL = (appModuleName?: string, treeValue?: string) => {
+        let path: any[] = [];
         let appModuleNameThis = appModuleName || this.state.appModuleName;
-        if (this.state.pathBreadcrumb.length !== 0) {
-            if (this.state.pathBreadcrumb.includes(appModuleNameThis)) {
-                if (this.state.pathBreadcrumb[0] !== appModuleNameThis) {
-                    path = '?path=' + JSON.stringify(this.state.pathBreadcrumb.slice(0, this.state.pathBreadcrumb.indexOf(appModuleNameThis)))
-                } else {
-                    path = ""
+        if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                let updatedElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    updatedElement.tree = treeValue.split('/');
+                    path.push(updatedElement)
                 }
-                } else {
-                let pathBreadcrumb = this.state.pathBreadcrumb;
-                if (appModuleName !== this.state.appModuleName) {
-                    pathBreadcrumb.push(this.state.appModuleName)
+                else {
+                    path.push(updatedElement)
                 }
-                this.setState({pathBreadcrumb});
-                path = '?path=' + JSON.stringify(pathBreadcrumb)
-            }
+            });
+        } else if (appModuleName !== this.state.appModuleName) {
+            this.state.pathFull.forEach( (p:any) => {
+                path.push(p)
+            });
+            let newElement = {
+                appModule: appModuleName,
+                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                params: {}
+            };
+            path.push(newElement)
         }
-        else if (this.state.appModuleName !== appModuleName) {
-            path = '?path=' + JSON.stringify([this.state.appModuleName])
-        }
-        else {
-            path = ""
-        }
-
-        if (pathTree && appModuleNameThis) {
-            this.props.history.push(`/app/${appModuleNameThis}${path}#${pathTree}`);
-        }
-        else if (appModuleNameThis) {
-            this.props.history.push(`/app/${appModuleNameThis}${path}`);
-        }
+        this.setState({pathFull: path});
+        this.props.history.push(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        path
+                    )
+                )
+            )
+            }`);
     };
 
     loadObject = () => {
@@ -97,27 +100,28 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(eClass, name).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-                        const splitPath = this.state.pathFull.split('#');
-                        if (splitPath.length === 1) {
+
+                        let currentAppModule = this.state.pathFull[this.state.pathFull.length - 1]
+                        if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
                                 this.updateContext(
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
                                 )
                             });
-                        } else {
+
+                        }
+                        else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
-                            let treePath: string[];
-                            if (splitPath[1].split('?').length === 1) {
-                                treePath = splitPath[1].split('/');
-                            } else {
-                                treePath = splitPath[1].split('?')[1].split('/')
-                            }
-                            for (let i = 0; i < treePath.length; i++) {
+                            let currentAppModule = this.state.pathFull[this.state.pathFull.length - 1]
+                            let currentTree: any[] = currentAppModule['tree']
+
+                            for (let i = 0; i <= currentTree.length - 1; i++) {
                                 for (let t of treeChildren
-                                    .filter((t: any) => t.get('name') === decodeURI(treePath[i]))) {
+                                    .filter((t: any) => t.get('name') === currentTree[i])) {
                                     treeChildren = t.eContents();
                                 }
                             }
+
                             this.updateContext(
                                 ({
                                     viewObject: treeChildren[0],
@@ -131,7 +135,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        if (prevState.pathFull !== this.state.pathFull) {
+        if (prevProps.location.pathname !== this.props.location.pathname) {
             this.loadObject()
         }
     }
@@ -141,28 +145,11 @@ export class MainApp extends React.Component<any, State> {
     }
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        const pathFull = nextProps.history.location.pathname +
-            decodeURI(nextProps.history.location.search) + nextProps.history.location.hash;
-        if (
-            prevState.pathFull !== pathFull
-           ) {
+        const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.match.params.appModuleName)))
+        if (pathFull) {
             return {
-                pathBreadcrumb: prevState.pathBreadcrumb.length === 0 ||  prevState.appModuleName !== nextProps.match.params.appModuleName
-                    ?
-                    nextProps.history.location.search !== ""
-                        ?
-                        prevState.pathBreadcrumb.includes(nextProps.match.params.appModuleName)
-                            ?
-                            prevState.pathBreadcrumb.slice(0, prevState.pathBreadcrumb.indexOf(nextProps.match.params.appModuleName))
-                            :
-                            JSON.parse(decodeURI(nextProps.history.location.search.split('?path=')[1]))
-                        :
-                        ""
-                    :
-                    prevState.pathBreadcrumb.push(nextProps.match.params.appModuleName)
-                ,
                 pathFull: pathFull,
-                appModuleName: nextProps.match.params.appModuleName
+                appModuleName: pathFull[pathFull.length - 1].appModule
             }
         } else {
             return null
@@ -275,8 +262,8 @@ export class MainApp extends React.Component<any, State> {
 
     private setURL(eObject: Ecore.EObject, key: any) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.state.appModuleName;
-        let pathTree = eObject.get('AppModule') ? undefined : key;
-        this.changeURL(appModuleName, pathTree);
+        let treeValue = eObject.get('AppModule') ? undefined : key;
+        this.changeURL(appModuleName, treeValue);
     }
 
     render = () => {

@@ -8,7 +8,7 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, Col, Modal, Select} from "antd";
+import {Button, Modal, Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import {EObject} from "ecore";
