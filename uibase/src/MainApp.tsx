@@ -48,7 +48,7 @@ export class MainApp extends React.Component<any, State> {
         }, cb)
     };
 
-    changeURL = (appModuleName?: string, treeValue?: string) => {
+    changeURL = (appModuleName?: string, treeValue?: string, date?: string) => {
         let path: any[] = [];
         let appModuleNameThis = appModuleName || this.state.appModuleName;
         if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
@@ -56,6 +56,7 @@ export class MainApp extends React.Component<any, State> {
                 let updatedElement = p;
                 if (p.appModule === appModuleNameThis) {
                     updatedElement.tree = treeValue.split('/');
+                    updatedElement.params.date = date
                     path.push(updatedElement)
                 }
                 else {
@@ -69,7 +70,9 @@ export class MainApp extends React.Component<any, State> {
             let newElement = {
                 appModule: appModuleName,
                 tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: {}
+                params: {
+                    date: date
+                }
             };
             path.push(newElement)
         }

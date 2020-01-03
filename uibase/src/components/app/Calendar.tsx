@@ -139,9 +139,9 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                     <Button
                                         onClick={() =>
                                             context.changeURL(
-                                                r.eContents()[0].get('report').get('AppModule').get('name')
-                                                // undefined,
-                                                // r.eContents()[0].eURI().split('#')[0]
+                                                r.eContents()[0].get('report').get('AppModule').get('name'),
+                                                 undefined,
+                                                r.eContents()[0].get('date')
                                             )
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}

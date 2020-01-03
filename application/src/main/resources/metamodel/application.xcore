@@ -93,7 +93,7 @@ abstract class DatasetView extends ViewElement {
 
 class DatasetGridView extends DatasetView {
     op JSON getDatasetGrids()
-    contains DatasetGrid[] datasetGrid
+    refers DatasetGrid[] datasetGrid
     refers DatasetGrid defaultDatasetGrid
 }
 
@@ -135,7 +135,7 @@ abstract class TreeNode{
 
 class AppModuleNode extends TreeNode {
     refers AppModule AppModule
-    refers EObject eObject
+    //refers EObject eObject
 }
 
 class CatalogNode extends TreeNode {

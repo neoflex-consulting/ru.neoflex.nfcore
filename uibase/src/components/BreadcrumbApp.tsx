@@ -25,7 +25,7 @@ class BreadcrumbApp extends React.Component<Props & WithTranslation, any> {
             ?
                 <Breadcrumb className="ul-breadcrumb breadcrumb-visibility">
                     {this.props.breadcrumb.map((b: string) =>
-                            <li className="li-breadcrumb" title={b} key={b}>
+                            <li className="li-breadcrumb" title={t(`${b.split('_')[0]}`)} key={b}>
                                 <Breadcrumb.Item separator="" key={b} onClick={() => this.props.onClickBreadcrumb(b)}>
                                     <FontAwesomeIcon className="breadcrumbIcon" icon={b !== this.props.breadcrumb[0] ? faEllipsisH : faHome}/>
                                     <span className="text">
