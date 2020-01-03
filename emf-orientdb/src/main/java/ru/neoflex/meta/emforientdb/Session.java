@@ -200,7 +200,7 @@ public class Session implements Closeable {
             return (OVertex) queryElement(
                     "select from " + getOClassName(eClass) +
                             " where " + eIDAttribute.getName() + "=?",
-                    eObject.eGet(eIDAttribute));
+                    objectToOObject(eIDAttribute.getEAttributeType(), eObject.eGet(eIDAttribute)));
         }
         URI uri = EcoreUtil.getURI(eObject);
         return loadElement(uri);
@@ -370,6 +370,7 @@ public class Session implements Closeable {
     }
 
     public void save(Resource resource) {
+        ORecord firstRecord = null;
         for (EObject eObject: resource.getContents()) {
             OVertex oVertex = loadElement(eObject);
             if (oVertex == null) {
@@ -380,8 +381,13 @@ public class Session implements Closeable {
             }
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
-            savedResourcesMap.put(resource, oRecord);
-            resource.setURI(factory.createResourceURI(oRecord));
+            if (firstRecord == null) {
+                firstRecord = oRecord;
+            }
+        }
+        if (firstRecord != null) {
+            resource.setURI(factory.createResourceURI(firstRecord));
+            savedResourcesMap.put(resource, firstRecord);
         }
     }
 
