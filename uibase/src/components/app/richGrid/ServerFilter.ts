@@ -16,7 +16,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
 
 
     render() {
-        const { t } = this.props
+       // const { t } = this.props
         return (
             "Some"
         )

@@ -5,7 +5,7 @@ import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowser from "./components/MetaBrowser";
 import ResourceEditor from "./components/ResourceEditor"
-import {Link, Redirect, Route, Switch} from "react-router-dom";
+import {Link, Route, Switch} from "react-router-dom";
 import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
@@ -56,7 +56,18 @@ class EcoreApp extends React.Component<any, State> {
             this.props.history.push('/developer/data');
         }
         else if (e.key.split('.').includes('app')) {
-            this.props.history.push(`/app/${e.key.split('.').slice(1).join('.')}`);
+            const path = btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        [{
+                            appModule: e.key.split('.').slice(1).join('.'),
+                            tree: [],
+                            params: {}
+                        }]
+                    )
+                )
+            );
+            this.props.history.push(`/app/${path}`);
         }
         else if (e.key === "test") {
             this.props.history.push('/test');
@@ -107,20 +118,27 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     setBreadcrumb() {
-        if (this.props.location.search !== "") {
-            let breadcrumb = JSON.parse(decodeURI(this.props.location.search.split('?path=')[1]));
-            if (!breadcrumb.includes( decodeURI(this.props.location.pathname.split('/')[2]))) {
-                breadcrumb.push(decodeURI(this.props.location.pathname.split('/')[2]));
+        if (this.props.location.pathname.split('/app/')[1] !== undefined) {
+            const allAppModules = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])));
+            let breadcrumb = [];
+            for (let i = 0; i <= allAppModules.length - 1; i++) {
+                breadcrumb.push(`${allAppModules[i].appModule}_${i}`)
             }
             this.setState({breadcrumb})
-        } else if (this.props.location.pathname.split('/')[1] === 'app' && this.props.location.pathname.split('/').length > 2) {this.setState({breadcrumb: [decodeURI(  this.props.location.pathname.split('/')[2]  )]})}
+        }
     }
 
     onClickBreadcrumb = (b : string): void => {
         let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
         let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-        if (breadcrumb.length > 1) {this.props.history.push(`${b}?path=${JSON.stringify(this.state.breadcrumb.slice(0, indexBreadcrumb))}`)}
-        else {this.props.history.push(`${b}`)}
+        let path = btoa(
+            encodeURIComponent(
+                JSON.stringify(
+                    JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1)
+                )
+            )
+        );
+        this.props.history.push(path)
         this.setState({breadcrumb});
     };
 
@@ -222,7 +240,6 @@ class EcoreApp extends React.Component<any, State> {
                     </Row>
                 </Header>
                 <Switch>
-                    <Redirect from={'/app'} exact={true} to={'/app/ReportsApp'}/>
                     <Route path='/home' component={this.renderStartPage}/>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer' component={this.renderSettings}/>
@@ -238,11 +255,12 @@ class EcoreApp extends React.Component<any, State> {
             this.state.applications.map((a: any) =>
                 selectedKeys.push(`app.${a.eContents()[0].get('name')}`));
         }
-        if (this.props.location.search) {
+        if (this.props.location.pathname.includes('/app/')) {
+            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule
             selectedKeys = selectedKeys
                 .filter(k => k.split('.').length > 1)
                 .filter( k =>
-                    JSON.parse(decodeURI(this.props.location.search.split('?path=')[1])).includes(k.slice(4))
+                    currentApplication.includes(k.slice(4))
                 )
         } else {
             selectedKeys = selectedKeys.filter(k =>
@@ -325,10 +343,11 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (decodeURI(prevProps.location.pathname + prevProps.location.search) !== decodeURI(this.props.location.pathname + this.props.location.search)) {
+        if (prevProps.location.pathname !== this.props.location.pathname) {
             this.setBreadcrumb()
         }
     }
+
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applications.length) {this.getAllApplication()}

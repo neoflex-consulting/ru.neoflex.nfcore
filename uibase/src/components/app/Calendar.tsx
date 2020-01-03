@@ -138,7 +138,11 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                 content.map( (r: any) =>
                                     <Button
                                         onClick={() =>
-                                            context.changeURL(r.eContents()[0].get('report').get('AppModule').get('name'))
+                                            context.changeURL(
+                                                r.eContents()[0].get('report').get('AppModule').get('name')
+                                                // undefined,
+                                                // r.eContents()[0].eURI().split('#')[0]
+                                            )
                                         }
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"

@@ -29,7 +29,7 @@ class BreadcrumbApp extends React.Component<Props & WithTranslation, any> {
                                 <Breadcrumb.Item separator="" key={b} onClick={() => this.props.onClickBreadcrumb(b)}>
                                     <FontAwesomeIcon className="breadcrumbIcon" icon={b !== this.props.breadcrumb[0] ? faEllipsisH : faHome}/>
                                     <span className="text">
-                                        {t(`${b}`)}
+                                        {t(`${b.split('_')[0]}`)}
                                     </span>
                                 </Breadcrumb.Item>
                             </li>
