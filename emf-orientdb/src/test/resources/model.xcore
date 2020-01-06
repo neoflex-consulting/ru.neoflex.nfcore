@@ -8,6 +8,9 @@ package ru.neoflex.meta.test
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EClass
+import java.util.List
+
+annotation "http://orientdb.com/meta" as orientdb
 
 abstract class Authority {
     String qName
@@ -25,8 +28,10 @@ class Column {
 	String dbType
 }
 
+@orientdb(embedded="true", oAbstract="true")
 abstract class DBKey {
 	String name
+    @orientdb(embedded="true")
 	refers Column[] columns
 }
 
@@ -37,6 +42,7 @@ class IEKey extends DBKey {
 }
 
 class FKey extends DBKey {
+    @orientdb(embedded="true")
 	refers DBEntity entity
 }
 
@@ -61,4 +67,25 @@ class MetaView {
 	refers EPackage aPackage
 	refers EClass aClass
 	refers EObject aObject
+}
+
+type List3OfDouble wraps List<List<List<Double>>>
+
+@orientdb(embedded="true", oClassName="OPoint")
+class OPoint {
+    Double[] coordinates
+}
+
+@orientdb(embedded="true", oClassName="OMultiPolygon")
+class OMultiPolygon {
+    List3OfDouble[] coordinates
+}
+
+class Placemark {
+    @orientdb(indexType="FULLTEXT")
+    String name
+    @orientdb(indexType="FULLTEXT")
+    String description
+    @orientdb(indexType="SPATIAL")
+    contains OPoint point
 }
