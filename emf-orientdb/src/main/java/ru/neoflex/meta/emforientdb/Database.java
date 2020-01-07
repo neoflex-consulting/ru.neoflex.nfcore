@@ -1,11 +1,13 @@
 package ru.neoflex.meta.emforientdb;
 
-import com.orientechnologies.orient.core.db.*;
+import com.orientechnologies.orient.core.db.ODatabasePool;
+import com.orientechnologies.orient.core.db.ODatabaseType;
+import com.orientechnologies.orient.core.db.OrientDB;
+import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.eclipse.emf.ecore.EPackage;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.List;
 
 public class Database extends SessionFactory implements Closeable {
@@ -21,6 +23,7 @@ public class Database extends SessionFactory implements Closeable {
         orientDB = new OrientDB(url, user, password, OrientDBConfig.defaultConfig());
         orientDB.createIfNotExists(dbName, ODatabaseType.PLOCAL);
         pool = new ODatabasePool(orientDB,dbName,user,password);
+        createSchema();
     }
 
     @Override

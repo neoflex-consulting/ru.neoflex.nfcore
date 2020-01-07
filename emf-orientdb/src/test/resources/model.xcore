@@ -69,16 +69,52 @@ class MetaView {
 	refers EObject aObject
 }
 
+type ListOfDouble wraps List<Double>
+type List2OfDouble wraps List<List<Double>>
 type List3OfDouble wraps List<List<List<Double>>>
 
-@orientdb(embedded="true", oClassName="OPoint")
-class OPoint {
+@orientdb(embedded="true", oClassName="OShape")
+abstract class OShape {
+}
+
+@orientdb(oClassName="OPoint")
+class OPoint extends OShape {
     Double[] coordinates
 }
 
-@orientdb(embedded="true", oClassName="OMultiPolygon")
-class OMultiPolygon {
+@orientdb(oClassName="OMultiPoint")
+class OMultiPoint extends OShape {
+    ListOfDouble[] coordinates
+}
+
+@orientdb(oClassName="OLineString")
+class OLineString extends OShape {
+    ListOfDouble[] coordinates
+}
+
+@orientdb(oClassName="OMultiLineString")
+class OMultiLineString extends OShape {
+    List2OfDouble[] coordinates
+}
+
+@orientdb(oClassName="OPolygon")
+class OPolygon extends OShape {
+    List2OfDouble[] coordinates
+}
+
+@orientdb(oClassName="OMultiPolygon")
+class OMultiPolygon extends OShape {
     List3OfDouble[] coordinates
+}
+
+@orientdb(oClassName="ORectangle")
+class ORectangle extends OShape {
+    Double[] coordinates
+}
+
+@orientdb(oClassName="OGeometryCollection")
+class OGeometryCollection extends OShape {
+    contains OShape[] geometries
 }
 
 class Placemark {
@@ -87,5 +123,5 @@ class Placemark {
     @orientdb(indexType="FULLTEXT")
     String description
     @orientdb(indexType="SPATIAL")
-    contains OPoint point
+    contains OShape point
 }
