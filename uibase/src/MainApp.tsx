@@ -7,8 +7,6 @@ import {API} from "./modules/api";
 import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import {Tree} from 'antd'
-import {IMainContext, MainContext} from './MainContext'
-import update from 'immutability-helper'
 const FooterHeight = '2em';
 const backgroundColor = "white";
 
@@ -16,7 +14,6 @@ interface State {
     appModuleName: string;
     pathFull: any[];
     pathBreadcrumb: string[];
-    context: IMainContext
     hideReferences: boolean
     currentTool?: string
     objectApp?: Ecore.EObject
@@ -29,64 +26,13 @@ export class MainApp extends React.Component<any, State> {
 
     constructor(props: any) {
         super(props);
-        const context: IMainContext = {
-            updateContext: this.updateContext,
-            changeURL: this.changeURL
-        };
         this.state = {
             appModuleName: props.appModuleName,
             pathFull: [],
             pathBreadcrumb: [],
             hideReferences: false,
-            context
         }
     }
-
-    updateContext = (context: any, cb?: ()=>void) => {
-        this.setState((state, props) => {
-            return {context: update(state.context, {$merge: context})}
-        }, cb)
-    };
-
-    changeURL = (appModuleName?: string, treeValue?: string, date?: string) => {
-        let path: any[] = [];
-        let appModuleNameThis = appModuleName || this.state.appModuleName;
-        if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
-            this.state.pathFull.forEach( (p:any) => {
-                let updatedElement = p;
-                if (p.appModule === appModuleNameThis) {
-                    updatedElement.tree = treeValue.split('/');
-                    updatedElement.params.date = date
-                    path.push(updatedElement)
-                }
-                else {
-                    path.push(updatedElement)
-                }
-            });
-        } else if (appModuleName !== this.state.appModuleName) {
-            this.state.pathFull.forEach( (p:any) => {
-                path.push(p)
-            });
-            let newElement = {
-                appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: {
-                    date: date
-                }
-            };
-            path.push(newElement)
-        }
-        this.setState({pathFull: path});
-        this.props.history.push(`/app/${
-            btoa(
-                encodeURIComponent(
-                    JSON.stringify(
-                        path
-                    )
-                )
-            )
-            }`);
-    };
 
     loadObject = () => {
         let name: string;
@@ -107,7 +53,7 @@ export class MainApp extends React.Component<any, State> {
                         let currentAppModule = this.state.pathFull[this.state.pathFull.length - 1]
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
-                                this.updateContext(
+                                this.props.context.updateContext!(
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
                                 )
                             });
@@ -125,7 +71,7 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
 
-                            this.updateContext(
+                            this.props.context.updateContext!(
                                 ({
                                     viewObject: treeChildren[0],
                                     applicationReferenceTree: objectApp.get('referenceTree')})
@@ -193,14 +139,14 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderContent = () => {
-        const {context} = this.state;
+        const {context} = this.props;
         const {viewObject} = context;
         if (!viewObject) return null;
         return this.viewFactory.createView(viewObject, this.props)
     };
 
     renderReferences = () => {
-        const {context} = this.state;
+        const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
         const cbs = new Map<string, () => void>();
@@ -266,72 +212,70 @@ export class MainApp extends React.Component<any, State> {
     private setURL(eObject: Ecore.EObject, key: any) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.state.appModuleName;
         let treeValue = eObject.get('AppModule') ? undefined : key;
-        this.changeURL(appModuleName, treeValue);
+        this.props.context.changeURL!(appModuleName, treeValue)
     }
 
     render = () => {
         return (
-            <MainContext.Provider value={this.state.context}>
-                <div style={{flexGrow: 1}}>
-                    <Splitter
-                        minimalizedPrimaryPane={this.state.hideReferences}
-                        allowResize={!this.state.hideReferences}
-                        ref={this.refSplitterRef}
-                        position="vertical"
-                        primaryPaneMaxWidth="50%"
-                        primaryPaneMinWidth={0}
-                        primaryPaneWidth={localStorage.getItem('mainapp_refsplitter_pos') || "233px"}
-                        dispatchResize={true}
-                        postPoned={false}
-                        onDragFinished={() => {
-                            const size: string = this.refSplitterRef.current!.panePrimary.props.style.width;
-                            localStorage.setItem('mainapp_refsplitter_pos', size)
-                        }}
-                    >
-                        <div style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
-                            {this.renderReferences()}
-                        </div>
-                        <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
-                            <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
-                                <Splitter
-                                    ref={this.toolsSplitterRef}
-                                    position="horizontal"
-                                    primaryPaneMaxHeight="100%"
-                                    primaryPaneMinHeight="0%"
-                                    primaryPaneHeight={localStorage.getItem('mainapp_toolssplitter_pos') || "400px"}
-                                    dispatchResize={true}
-                                    postPoned={false}
-                                    maximizedPrimaryPane={this.state.currentTool === undefined}
-                                    allowResize={this.state.currentTool !== undefined}
-                                    onDragFinished={() => {
-                                        const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height;
-                                        localStorage.setItem('mainapp_toolssplitter_pos', size)
-                                    }}
-                                >
-                                    <div style={{zIndex: 10, backgroundColor: backgroundColor}}>
-                                        <div style={{
-                                            height: '100%',
-                                            width: '100%',
-                                            backgroundColor: backgroundColor
-                                        }}>{this.renderContent()}</div>
-                                    </div>
+            <div style={{flexGrow: 1}}>
+                <Splitter
+                    minimalizedPrimaryPane={this.state.hideReferences}
+                    allowResize={!this.state.hideReferences}
+                    ref={this.refSplitterRef}
+                    position="vertical"
+                    primaryPaneMaxWidth="50%"
+                    primaryPaneMinWidth={0}
+                    primaryPaneWidth={localStorage.getItem('mainapp_refsplitter_pos') || "233px"}
+                    dispatchResize={true}
+                    postPoned={false}
+                    onDragFinished={() => {
+                        const size: string = this.refSplitterRef.current!.panePrimary.props.style.width;
+                        localStorage.setItem('mainapp_refsplitter_pos', size)
+                    }}
+                >
+                    <div style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
+                        {this.renderReferences()}
+                    </div>
+                    <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
+                        <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
+                            <Splitter
+                                ref={this.toolsSplitterRef}
+                                position="horizontal"
+                                primaryPaneMaxHeight="100%"
+                                primaryPaneMinHeight="0%"
+                                primaryPaneHeight={localStorage.getItem('mainapp_toolssplitter_pos') || "400px"}
+                                dispatchResize={true}
+                                postPoned={false}
+                                maximizedPrimaryPane={this.state.currentTool === undefined}
+                                allowResize={this.state.currentTool !== undefined}
+                                onDragFinished={() => {
+                                    const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height;
+                                    localStorage.setItem('mainapp_toolssplitter_pos', size)
+                                }}
+                            >
+                                <div style={{zIndex: 10, backgroundColor: backgroundColor}}>
                                     <div style={{
                                         height: '100%',
                                         width: '100%',
-                                        overflow: 'auto',
                                         backgroundColor: backgroundColor
-                                    }}>
-                                        {this.renderToolbox()}
-                                    </div>
-                                </Splitter>
-                            </div>
-                            <div style={{height: `${FooterHeight}`}}>
-                                {this.renderFooter()}
-                            </div>
+                                    }}>{this.renderContent()}</div>
+                                </div>
+                                <div style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    overflow: 'auto',
+                                    backgroundColor: backgroundColor
+                                }}>
+                                    {this.renderToolbox()}
+                                </div>
+                            </Splitter>
                         </div>
-                    </Splitter>
-                </div>
-            </MainContext.Provider>
+                        <div style={{height: `${FooterHeight}`}}>
+                            {this.renderFooter()}
+                        </div>
+                    </div>
+                </Splitter>
+            </div>
         )
     }
 }
