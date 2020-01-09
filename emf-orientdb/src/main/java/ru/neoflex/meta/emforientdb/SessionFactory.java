@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class SessionFactory {
@@ -30,6 +31,7 @@ public abstract class SessionFactory {
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
     protected final String dbName;
     protected final List<EPackage> packages;
+    Map<String, URI> oClassToUriMap = new HashMap<>();
 
     public SessionFactory(String dbName, List<EPackage> packages) {
         this.dbName = dbName;

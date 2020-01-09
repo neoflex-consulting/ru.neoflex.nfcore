@@ -8,6 +8,9 @@ package ru.neoflex.meta.test
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EClass
+import java.util.List
+
+annotation "http://orientdb.com/meta" as orientdb
 
 abstract class Authority {
     String qName
@@ -25,8 +28,10 @@ class Column {
 	String dbType
 }
 
+@orientdb(embedded="true", oAbstract="true")
 abstract class DBKey {
 	String name
+    @orientdb(embedded="true")
 	refers Column[] columns
 }
 
@@ -37,6 +42,7 @@ class IEKey extends DBKey {
 }
 
 class FKey extends DBKey {
+    @orientdb(embedded="true")
 	refers DBEntity entity
 }
 
@@ -61,4 +67,61 @@ class MetaView {
 	refers EPackage aPackage
 	refers EClass aClass
 	refers EObject aObject
+}
+
+type ListOfDouble wraps List<Double>
+type List2OfDouble wraps List<List<Double>>
+type List3OfDouble wraps List<List<List<Double>>>
+
+@orientdb(embedded="true", oClassName="OShape")
+abstract class OShape {
+}
+
+@orientdb(oClassName="OPoint")
+class OPoint extends OShape {
+    Double[] coordinates
+}
+
+@orientdb(oClassName="OMultiPoint")
+class OMultiPoint extends OShape {
+    ListOfDouble[] coordinates
+}
+
+@orientdb(oClassName="OLineString")
+class OLineString extends OShape {
+    ListOfDouble[] coordinates
+}
+
+@orientdb(oClassName="OMultiLineString")
+class OMultiLineString extends OShape {
+    List2OfDouble[] coordinates
+}
+
+@orientdb(oClassName="OPolygon")
+class OPolygon extends OShape {
+    List2OfDouble[] coordinates
+}
+
+@orientdb(oClassName="OMultiPolygon")
+class OMultiPolygon extends OShape {
+    List3OfDouble[] coordinates
+}
+
+@orientdb(oClassName="ORectangle")
+class ORectangle extends OShape {
+    Double[] coordinates
+}
+
+@orientdb(oClassName="OGeometryCollection")
+class OGeometryCollection extends OShape {
+    contains OShape[] geometries
+}
+
+class Placemark {
+    @orientdb(indexType="FULLTEXT")
+    String name
+    @orientdb(indexType="FULLTEXT")
+    String description
+    @orientdb(indexType="SPATIAL")
+    contains OShape point
 }
