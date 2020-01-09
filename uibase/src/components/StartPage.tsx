@@ -9,23 +9,11 @@ export class StartPage extends React.Component<any, State> {
 
     constructor(props: any) {
         super(props);
-        this.state = {
-        }
+        this.state = {}
     }
 
     selectApplication(applicationName: string): void  {
-        const path = btoa(
-            encodeURIComponent(
-                JSON.stringify(
-                    [{
-                        appModule: applicationName,
-                        tree: [],
-                        params: {}
-                    }]
-                )
-            )
-        );
-        this.props.history.push(`/app/${path}`);
+        this.props.context.changeURL!(applicationName)
     }
 
     render() {

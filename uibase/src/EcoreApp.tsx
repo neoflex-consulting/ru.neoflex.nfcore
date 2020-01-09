@@ -64,8 +64,8 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])))
-        if (pathFull) {
+        if (nextProps.location.pathname.includes("app")) {
+            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])))
             return {
                 pathFull: pathFull,
                 appModuleName: pathFull[pathFull.length - 1].appModule
@@ -413,7 +413,11 @@ class EcoreApp extends React.Component<any, State> {
 
     renderStartPage = (props: any) => {
         return (
-            <StartPage {...props} applications={this.state.applications} />
+            <MainContext.Consumer>
+                {context => {
+                    return <StartPage {...props} context={context} applications={this.state.applications}/>;
+                }}
+            </MainContext.Consumer>
         )
     };
 
