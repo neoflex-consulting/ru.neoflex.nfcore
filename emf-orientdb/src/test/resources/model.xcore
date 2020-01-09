@@ -59,6 +59,7 @@ class DBTable extends DBEntity {
 
 class DBView extends DBEntity {
 	refers Column[] columns
+    @orientdb(indexType="NOTUNIQUE_HASH_INDEX")
 	boolean isMaterialized
 }
 
@@ -124,4 +125,12 @@ class Placemark {
     String description
     @orientdb(indexType="SPATIAL")
     contains OShape point
+}
+
+class Country {
+    String gid
+    @orientdb(indexType="FULLTEXT")
+    String name
+//    @orientdb(indexType="SPATIAL")
+    contains OMultiPolygon geometry
 }

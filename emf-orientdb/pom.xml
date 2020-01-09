@@ -24,6 +24,7 @@
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
         <ecore-xcore-version>1.7.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
+        <orientdb-version>3.0.27</orientdb-version>
         <argLine>-XX:MaxDirectMemorySize=512g</argLine>
     </properties>
     <dependencies>
@@ -57,32 +58,32 @@
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-client</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-server</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-tools</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-lucene</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-studio</artifactId>
-            <version>3.0.26</version>
+            <version>${orientdb-version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
