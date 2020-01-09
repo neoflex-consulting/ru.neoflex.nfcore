@@ -21,6 +21,8 @@ import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
+import {IMainContext, MainContext} from "./MainContext";
+import update from "immutability-helper";
 
 const { Header, Content, Sider } = Layout;
 
@@ -30,20 +32,89 @@ interface State {
     notifierDuration: number;
     breadcrumb: string[];
     applications: Ecore.EObject[];
+    context: IMainContext;
+    pathFull: any[];
+    appModuleName: string;
 }
 
 class EcoreApp extends React.Component<any, State> {
 
     constructor(props: any) {
         super(props);
+        const context: IMainContext = {
+            updateContext: this.updateContext,
+            changeURL: this.changeURL
+        };
         this.state = {
             principal: undefined,
             languages: [],
             notifierDuration: 0,
             breadcrumb: [],
             applications: [],
+            context,
+            pathFull: [],
+            appModuleName: props.appModuleName,
         }
     }
+
+    updateContext = (context: any, cb?: ()=>void) => {
+        this.setState((state, props) => {
+            return {context: update(state.context, {$merge: context})}
+        }, cb)
+    };
+
+    static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        if (nextProps.location.pathname.includes("app")) {
+            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])))
+            return {
+                pathFull: pathFull,
+                appModuleName: pathFull[pathFull.length - 1].appModule
+            }
+        } else {
+            return null
+        }
+    }
+
+    changeURL = (appModuleName?: string, treeValue?: string, date?: string) => {
+        let path: any[] = [];
+        let appModuleNameThis = appModuleName || this.state.appModuleName;
+        if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                let updatedElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    updatedElement.tree = treeValue.split('/');
+                    updatedElement.params.date = date
+                    path.push(updatedElement)
+                }
+                else {
+                    path.push(updatedElement)
+                }
+                path.push(updatedElement)
+            });
+        } else if (appModuleName !== this.state.appModuleName) {
+            this.state.pathFull.forEach( (p:any) => {
+                path.push(p)
+            });
+            let newElement = {
+                appModule: appModuleName,
+                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                params: {
+                    date: date
+                }
+            };
+            path.push(newElement)
+        }
+        this.setState({pathFull: path});
+        this.props.history.push(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        path
+                    )
+                )
+            )
+            }`);
+    };
 
     onRightMenu(e : any) {
         if (e.key === "logout") {
@@ -332,13 +403,21 @@ class EcoreApp extends React.Component<any, State> {
 
     renderApplication = (props: any)=>{
         return (
-            <MainApp {...props}/>
+            <MainContext.Consumer>
+                {context => {
+                    return <MainApp {...props} context={context}/>;
+                }}
+            </MainContext.Consumer>
         )
     };
 
     renderStartPage = (props: any) => {
         return (
-            <StartPage {...props} applications={this.state.applications} />
+            <MainContext.Consumer>
+                {context => {
+                    return <StartPage {...props} context={context} applications={this.state.applications}/>;
+                }}
+            </MainContext.Consumer>
         )
     };
 
@@ -386,13 +465,15 @@ class EcoreApp extends React.Component<any, State> {
 
     render = () => {
         return (
-            <Layout>
-                {this.state.principal === undefined ?
-                    <Login onLoginSucceed={this.setPrincipal}/>
-                    :
-                    this.renderDev()
-                }
-            </Layout>
+            <MainContext.Provider value={this.state.context}>
+                <Layout>
+                    {this.state.principal === undefined ?
+                        <Login onLoginSucceed={this.setPrincipal}/>
+                        :
+                        this.renderDev()
+                    }
+                </Layout>
+            </MainContext.Provider>
         )
     }
 }
