@@ -23,6 +23,7 @@ import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
+import ConfigUrlElement from "./ConfigUrlElement";
 
 const { Header, Content, Sider } = Layout;
 
@@ -75,34 +76,36 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    changeURL = (appModuleName?: string, treeValue?: string, date?: string) => {
+    changeURL = (appModuleName?: string, treeValue?: string, reportDate?: string) => {
         let path: any[] = [];
+        let urlElement: ConfigUrlElement = {
+            appModule: appModuleName,
+            tree: [],
+            params: {
+                reportDate: reportDate
+            }
+        };
         let appModuleNameThis = appModuleName || this.state.appModuleName;
         if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
             this.state.pathFull.forEach( (p:any) => {
-                let updatedElement = p;
+                urlElement = p;
                 if (p.appModule === appModuleNameThis) {
-                    updatedElement.tree = treeValue.split('/');
-                    updatedElement.params.date = date
-                    path.push(updatedElement)
+                    urlElement.tree = treeValue.split('/');
+                    urlElement.params.reportDate = reportDate;
+                    path.push(urlElement)
                 }
                 else {
-                    path.push(updatedElement)
+                    path.push(urlElement)
                 }
-                path.push(updatedElement)
             });
         } else if (appModuleName !== this.state.appModuleName) {
             this.state.pathFull.forEach( (p:any) => {
                 path.push(p)
             });
-            let newElement = {
-                appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: {
-                    date: date
-                }
-            };
-            path.push(newElement)
+            urlElement.appModule = appModuleName
+            urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
+            urlElement.params.reportDate = reportDate
+            path.push(urlElement)
         }
         this.setState({pathFull: path});
         this.props.history.push(`/app/${
@@ -127,18 +130,7 @@ class EcoreApp extends React.Component<any, State> {
             this.props.history.push('/developer/data');
         }
         else if (e.key.split('.').includes('app')) {
-            const path = btoa(
-                encodeURIComponent(
-                    JSON.stringify(
-                        [{
-                            appModule: e.key.split('.').slice(1).join('.'),
-                            tree: [],
-                            params: {}
-                        }]
-                    )
-                )
-            );
-            this.props.history.push(`/app/${path}`);
+            this.changeURL(e.key.split('.').slice(1).join('.'))
         }
         else if (e.key === "test") {
             this.props.history.push('/test');
@@ -202,14 +194,7 @@ class EcoreApp extends React.Component<any, State> {
     onClickBreadcrumb = (b : string): void => {
         let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
         let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-        let path = btoa(
-            encodeURIComponent(
-                JSON.stringify(
-                    JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1)
-                )
-            )
-        );
-        this.props.history.push(path)
+        this.changeURL(JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1));
         this.setState({breadcrumb});
     };
 
