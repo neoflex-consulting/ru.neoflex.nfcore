@@ -37,6 +37,7 @@ public class Session implements Closeable {
     public static final String EOBJECT = "EObject";
     public static final String EPROXY = "EProxy";
     public static final String ORIENTDB_SOURCE = "http://orientdb.com/meta";
+    public static final String ANN_O_CLASS_NAME = "oClassName";
     final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
@@ -76,7 +77,7 @@ public class Session implements Closeable {
     }
 
     public String getOClassName(EClass eClass) {
-        String oClassName = getAnnotation(eClass, "oClassName", null);
+        String oClassName = getAnnotation(eClass, ANN_O_CLASS_NAME, null);
         if (oClassName != null) {
             return oClassName;
         }
@@ -223,14 +224,7 @@ public class Session implements Closeable {
                     if (sf.isID()) {
                         id = sf;
                     }
-                    String indexType = getAnnotation(sf, "indexType", null);
-                    if (indexType != null) {
-                        String name = oClass.getName() + "_" + sf.getName() + "_ie";
-                        if (oClass.getClassIndex(name) == null) {
-                            ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
-                            oClass.createIndex(name, indexType, null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM, new String[]{sf.getName()});
-                        }
-                    }
+                    createIndexIfRequired(oClass, sf);
                 }
             }
             if (id != null) {
@@ -259,14 +253,27 @@ public class Session implements Closeable {
                             edgeClass.setCustom("feature", sf.getName());
                         }
                     }
-                    String indexType = getAnnotation(sf, "indexType", null);
-                    if (indexType != null) {
-                        String name = oClass.getName() + "_" + sf.getName() + "_ie";
-                        if (oClass.getClassIndex(name) == null) {
-                            ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
-                            oClass.createIndex(name, indexType, null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM, new String[]{sf.getName()});
-                        }
-                    }
+                    createIndexIfRequired(oClass, sf);
+                }
+            }
+        }
+    }
+
+    public void createIndexIfRequired(OClass oClass, EStructuralFeature sf) {
+        String indexType = getAnnotation(sf, "indexType", null);
+        if (indexType != null) {
+            String name = oClass.getName() + "_" + sf.getName() + "_ie";
+            if (oClass.getClassIndex(name) == null) {
+                if (indexType.startsWith("SPATIAL")) {
+                    ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                    oClass.createIndex(name, indexType, null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM, new String[]{sf.getName()});
+                }
+                else if (indexType.startsWith("FULLTEXT")) {
+                    ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                    oClass.createIndex(name, indexType, null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM, new String[]{sf.getName()});
+                }
+                else {
+                    oClass.createIndex(name, indexType, sf.getName());
                 }
             }
         }
