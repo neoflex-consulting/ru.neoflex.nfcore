@@ -113,8 +113,6 @@ class DatasetGridInit {
             serverFilter3.enable = true
             datasetGrid.serverFilter.add(serverFilter3)
 
-            datasetGrid.useServerFilter = true
-
             Context.current.store.updateEObject(datasetGridRef, datasetGrid)
         }
     }

@@ -69,7 +69,6 @@ class DatasetGrid extends DatasetComponent {
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
-     boolean useServerFilter
      contains Conditions[] serverFilter //Состав серверного фильтра
      //String clientFilterExpression //выражение в клиентском фильтре
 }
@@ -107,6 +106,7 @@ abstract class DatasetColumnView {
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
+    boolean editable
 }
 
 class RdbmsColumn extends DatasetColumnView {
