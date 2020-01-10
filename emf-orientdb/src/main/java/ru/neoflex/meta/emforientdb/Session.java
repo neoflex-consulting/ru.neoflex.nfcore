@@ -602,8 +602,8 @@ public class Session implements Closeable {
     private void setNonContainedReference(ResourceSet rs, EObject eObject, EReference sf, OVertex crVertex) {
         EObject crObject = createEObject(rs, crVertex);
         if (!crObject.eIsProxy()) {
-            //OElement top = getTopElement(crVertex);
-            OElement top = crVertex;
+            OElement top = getTopElement(crVertex);
+            //OElement top = crVertex;
             URI crURI = factory.createResourceURI(top).appendFragment(factory.getId(crVertex.getIdentity()));
             ((InternalEObject) crObject).eSetProxyURI(crURI);
         }
@@ -642,7 +642,9 @@ public class Session implements Closeable {
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient()) {
                 if (!propertyNames.contains(sf.getName())) {
-                    eObject.eUnset(sf);
+                    if (!(sf instanceof EReference) || !((EReference) sf).isContainer()) {
+                        eObject.eUnset(sf);
+                    }
                     continue;
                 }
                 Object value = oElement.getProperty(sf.getName());

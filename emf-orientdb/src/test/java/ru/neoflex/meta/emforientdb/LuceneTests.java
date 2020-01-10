@@ -10,7 +10,10 @@ import org.noggit.JSONParser;
 import org.noggit.ObjectBuilder;
 import ru.neoflex.meta.test.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -80,6 +83,8 @@ public class LuceneTests extends TestBase {
                     resource.getContents().add(country);
                     resource.save(null);
                 });
+                server.createDatabaseDocument().execute("sql",
+                        "CREATE INDEX test_Country.geometry ON test_Country(geometry) SPATIAL ENGINE LUCENE").close();
             }
         }
     }
