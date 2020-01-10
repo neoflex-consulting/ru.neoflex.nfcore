@@ -249,6 +249,7 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                             headerTooltip={"headerTooltip"}
                             filter="agDateColumnFilter"
                             sort={"DESC"}
+                            editable={true}
                         >
                         </AgGridColumn>
                             {
@@ -259,6 +260,7 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                                             headerName={col.get("headerName").toString().substring(0,1).toUpperCase() + col.get("headerName").toString().substring(1)}
                                             headerTooltip={col.get("headerTooltip")}
                                             hide={col.get("hide")}
+                                            editable={col.get("editable")}
                                             pinned={col.get("pinned") === 'Left' ? 'left' : col.get("pinned") === 'Right' ? 'right' : false}
                                             filter={col.get("filter") === 'NumberColumnFilter'
                                                 ? 'agNumberColumnFilter' : col.get("filter") === 'DateColumnFilter' ?

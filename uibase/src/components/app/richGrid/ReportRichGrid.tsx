@@ -63,6 +63,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
             rowData.set('pinned', c.get('pinned'))
             rowData.set('filter', c.get('filter'))
             rowData.set('sort', c.get('sort'))
+            rowData.set('editable', c.get('editable'))
             allColumn.push(rowData)
         })
         this.setState({columnDefs: allColumn});

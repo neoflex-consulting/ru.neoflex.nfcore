@@ -32,7 +32,7 @@ interface State {
     languages: string[];
     notifierDuration: number;
     breadcrumb: string[];
-    applications: Ecore.EObject[];
+    applications: string[];
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
@@ -86,7 +86,10 @@ class EcoreApp extends React.Component<any, State> {
             }
         };
         let appModuleNameThis = appModuleName || this.state.appModuleName;
-        if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+        if (appModuleName !== undefined && this.state.applications.includes(appModuleName)){
+            path.push(urlElement)
+        }
+        else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
             this.state.pathFull.forEach( (p:any) => {
                 urlElement = p;
                 if (p.appModule === appModuleNameThis) {
@@ -106,6 +109,10 @@ class EcoreApp extends React.Component<any, State> {
             urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
             urlElement.params.reportDate = reportDate
             path.push(urlElement)
+        } else if (appModuleName === this.state.appModuleName) {
+            this.state.pathFull.forEach( (p:any) => {
+                path.push(p)
+            });
         }
         this.setState({pathFull: path});
         this.props.history.push(`/app/${
@@ -157,7 +164,10 @@ class EcoreApp extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
+                    .then((applicationsObjects) => {
+                        let applications = applicationsObjects.map( (a:any) =>
+                            a.eContents()[0].get('name')
+                        )
                         this.setState({applications})
                     })
             }
@@ -192,13 +202,27 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     onClickBreadcrumb = (b : string): void => {
-        let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
-        let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-        this.changeURL(JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1));
-        this.setState({breadcrumb});
+        if (b === "home") {
+            this.props.history.push('/home')
+            this.setState({breadcrumb: []});
+        } else {
+            let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
+            let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
+            let path = JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1);
+            this.props.history.push(`/app/${
+                btoa(
+                    encodeURIComponent(
+                        JSON.stringify(
+                            path
+                        )
+                    )
+                )
+                }`);
+            this.setState({breadcrumb});
+        }
     };
 
-    renderDev = () => {
+    renderDev = (props: any) => {
         const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
@@ -229,7 +253,7 @@ class EcoreApp extends React.Component<any, State> {
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
                                 <Col span={19}>
-                                    <BreadcrumbApp selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
+                                    <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
                                 <Col span={5}>
@@ -257,8 +281,8 @@ class EcoreApp extends React.Component<any, State> {
                                             <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Applications</span>}>
                                                 {this.state.applications.map((a: any) =>
-                                                    <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
-                                                        {a.eContents()[0].get('name')}
+                                                    <Menu.Item key={`app.${a}`}>
+                                                        {a}
                                                     </Menu.Item>
                                                 )}
                                             </Menu.SubMenu>
@@ -309,7 +333,7 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = ['developer', 'test'];
         if (this.state.applications) {
             this.state.applications.map((a: any) =>
-                selectedKeys.push(`app.${a.eContents()[0].get('name')}`));
+                selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
             const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule
@@ -455,7 +479,7 @@ class EcoreApp extends React.Component<any, State> {
                     {this.state.principal === undefined ?
                         <Login onLoginSucceed={this.setPrincipal}/>
                         :
-                        this.renderDev()
+                        this.renderDev(this.props)
                     }
                 </Layout>
             </MainContext.Provider>

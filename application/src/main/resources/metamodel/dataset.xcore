@@ -107,6 +107,7 @@ abstract class DatasetColumnView {
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
+    boolean editable
 }
 
 class RdbmsColumn extends DatasetColumnView {
