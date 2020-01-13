@@ -117,6 +117,7 @@ class NfDataGrid extends React.Component<any, any> {
     updateTableData(e: any): void  {
         this.props.context.changeURL!(this.props.appModule, undefined, e._d)
     }
+
     render() {
         const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
         let defaultFilter: any[] = [];
