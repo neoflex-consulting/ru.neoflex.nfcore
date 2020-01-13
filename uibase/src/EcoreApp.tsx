@@ -101,6 +101,17 @@ class EcoreApp extends React.Component<any, State> {
                     path.push(urlElement)
                 }
             });
+        } else if (this.state.pathFull && appModuleName === this.state.appModuleName && reportDate !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.params.reportDate = reportDate;
+                    path.push(urlElement)
+                }
+                else {
+                    path.push(urlElement)
+                }
+            });
         } else if (appModuleName !== this.state.appModuleName) {
             this.state.pathFull.forEach( (p:any) => {
                 path.push(p)

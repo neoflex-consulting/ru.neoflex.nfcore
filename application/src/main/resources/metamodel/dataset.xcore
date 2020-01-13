@@ -61,7 +61,7 @@ abstract class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery()
+     op JSON runQuery(String reportDate)
 }
 
 class DatasetGrid extends DatasetComponent {

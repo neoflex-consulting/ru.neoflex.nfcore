@@ -8,11 +8,12 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, Modal, Select} from "antd";
+import {Button, DatePicker, Modal, Select} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import {EObject} from "ecore";
 import ServerFilter from "./ServerFilter";
+import moment from 'moment';
 
 interface Props {
     onCtrlA?: Function,
@@ -23,10 +24,11 @@ interface Props {
     rowData?: Array<any>,
     gridOptions?: { [ key:string ]: any },
     serverFilters:  Array<EObject>,
-    useServerFilter: boolean
+    useServerFilter: boolean,
+    reportDate: any
 }
 
-class NfDataGrid extends React.Component<Props & WithTranslation, any> {
+class NfDataGrid extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;
 
@@ -112,6 +114,9 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
         this.setState({ modalResourceVisible: false })
     }
 
+    updateTableData(e: any): void  {
+        this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+    }
     render() {
         const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
         let defaultFilter: any[] = [];
@@ -124,50 +129,53 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
         return (
             <div
                 onKeyDown={this.handleKeyDown}
-                style={{ boxSizing: 'border-box', height: '100%', width: '100%' }}
+                style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.theme}
             >
+                <span style={{color: 'gray', fontSize: 'larger'}}>{t("theme")}: </span>
                 <Select
                     notFoundContent={t('notfound')}
                     allowClear={true}
                     showSearch={true}
-                    style={{ width: '180px', marginLeft: '10px' }}
+                    style={{ width: '180px' }}
                     onSelect={ (e:string) => this.setState({theme: e})}
-                    defaultValue={"Theme: " + this.state.themes[0]}
+                    defaultValue={this.state.themes[0]}
                 >
                     {
                         this.state.themes
                             .map((theme: string) =>
                                 <Select.Option key={theme} value={theme}>
-                                    {"Theme: " + theme}
+                                    {theme}
                                 </Select.Option>)
                     }
                 </Select>
+                <span style={{color: 'gray', fontSize: 'larger', marginLeft: '10px'}}>  {t("showrows")}: </span>
                 <Select
                     notFoundContent={t('notfound')}
                     allowClear={true}
                     showSearch={true}
-                    style={{ width: '180px', marginLeft: '10px' }}
+                    style={{ width: '180px' }}
                     placeholder="Show rows"
-                    defaultValue={"Show rows: " + this.state.paginationPageSize}
+                    defaultValue={this.state.paginationPageSize}
                     onChange={this.onPageSizeChanged.bind(this)}
                 >
                     {
                         this.state.paginationPageSizes
                             .map((paginationPageSize: string) =>
                                 <Select.Option key={paginationPageSize} value={paginationPageSize}>
-                                    {"Show rows: " + paginationPageSize}
+                                    {paginationPageSize}
                                 </Select.Option>)
                     }
                 </Select>
                 {this.props.useServerFilter &&
-                <div style={{display: "inline"}}>
+                <div style={{marginLeft: '10px', display: 'inline'}}>
+                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
                     <Select
                         //selectedServerFilters
                         notFoundContent={t('notfound')}
                         //allowClear={true}
+                        style={{width: '400px'}}
                         showSearch={true}
-                        style={{ width: '400px', marginLeft: '10px' }}
                         //onSelect={ (e:any) => this.setState({serverFilters: e})}
                         mode="multiple"
                         placeholder="No Filters Selected"
@@ -203,7 +211,19 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                     </Modal>}
                 </div>
                 }
-                <div style={{ marginTop: "30px", marginLeft: '10px'}}>
+                {this.props.reportDate &&
+                <div style={{marginTop: "10px"}}>
+                    <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
+                    <DatePicker
+                        allowClear={true}
+                        placeholder="Select date"
+                        defaultValue={moment(this.props.reportDate)}
+                        format={'DD.MM.YYYY'}
+                        onChange={ (e: any) => this.updateTableData(e)}
+                    />
+                </div>
+                }
+                <div style={{ marginTop: "30px"}}>
                     <AgGridReact
                         ref={this.grid}
                         //columnDefs={columnDefs}
@@ -268,7 +288,6 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                                         />
                                     )
                                     : null
-
                             }
                     </AgGridReact>
                 </div>

@@ -19,13 +19,13 @@ class DatasetGridInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateDatasetGrid(String name) {
+    static def recreateDatasetGrid(String name, String JdbcDataset) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
             def datasetGrid = DatasetFactory.eINSTANCE.createDatasetGrid()
             datasetGrid.name = name
-            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest")
+            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
                 datasetGrid.setDataset(dataset)
             }
@@ -35,7 +35,7 @@ class DatasetGridInit {
         else if ((rs.resources.get(0).contents.get(0) as DatasetGrid).dataset == null) {
             def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
             def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
-            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest")
+            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
                 datasetGrid.setDataset(dataset)
             }
@@ -77,14 +77,14 @@ class DatasetGridInit {
         }
     }
 
-    static def createServerFilters(String name) {
+    static def createServerFilters(String name, String JdbcDataset) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
                 .execute().resourceSet
         if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0) {
             def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
             def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
 
-            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest") as JdbcDataset
+            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
             def serverFilter1 = DatasetFactory.eINSTANCE.createConditions()
             serverFilter1.name = "EnableFirstServerFilter_eidLessThen100000"
