@@ -54,7 +54,7 @@ class NfDataGrid extends React.Component<any, any> {
                 1000,
                 "All"
             ],
-            paginationPageSize: 7,
+            paginationPageSize: "All",
             selectedServerFilters: [],
             modalResourceVisible: false
         };
@@ -115,7 +115,9 @@ class NfDataGrid extends React.Component<any, any> {
     }
 
     updateTableData(e: any): void  {
-        this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+        if (e !== null) {
+            this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+        }
     }
 
     render() {
@@ -136,7 +138,6 @@ class NfDataGrid extends React.Component<any, any> {
                 <span style={{color: 'gray', fontSize: 'larger'}}>{t("theme")}: </span>
                 <Select
                     notFoundContent={t('notfound')}
-                    allowClear={true}
                     showSearch={true}
                     style={{ width: '180px' }}
                     onSelect={ (e:string) => this.setState({theme: e})}
@@ -153,7 +154,6 @@ class NfDataGrid extends React.Component<any, any> {
                 <span style={{color: 'gray', fontSize: 'larger', marginLeft: '10px'}}>  {t("showrows")}: </span>
                 <Select
                     notFoundContent={t('notfound')}
-                    allowClear={true}
                     showSearch={true}
                     style={{ width: '180px' }}
                     placeholder="Show rows"
@@ -216,7 +216,6 @@ class NfDataGrid extends React.Component<any, any> {
                 <div style={{marginTop: "10px"}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
                     <DatePicker
-                        allowClear={true}
                         placeholder="Select date"
                         defaultValue={moment(this.props.reportDate)}
                         format={'DD.MM.YYYY'}
@@ -230,7 +229,6 @@ class NfDataGrid extends React.Component<any, any> {
                         //columnDefs={columnDefs}
                         rowData={rowData}
                         modules={AllCommunityModules}
-                        //pagination //странички
                         rowSelection="multiple" //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
