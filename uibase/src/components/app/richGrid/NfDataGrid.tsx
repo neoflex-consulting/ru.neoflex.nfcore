@@ -9,11 +9,11 @@ import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Button, DatePicker, Modal, Select} from "antd";
-import {WithTranslation, withTranslation} from "react-i18next";
+import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import {EObject} from "ecore";
-import ServerFilter from "./ServerFilter";
 import moment from 'moment';
+import ServerFilter from "./ServerFilter";
 
 interface Props {
     onCtrlA?: Function,
@@ -173,12 +173,11 @@ class NfDataGrid extends React.Component<any, any> {
                 <div style={{marginLeft: '10px', display: 'inline'}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
                     <Select
-                        //selectedServerFilters
                         notFoundContent={t('notfound')}
-                        //allowClear={true}
+                        allowClear={true}
                         style={{width: '400px'}}
                         showSearch={true}
-                        //onSelect={ (e:any) => this.setState({serverFilters: e})}
+                      //  onSelect={ (e:any) => this.setState({serverFilters: e})}
                         mode="multiple"
                         placeholder="No Filters Selected"
                         defaultValue={defaultFilter}
@@ -187,7 +186,10 @@ class NfDataGrid extends React.Component<any, any> {
                             this.props.serverFilters !== undefined ?
                                 this.props.serverFilters
                                     .map((f: EObject) =>
-                                        <Select.Option key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`} value={`${f.get('datasetColumn')} ${f.get('operation')} ${f.get('value')}`}>
+                                        <Select.Option
+                                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                        >
                                             {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
                                         </Select.Option>)
                                 :
@@ -206,7 +208,11 @@ class NfDataGrid extends React.Component<any, any> {
                         {
                             this.props.serverFilters
                                 ?
-                                <ServerFilter serverFilters={this.props.serverFilters}/>
+                                <ServerFilter
+                                    {...this.props}
+                                    serverFilters={this.props.serverFilters}
+                                    columnDefs={this.props.columnDefs}
+                                />
                                 :
                                 <ServerFilter/>
                         }

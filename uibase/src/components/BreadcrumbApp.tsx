@@ -24,9 +24,9 @@ class BreadcrumbApp extends React.Component<any, any> {
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
-            this.props.selectedKeys[0] &&
+            (this.props.selectedKeys[0] &&
             this.props.selectedKeys[0].split('.').includes('app') &&
-            this.props.breadcrumb.length !== 0
+            this.props.breadcrumb.length !== 0)
                 ||
                 this.props.location.pathname === "/home"
             ?

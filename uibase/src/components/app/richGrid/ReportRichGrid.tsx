@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withTranslation, WithTranslation } from "react-i18next";
+import { withTranslation } from "react-i18next";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
 import NfDataGrid from "./NfDataGrid";
@@ -49,8 +49,7 @@ class ReportRichGrid extends React.Component<any, State> {
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         const parameters: any[] = [];
-        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))
-            [JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1]
+        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1]
         const reportDate = currentApp.params.reportDate
         this.setState({appModule: currentApp.appModule})
         if (reportDate) {
