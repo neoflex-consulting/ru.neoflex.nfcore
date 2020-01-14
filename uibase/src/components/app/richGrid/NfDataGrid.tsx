@@ -127,7 +127,8 @@ class NfDataGrid extends React.Component<any, any> {
             defaultFilter = serverFilters
                 .filter((f: EObject) => f.get('enable') === true)
                 .map((f: EObject) =>
-                    f.get('name'))
+                    `${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`
+                )
         }
         return (
             <div
@@ -186,8 +187,8 @@ class NfDataGrid extends React.Component<any, any> {
                             this.props.serverFilters !== undefined ?
                                 this.props.serverFilters
                                     .map((f: EObject) =>
-                                        <Select.Option key={f.get('name')} value={f.get('name')}>
-                                            {f.get('name')}
+                                        <Select.Option key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`} value={`${f.get('datasetColumn')} ${f.get('operation')} ${f.get('value')}`}>
+                                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
                                         </Select.Option>)
                                 :
                                 undefined

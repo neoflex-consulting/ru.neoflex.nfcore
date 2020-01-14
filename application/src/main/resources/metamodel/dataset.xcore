@@ -124,7 +124,6 @@ class FormatMask {
 }
 
 class Conditions {
-    String name
     refers DatasetColumn datasetColumn
     Operations operation
     String value
