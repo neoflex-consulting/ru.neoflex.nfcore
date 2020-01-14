@@ -83,6 +83,7 @@ public class DbTests extends TestBase {
             group_name.setDbType("STRING");
             group.getColumns().add(group_name);
             PKey group_pk = TestFactory.eINSTANCE.createPKey();
+            group_pk.setName("group_pk");
             group_pk.getColumns().add(group_id);
             group.setPKey(group_pk);
             Resource group_res = rs.createResource(server.createURI());
@@ -104,9 +105,11 @@ public class DbTests extends TestBase {
             user_group_id.setDbType("INTEGER");
             user.getColumns().add(user_group_id);
             PKey user_pk = TestFactory.eINSTANCE.createPKey();
+            user_pk.setName("user_pk");
             user_pk.getColumns().add(user_id);
             user.setPKey(user_pk);
             FKey user_group_fk = TestFactory.eINSTANCE.createFKey();
+            user_group_fk.setName("user_group_fk");
             user_group_fk.getColumns().add(user_group_id);
             user_group_fk.setEntity(group);
             user.getFKeys().add(user_group_fk);
@@ -123,6 +126,12 @@ public class DbTests extends TestBase {
             Resource user_group_res = rs.createResource(server.createURI());
             user_group_res.getContents().add(user_group);
             user_group_res.save(null);
+        });
+        server.withSession(session -> {
+            List<Resource> users = session.query("select from test_DBTable where qName=?", "USER");
+            Assert.assertEquals(1, users.size());
+            DBTable user = (DBTable) users.get(0).getContents().get(0);
+            Assert.assertEquals("GROUP_ID", user.getFKeys().get(0).getColumns().get(0).getName());
         });
         server.withSession(session -> {
             List<Resource> views = session.query("select from test_DBView");
