@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.dataset.DatasetGrid
 import ru.neoflex.nfcore.dataset.Filter
 import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.Operations
+import ru.neoflex.nfcore.dataset.RowPerPage
 
 class DatasetGridInit {
     static def findOrCreateEObject(EClass eClass, String name) {
@@ -29,6 +30,7 @@ class DatasetGridInit {
             if (dataset) {
                 datasetGrid.setDataset(dataset)
             }
+            datasetGrid.rowPerPage = RowPerPage.ALL
             rs.resources.add(Context.current.store.createEObject(datasetGrid))
             return rs.resources.get(0).contents.get(0) as DatasetGrid
         }
@@ -39,6 +41,7 @@ class DatasetGridInit {
             if (dataset) {
                 datasetGrid.setDataset(dataset)
             }
+            datasetGrid.rowPerPage = RowPerPage.ALL
             Context.current.store.updateEObject(datasetGridRef, datasetGrid)
         }
     }

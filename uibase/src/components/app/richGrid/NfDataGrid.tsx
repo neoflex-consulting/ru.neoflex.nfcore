@@ -16,6 +16,7 @@ import moment from 'moment';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
+import rowPerPageMapper from "../../../utils/consts";
 
 interface Props {
     onCtrlA?: Function,
@@ -40,17 +41,8 @@ class NfDataGrid extends React.Component<any, any> {
         this.state = {
             themes: [],
             currentTheme: this.props.viewObject.get('defaultDatasetGrid').get('theme'),
-            paginationPageSizes: [
-                1,
-                10,
-                20,
-                50,
-                100,
-                500,
-                1000,
-                "All"
-            ],
-            paginationPageSize: "All",
+            rowPerPages: [],
+            paginationPageSize: this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage'),
             selectedServerFilters: [],
             modalResourceVisible: false
         };
@@ -120,6 +112,10 @@ class NfDataGrid extends React.Component<any, any> {
         if (e.key.split('.').includes('theme')) {
             this.setSelectedKeys(e.key.split('.')[1])
         }
+        if (e.key.split('.').includes('rowPerPage')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+            this.onPageSizeChanged(e.key.split('.')[1])
+        }
     }
 
     private setSelectedKeys(parameter?: string) {
@@ -137,6 +133,19 @@ class NfDataGrid extends React.Component<any, any> {
                 selectedKeys.push(`theme.${this.state.currentTheme}`)
             }
         }
+        if (this.state.rowPerPages.length !== 0) {
+            if (parameter && this.state.rowPerPages.includes(parameter)) {
+                selectedKeys.push(`rowPerPage.${parameter}`)
+                this.setState({paginationPageSize: parameter})
+            }
+            else if (this.state.paginationPageSize === null) {
+                selectedKeys.push(`rowPerPage.${this.state.rowPerPages[0]}`)
+                this.setState({paginationPageSize: this.state.rowPerPages[0]})
+            }
+            else {
+                selectedKeys.push(`rowPerPage.${this.state.paginationPageSize}`)
+            }
+        }
         return selectedKeys;
     }
 
@@ -148,12 +157,26 @@ class NfDataGrid extends React.Component<any, any> {
                 });
                 this.setState({themes})
             })
+    };
+
+    getAllRowPerPage() {
+        API.instance().findEnum('dataset', 'RowPerPage')
+            .then((result: Ecore.EObject[]) => {
+                const rowPerPageMapper_: any = rowPerPageMapper;
+                let rowPerPages = result.map( (t: any) => {
+                    return rowPerPageMapper_[t.get('name')]
+                });
+                this.setState({rowPerPages})
+            })
 
     };
 
     componentDidMount(): void {
         if (this.state.themes.length === 0) {
             this.getAllThemes()
+        }
+        if (this.state.rowPerPages.length === 0) {
+            this.getAllRowPerPage()
         }
     }
 
@@ -179,31 +202,12 @@ class NfDataGrid extends React.Component<any, any> {
                 <Menu.Item>
                     Filter
                 </Menu.Item>
-
-
-                {/*<span style={{color: 'gray', fontSize: 'larger', marginLeft: '10px'}}>  {t("showrows")}: </span>*/}
-                {/*<Select*/}
-                {/*    notFoundContent={t('notfound')}*/}
-                {/*    showSearch={true}*/}
-                {/*    style={{ width: '180px' }}*/}
-                {/*    placeholder="Show rows"*/}
-                {/*    defaultValue={this.state.paginationPageSize}*/}
-                {/*    onChange={this.onPageSizeChanged.bind(this)}*/}
-                {/*>*/}
-                {/*    {*/}
-                {/*        this.state.paginationPageSizes*/}
-                {/*            .map((paginationPageSize: string) =>*/}
-                {/*                <Select.Option key={paginationPageSize} value={paginationPageSize}>*/}
-                {/*                    {paginationPageSize}*/}
-                {/*                </Select.Option>)*/}
-                {/*    }*/}
-                {/*</Select>*/}
                 <Menu.SubMenu title={"Rows Per Page"}>
-                    {/*{this.state.themes.map((theme: string) =>*/}
-                    {/*    <Menu.Item key={`theme.${theme}`}>*/}
-                    {/*        {theme}*/}
-                    {/*    </Menu.Item>*/}
-                    {/*)}*/}
+                    {this.state.rowPerPages.map((rowPerPage: string) =>
+                        <Menu.Item key={`rowPerPage.${rowPerPage}`}>
+                            {rowPerPage}
+                        </Menu.Item>
+                    )}
                 </Menu.SubMenu>
 
                 <Menu.Item>
@@ -326,7 +330,7 @@ class NfDataGrid extends React.Component<any, any> {
                         // //sortingOrder={["desc", "asc", null]}
                         enableFilter={true}
                         gridAutoHeight={true}
-                        paginationPageSize={this.state.paginationPageSize}
+                        paginationPageSize={Number(this.state.paginationPageSize)}
                         {...gridOptions}
                     >
                         <AgGridColumn

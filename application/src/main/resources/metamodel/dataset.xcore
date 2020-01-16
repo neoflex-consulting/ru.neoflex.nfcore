@@ -65,7 +65,7 @@ abstract class DatasetComponent {
 }
 
 class DatasetGrid extends DatasetComponent {
-     String rowCount//сколько строк показывать (выбрать из списка)
+     RowPerPage rowPerPage//сколько строк показывать (выбрать из списка)
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
@@ -128,6 +128,17 @@ class Conditions {
     Operations operation
     String value
     boolean enable //включен ли фильтр
+}
+
+enum RowPerPage {
+    one,
+    ten,
+    twenty,
+    fifty,
+    oneHundred,
+    fiveHundred,
+    oneThousand,
+    all
 }
 
 enum QueryType {

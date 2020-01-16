@@ -1,3 +1,13 @@
+const rowPerPageMapper = {
+    "one": "1",
+    "ten": "10",
+    "twenty": "20",
+    "fifty": "50",
+    "oneHundred": "100",
+    "fiveHundred": "500",
+    "oneThousand": "1000",
+    "all": "All"
+};
 
 // @ts-ignore
 const colorScheme = [
@@ -38,5 +48,6 @@ const colorScheme = [
     "rgb(132,80,202)",
     "rgb(135,75,199)",
     "rgb(138,69,198)"
-
 ];
+
+export default rowPerPageMapper;
