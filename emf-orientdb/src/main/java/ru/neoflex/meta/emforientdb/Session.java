@@ -648,7 +648,10 @@ public class Session implements Closeable {
     }
 
     private void populateEObjectContains(ResourceSet rs, OElement oElement, EObject eObject) {
-        ((OrientDBResource) eObject.eResource()).setID(eObject, factory.getId(oElement.getIdentity()));
+        ORID orid = oElement.getIdentity();
+        if (orid.isValid()) {
+            ((OrientDBResource) eObject.eResource()).setID(eObject, factory.getId(orid));
+        }
         EClass eClass = eObject.eClass();
         Set<String> propertyNames = oElement.getPropertyNames();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
