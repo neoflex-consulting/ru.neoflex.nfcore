@@ -132,6 +132,7 @@ public class DbTests extends TestBase {
             Assert.assertEquals(1, users.size());
             DBTable user = (DBTable) users.get(0).getContents().get(0);
             Assert.assertEquals("GROUP_ID", user.getFKeys().get(0).getColumns().get(0).getName());
+            Assert.assertEquals("ID", user.getPKey().getColumns().get(0).getName());
         });
         server.withSession(session -> {
             List<Resource> views = session.query("select from test_DBView");
