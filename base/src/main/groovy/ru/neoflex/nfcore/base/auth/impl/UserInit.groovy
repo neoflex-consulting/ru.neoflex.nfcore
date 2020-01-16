@@ -50,6 +50,20 @@ class UserInit extends UserImpl {
         return adminUser
     }
 
+    static User createAnna(Role role) {
+        def annaUser = AuthFactory.eINSTANCE.createUser()
+        annaUser.setName("anna")
+        annaUser.setDescription("Anna user with Super User role")
+        annaUser.setEmail("asuvorova@neoflex.ru")
+        def passwordAuthenticator = AuthFactory.eINSTANCE.createPasswordAuthenticator()
+        passwordAuthenticator.setPassword("anna")
+        passwordAuthenticator.setDisabled(false)
+        annaUser.getAuthenticators().add(passwordAuthenticator)
+        annaUser.getRoles().add(role)
+        Context.current.store.createEObject(annaUser)
+        return annaUser
+    }
+
     static void encodeUserPassword(EObject eObject, PasswordEncoder pencoder) {
         if (eObject.eClass() == AuthPackage.Literals.USER) {
             User user = (User) eObject
@@ -91,6 +105,7 @@ class UserInit extends UserImpl {
         def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resources
         if (admins.size() == 0) {
             createAdmin(su)
+            createAnna(su)
         }
         else {
             Context.current.store.saveResource(admins[0])

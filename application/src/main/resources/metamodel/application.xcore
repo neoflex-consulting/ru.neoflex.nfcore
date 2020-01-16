@@ -29,9 +29,6 @@ class UserComponent extends Component {
     String[1] componentClassName
 }
 
-/* Applications */
-//Нужна проверка, чтобы не было в одном AppModule два и более одинаковых JdbcDataset
-//На CompnentDid(Mount && Update) в AppModule будут начитывться все AppDataset, если они уже ранее не были начитаны
 class AppModule {
     QName name
     contains ViewElement view
@@ -91,9 +88,9 @@ abstract class DatasetView extends ViewElement {
     refers Dataset dataset
 }
 
+@Ecore(constraints="IsValid")
 class DatasetGridView extends DatasetView {
     op JSON getDatasetGrids()
-    refers DatasetGrid[] datasetGrid
     refers DatasetGrid defaultDatasetGrid
 }
 

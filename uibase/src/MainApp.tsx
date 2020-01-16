@@ -11,8 +11,6 @@ const FooterHeight = '2em';
 const backgroundColor = "white";
 
 interface State {
-    appModuleName: string;
-    pathFull: any[];
     pathBreadcrumb: string[];
     hideReferences: boolean
     currentTool?: string
@@ -27,8 +25,6 @@ export class MainApp extends React.Component<any, State> {
     constructor(props: any) {
         super(props);
         this.state = {
-            appModuleName: props.appModuleName,
-            pathFull: [],
             pathBreadcrumb: [],
             hideReferences: false,
         }
@@ -38,8 +34,8 @@ export class MainApp extends React.Component<any, State> {
         let name: string;
         let objectPackage: string;
         let objectClass: string;
-        if (this.state.appModuleName !== undefined) {
-        name = decodeURI(this.state.appModuleName);
+        if (this.props.appModuleName !== undefined) {
+        name = decodeURI(this.props.appModuleName);
         objectPackage = "ru.neoflex.nfcore.application";
         objectClass = "AppModule";
         API.instance().fetchPackages().then(packages => {
@@ -50,7 +46,7 @@ export class MainApp extends React.Component<any, State> {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
 
-                        let currentAppModule = this.state.pathFull[this.state.pathFull.length - 1]
+                        let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
                                 this.props.context.updateContext!(
@@ -61,7 +57,7 @@ export class MainApp extends React.Component<any, State> {
                         }
                         else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
-                            let currentAppModule = this.state.pathFull[this.state.pathFull.length - 1]
+                            let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
                             let currentTree: any[] = currentAppModule['tree']
 
                             for (let i = 0; i <= currentTree.length - 1; i++) {
@@ -91,18 +87,6 @@ export class MainApp extends React.Component<any, State> {
 
     componentDidMount(): void {
         this.loadObject()
-    }
-
-    static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.match.params.appModuleName)))
-        if (pathFull) {
-            return {
-                pathFull: pathFull,
-                appModuleName: pathFull[pathFull.length - 1].appModule
-            }
-        } else {
-            return null
-        }
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
@@ -210,7 +194,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     private setURL(eObject: Ecore.EObject, key: any) {
-        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.state.appModuleName;
+        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.appModuleName;
         let treeValue = eObject.get('AppModule') ? undefined : key;
         this.props.context.changeURL!(appModuleName, treeValue)
     }

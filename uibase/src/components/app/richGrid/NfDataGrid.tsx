@@ -8,10 +8,15 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, Modal, Select} from "antd";
-import {WithTranslation, withTranslation} from "react-i18next";
+import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from "antd";
+import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
-import {EObject} from "ecore";
+import Ecore, {EObject} from "ecore";
+import moment from 'moment';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import {API} from "../../../modules/api";
+import rowPerPageMapper from "../../../utils/consts";
 import ServerFilter from "./ServerFilter";
 
 interface Props {
@@ -23,10 +28,11 @@ interface Props {
     rowData?: Array<any>,
     gridOptions?: { [ key:string ]: any },
     serverFilters:  Array<EObject>,
-    useServerFilter: boolean
+    useServerFilter: boolean,
+    reportDate: any
 }
 
-class NfDataGrid extends React.Component<Props & WithTranslation, any> {
+class NfDataGrid extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;
 
@@ -34,25 +40,10 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
         super(props);
 
         this.state = {
-            themes: [
-                "balham",
-                "blue",
-                "bootstrap",
-                "fresh",
-                "material"
-            ],
-            theme: "balham",
-            paginationPageSizes: [
-                1,
-                10,
-                20,
-                50,
-                100,
-                500,
-                1000,
-                "All"
-            ],
-            paginationPageSize: 7,
+            themes: [],
+            currentTheme: this.props.viewObject.get('defaultDatasetGrid').get('theme'),
+            rowPerPages: [],
+            paginationPageSize: this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage'),
             selectedServerFilters: [],
             modalResourceVisible: false
         };
@@ -112,6 +103,87 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
         this.setState({ modalResourceVisible: false })
     }
 
+    updateTableData(e: any): void  {
+        if (e !== null) {
+            this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+        }
+    }
+
+    onActionMenu(e : any) {
+        if (e.key.split('.').includes('theme')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+        }
+        if (e.key.split('.').includes('rowPerPage')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+            this.onPageSizeChanged(e.key.split('.')[1])
+        }
+        if (e.key === 'filter') {
+            this.setState({ modalResourceVisible: true })
+        }
+    }
+
+    private setSelectedKeys(parameter?: string) {
+        let selectedKeys: string[] = [];
+        if (this.state.themes.length !== 0) {
+            if (parameter && this.state.themes.includes(parameter)) {
+                selectedKeys.push(`theme.${parameter}`)
+                this.setState({currentTheme: parameter})
+            }
+            else if (this.state.currentTheme === null) {
+                selectedKeys.push(`theme.${this.state.themes[0]}`)
+                this.setState({currentTheme: this.state.themes[0]})
+            }
+            else {
+                selectedKeys.push(`theme.${this.state.currentTheme}`)
+            }
+        }
+        if (this.state.rowPerPages.length !== 0) {
+            if (parameter && this.state.rowPerPages.includes(parameter)) {
+                selectedKeys.push(`rowPerPage.${parameter}`)
+                this.setState({paginationPageSize: parameter})
+            }
+            else if (this.state.paginationPageSize === null) {
+                selectedKeys.push(`rowPerPage.${this.state.rowPerPages[0]}`)
+                this.setState({paginationPageSize: this.state.rowPerPages[0]})
+            }
+            else {
+                selectedKeys.push(`rowPerPage.${this.state.paginationPageSize}`)
+            }
+        }
+        return selectedKeys;
+    }
+
+    getAllThemes() {
+        API.instance().findEnum('dataset', 'Theme')
+            .then((result: Ecore.EObject[]) => {
+                let themes = result.map( (t: any) => {
+                    return t.get('name').toLowerCase()
+                });
+                this.setState({themes})
+            })
+    };
+
+    getAllRowPerPage() {
+        API.instance().findEnum('dataset', 'RowPerPage')
+            .then((result: Ecore.EObject[]) => {
+                const rowPerPageMapper_: any = rowPerPageMapper;
+                let rowPerPages = result.map( (t: any) => {
+                    return rowPerPageMapper_[t.get('name')]
+                });
+                this.setState({rowPerPages})
+            })
+
+    };
+
+    componentDidMount(): void {
+        if (this.state.themes.length === 0) {
+            this.getAllThemes()
+        }
+        if (this.state.rowPerPages.length === 0) {
+            this.getAllRowPerPage()
+        }
+    }
+
     render() {
         const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
         let defaultFilter: any[] = [];
@@ -119,56 +191,84 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
             defaultFilter = serverFilters
                 .filter((f: EObject) => f.get('enable') === true)
                 .map((f: EObject) =>
-                    f.get('name'))
+                    `${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`
+                )
         }
+        let selectedKeys = this.setSelectedKeys();
+        const menu = (
+            <Menu
+                onClick={(e) => this.onActionMenu(e)}
+                selectedKeys={selectedKeys}
+                style={{width: '150px'}}
+            >
+                <Menu.Item>
+                    Select Columns
+                </Menu.Item>
+                <Menu.Item key={'filter'}>
+                    Filter
+                </Menu.Item>
+                <Menu.SubMenu title={"Rows Per Page"}>
+                    {this.state.rowPerPages.map((rowPerPage: string) =>
+                        <Menu.Item key={`rowPerPage.${rowPerPage.toLowerCase()}`} style={{width: '65px'}}>
+                            {rowPerPage}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+                <Menu.Item>
+                    Format
+                </Menu.Item>
+                <Menu.Item>
+                    Save Report
+                </Menu.Item>
+                <Menu.Item>
+                    Reset
+                </Menu.Item>
+                <Menu.SubMenu title={"Theme"}>
+                    {this.state.themes.map((theme: string) =>
+                        <Menu.Item key={`theme.${theme}`} style={{width: '100px'}}>
+                            {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+                <Menu.Item>
+                    Help
+                </Menu.Item>
+                <Menu.Item>
+                    Download
+                </Menu.Item>
+            </Menu>
+        );
         return (
             <div
                 onKeyDown={this.handleKeyDown}
-                style={{ boxSizing: 'border-box', height: '100%', width: '100%' }}
-                className={"ag-theme-" + this.state.theme}
+                style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
+                className={"ag-theme-" + this.state.currentTheme}
             >
-                <Select
-                    notFoundContent={t('notfound')}
-                    allowClear={true}
-                    showSearch={true}
-                    style={{ width: '180px', marginLeft: '10px' }}
-                    onSelect={ (e:string) => this.setState({theme: e})}
-                    defaultValue={"Theme: " + this.state.themes[0]}
-                >
-                    {
-                        this.state.themes
-                            .map((theme: string) =>
-                                <Select.Option key={theme} value={theme}>
-                                    {"Theme: " + theme}
-                                </Select.Option>)
-                    }
-                </Select>
-                <Select
-                    notFoundContent={t('notfound')}
-                    allowClear={true}
-                    showSearch={true}
-                    style={{ width: '180px', marginLeft: '10px' }}
-                    placeholder="Show rows"
-                    defaultValue={"Show rows: " + this.state.paginationPageSize}
-                    onChange={this.onPageSizeChanged.bind(this)}
-                >
-                    {
-                        this.state.paginationPageSizes
-                            .map((paginationPageSize: string) =>
-                                <Select.Option key={paginationPageSize} value={paginationPageSize}>
-                                    {"Show rows: " + paginationPageSize}
-                                </Select.Option>)
-                    }
-                </Select>
+                {this.props.reportDate &&
+                <div style={{marginBottom: '10px', textAlign: 'center'}}>
+                    <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
+                    <DatePicker
+                        placeholder="Select date"
+                        defaultValue={moment(this.props.reportDate)}
+                        format={'DD.MM.YYYY'}
+                        onChange={ (e: any) => this.updateTableData(e)}
+                    />
+                </div>
+                }
+                <Dropdown overlay={menu} placement="bottomLeft">
+                    <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
+                        <FontAwesomeIcon icon={faChevronDown} size="xs"
+                                         style={{marginLeft: "5px"}}/>
+                    </Button>
+                </Dropdown>
                 {this.props.useServerFilter &&
-                <div style={{display: "inline"}}>
+                <div style={{marginLeft: '10px', marginTop: '10px'}}>
+                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
                     <Select
-                        //selectedServerFilters
                         notFoundContent={t('notfound')}
-                        //allowClear={true}
+                        allowClear={true}
+                        style={{width: '400px'}}
                         showSearch={true}
-                        style={{ width: '400px', marginLeft: '10px' }}
-                        //onSelect={ (e:any) => this.setState({serverFilters: e})}
                         mode="multiple"
                         placeholder="No Filters Selected"
                         defaultValue={defaultFilter}
@@ -177,39 +277,45 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                             this.props.serverFilters !== undefined ?
                                 this.props.serverFilters
                                     .map((f: EObject) =>
-                                        <Select.Option key={f.get('name')} value={f.get('name')}>
-                                            {f.get('name')}
+                                        <Select.Option
+                                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                        >
+                                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
                                         </Select.Option>)
                                 :
                                 undefined
                         }
                     </Select>
-                    <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"
-                            onClick={() => this.setState({ modalResourceVisible: true })}/>
-                    {this.state.modalResourceVisible && <Modal
-                        width={'1000px'}
-                        title={t('addFilters')}
-                        visible={this.state.modalResourceVisible}
-                        footer={null}
-                        onCancel={this.handleResourceModalCancel}
-                    >
-                        {
-                            this.props.serverFilters
-                                ?
-                                <ServerFilter serverFilters={this.props.serverFilters}/>
-                                :
-                                <ServerFilter/>
-                        }
-                    </Modal>}
                 </div>
                 }
-                <div style={{ marginTop: "30px", marginLeft: '10px'}}>
+                <Drawer
+                    placement="right"
+                    title={t('addFilters')}
+                    width={'500px'}
+                    visible={this.state.modalResourceVisible}
+                    onClose={this.handleResourceModalCancel}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        this.props.serverFilters
+                            ?
+                            <ServerFilter
+                                {...this.props}
+                                serverFilters={this.props.serverFilters}
+                                columnDefs={this.props.columnDefs}
+                            />
+                            :
+                            <ServerFilter/>
+                    }
+                </Drawer>
+                <div style={{ marginTop: "30px"}}>
                     <AgGridReact
                         ref={this.grid}
                         //columnDefs={columnDefs}
                         rowData={rowData}
                         modules={AllCommunityModules}
-                        //pagination //странички
                         rowSelection="multiple" //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
@@ -227,7 +333,7 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                         // //sortingOrder={["desc", "asc", null]}
                         enableFilter={true}
                         gridAutoHeight={true}
-                        paginationPageSize={this.state.paginationPageSize}
+                        paginationPageSize={Number(this.state.paginationPageSize)}
                         {...gridOptions}
                     >
                         <AgGridColumn
@@ -249,6 +355,7 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                             headerTooltip={"headerTooltip"}
                             filter="agDateColumnFilter"
                             sort={"DESC"}
+                            editable={true}
                         >
                         </AgGridColumn>
                             {
@@ -259,6 +366,7 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                                             headerName={col.get("headerName").toString().substring(0,1).toUpperCase() + col.get("headerName").toString().substring(1)}
                                             headerTooltip={col.get("headerTooltip")}
                                             hide={col.get("hide")}
+                                            editable={col.get("editable")}
                                             pinned={col.get("pinned") === 'Left' ? 'left' : col.get("pinned") === 'Right' ? 'right' : false}
                                             filter={col.get("filter") === 'NumberColumnFilter'
                                                 ? 'agNumberColumnFilter' : col.get("filter") === 'DateColumnFilter' ?
@@ -266,7 +374,6 @@ class NfDataGrid extends React.Component<Props & WithTranslation, any> {
                                         />
                                     )
                                     : null
-
                             }
                     </AgGridReact>
                 </div>

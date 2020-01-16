@@ -15,6 +15,7 @@
         "dynamiccomponent": " component cannot be downloaded from path ",
         "edit": "Edit",
         "eClass": "EClass",
+        "filters": "Filters",
         "itemname": "Item name",
         "language": "Language",
         "legend": "Legend",
@@ -28,11 +29,14 @@
         "password": "Password",
         "query": "Query",
         "regularexpression": "Regular expression",
+        "reportdate": "Report Date",
         "run": "Run",
         "search": "Search: ",
         "searchsimple": "Search",
         "select": "Select",
+        "showrows": "Show Rows",
         "taxreporting": "Tax Reporting",
+        "theme": "Theme",
         "username": "User Name",
         "tools": "Tools"
 }

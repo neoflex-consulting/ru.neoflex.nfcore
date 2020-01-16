@@ -61,11 +61,11 @@ abstract class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery()
+     op JSON runQuery(String reportDate)
 }
 
 class DatasetGrid extends DatasetComponent {
-     String rowCount//сколько строк показывать (выбрать из списка)
+     RowPerPage rowPerPage//сколько строк показывать (выбрать из списка)
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
@@ -107,6 +107,7 @@ abstract class DatasetColumnView {
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
+    boolean editable
 }
 
 class RdbmsColumn extends DatasetColumnView {
@@ -123,11 +124,21 @@ class FormatMask {
 }
 
 class Conditions {
-    String name
     refers DatasetColumn datasetColumn
     Operations operation
     String value
     boolean enable //включен ли фильтр
+}
+
+enum RowPerPage {
+    one,
+    ten,
+    twenty,
+    fifty,
+    oneHundred,
+    fiveHundred,
+    oneThousand,
+    all
 }
 
 enum QueryType {

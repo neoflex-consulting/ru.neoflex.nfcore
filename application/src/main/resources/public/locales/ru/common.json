@@ -15,6 +15,7 @@
         "dynamiccomponent": " компонента не может быть загружена из ",
         "edit": "Редактировать",
         "eClass": "EClass",
+        "filters": "Фильтры",
         "itemname": "Название элемента",
         "language": "Язык",
         "legend": "Легенда",
@@ -28,11 +29,14 @@
         "password": "Пароль",
         "query": "Запрос",
         "regularexpression": "Регулярное выражение",
+        "reportdate": "Дата отчета",
         "run": "Старт",
         "search": "Поиск: ",
         "searchsimple": "Поиск",
         "select": "Выбрать",
+        "showrows": "Показать строки",
         "taxreporting": "Налоговая Отчетность",
+        "theme": "Тема",
         "username": "Имя пользователя",
         "tools": "Утилиты"
 }

@@ -15,6 +15,7 @@
         "dynamiccomponent": "組件無法加載",
         "edit": "編輯",
         "eClass": "EClass",
+        "filters": "過濾器",
         "itemname": "項目名稱",
         "language": "語言",
         "legend": "傳說",
@@ -28,11 +29,14 @@
         "operationsettings": "操作設定",
         "query": "詢問",
         "regularexpression": "正則表達式",
+        "reportdate": "報告日期 ",
         "run": "跑",
         "search": "搜索",
         "searchsimple": "搜索",
         "select": "選擇",
+        "showrows": "顯示行",
         "taxreporting": "稅務申報",
+        "theme": "主題",
         "username": "用戶名",
         "tools": "工具"
 }

@@ -27,9 +27,9 @@ export class StartPage extends React.Component<any, State> {
                             width: "300px",
                             textAlign: "left",
                         }}>
-                            <CheckableTag checked={true} onChange={ e => this.selectApplication(app.eContents()[0].get('name'))}
+                            <CheckableTag checked={true} onChange={ e => this.selectApplication(app)}
                             >
-                                {app.eContents()[0].get('name')}
+                                {app}
                             </CheckableTag>
                         </div>
                     )

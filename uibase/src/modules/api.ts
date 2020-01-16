@@ -290,6 +290,18 @@ export class API implements IErrorHandler {
         return this.ePackagesPromise;
     }
 
+    findEnum(ePackageName: string, eEnumName: string): Promise<Ecore.EClass[]> {
+        return this.fetchPackages().then(packages => {
+            let eClassifiers = packages
+                .filter(p=>p.get('name') === ePackageName)
+                .map(p=>p.get('eClassifiers').array())
+                .flat() as Ecore.EObject[];
+            return eClassifiers.filter(c=>c.get('name') === eEnumName)
+                .map(p=>p.get('eLiterals').array())
+                .flat() as Ecore.EObject[]
+        })
+    }
+
     find(selection: any, level: number = 1): Promise<QueryResult> {
         return this.fetchJson("/emf/find", {
             method: "POST",

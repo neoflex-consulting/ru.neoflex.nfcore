@@ -14,14 +14,14 @@ class JdbcDatasetInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateJdbcDatasetInit(String name) {
+    static def recreateJdbcDatasetInit(String name, String tableName) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
             def jdbcDataset = DatasetFactory.eINSTANCE.createJdbcDataset()
             jdbcDataset.name = name
-            jdbcDataset.query = "SELECT * FROM public.sse_workspace"
-            jdbcDataset.tableName = "sse_workspace"
+            jdbcDataset.query = "SELECT * FROM public." + tableName
+            jdbcDataset.tableName = tableName
             jdbcDataset.schemaName = "public"
             def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, "JdbcConnectionPostgresqlTest")
             jdbcDataset.setConnection(connection)

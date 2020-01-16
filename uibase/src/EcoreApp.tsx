@@ -32,7 +32,7 @@ interface State {
     languages: string[];
     notifierDuration: number;
     breadcrumb: string[];
-    applications: Ecore.EObject[];
+    applications: string[];
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
@@ -77,46 +77,68 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     changeURL = (appModuleName?: string, treeValue?: string, reportDate?: string) => {
-        let path: any[] = [];
-        let urlElement: ConfigUrlElement = {
-            appModule: appModuleName,
-            tree: [],
-            params: {
-                reportDate: reportDate
+        if (appModuleName === "home") {
+            this.props.history.push('/home')
+        } else {
+            let path: any[] = [];
+            let urlElement: ConfigUrlElement = {
+                appModule: appModuleName,
+                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                params: {
+                    reportDate: reportDate
+                }
+            };
+            let appModuleNameThis = appModuleName || this.state.appModuleName;
+            if (appModuleName !== undefined && this.state.applications.includes(appModuleName)){
+                path.push(urlElement)
             }
-        };
-        let appModuleNameThis = appModuleName || this.state.appModuleName;
-        if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
-            this.state.pathFull.forEach( (p:any) => {
-                urlElement = p;
-                if (p.appModule === appModuleNameThis) {
-                    urlElement.tree = treeValue.split('/');
-                    urlElement.params.reportDate = reportDate;
-                    path.push(urlElement)
-                }
-                else {
-                    path.push(urlElement)
-                }
-            });
-        } else if (appModuleName !== this.state.appModuleName) {
-            this.state.pathFull.forEach( (p:any) => {
-                path.push(p)
-            });
-            urlElement.appModule = appModuleName
-            urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
-            urlElement.params.reportDate = reportDate
-            path.push(urlElement)
-        }
-        this.setState({pathFull: path});
-        this.props.history.push(`/app/${
-            btoa(
-                encodeURIComponent(
-                    JSON.stringify(
-                        path
+            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+                this.state.pathFull.forEach( (p:any) => {
+                    urlElement = p;
+                    if (p.appModule === appModuleNameThis) {
+                        urlElement.tree = treeValue.split('/');
+                        urlElement.params.reportDate = reportDate;
+                        path.push(urlElement)
+                    }
+                    else {
+                        path.push(urlElement)
+                    }
+                });
+            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && reportDate !== undefined) {
+                this.state.pathFull.forEach( (p:any) => {
+                    urlElement = p;
+                    if (p.appModule === appModuleNameThis) {
+                        urlElement.params.reportDate = reportDate;
+                        path.push(urlElement)
+                    }
+                    else {
+                        path.push(urlElement)
+                    }
+                });
+            } else if (appModuleName !== this.state.appModuleName) {
+                this.state.pathFull.forEach( (p:any) => {
+                    path.push(p)
+                });
+                urlElement.appModule = appModuleName
+                urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
+                urlElement.params.reportDate = reportDate
+                path.push(urlElement)
+            } else if (appModuleName === this.state.appModuleName) {
+                this.state.pathFull.forEach( (p:any) => {
+                    path.push(p)
+                });
+            }
+            this.setState({pathFull: path});
+            this.props.history.push(`/app/${
+                btoa(
+                    encodeURIComponent(
+                        JSON.stringify(
+                            path
+                        )
                     )
                 )
-            )
-            }`);
+                }`);
+        }
     };
 
     onRightMenu(e : any) {
@@ -148,7 +170,7 @@ class EcoreApp extends React.Component<any, State> {
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
         if (this.props.history.location.pathname === "/") {
-            this.props.history.push('/home')
+            this.changeURL("home")
         }
     };
 
@@ -157,7 +179,10 @@ class EcoreApp extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
+                    .then((applicationsObjects) => {
+                        let applications = applicationsObjects.map( (a:any) =>
+                            a.eContents()[0].get('name')
+                        )
                         this.setState({applications})
                     })
             }
@@ -180,8 +205,19 @@ class EcoreApp extends React.Component<any, State> {
         })
     }
 
-    setBreadcrumb() {
-        if (this.props.location.pathname.split('/app/')[1] !== undefined) {
+    setBreadcrumb(breadcrumbValue? : string) {
+        if (breadcrumbValue) {
+            if (breadcrumbValue === "home") {
+                this.changeURL("home")
+                this.setState({breadcrumb: []});
+            } else {
+                let indexBreadcrumb = this.state.breadcrumb.indexOf(breadcrumbValue);
+                let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
+                this.setState({breadcrumb});
+                this.changeURL(breadcrumbValue.slice(0, -2))
+            }
+        }
+        else if (this.props.location.pathname.split('/app/')[1] !== undefined) {
             const allAppModules = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])));
             let breadcrumb = [];
             for (let i = 0; i <= allAppModules.length - 1; i++) {
@@ -191,14 +227,11 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    onClickBreadcrumb = (b : string): void => {
-        let indexBreadcrumb = this.state.breadcrumb.indexOf(b);
-        let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-        this.changeURL(JSON.parse(decodeURIComponent(atob(this.props.history.location.pathname.split('/app/')[1]))).slice(0, indexBreadcrumb + 1));
-        this.setState({breadcrumb});
+    onClickBreadcrumb = (breadcrumbValue: string): void => {
+       this.setBreadcrumb(breadcrumbValue)
     };
 
-    renderDev = () => {
+    renderDev = (props: any) => {
         const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
@@ -229,7 +262,7 @@ class EcoreApp extends React.Component<any, State> {
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
                                 <Col span={19}>
-                                    <BreadcrumbApp selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
+                                    <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
                                 <Col span={5}>
@@ -257,8 +290,8 @@ class EcoreApp extends React.Component<any, State> {
                                             <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Applications</span>}>
                                                 {this.state.applications.map((a: any) =>
-                                                    <Menu.Item key={`app.${a.eContents()[0].get('name')}`}>
-                                                        {a.eContents()[0].get('name')}
+                                                    <Menu.Item key={`app.${a}`}>
+                                                        {a}
                                                     </Menu.Item>
                                                 )}
                                             </Menu.SubMenu>
@@ -309,7 +342,7 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = ['developer', 'test'];
         if (this.state.applications) {
             this.state.applications.map((a: any) =>
-                selectedKeys.push(`app.${a.eContents()[0].get('name')}`));
+                selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
             const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule
@@ -390,7 +423,12 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <MainContext.Consumer>
                 {context => {
-                    return <MainApp {...props} context={context}/>;
+                    return <MainApp
+                        {...props}
+                        context={context}
+                        pathFull={this.state.pathFull}
+                        appModuleName={this.state.appModuleName}
+                    />;
                 }}
             </MainContext.Consumer>
         )
@@ -455,7 +493,7 @@ class EcoreApp extends React.Component<any, State> {
                     {this.state.principal === undefined ?
                         <Login onLoginSucceed={this.setPrincipal}/>
                         :
-                        this.renderDev()
+                        this.renderDev(this.props)
                     }
                 </Layout>
             </MainContext.Provider>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withTranslation, WithTranslation } from "react-i18next";
+import { withTranslation } from "react-i18next";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
 import NfDataGrid from "./NfDataGrid";
@@ -14,10 +14,12 @@ interface State {
     rowData: any[];
     queryCount: number;
     serverFilters: any[];
-    useServerFilter: boolean
+    useServerFilter: boolean;
+    reportDate: any;
+    appModule: any;
 }
 
-class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
+class ReportRichGrid extends React.Component<any, State> {
 
     state = {
         datasetComponents: [],
@@ -25,7 +27,9 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         rowData: [],
         queryCount: 0,
         serverFilters: [],
-        useServerFilter: false
+        useServerFilter: false,
+        reportDate: undefined,
+        appModule: undefined
     };
 
     getDatasetComponents() {
@@ -45,6 +49,13 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         const parameters: any[] = [];
+        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1]
+        const reportDate = currentApp.params.reportDate
+        this.setState({appModule: currentApp.appModule})
+        if (reportDate) {
+            this.setState({reportDate})
+            parameters.push(reportDate)
+        }
         API.instance().call(ref, methodName, parameters).then( result => {
             this.setState({rowData: JSON.parse(result)});
         })
@@ -63,6 +74,7 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
             rowData.set('pinned', c.get('pinned'))
             rowData.set('filter', c.get('filter'))
             rowData.set('sort', c.get('sort'))
+            rowData.set('editable', c.get('editable'))
             allColumn.push(rowData)
         })
         this.setState({columnDefs: allColumn});
@@ -76,10 +88,10 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter')});
     }
 
-    componentDidUpdate(): void {
+    componentDidUpdate(prevProps: any): void {
         if (this.state.datasetComponents) {
             let resource = this.state.datasetComponents.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('dataset').get('name') === this.props.datasetGridName
+                d.eContents()[0].get('name') === this.props.datasetGridName
             );
             if (resource) {
                 if (this.state.queryCount === 0) {
@@ -88,6 +100,9 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
                 if (this.state.queryCount < 2) {
                     this.findcolumnDefs(resource as Ecore.Resource)
                     this.findServerFilters(resource as Ecore.Resource)
+                }
+                if (prevProps.location.pathname !== this.props.location.pathname) {
+                    this.runQuery(resource as Ecore.Resource)
                 }
             }
         }
@@ -98,14 +113,39 @@ class ReportRichGrid extends React.Component<Props & WithTranslation, State> {
     }
 
     render() {
+        let reportDate = undefined
+        if (this.state.reportDate && this.state.columnDefs) {
+            this.state.columnDefs.forEach( (c: any) => {
+                if (c.get("field").toLowerCase() === "reportdate") {
+                    reportDate = this.state.reportDate
+                }
+            });
+        }
+
         return (
             this.state.columnDefs.length > 0
                 ?
                 this.state.rowData.length > 0
                     ?
-                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={this.state.rowData} useServerFilter={this.state.useServerFilter} serverFilters={this.state.serverFilters} />
+                    <NfDataGrid
+                        {...this.props}
+                        columnDefs={this.state.columnDefs}
+                        useServerFilter={this.state.useServerFilter}
+                        serverFilters={this.state.serverFilters}
+                        reportDate={reportDate}
+                        appModule={this.state.appModule}
+                        rowData={this.state.rowData}
+                    />
                     :
-                    <NfDataGrid columnDefs={this.state.columnDefs} rowData={[]} useServerFilter={this.state.useServerFilter} serverFilters={this.state.serverFilters} />
+                    <NfDataGrid
+                        {...this.props}
+                        columnDefs={this.state.columnDefs}
+                        useServerFilter={this.state.useServerFilter}
+                        serverFilters={this.state.serverFilters}
+                        reportDate={reportDate}
+                        appModule={this.state.appModule}
+                        rowData={[]}
+                    />
                     :
                 "No columns found"
         )

@@ -85,9 +85,9 @@ class DatasetGridExt extends DatasetGridImpl {
     }
 
     @Override
-    String runQuery() {
+    String runQuery(String reportDate) {
         if (column) {
-            ResultSet rs = connectionToDB()
+            ResultSet rs = connectionToDB(reportDate)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -106,7 +106,7 @@ class DatasetGridExt extends DatasetGridImpl {
     }
 
 
-    ResultSet connectionToDB() {
+    ResultSet connectionToDB(String reportDate) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -129,13 +129,22 @@ class DatasetGridExt extends DatasetGridImpl {
 
         /*Execute query*/
         def queryColumns = []
+        def serverFilters = []
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
                 if (column[i].class.toString().toLowerCase().contains('rdbms')) {
                     if (queryColumns.contains("${column[i].datasetColumn.name}")) {
                         throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                     } else {
-                        queryColumns.add("\"${column[i].datasetColumn.name}\"")
+                        queryColumns.add("t.\"${column[i].datasetColumn.name}\"")
+                        if (column[i].datasetColumn.name.toLowerCase() == "reportdate") {
+                            def map = [:]
+                            map["column"] = column[i].datasetColumn.name
+                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(DAY FROM CAST('${reportDate}' AS DATE)) AND " +
+                                    "EXTRACT(MONTH FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(MONTH FROM CAST('${reportDate}' AS DATE)) AND " +
+                                    "EXTRACT(YEAR FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(YEAR FROM CAST('${reportDate}' AS DATE)))"
+                            serverFilters.add(map)
+                        }
                     }
                 } else {
                     def valueCustomColumn
@@ -152,24 +161,35 @@ class DatasetGridExt extends DatasetGridImpl {
                     } else {
                         queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"")
                     }
+
+                    if (column[i].headerName.name == "reportDate") {
+                        def map = [:]
+                        map["column"] = column[i].datasetColumn.name
+                        map["select"] = "t.${column[i].datasetColumn.name} = ${reportDate}"
+                        serverFilters.add(map)
+                    }
                 }
             }
         }
 
-        def serverFilters = []
         if (serverFilter) {
             for (int i = 0; i <= serverFilter.size() - 1; ++i) {
                 if (serverFilter[i].enable) {
+                    def map = [:]
+                    map["column"] = serverFilter[i].datasetColumn.name
                     def operator = getConvertOperator(serverFilter[i].operation.toString().toLowerCase())
                     if (operator == 'LIKE') {
-                        serverFilters.add(
-                                "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') OR " +
-                                        "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') OR " +
-                                        "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') OR " +
-                                        "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
-                        )
+                        map["select"] = "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') OR " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') OR " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') OR " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
                     } else {
-                        serverFilters.add("t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}")
+                        map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}"
+                    }
+                    if (!serverFilters.column.contains(serverFilter[i].datasetColumn.name)) {
+                        serverFilters.add(map)
+                    } else {
+                        serverFilter[i].enable = false
                     }
                 }
             }
@@ -178,9 +198,8 @@ class DatasetGridExt extends DatasetGridImpl {
         String currentQuery
         if (serverFilters) {
             currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t" +
-                    " WHERE ${serverFilters.join(' AND ')}"
+                    " WHERE ${serverFilters.select.join(' AND ')}"
             logger.info("connectionToDB", currentQuery)
-
         }
         else {
             currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"

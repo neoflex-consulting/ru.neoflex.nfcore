@@ -100,8 +100,8 @@ class ComponentElement_ extends ViewContainer {
 
 class DatasetGridView_ extends ViewContainer {
     render = () => {
-        if (this.props.viewObject.get('dataset') !== null) {
-            return <ReportRichGrid datasetGridName={this.props.viewObject.get('dataset').get('name')}/>
+        if (this.props.viewObject.get('defaultDatasetGrid') !== null) {
+            return <ReportRichGrid {...this.props} datasetGridName={this.props.viewObject.get('defaultDatasetGrid').get('name')}/>
         }
         else {
             return <div> DatasetGrid not found </div>

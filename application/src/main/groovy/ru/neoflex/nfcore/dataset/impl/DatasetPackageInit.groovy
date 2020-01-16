@@ -11,11 +11,17 @@ class DatasetPackageInit {
         /*DatasetPackage*/
         JdbcDriverInit.recreateDriver("JdbcDriverPostgresqlTest")
         JdbcConnectionInit.recreateConnection("JdbcConnectionPostgresqlTest")
-        JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetTest")
+
+        JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetTest", "sse_workspace")
         JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
-        DatasetGridInit.recreateDatasetGrid("DatasetGridTest")
+        DatasetGridInit.recreateDatasetGrid("DatasetGridTest", "JdbcDatasetTest")
         DatasetGridInit.createAllColumn("DatasetGridTest")
-        DatasetGridInit.createServerFilters("DatasetGridTest")
+        DatasetGridInit.createServerFilters("DatasetGridTest", "JdbcDatasetTest")
+
+        JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetTestAAA", "aaa_test")
+        JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTestAAA")
+        DatasetGridInit.recreateDatasetGrid("DatasetGridTestAAA", "JdbcDatasetTestAAA")
+        DatasetGridInit.createAllColumn("DatasetGridTestAAA")
 
         /*ApplicationPackage*/
         InstanceReportInit.deleteInstanceReport("InstanceReport1")
