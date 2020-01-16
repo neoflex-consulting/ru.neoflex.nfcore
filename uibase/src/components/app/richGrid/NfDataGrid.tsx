@@ -8,12 +8,14 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, DatePicker, Modal, Select} from "antd";
+import {Button, DatePicker, Dropdown, Menu, Modal, Select} from "antd";
 import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
-import {EObject} from "ecore";
+import Ecore, {EObject} from "ecore";
 import moment from 'moment';
-import ServerFilter from "./ServerFilter";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import {API} from "../../../modules/api";
 
 interface Props {
     onCtrlA?: Function,
@@ -36,14 +38,8 @@ class NfDataGrid extends React.Component<any, any> {
         super(props);
 
         this.state = {
-            themes: [
-                "balham",
-                "blue",
-                "bootstrap",
-                "fresh",
-                "material"
-            ],
-            theme: "balham",
+            themes: [],
+            currentTheme: this.props.viewObject.get('defaultDatasetGrid').get('theme'),
             paginationPageSizes: [
                 1,
                 10,
@@ -120,6 +116,47 @@ class NfDataGrid extends React.Component<any, any> {
         }
     }
 
+    onActionMenu(e : any) {
+        if (e.key.split('.').includes('theme')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+        }
+    }
+
+    private setSelectedKeys(parameter?: string) {
+        let selectedKeys: string[] = [];
+        if (this.state.themes.length !== 0) {
+            if (parameter && this.state.themes.includes(parameter)) {
+                selectedKeys.push(`theme.${parameter}`)
+                this.setState({currentTheme: parameter})
+            }
+            else if (this.state.currentTheme === null) {
+                selectedKeys.push(`theme.${this.state.themes[0]}`)
+                this.setState({currentTheme: this.state.themes[0]})
+            }
+            else {
+                selectedKeys.push(`theme.${this.state.currentTheme}`)
+            }
+        }
+        return selectedKeys;
+    }
+
+    getAllThemes() {
+        API.instance().findEnum('dataset', 'Theme')
+            .then((result: Ecore.EObject[]) => {
+                let themes = result.map( (t: any) => {
+                    return t.get('name').toLowerCase()
+                });
+                this.setState({themes})
+            })
+
+    };
+
+    componentDidMount(): void {
+        if (this.state.themes.length === 0) {
+            this.getAllThemes()
+        }
+    }
+
     render() {
         const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
         let defaultFilter: any[] = [];
@@ -130,95 +167,131 @@ class NfDataGrid extends React.Component<any, any> {
                     `${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`
                 )
         }
+        let selectedKeys = this.setSelectedKeys();
+        const menu = (
+            <Menu
+                onClick={(e) => this.onActionMenu(e)}
+                selectedKeys={selectedKeys}
+            >
+                <Menu.Item>
+                    Select Columns
+                </Menu.Item>
+                <Menu.Item>
+                    Filter
+                </Menu.Item>
+
+
+                {/*<span style={{color: 'gray', fontSize: 'larger', marginLeft: '10px'}}>  {t("showrows")}: </span>*/}
+                {/*<Select*/}
+                {/*    notFoundContent={t('notfound')}*/}
+                {/*    showSearch={true}*/}
+                {/*    style={{ width: '180px' }}*/}
+                {/*    placeholder="Show rows"*/}
+                {/*    defaultValue={this.state.paginationPageSize}*/}
+                {/*    onChange={this.onPageSizeChanged.bind(this)}*/}
+                {/*>*/}
+                {/*    {*/}
+                {/*        this.state.paginationPageSizes*/}
+                {/*            .map((paginationPageSize: string) =>*/}
+                {/*                <Select.Option key={paginationPageSize} value={paginationPageSize}>*/}
+                {/*                    {paginationPageSize}*/}
+                {/*                </Select.Option>)*/}
+                {/*    }*/}
+                {/*</Select>*/}
+                <Menu.SubMenu title={"Rows Per Page"}>
+                    {/*{this.state.themes.map((theme: string) =>*/}
+                    {/*    <Menu.Item key={`theme.${theme}`}>*/}
+                    {/*        {theme}*/}
+                    {/*    </Menu.Item>*/}
+                    {/*)}*/}
+                </Menu.SubMenu>
+
+                <Menu.Item>
+                    Format
+                </Menu.Item>
+                <Menu.Item>
+                    Save Report
+                </Menu.Item>
+                <Menu.Item>
+                    Reset
+                </Menu.Item>
+                <Menu.SubMenu title={"Theme"}>
+                    {this.state.themes.map((theme: string) =>
+                        <Menu.Item key={`theme.${theme}`}>
+                            {theme}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+                <Menu.Item>
+                    Help
+                </Menu.Item>
+                <Menu.Item>
+                    Download
+                </Menu.Item>
+            </Menu>
+        );
         return (
             <div
                 onKeyDown={this.handleKeyDown}
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
-                className={"ag-theme-" + this.state.theme}
+                className={"ag-theme-" + this.state.currentTheme}
             >
-                <span style={{color: 'gray', fontSize: 'larger'}}>{t("theme")}: </span>
-                <Select
-                    notFoundContent={t('notfound')}
-                    showSearch={true}
-                    style={{ width: '180px' }}
-                    onSelect={ (e:string) => this.setState({theme: e})}
-                    defaultValue={this.state.themes[0]}
-                >
-                    {
-                        this.state.themes
-                            .map((theme: string) =>
-                                <Select.Option key={theme} value={theme}>
-                                    {theme}
-                                </Select.Option>)
-                    }
-                </Select>
-                <span style={{color: 'gray', fontSize: 'larger', marginLeft: '10px'}}>  {t("showrows")}: </span>
-                <Select
-                    notFoundContent={t('notfound')}
-                    showSearch={true}
-                    style={{ width: '180px' }}
-                    placeholder="Show rows"
-                    defaultValue={this.state.paginationPageSize}
-                    onChange={this.onPageSizeChanged.bind(this)}
-                >
-                    {
-                        this.state.paginationPageSizes
-                            .map((paginationPageSize: string) =>
-                                <Select.Option key={paginationPageSize} value={paginationPageSize}>
-                                    {paginationPageSize}
-                                </Select.Option>)
-                    }
-                </Select>
-                {this.props.useServerFilter &&
-                <div style={{marginLeft: '10px', display: 'inline'}}>
-                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
-                    <Select
-                        notFoundContent={t('notfound')}
-                        allowClear={true}
-                        style={{width: '400px'}}
-                        showSearch={true}
-                      //  onSelect={ (e:any) => this.setState({serverFilters: e})}
-                        mode="multiple"
-                        placeholder="No Filters Selected"
-                        defaultValue={defaultFilter}
-                    >
-                        {
-                            this.props.serverFilters !== undefined ?
-                                this.props.serverFilters
-                                    .map((f: EObject) =>
-                                        <Select.Option
-                                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
-                                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
-                                        >
-                                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
-                                        </Select.Option>)
-                                :
-                                undefined
-                        }
-                    </Select>
-                    <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"
-                            onClick={() => this.setState({ modalResourceVisible: true })}/>
-                    {this.state.modalResourceVisible && <Modal
-                        width={'1000px'}
-                        title={t('addFilters')}
-                        visible={this.state.modalResourceVisible}
-                        footer={null}
-                        onCancel={this.handleResourceModalCancel}
-                    >
-                        {
-                            this.props.serverFilters
-                                ?
-                                <ServerFilter
-                                    {...this.props}
-                                    serverFilters={this.props.serverFilters}
-                                    columnDefs={this.props.columnDefs}
-                                />
-                                :
-                                <ServerFilter/>
-                        }
-                    </Modal>}
-                </div>
-                }
+                <Dropdown overlay={menu} placement="bottomLeft">
+                    <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
+                        <FontAwesomeIcon icon={faChevronDown} size="xs"
+                                         style={{marginLeft: "5px"}}/>
+                    </Button>
+                </Dropdown>
+                {/*{this.props.useServerFilter &&*/}
+                {/*<div style={{marginLeft: '10px', display: 'inline'}}>*/}
+                {/*    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>*/}
+                {/*    <Select*/}
+                {/*        notFoundContent={t('notfound')}*/}
+                {/*        allowClear={true}*/}
+                {/*        style={{width: '400px'}}*/}
+                {/*        showSearch={true}*/}
+                {/*      //  onSelect={ (e:any) => this.setState({serverFilters: e})}*/}
+                {/*        mode="multiple"*/}
+                {/*        placeholder="No Filters Selected"*/}
+                {/*        defaultValue={defaultFilter}*/}
+                {/*    >*/}
+                {/*        {*/}
+                {/*            this.props.serverFilters !== undefined ?*/}
+                {/*                this.props.serverFilters*/}
+                {/*                    .map((f: EObject) =>*/}
+                {/*                        <Select.Option*/}
+                {/*                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}*/}
+                {/*                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}*/}
+                {/*                        >*/}
+                {/*                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}*/}
+                {/*                        </Select.Option>)*/}
+                {/*                :*/}
+                {/*                undefined*/}
+                {/*        }*/}
+                {/*    </Select>*/}
+                {/*    <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"*/}
+                {/*            onClick={() => this.setState({ modalResourceVisible: true })}/>*/}
+                {/*    {this.state.modalResourceVisible && <Modal*/}
+                {/*        width={'1000px'}*/}
+                {/*        title={t('addFilters')}*/}
+                {/*        visible={this.state.modalResourceVisible}*/}
+                {/*        footer={null}*/}
+                {/*        onCancel={this.handleResourceModalCancel}*/}
+                {/*    >*/}
+                {/*        {*/}
+                {/*            this.props.serverFilters*/}
+                {/*                ?*/}
+                {/*                <ServerFilter*/}
+                {/*                    {...this.props}*/}
+                {/*                    serverFilters={this.props.serverFilters}*/}
+                {/*                    columnDefs={this.props.columnDefs}*/}
+                {/*                />*/}
+                {/*                :*/}
+                {/*                <ServerFilter/>*/}
+                {/*        }*/}
+                {/*    </Modal>}*/}
+                {/*</div>*/}
+                {/*}*/}
                 {this.props.reportDate &&
                 <div style={{marginTop: "10px"}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>

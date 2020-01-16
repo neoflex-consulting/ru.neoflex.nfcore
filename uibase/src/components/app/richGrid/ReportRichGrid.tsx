@@ -91,7 +91,7 @@ class ReportRichGrid extends React.Component<any, State> {
     componentDidUpdate(prevProps: any): void {
         if (this.state.datasetComponents) {
             let resource = this.state.datasetComponents.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('dataset').get('name') === this.props.datasetGridName
+                d.eContents()[0].get('name') === this.props.datasetGridName
             );
             if (resource) {
                 if (this.state.queryCount === 0) {
