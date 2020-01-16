@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import ru.neoflex.nfcore.application.ApplicationPackage;
+import ru.neoflex.nfcore.application.impl.ApplicationValidatorExt;
 import ru.neoflex.nfcore.base.components.ModuleRegistryImpl;
 import ru.neoflex.nfcore.dataset.DatasetPackage;
 import ru.neoflex.nfcore.locales.LocalesPackage;
@@ -16,7 +17,7 @@ import ru.neoflex.nfcore.dataset.impl.DatasetValidatorExt;
 @Component
 public class ApplicationModuleRegistry extends ModuleRegistryImpl {
     ApplicationModuleRegistry() {
-        registerEPackage(ApplicationPackage.eINSTANCE);
+        registerEPackage(ApplicationPackage.eINSTANCE, new ApplicationValidatorExt());
         registerEPackage(DatasetPackage.eNS_URI, ()->DatasetPackage.eINSTANCE, new DatasetFactoryExt(), new DatasetValidatorExt());
         registerEPackage(LocalesPackage.eINSTANCE);
         registerEPackage(ReportsPackage.eINSTANCE);

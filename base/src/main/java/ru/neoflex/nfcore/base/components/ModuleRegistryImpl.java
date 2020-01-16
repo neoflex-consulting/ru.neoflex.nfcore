@@ -50,4 +50,9 @@ public class ModuleRegistryImpl implements IModuleRegistry {
         registerEPackage(uri, ePackageCB, eFactory);
         EValidator.Registry.INSTANCE.put(ePackageCB.get(), eValidator);
     }
+
+    public void registerEPackage(EPackage ePackage, EValidator eValidator) {
+        registerEPackage(ePackage);
+        EValidator.Registry.INSTANCE.put(ePackage, eValidator);
+    }
 }

@@ -55,11 +55,15 @@ class AppModuleInit {
             datasetGridView1.name = 'Dataset View Grid'
             def jdbcDataset1 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
             datasetGridView1.setDataset(jdbcDataset1)
+            def defaultDatasetGrid1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTest", "",false)
+            datasetGridView1.setDefaultDatasetGrid(defaultDatasetGrid1)
 
             def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGridView2.name = 'Dataset View Grid Test With ReportDate'
             def jdbcDataset2 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA", "",false)
             datasetGridView2.setDataset(jdbcDataset2)
+            def defaultDatasetGrid2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTestAAA", "",false)
+            datasetGridView2.setDefaultDatasetGrid(defaultDatasetGrid2)
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
