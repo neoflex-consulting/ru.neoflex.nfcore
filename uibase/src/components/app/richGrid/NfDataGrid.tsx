@@ -8,7 +8,7 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, DatePicker, Dropdown, Menu, Modal, Select} from "antd";
+import {Button, DatePicker, Dropdown, Menu} from "antd";
 import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import Ecore, {EObject} from "ecore";
@@ -195,6 +195,7 @@ class NfDataGrid extends React.Component<any, any> {
             <Menu
                 onClick={(e) => this.onActionMenu(e)}
                 selectedKeys={selectedKeys}
+                style={{width: '150px'}}
             >
                 <Menu.Item>
                     Select Columns
@@ -204,7 +205,7 @@ class NfDataGrid extends React.Component<any, any> {
                 </Menu.Item>
                 <Menu.SubMenu title={"Rows Per Page"}>
                     {this.state.rowPerPages.map((rowPerPage: string) =>
-                        <Menu.Item key={`rowPerPage.${rowPerPage.toLowerCase()}`}>
+                        <Menu.Item key={`rowPerPage.${rowPerPage.toLowerCase()}`} style={{width: '65px'}}>
                             {rowPerPage}
                         </Menu.Item>
                     )}
@@ -221,8 +222,8 @@ class NfDataGrid extends React.Component<any, any> {
                 </Menu.Item>
                 <Menu.SubMenu title={"Theme"}>
                     {this.state.themes.map((theme: string) =>
-                        <Menu.Item key={`theme.${theme}`}>
-                            {theme}
+                        <Menu.Item key={`theme.${theme}`} style={{width: '100px'}}>
+                            {theme.charAt(0).toUpperCase() + theme.slice(1)}
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
