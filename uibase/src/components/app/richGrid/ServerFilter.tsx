@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
 import {EObject} from "ecore";
-import {Form, Input, Select} from "antd";
+import {Button, Form, Input, Select} from "antd";
 import {API} from "../../../modules/api";
 
 interface Props {
@@ -49,7 +49,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                     column: f.get('datasetColumn').get('name'),
                     operation: f.get('operation'),
                     value: f.get('value'),
-                    active: f.get('enable') !== null ? `${f.get('enable')}` : "false"}
+                    active: f.get('enable') !== null ? f.get('enable') : false}
             });
             if (serverFilters.length < 9) {
                 for (let i = serverFilters.length + 1; i <= 9; i++) {
@@ -58,7 +58,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                             column: undefined,
                             operation: undefined,
                             value: undefined,
-                            active: "false"}
+                            active: undefined}
                     )
                 }
             }
@@ -85,7 +85,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                         .map((serverFilter: any) =>
                             <Form.Item key={serverFilter.index} style={{ marginTop: '-20px' }}>
                                 <span>{serverFilter.index} </span>
-                                <Select style={{ width: '180px' }} defaultValue={serverFilter.column}>
+                                <Select style={{ width: '90px', marginRight: '10px' }} defaultValue={serverFilter.column}>
                                     {
                                         this.state.allColumns
                                             .map((c: any) =>
@@ -94,7 +94,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                                                 </Select.Option>)
                                     }
                                 </Select>
-                                <Select style={{ width: '180px' }} defaultValue={serverFilter.operation}>
+                                <Select style={{ width: '90px', marginRight: '10px' }} defaultValue={serverFilter.operation}>
                                     {
                                         this.state.allOperations
                                             .map((o: any) =>
@@ -103,8 +103,8 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                                                 </Select.Option>)
                                     }
                                 </Select>
-                                <Input style={{ width: '180px' }} defaultValue={serverFilter.value}/>
-                                <Select style={{ width: '180px' }} defaultValue={serverFilter.active}>
+                                <Input style={{ width: '90px', marginRight: '10px' }} defaultValue={serverFilter.value}/>
+                                <Select style={{ width: '90px' }} defaultValue={serverFilter.active !== undefined ? serverFilter.active.toString() : undefined}>
                                     <Select.Option key={serverFilter.index + "false"} value={serverFilter.index + "false"}>
                                         false
                                     </Select.Option>
@@ -115,6 +115,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                             </Form.Item>
                         )
                 }
+                <Button>Apply</Button>
             </Form>
         )
     }

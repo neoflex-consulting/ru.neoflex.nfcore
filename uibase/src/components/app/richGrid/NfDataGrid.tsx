@@ -8,7 +8,7 @@ import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
 import { copyIntoClipboard } from '../../../utils/clipboard';
-import {Button, DatePicker, Dropdown, Menu} from "antd";
+import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from "antd";
 import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
 import Ecore, {EObject} from "ecore";
@@ -17,6 +17,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import rowPerPageMapper from "../../../utils/consts";
+import ServerFilter from "./ServerFilter";
 
 interface Props {
     onCtrlA?: Function,
@@ -116,6 +117,9 @@ class NfDataGrid extends React.Component<any, any> {
             this.setSelectedKeys(e.key.split('.')[1])
             this.onPageSizeChanged(e.key.split('.')[1])
         }
+        if (e.key === 'filter') {
+            this.setState({ modalResourceVisible: true })
+        }
     }
 
     private setSelectedKeys(parameter?: string) {
@@ -200,7 +204,7 @@ class NfDataGrid extends React.Component<any, any> {
                 <Menu.Item>
                     Select Columns
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key={'filter'}>
                     Filter
                 </Menu.Item>
                 <Menu.SubMenu title={"Rows Per Page"}>
@@ -210,7 +214,6 @@ class NfDataGrid extends React.Component<any, any> {
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
-
                 <Menu.Item>
                     Format
                 </Menu.Item>
@@ -241,64 +244,8 @@ class NfDataGrid extends React.Component<any, any> {
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >
-                <Dropdown overlay={menu} placement="bottomLeft">
-                    <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
-                        <FontAwesomeIcon icon={faChevronDown} size="xs"
-                                         style={{marginLeft: "5px"}}/>
-                    </Button>
-                </Dropdown>
-                {/*{this.props.useServerFilter &&*/}
-                {/*<div style={{marginLeft: '10px', display: 'inline'}}>*/}
-                {/*    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>*/}
-                {/*    <Select*/}
-                {/*        notFoundContent={t('notfound')}*/}
-                {/*        allowClear={true}*/}
-                {/*        style={{width: '400px'}}*/}
-                {/*        showSearch={true}*/}
-                {/*      //  onSelect={ (e:any) => this.setState({serverFilters: e})}*/}
-                {/*        mode="multiple"*/}
-                {/*        placeholder="No Filters Selected"*/}
-                {/*        defaultValue={defaultFilter}*/}
-                {/*    >*/}
-                {/*        {*/}
-                {/*            this.props.serverFilters !== undefined ?*/}
-                {/*                this.props.serverFilters*/}
-                {/*                    .map((f: EObject) =>*/}
-                {/*                        <Select.Option*/}
-                {/*                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}*/}
-                {/*                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}*/}
-                {/*                        >*/}
-                {/*                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}*/}
-                {/*                        </Select.Option>)*/}
-                {/*                :*/}
-                {/*                undefined*/}
-                {/*        }*/}
-                {/*    </Select>*/}
-                {/*    <Button title={t('addFilters')} icon="plus" type="primary" style={{ marginLeft: '10px' }} shape="circle" size="default"*/}
-                {/*            onClick={() => this.setState({ modalResourceVisible: true })}/>*/}
-                {/*    {this.state.modalResourceVisible && <Modal*/}
-                {/*        width={'1000px'}*/}
-                {/*        title={t('addFilters')}*/}
-                {/*        visible={this.state.modalResourceVisible}*/}
-                {/*        footer={null}*/}
-                {/*        onCancel={this.handleResourceModalCancel}*/}
-                {/*    >*/}
-                {/*        {*/}
-                {/*            this.props.serverFilters*/}
-                {/*                ?*/}
-                {/*                <ServerFilter*/}
-                {/*                    {...this.props}*/}
-                {/*                    serverFilters={this.props.serverFilters}*/}
-                {/*                    columnDefs={this.props.columnDefs}*/}
-                {/*                />*/}
-                {/*                :*/}
-                {/*                <ServerFilter/>*/}
-                {/*        }*/}
-                {/*    </Modal>}*/}
-                {/*</div>*/}
-                {/*}*/}
                 {this.props.reportDate &&
-                <div style={{marginTop: "10px"}}>
+                <div style={{marginBottom: '10px', textAlign: 'center'}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
                     <DatePicker
                         placeholder="Select date"
@@ -308,6 +255,61 @@ class NfDataGrid extends React.Component<any, any> {
                     />
                 </div>
                 }
+                <Dropdown overlay={menu} placement="bottomLeft">
+                    <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
+                        <FontAwesomeIcon icon={faChevronDown} size="xs"
+                                         style={{marginLeft: "5px"}}/>
+                    </Button>
+                </Dropdown>
+                {this.props.useServerFilter &&
+                <div style={{marginLeft: '10px', marginTop: '10px'}}>
+                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
+                    <Select
+                        notFoundContent={t('notfound')}
+                        allowClear={true}
+                        style={{width: '400px'}}
+                        showSearch={true}
+                        mode="multiple"
+                        placeholder="No Filters Selected"
+                        defaultValue={defaultFilter}
+                    >
+                        {
+                            this.props.serverFilters !== undefined ?
+                                this.props.serverFilters
+                                    .map((f: EObject) =>
+                                        <Select.Option
+                                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                        >
+                                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
+                                        </Select.Option>)
+                                :
+                                undefined
+                        }
+                    </Select>
+                </div>
+                }
+                <Drawer
+                    placement="right"
+                    title={t('addFilters')}
+                    width={'500px'}
+                    visible={this.state.modalResourceVisible}
+                    onClose={this.handleResourceModalCancel}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        this.props.serverFilters
+                            ?
+                            <ServerFilter
+                                {...this.props}
+                                serverFilters={this.props.serverFilters}
+                                columnDefs={this.props.columnDefs}
+                            />
+                            :
+                            <ServerFilter/>
+                    }
+                </Drawer>
                 <div style={{ marginTop: "30px"}}>
                     <AgGridReact
                         ref={this.grid}
