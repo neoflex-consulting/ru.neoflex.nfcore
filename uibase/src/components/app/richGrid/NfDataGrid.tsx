@@ -204,7 +204,7 @@ class NfDataGrid extends React.Component<any, any> {
                 </Menu.Item>
                 <Menu.SubMenu title={"Rows Per Page"}>
                     {this.state.rowPerPages.map((rowPerPage: string) =>
-                        <Menu.Item key={`rowPerPage.${rowPerPage}`}>
+                        <Menu.Item key={`rowPerPage.${rowPerPage.toLowerCase()}`}>
                             {rowPerPage}
                         </Menu.Item>
                     )}
