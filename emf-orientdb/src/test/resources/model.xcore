@@ -28,13 +28,13 @@ class Column {
 	String dbType
 }
 
-@orientdb(embedded="true", oAbstract="true")
 abstract class DBKey {
 	String name
     @orientdb(embedded="true")
 	refers Column[] columns
 }
 
+@orientdb(embedded="true", oAbstract="true")
 class PKey extends DBKey {}
 
 class IEKey extends DBKey {

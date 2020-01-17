@@ -583,28 +583,40 @@ public class Session implements Closeable {
             }
         }
         for (EReference eReference : eObject.eClass().getEAllReferences()) {
-            if (eReference.isContainment() || eReference.isContainer() || !isEmbedded(eReference)
-                    || !oElement.getPropertyNames().contains(eReference.getName())) {
-                continue;
-            }
-            if (eReference.isMany()) {
-                for (OVertex crVertex : (List<OVertex>) oElement.getProperty(eReference.getName())) {
-                    setNonContainedReference(rs, eObject, eReference, crVertex);
-                }
+            if (!eReference.isContainer() && isEmbedded(eReference) && oElement.getPropertyNames().contains(eReference.getName())) {
+                Object value = oElement.getProperty(eReference.getName());
+                if (eReference.isContainment()) {
+                    if (eReference.isMany()) {
+                        List<OElement> valueList = (List<OElement>) value;
+                        List<EObject> objectList = (List<EObject>) eObject.eGet(eReference);
+                        for (int i = 0; i < valueList.size(); ++ i) {
+                            populateEObjectRefers(rs, valueList.get(i), objectList.get(i));
+                        }
 
-            } else {
-                OVertex crVertex = oElement.getProperty(eReference.getName());
-                setNonContainedReference(rs, eObject, eReference, crVertex);
+                    } else {
+                        populateEObjectRefers(rs, (OElement) value, (EObject) eObject.eGet(eReference));
+                    }
+                }
+                else {
+                    if (eReference.isMany()) {
+                        for (OElement crVertex : (List<OElement>) value) {
+                            setNonContainedReference(rs, eObject, eReference, crVertex);
+                        }
+
+                    } else {
+                        setNonContainedReference(rs, eObject, eReference, (OElement) value);
+                    }
+                }
             }
         }
     }
 
-    private void setNonContainedReference(ResourceSet rs, EObject eObject, EReference sf, OVertex crVertex) {
-        EObject crObject = createEObject(rs, crVertex);
+    private void setNonContainedReference(ResourceSet rs, EObject eObject, EReference sf, OElement oElement) {
+        EObject crObject = createEObject(rs, oElement);
         if (!crObject.eIsProxy()) {
-            OElement top = getTopElement(crVertex);
+            OElement top = getTopElement(oElement);
             //OElement top = crVertex;
-            URI crURI = factory.createResourceURI(top).appendFragment(factory.getId(crVertex.getIdentity()));
+            URI crURI = factory.createResourceURI(top).appendFragment(factory.getId(oElement.getIdentity()));
             ((InternalEObject) crObject).eSetProxyURI(crURI);
         }
         if (sf.isMany()) {
@@ -614,7 +626,7 @@ public class Session implements Closeable {
         }
     }
 
-    private OElement getTopElement(OVertex crVertex) {
+    private OElement getTopElement(OElement crVertex) {
         return queryElement("select * from (traverse in('EContains') from ?) where in('EContains').size() == 0",
                 crVertex.getIdentity());
     }
@@ -636,7 +648,10 @@ public class Session implements Closeable {
     }
 
     private void populateEObjectContains(ResourceSet rs, OElement oElement, EObject eObject) {
-        ((OrientDBResource) eObject.eResource()).setID(eObject, factory.getId(oElement.getIdentity()));
+        ORID orid = oElement.getIdentity();
+        if (orid.isValid()) {
+            ((OrientDBResource) eObject.eResource()).setID(eObject, factory.getId(orid));
+        }
         EClass eClass = eObject.eClass();
         Set<String> propertyNames = oElement.getPropertyNames();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
