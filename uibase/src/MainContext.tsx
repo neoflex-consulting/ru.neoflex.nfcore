@@ -9,4 +9,5 @@ export interface IMainContext {
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, treeValue?: string, reportDate?: string) => void;
+    runQuery?: (resource: Ecore.Resource) => Promise<string>;
 }

@@ -17,7 +17,6 @@ import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import {rowPerPageMapper} from "../../../utils/consts";
 import ServerFilter from "./ServerFilter";
-import Splitter from '../../../components/CustomSplitter'
 
 const rowPerPageMapper_: any = rowPerPageMapper;
 
@@ -31,7 +30,7 @@ interface Props {
     gridOptions?: { [ key:string ]: any },
     serverFilters:  Array<EObject>,
     useServerFilter: boolean,
-    reportDate: any
+    activeReportDateField: boolean
 }
 
 class NfDataGrid extends React.Component<any, any> {
@@ -104,11 +103,11 @@ class NfDataGrid extends React.Component<any, any> {
 
     handleResourceModalCancel = () => {
         this.setState({ modalResourceVisible: false })
-    }
+    };
 
     updateTableData(e: any): void  {
         if (e !== null) {
-            this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, e._d)
         }
     }
 
@@ -245,12 +244,12 @@ class NfDataGrid extends React.Component<any, any> {
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >
-                {this.props.reportDate &&
+                {this.props.activeReportDateField &&
                 <div style={{marginBottom: '10px', textAlign: 'center'}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
                     <DatePicker
                         placeholder="Select date"
-                        defaultValue={moment(this.props.reportDate)}
+                        defaultValue={moment(this.props.pathFull[this.props.pathFull.length - 1].params.reportDate)}
                         format={'DD.MM.YYYY'}
                         onChange={ (e: any) => this.updateTableData(e)}
                     />

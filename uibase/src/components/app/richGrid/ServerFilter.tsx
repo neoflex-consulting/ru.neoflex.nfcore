@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from "react-i18next";
-import Ecore, {EObject} from "ecore";
+import {withTranslation} from "react-i18next";
+import  {EObject} from "ecore";
 import {Button, Form, Input, Select} from "antd";
 import {API} from "../../../modules/api";
 import {operationsMapper} from "../../../utils/consts";
@@ -12,7 +12,7 @@ interface Props {
     columnDefs?:  Array<any>;
 }
 
-class ServerFilter extends React.Component<Props & WithTranslation, any> {
+class ServerFilter extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
@@ -122,7 +122,7 @@ class ServerFilter extends React.Component<Props & WithTranslation, any> {
                             </Form.Item>
                         )
                 }
-                <Button>Apply</Button>
+                <Button onClick={ ()=> this.props.context.runQuery(this.props.currentDatasetComponent)}>Apply</Button>
             </Form>
         )
     }
