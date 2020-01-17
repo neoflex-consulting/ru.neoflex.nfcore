@@ -180,7 +180,7 @@ public class DbTests extends TestBase {
 
     @Test
     public void testImportExport() throws Exception {
-        File export = new File(getHomeFile(), "exports/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".export");
+        File export = new File(getHomeFile(), "exports/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".json.gzip");
         export.getParentFile().mkdirs();
         server.exportDatabase(export);
         server.importDatabase(export);

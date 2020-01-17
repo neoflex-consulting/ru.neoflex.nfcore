@@ -21,6 +21,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
     public static final String ORIENTDB_STUDIO_JAR = "orientdb-studio-3.0.26.jar";
@@ -161,13 +163,15 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public void exportDatabase(OutputStream os) throws IOException {
-        try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
-            ODatabaseExport export = new ODatabaseExport(db, os, (String iText)->{System.out.println(iText);});
-            try {
-                export.exportDatabase();
-            }
-            finally {
-                export.close();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{System.out.println(iText);});
+                try {
+                    export.exportDatabase();
+                }
+                finally {
+                    export.close();
+                }
             }
         }
     }
@@ -179,13 +183,15 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public void importDatabase(InputStream is) throws IOException {
-        try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
-            ODatabaseImport export = new ODatabaseImport(db, is, (String iText)->{System.out.println(iText);});
-            try {
-                export.importDatabase();
-            }
-            finally {
-                export.close();
+        try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{System.out.println(iText);});
+                try {
+                    import_.importDatabase();
+                }
+                finally {
+                    import_.close();
+                }
             }
         }
     }
