@@ -7,7 +7,6 @@ import "@ag-grid-community/core/dist/styles/ag-theme-material.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
-import { copyIntoClipboard } from '../../../utils/clipboard';
 import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from "antd";
 import {withTranslation} from "react-i18next";
 import './../../../styles/RichGrid.css';
@@ -16,8 +15,10 @@ import moment from 'moment';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
-import rowPerPageMapper from "../../../utils/consts";
+import {rowPerPageMapper} from "../../../utils/consts";
 import ServerFilter from "./ServerFilter";
+
+const rowPerPageMapper_: any = rowPerPageMapper;
 
 interface Props {
     onCtrlA?: Function,
@@ -29,7 +30,7 @@ interface Props {
     gridOptions?: { [ key:string ]: any },
     serverFilters:  Array<EObject>,
     useServerFilter: boolean,
-    reportDate: any
+    activeReportDateField: boolean
 }
 
 class NfDataGrid extends React.Component<any, any> {
@@ -44,47 +45,48 @@ class NfDataGrid extends React.Component<any, any> {
             currentTheme: this.props.viewObject.get('defaultDatasetGrid').get('theme'),
             rowPerPages: [],
             paginationPageSize: this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage'),
+            operations: [],
             selectedServerFilters: [],
             modalResourceVisible: false
         };
 
         this.grid = React.createRef();
         this.exportToCSV = this.exportToCSV.bind(this);
-        this.handleKeyDown = this.handleKeyDown.bind(this);
+       // this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
-    handleKeyDown(event: { [key:string]: any }) {
-        const { onCtrlA, onCtrlShiftA } = this.props
-        const rowData = this.grid.current.api.getSelectedRows()
-        const focusedCell = this.grid.current.api.getFocusedCell()
-        const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
-
-        let charCode = String.fromCharCode(event.which).toLowerCase()
-        if (rowData.length > 0 && focusedCell) {
-            const cellData = row.data[focusedCell.column.colId]
-            if (event.ctrlKey && charCode === 'c') {
-                copyIntoClipboard!(cellData)
-                event.preventDefault()
-            }
-            // For MAC
-            if (event.metaKey && charCode === 'c') {
-                copyIntoClipboard!(cellData)
-                event.preventDefault()
-            }
-        }
-        if (this.props.onCtrlA) {
-            if (event.ctrlKey && charCode === 'a') {
-                onCtrlA!(event)
-                event.preventDefault()
-            }
-        }
-        if (this.props.onCtrlShiftA) {
-            if (event.ctrlKey && event.shiftKey && charCode === 'a') {
-                onCtrlShiftA!(event)
-                event.preventDefault()
-            }
-        }
-    }
+   // handleKeyDown(event: { [key:string]: any }) {
+   //      const { onCtrlA, onCtrlShiftA } = this.props
+   //      const rowData = this.grid.current.api.getSelectedRows()
+   //      const focusedCell = this.grid.current.api.getFocusedCell()
+   //      const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
+   //
+   //      let charCode = String.fromCharCode(event.which).toLowerCase()
+   //      if (rowData.length > 0 && focusedCell) {
+   //          const cellData = row.data[focusedCell.column.colId]
+   //          if (event.ctrlKey && charCode === 'c') {
+   //              copyIntoClipboard!(cellData)
+   //              event.preventDefault()
+   //          }
+   //          // For MAC
+   //          if (event.metaKey && charCode === 'c') {
+   //              copyIntoClipboard!(cellData)
+   //              event.preventDefault()
+   //          }
+   //      }
+   //      if (this.props.onCtrlA) {
+   //          if (event.ctrlKey && charCode === 'a') {
+   //              onCtrlA!(event)
+   //              event.preventDefault()
+   //          }
+   //      }
+   //      if (this.props.onCtrlShiftA) {
+   //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
+   //              onCtrlShiftA!(event)
+   //              event.preventDefault()
+   //          }
+   //      }
+   //  }
 
     exportToCSV(name: string) {
         this.grid.current.api.exportDataAsCsv({ fileName: name })
@@ -101,11 +103,11 @@ class NfDataGrid extends React.Component<any, any> {
 
     handleResourceModalCancel = () => {
         this.setState({ modalResourceVisible: false })
-    }
+    };
 
     updateTableData(e: any): void  {
         if (e !== null) {
-            this.props.context.changeURL!(this.props.appModule, undefined, e._d)
+            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, e._d)
         }
     }
 
@@ -166,13 +168,11 @@ class NfDataGrid extends React.Component<any, any> {
     getAllRowPerPage() {
         API.instance().findEnum('dataset', 'RowPerPage')
             .then((result: Ecore.EObject[]) => {
-                const rowPerPageMapper_: any = rowPerPageMapper;
                 let rowPerPages = result.map( (t: any) => {
                     return rowPerPageMapper_[t.get('name')]
                 });
                 this.setState({rowPerPages})
             })
-
     };
 
     componentDidMount(): void {
@@ -240,16 +240,16 @@ class NfDataGrid extends React.Component<any, any> {
         );
         return (
             <div
-                onKeyDown={this.handleKeyDown}
+                //onKeyDown={this.handleKeyDown}
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >
-                {this.props.reportDate &&
+                {this.props.activeReportDateField &&
                 <div style={{marginBottom: '10px', textAlign: 'center'}}>
                     <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
                     <DatePicker
                         placeholder="Select date"
-                        defaultValue={moment(this.props.reportDate)}
+                        defaultValue={moment(this.props.pathFull[this.props.pathFull.length - 1].params.reportDate)}
                         format={'DD.MM.YYYY'}
                         onChange={ (e: any) => this.updateTableData(e)}
                     />
@@ -291,8 +291,8 @@ class NfDataGrid extends React.Component<any, any> {
                 }
                 <Drawer
                     placement="right"
-                    title={t('addFilters')}
-                    width={'500px'}
+                    title={t('filters')}
+                    width={'700px'}
                     visible={this.state.modalResourceVisible}
                     onClose={this.handleResourceModalCancel}
                     mask={false}

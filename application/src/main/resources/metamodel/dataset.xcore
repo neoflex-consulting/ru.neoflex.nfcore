@@ -161,12 +161,15 @@ enum Colors {
 
 enum Operations {
     EqualTo
-    GreaterThan
-    GreaterThenOrEqualTo
-    IncludeIn
+    NotEqual
     LessThan
     LessThenOrEqualTo
-    NotEqual
+    GreaterThan
+    GreaterThenOrEqualTo
+    IsNull
+    IsNotNull
+    IncludeIn
+    NotIncludeIn
 }
 
 enum Theme {

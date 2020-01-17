@@ -24,6 +24,7 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
+import {string} from "prop-types";
 
 const { Header, Content, Sider } = Layout;
 
@@ -44,7 +45,8 @@ class EcoreApp extends React.Component<any, State> {
         super(props);
         const context: IMainContext = {
             updateContext: this.updateContext,
-            changeURL: this.changeURL
+            changeURL: this.changeURL,
+            runQuery: this.runQuery
         };
         this.state = {
             principal: undefined,
@@ -75,6 +77,18 @@ class EcoreApp extends React.Component<any, State> {
             return null
         }
     }
+
+    runQuery = (resource: Ecore.Resource) => {
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'runQuery';
+        const parameters: any[] = [];
+        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1]
+        const reportDate = currentApp.params.reportDate
+        if (reportDate) {
+            parameters.push(reportDate)
+        }
+        return API.instance().call(ref, methodName, parameters)
+    };
 
     changeURL = (appModuleName?: string, treeValue?: string, reportDate?: string) => {
         if (appModuleName === "home") {

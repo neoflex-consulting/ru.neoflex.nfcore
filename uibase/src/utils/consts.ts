@@ -9,6 +9,19 @@ const rowPerPageMapper = {
     "all": "All"
 };
 
+const operationsMapper = {
+    "EqualTo": "=",
+    "NotEqual": "!=",
+    "LessThan": "<",
+    "LessThenOrEqualTo": "<=",
+    "GreaterThan": ">",
+    "GreaterThenOrEqualTo": ">=",
+    "IncludeIn": "include",
+    "NotIncludeIn": "not include",
+    "IsNull": "= null",
+    "IsNotNull": "!= null",
+};
+
 // @ts-ignore
 const colorScheme = [
     "#8056CD",
@@ -50,4 +63,5 @@ const colorScheme = [
     "rgb(138,69,198)"
 ];
 
-export default rowPerPageMapper;
+export {rowPerPageMapper};
+export {operationsMapper};
