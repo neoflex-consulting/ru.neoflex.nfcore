@@ -183,7 +183,17 @@ class DatasetGridExt extends DatasetGridImpl {
                                 "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') OR " +
                                 "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') OR " +
                                 "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
-                    } else {
+                    }
+                    else if (operator == 'NOT LIKE') {
+                        map["select"] = "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') AND " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') AND " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') AND " +
+                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
+                    }
+                    else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
+                        map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator}"
+                    }
+                    else {
                         map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}"
                     }
                     if (!serverFilters.column.contains(serverFilter[i].datasetColumn.name)) {
@@ -219,6 +229,9 @@ class DatasetGridExt extends DatasetGridImpl {
         else if (operator == Operations.GREATER_THEN_OR_EQUAL_TO.toString().toLowerCase()) {return '>='}
         else if (operator == Operations.NOT_EQUAL.toString().toLowerCase()) {return '!='}
         else if (operator == Operations.INCLUDE_IN.toString().toLowerCase()) {return 'LIKE'}
+        else if (operator == Operations.NOT_INCLUDE_IN.toString().toLowerCase()) {return 'NOT LIKE'}
+        else if (operator == Operations.IS_NULL.toString().toLowerCase()) {return 'IS NULL'}
+        else if (operator == Operations.IS_NOT_NULL.toString().toLowerCase()) {return 'IS NOT NULL'}
     }
 
     private static final ClassLogger logger =
