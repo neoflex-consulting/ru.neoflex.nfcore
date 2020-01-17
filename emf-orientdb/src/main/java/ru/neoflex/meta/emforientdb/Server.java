@@ -18,21 +18,22 @@ import org.eclipse.emf.ecore.EPackage;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
-    public static final String ORIENTDB_STUDIO_JAR = "orientdb-studio-3.0.26.jar";
+    private String home;
     OServer server;
     private OServerConfiguration configuration;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
+        this.home = home;
         System.setProperty("ORIENTDB_HOME", home);
-        //installStudioJar(home);
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
@@ -125,19 +126,6 @@ public class Server extends SessionFactory implements Closeable {
         return configuration;
     }
 
-    public void installStudioJar(String home) throws IOException {
-        File pluginDir = new File(home, "plugins");
-        pluginDir.mkdirs();
-        File studioJar = new File(pluginDir, ORIENTDB_STUDIO_JAR);
-        if (!studioJar.exists()) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("plugins/" + ORIENTDB_STUDIO_JAR);
-            if (is != null) {
-                Files.copy(is, studioJar.toPath());
-                is.close();
-            }
-        }
-    }
-
     @Override
     public void close() {
         server.shutdown();
@@ -194,6 +182,18 @@ public class Server extends SessionFactory implements Closeable {
                 }
             }
         }
+    }
+
+    public void vacuum() throws IOException {
+        File export = exportDatabase();
+        importDatabase(export);
+    }
+
+    public File exportDatabase() throws IOException {
+        File export = new File(home, "exports/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".json.gzip");
+        export.getParentFile().mkdirs();
+        exportDatabase(export);
+        return export;
     }
 
     public static void main(String[] args) {

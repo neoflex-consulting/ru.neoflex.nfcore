@@ -10,10 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.neoflex.meta.test.*;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class DbTests extends TestBase {
@@ -180,10 +177,7 @@ public class DbTests extends TestBase {
 
     @Test
     public void testImportExport() throws Exception {
-        File export = new File(getHomeFile(), "exports/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".json.gzip");
-        export.getParentFile().mkdirs();
-        server.exportDatabase(export);
-        server.importDatabase(export);
+        server.vacuum();
     }
 
     @Test
