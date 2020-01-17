@@ -190,7 +190,7 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public File exportDatabase() throws IOException {
-        File export = new File(home, "exports/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".json.gzip");
+        File export = new File(home, "exports/" + dbName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gzip");
         export.getParentFile().mkdirs();
         exportDatabase(export);
         return export;
