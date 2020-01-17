@@ -1,9 +1,12 @@
 package ru.neoflex.meta.emforientdb;
 
 import com.orientechnologies.common.util.OCallable;
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.db.tool.ODatabaseExport;
+import com.orientechnologies.orient.core.db.tool.ODatabaseImport;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.*;
@@ -149,6 +152,42 @@ public class Server extends SessionFactory implements Closeable {
 
     public void setConfiguration(OServerConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public void exportDatabase(File file) throws IOException {
+        try (OutputStream os = new FileOutputStream(file)) {
+            exportDatabase(os);
+        }
+    }
+
+    public void exportDatabase(OutputStream os) throws IOException {
+        try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+            ODatabaseExport export = new ODatabaseExport(db, os, (String iText)->{System.out.println(iText);});
+            try {
+                export.exportDatabase();
+            }
+            finally {
+                export.close();
+            }
+        }
+    }
+
+    public void importDatabase(File file) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            importDatabase(is);
+        }
+    }
+
+    public void importDatabase(InputStream is) throws IOException {
+        try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+            ODatabaseImport export = new ODatabaseImport(db, is, (String iText)->{System.out.println(iText);});
+            try {
+                export.importDatabase();
+            }
+            finally {
+                export.close();
+            }
+        }
     }
 
     public static void main(String[] args) {
