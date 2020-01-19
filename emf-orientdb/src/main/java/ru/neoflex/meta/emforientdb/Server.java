@@ -153,9 +153,11 @@ public class Server extends SessionFactory implements Closeable {
     public void exportDatabase(OutputStream os) throws IOException {
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
             try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
-                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{System.out.println(iText);});
+                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{
+                    System.out.print(iText);
+                });
                 try {
-                    export.exportDatabase();
+                    export.run();
                 }
                 finally {
                     export.close();
@@ -173,9 +175,11 @@ public class Server extends SessionFactory implements Closeable {
     public void importDatabase(InputStream is) throws IOException {
         try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
             try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
-                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{System.out.println(iText);});
+                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{
+                    System.out.print(iText);
+                });
                 try {
-                    import_.importDatabase();
+                    import_.run();
                 }
                 finally {
                     import_.close();
@@ -190,7 +194,7 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public File exportDatabase() throws IOException {
-        File export = new File(home, "exports/" + dbName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gzip");
+        File export = new File(home, "exports/" + dbName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
         export.getParentFile().mkdirs();
         exportDatabase(export);
         return export;
