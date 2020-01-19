@@ -43,8 +43,8 @@ public class Server extends SessionFactory implements Closeable {
         server.startup(configuration);
         server.activate();
         registerWwwAsStudio();
-        if (!server.existsDatabase(dbName)) {
-            server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        if (!server.existsDatabase(getDbName())) {
+            server.createDatabase(getDbName(), ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
         }
         createSchema();
         return this;
@@ -133,7 +133,7 @@ public class Server extends SessionFactory implements Closeable {
 
     @Override
     public ODatabaseDocument createDatabaseDocument() {
-        return server.openDatabase(dbName);
+        return server.openDatabase(getDbName());
     }
 
     public OServerConfiguration getConfiguration() {
@@ -144,15 +144,17 @@ public class Server extends SessionFactory implements Closeable {
         this.configuration = configuration;
     }
 
-    public void exportDatabase(File file) throws IOException {
+    public File exportDatabase(File file) throws IOException {
+        file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             exportDatabase(os);
         }
+        return file;
     }
 
     public void exportDatabase(OutputStream os) throws IOException {
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
-            try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
                 ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{
                     System.out.print(iText);
                 });
@@ -166,19 +168,20 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public void importDatabase(File file) throws IOException {
+    public void importDatabase(File file, boolean merge) throws IOException {
         try (InputStream is = new FileInputStream(file)) {
-            importDatabase(is);
+            importDatabase(is, merge);
         }
     }
 
-    public void importDatabase(InputStream is) throws IOException {
+    public void importDatabase(InputStream is, boolean merge) throws IOException {
         try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
-            try (ODatabaseDocumentInternal db = server.openDatabase(dbName)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
                 ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{
                     System.out.print(iText);
                 });
                 try {
+                    import_.setMerge(merge);
                     import_.run();
                 }
                 finally {
@@ -190,14 +193,12 @@ public class Server extends SessionFactory implements Closeable {
 
     public void vacuum() throws IOException {
         File export = exportDatabase();
-        importDatabase(export);
+        importDatabase(export, false);
     }
 
     public File exportDatabase() throws IOException {
-        File export = new File(home, "exports/" + dbName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
-        export.getParentFile().mkdirs();
-        exportDatabase(export);
-        return export;
+        File export = new File(home, "exports/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
+        return exportDatabase(export);
     }
 
     public static void main(String[] args) {
@@ -210,5 +211,9 @@ public class Server extends SessionFactory implements Closeable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String getHome() {
+        return home;
     }
 }

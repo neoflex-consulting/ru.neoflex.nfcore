@@ -29,7 +29,7 @@ public abstract class SessionFactory {
     public final static String QNAME = "qName";
 
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
-    protected final String dbName;
+    private final String dbName;
     protected final List<EPackage> packages;
     Map<String, URI> oClassToUriMap = new HashMap<>();
 
@@ -168,6 +168,10 @@ public abstract class SessionFactory {
 
     public void setQualifiedNameDelegate(Function<EClass, EStructuralFeature> qualifiedNameDelegate) {
         this.qualifiedNameDelegate = qualifiedNameDelegate;
+    }
+
+    public String getDbName() {
+        return dbName;
     }
 
     public interface SessionFunction<R> {

@@ -175,7 +175,7 @@ public class DbTests extends TestBase {
 //        sleepForever();
     }
 
-    @Test
+    //@Test
     public void testImportExport() throws Exception {
         server.vacuum();
     }
