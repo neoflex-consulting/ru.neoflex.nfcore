@@ -65,8 +65,7 @@ public class GITCommands {
     public String gitCd(String dir) throws Exception {
         Path wdPath = workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             FileSystem fs = tx.getFileSystem();
-            Path dirPath = fs.getPath(dir);
-            Path newWd = dirPath.isAbsolute() ? dirPath : fs.getPath(wd, dir).normalize();
+            Path newWd = getPath(fs, dir);
             if (!Files.isDirectory(newWd)) {
                 throw new IllegalArgumentException("Not a directory " + dir);
             }
@@ -74,6 +73,11 @@ public class GITCommands {
         });
         wd = wdPath.toString();
         return wd;
+    }
+
+    private Path getPath(FileSystem fs, String fileName) {
+        Path path = fs.getPath(fileName);
+        return path.isAbsolute() ? path : fs.getPath(wd, fileName).normalize();
     }
 
 }
