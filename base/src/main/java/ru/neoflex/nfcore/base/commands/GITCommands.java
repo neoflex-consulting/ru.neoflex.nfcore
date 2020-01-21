@@ -49,8 +49,8 @@ public class GITCommands {
     public String gitLs(@ShellOption(defaultValue=ShellOption.NULL) String dir) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             FileSystem fs = tx.getFileSystem();
-            Path workingDir = fs.getPath(dir == null ? wd : dir);
-            return Files.list(workingDir).map(path ->
+            Path dirPath = getDirectory(fs, dir);
+            return Files.list(dirPath).map(path ->
                     Files.isDirectory(path) ? path.getFileName().toString() + "/" : path.getFileName().toString())
                     .collect(Collectors.joining(" "));
         });
@@ -65,13 +65,18 @@ public class GITCommands {
     public String gitCd(String dir) throws Exception {
         wd = workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             FileSystem fs = tx.getFileSystem();
-            Path newWd = getPath(fs, dir);
-            if (!Files.isDirectory(newWd)) {
-                throw new IllegalArgumentException("Not a directory " + dir);
-            }
+            Path newWd = getDirectory(fs, dir);
             return newWd.toString();
         });
         return wd;
+    }
+
+    private Path getDirectory(FileSystem fs, String dir) {
+        Path path = getPath(fs, dir);
+        if (!Files.isDirectory(path)) {
+            throw new IllegalArgumentException("Not a directory " + dir);
+        }
+        return path;
     }
 
     @ShellMethod("Cat file")
@@ -87,6 +92,9 @@ public class GITCommands {
     }
 
     private Path getPath(FileSystem fs, String fileName) {
+        if (fileName == null) {
+            return fs.getPath(wd);
+        }
         Path path = fs.getPath(fileName);
         return path.isAbsolute() ? path : fs.getPath(wd, fileName).normalize();
     }
