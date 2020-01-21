@@ -63,15 +63,14 @@ public class GITCommands {
 
     @ShellMethod("Change working directory")
     public String gitCd(String dir) throws Exception {
-        Path wdPath = workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
+        wd = workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             FileSystem fs = tx.getFileSystem();
             Path newWd = getPath(fs, dir);
             if (!Files.isDirectory(newWd)) {
                 throw new IllegalArgumentException("Not a directory " + dir);
             }
-            return newWd;
+            return newWd.toString();
         });
-        wd = wdPath.toString();
         return wd;
     }
 
