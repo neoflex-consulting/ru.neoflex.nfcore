@@ -75,6 +75,18 @@ public class GITCommands {
         return wd;
     }
 
+    @ShellMethod("Cat file")
+    public String gitCat(String fileName) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
+            FileSystem fs = tx.getFileSystem();
+            Path path = getPath(fs, fileName);
+            if (!Files.isRegularFile(path)) {
+                throw new IllegalArgumentException("Not a file " + fileName);
+            }
+            return new String(Files.readAllBytes(path), "utf-8");
+        });
+    }
+
     private Path getPath(FileSystem fs, String fileName) {
         Path path = fs.getPath(fileName);
         return path.isAbsolute() ? path : fs.getPath(wd, fileName).normalize();
