@@ -23,7 +23,7 @@ class MandatoryReporting extends React.Component<WithTranslation, any> {
                     </div>
                 </div>
                 <StatusLegend />
-                <Calendar reporting={1}/>
+                <Calendar {...this.props} reporting={1}/>
             </Form>
         );
     }

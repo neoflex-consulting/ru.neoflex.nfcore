@@ -101,6 +101,20 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         return <div className="days row">{days}</div>;
     }
 
+    openReport(report: any, context: any): void  {
+        let params: Object[] = [{
+            datasetColumn: 'reportDate',
+            operation: 'EqualTo',
+            value: report.eContents()[0].get('date'),
+            enable: true
+        }];
+        context.changeURL(
+            report.eContents()[0].get('report').get('AppModule').get('name'),
+            undefined,
+            params
+        )
+    }
+
     renderCells(context: any) {
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
@@ -137,13 +151,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                 ?
                                 content.map( (r: any) =>
                                     <Button
-                                        onClick={() =>
-                                            context.changeURL(
-                                                r.eContents()[0].get('report').get('AppModule').get('name'),
-                                                 undefined,
-                                                r.eContents()[0].get('date')
-                                            )
-                                        }
+                                        onClick={ () => this.openReport(r, context)}
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"
                                         style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}

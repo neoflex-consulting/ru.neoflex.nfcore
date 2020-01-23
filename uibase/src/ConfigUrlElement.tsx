@@ -1,10 +1,9 @@
+import {EObject} from "ecore";
 
 interface ConfigUrlElement {
     appModule: string | undefined
     tree: string[]
-    params: {
-        reportDate: string | undefined
-    }
+    params: Object[] | undefined
 }
 
 export default ConfigUrlElement

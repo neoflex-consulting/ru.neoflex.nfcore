@@ -72,22 +72,22 @@ class ReportRichGrid extends React.Component<any, State> {
     componentDidUpdate(prevProps: any): void {
         if (this.state.datasetComponents) {
             let resource = this.state.datasetComponents.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('name') === this.props.datasetGridName)
+                d.eContents()[0].get('name') === this.props.datasetGridName);
             if (resource) {
                 if (this.state.queryCount === 0) {
-                    this.setState({currentDatasetComponent: resource})
+                    this.setState({currentDatasetComponent: resource});
                     this.props.context.runQuery(resource as Ecore.Resource)
                         .then( (result: string) => this.setState({rowData: JSON.parse(result)})
                     )
                 }
                 if (this.state.queryCount < 2) {
-                    this.findcolumnDefs(resource as Ecore.Resource)
+                    this.findcolumnDefs(resource as Ecore.Resource);
                     this.findServerFilters(resource as Ecore.Resource)
-                }
+               }
                 if (prevProps.location.pathname !== this.props.location.pathname) {
                     this.props.context.runQuery(resource as Ecore.Resource)
-                        .then( (result: string) => this.setState({rowData: JSON.parse(result)})
-                        )
+                        .then( (result: string) =>
+                            this.setState({rowData: JSON.parse(result)}))
                 }
             }
         }
@@ -98,15 +98,16 @@ class ReportRichGrid extends React.Component<any, State> {
     }
 
     render() {
-        let activeReportDateField = false
-        if (this.props.pathFull[this.props.pathFull.length - 1].params.reportDate && this.state.columnDefs) {
-            this.state.columnDefs.forEach( (c: any) => {
-                if (c.get("field").toLowerCase() === "reportdate") {
-                    activeReportDateField = true
-                }
-            });
-        }
-
+        let activeReportDateField = false;
+        this.props.pathFull[this.props.pathFull.length - 1].params.find((p: any) => {
+            if (p.datasetColumn.toLowerCase() === "reportdate") {
+                this.state.columnDefs.forEach( (c: any) => {
+                    if (c.get("field").toLowerCase() === "reportdate") {
+                        activeReportDateField = true
+                    }
+                });
+            }
+        })
         return (
             this.state.columnDefs.length > 0
                 ?

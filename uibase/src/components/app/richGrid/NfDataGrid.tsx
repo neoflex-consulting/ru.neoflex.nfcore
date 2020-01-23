@@ -107,7 +107,13 @@ class NfDataGrid extends React.Component<any, any> {
 
     updateTableData(e: any): void  {
         if (e !== null) {
-            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, e._d)
+            let params: Object[] = [{
+                datasetColumn: 'reportDate',
+                operation: 'EqualTo',
+                value: e._d,
+                enable: true
+            }];
+            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, params)
         }
     }
 
@@ -240,7 +246,6 @@ class NfDataGrid extends React.Component<any, any> {
         );
         return (
             <div
-                //onKeyDown={this.handleKeyDown}
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >

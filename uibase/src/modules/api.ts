@@ -1,4 +1,4 @@
-import Ecore from "ecore";
+import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
 
 export class Error {
@@ -299,6 +299,16 @@ export class API implements IErrorHandler {
             return eClassifiers.filter(c=>c.get('name') === eEnumName)
                 .map(p=>p.get('eLiterals').array())
                 .flat() as Ecore.EObject[]
+        })
+    }
+
+    findClass(ePackageName: string, eClassName: string): Promise<Ecore.EClass> {
+        return this.fetchPackages().then(packages => {
+            let eClassifiers = packages
+                .filter(p=>p.get('name') === ePackageName)
+                .map(p=>p.get('eClassifiers').array())
+                .flat() as Ecore.EObject[];
+            return eClassifiers.filter(c=>c.get('name') === eClassName)[0]
         })
     }
 

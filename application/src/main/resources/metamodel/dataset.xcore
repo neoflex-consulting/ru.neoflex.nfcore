@@ -61,7 +61,7 @@ abstract class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(String reportDate)
+     op JSON runQuery(ConditionDTO[] conditions)
 }
 
 class DatasetGrid extends DatasetComponent {
@@ -70,7 +70,7 @@ class DatasetGrid extends DatasetComponent {
      Theme theme //Выбранная тема грида
      boolean showUniqRow//Показывать только уникальные строки
      boolean useServerFilter
-     contains Conditions[] serverFilter //Состав серверного фильтра
+     contains Condition[] serverFilter //Состав серверного фильтра
      //String clientFilterExpression //выражение в клиентском фильтре
 }
 
@@ -123,11 +123,18 @@ class FormatMask {
     String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
 }
 
-class Conditions {
+class Condition {
     refers DatasetColumn datasetColumn
     Operations operation
     String value
     boolean enable //включен ли фильтр
+}
+
+class ConditionDTO {
+    String datasetColumn
+    String operation
+    String value
+    boolean enable
 }
 
 enum RowPerPage {

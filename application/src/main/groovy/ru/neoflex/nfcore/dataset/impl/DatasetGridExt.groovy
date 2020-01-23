@@ -2,11 +2,13 @@ package ru.neoflex.nfcore.dataset.impl
 
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
+import org.eclipse.emf.common.util.EList
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.dataset.ConditionDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -85,9 +87,9 @@ class DatasetGridExt extends DatasetGridImpl {
     }
 
     @Override
-    String runQuery(String reportDate) {
+    String runQuery(EList<ConditionDTO> conditions) {
         if (column) {
-            ResultSet rs = connectionToDB(reportDate)
+            ResultSet rs = connectionToDB(conditions)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -105,8 +107,7 @@ class DatasetGridExt extends DatasetGridImpl {
         }
     }
 
-
-    ResultSet connectionToDB(String reportDate) {
+    ResultSet connectionToDB(EList<ConditionDTO> conditions) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -130,6 +131,8 @@ class DatasetGridExt extends DatasetGridImpl {
         /*Execute query*/
         def queryColumns = []
         def serverFilters = []
+
+        def reportDate = conditions.find{ condition -> condition.datasetColumn.toLowerCase() == 'reportdate' }
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
                 if (column[i].class.toString().toLowerCase().contains('rdbms')) {
@@ -137,12 +140,12 @@ class DatasetGridExt extends DatasetGridImpl {
                         throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                     } else {
                         queryColumns.add("t.\"${column[i].datasetColumn.name}\"")
-                        if (column[i].datasetColumn.name.toLowerCase() == "reportdate") {
+                        if (column[i].datasetColumn.name.toLowerCase() == "reportdate" && reportDate != null) {
                             def map = [:]
                             map["column"] = column[i].datasetColumn.name
-                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(DAY FROM CAST('${reportDate}' AS DATE)) AND " +
-                                    "EXTRACT(MONTH FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(MONTH FROM CAST('${reportDate}' AS DATE)) AND " +
-                                    "EXTRACT(YEAR FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(YEAR FROM CAST('${reportDate}' AS DATE)))"
+                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(DAY FROM CAST('${reportDate.value}' AS DATE)) AND " +
+                                    "EXTRACT(MONTH FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(MONTH FROM CAST('${reportDate.value}' AS DATE)) AND " +
+                                    "EXTRACT(YEAR FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(YEAR FROM CAST('${reportDate.value}' AS DATE)))"
                             serverFilters.add(map)
                         }
                     }
@@ -162,10 +165,10 @@ class DatasetGridExt extends DatasetGridImpl {
                         queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"")
                     }
 
-                    if (column[i].headerName.name == "reportDate") {
+                    if (column[i].headerName.name.toLowerCase() == "reportdate" && reportDate != null) {
                         def map = [:]
                         map["column"] = column[i].datasetColumn.name
-                        map["select"] = "t.${column[i].datasetColumn.name} = ${reportDate}"
+                        map["select"] = "t.${column[i].datasetColumn.name} = ${reportDate.value}"
                         serverFilters.add(map)
                     }
                 }
