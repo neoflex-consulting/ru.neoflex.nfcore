@@ -11,7 +11,7 @@ import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
-import Ecore, {EList, EObject} from "ecore";
+import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";

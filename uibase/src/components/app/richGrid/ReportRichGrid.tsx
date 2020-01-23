@@ -99,7 +99,7 @@ class ReportRichGrid extends React.Component<any, State> {
 
     render() {
         let activeReportDateField = false;
-        this.props.pathFull[this.props.pathFull.length - 1].params.find((p: any) => {
+        this.props.pathFull[this.props.pathFull.length - 1].params.forEach((p: any) => {
             if (p.datasetColumn.toLowerCase() === "reportdate") {
                 this.state.columnDefs.forEach( (c: any) => {
                     if (c.get("field").toLowerCase() === "reportdate") {
