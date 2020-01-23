@@ -91,6 +91,7 @@ public class EmfJson {
                             eObject.eSet(attr, node.get(attr.getName()));
                         }
                     }
+                    return eObject;
                 }
             }
             if (arg instanceof List) {

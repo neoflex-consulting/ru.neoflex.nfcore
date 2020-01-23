@@ -175,6 +175,37 @@ class DatasetGridExt extends DatasetGridImpl {
             }
         }
 
+        if (conditions) {
+            for (int i = 0; i <= conditions.size() - 1; ++i) {
+                if (conditions[i].datasetColumn.toLowerCase() != 'reportdate' && conditions[i].enable) {
+                    def map = [:]
+                    map["column"] = conditions[i].datasetColumn
+                    def operator = getConvertOperator(conditions[i].operation.toString().toLowerCase())
+                    if (operator == 'LIKE') {
+                        map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') OR " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') OR " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') OR " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
+                    }
+                    else if (operator == 'NOT LIKE') {
+                        map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') AND " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') AND " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') AND " +
+                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
+                    }
+                    else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
+                        map["select"] = "t.${conditions[i].datasetColumn} ${operator}"
+                    }
+                    else {
+                        map["select"] = "t.${conditions[i].datasetColumn} ${operator} ${conditions[i].value}"
+                    }
+                    if (!serverFilters.contains(map)) {
+                        serverFilters.add(map)
+                    }
+                }
+            }
+        }
+
         if (serverFilter) {
             for (int i = 0; i <= serverFilter.size() - 1; ++i) {
                 if (serverFilter[i].enable) {
@@ -199,10 +230,8 @@ class DatasetGridExt extends DatasetGridImpl {
                     else {
                         map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}"
                     }
-                    if (!serverFilters.column.contains(serverFilter[i].datasetColumn.name)) {
+                    if (!serverFilters.contains(map)) {
                         serverFilters.add(map)
-                    } else {
-                        serverFilter[i].enable = false
                     }
                 }
             }

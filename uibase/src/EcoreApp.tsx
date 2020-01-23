@@ -85,7 +85,7 @@ class EcoreApp extends React.Component<any, State> {
         const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1];
         let resourceSet = Ecore.ResourceSet.create();
         let resourceParameters = resourceSet.create({ uri: '/parameter' });
-        let parameters: EObject[] = currentApp.params.map( (p: any) => {
+        let parameters: EObject[] = currentApp.params !== undefined && currentApp.params.map( (p: any) => {
             return this.state.conditionDtoPattern!.create({
                 datasetColumn: p['datasetColumn'],
                 operation: p['operation'],
@@ -94,7 +94,7 @@ class EcoreApp extends React.Component<any, State> {
             })
         });
         resourceParameters.addAll(parameters);
-        let resourceStringList: Ecore.EObject[] = [resourceParameters.to()];
+        let resourceStringList: Ecore.EObject[] = parameters.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
         return API.instance().call(ref, methodName, [resourceStringList])
     };
 

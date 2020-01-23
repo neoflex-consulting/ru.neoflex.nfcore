@@ -1,4 +1,3 @@
-import {EObject} from "ecore";
 
 interface ConfigUrlElement {
     appModule: string | undefined

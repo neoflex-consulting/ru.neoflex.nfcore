@@ -44,10 +44,10 @@ class ServerFilter extends React.Component<any, any> {
         if (this.state.serverFilters.length === 0 && this.props.serverFilters !== undefined) {
             let serverFilters = this.props.serverFilters.map( (f: any, index: any) => {
                 return {index: index + 1,
-                    column: f.get('datasetColumn').get('name'),
-                    operation: f.get('operation'),
-                    value: f.get('value'),
-                    enable: f.get('enable') !== null ? f.get('enable') : false}
+                    column: f['datasetColumn'],
+                    operation: f['operation'],
+                    value: f['value'],
+                    enable: f['enable'] !== null ? f['enable'] : false}
             });
             if (serverFilters.length < 9) {
                 for (let i = serverFilters.length + 1; i <= 9; i++) {
@@ -66,8 +66,8 @@ class ServerFilter extends React.Component<any, any> {
 
     updateTableData(pathFull: any): void  {
         const appModule = pathFull[pathFull.length - 1];
-        let params: Object[] = [this.state.serverFilters
-            .filter( (f:any) => f['column'] !== undefined && f['operation'] !== undefined)
+        let params: Object[] = this.state.serverFilters
+            .filter( (f:any) => f['column'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
             .map( (f:any) => {
                 return {
                     datasetColumn: f['column'],
@@ -75,8 +75,7 @@ class ServerFilter extends React.Component<any, any> {
                     value: f['value'],
                     enable: f['enable']
                 }
-            })
-        ];
+            });
         this.props.context.changeURL!(appModule.appModule, undefined, params)
     }
 
@@ -125,6 +124,7 @@ class ServerFilter extends React.Component<any, any> {
                                 <Select
                                     style={{ width: '100px', marginRight: '10px' }}
                                     defaultValue={operationsMapper_[serverFilter.operation]}
+                                    allowClear={true}
                                     onChange={(e: any) => this.handleChange(e)}
                                 >
                                     {
@@ -142,6 +142,7 @@ class ServerFilter extends React.Component<any, any> {
                                     disabled={serverFilter.operation === 'IsNull' || serverFilter.operation === 'IsNotNull'}
                                     style={{ width: '110px', marginRight: '10px' }}
                                     defaultValue={serverFilter.value}
+                                    allowClear={true}
                                     onChange={(e: any) => this.handleChange(
                                         JSON.stringify([{index: e.target.id, columnName: "value", value: e.target.value}])
                                     )}
@@ -150,6 +151,7 @@ class ServerFilter extends React.Component<any, any> {
                                 <Select
                                     style={{ width: '75px' }}
                                     defaultValue={serverFilter.enable !== undefined ? serverFilter.enable.toString() : undefined}
+                                    allowClear={true}
                                     onChange={(e: any) => this.handleChange(e)}
                                 >
                                     <Select.Option
