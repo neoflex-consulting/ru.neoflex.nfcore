@@ -1,9 +1,12 @@
 package ru.neoflex.meta.emforientdb;
 
 import com.orientechnologies.common.util.OCallable;
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.db.tool.ODatabaseExport;
+import com.orientechnologies.orient.core.db.tool.ODatabaseImport;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.*;
@@ -15,19 +18,22 @@ import org.eclipse.emf.ecore.EPackage;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
-    public static final String ORIENTDB_STUDIO_JAR = "orientdb-studio-3.0.26.jar";
+    private String home;
     OServer server;
     private OServerConfiguration configuration;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
+        this.home = home;
         System.setProperty("ORIENTDB_HOME", home);
-        //installStudioJar(home);
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
@@ -37,8 +43,8 @@ public class Server extends SessionFactory implements Closeable {
         server.startup(configuration);
         server.activate();
         registerWwwAsStudio();
-        if (!server.existsDatabase(dbName)) {
-            server.createDatabase(dbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        if (!server.existsDatabase(getDbName())) {
+            server.createDatabase(getDbName(), ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
         }
         createSchema();
         return this;
@@ -120,19 +126,6 @@ public class Server extends SessionFactory implements Closeable {
         return configuration;
     }
 
-    public void installStudioJar(String home) throws IOException {
-        File pluginDir = new File(home, "plugins");
-        pluginDir.mkdirs();
-        File studioJar = new File(pluginDir, ORIENTDB_STUDIO_JAR);
-        if (!studioJar.exists()) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("plugins/" + ORIENTDB_STUDIO_JAR);
-            if (is != null) {
-                Files.copy(is, studioJar.toPath());
-                is.close();
-            }
-        }
-    }
-
     @Override
     public void close() {
         server.shutdown();
@@ -140,7 +133,7 @@ public class Server extends SessionFactory implements Closeable {
 
     @Override
     public ODatabaseDocument createDatabaseDocument() {
-        return server.openDatabase(dbName);
+        return server.openDatabase(getDbName());
     }
 
     public OServerConfiguration getConfiguration() {
@@ -149,6 +142,63 @@ public class Server extends SessionFactory implements Closeable {
 
     public void setConfiguration(OServerConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public File exportDatabase(File file) throws IOException {
+        file.getParentFile().mkdirs();
+        try (OutputStream os = new FileOutputStream(file)) {
+            exportDatabase(os);
+        }
+        return file;
+    }
+
+    public void exportDatabase(OutputStream os) throws IOException {
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
+                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{
+                    System.out.print(iText);
+                });
+                try {
+                    export.run();
+                }
+                finally {
+                    export.close();
+                }
+            }
+        }
+    }
+
+    public void importDatabase(File file, boolean merge) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            importDatabase(is, merge);
+        }
+    }
+
+    public void importDatabase(InputStream is, boolean merge) throws IOException {
+        try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
+            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
+                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{
+                    System.out.print(iText);
+                });
+                try {
+                    import_.setMerge(merge);
+                    import_.run();
+                }
+                finally {
+                    import_.close();
+                }
+            }
+        }
+    }
+
+    public void vacuum() throws IOException {
+        File export = exportDatabase();
+        importDatabase(export, false);
+    }
+
+    public File exportDatabase() throws IOException {
+        File export = new File(home, "exports/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
+        return exportDatabase(export);
     }
 
     public static void main(String[] args) {
@@ -161,5 +211,9 @@ public class Server extends SessionFactory implements Closeable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String getHome() {
+        return home;
     }
 }

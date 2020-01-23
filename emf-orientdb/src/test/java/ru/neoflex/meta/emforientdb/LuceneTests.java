@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 public class LuceneTests extends TestBase {
 
@@ -52,15 +53,37 @@ public class LuceneTests extends TestBase {
         Assert.assertEquals("[IT-86029] Trivento (Cathedral) [I-Trivento]", placemark.getDescription());
     }
 
-//    @Test
+    //@Test
     public void testLoadCountries() throws Exception {
         InputStream is;
         try {
-            is = new FileInputStream("C:/Users/arch7/Downloads/gadm36_levels_shp/gadm36_0.json");
+            is = new FileInputStream("C:/Users/arch7/Downloads/geodata/gadm36_0.json.gz");
         }
         catch (Throwable e) {
             return;
         }
+        try (GZIPInputStream gis = new GZIPInputStream(is)) {
+            loadCountries(gis);
+        }
+        finally {
+            is.close();
+        }
+        try {
+            is = new FileInputStream("C:/Users/arch7/Downloads/geodata/Palaces and castles.json.gz");
+        }
+        catch (Throwable e) {
+            return;
+        }
+        try (GZIPInputStream gis = new GZIPInputStream(is)) {
+            loadPlaces(gis);
+        }
+        finally {
+            is.close();
+        }
+        server.exportDatabase();
+    }
+
+    public void loadCountries(InputStream is) throws Exception {
         try(BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
             for(String line; (line = br.readLine()) != null; ) {
                 Map map = (Map) ObjectBuilder.getVal(new JSONParser(line));
@@ -83,9 +106,39 @@ public class LuceneTests extends TestBase {
                     resource.getContents().add(country);
                     resource.save(null);
                 });
-                server.createDatabaseDocument().execute("sql",
-                        "CREATE INDEX test_Country.geometry ON test_Country(geometry) SPATIAL ENGINE LUCENE").close();
             }
         }
+        server.createDatabaseDocument().execute("sql",
+                "CREATE INDEX test_Country.geometry ON test_Country(geometry) SPATIAL ENGINE LUCENE").close();
+    }
+
+    public void loadPlaces(InputStream is) throws Exception {
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
+            for(String line; (line = br.readLine()) != null; ) {
+                Map map = (Map) ObjectBuilder.getVal(new JSONParser(line));
+                Map properties = (Map) map.get("properties");
+                String name = (String) properties.get("Name");
+                String description = (String) properties.get("description");
+                Map geometry = (Map) map.get("geometry");
+                String type = (String) geometry.get("type");
+                ArrayList coordinates = (ArrayList) geometry.get("coordinates");
+                Placemark placemark = TestFactory.eINSTANCE.createPlacemark();
+                placemark.setName(name);
+                System.out.println(placemark.getName());
+                placemark.setDescription(description);
+                System.out.println(placemark.getName());
+                OPoint point = TestFactory.eINSTANCE.createOPoint();
+                point.getCoordinates().addAll(coordinates);
+                placemark.setPoint(point);
+                server.inTransaction(session -> {
+                    ResourceSet rs = session.createResourceSet();
+                    Resource resource = rs.createResource(server.createURI());
+                    resource.getContents().add(placemark);
+                    resource.save(null);
+                });
+            }
+        }
+        server.createDatabaseDocument().execute("sql",
+                "CREATE INDEX test_Placemark.point ON test_Placemark(point) SPATIAL ENGINE LUCENE").close();
     }
 }

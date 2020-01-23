@@ -175,6 +175,11 @@ public class DbTests extends TestBase {
 //        sleepForever();
     }
 
+    //@Test
+    public void testImportExport() throws Exception {
+        server.vacuum();
+    }
+
     @Test
     public void databaseTest() throws Exception {
         try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", Collections.singletonList(TestPackage.eINSTANCE))) {

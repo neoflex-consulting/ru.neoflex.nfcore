@@ -28,7 +28,7 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     @Autowired
     PackageRegistry registry;
 
-    Server server;
+    private Server server;
 
     @PostConstruct
     public void init() throws Exception {
@@ -119,5 +119,9 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
                 }
             });
         }
+    }
+
+    public Server getServer() {
+        return server;
     }
 }
