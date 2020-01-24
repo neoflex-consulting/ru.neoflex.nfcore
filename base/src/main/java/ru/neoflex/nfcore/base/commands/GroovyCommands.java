@@ -37,9 +37,9 @@ public class GroovyCommands {
             OutputStream os = sshContext.getTerminal().output();
             binding.setProperty("out", new PrintWriter(os, true));
             binding.setProperty("current", Context.getCurrent());
+            System.setProperty(TerminalFactory.JLINE_TERMINAL, "none");
             AnsiConsole.systemInstall();
             Ansi.setDetector(new AnsiDetector());
-            System.setProperty(TerminalFactory.JLINE_TERMINAL, "none");
             Groovysh sh = new Groovysh(binding, new IO(is, os, os));
             return sh.run(null);
         });
