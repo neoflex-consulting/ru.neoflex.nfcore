@@ -1,7 +1,7 @@
 import {ViewFactory, View} from './View'
 import Ecore from "ecore";
 import * as React from "react";
-import {Col, Form, Row, Tabs} from "antd";
+import {Col, Form, Row, Tabs} from "antd/lib";
 import UserComponent from "./components/app/UserComponent";
 import ReportRichGrid from "./components/app/richGrid/ReportRichGrid";
 
@@ -124,7 +124,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
         this.components.set('ru.neoflex.nfcore.application#//DatasetGridView', DatasetGridView_);
-        //this.components.set('ru.neoflex.nfcore.application#//DatasetPivotView', DatasetPivotView_);
+       // this.components.set('ru.neoflex.nfcore.application#//DatasetPivotView', DatasetPivotView_);
         //this.components.set('ru.neoflex.nfcore.application#//DatasetDiagramView', DatasetDiagramView_);
     }
 

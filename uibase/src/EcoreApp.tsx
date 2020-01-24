@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown, Col, Row} from 'antd';
+import {Button, Icon, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -15,9 +15,9 @@ import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faSignOutAlt, faBullhorn, faTools, faEquals} from '@fortawesome/free-solid-svg-icons'
-import {faClock, faEye, faUser} from '@fortawesome/free-regular-svg-icons'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {faSignOutAlt, faBullhorn, faTools, faEquals} from "@fortawesome/free-solid-svg-icons"
+import {faClock, faEye, faUser} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
@@ -79,7 +79,7 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     runQuery = (resource_: Ecore.Resource) => {
-        const resource: Ecore.Resource = resource_
+        const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1];
@@ -287,7 +287,7 @@ class EcoreApp extends React.Component<any, State> {
                                 </Col>
                                 <Col span={5}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu" theme="light"
-                                          mode="horizontal" onClick={(e) => this.onRightMenu(e)}>
+                                          mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
                                         <Menu.SubMenu title={<span style={{
                                             fontVariantCaps: 'petite-caps',
                                             fontSize: '18px',

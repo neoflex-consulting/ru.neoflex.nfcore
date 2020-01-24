@@ -84,25 +84,27 @@ class FormItem extends ViewContainer {
     contains Typography headerName
 }
 
-abstract class DatasetView extends ViewElement {
+class DatasetView extends ViewElement {
     refers Dataset dataset
 }
 
+abstract class DataView extends ViewElement {
+    refers DatasetView datasetView
+}
+
 @Ecore(constraints="IsValid")
-class DatasetGridView extends DatasetView {
+class DatasetGridView extends DataView {
     op JSON getDatasetGrids()
     refers DatasetGrid defaultDatasetGrid
 }
 
-class DatasetPivotView extends DatasetView {
+class DatasetPivotView extends DataView {
     op JSON getDatasetPivots()
-    contains DatasetPivot[] datasetPivot
     refers DatasetPivot defaultDatasetPivot
 }
 
-class DatasetDiagramView extends DatasetView {
+class DatasetDiagramView extends DataView {
     op JSON getDatasetDiagrams()
-    contains DatasetDiagram[] datasetDiagram
     refers DatasetDiagram defaultDatasetDiagram
 }
 

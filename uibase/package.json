@@ -21,7 +21,7 @@
     "@types/react-router-dom": "^4.3.4",
     "@types/react-split-pane": "^0.1.67",
     "ag-grid-community": "^21.2.2",
-    "ag-grid-react": "^21.2.2",
+    "ag-grid-react": "21.2.2",
     "antd": "3.20.2",
     "brace": "^0.11.1",
     "ecore": "^0.12.0",
