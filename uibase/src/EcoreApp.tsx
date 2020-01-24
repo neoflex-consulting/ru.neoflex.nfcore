@@ -11,7 +11,7 @@ import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
-import Ecore from "ecore";
+import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
@@ -24,7 +24,6 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
-import {string} from "prop-types";
 
 const { Header, Content, Sider } = Layout;
 
@@ -37,6 +36,7 @@ interface State {
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
+    conditionDtoPattern?: EObject;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -56,7 +56,7 @@ class EcoreApp extends React.Component<any, State> {
             applications: [],
             context,
             pathFull: [],
-            appModuleName: props.appModuleName,
+            appModuleName: props.appModuleName
         }
     }
 
@@ -78,19 +78,27 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    runQuery = (resource: Ecore.Resource) => {
+    runQuery = (resource_: Ecore.Resource) => {
+        const resource: Ecore.Resource = resource_
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
-        const parameters: any[] = [];
-        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1]
-        const reportDate = currentApp.params.reportDate
-        if (reportDate) {
-            parameters.push(reportDate)
-        }
-        return API.instance().call(ref, methodName, parameters)
+        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1];
+        let resourceSet = Ecore.ResourceSet.create();
+        let resourceParameters = resourceSet.create({ uri: '/parameter' });
+        let parameters: EObject[] = currentApp.params !== undefined && currentApp.params.map( (p: any) => {
+            return this.state.conditionDtoPattern!.create({
+                datasetColumn: p['datasetColumn'],
+                operation: p['operation'],
+                value: p['value'],
+                enable: p['enable']
+            })
+        });
+        resourceParameters.addAll(parameters);
+        let resourceStringList: Ecore.EObject[] = parameters.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
+        return API.instance().call(ref, methodName, [resourceStringList])
     };
 
-    changeURL = (appModuleName?: string, treeValue?: string, reportDate?: string) => {
+    changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
         if (appModuleName === "home") {
             this.props.history.push('/home')
         } else {
@@ -98,9 +106,7 @@ class EcoreApp extends React.Component<any, State> {
             let urlElement: ConfigUrlElement = {
                 appModule: appModuleName,
                 tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: {
-                    reportDate: reportDate
-                }
+                params: params
             };
             let appModuleNameThis = appModuleName || this.state.appModuleName;
             if (appModuleName !== undefined && this.state.applications.includes(appModuleName)){
@@ -111,18 +117,18 @@ class EcoreApp extends React.Component<any, State> {
                     urlElement = p;
                     if (p.appModule === appModuleNameThis) {
                         urlElement.tree = treeValue.split('/');
-                        urlElement.params.reportDate = reportDate;
+                        urlElement.params = params;
                         path.push(urlElement)
                     }
                     else {
                         path.push(urlElement)
                     }
                 });
-            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && reportDate !== undefined) {
+            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
                 this.state.pathFull.forEach( (p:any) => {
                     urlElement = p;
                     if (p.appModule === appModuleNameThis) {
-                        urlElement.params.reportDate = reportDate;
+                        urlElement.params = params;
                         path.push(urlElement)
                     }
                     else {
@@ -133,9 +139,9 @@ class EcoreApp extends React.Component<any, State> {
                 this.state.pathFull.forEach( (p:any) => {
                     path.push(p)
                 });
-                urlElement.appModule = appModuleName
+                urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
-                urlElement.params.reportDate = reportDate
+                urlElement.params = params;
                 path.push(urlElement)
             } else if (appModuleName === this.state.appModuleName) {
                 this.state.pathFull.forEach( (p:any) => {
@@ -151,7 +157,7 @@ class EcoreApp extends React.Component<any, State> {
                         )
                     )
                 )
-                }`);
+            }`);
         }
     };
 
@@ -196,7 +202,7 @@ class EcoreApp extends React.Component<any, State> {
                     .then((applicationsObjects) => {
                         let applications = applicationsObjects.map( (a:any) =>
                             a.eContents()[0].get('name')
-                        )
+                        );
                         this.setState({applications})
                     })
             }
@@ -383,7 +389,7 @@ class EcoreApp extends React.Component<any, State> {
                 <DynamicComponent componentPath={"components/reports/component.js"} componentName={"UnCorrect"}/>
             </div>
     )};
-    
+
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
         let selectedKeys = ['metadata', 'data', 'query', 'tools']
@@ -464,7 +470,16 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
+    getConditionDtoPattern() {
+        API.instance().findClass('dataset', 'ConditionDTO')
+            .then( (conditionDtoPattern: EObject ) => {
+                this.setState({conditionDtoPattern})
+            })
+    };
+
     componentDidMount(): void {
+
+        if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applications.length) {this.getAllApplication()}
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}

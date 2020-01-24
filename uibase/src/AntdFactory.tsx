@@ -93,7 +93,7 @@ class ComponentElement_ extends ViewContainer {
     render = () => {
         if (this.props.viewObject.eClass.get("name") === "ComponentElement" && this.props.viewObject.get('component')) {
             const componentClassName = this.props.viewObject.get('component').get('componentClassName')
-            return <UserComponent componentClassName={componentClassName}/>
+            return <UserComponent {...this.props} componentClassName={componentClassName}/>
         } else return <div>Not found</div>
     }
 }

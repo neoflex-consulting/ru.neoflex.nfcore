@@ -31,7 +31,7 @@ class UserComponent extends React.Component<Props & WithTranslation, any> {
             Component = UserComponents['PageNotFound']
         }
         return (
-            <Component/>
+            <Component {...this.props}/>
         )}
     }
 

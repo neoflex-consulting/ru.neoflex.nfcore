@@ -107,7 +107,13 @@ class NfDataGrid extends React.Component<any, any> {
 
     updateTableData(e: any): void  {
         if (e !== null) {
-            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, e._d)
+            let params: Object[] = [{
+                datasetColumn: 'reportDate',
+                operation: 'EqualTo',
+                value: e._d,
+                enable: true
+            }];
+            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, params)
         }
     }
 
@@ -185,13 +191,13 @@ class NfDataGrid extends React.Component<any, any> {
     }
 
     render() {
-        const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props
+        const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props;
         let defaultFilter: any[] = [];
         if (serverFilters !== undefined) {
             defaultFilter = serverFilters
-                .filter((f: EObject) => f.get('enable') === true)
-                .map((f: EObject) =>
-                    `${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`
+                .filter((f: any) => f['enable'] === true)
+                .map((f: any) =>
+                    `${f['datasetColumn']} ${f['operation']} ${f['value']}`
                 )
         }
         let selectedKeys = this.setSelectedKeys();
@@ -240,7 +246,6 @@ class NfDataGrid extends React.Component<any, any> {
         );
         return (
             <div
-                //onKeyDown={this.handleKeyDown}
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >
@@ -271,17 +276,17 @@ class NfDataGrid extends React.Component<any, any> {
                         showSearch={true}
                         mode="multiple"
                         placeholder="No Filters Selected"
-                        defaultValue={defaultFilter}
+                        value={defaultFilter}
                     >
                         {
                             this.props.serverFilters !== undefined ?
                                 this.props.serverFilters
-                                    .map((f: EObject) =>
+                                    .map((f: any) =>
                                         <Select.Option
-                                            key={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
-                                            value={`${f.get('datasetColumn').get('name')} ${f.get('operation')} ${f.get('value')}`}
+                                            key={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
+                                            value={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
                                         >
-                                            {f.get('datasetColumn').get('name')} {f.get('operation')} {f.get('value')}
+                                            {f['datasetColumn']} {f['operation']} {f['value']}
                                         </Select.Option>)
                                 :
                                 undefined

@@ -8,6 +8,6 @@ export interface IMainContext {
     applicationReferenceTree?: Ecore.EObject
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
-    changeURL?: (appModuleName?: string, treeValue?: string, reportDate?: string) => void;
+    changeURL?: (appModuleName?: string, treeValue?: undefined, params?: Object[] | undefined) => void;
     runQuery?: (resource: Ecore.Resource) => Promise<string>;
 }

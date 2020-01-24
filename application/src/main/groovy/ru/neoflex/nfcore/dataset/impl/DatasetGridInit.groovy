@@ -89,7 +89,7 @@ class DatasetGridInit {
 
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
-            def serverFilter1 = DatasetFactory.eINSTANCE.createConditions()
+            def serverFilter1 = DatasetFactory.eINSTANCE.createCondition()
             def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter1.setDatasetColumn(datasetColumn1)
             serverFilter1.operation = Operations.LESS_THAN
@@ -97,7 +97,7 @@ class DatasetGridInit {
             serverFilter1.enable = true
             datasetGrid.serverFilter.add(serverFilter1)
 
-            def serverFilter2 = DatasetFactory.eINSTANCE.createConditions()
+            def serverFilter2 = DatasetFactory.eINSTANCE.createCondition()
             def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter2.setDatasetColumn(datasetColumn2)
             serverFilter2.operation = Operations.LESS_THAN
@@ -105,7 +105,7 @@ class DatasetGridInit {
             serverFilter2.enable = false
             datasetGrid.serverFilter.add(serverFilter2)
 
-            def serverFilter3 = DatasetFactory.eINSTANCE.createConditions()
+            def serverFilter3 = DatasetFactory.eINSTANCE.createCondition()
             def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
             serverFilter3.setDatasetColumn(datasetColumn3)
             serverFilter3.operation = Operations.INCLUDE_IN
