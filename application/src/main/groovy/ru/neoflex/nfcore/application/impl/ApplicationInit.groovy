@@ -55,6 +55,7 @@ class ApplicationInit {
                 application.view = componentElement1
 
                 def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
+                referenceTree.name = "CatalogNode1"
                 def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
                 componentElement3.name = 'Mandatory Reporting'
                 componentElement3.setComponent(userComponent1)

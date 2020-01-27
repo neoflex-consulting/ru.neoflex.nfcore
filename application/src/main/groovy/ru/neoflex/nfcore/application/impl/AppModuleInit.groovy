@@ -41,9 +41,9 @@ class AppModuleInit {
         }
         if (rs.resources.empty) {
 
-            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "ReportPivot",true)
-            def userComponent2 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Rich Grid", "ReportRichGrid",true)
-            def userComponent3 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Diagram", "ReportDiagram",true)
+            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "DatasetPivot",true)
+            def userComponent2 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Rich Grid", "DatasetGrid",true)
+            def userComponent3 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Diagram", "DatasetDiagram",true)
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
@@ -51,31 +51,36 @@ class AppModuleInit {
             def tabs = ApplicationFactory.eINSTANCE.createTabsViewReport()
             tabs.name = 'View Report'
 
+            def componentElement4 = ApplicationFactory.eINSTANCE.createForm()
+            componentElement4.name = "TwoGridWithDifferentDataset"
 
-//
-//            def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
-//            datasetView1.name = "DatasetViewTest_1"
-//            def jdbcDataset1 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
-//            datasetView1.setDataset(jdbcDataset1)
-//
-//            def datasetView2 = ApplicationFactory.eINSTANCE.createDatasetView()
-//            datasetView2.name = "DatasetViewTest_2"
-//            def jdbcDataset2 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA", "",false)
-//            datasetView2.setDataset(jdbcDataset2)
-//
-//
-//
-//            def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-//            datasetGridView1.name = 'Dataset View Grid'
-//            datasetGridView1.setDatasetView(datasetView1)
-//            def defaultDatasetGrid1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTest", "",false)
-//            datasetGridView1.setDefaultDatasetGrid(defaultDatasetGrid1)
-//            def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-//            datasetGridView2.name = 'Dataset View Grid Test With ReportDate'
-//
-//            datasetGridView2.setDatasetView(datasetView2)
-//            def defaultDatasetGrid2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTestAAA", "",false)
-//            datasetGridView2.setDefaultDatasetGrid(defaultDatasetGrid2)
+            def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView1.name = "DatasetViewTest_1"
+            def jdbcDataset1 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
+            datasetView1.setDataset(jdbcDataset1)
+
+            def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
+            datasetGridView1.name = 'Dataset View Grid'
+            //datasetGridView1.setDatasetView(datasetView1)
+            def defaultDatasetGrid1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTest", "",false)
+            datasetGridView1.setDefaultDatasetGrid(defaultDatasetGrid1)
+
+            componentElement4.children.add(datasetView1)
+            componentElement4.children.add(datasetGridView1)
+
+            def datasetView2 = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView2.name = "DatasetViewTest_2"
+            def jdbcDataset2 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA", "",false)
+            datasetView2.setDataset(jdbcDataset2)
+
+            def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
+            datasetGridView2.name = 'Dataset View Grid Test With ReportDate'
+            //datasetGridView2.setDatasetView(datasetView2)
+            def defaultDatasetGrid2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTestAAA", "",false)
+            datasetGridView2.setDefaultDatasetGrid(defaultDatasetGrid2)
+
+            componentElement4.children.add(datasetView2)
+            componentElement4.children.add(datasetGridView2)
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
@@ -89,11 +94,12 @@ class AppModuleInit {
             tabs.children.add(componentElement1)
             tabs.children.add(componentElement2)
             tabs.children.add(componentElement3)
-//            tabs.children.(datasetGridView1)
+            tabs.children.add(componentElement4)
 //            tabs.children.add(datasetGridView2)
             application.view = tabs
 
             def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
+            referenceTree.name = "CatalogNode1"
             application.setReferenceTree(referenceTree)
 
             rs.resources.add(Context.current.store.createEObject(application))
