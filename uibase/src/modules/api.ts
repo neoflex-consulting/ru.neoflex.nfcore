@@ -203,6 +203,23 @@ export class API implements IErrorHandler {
         return {id, rev, fragment, query, resid};
     }
 
+    static fixReferences(object: any, rootId: string): void {
+        if (!object || typeof object !== 'object') {
+            return;
+        }
+        let ref = object.$ref;
+        if (ref) {
+            if (!ref.includes("#")) {
+                object.$ref = rootId + '#' + ref;
+            }
+        }
+        for (var i in object) {
+            if (object.hasOwnProperty(i)) {
+                API.fixReferences(object[i], rootId);
+            }
+        }
+    }
+
     saveResource(resource: Ecore.Resource, level: number = 1): Promise<Ecore.Resource> {
         let url = "/emf/resource";
         let uri = resource.get('uri');
@@ -214,13 +231,15 @@ export class API implements IErrorHandler {
             }
             url = url + '?ref=' + encodeURIComponent(id);
         }
+        let obj = resource.to()
+        API.fixReferences(obj, obj._id)
         return this.fetchJson(url, {
             method: "PUT",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(resource.to())
+            body: JSON.stringify(obj)
         }).then(json => {
             let {contents, uri} = json;
             let jsonObject = contents[0];
