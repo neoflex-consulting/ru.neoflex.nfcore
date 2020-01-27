@@ -44,6 +44,7 @@
 
 .ul-breadcrumb .li-breadcrumb .breadcrumbIcon{
     margin-left: 15px;
+    margin-right: 20px;
 }
 
 .ul-breadcrumb .li-breadcrumb:before {
@@ -79,7 +80,7 @@
 }
 
 .ul-breadcrumb .li-breadcrumb:first-child .breadcrumbIcon {
-    margin-left: 23px;
+    margin-left: 10px;
     display: inline-block;
 }
 
