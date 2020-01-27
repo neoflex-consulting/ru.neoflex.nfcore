@@ -218,12 +218,13 @@ interface Props {
 export default class ComponentMapper extends React.Component<Props, any>{
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx } = props
+        const { targetObject, eObject, eType, value, ukey, idx } = props;
+        const targetValue = value || props.eObject.get('defaultValueLiteral');
         if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
             return <SelectRefObject
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 eObject={props.eObject}
                 mainEObject={props.mainEObject}
                 handleDeleteRef={props.handleDeleteRef}
@@ -236,7 +237,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
             return <BooleanSelect
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 onChange={(newValue: any) => {
                     props.onChange && props.onChange!(newValue, 'BooleanSelect', targetObject, eObject)
                 }}
@@ -245,21 +246,21 @@ export default class ComponentMapper extends React.Component<Props, any>{
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DDTHH:mm:ss.SSSZZ'), 'DatePickerComponent', targetObject, props.eObject)}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DD'), 'DatePickerComponent', targetObject, props.eObject)}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
             return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', targetObject, props.eObject)}
                 type="password"
             />
@@ -267,7 +268,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
-                value={value || eType.eContents()[0].get('name')}
+                value={targetValue || eType.eContents()[0].get('name')}
                 eType={eType}
                 id={props.id}
                 onChange={(newValue: any) => {
@@ -279,7 +280,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
             return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
-                value={value}
+                value={targetValue}
                 onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', targetObject, props.eObject)}
                 type="text"
             />
