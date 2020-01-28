@@ -75,7 +75,7 @@ class Div extends ViewContainer {
     String marginLeft = "0"
 }
 
-class EClassForm extends Form {
+class EClassForm extends ViewContainer {
 	refers EClass aClass
 }
 
@@ -152,7 +152,9 @@ class DynamicNode extends TreeNode {
     refers EObject eObject
 }
 
-class EClassNode extends ViewNode {
+class EClassNode extends TreeNode {
+    contains ViewElement view
+    refers EObject eObject
     refers EClass aClass
 }
 
