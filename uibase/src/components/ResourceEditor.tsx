@@ -416,7 +416,7 @@ class ResourceEditor extends React.Component<any, State> {
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = !targetObject._id ? targetObject : findObjectById(updatedJSON, targetObject._id)
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
             this.setState({
                 resourceJSON: nestedJSON,
@@ -434,16 +434,16 @@ class ResourceEditor extends React.Component<any, State> {
         }
 
         if (e.key === "delete") {
-            let updatedJSON
+            let updatedJSON;
             if (node.featureUpperBound === -1) {
-                const index = node.eventKey ? node.eventKey[node.eventKey.length - 1] : undefined
+                const index = node.pos ? node.pos[node.pos.length - 1] : undefined;
                 updatedJSON = index && node.parentUpdater(null, undefined, node.propertyName, { operation: "splice", index: index })
             } else {
                 updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = !targetObject._id ? targetObject : findObjectById(updatedJSON, targetObject._id)
-            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
                 mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
