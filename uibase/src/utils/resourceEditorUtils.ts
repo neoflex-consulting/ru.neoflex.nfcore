@@ -1,9 +1,13 @@
-import update from 'immutability-helper';
+import update, { extend } from 'immutability-helper';
 
 /**
 * Creates updaters for all levels of an object, including for objects in arrays.
 */
 function nestUpdaters(json: any, parentObject: any = null, property ?: String): Object {
+
+    // extend('$moveUp', function(index: any ) {
+    //     return index;
+    // });
 
     const createUpdater = (data: Object, init_idx?: Number) => {
         return (newValues: Object, indexForParentUpdater?: any, updaterProperty?: any, options?: any) => {
@@ -18,7 +22,7 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                 } else {
                     if (options && options.operation === "push") {
                         //cause a property may not exist
-                        if (!currentObject[updaterProperty]) currentObject[updaterProperty] = []
+                        if (!currentObject[updaterProperty]) currentObject[updaterProperty] = [];
                         updatedData = update(currentObject as any, { [updaterProperty]: { $push: [newValues] } })
                     } else if (options && options.index && options.operation === "splice") {
                         updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
@@ -26,6 +30,12 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         updatedData = update(currentObject as any, { [updaterProperty]: { $set: newValues } })
                     } else if (options && options.operation === "unset") {
                         updatedData = update(currentObject as any, { $unset: [updaterProperty] })
+                    } else if (options && options.operation === "move") {
+                        let oldIndexValue = currentObject.children[options.oldIndex];
+                        let temp = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } });
+                        updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
+                    } else if (options && options.operation === "getAllParentChildren") {
+                        return currentObject.children ? currentObject.children : undefined
                     } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })

@@ -346,12 +346,13 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     renderRightMenu(): any {
-        const node: { [key: string]: any } = this.state.treeRightClickNode
+        const node: { [key: string]: any } = this.state.treeRightClickNode;
         const eClass = node.eClass
-        const eClassObject = Ecore.ResourceSet.create().getEObject(eClass)
-        const allSubTypes = eClassObject.get('eAllSubTypes')
-        node.isArray && eClassObject && allSubTypes.push(eClassObject)
-        return <div style={{
+        const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+        const allSubTypes = eClassObject.get('eAllSubTypes');
+        node.isArray && eClassObject && allSubTypes.push(eClassObject);
+        const allParentChildren = node.propertyName ? node.parentUpdater(null, undefined, node.propertyName, { operation: "getAllParentChildren" }) : undefined;
+        return (node.upperBound === undefined || node.upperBound === 1 && node.children.length === 0 || node.upperBound === -1) && node.propertyName !== undefined && <div style={{
             position: "absolute",
             display: "grid",
             boxShadow: "2px 2px 8px -1px #cacaca",
@@ -380,9 +381,13 @@ class ResourceEditor extends React.Component<any, State> {
                                 {type.get('name')}
                             </Menu.Item>)}
                 </Menu.SubMenu>}
-                {(node.isArray || node.headline) && <Menu.Item key="moveUp">Collapse children</Menu.Item>}
-                {!node.isArray && !node.headline && <Menu.Item key="moveUp">Move Up</Menu.Item>}
-                {!node.isArray && !node.headline && <Menu.Item key="moveDown">Move Down</Menu.Item>}
+                {Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== 0 &&
+                !node.isArray && !node.headline && <Menu.Item key="moveUp">Move Up</Menu.Item>}
+
+                {(allParentChildren ? allParentChildren.length !== 1 : false) &&
+                Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== allParentChildren.length - 1 &&
+                !node.isArray && !node.headline && <Menu.Item key="moveDown">Move Down</Menu.Item>}
+
                 {!node.isArray && !node.headline && <Menu.Item key="delete">Delete</Menu.Item>}
             </Menu>
         </div>
@@ -425,18 +430,34 @@ class ResourceEditor extends React.Component<any, State> {
             })
         }
 
-        if (e.key === "moveUp") {
-
-        }
-
-        if (e.key === "moveDown") {
-
+        if (e.key === "moveUp" || e.key === "moveDown") {
+            let updatedJSON;
+            if (node.featureUpperBound === -1) {
+                if (e.key === "moveUp") {
+                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
+                }
+                if (e.key === "moveDown") {
+                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
+                }
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                mainEObject: resource.eContents()[0],
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
+                tableData: updatedTargetObject ? state.tableData : [],
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey)
+            }))
         }
 
         if (e.key === "delete") {
             let updatedJSON;
             if (node.featureUpperBound === -1) {
-                const index = node.pos ? node.pos[node.pos.length - 1] : undefined;
+                const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
                 updatedJSON = index && node.parentUpdater(null, undefined, node.propertyName, { operation: "splice", index: index })
             } else {
                 updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "set" })
