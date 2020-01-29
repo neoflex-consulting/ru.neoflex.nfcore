@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.ContextAttributes;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.common.util.*;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -13,10 +14,16 @@ import org.emfjson.jackson.annotations.EcoreIdentityInfo;
 import org.emfjson.jackson.annotations.EcoreTypeInfo;
 import org.emfjson.jackson.databind.EMFContext;
 import org.emfjson.jackson.module.EMFModule;
+import org.emfjson.jackson.resource.JsonResource;
+import org.emfjson.jackson.resource.JsonResourceFactory;
+import org.emfjson.jackson.utils.ValueReader;
 import org.emfjson.jackson.utils.ValueWriter;
+import ru.neoflex.meta.emforientdb.OrientDBResource;
 import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,12 +43,24 @@ public class EmfJson {
         emfModule.configure(EMFModule.Feature.OPTION_USE_ID, true);
         emfModule.setTypeInfo(new EcoreTypeInfo("eClass"));
         emfModule.setIdentityInfo(new EcoreIdentityInfo("_id",
+                (ValueReader<Object, String>) (value, context) -> {
+                    return value.toString();
+                },
                 (ValueWriter<EObject, Object>) (eObject, context) -> {
-                    URI eObjectURI = EMFContext.getURI(context, eObject);
-                    if (eObjectURI == null) {
-                        return null;
+                    Resource resource = EMFContext.getResource(context, eObject);
+                    Object id;
+                    if (resource instanceof OrientDBResource) {
+                        id = ((OrientDBResource) resource).getID(eObject);
+                    } else {
+                        URI eObjectURI = EMFContext.getURI(context, eObject);
+                        if (eObjectURI == null) {
+                            id = null;
+                        }
+                        else {
+                            id = eObjectURI.fragment();
+                        }
                     }
-                    return eObjectURI.fragment();
+                    return id;
                 }));
         mapper.registerModule(emfModule);
         mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
@@ -49,15 +68,53 @@ public class EmfJson {
     }
 
     public static Resource treeToResource(JsonNode contents, Resource resource) throws JsonProcessingException {
+        ObjectMapper mapper = createMapper();
+        JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI());
         ContextAttributes attributes = ContextAttributes
                 .getEmpty()
-                .withSharedAttribute("resourceSet", resource.getResourceSet())
-                .withSharedAttribute("resource", resource);
-        createMapper().reader()
+                .withSharedAttribute("resourceSet", jsonResource.getResourceSet())
+                .withSharedAttribute("resource", jsonResource);
+        mapper.reader()
                 .with(attributes)
-                .withValueToUpdate(resource)
+                .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
+        if (resource instanceof OrientDBResource) {
+            OrientDBResource orientDBResource = (OrientDBResource) resource;
+            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
+                EObject eObject = it.next();
+                orientDBResource.setID(eObject, jsonResource.getID(eObject));
+            }
+        }
+        resource.getContents().addAll(jsonResource.getContents());
         return resource;
+    }
+
+    public static ObjectNode resourceToTree(Store store, Resource resource) {
+        ObjectMapper mapper = createMapper();
+        ObjectNode result = mapper.createObjectNode();
+        result.put("uri", store.getRef(resource));
+        JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI());
+        if (resource instanceof OrientDBResource) {
+            OrientDBResource orientDBResource = (OrientDBResource) resource;
+            for (Iterator<EObject> it = orientDBResource.getAllContents();it.hasNext();) {
+                EObject eObject = it.next();
+                jsonResource.setID(eObject, orientDBResource.getID(eObject));
+            }
+        }
+        jsonResource.getContents().addAll(resource.getContents());
+        result.withArray("contents").add(mapper.valueToTree(jsonResource.getContents().get(0)));
+        return result;
+    }
+
+    public static ObjectNode resourceSetToTree(Store store, ResourceSet resourceSet) {
+        ObjectMapper mapper = createMapper();
+        ObjectNode result = mapper.createObjectNode();
+        List<Resource> resources = new ArrayList<>(resourceSet.getResources());
+        result.withArray("resources");
+        for (Resource resource: resources) {
+            result.withArray("resources").add(resourceToTree(store, resource));
+        }
+        return result;
     }
 
     public static Object fromJson(Store store, EClassifier eType, Object arg) throws IOException {

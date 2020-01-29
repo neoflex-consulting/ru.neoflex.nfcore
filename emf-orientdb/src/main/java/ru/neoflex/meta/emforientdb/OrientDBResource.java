@@ -61,6 +61,10 @@ public class OrientDBResource extends ResourceImpl {
         super.detachedHelper(eObject);
     }
 
+    public String getID(EObject eObject) {
+        return eObjectToIDMap.get(eObject);
+    }
+
     public void setID(EObject eObject, String id) {
          String oldID = id != null ?
                 eObjectToIDMap.put(eObject, id):

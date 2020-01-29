@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -12,8 +11,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.util.EContentsEList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +21,6 @@ import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,28 +42,12 @@ public class EMFController {
         mapper = EmfJson.createMapper();
     }
 
-    private ObjectNode resourceToTree(Resource resource) {
-        ObjectNode result = mapper.createObjectNode();
-        result.put("uri", store.getRef(resource));
-        result.withArray("contents").add(mapper.valueToTree(resource.getContents().get(0)));
-        return result;
-    }
-
-    private ObjectNode resourceSetToTree(ResourceSet resourceSet) {
-        ObjectNode result = mapper.createObjectNode();
-        List<Resource> resources = new ArrayList<>(resourceSet.getResources());
-        result.withArray("resources");
-        for (Resource resource: resources) {
-            result.withArray("resources").add(resourceToTree(resource));
-        }
-        return result;
-    }
-
     @GetMapping("/resource")
     JsonNode getObject(@RequestParam String ref) throws Exception {
         return store.inTransaction(true, tx -> {
             Resource resource = store.loadResource(ref);
-            ObjectNode result = resourceToTree(resource);
+            EcoreUtil.resolveAll(resource);
+            ObjectNode result = EmfJson.resourceToTree(store, resource);
             return result;
         });
     }
@@ -110,7 +89,7 @@ public class EMFController {
                     .executionStats(true)
                     .selector(selector)
                     .execute();
-            ObjectNode resourceSetNode = resourceSetToTree(docFinder.getResourceSet());
+            ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, docFinder.getResourceSet());
             resourceSetNode.set("executionStats", docFinder.getExecutionStats());
             resourceSetNode.put("warning", docFinder.getWarning());
             resourceSetNode.put("bookmark", docFinder.getBookmark());
