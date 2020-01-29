@@ -3,20 +3,37 @@ package ru.neoflex.nfcore.application.impl;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EObject;
-import ru.neoflex.nfcore.application.DatasetGridView;
-import ru.neoflex.nfcore.application.DatasetView;
+import ru.neoflex.nfcore.application.*;
 import ru.neoflex.nfcore.application.util.ApplicationValidator;
 
 import java.util.Map;
 
 public class ApplicationValidatorExt extends ApplicationValidator {
+
+    @Override
+    public boolean validateUserComponent_IsValid(UserComponent userComponent, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (userComponent.getComponentClassName() == null) {
+            return validate(userComponent, diagnostics, context, "componentClassName - must be set");
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateViewElement_IsValid(ViewElement viewElement, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (viewElement.getName() == null) {
+            return validate(viewElement, diagnostics, context, "name - must be set");
+        }
+        else {
+            return false;
+        }
+    }
+
     @Override
     public boolean validateDatasetView(DatasetView datasetView, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (datasetView.getDataset() == null) {
             return validate(datasetView, diagnostics, context, "datasetGrid - must be set");
-        }
-        if (datasetView.getName() == null) {
-            return validate(datasetView, diagnostics, context, "name - must be set");
         }
         else {
             return false;
@@ -27,6 +44,16 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     public boolean validateDatasetGridView_IsValid(DatasetGridView datasetGridView, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (datasetGridView.getDefaultDatasetGrid() == null) {
             return validate(datasetGridView, diagnostics, context, "defaultDatasetGrid - must be set");
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateTreeNode_IsValid(TreeNode treeNode, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (treeNode.getName() == null) {
+            return validate(treeNode, diagnostics, context, "name - must be set");
         }
         else {
             return false;
