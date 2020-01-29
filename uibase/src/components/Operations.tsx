@@ -1,13 +1,13 @@
 import React, {Fragment, useState} from 'react';
 import {Button, Dropdown, Menu, Modal, notification, Select} from 'antd'
 import Ecore from 'ecore';
-import i18next from 'i18next';
 
 import {API} from './../modules/api'
 import FormComponentMapper from './FormComponentMapper';
+import {TFunction} from "i18next";
 
 interface Props {
-    translate: i18next.TFunction,
+    translate: TFunction,
     mainEObject: Ecore.EObject,
     refresh: (refresh: boolean) => void;
 }
