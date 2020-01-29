@@ -19,13 +19,16 @@ public class StartUp {
     private static final Logger logger = LoggerFactory.getLogger(StartUp.class);
     @Autowired
     Context context;
+    @Autowired
+    Store store;
+    @Autowired
+    PackageRegistry registry;
 
     @PostConstruct
     void init() throws Exception {
         context.inContext(() -> {
-            Store store = context.getStore();
             return store.inTransaction(false, tx -> {
-                for (EPackage ePackage: context.getRegistry().getEPackages()) {
+                for (EPackage ePackage: registry.getEPackages()) {
                     String nsURI = ePackage.getNsURI();
                     String name = StringUtils.capitalize(ePackage.getName());
                     String initClassName = nsURI + ".impl." + name + "PackageInit";
@@ -39,7 +42,7 @@ public class StartUp {
                         logger.error(initClassName, e);
                     }
                 }
-                for (EClassifier eClassifier: context.getRegistry().getEClassifiers()) {
+                for (EClassifier eClassifier: registry.getEClassifiers()) {
                     String nsURI = eClassifier.getEPackage().getNsURI();
                     String name = StringUtils.capitalize(eClassifier.getName());
                     String initClassName = nsURI + ".impl." + name + "Init";
