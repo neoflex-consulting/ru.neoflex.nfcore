@@ -151,12 +151,12 @@ export class API implements IErrorHandler {
         if (ref) {
             let {id, fragment} = API.parseRef(ref);
             if (id) {
-                if (!ids.has(fragment)) {
+                if (!ids.has(id) && !ids.has(fragment)) {
                     object.$ref = id + '#' + fragment;
                     found.add(object.$ref);
                 }
                 else {
-                    object.$ref = rootId + "#" + fragment;
+                    object.$ref = rootId + "#" + (fragment === "/" ? id : fragment);
                 }
             }
         }

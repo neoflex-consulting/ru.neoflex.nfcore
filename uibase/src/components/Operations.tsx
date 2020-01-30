@@ -4,7 +4,7 @@ import Ecore from 'ecore';
 
 import {API} from './../modules/api'
 import FormComponentMapper from './FormComponentMapper';
-import {TFunction} from "i18next";
+import {TFunction} from 'i18next';
 
 interface Props {
     translate: TFunction,
