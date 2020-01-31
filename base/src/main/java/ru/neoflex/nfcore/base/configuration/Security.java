@@ -7,6 +7,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -60,25 +61,29 @@ public class Security extends WebSecurityConfigurerAdapter {
         http
                 .httpBasic()
                 .and()
-                    .authorizeRequests()
-                    .antMatchers("/locales/**").permitAll()
-                    .antMatchers("/emf/*").authenticated()
-                    .antMatchers("/system/**").authenticated()
-                    .antMatchers("/app/**").authenticated()
-                    .antMatchers("/git/**").authenticated()
+                .authorizeRequests()
+                .antMatchers("/emf/**").authenticated()
+                .antMatchers("/system/**").authenticated()
+                .antMatchers("/app/**").authenticated()
+                .antMatchers("/git/**").authenticated()
+                .antMatchers("/locales/**").permitAll()
+                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAuthority("ACTUATOR")
                 .and()
-                     .cors().configurationSource(source)
+                .cors().configurationSource(source)
                 .and()
-                     .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")).deleteCookies("JSESSIONID").clearAuthentication(true).invalidateHttpSession(true).logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
+                .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .deleteCookies("JSESSIONID")
+                .clearAuthentication(true).invalidateHttpSession(true)
+                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
                 .and()
-                     .csrf().disable();
+                .csrf().disable();
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
     }
 
     @Bean
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception
-    {
+    public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
@@ -148,7 +153,7 @@ public class Security extends WebSecurityConfigurerAdapter {
                                     .execute();
                             EList<Resource> resources = docFinder.getResourceSet().getResources();
 
-                            for (Resource resource: resources) {
+                            for (Resource resource : resources) {
                                 ru.neoflex.nfcore.base.auth.Role role = (ru.neoflex.nfcore.base.auth.Role) resource.getContents().get(0);
                                 if (!role.getName().isEmpty()) {
                                     rolesFromDB.add(role.getName());
@@ -156,7 +161,7 @@ public class Security extends WebSecurityConfigurerAdapter {
                             }
 
                             //Add roles from Ldap that are contained in Databases
-                            for (String roleFromLdap:rolesFromLdap) {
+                            for (String roleFromLdap : rolesFromLdap) {
                                 if (rolesFromDB.contains(roleFromLdap)) {
                                     au.add(new SimpleGrantedAuthority(roleFromLdap));
                                 }
@@ -179,6 +184,6 @@ public class Security extends WebSecurityConfigurerAdapter {
                 auth.eraseCredentials(false).authenticationProvider(provider);
             }
         }
-}
+    }
 }
 
