@@ -1,13 +1,9 @@
-import update, { extend } from 'immutability-helper';
+import update from 'immutability-helper';
 
 /**
-* Creates updaters for all levels of an object, including for objects in arrays.
-*/
+ * Creates updaters for all levels of an object, including for objects in arrays.
+ */
 function nestUpdaters(json: any, parentObject: any = null, property ?: String): Object {
-
-    // extend('$moveUp', function(index: any ) {
-    //     return index;
-    // });
 
     const createUpdater = (data: Object, init_idx?: Number) => {
         return (newValues: Object, indexForParentUpdater?: any, updaterProperty?: any, options?: any) => {
@@ -83,8 +79,8 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
 }
 
 /**
-* Looking for a target id and returns an object.
-*/
+ * Looking for a target id and returns an object.
+ */
 function findObjectById(data: any, id: String): any {
     const walkThroughArray = (array: Array<any>): any => {
         for (var el of array) {
