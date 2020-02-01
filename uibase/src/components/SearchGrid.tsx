@@ -220,7 +220,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 onChange: this.onSelectChange
             };
             const hasSelected = selectedRowKeys.length > 0;
-
+            const columnsWidth = columnsT.length * 315;
             return (
              <div style={{padding: '20px'}}>
                  <div>
@@ -245,7 +245,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                     </Button>
                                  </div>
                                  <Table
-                                     scroll={{x: 1300}}
+                                     scroll={{x: columnsWidth}}
                                      columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                      dataSource={this.filteredData()}
                                      bordered={true}
@@ -255,7 +255,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                              </div>
                              :
                              <Table
-                                 scroll={{x: 1300}}
+                                 scroll={{x: columnsWidth}}
                                  columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                  dataSource={this.filteredData()}
                                  bordered={true}
