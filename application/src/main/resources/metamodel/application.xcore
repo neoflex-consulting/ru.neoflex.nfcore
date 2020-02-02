@@ -155,7 +155,7 @@ class Select extends ViewElement {
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
-    String value = "undefined"
+    String value
 }
 
 class Input extends ViewElement {

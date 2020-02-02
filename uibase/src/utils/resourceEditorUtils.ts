@@ -120,7 +120,7 @@ function findObjectById(data: any, id: String): any {
     }
 }
 
-const boolSelectionOption: { [key: string]: any } = { "false": false, "undefined": false, "true": true }
+const boolSelectionOption: { [key: string]: any } = { "false": false, "undefined": false, "null": false, "true": true }
 const getPrimitiveType = (value: string): any => boolSelectionOption[value]
 const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
