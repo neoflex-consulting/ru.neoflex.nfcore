@@ -406,22 +406,17 @@ class ResourceEditor extends React.Component<any, State> {
         const node: { [key: string]: any } = this.state.treeRightClickNode
 
         if (e.keyPath[e.keyPath.length - 1] === "add") {
-            //willkommen
             const subTypeName = e.item.props.children
             const eClass = node.eClass
             const eClassObject = Ecore.ResourceSet.create().getEObject(eClass)
             const allSubTypes = eClassObject.get('eAllSubTypes')
             node.isArray && eClassObject && allSubTypes.push(eClassObject)
             const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName)
-            const lastId = node.targetObject.length > 0 ? node.targetObject[node.targetObject.length - 1]._id : undefined
-            const id = lastId ?
-                lastId.substring(0, lastId.length - 1) + (node.targetObject.length)
-                :
-                `ui_generated_${node.pos}//${node.propertyName}.0`
+            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id
-            }
+            };
             let updatedJSON
             if (node.upperBound === -1) {
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
@@ -562,10 +557,19 @@ class ResourceEditor extends React.Component<any, State> {
     cloneResource = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-        resource.set('uri', null)
-
+        resource.set('uri', '/')
+        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`)
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
+                const targetObject: { [key: string]: any } = this.state.targetObject
+                const nestedJSON = nestUpdaters(resource.eResource().to(), null)
+                const updatedTargetObject = findObjectById(nestedJSON, targetObject._id)
+                this.setState({
+                    mainEObject: resource.eResource().eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject,
+                    resource: resource
+                });
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
             })
         }

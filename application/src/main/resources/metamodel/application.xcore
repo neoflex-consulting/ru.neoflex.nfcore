@@ -61,6 +61,10 @@ class ClassFeature extends FormItem {
 @GenModel(documentation="max span value = 24 in one row")
 class Column extends ViewContainer {
     String span = "24"
+    boolean borderRight
+    boolean borderBottom
+    boolean borderTop
+    boolean borderLeft
 }
 
 class ComponentElement extends ViewElement {
@@ -68,7 +72,7 @@ class ComponentElement extends ViewElement {
 }
 
 class Div extends ViewContainer {
-    TextAlign textAlign
+    TextAlign textAlign = "Left"
     String marginRight = "0"
     String marginBottom = "0"
     String marginTop = "0"
@@ -114,12 +118,15 @@ class DatasetDiagramView extends DataView {
 }
 
 class Row extends ViewContainer {
+    String horizontalGutter = "0"
+    String verticalGutter = "0"
 }
 
 class Span extends ViewContainer {
 }
 
 class TabsViewReport extends ViewContainer {
+    TabPosition tabPosition = "Top"
 }
 
 class Tool extends ViewContainer {
@@ -130,6 +137,38 @@ class Tools extends ViewContainer {
 }
 
 class Typography extends ViewElement {
+    boolean buttonCopyable
+    boolean buttonEditable
+    String ellipsisRow = "999"
+    boolean codeStyle
+    boolean deleteStyle
+    boolean disabledStyle
+    boolean markStyle
+    boolean underlineStyle
+    boolean strongStyle
+}
+
+class Select extends ViewElement {
+    refers EClass ClassToShow
+    boolean disabled
+    boolean showSearch
+    String placeholder
+    SelectMode mode = "Default"
+    String width = "200"
+    String value = "undefined"
+}
+
+class Input extends ViewElement {
+    InputType inputType = "InputString"
+    String minValue = "1"
+    String maxValue = "99"
+    String defaultValue
+    String step = "1"
+}
+
+class Button extends ViewElement {
+    boolean buttonCancel
+    boolean buttonSave
 }
 
 /* Trees */
@@ -170,3 +209,20 @@ enum TextAlign {
     Right
 }
 
+enum TabPosition {
+    Top
+    Right
+    Bottom
+    Left
+}
+
+enum SelectMode {
+    Default
+    Multiple
+    Tags
+}
+
+enum InputType {
+    InputNumber
+    InputString
+}
