@@ -178,7 +178,7 @@ public class Scheduler {
                 Object result = null;
                 try {
                     result =  sh.evaluate(task.getScript());
-                    printWriter.println("result: " + result.getClass().getTypeName() + " = " + result);
+                    printWriter.println("result: " + (result == null ? "<null>" : result.getClass().getTypeName() + " = " + result));
                     logger.debug(stringWriter.toString());
                     task.setLastRunTime(new Timestamp(new Date().getTime()));
                     task.setLastResult(stringWriter.toString());

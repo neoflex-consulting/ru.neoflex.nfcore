@@ -114,7 +114,12 @@ public abstract class SessionFactory {
         if (ids.length != 2) {
             return null;
         }
-        return new ORecordId(new Integer(ids[0]), new Long(ids[1]));
+        try {
+            return new ORecordId(new Integer(ids[0]), new Long(ids[1]));
+        }
+        catch (NumberFormatException nfe) {
+            return null;
+        }
     }
 
     public Integer getVersion(URI uri) {
