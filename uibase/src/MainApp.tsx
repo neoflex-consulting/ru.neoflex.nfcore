@@ -138,10 +138,11 @@ export class MainApp extends React.Component<any, State> {
             const cb = cbs.get(keys[keys.length - 1]);
             if (cb) cb();
         };
-        const pathReferenceTree = decodeURI(this.props.history.location.hash).split('#')[1];
+        const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree[currentAppModule.tree.length - 1] : undefined;
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
-                <Tree.DirectoryTree defaultSelectedKeys={[pathReferenceTree]} defaultExpandAll onSelect={onSelect}>
+                <Tree.DirectoryTree selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined} defaultExpandAll onSelect={onSelect}>
                     {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
                 </Tree.DirectoryTree>
             </Layout>
