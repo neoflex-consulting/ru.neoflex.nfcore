@@ -635,7 +635,7 @@ class ResourceEditor extends React.Component<any, State> {
                         refresh={this.refresh}
                     />}
                     <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={"Copy"} />
-                    <Button className="panel-button" icon="delete" type="danger" onClick={this.delete} title={"Delete"} />
+                    <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={"Delete"} />
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
