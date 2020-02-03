@@ -601,7 +601,8 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     componentWillUnmount() {
-        window.removeEventListener("click", this.hideRightClickMenu)
+        window.removeEventListener("click", this.hideRightClickMenu);
+        window.removeEventListener("keydown", this.saveOnCtrlS)
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
@@ -615,9 +616,17 @@ class ResourceEditor extends React.Component<any, State> {
 
     componentDidMount(): void {
         this.getEClasses()
-        window.addEventListener("click", this.hideRightClickMenu)
+        window.addEventListener("click", this.hideRightClickMenu);
+        window.addEventListener("keydown", this.saveOnCtrlS)
     }
 
+    private saveOnCtrlS = (event: any) => {
+        if (event.ctrlKey && event.code === 'KeyS') {
+            this.save();
+            event.preventDefault();
+        }
+    };
+    
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
