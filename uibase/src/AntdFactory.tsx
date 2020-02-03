@@ -1,18 +1,19 @@
 import {ViewFactory, View} from './View'
-import Ecore from "ecore";
-import * as React from "react";
-import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
-import UserComponent from "./components/app/UserComponent";
-import DatasetView from "./components/app/dataset/DatasetView";
-import DatasetGrid from "./components/app/dataset/DatasetGrid";
-import DatasetPivot from "./components/app/dataset/DatasetPivot";
-import DatasetDiagram from "./components/app/dataset/DatasetDiagram";
-import {API} from "./modules/api";
-import { WithTranslation } from "react-i18next";
+import Ecore from 'ecore';
+import * as React from 'react';
+import {Button, Col, Form, Input, InputNumber, Select, Tabs, Typography} from 'antd';
+import UserComponent from './components/app/UserComponent';
+import DatasetView from './components/app/dataset/DatasetView';
+import DatasetGrid from './components/app/dataset/DatasetGrid';
+import DatasetPivot from './components/app/dataset/DatasetPivot';
+import DatasetDiagram from './components/app/dataset/DatasetDiagram';
+import {API} from './modules/api';
+import { WithTranslation } from 'react-i18next';
+import {colorScheme} from './utils/consts';
 
 const { TabPane } = Tabs;
-const { Paragraph } = Typography;
-const marginBottom = '20px'
+const { Paragraph, Text } = Typography;
+const marginBottom = '20px';
 
 let startResource: Object;
 
@@ -22,7 +23,7 @@ interface State {
 
 abstract class ViewContainer extends View {
     renderChildren = () => {
-        let children = this.props.viewObject.get("children") as Ecore.EObject[];
+        let children = this.props.viewObject.get('children') as Ecore.EObject[];
         let childrenView = children.map(
             (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
         return <div>{childrenView}</div>
@@ -42,7 +43,7 @@ class Div_ extends ViewContainer {
         const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}px`;
         return (
             <div style={{
-                textAlign: this.props.viewObject.get('textAlign') || "center",
+                textAlign: this.props.viewObject.get('textAlign') || 'center',
                 marginRight: marginRight,
                 marginBottom: marginBottom,
                 marginTop: marginTop,
@@ -60,19 +61,6 @@ class Span_ extends ViewContainer {
             <span style={{marginBottom: marginBottom}}>
                 {this.renderChildren()}
             </span>
-        )
-    }
-}
-
-class Row_ extends ViewContainer {
-    render = () => {
-        return (
-            <Row
-                style={{marginBottom: marginBottom}}
-                gutter={[this.props.viewObject.get('horizontalGutter'), this.props.viewObject.get('verticalGutter')]}
-            >
-                {this.renderChildren()}
-            </Row>
         )
     }
 }
@@ -105,7 +93,7 @@ class Form_ extends ViewContainer {
 
 class TabsViewReport_ extends ViewContainer {
     render = () => {
-        let children = this.viewObject.get("children").array() as Ecore.EObject[];
+        let children = this.viewObject.get('children').array() as Ecore.EObject[];
         return (
             <Tabs defaultActiveKey={children[0]._id} tabPosition={this.props.viewObject.get('tabPosition').toLowerCase()}>
                 {
@@ -122,7 +110,7 @@ class TabsViewReport_ extends ViewContainer {
 
 class ComponentElement_ extends ViewContainer {
     render = () => {
-        if (this.props.viewObject.eClass.get("name") === "ComponentElement" && this.props.viewObject.get('component')) {
+        if (this.props.viewObject.eClass.get('name') === 'ComponentElement' && this.props.viewObject.get('component')) {
             const componentClassName = this.props.viewObject.get('component').get('componentClassName')
             return<UserComponent {...this.props} componentClassName={componentClassName}/>
         } else return <div>Not found</div>
@@ -179,17 +167,27 @@ class Button_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: oldViewObject[0]}))
     };
+    backStartPage = () => {
+        const appModule = this.props.pathFull[this.props.pathFull.length - 1];
+        let params: Object[] = appModule.params;
+        this.props.context.changeURL!(appModule.appModule, undefined, params);
+    };
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
         return <div >
             {this.props.viewObject.get('buttonCancel') === true &&
-            <Button title={"Cancel"} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
+            <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
                 {t('cancel')}
             </Button>}
             {this.props.viewObject.get('buttonSave') === true &&
-            <Button title={"Save"} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
+            <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
                 {t('save')}
+            </Button>
+            }
+            {this.props.viewObject.get('backStartPage') === true &&
+            <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
+                {t('backStartPage')}
             </Button>
             }
         </div>
@@ -267,7 +265,7 @@ class Input_ extends ViewContainer {
     };
     render = () => {
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
-        if (this.props.viewObject.get('inputType') === "InputNumber" ) {
+        if (this.props.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div style={{marginBottom: marginBottom}}>
                     <InputNumber
@@ -276,7 +274,7 @@ class Input_ extends ViewContainer {
                         max={this.props.viewObject.get('maxValue') || 99}
                         step={this.props.viewObject.get('step') || 1}
                         placeholder={this.props.viewObject.get('placeholder')}
-                        defaultValue={this.props.viewObject.get('value') || this.props.viewObject.get('minValue') || 1}
+                        defaultValue={Number(this.props.viewObject.get('value') || this.props.viewObject.get('minValue') || 1)}
                         onChange={(currentValue: any) => {
                             this.onChange(String(currentValue))
                         }}
@@ -307,26 +305,53 @@ class Typography_ extends ViewContainer {
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
     render = () => {
-        return (
-            <Paragraph
-                style={{marginBottom: marginBottom}}
-                copyable={this.props.viewObject.get('buttonCopyable')}
-                editable={this.props.viewObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
-                code={this.props.viewObject.get('codeStyle')}
-                delete={this.props.viewObject.get('deleteStyle')}
-                disabled={this.props.viewObject.get('disabledStyle')}
-                ellipsis={{rows: this.props.viewObject.get('ellipsisRow'), expandable: false}}
-                mark={this.props.viewObject.get('markStyle')}
-                underline={this.props.viewObject.get('underlineStyle')}
-                strong={this.props.viewObject.get('strongStyle')}
-            >
-                {this.props.viewObject.get('name')}
-            </Paragraph>
-        )
+        const colorScheme_: any = colorScheme;
+        const step = colorScheme_.length/this.props.viewObject.get('name').length;
+        if (this.props.viewObject.get('pageTitle')) {
+            return (
+                <div style={{
+                    marginTop: '12px',
+                    borderBottom: '1px solid #eeeff0',
+                    fontSize: '34px',
+                    textIndent: '20px',
+                    height: '70px',
+                    fontWeight: 'lighter',
+                    textAlign: this.props.viewObject.get('textAlign') || 'center'
+                }}>
+                    {this.props.viewObject.get('name').split('').map( (name: string, index: any) =>
+                        <Text style={{
+                            color: index === 0 ? colorScheme_[1]
+                                : index === this.props.viewObject.get('name').length - 1 ? colorScheme_[colorScheme_.length - 1]
+                                    : colorScheme_[Math.round(1 + step*index)]
+                        }}
+                        >
+                            {name}
+                        </Text>
+                    )}
+                </div>
+            )
+        } else {
+            return (
+                <Paragraph
+                    style={{marginBottom: marginBottom}}
+                    copyable={this.props.viewObject.get('buttonCopyable')}
+                    editable={this.props.viewObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
+                    code={this.props.viewObject.get('codeStyle')}
+                    delete={this.props.viewObject.get('deleteStyle')}
+                    disabled={this.props.viewObject.get('disabledStyle')}
+                    ellipsis={{rows: this.props.viewObject.get('ellipsisRow'), expandable: false}}
+                    mark={this.props.viewObject.get('markStyle')}
+                    underline={this.props.viewObject.get('underlineStyle')}
+                    strong={this.props.viewObject.get('strongStyle')}
+                >
+                    {this.props.viewObject.get('name')}
+                </Paragraph>
+            )
+        }
     }
 }
 
@@ -337,7 +362,6 @@ class AntdFactory implements ViewFactory {
     constructor() {
         this.components.set('ru.neoflex.nfcore.application#//Div', Div_);
         this.components.set('ru.neoflex.nfcore.application#//Span', Span_);
-        this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
         this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);

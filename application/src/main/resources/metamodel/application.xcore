@@ -117,11 +117,6 @@ class DatasetDiagramView extends DataView {
     refers DatasetDiagram defaultDatasetDiagram
 }
 
-class Row extends ViewContainer {
-    String horizontalGutter = "0"
-    String verticalGutter = "0"
-}
-
 class Span extends ViewContainer {
 }
 
@@ -137,6 +132,8 @@ class Tools extends ViewContainer {
 }
 
 class Typography extends ViewElement {
+    boolean pageTitle
+    TextAlign textAlign
     boolean buttonCopyable
     boolean buttonEditable
     String ellipsisRow = "999"
@@ -171,6 +168,7 @@ class Input extends ViewElement {
 class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
+    boolean backStartPage
     String span = "0"
 }
 

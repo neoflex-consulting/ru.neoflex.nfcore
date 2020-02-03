@@ -19,24 +19,7 @@ class DatasetDiagram extends React.Component<Props & WithTranslation, State> {
     render() {
         return (
             <div>
-
-                <Col span={12} style={{backgroundColor: "red"}}>
-                    Первая колонка
-                </Col>
-                <Col span={12} style={{backgroundColor: "blue"}}>
-                    Вторая колонка
-                </Col>
-
-
-
-
-                <Col span={12} style={{backgroundColor: "red"}}>
-                    Первая колонка
-                </Col>
-                <Col span={11} style={{backgroundColor: "blue"}}>
-                    Вторая колонка
-                </Col>
-
+                This is Diagram
             </div>
         )
     }
