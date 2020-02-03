@@ -2,19 +2,21 @@ import * as React from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import MandatoryReporting from "./MandatoryReporting";
-import ReportPivot from "./ReportPivot";
-import ReportDiagram from "./ReportDiagram";
-import ReportRichGrid from "./richGrid/ReportRichGrid";
+import DatasetView from "./dataset/DatasetView";
+import DatasetPivot from "./dataset/DatasetPivot";
+import DatasetDiagram from "./dataset/DatasetDiagram";
+import DatasetGrid from "./dataset/DatasetGrid"
 import PageNotFound from "./PageNotFound";
 import TaxReporting from "./TaxReporting";
 
 const UserComponents: any = {
     MandatoryReporting: MandatoryReporting,
-    ReportPivot: ReportPivot,
-    ReportDiagram: ReportDiagram,
-    ReportRichGrid: ReportRichGrid,
+    DatasetPivot: DatasetPivot,
+    DatasetDiagram: DatasetDiagram,
+    DatasetView: DatasetView,
     PageNotFound: PageNotFound,
-    TaxReporting: TaxReporting
+    TaxReporting: TaxReporting,
+    DatasetGrid: DatasetGrid,
 };
 
 export interface Props {
@@ -33,6 +35,6 @@ class UserComponent extends React.Component<Props & WithTranslation, any> {
         return (
             <Component {...this.props}/>
         )}
-    }
+}
 
 export default withTranslation()(UserComponent)

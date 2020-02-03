@@ -1,19 +1,19 @@
 import React from 'react';
-import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
-import {AllCommunityModules} from '@ag-grid-community/all-modules';
+// import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
+// import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import "@ag-grid-community/core/dist/styles/ag-grid.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-balham.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-material.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
 import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
-import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from "antd";
-import {withTranslation} from "react-i18next";
+import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from 'antd';
+import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore, {EObject} from "ecore";
-import moment from 'moment';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
+//import moment from 'moment';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from "../../../modules/api";
 import {rowPerPageMapper} from "../../../utils/consts";
 import ServerFilter from "./ServerFilter";
@@ -33,7 +33,7 @@ interface Props {
     activeReportDateField: boolean
 }
 
-class NfDataGrid extends React.Component<any, any> {
+class DatasetGrid extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;
 
@@ -46,47 +46,46 @@ class NfDataGrid extends React.Component<any, any> {
             rowPerPages: [],
             paginationPageSize: this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage'),
             operations: [],
-            selectedServerFilters: [],
-            modalResourceVisible: false
+            selectedServerFilters: []
         };
 
         this.grid = React.createRef();
         this.exportToCSV = this.exportToCSV.bind(this);
-       // this.handleKeyDown = this.handleKeyDown.bind(this);
+        // this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
-   // handleKeyDown(event: { [key:string]: any }) {
-   //      const { onCtrlA, onCtrlShiftA } = this.props
-   //      const rowData = this.grid.current.api.getSelectedRows()
-   //      const focusedCell = this.grid.current.api.getFocusedCell()
-   //      const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
-   //
-   //      let charCode = String.fromCharCode(event.which).toLowerCase()
-   //      if (rowData.length > 0 && focusedCell) {
-   //          const cellData = row.data[focusedCell.column.colId]
-   //          if (event.ctrlKey && charCode === 'c') {
-   //              copyIntoClipboard!(cellData)
-   //              event.preventDefault()
-   //          }
-   //          // For MAC
-   //          if (event.metaKey && charCode === 'c') {
-   //              copyIntoClipboard!(cellData)
-   //              event.preventDefault()
-   //          }
-   //      }
-   //      if (this.props.onCtrlA) {
-   //          if (event.ctrlKey && charCode === 'a') {
-   //              onCtrlA!(event)
-   //              event.preventDefault()
-   //          }
-   //      }
-   //      if (this.props.onCtrlShiftA) {
-   //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
-   //              onCtrlShiftA!(event)
-   //              event.preventDefault()
-   //          }
-   //      }
-   //  }
+    // handleKeyDown(event: { [key:string]: any }) {
+    //      const { onCtrlA, onCtrlShiftA } = this.props
+    //      const rowData = this.grid.current.api.getSelectedRows()
+    //      const focusedCell = this.grid.current.api.getFocusedCell()
+    //      const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
+    //
+    //      let charCode = String.fromCharCode(event.which).toLowerCase()
+    //      if (rowData.length > 0 && focusedCell) {
+    //          const cellData = row.data[focusedCell.column.colId]
+    //          if (event.ctrlKey && charCode === 'c') {
+    //              copyIntoClipboard!(cellData)
+    //              event.preventDefault()
+    //          }
+    //          // For MAC
+    //          if (event.metaKey && charCode === 'c') {
+    //              copyIntoClipboard!(cellData)
+    //              event.preventDefault()
+    //          }
+    //      }
+    //      if (this.props.onCtrlA) {
+    //          if (event.ctrlKey && charCode === 'a') {
+    //              onCtrlA!(event)
+    //              event.preventDefault()
+    //          }
+    //      }
+    //      if (this.props.onCtrlShiftA) {
+    //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
+    //              onCtrlShiftA!(event)
+    //              event.preventDefault()
+    //          }
+    //      }
+    //  }
 
     exportToCSV(name: string) {
         this.grid.current.api.exportDataAsCsv({ fileName: name })
@@ -101,34 +100,47 @@ class NfDataGrid extends React.Component<any, any> {
         this.grid.current.api.paginationSetPageSize(Number(newPageSize));
     }
 
-    handleResourceModalCancel = () => {
-        this.setState({ modalResourceVisible: false })
+    componentDidMount(): void {
+        this.getDatasetComponents();
+        if (this.state.themes.length === 0) {
+            this.getAllThemes()
+        }
+        if (this.state.rowPerPages.length === 0) {
+            this.getAllRowPerPage()
+        }
+    }
+
+    getDatasetComponents() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//DatasetComponent");
+            if (temp !== undefined) {
+                API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
+                    .then((datasetComponents: Ecore.Resource[]) => {
+                        this.setState({datasetComponents})
+                    })
+            }
+        })
     };
 
-    updateTableData(e: any): void  {
-        if (e !== null) {
-            let params: Object[] = [{
-                datasetColumn: 'reportDate',
-                operation: 'EqualTo',
-                value: e._d,
-                enable: true
-            }];
-            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, params)
-        }
-    }
+    getAllThemes() {
+        API.instance().findEnum('dataset', 'Theme')
+            .then((result: Ecore.EObject[]) => {
+                let themes = result.map( (t: any) => {
+                    return t.get('name').toLowerCase()
+                });
+                this.setState({themes})
+            })
+    };
 
-    onActionMenu(e : any) {
-        if (e.key.split('.').includes('theme')) {
-            this.setSelectedKeys(e.key.split('.')[1])
-        }
-        if (e.key.split('.').includes('rowPerPage')) {
-            this.setSelectedKeys(e.key.split('.')[1])
-            this.onPageSizeChanged(e.key.split('.')[1])
-        }
-        if (e.key === 'filter') {
-            this.setState({ modalResourceVisible: true })
-        }
-    }
+    getAllRowPerPage() {
+        API.instance().findEnum('dataset', 'RowPerPage')
+            .then((result: Ecore.EObject[]) => {
+                let rowPerPages = result.map( (t: any) => {
+                    return rowPerPageMapper_[t.get('name')]
+                });
+                this.setState({rowPerPages})
+            })
+    };
 
     private setSelectedKeys(parameter?: string) {
         let selectedKeys: string[] = [];
@@ -161,45 +173,21 @@ class NfDataGrid extends React.Component<any, any> {
         return selectedKeys;
     }
 
-    getAllThemes() {
-        API.instance().findEnum('dataset', 'Theme')
-            .then((result: Ecore.EObject[]) => {
-                let themes = result.map( (t: any) => {
-                    return t.get('name').toLowerCase()
-                });
-                this.setState({themes})
-            })
-    };
-
-    getAllRowPerPage() {
-        API.instance().findEnum('dataset', 'RowPerPage')
-            .then((result: Ecore.EObject[]) => {
-                let rowPerPages = result.map( (t: any) => {
-                    return rowPerPageMapper_[t.get('name')]
-                });
-                this.setState({rowPerPages})
-            })
-    };
-
-    componentDidMount(): void {
-        if (this.state.themes.length === 0) {
-            this.getAllThemes()
+    onActionMenu(e : any) {
+        if (e.key.split('.').includes('theme')) {
+            this.setSelectedKeys(e.key.split('.')[1])
         }
-        if (this.state.rowPerPages.length === 0) {
-            this.getAllRowPerPage()
+        if (e.key.split('.').includes('rowPerPage')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+            this.onPageSizeChanged(e.key.split('.')[1])
+        }
+        if (e.key === 'filter') {
+            this.setState({ modalResourceVisible: true })
         }
     }
 
     render() {
-        const { columnDefs, rowData, gridOptions, t, serverFilters } = this.props;
-        let defaultFilter: any[] = [];
-        if (serverFilters !== undefined) {
-            defaultFilter = serverFilters
-                .filter((f: any) => f['enable'] === true)
-                .map((f: any) =>
-                    `${f['datasetColumn']} ${f['operation']} ${f['value']}`
-                )
-        }
+        const { columnDefs, rowData, gridOptions } = this.props;
         let selectedKeys = this.setSelectedKeys();
         const menu = (
             <Menu
@@ -249,74 +237,15 @@ class NfDataGrid extends React.Component<any, any> {
                 style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
                 className={"ag-theme-" + this.state.currentTheme}
             >
-                {this.props.activeReportDateField &&
-                <div style={{marginBottom: '10px', textAlign: 'center'}}>
-                    <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
-                    <DatePicker
-                        placeholder="Select date"
-                        defaultValue={moment(this.props.pathFull[this.props.pathFull.length - 1].params.reportDate)}
-                        format={'DD.MM.YYYY'}
-                        onChange={ (e: any) => this.updateTableData(e)}
-                    />
-                </div>
-                }
                 <Dropdown overlay={menu} placement="bottomLeft">
                     <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
                         <FontAwesomeIcon icon={faChevronDown} size="xs"
                                          style={{marginLeft: "5px"}}/>
                     </Button>
                 </Dropdown>
-                {this.props.useServerFilter &&
-                <div style={{marginLeft: '10px', marginTop: '10px'}}>
-                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
-                    <Select
-                        notFoundContent={t('notfound')}
-                        allowClear={true}
-                        style={{width: '400px'}}
-                        showSearch={true}
-                        mode="multiple"
-                        placeholder="No Filters Selected"
-                        value={defaultFilter}
-                    >
-                        {
-                            this.props.serverFilters !== undefined ?
-                                this.props.serverFilters
-                                    .map((f: any) =>
-                                        <Select.Option
-                                            key={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
-                                            value={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
-                                        >
-                                            {f['datasetColumn']} {f['operation']} {f['value']}
-                                        </Select.Option>)
-                                :
-                                undefined
-                        }
-                    </Select>
-                </div>
-                }
-                <Drawer
-                    placement="right"
-                    title={t('filters')}
-                    width={'700px'}
-                    visible={this.state.modalResourceVisible}
-                    onClose={this.handleResourceModalCancel}
-                    mask={false}
-                    maskClosable={false}
-                >
-                    {
-                        this.props.serverFilters
-                            ?
-                            <ServerFilter
-                                {...this.props}
-                                serverFilters={this.props.serverFilters}
-                                columnDefs={this.props.columnDefs}
-                            />
-                            :
-                            <ServerFilter/>
-                    }
-                </Drawer>
                 <div style={{ marginTop: "30px"}}>
-                    <AgGridReact
+                    DatasetGrid
+                    {/*<AgGridReact
                         ref={this.grid}
                         //columnDefs={columnDefs}
                         rowData={rowData}
@@ -380,11 +309,11 @@ class NfDataGrid extends React.Component<any, any> {
                                     )
                                     : null
                             }
-                    </AgGridReact>
+                    </AgGridReact>*/}
                 </div>
             </div>
         )
     }
 }
 
-export default withTranslation()(NfDataGrid)
+export default withTranslation()(DatasetGrid)

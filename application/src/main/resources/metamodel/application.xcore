@@ -72,7 +72,7 @@ class ComponentElement extends ViewElement {
 }
 
 class Div extends ViewContainer {
-    TextAlign textAlign = "Left"
+    TextAlign textAlign
     String marginRight = "0"
     String marginBottom = "0"
     String marginTop = "0"
@@ -162,13 +162,16 @@ class Input extends ViewElement {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
-    String defaultValue
+    String value
     String step = "1"
+    String placeholder
+    String width = "200"
 }
 
 class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
+    String span = "0"
 }
 
 /* Trees */

@@ -2,7 +2,7 @@ import * as React from "react";
 import { withTranslation } from "react-i18next";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
-import NfDataGrid from "./NfDataGrid";
+import NfDataGrid from "./DatasetView";
 
 interface Props {
     datasetGridName: string
@@ -18,7 +18,7 @@ interface State {
     useServerFilter: boolean;
 }
 
-class ReportRichGrid extends React.Component<any, State> {
+class DatasetPivot extends React.Component<any, State> {
 
     state = {
         datasetComponents: [],
@@ -158,4 +158,4 @@ class ReportRichGrid extends React.Component<any, State> {
     }
 }
 
-export default withTranslation()(ReportRichGrid)
+export default withTranslation()(DatasetPivot)

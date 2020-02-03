@@ -439,12 +439,13 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-    renderApplication = (props: any)=>{
+    renderApplication = ()=>{
         return (
             <MainContext.Consumer>
                 {context => {
                     return <MainApp
-                        {...props}
+                        {...this.props}
+
                         context={context}
                         pathFull={this.state.pathFull}
                         appModuleName={this.state.appModuleName}

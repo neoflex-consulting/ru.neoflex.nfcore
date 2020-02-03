@@ -81,7 +81,7 @@ class ServerFilter extends React.Component<any, any> {
 
     handleChange(e: any) {
         const target = JSON.parse(e)[0];
-            let serverFilters = this.state.serverFilters.map( (f: any) => {
+        let serverFilters = this.state.serverFilters.map( (f: any) => {
             if (f.index.toString() === target["index"].toString()) {
                 return {index: f.index,
                     column: target["columnName"] === "column" ? target["value"] : f.column,
