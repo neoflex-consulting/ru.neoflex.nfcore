@@ -106,10 +106,9 @@ public class EmfJson {
         return result;
     }
 
-    public static ObjectNode resourceSetToTree(Store store, ResourceSet resourceSet) {
+    public static ObjectNode resourceSetToTree(Store store, List<Resource> resources) {
         ObjectMapper mapper = createMapper();
         ObjectNode result = mapper.createObjectNode();
-        List<Resource> resources = new ArrayList<>(resourceSet.getResources());
         result.withArray("resources");
         for (Resource resource: resources) {
             result.withArray("resources").add(resourceToTree(store, resource));

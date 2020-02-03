@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,7 +91,10 @@ public class EMFController {
                     .executionStats(true)
                     .selector(selector)
                     .execute();
-            ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, docFinder.getResourceSet());
+            ResourceSet resourceSet = docFinder.getResourceSet();
+            List<Resource> resources = new ArrayList<>(resourceSet.getResources());
+            EcoreUtil.resolveAll(resourceSet);
+            ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resources);
             resourceSetNode.set("executionStats", docFinder.getExecutionStats());
             resourceSetNode.put("warning", docFinder.getWarning());
             resourceSetNode.put("bookmark", docFinder.getBookmark());
