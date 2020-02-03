@@ -90,20 +90,20 @@ class Highlight {
     String value
 }
 
-class DatasetColumn {  //не редактирумый класс, информативный. Отвечает на вопрос: что пришло с сервера?
-    String name //rdbmsFieldName название поля с сервера
-    String rdbmsDataType //тип, который приходит с сервера (не измененный)
-    DataType convertDataType //rdbmsDataType преобразованный в какой-то из enum DataType
+class DatasetColumn {
+    String name
+    String rdbmsDataType
+    DataType convertDataType
 }
 
 abstract class DatasetColumnView {
     QName name
     contains Typography headerName //название столбца
     refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
-    String headerTooltip //всплывающая подсказка
-    boolean hide //скрытый ли столбец. По умолчанию false
-    Pinned pinned //зафиксированный ли столбец (слева, справа)
-    Filter filter //выбор типа фильтра клиентского на столбце. Зависит от типа данных, но можно изменить.
+    String headerTooltip
+    boolean hide
+    Pinned pinned = "Undefined"
+    Filter filter = "TextColumnFilter"
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
@@ -209,9 +209,9 @@ enum Access {
 }
 
 enum Filter {
-    TextColumnFilter //A Text Filter for string comparisons.
-    NumberColumnFilter //A Number Filter for number comparisons.
-    DateColumnFilter //A Date Filter for date comparisons.
+    TextColumnFilter
+    NumberColumnFilter
+    DateColumnFilter
 }
 
 enum Pinned {

@@ -153,7 +153,7 @@ function BooleanSelect(props: BooleanSelectProps): JSX.Element {
         }}
     >
         {Object.keys(boolSelectionOption).map((value: any) =>
-            value !== "undefined" && <Select.Option key={ukey + "_" + value + "_" + idx} value={value}>{value}</Select.Option>)}
+            value !== "undefined" && value !== "null" && <Select.Option key={ukey + "_" + value + "_" + idx} value={value}>{value}</Select.Option>)}
     </Select>
 }
 
