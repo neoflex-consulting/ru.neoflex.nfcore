@@ -7,54 +7,53 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
-import ru.neoflex.nfcore.dataset.DatasetGrid
+import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Filter
 import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.Operations
-import ru.neoflex.nfcore.dataset.RowPerPage
 
-class DatasetGridInit {
+class DatasetComponentInit {
     static def findOrCreateEObject(EClass eClass, String name) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateDatasetGrid(String name, String JdbcDataset) {
-        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
+    static def recreateDatasetComponent(String name, String JdbcDataset) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
-            def datasetGrid = DatasetFactory.eINSTANCE.createDatasetGrid()
-            datasetGrid.name = name
+            def datasetComponent = DatasetFactory.eINSTANCE.createDatasetComponent()
+            datasetComponent.name = name
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
-                datasetGrid.setDataset(dataset)
+                datasetComponent.setDataset(dataset)
+                datasetComponent.useServerFilter = true
             }
-            datasetGrid.rowPerPage = RowPerPage.ALL
-            rs.resources.add(Context.current.store.createEObject(datasetGrid))
-            return rs.resources.get(0).contents.get(0) as DatasetGrid
+            rs.resources.add(Context.current.store.createEObject(datasetComponent))
+            return rs.resources.get(0).contents.get(0) as DatasetComponent
         }
-        else if ((rs.resources.get(0).contents.get(0) as DatasetGrid).dataset == null) {
-            def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
-            def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
+        else if ((rs.resources.get(0).contents.get(0) as DatasetComponent).dataset == null) {
+            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
-                datasetGrid.setDataset(dataset)
+                datasetComponent.setDataset(dataset)
+                datasetComponent.useServerFilter = true
             }
-            datasetGrid.rowPerPage = RowPerPage.ALL
-            Context.current.store.updateEObject(datasetGridRef, datasetGrid)
+            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
         }
     }
 
     static def createAllColumn(String name) {
-        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
                 .execute().resourceSet
-        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).column.size() == 0) {
-            def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
-            def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
-            if (datasetGrid.dataset) {
-                if (datasetGrid.dataset.datasetColumn.size() != 0) {
-                    def columns = datasetGrid.dataset.datasetColumn
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetComponent).column.size() == 0) {
+            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
+            if (datasetComponent.dataset) {
+                if (datasetComponent.dataset.datasetColumn.size() != 0) {
+                    def columns = datasetComponent.dataset.datasetColumn
                     for (int i = 0; i <= columns.size() - 1; ++i) {
                         def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                         rdbmsColumn.name = columns[i].name
@@ -67,25 +66,25 @@ class DatasetGridInit {
                                 ? Filter.DATE_COLUMN_FILTER :
                                 columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
                                         ? Filter.NUMBER_COLUMN_FILTER : Filter.TEXT_COLUMN_FILTER
-                        datasetGrid.column.each { c->
+                        datasetComponent.column.each { c->
                             if (c.name == columns[i].name.toString()) {
                                 throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                             }
                         }
-                        datasetGrid.column.add(rdbmsColumn)
+                        datasetComponent.column.add(rdbmsColumn)
                     }
                 }
             }
-            Context.current.store.updateEObject(datasetGridRef, datasetGrid)
+            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
         }
     }
 
     static def createServerFilters(String name, String JdbcDataset) {
-        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: name])
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
                 .execute().resourceSet
-        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetGrid).serverFilter.size() == 0) {
-            def datasetGridRef = Context.current.store.getRef(rs.resources.get(0))
-            def datasetGrid = rs.resources.get(0).contents.get(0) as DatasetGrid
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetComponent).serverFilter.size() == 0) {
+            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
 
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
@@ -95,7 +94,7 @@ class DatasetGridInit {
             serverFilter1.operation = Operations.LESS_THAN
             serverFilter1.value = 100000
             serverFilter1.enable = true
-            datasetGrid.serverFilter.add(serverFilter1)
+            datasetComponent.serverFilter.add(serverFilter1)
 
             def serverFilter2 = DatasetFactory.eINSTANCE.createCondition()
             def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
@@ -103,7 +102,7 @@ class DatasetGridInit {
             serverFilter2.operation = Operations.LESS_THAN
             serverFilter2.value = 4000
             serverFilter2.enable = false
-            datasetGrid.serverFilter.add(serverFilter2)
+            datasetComponent.serverFilter.add(serverFilter2)
 
             def serverFilter3 = DatasetFactory.eINSTANCE.createCondition()
             def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
@@ -111,14 +110,14 @@ class DatasetGridInit {
             serverFilter3.operation = Operations.INCLUDE_IN
             serverFilter3.value = "test"
             serverFilter3.enable = true
-            datasetGrid.serverFilter.add(serverFilter3)
+            datasetComponent.serverFilter.add(serverFilter3)
 
-            datasetGrid.useServerFilter = true
+            datasetComponent.useServerFilter = true
 
-            Context.current.store.updateEObject(datasetGridRef, datasetGrid)
+            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
         }
     }
 
-    DatasetGridInit() {}
+    DatasetComponentInit() {}
 
 }

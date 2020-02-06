@@ -52,7 +52,7 @@ class JdbcDataset extends Dataset {
 }
 
 /*View*/
-abstract class DatasetComponent {
+class DatasetComponent {
      QName name //default сделать по умолчанию (не редактируемый)
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
@@ -62,32 +62,9 @@ abstract class DatasetComponent {
      refers Dataset dataset
      contains DatasetColumnView[] column
      op JSON runQuery(ConditionDTO[] conditions)
-}
-
-class DatasetGrid extends DatasetComponent {
-     RowPerPage rowPerPage//сколько строк показывать (выбрать из списка)
-     contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
-     Theme theme //Выбранная тема грида
-     boolean showUniqRow//Показывать только уникальные строки
      boolean useServerFilter
      contains Condition[] serverFilter //Состав серверного фильтра
      //String clientFilterExpression //выражение в клиентском фильтре
-}
-
-class DatasetPivot extends DatasetComponent {
-}
-
-class DatasetDiagram extends DatasetComponent {
-}
-
-class Highlight {
-    QName name
-    HighlightType highlightType
-    Colors backgroundColor
-    Colors textColor
-    refers DatasetColumnView datasetColumnView
-    Operations operation
-    String value
 }
 
 class DatasetColumn {
@@ -108,6 +85,10 @@ abstract class DatasetColumnView {
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
     boolean editable
+    boolean checkboxSelection
+    boolean sortable
+    boolean suppressMenu
+    boolean resizable
 }
 
 class RdbmsColumn extends DatasetColumnView {
@@ -137,33 +118,9 @@ class ConditionDTO {
     boolean enable
 }
 
-enum RowPerPage {
-    one,
-    ten,
-    twenty,
-    fifty,
-    oneHundred,
-    fiveHundred,
-    oneThousand,
-    all
-}
-
 enum QueryType {
     UseTableName
     UseQuery
-}
-
-enum HighlightType {
-    Row
-    Column
-}
-
-enum Colors {
-    Yellow
-    Green
-    Blue
-    Orange
-    Red
 }
 
 enum Operations {
@@ -179,15 +136,8 @@ enum Operations {
     NotIncludeIn
 }
 
-enum Theme {
-    Balham
-    Blue
-    Bootstrap
-    Fresh
-    Material
-}
-
 enum Aggregate {
+    Undefined
     Average
     Count
     CountDistinct

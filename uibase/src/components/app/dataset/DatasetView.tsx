@@ -1,61 +1,58 @@
-import * as React from "react";
+import * as React from 'react';
 import { withTranslation } from 'react-i18next';
-//import {API} from "../../../modules/api";
-import Ecore from "ecore";
-//import DatasetGrid from "./DatasetGrid";
-import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from 'antd';
-// import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-// import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
-import ServerFilter from "./ServerFilter";
-import moment from "moment";
-import {rowPerPageMapper} from "../../../utils/consts";
+import {API} from '../../../modules/api';
+import Ecore from 'ecore';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faFilter} from '@fortawesome/free-solid-svg-icons';
+import {Button, DatePicker, Drawer, Select} from 'antd';
+import ServerFilter from './ServerFilter';
+import moment from 'moment';
+import {operationsMapper} from '../../../utils/consts';
 
-const rowPerPageMapper_: any = rowPerPageMapper;
+const operationsMapper_: any = operationsMapper;
+
+const Option = Select.Option;
 
 interface Props {
-    datasetGridName: string
 }
 
 interface State {
-    datasetComponents: Ecore.Resource[];
+    allDatasetComponents: Ecore.Resource[];
     currentDatasetComponent: Ecore.Resource;
     columnDefs: any[];
     rowData: any[];
     queryCount: number;
     serverFilters: any[];
     useServerFilter: boolean;
+    datasetComponentsData: any;
     modalResourceVisible: boolean;
-    themes: any[];
-    currentTheme: any;
-    rowPerPages: any[];
-    paginationPageSize: any;
-    operations: any[];
-    selectedServerFilters: any[];
 }
 
 class DatasetView extends React.Component<any, State> {
 
-    constructor(props: any) {
-        super(props);
+    state = {
+        allDatasetComponents: [],
+        currentDatasetComponent: {} as Ecore.Resource,
+        columnDefs: [],
+        rowData: [],
+        queryCount: 0,
+        serverFilters: [],
+        useServerFilter: false,
+        datasetComponentsData: undefined,
+        modalResourceVisible: false
+    };
 
-        this.state = {
-            datasetComponents: [],
-            currentDatasetComponent: {} as Ecore.Resource,
-            columnDefs: [],
-            rowData: [],
-            queryCount: 0,
-            serverFilters: [],
-            useServerFilter: false,
-            modalResourceVisible: false,
-            themes: [],
-            currentTheme: ""/*this.props.viewObject.get('defaultDatasetGrid').get('theme')*/,
-            rowPerPages: [],
-            paginationPageSize: ""/*this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage')*/,
-            operations: [],
-            selectedServerFilters: []
-        };
-
-    }
+    getAllDatasetComponents() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent')
+            if (temp !== undefined) {
+                API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
+                    .then((allDatasetComponents: Ecore.Resource[]) => {
+                        this.setState({allDatasetComponents})
+                    })
+            }
+        })
+    };
 
     findColumnDefs(resource: Ecore.Resource){
         this.setState({queryCount: 2});
@@ -70,16 +67,27 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
-            allColumn.push(rowData)
+            rowData.set('checkboxSelection', c.get('checkboxSelection'));
+            rowData.set('sortable', c.get('sortable'));
+            rowData.set('suppressMenu', c.get('suppressMenu'));
+            rowData.set('resizable', c.get('resizable'));
+            allColumn.push(rowData);
         });
         this.setState({columnDefs: allColumn});
+        this.findServerFilters(resource as Ecore.Resource, allColumn);
+        this.changeDatasetArray(allColumn, undefined)
     }
 
-    findServerFilters(resource: Ecore.Resource){
+    findServerFilters(resource: Ecore.Resource, allColumn: Object[]){
         let serverFilters: any = [];
-        if (this.props.pathFull[this.props.pathFull.length - 1].params.length !== 0) {
-            this.props.pathFull[this.props.pathFull.length - 1].params.forEach( (f: any) => {
-                serverFilters.push(f)
+        const params = this.props.pathFull[this.props.pathFull.length - 1].params;
+        if (params.length !== 0) {
+            params.forEach( (f: any) => {
+                allColumn.forEach( (c: any) => {
+                    if (c.get('field').toLowerCase() === f.datasetColumn.toLowerCase()) {
+                        serverFilters.push(f)
+                    }
+                })
             })
         }
         resource.eContents()[0].get('serverFilter').array().forEach( (f: Ecore.Resource) => {
@@ -93,40 +101,80 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: f.get('datasetColumn').get('name'),
                     operation: f.get('operation'),
                     value: f.get('value'),
-                    enable: (f.get('enable') !== null ? f.get('enable') : false)
+                    enable: (f.get('enable') !== null ? f.get('enable') : false),
+                    type: f.get('datasetColumn').get('convertDataType')
                 })
             }
         });
-        this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter')});
+        this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
     }
 
     componentDidUpdate(prevProps: any): void {
-        if (this.state.datasetComponents) {
-            let resource = this.state.datasetComponents.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('name') === this.props.datasetGridName);
+        if (this.state.allDatasetComponents) {
+            let resource = this.state.allDatasetComponents.find( (d:Ecore.Resource) =>
+                d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name'));
             if (resource) {
                 if (this.state.queryCount === 0) {
                     this.setState({currentDatasetComponent: resource});
                     this.props.context.runQuery(resource as Ecore.Resource)
-                        .then( (result: string) => this.setState({rowData: JSON.parse(result)})
+                        .then( (result: string) =>  {
+                            this.setState({rowData: JSON.parse(result)})
+                                this.changeDatasetArray(undefined, JSON.parse(result))
+                        }
                         )
                 }
                 if (this.state.queryCount < 2) {
                     this.findColumnDefs(resource as Ecore.Resource);
-                    this.findServerFilters(resource as Ecore.Resource)
                 }
                 if (prevProps.location.pathname !== this.props.location.pathname) {
-                    this.findServerFilters(resource as Ecore.Resource);
+                    this.findServerFilters(resource as Ecore.Resource, this.state.columnDefs);
                     this.props.context.runQuery(resource as Ecore.Resource)
-                        .then( (result: string) =>
-                            this.setState({rowData: JSON.parse(result)}))
+                        .then( (result: string) => {
+                                this.setState({rowData: JSON.parse(result)})
+                                this.changeDatasetArray(undefined, JSON.parse(result))
+                            }
+                        )
                 }
             }
         }
     }
 
     componentDidMount(): void {
+        this.getAllDatasetComponents()
     }
+
+    componentWillUnmount() {
+        this.props.context.updateContext({datasetComponents: undefined})
+    }
+
+    changeDatasetArray(allColumn: any, rowData: any){
+        const datasetComponentName: string = this.props.viewObject.get('datasetComponent').get('name');
+        let currentDataset = {
+            [datasetComponentName] : {
+                columnDefs: this.state.columnDefs.length !== 0 ? this.state.columnDefs : allColumn,
+                rowData: this.state.rowData.length !== 0 ? this.state.rowData : rowData,
+            }
+        };
+        if (this.props.context.datasetComponents) {
+            let datasetComponents = this.props.context.datasetComponents
+            datasetComponents[datasetComponentName] = {
+                columnDefs: this.state.columnDefs.length !== 0 ? this.state.columnDefs : allColumn,
+                rowData: this.state.rowData.length !== 0 ? this.state.rowData : rowData,
+            };
+                this.props.context.updateContext({datasetComponents: datasetComponents})
+
+        } else {
+            this.props.context.updateContext({datasetComponents: currentDataset})
+        }
+    }
+
+    handleFilterModal = () => {
+        this.state.modalResourceVisible
+            ?
+            this.setState({ modalResourceVisible: false })
+            :
+            this.setState({ modalResourceVisible: true })
+    };
 
     updateTableData(e: any): void  {
         if (e !== null) {
@@ -140,124 +188,97 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleResourceModalCancel = () => {
-        this.setState({ modalResourceVisible: false })
-    };
+    changeEnableServerFilters(filter: any): void  {
+        console.log(filter)
+        const serverFilters = this.state.serverFilters
+            .filter((f: any) => f['enable'] === true)
+            .map( (f: any) => {
+                if (filter['datasetColumn'] === f['datasetColumn']
+                    && filter['operation'] === f['operation']
+                    && filter['value'] === f['value']) {
+                    return {
+                        datasetColumn: f['datasetColumn'],
+                        operation: f['operation'],
+                        value: f['value'],
+                        enable: false,
+                        type: f['type']
+                    }
+                }
+                else {
+                    return f
+                }
+        });
+        this.setState({serverFilters})
+    }
 
     render() {
-        const { serverFilters, t } = this.props;
-        let activeReportDateField = false;
-        const params = this.props.pathFull[this.props.pathFull.length - 1].params;
-        let defaultFilter: any[] = [];
-        if (serverFilters !== undefined) {
-            defaultFilter = serverFilters
-                .filter((f: any) => f['enable'] === true)
-                .map((f: any) =>
-                    `${f['datasetColumn']} ${f['operation']} ${f['value']}`
-                )
-        }
-        if (params) {
-            params.forEach((p: any) => {
-                if (p.datasetColumn.toLowerCase() === "reportdate") {
-                    this.state.columnDefs.forEach( (c: any) => {
-                        if (c.get("field").toLowerCase() === "reportdate") {
-                            activeReportDateField = true
-                        }
-                    });
+        const { t } = this.props;
+        let filtersBtn = (
+            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
+            onClick={this.handleFilterModal}
+            >
+                <FontAwesomeIcon icon={faFilter} size='xs'/>
+            </Button>);
+        let filtersModal = (
+            <Drawer
+                placement='right'
+                title={t('filters')}
+                width={'700px'}
+                visible={this.state.modalResourceVisible}
+                onClose={this.handleFilterModal}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    this.state.serverFilters
+                        ?
+                        <ServerFilter
+                            {...this.props}
+                            serverFilters={this.state.serverFilters}
+                            columnDefs={this.state.columnDefs}
+                        />
+                        :
+                        <ServerFilter/>
                 }
-            })
-        }
+            </Drawer>
+        );
+        //style={{color: 'gray', fontSize: 'larger'}}
         return (
             <div>
-                {this.props.activeReportDateField &&
-                <div style={{marginBottom: '10px', textAlign: 'center'}}>
-                    <span style={{color: 'gray', fontSize: 'larger'}}>{t("reportdate")}: </span>
-                    <DatePicker
-                        placeholder="Select date"
-                        defaultValue={moment(this.props.pathFull[this.props.pathFull.length - 1].params.reportDate)}
-                        format={'DD.MM.YYYY'}
-                        onChange={ (e: any) => this.updateTableData(e)}
-                    />
-                </div>
-                }
-                <Drawer
-                    placement="right"
-                    title={t('filters')}
-                    width={'700px'}
-                    visible={this.state.modalResourceVisible}
-                    onClose={this.handleResourceModalCancel}
-                    mask={false}
-                    maskClosable={false}
-                >
-                    {
-                        this.props.serverFilters
-                            ?
-                            <ServerFilter
-                                {...this.props}
-                                serverFilters={this.props.serverFilters}
-                                columnDefs={this.props.columnDefs}
-                            />
-                            :
-                            <ServerFilter/>
+                {filtersBtn}
+                {filtersModal}
+                {this.state.useServerFilter &&
+                <div style={{display: 'inline-block'}}>
+                    {this.state.serverFilters
+                        .filter((f: any) => f['enable'] === true)
+                        .map((f: any) =>
+                            f.type === 'Date' || f.type === 'Timestamp'
+                                ?
+                                <div style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
+
+                                    <span >{f.datasetColumn}: </span>
+                                    <DatePicker
+                                        defaultValue={moment(f.value)}
+                                        format={'DD.MM.YYYY'}
+                                        onChange={ (e: any) => this.updateTableData(e)}
+                                    />
+                                </div>
+                                 :
+                                <Select
+                                    key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                    defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                    style={{ width: 'auto', marginLeft: '10px' }}
+                                    allowClear={true}
+                                    showArrow={false}
+                                    onChange={ () => this.changeEnableServerFilters(f) }
+                                >
+                                </Select>
+                        )
                     }
-                </Drawer>
-                {this.props.useServerFilter &&
-                <div style={{marginLeft: '10px', marginTop: '10px'}}>
-                    <span style={{color: 'gray', fontSize: 'larger'}}>  {t("filters")}: </span>
-                    <Select
-                        notFoundContent={t('notfound')}
-                        allowClear={true}
-                        style={{width: '400px'}}
-                        showSearch={true}
-                        mode="multiple"
-                        placeholder="No Filters Selected"
-                        value={defaultFilter}
-                    >
-                        {
-                            this.props.serverFilters !== undefined ?
-                                this.props.serverFilters
-                                    .map((f: any) =>
-                                        <Select.Option
-                                            key={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
-                                            value={`${f['datasetColumn']} ${f['operation']} ${f['value']}`}
-                                        >
-                                            {f['datasetColumn']} {f['operation']} {f['value']}
-                                        </Select.Option>)
-                                :
-                                undefined
-                        }
-                    </Select>
                 </div>
                 }
             </div>
         )
-        // return (
-        //     this.state.columnDefs.length > 0
-        //         ?
-        //         this.state.rowData.length > 0
-        //             ?
-        //             <DatasetGrid
-        //                 {...this.props}
-        //                 columnDefs={this.state.columnDefs}
-        //                 useServerFilter={this.state.useServerFilter}
-        //                 serverFilters={this.state.serverFilters}
-        //                 rowData={this.state.rowData}
-        //                 activeReportDateField={activeReportDateField}
-        //                 currentDatasetComponent={this.state.currentDatasetComponent}
-        //             />
-        //             :
-        //             <DatasetGrid
-        //                 {...this.props}
-        //                 columnDefs={this.state.columnDefs}
-        //                 useServerFilter={this.state.useServerFilter}
-        //                 serverFilters={this.state.serverFilters}
-        //                 rowData={[]}
-        //                 activeReportDateField={activeReportDateField}
-        //                 currentDatasetComponent={this.state.currentDatasetComponent}
-        //             />
-        //             :
-        //         "No columns found"
-        // )
     }
 }
 

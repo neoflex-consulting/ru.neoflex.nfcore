@@ -41,16 +41,6 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     }
 
     @Override
-    public boolean validateDatasetGridView_IsValid(DatasetGridView datasetGridView, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (datasetGridView.getDefaultDatasetGrid() == null) {
-            return validate(datasetGridView, diagnostics, context, "defaultDatasetGrid - must be set");
-        }
-        else {
-            return false;
-        }
-    }
-
-    @Override
     public boolean validateTreeNode_IsValid(TreeNode treeNode, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (treeNode.getName() == null) {
             return validate(treeNode, diagnostics, context, "name - must be set");

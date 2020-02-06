@@ -10,11 +10,11 @@ import ru.neoflex.nfcore.base.types.QName
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
-import ru.neoflex.nfcore.dataset.DatasetGrid
-import ru.neoflex.nfcore.dataset.DatasetPivot
-import ru.neoflex.nfcore.dataset.DatasetDiagram
+import ru.neoflex.nfcore.dataset.DatasetComponent
+import ru.neoflex.nfcore.dataset.DatasetColumnView
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.JSON
+import ru.neoflex.nfcore.base.types.Color
 
 /* Components */
 abstract class Component {
@@ -33,7 +33,7 @@ class UserComponent extends Component {
 class AppModule {
     QName name
     contains ViewElement view
-    contains Tools tools
+    contains ToolPanel toolPanel
     contains CatalogNode referenceTree
 }
 
@@ -71,14 +71,6 @@ class ComponentElement extends ViewElement {
 	refers Component component
 }
 
-class Div extends ViewContainer {
-    TextAlign textAlign
-    String marginRight = "0"
-    String marginBottom = "0"
-    String marginTop = "0"
-    String marginLeft = "0"
-}
-
 class EClassForm extends ViewContainer {
 	refers EClass aClass
 }
@@ -95,6 +87,7 @@ class FormItem extends ViewContainer {
 
 class DatasetView extends ViewElement {
     refers Dataset dataset
+    refers DatasetComponent datasetComponent
 }
 
 abstract class DataView extends ViewElement {
@@ -103,36 +96,46 @@ abstract class DataView extends ViewElement {
 
 @Ecore(constraints="IsValid")
 class DatasetGridView extends DataView {
-    op JSON getDatasetGrids()
-    refers DatasetGrid defaultDatasetGrid
+    op JSON getDatasetGrids() // для чего?
+    RowPerPage rowPerPage = "all"
+    contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
+    Theme theme = "Balham"
+    boolean showUniqRow//Показывать только уникальные строки
 }
 
 class DatasetPivotView extends DataView {
-    op JSON getDatasetPivots()
-    refers DatasetPivot defaultDatasetPivot
+    op JSON getDatasetPivots() // для чего?
 }
 
 class DatasetDiagramView extends DataView {
-    op JSON getDatasetDiagrams()
-    refers DatasetDiagram defaultDatasetDiagram
-}
-
-class Span extends ViewContainer {
+    op JSON getDatasetDiagrams() // для чего?
 }
 
 class TabsViewReport extends ViewContainer {
     TabPosition tabPosition = "Top"
 }
 
-class Tool extends ViewContainer {
+class Tool {
+    String name
 	contains Icon icon
 }
 
-class Tools extends ViewContainer {
+class ToolPanel {
+    contains Tool[] tools
+}
+
+class Row extends ViewContainer {
+    String horizontalGutter = "0"
+    String verticalGutter = "0"
+    TextAlign textAlign
+    String marginRight = "0"
+    String marginBottom = "0"
+    String marginTop = "0"
+    String marginLeft = "0"
 }
 
 class Typography extends ViewElement {
-    boolean pageTitle
+    refers TypographyStyle typographyStyle
     TextAlign textAlign
     boolean buttonCopyable
     boolean buttonEditable
@@ -143,6 +146,18 @@ class Typography extends ViewElement {
     boolean markStyle
     boolean underlineStyle
     boolean strongStyle
+    String marginTop
+    String borderBottom
+    String fontSize
+    String textIndent
+    String height
+    String fontWeight
+    refers GradientStyle gradientStyle
+}
+
+class GradientStyle {
+    QName name
+    Color[] colors
 }
 
 class Select extends ViewElement {
@@ -152,9 +167,10 @@ class Select extends ViewElement {
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
-    String value
+    String value // заглушка
 }
 
+//add TextArea
 class Input extends ViewElement {
     InputType inputType = "InputString"
     String minValue = "1"
@@ -166,10 +182,24 @@ class Input extends ViewElement {
 }
 
 class Button extends ViewElement {
+    refers ButtonStyle buttonStyle
     boolean buttonCancel
     boolean buttonSave
     boolean backStartPage
     String span = "0"
+}
+
+/* Style */
+abstract class Style {
+    QName name
+}
+
+class TypographyStyle extends Style {
+    contains Typography typography
+}
+
+class ButtonStyle extends Style {
+    contains Button button
 }
 
 /* Trees */
@@ -203,6 +233,16 @@ class ViewNode extends TreeNode {
     refers EObject eObject
 }
 
+class Highlight {
+    QName name
+    HighlightType highlightType
+    Colors backgroundColor
+    Colors textColor
+    refers DatasetColumnView datasetColumnView
+    Operations operation
+    String value
+}
+
 enum TextAlign {
     Center
     Justify
@@ -226,4 +266,49 @@ enum SelectMode {
 enum InputType {
     InputNumber
     InputString
+}
+
+enum RowPerPage {
+    one,
+    ten,
+    twenty,
+    fifty,
+    oneHundred,
+    fiveHundred,
+    oneThousand,
+    all
+}
+
+enum HighlightType {
+    Row
+    Column
+}
+
+enum Theme {
+    Balham
+    Blue
+    Bootstrap
+    Fresh
+    Material
+}
+
+enum Colors {
+    Yellow
+    Green
+    Blue
+    Orange
+    Red
+}
+
+enum Operations {
+    EqualTo
+    NotEqual
+    LessThan
+    LessThenOrEqualTo
+    GreaterThan
+    GreaterThenOrEqualTo
+    IsNull
+    IsNotNull
+    IncludeIn
+    NotIncludeIn
 }

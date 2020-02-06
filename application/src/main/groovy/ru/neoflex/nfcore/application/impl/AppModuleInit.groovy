@@ -4,6 +4,9 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
+import ru.neoflex.nfcore.application.RowPerPage
+import ru.neoflex.nfcore.application.TextAlign
+import ru.neoflex.nfcore.application.Theme
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -54,33 +57,68 @@ class AppModuleInit {
             def componentElement4 = ApplicationFactory.eINSTANCE.createForm()
             componentElement4.name = "TwoGridWithDifferentDataset"
 
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = 'row1'
+            row1.textAlign = TextAlign.LEFT
+            row1.marginTop = "20"
+            row1.marginLeft = "20"
+            row1.marginBottom = "20"
+
             def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView1.name = "DatasetViewTest_1"
             def jdbcDataset1 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
             datasetView1.setDataset(jdbcDataset1)
+            def datasetComponent1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTest", "",false)
+            datasetView1.setDatasetComponent(datasetComponent1)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = 'row2'
+            row2.textAlign = TextAlign.LEFT
+            row2.marginLeft = "20"
+            row2.marginBottom = "20"
+            row2.marginRight = "20"
 
             def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGridView1.name = 'Dataset View Grid'
-            //datasetGridView1.setDatasetView(datasetView1)
-            def defaultDatasetGrid1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTest", "",false)
-            datasetGridView1.setDefaultDatasetGrid(defaultDatasetGrid1)
+            datasetGridView1.name = 'DatasetGridTest'
+            datasetGridView1.setDatasetView(datasetView1)
+            datasetGridView1.rowPerPage = RowPerPage.ALL
+            datasetGridView1.theme = Theme.BALHAM
 
-            componentElement4.children.add(datasetView1)
-            componentElement4.children.add(datasetGridView1)
+            row1.children.add(datasetView1)
+            row2.children.add(datasetGridView1)
+            componentElement4.children.add(row1)
+            componentElement4.children.add(row2)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = 'row3'
+            row3.textAlign = TextAlign.LEFT
+            row3.marginLeft = "20"
+            row3.marginBottom = "20"
 
             def datasetView2 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView2.name = "DatasetViewTest_2"
             def jdbcDataset2 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA", "",false)
             datasetView2.setDataset(jdbcDataset2)
+            def datasetComponent2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTestAAA", "",false)
+            datasetView2.setDatasetComponent(datasetComponent2)
+
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = 'row4'
+            row4.textAlign = TextAlign.LEFT
+            row4.marginLeft = "20"
+            row4.marginBottom = "20"
+            row4.marginRight = "20"
 
             def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGridView2.name = 'Dataset View Grid Test With ReportDate'
-            //datasetGridView2.setDatasetView(datasetView2)
-            def defaultDatasetGrid2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_GRID, "DatasetGridTestAAA", "",false)
-            datasetGridView2.setDefaultDatasetGrid(defaultDatasetGrid2)
+            datasetGridView2.name = 'DatasetGridTestAAA'
+            datasetGridView2.setDatasetView(datasetView2)
+            datasetGridView2.rowPerPage = RowPerPage.ALL
+            datasetGridView2.theme = Theme.BALHAM
 
-            componentElement4.children.add(datasetView2)
-            componentElement4.children.add(datasetGridView2)
+            row3.children.add(datasetView2)
+            row4.children.add(datasetGridView2)
+            componentElement4.children.add(row3)
+            componentElement4.children.add(row4)
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
@@ -95,7 +133,6 @@ class AppModuleInit {
             tabs.children.add(componentElement2)
             tabs.children.add(componentElement3)
             tabs.children.add(componentElement4)
-//            tabs.children.add(datasetGridView2)
             application.view = tabs
 
             def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()

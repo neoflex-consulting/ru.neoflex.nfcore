@@ -106,7 +106,8 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
             datasetColumn: 'reportDate',
             operation: 'EqualTo',
             value: report.eContents()[0].get('date'),
-            enable: true
+            enable: true,
+            type: 'Date'
         }];
         context.changeURL(
             report.eContents()[0].get('report').get('AppModule').get('name'),

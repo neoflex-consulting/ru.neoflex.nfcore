@@ -1,15 +1,15 @@
 import {ViewFactory, View} from './View'
 import Ecore from 'ecore';
 import * as React from 'react';
-import {Button, Col, Form, Input, InputNumber, Select, Tabs, Typography} from 'antd';
+import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
-import DatasetGrid from './components/app/dataset/DatasetGrid';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
 import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
 import {colorScheme} from './utils/consts';
+import DatasetGrid from "./components/app/dataset/DatasetGrid";
 
 const { TabPane } = Tabs;
 const { Paragraph, Text } = Typography;
@@ -32,36 +32,6 @@ abstract class ViewContainer extends View {
 
     render = () => {
         return <div>{this.renderChildren()}</div>
-    }
-}
-
-class Div_ extends ViewContainer {
-    render = () => {
-        const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}px`;
-        const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}px`;
-        const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}px`;
-        const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}px`;
-        return (
-            <div style={{
-                textAlign: this.props.viewObject.get('textAlign') || 'center',
-                marginRight: marginRight,
-                marginBottom: marginBottom,
-                marginTop: marginTop,
-                marginLeft: marginLeft
-            }}>
-                {this.renderChildren()}
-            </div>
-        )
-    }
-}
-
-class Span_ extends ViewContainer {
-    render = () => {
-        return (
-            <span style={{marginBottom: marginBottom}}>
-                {this.renderChildren()}
-            </span>
-        )
     }
 }
 
@@ -95,7 +65,7 @@ class TabsViewReport_ extends ViewContainer {
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
         return (
-            <Tabs defaultActiveKey={children[0]._id} tabPosition={this.props.viewObject.get('tabPosition').toLowerCase()}>
+            <Tabs defaultActiveKey={children[0]._id} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('name')} key={c._id} >
@@ -120,10 +90,10 @@ class ComponentElement_ extends ViewContainer {
 class DatasetView_ extends ViewContainer {
     render = () => {
         // if (this.props.viewObject.get('defaultDatasetGrid') !== null) {
-        return <DatasetView {...this.props}/* datasetGridName={this.props.viewObject.get('defaultDatasetGrid').get('name')}*//>
+        return <DatasetView {...this.props}/>
         // }
         // else {
-        //     return <div> DatasetGrid not found </div>
+            // return <div> DatasetGrid not found </div>
         // }
     }
 }
@@ -143,6 +113,29 @@ class DatasetPivotView_ extends ViewContainer {
 class DatasetDiagramView_ extends ViewContainer {
     render = () => {
         return <DatasetDiagram {...this.props}/>
+    }
+}
+
+class Row_ extends ViewContainer {
+    render = () => {
+        const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}px`;
+        const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}px`;
+        const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}px`;
+        const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}px`;
+        return (
+            <Row
+                style={{
+                    textAlign: this.props.viewObject.get('textAlign') || 'center',
+                    marginRight: marginRight,
+                    marginBottom: marginBottom,
+                    marginTop: marginTop,
+                    marginLeft: marginLeft
+                }}
+                gutter={[this.props.viewObject.get('horizontalGutter') || 0, this.props.viewObject.get('verticalGutter') || 0]}
+            >
+                {this.renderChildren()}
+            </Row>
+        )
     }
 }
 
@@ -360,8 +353,6 @@ class AntdFactory implements ViewFactory {
     components = new Map<string, typeof View>();
 
     constructor() {
-        this.components.set('ru.neoflex.nfcore.application#//Div', Div_);
-        this.components.set('ru.neoflex.nfcore.application#//Span', Span_);
         this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
         this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
@@ -374,6 +365,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
+        this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
     }
 
 

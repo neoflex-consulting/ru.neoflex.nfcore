@@ -26,7 +26,7 @@ class ServerFilter extends React.Component<any, any> {
     }
 
     getAllOperations() {
-        API.instance().findEnum('dataset', 'Operations')
+        API.instance().findEnum('application', 'Operations')
             .then((result: EObject[]) => {
                 let allOperations = result.map( (o: any) => {return o});
                 this.setState({allOperations})

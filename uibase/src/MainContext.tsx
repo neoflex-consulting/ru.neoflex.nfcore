@@ -10,4 +10,6 @@ export interface IMainContext {
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, treeValue?: undefined, params?: Object[] | undefined) => void;
     runQuery?: (resource: Ecore.Resource) => Promise<string>;
+    datasetComponents?: any; //map in map
+    notification?: () => void; //add...
 }

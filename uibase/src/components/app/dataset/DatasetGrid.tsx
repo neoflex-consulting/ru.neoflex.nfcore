@@ -1,22 +1,20 @@
 import React from 'react';
-// import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
-// import {AllCommunityModules} from '@ag-grid-community/all-modules';
-import "@ag-grid-community/core/dist/styles/ag-grid.css";
-import "@ag-grid-community/core/dist/styles/ag-theme-balham.css";
-import "@ag-grid-community/core/dist/styles/ag-theme-material.css";
-import "@ag-grid-community/core/dist/styles/ag-theme-fresh.css";
-import "@ag-grid-community/core/dist/styles/ag-theme-blue.css";
-import "@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css";
-import {Button, DatePicker, Drawer, Dropdown, Menu, Select} from 'antd';
+import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
+import {AllCommunityModules} from '@ag-grid-community/all-modules';
+import '@ag-grid-community/core/dist/styles/ag-grid.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
+import {Button, Dropdown, Menu,} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
-import Ecore, {EObject} from "ecore";
-//import moment from 'moment';
+import Ecore from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
-import {API} from "../../../modules/api";
-import {rowPerPageMapper} from "../../../utils/consts";
-import ServerFilter from "./ServerFilter";
+import {API} from '../../../modules/api';
+import {rowPerPageMapper} from '../../../utils/consts';
 
 const rowPerPageMapper_: any = rowPerPageMapper;
 
@@ -25,11 +23,7 @@ interface Props {
     onCtrlShiftA?: Function,
     headerSelection?: boolean,
     onHeaderSelection?: Function,
-    columnDefs?: Array<any>,
-    rowData?: Array<any>,
     gridOptions?: { [ key:string ]: any },
-    serverFilters:  Array<EObject>,
-    useServerFilter: boolean,
     activeReportDateField: boolean
 }
 
@@ -42,11 +36,15 @@ class DatasetGrid extends React.Component<any, any> {
 
         this.state = {
             themes: [],
-            currentTheme: this.props.viewObject.get('defaultDatasetGrid').get('theme'),
+            currentTheme: this.props.viewObject.get('theme') || 'balham',
             rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('defaultDatasetGrid').get('rowPerPage'),
+            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'All',
             operations: [],
-            selectedServerFilters: []
+            selectedServerFilters: [],
+            showUniqRow: this.props.viewObject.get('showUniqRow') || false,
+            highlight: this.props.viewObject.get('highlight') || [],
+            columnDefs: [],
+            rowData: []
         };
 
         this.grid = React.createRef();
@@ -100,47 +98,15 @@ class DatasetGrid extends React.Component<any, any> {
         this.grid.current.api.paginationSetPageSize(Number(newPageSize));
     }
 
-    componentDidMount(): void {
-        this.getDatasetComponents();
-        if (this.state.themes.length === 0) {
-            this.getAllThemes()
+    onActionMenu(e : any) {
+        if (e.key.split('.').includes('theme')) {
+            this.setSelectedKeys(e.key.split('.')[1])
         }
-        if (this.state.rowPerPages.length === 0) {
-            this.getAllRowPerPage()
+        if (e.key.split('.').includes('rowPerPage')) {
+            this.setSelectedKeys(e.key.split('.')[1])
+            this.onPageSizeChanged(e.key.split('.')[1])
         }
     }
-
-    getDatasetComponents() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//DatasetComponent");
-            if (temp !== undefined) {
-                API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
-                    .then((datasetComponents: Ecore.Resource[]) => {
-                        this.setState({datasetComponents})
-                    })
-            }
-        })
-    };
-
-    getAllThemes() {
-        API.instance().findEnum('dataset', 'Theme')
-            .then((result: Ecore.EObject[]) => {
-                let themes = result.map( (t: any) => {
-                    return t.get('name').toLowerCase()
-                });
-                this.setState({themes})
-            })
-    };
-
-    getAllRowPerPage() {
-        API.instance().findEnum('dataset', 'RowPerPage')
-            .then((result: Ecore.EObject[]) => {
-                let rowPerPages = result.map( (t: any) => {
-                    return rowPerPageMapper_[t.get('name')]
-                });
-                this.setState({rowPerPages})
-            })
-    };
 
     private setSelectedKeys(parameter?: string) {
         let selectedKeys: string[] = [];
@@ -173,21 +139,53 @@ class DatasetGrid extends React.Component<any, any> {
         return selectedKeys;
     }
 
-    onActionMenu(e : any) {
-        if (e.key.split('.').includes('theme')) {
-            this.setSelectedKeys(e.key.split('.')[1])
+    getAllThemes() {
+        API.instance().findEnum('application', 'Theme')
+            .then((result: Ecore.EObject[]) => {
+                let themes = result.map( (t: any) => {
+                    return t.get('name').toLowerCase()
+                });
+                this.setState({themes})
+            })
+    };
+
+    getAllRowPerPage() {
+        API.instance().findEnum('application', 'RowPerPage')
+            .then((result: Ecore.EObject[]) => {
+                let rowPerPages = result.map( (t: any) => {
+                    return rowPerPageMapper_[t.get('name')]
+                });
+                this.setState({rowPerPages})
+            })
+    };
+
+    componentDidMount(): void {
+        if (this.state.themes.length === 0) {
+            this.getAllThemes()
         }
-        if (e.key.split('.').includes('rowPerPage')) {
-            this.setSelectedKeys(e.key.split('.')[1])
-            this.onPageSizeChanged(e.key.split('.')[1])
+        if (this.state.rowPerPages.length === 0) {
+            this.getAllRowPerPage()
         }
-        if (e.key === 'filter') {
-            this.setState({ modalResourceVisible: true })
+    }
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (this.props.context.datasetComponents !== undefined
+            && this.props.context.datasetComponents[this.props.viewObject.get('name')] !== undefined //заглушка
+            && this.state.columnDefs.length === 0
+            && this.state.rowData.length === 0
+        ) {
+            if (this.props.context.datasetComponents[this.props.viewObject.get('name')]['columnDefs'] !== undefined
+            && this.props.context.datasetComponents[this.props.viewObject.get('name')]['rowData'] !== undefined) {
+                    const columnDefs = this.props.context.datasetComponents[this.props.viewObject.get('name')]['columnDefs'];
+                    this.setState({columnDefs})
+                    const rowData = this.props.context.datasetComponents[this.props.viewObject.get('name')]['rowData'];
+                    this.setState({rowData})
+            }
         }
     }
 
     render() {
-        const { columnDefs, rowData, gridOptions } = this.props;
+        const { gridOptions, t } = this.props;
         let selectedKeys = this.setSelectedKeys();
         const menu = (
             <Menu
@@ -198,12 +196,9 @@ class DatasetGrid extends React.Component<any, any> {
                 <Menu.Item>
                     Select Columns
                 </Menu.Item>
-                <Menu.Item key={'filter'}>
-                    Filter
-                </Menu.Item>
-                <Menu.SubMenu title={"Rows Per Page"}>
+                <Menu.SubMenu title={'Rows Per Page'}>
                     {this.state.rowPerPages.map((rowPerPage: string) =>
-                        <Menu.Item key={`rowPerPage.${rowPerPage.toLowerCase()}`} style={{width: '65px'}}>
+                        <Menu.Item key={`rowPerPage.${rowPerPage}`} style={{width: '65px'}}>
                             {rowPerPage}
                         </Menu.Item>
                     )}
@@ -217,7 +212,7 @@ class DatasetGrid extends React.Component<any, any> {
                 <Menu.Item>
                     Reset
                 </Menu.Item>
-                <Menu.SubMenu title={"Theme"}>
+                <Menu.SubMenu title={'Theme'}>
                     {this.state.themes.map((theme: string) =>
                         <Menu.Item key={`theme.${theme}`} style={{width: '100px'}}>
                             {theme.charAt(0).toUpperCase() + theme.slice(1)}
@@ -234,25 +229,24 @@ class DatasetGrid extends React.Component<any, any> {
         );
         return (
             <div
-                style={{boxSizing: 'border-box', height: '100%', marginLeft: '20px', marginRight: '20px' }}
-                className={"ag-theme-" + this.state.currentTheme}
+                style={{boxSizing: 'border-box', height: '100%' }}
+                className={'ag-theme-' + this.state.currentTheme}
             >
-                <Dropdown overlay={menu} placement="bottomLeft">
-                    <Button style={{color: "rgb(151, 151, 151)"}}> Actions{/*{t('actions')}*/}
-                        <FontAwesomeIcon icon={faChevronDown} size="xs"
-                                         style={{marginLeft: "5px"}}/>
+                <Dropdown overlay={menu} placement='bottomLeft'>
+                    <Button style={{color: 'rgb(151, 151, 151)'}}> {t('action')}
+                        <FontAwesomeIcon icon={faChevronDown} size='xs'
+                                         style={{marginLeft: '5px'}}/>
                     </Button>
                 </Dropdown>
-                <div style={{ marginTop: "30px"}}>
-                    DatasetGrid
-                    {/*<AgGridReact
+                <div style={{ marginTop: '30px'}}>
+                    {this.state.columnDefs.length !== 0 && <AgGridReact
                         ref={this.grid}
-                        //columnDefs={columnDefs}
-                        rowData={rowData}
+                        //columnDefs={this.state.columnDefs}
+                        rowData={this.state.rowData}
                         modules={AllCommunityModules}
-                        rowSelection="multiple" //выделение строки
+                        rowSelection='multiple' //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
-                       //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
+                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
                         //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
                         suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
                         suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
@@ -264,56 +258,34 @@ class DatasetGrid extends React.Component<any, any> {
                         enableColResize={true}
                         // //pivotHeaderHeight={true}
                         enableSorting={true}
-                        // //sortingOrder={["desc", "asc", null]}
+                        // //sortingOrder={['desc', 'asc', null]}
                         enableFilter={true}
                         gridAutoHeight={true}
                         paginationPageSize={Number(this.state.paginationPageSize)}
                         {...gridOptions}
                     >
-                        <AgGridColumn
-                            headerName="#"
-                            width={30}
-                            checkboxSelection
-                            sortable={false}
-                            suppressMenu //скрыть меню с фильтрами и пр.
-                            filter={false}
-                            hide={false}
-                            pinned //закрепить стобец (слево, справо, отмена)
-                        >
-                        </AgGridColumn>
-                        <AgGridColumn
-                            headerName="Name_agDateColumnFilter"
-                            field="name"
-                            hide={false}
-                            pinned
-                            headerTooltip={"headerTooltip"}
-                            filter="agDateColumnFilter"
-                            sort={"DESC"}
-                            editable={true}
-                        >
-                        </AgGridColumn>
-                            {
-                                columnDefs !== undefined ?
-                                    columnDefs.map((col: any) =>
-                                        <AgGridColumn
-                                            field={col.get("field")}
-                                            headerName={col.get("headerName").toString().substring(0,1).toUpperCase() + col.get("headerName").toString().substring(1)}
-                                            headerTooltip={col.get("headerTooltip")}
-                                            hide={col.get("hide")}
-                                            editable={col.get("editable")}
-                                            pinned={col.get("pinned") === 'Left' ? 'left' : col.get("pinned") === 'Right' ? 'right' : false}
-                                            filter={col.get("filter") === 'NumberColumnFilter'
-                                                ? 'agNumberColumnFilter' : col.get("filter") === 'DateColumnFilter' ?
-                                                    'agDateColumnFilter' : 'agTextColumnFilter'}
-                                        />
-                                    )
-                                    : null
-                            }
-                    </AgGridReact>*/}
+                        {this.state.columnDefs.map((col: any) =>
+                                <AgGridColumn
+                                    field={col.get('field')}
+                                    headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
+                                    headerTooltip={col.get('headerTooltip')}
+                                    hide={col.get('hide') || false}
+                                    editable={col.get('editable') || false}
+                                    pinned={col.get('pinned') === 'Left' ? 'left' : col.get('pinned') === 'Right' ? 'right' : false}
+                                    filter={col.get('filter') === 'NumberColumnFilter'
+                                        ? 'agNumberColumnFilter' : col.get('filter') === 'DateColumnFilter' ?
+                                            'agDateColumnFilter' : 'agTextColumnFilter'}
+                                    checkboxSelection={col.get('checkboxSelection') || false}
+                                    resizable={col.get('resizable') || false}
+                                    sortable={col.get('sortable') || false}
+                                    suppressMenu={col.get('suppressMenu') || false}
+                                />
+                                )}
+                    </AgGridReact>
+                    }
                 </div>
             </div>
         )
     }
 }
-
 export default withTranslation()(DatasetGrid)

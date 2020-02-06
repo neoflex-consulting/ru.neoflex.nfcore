@@ -12,7 +12,7 @@ import ru.neoflex.nfcore.dataset.ConditionDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
-import ru.neoflex.nfcore.dataset.DatasetGrid
+import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Filter
 import ru.neoflex.nfcore.dataset.Operations
 
@@ -22,20 +22,20 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 
-class DatasetGridExt extends DatasetGridImpl {
+class DatasetComponentExt extends DatasetComponentImpl {
 
     @Override
     String createAllColumns() {
         return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
             @Override
             Object call(TransactionSPI tx) throws Exception {
-                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: this.name])
+                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                         .execute().resourceSet
                 if (!resource.resources.empty) {
-                    def datasetGridRef = Context.current.store.getRef(resource.resources[0])
-                    def datasetGrid = resource.resources.get(0).contents.get(0) as DatasetGrid
-                    if (datasetGrid.dataset.datasetColumn != null) {
-                        def columns = datasetGrid.dataset.datasetColumn
+                    def datasetComponentRef = Context.current.store.getRef(resource.resources[0])
+                    def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
+                    if (datasetComponent.dataset.datasetColumn != null) {
+                        def columns = datasetComponent.dataset.datasetColumn
                         if (columns != []) {
                             for (int i = 0; i <= columns.size() - 1; ++i) {
                                 def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
@@ -49,16 +49,16 @@ class DatasetGridExt extends DatasetGridImpl {
                                         ? Filter.DATE_COLUMN_FILTER :
                                         columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
                                                 ? Filter.NUMBER_COLUMN_FILTER : Filter.TEXT_COLUMN_FILTER
-                                datasetGrid.column.each { c->
+                                datasetComponent.column.each { c->
                                     if (c.name == columns[i].name.toString()) {
                                         throw new IllegalArgumentException("Please modify your query in the 'dataset'. Has a similar column name")
                                     }
                                 }
-                                datasetGrid.column.add(rdbmsColumn)
+                                datasetComponent.column.add(rdbmsColumn)
                             }
-                            Context.current.store.updateEObject(datasetGridRef, datasetGrid)
-                            Context.current.store.commit("Entity was updated " + datasetGridRef)
-                            return JsonOutput.toJson("Columns in entity " + datasetGrid.name + " were created")
+                            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+                            Context.current.store.commit("Entity was updated " + datasetComponentRef)
+                            return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created")
                         }
                     }
                     return JsonOutput.toJson("The 'dataset' parameter is not specified OR the 'dataset' object does not contain columns")
@@ -72,15 +72,15 @@ class DatasetGridExt extends DatasetGridImpl {
         return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
             @Override
             Object call(TransactionSPI tx) throws Exception {
-                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_GRID, [name: this.name])
+                def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                         .execute().resourceSet
                 if (!resource.resources.empty) {
-                    def datasetGridRef = Context.current.store.getRef(resource.resources.get(0))
-                    def datasetGrid = resource.resources.get(0).contents.get(0) as DatasetGrid
-                    datasetGrid.column.clear()
-                    Context.current.store.updateEObject(datasetGridRef, datasetGrid)
-                    Context.current.store.commit("Entity was updated " + datasetGridRef)
-                    return JsonOutput.toJson("Columns in entity " + datasetGrid.name + " were deleted")
+                    def datasetComponentRef = Context.current.store.getRef(resource.resources.get(0))
+                    def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
+                    datasetComponent.column.clear()
+                    Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+                    Context.current.store.commit("Entity was updated " + datasetComponentRef)
+                    return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were deleted")
                 }
             }
         })
