@@ -347,7 +347,6 @@ export class API implements IErrorHandler {
             for (let resource of resources as any[]) {
                 let uri: string = resource.uri;
                 let eObjectJson = resource.contents[0]
-                eObjectJson._id = API.parseRef(uri).fragment;
                 let aPromise = this.loadEObjectWithRefs(level, eObjectJson, rs, loading, uri);
                 promises.push(aPromise);
             }
