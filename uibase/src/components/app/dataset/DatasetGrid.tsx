@@ -169,8 +169,9 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const componentName = this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
         if (this.props.context.datasetComponents !== undefined
-            && this.props.context.datasetComponents[this.props.viewObject.get('name')] !== undefined //заглушка
+            && this.props.context.datasetComponents[componentName] !== undefined
             && this.state.columnDefs.length === 0
             && this.state.rowData.length === 0
         ) {

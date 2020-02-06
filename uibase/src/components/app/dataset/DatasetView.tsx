@@ -182,7 +182,8 @@ class DatasetView extends React.Component<any, State> {
                 datasetColumn: 'reportDate',
                 operation: 'EqualTo',
                 value: e._d,
-                enable: true
+                enable: true,
+                type: 'Date'
             }];
             this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, params)
         }
