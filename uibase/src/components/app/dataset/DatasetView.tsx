@@ -322,15 +322,19 @@ class DatasetView extends React.Component<any, State> {
                                     >
                                     </Select>
                                     :
-                                    <Select
-                                        key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                        defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                        style={{ width: 'auto', marginLeft: '10px' }}
-                                        allowClear={true}
-                                        showArrow={false}
-                                        onChange={ () => this.changeEnableServerFilters(f) }
-                                    >
-                                    </Select>
+                                    f['value']
+                                        ?
+                                        <Select
+                                            key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                            defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                            style={{ width: 'auto', marginLeft: '10px' }}
+                                            allowClear={true}
+                                            showArrow={false}
+                                            onChange={ () => this.changeEnableServerFilters(f) }
+                                        >
+                                        </Select>
+                                        :
+                                        <div/>
                         )
                     }
                 </div>
