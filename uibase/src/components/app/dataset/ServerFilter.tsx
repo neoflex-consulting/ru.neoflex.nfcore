@@ -1,15 +1,17 @@
 import * as React from 'react';
-import {withTranslation} from "react-i18next";
-import {EObject} from "ecore";
-import {Button, Form, Input, Select} from "antd";
-import {API} from "../../../modules/api";
-import {operationsMapper} from "../../../utils/consts";
+import {withTranslation} from 'react-i18next';
+import {EObject} from 'ecore';
+import {Button, Form, Input, notification, Select} from 'antd';
+import {operationsMapper} from '../../../utils/consts';
+import './../../../styles/ServerFilter.css';
 
 const operationsMapper_: any = operationsMapper;
 
 interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
+    allOperations?: Array<EObject>;
+    onChangeServerFilter?: (newServerFilter: any[]) => void;
 }
 
 class ServerFilter extends React.Component<any, any> {
@@ -17,82 +19,54 @@ class ServerFilter extends React.Component<any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            allColumns: [],
-            serverFilters: [],
-            allOperations: []
+            serverFilters: this.props.serverFilters
         };
-
         this.handleChange = this.handleChange.bind(this);
     }
 
-    getAllOperations() {
-        API.instance().findEnum('application', 'Operations')
-            .then((result: EObject[]) => {
-                let allOperations = result.map( (o: any) => {return o});
-                this.setState({allOperations})
-            })
-    };
-
-    componentDidMount(): void {
-        if (this.state.allOperations.length === 0) {this.getAllOperations()}
-        if (this.state.allColumns.length === 0 && this.props.columnDefs !== undefined) {
-            let allColumns = this.props.columnDefs.map( (c: any) => {
-                return c.get('field')
-            });
-            this.setState({allColumns})
-        }
-        if (this.state.serverFilters.length === 0 && this.props.serverFilters !== undefined) {
-            let serverFilters = this.props.serverFilters.map( (f: any, index: any) => {
-                return {index: index + 1,
-                    column: f['datasetColumn'],
-                    operation: f['operation'],
-                    value: f['value'],
-                    enable: f['enable'] !== null ? f['enable'] : false}
-            });
-            if (serverFilters.length < 9) {
-                for (let i = serverFilters.length + 1; i <= 9; i++) {
-                    serverFilters.push(
-                        {index: i,
-                            column: undefined,
-                            operation: undefined,
-                            value: undefined,
-                            enable: undefined}
-                    )
-                }
-            }
-            this.setState({serverFilters})
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (prevProps.serverFilters !== this.props.serverFilters) {
+            this.setState({serverFilters: this.props.serverFilters})
         }
     }
 
     updateTableData(pathFull: any): void  {
         const appModule = pathFull[pathFull.length - 1];
         let params: Object[] = this.state.serverFilters
-            .filter( (f:any) => f['column'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
+            .filter( (f:any) => f['datasetColumn'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
             .map( (f:any) => {
                 return {
-                    datasetColumn: f['column'],
+                    index: f['index'],
+                    datasetColumn: f['datasetColumn'],
                     operation: f['operation'],
                     value: f['value'],
-                    enable: f['enable']
+                    enable: f['enable'],
+                    type: f['type']
                 }
             });
         this.props.context.changeURL!(appModule.appModule, undefined, params)
     }
 
     handleChange(e: any) {
-        const target = JSON.parse(e)[0];
+        const target = JSON.parse(e)
         let serverFilters = this.state.serverFilters.map( (f: any) => {
-            if (f.index.toString() === target["index"].toString()) {
+            if (f.index.toString() === target['index'].toString()) {
+                const targetColumn = this.props.columnDefs.find( (c: any) =>
+                    c.get('field') === (f.datasetColumn || target['value'])
+                 );
                 return {index: f.index,
-                    column: target["columnName"] === "column" ? target["value"] : f.column,
-                    operation: target["columnName"] === "operation" ? target["value"] : f.operation,
-                    value: target["columnName"] === "value" ? target["value"] : f.value,
-                    enable: target["columnName"] === "enable" ? target["value"] : f.enable}
+                    datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
+                    operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
+                    value: target['columnName'] === 'value' ? target['value'] : f.value,
+                    enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
+                    type: f.type || targetColumn ? targetColumn.get('type') : undefined}
             } else {
                 return f
             }
         });
+
         this.setState({serverFilters})
+        this.props.onChangeServerFilter(serverFilters)
     }
 
     render() {
@@ -105,19 +79,22 @@ class ServerFilter extends React.Component<any, any> {
                                 <span>{serverFilter.index}</span>
                                 <Select
                                     style={{ width: '300px', marginRight: '10px', marginLeft: '10px' }}
-                                    defaultValue={serverFilter.column}
+                                    value={serverFilter.datasetColumn}
                                     showSearch={true}
                                     allowClear={true}
-                                    onChange={(e: any) => this.handleChange(e)}
+                                    onChange={(e: any) => {
+                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: undefined})
+                                        this.handleChange(event)
+                                    }}
                                 >
                                     {
-                                        this.state.allColumns
+                                        this.props.columnDefs
                                             .map((c: any) =>
                                                 <Select.Option
-                                                    key={JSON.stringify({index: serverFilter.index, columnName: "column", value: c})}
-                                                    value={JSON.stringify([{index: serverFilter.index, columnName: "column", value: c}])}
+                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
                                                 >
-                                                    {c}
+                                                    {c.get('field')}
                                                 </Select.Option>)
                                     }
                                 </Select>
@@ -125,14 +102,17 @@ class ServerFilter extends React.Component<any, any> {
                                     style={{ width: '100px', marginRight: '10px' }}
                                     defaultValue={operationsMapper_[serverFilter.operation]}
                                     allowClear={true}
-                                    onChange={(e: any) => this.handleChange(e)}
+                                    onChange={(e: any) => {
+                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
+                                        this.handleChange(event)
+                                    }}
                                 >
                                     {
-                                        this.state.allOperations
+                                        this.props.allOperations
                                             .map((o: any) =>
                                                 <Select.Option
-                                                    key={JSON.stringify({index: serverFilter.index, columnName: "operation", value: o.get('name')})}
-                                                    value={JSON.stringify([{index: serverFilter.index, columnName: "operation", value: o.get('name')}])}
+                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
+                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
                                                 >
                                                     {operationsMapper_[o.get('name')]}
                                                 </Select.Option>)
@@ -144,29 +124,33 @@ class ServerFilter extends React.Component<any, any> {
                                     defaultValue={serverFilter.value}
                                     allowClear={true}
                                     onChange={(e: any) => this.handleChange(
-                                        JSON.stringify([{index: e.target.id, columnName: "value", value: e.target.value}])
+                                        JSON.stringify({index: e.target.id, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                                     )}
                                     id={serverFilter.index}
                                 />
                                 <Select
-                                    style={{ width: '75px' }}
-                                    defaultValue={serverFilter.enable !== undefined ? serverFilter.enable.toString() : undefined}
+                                    value={serverFilter.enable !== undefined ? serverFilter.enable.toString() : undefined}
                                     allowClear={true}
-                                    onChange={(e: any) => this.handleChange(e)}
+                                    style={{width: '75px'}}
+                                    onChange={(e: any) => {
+                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'enable', value: undefined})
+                                        this.handleChange(event)
+                                    }}
                                 >
                                     <Select.Option
-                                        key={JSON.stringify({index: serverFilter.index, columnName: "enable", value: false})}
-                                        value={JSON.stringify([{index: serverFilter.index, columnName: "enable", value: false}])}
+                                        key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
+                                        value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
                                     >
                                         false
                                     </Select.Option>
                                     <Select.Option
-                                        key={JSON.stringify({index: serverFilter.index, columnName: "enable", value: true})}
-                                        value={JSON.stringify([{index: serverFilter.index, columnName: "enable", value: true}])}
+                                        key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
+                                        value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
                                     >
                                         true
                                     </Select.Option>
                                 </Select>
+
                             </Form.Item>
                         )
                 }
