@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {withTranslation} from 'react-i18next';
-import {EObject} from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import {Button, Form, Input, notification, Select} from 'antd';
 import {operationsMapper} from '../../../utils/consts';
-import './../../../styles/ServerFilter.css';
+//import './../../../styles/ServerFilter.css';
 
 const operationsMapper_: any = operationsMapper;
 
@@ -11,7 +11,7 @@ interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[]) => void;
+    onChangeServerFilter?: (newServerFilter: any[], updateData: boolean) => void;
 }
 
 class ServerFilter extends React.Component<any, any> {
@@ -30,21 +30,8 @@ class ServerFilter extends React.Component<any, any> {
         }
     }
 
-    updateTableData(pathFull: any): void  {
-        const appModule = pathFull[pathFull.length - 1];
-        let params: Object[] = this.state.serverFilters
-            .filter( (f:any) => f['datasetColumn'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
-            .map( (f:any) => {
-                return {
-                    index: f['index'],
-                    datasetColumn: f['datasetColumn'],
-                    operation: f['operation'],
-                    value: f['value'],
-                    enable: f['enable'],
-                    type: f['type']
-                }
-            });
-        this.props.context.changeURL!(appModule.appModule, undefined, params)
+    updateTableData(): void  {
+        this.props.onChangeServerFilter(this.state.serverFilters, true)
     }
 
     handleChange(e: any) {
@@ -66,7 +53,7 @@ class ServerFilter extends React.Component<any, any> {
         });
 
         this.setState({serverFilters})
-        this.props.onChangeServerFilter(serverFilters)
+        this.props.onChangeServerFilter(serverFilters, false)
     }
 
     render() {
@@ -154,7 +141,7 @@ class ServerFilter extends React.Component<any, any> {
                             </Form.Item>
                         )
                 }
-                <Button key={'serverFilter'} value={'serverFilter'} onClick={ () => this.updateTableData(this.props.pathFull)} >Apply</Button>
+                <Button key={'serverFilter'} value={'serverFilter'} onClick={ () => this.updateTableData()} >Apply</Button>
             </Form>
         )
     }

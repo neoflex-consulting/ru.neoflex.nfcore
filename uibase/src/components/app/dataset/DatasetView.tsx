@@ -22,11 +22,12 @@ interface State {
     columnDefs: any[];
     rowData: any[];
     queryCount: number;
-    serverFilters: any[];
+    serverFilters: EObject[];
     useServerFilter: boolean;
     datasetComponentsData: any;
     modalResourceVisible: boolean;
     allOperations: any[];
+    updateData: boolean;
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -41,7 +42,8 @@ class DatasetView extends React.Component<any, State> {
         useServerFilter: false,
         datasetComponentsData: undefined,
         modalResourceVisible: false,
-        allOperations: []
+        allOperations: [],
+        updateData: false
     };
 
     getAllDatasetComponents() {
@@ -175,6 +177,24 @@ class DatasetView extends React.Component<any, State> {
                             }
                         )
                 }
+                if (this.state.updateData) {
+                    let params: Object[] = this.state.serverFilters
+                        .filter( (f:any) => f['datasetColumn'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
+                        .map( (f:any) => {
+                            return {
+                                datasetColumn: f['datasetColumn'],
+                                operation: f['operation'],
+                                value: f['value'],
+                                enable: f['enable']
+                            }
+                        });
+                    this.props.context.runQuery(resource as Ecore.Resource, params)
+                        .then( (result: string) => {
+                                this.setState({rowData: JSON.parse(result), updateData: false});
+                                this.updateContext(undefined, JSON.parse(result))
+                            }
+                        )
+                }
             }
         }
     }
@@ -230,8 +250,8 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    onChangeServerFilter = (newServerFilter: any[]): void => {
-        this.setState({serverFilters: newServerFilter})
+    onChangeServerFilter = (newServerFilter: any[], updateData: boolean): void => {
+        this.setState({serverFilters: newServerFilter, updateData});
     };
 
     changeEnableServerFilters(filter: any): void {

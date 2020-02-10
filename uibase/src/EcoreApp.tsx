@@ -78,23 +78,38 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    runQuery = (resource_: Ecore.Resource) => {
+    runQuery = (resource_: Ecore.Resource, componentParams?: Object[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1];
         let resourceSet = Ecore.ResourceSet.create();
         let resourceParameters = resourceSet.create({ uri: '/parameter' });
-        let parameters: EObject[] = currentApp.params !== undefined && currentApp.params.map( (p: any) => {
-            return this.state.conditionDtoPattern!.create({
-                datasetColumn: p['datasetColumn'],
-                operation: p['operation'],
-                value: p['value'],
-                enable: p['enable']
-            })
-        });
-        resourceParameters.addAll(parameters);
-        let resourceStringList: Ecore.EObject[] = parameters.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
+        let params: EObject[];
+        params = componentParams === undefined
+            ?
+            currentApp.params !== undefined && currentApp.params.map( (p: any) => {
+                return (
+                    this.state.conditionDtoPattern!.create({
+                        datasetColumn: p['datasetColumn'],
+                        operation: p['operation'],
+                        value: p['value'],
+                        enable: p['enable']
+                    })
+                )})
+            :
+            componentParams.map( (p: any) => {
+                return (
+                    this.state.conditionDtoPattern!.create({
+                        datasetColumn: p['datasetColumn'],
+                        operation: p['operation'],
+                        value: p['value'],
+                        enable: p['enable']
+                    })
+                )
+            });
+        resourceParameters.addAll(params);
+        let resourceStringList: Ecore.EObject[] = params.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
         return API.instance().call(ref, methodName, [resourceStringList])
     };
 
@@ -479,7 +494,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
-
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applications.length) {this.getAllApplication()}
