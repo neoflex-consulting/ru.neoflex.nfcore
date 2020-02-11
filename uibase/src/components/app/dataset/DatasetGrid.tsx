@@ -170,17 +170,26 @@ class DatasetGrid extends React.Component<any, any> {
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const componentName = this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
-        if (this.props.context.datasetComponents !== undefined
-            && this.props.context.datasetComponents[componentName] !== undefined
-            && this.state.columnDefs.length === 0
-            && this.state.rowData.length === 0
-        ) {
-            if (this.props.context.datasetComponents[this.props.viewObject.get('name')]['columnDefs'] !== undefined
-            && this.props.context.datasetComponents[this.props.viewObject.get('name')]['rowData'] !== undefined) {
-                    const columnDefs = this.props.context.datasetComponents[this.props.viewObject.get('name')]['columnDefs'];
-                    this.setState({columnDefs})
-                    const rowData = this.props.context.datasetComponents[this.props.viewObject.get('name')]['rowData'];
+        if (this.props.context.datasetComponents
+            && this.props.context.datasetComponents[componentName] !== undefined) {
+
+            if (this.state.columnDefs.length === 0
+                && this.state.rowData.length === 0) {
+                if (this.props.context.datasetComponents[componentName]['columnDefs'] !== undefined
+                    && this.props.context.datasetComponents[componentName]['rowData'] !== undefined) {
+                    const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
+                    this.setState({columnDefs});
+                    const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                     this.setState({rowData})
+                }
+            }
+            if (prevState.rowData !== this.props.context.datasetComponents[componentName]['rowData']) {
+                const rowData = this.props.context.datasetComponents[componentName]['rowData'];
+                this.setState({rowData})
+            }
+            if (prevState.columnDefs !== this.props.context.datasetComponents[componentName]['columnDefs']) {
+                const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
+                this.setState({columnDefs})
             }
         }
     }

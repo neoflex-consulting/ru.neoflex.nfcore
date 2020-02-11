@@ -1,5 +1,5 @@
 import * as React from "react";
-import Ecore, {EObject} from "ecore"
+import Ecore from "ecore"
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 
@@ -9,7 +9,7 @@ export interface IMainContext {
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, treeValue?: undefined, params?: Object[] | undefined) => void;
-    runQuery?: (resource: Ecore.Resource, componentParams?: Object[]) => Promise<string>;
-    datasetComponents?: any; //map in map
-    notification?: () => void; //add...
+    runQuery?: (resource: Ecore.Resource, componentParams: Object[]) => Promise<string>;
+    datasetComponents?: any;
+    notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
 }

@@ -21,8 +21,7 @@ interface State {
     currentDatasetComponent: Ecore.Resource;
     columnDefs: any[];
     rowData: any[];
-    queryCount: number;
-    serverFilters: EObject[];
+    serverFilters: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
     modalResourceVisible: boolean;
@@ -37,7 +36,6 @@ class DatasetView extends React.Component<any, State> {
         currentDatasetComponent: {} as Ecore.Resource,
         columnDefs: [],
         rowData: [],
-        queryCount: 0,
         serverFilters: [],
         useServerFilter: false,
         datasetComponentsData: undefined,
@@ -52,7 +50,13 @@ class DatasetView extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
                     .then((allDatasetComponents: Ecore.Resource[]) => {
-                        this.setState({allDatasetComponents})
+                        let currentDatasetComponent = allDatasetComponents
+                            .find( (d: Ecore.Resource) =>
+                                d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name'))
+                        if (currentDatasetComponent) {
+                            this.setState({currentDatasetComponent})
+                            this.findColumnDefs(currentDatasetComponent)
+                        }
                     })
             }
         })
@@ -67,7 +71,6 @@ class DatasetView extends React.Component<any, State> {
     };
 
     findColumnDefs(resource: Ecore.Resource){
-        this.setState({queryCount: 2});
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
@@ -149,53 +152,26 @@ class DatasetView extends React.Component<any, State> {
                     type: undefined})
         }
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
+        this.runQuery(this.state.currentDatasetComponent, true, serverFilters);
     }
 
     componentDidUpdate(prevProps: any): void {
-        if (this.state.allDatasetComponents) {
-            let resource = this.state.allDatasetComponents.find( (d:Ecore.Resource) =>
-                d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name'));
-            if (resource) {
-                if (this.state.queryCount === 0) {
-                    this.setState({currentDatasetComponent: resource});
-                    this.props.context.runQuery(resource as Ecore.Resource)
-                        .then( (result: string) =>  {
-                            this.setState({rowData: JSON.parse(result)})
-                                this.updateContext(undefined, JSON.parse(result))
-                        }
-                        )
-                }
-                if (this.state.queryCount < 2) {
-                    this.findColumnDefs(resource as Ecore.Resource);
-                }
-                if (prevProps.location.pathname !== this.props.location.pathname) {
-                    this.findServerFilters(resource as Ecore.Resource, this.state.columnDefs);
-                    this.props.context.runQuery(resource as Ecore.Resource)
-                        .then( (result: string) => {
-                                this.setState({rowData: JSON.parse(result)})
-                                this.updateContext(undefined, JSON.parse(result))
-                            }
-                        )
-                }
-                if (this.state.updateData) {
-                    let params: Object[] = this.state.serverFilters
-                        .filter( (f:any) => f['datasetColumn'] !== undefined && f['operation'] !== undefined && f['enable'] !== undefined)
-                        .map( (f:any) => {
-                            return {
-                                datasetColumn: f['datasetColumn'],
-                                operation: f['operation'],
-                                value: f['value'],
-                                enable: f['enable']
-                            }
-                        });
-                    this.props.context.runQuery(resource as Ecore.Resource, params)
-                        .then( (result: string) => {
-                                this.setState({rowData: JSON.parse(result), updateData: false});
-                                this.updateContext(undefined, JSON.parse(result))
-                            }
-                        )
-                }
+        if (this.state.currentDatasetComponent) {
+            if (prevProps.location.pathname !== this.props.location.pathname) {
+                this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
             }
+        }
+    }
+
+    private runQuery(resource: Ecore.Resource, updateData: boolean, componentParams: Object[]) {
+        if (updateData) {
+            this.props.context.runQuery(resource, componentParams)
+                .then((result: string) => {
+                    this.props.context.notification('Filters notification','Request completed', 'success')
+                    this.setState({rowData: JSON.parse(result)});
+                        this.updateContext(undefined, JSON.parse(result))
+                    }
+                )
         }
     }
 
@@ -217,7 +193,7 @@ class DatasetView extends React.Component<any, State> {
             }
         };
         if (this.props.context.datasetComponents) {
-            let datasetComponents = this.props.context.datasetComponents
+            let datasetComponents = this.props.context.datasetComponents;
             datasetComponents[datasetComponentName] = {
                 columnDefs: this.state.columnDefs.length !== 0 ? this.state.columnDefs : columnDefs,
                 rowData: this.state.rowData.length !== 0 ? this.state.rowData : rowData,
@@ -251,7 +227,8 @@ class DatasetView extends React.Component<any, State> {
     }
 
     onChangeServerFilter = (newServerFilter: any[], updateData: boolean): void => {
-        this.setState({serverFilters: newServerFilter, updateData});
+        this.setState({serverFilters: newServerFilter});
+        this.runQuery(this.state.currentDatasetComponent, updateData, newServerFilter);
     };
 
     changeEnableServerFilters(filter: any): void {
@@ -278,13 +255,13 @@ class DatasetView extends React.Component<any, State> {
 
     render() {
         const { t } = this.props;
-        let filtersBtn = (
+        const filtersBtn = (
             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
             onClick={this.handleFilterModal}
             >
                 <FontAwesomeIcon icon={faFilter} size='xs'/>
             </Button>);
-        let filtersModal = (
+        const filtersModal = (
             <Drawer
                 placement='right'
                 title={t('filters')}
@@ -314,49 +291,50 @@ class DatasetView extends React.Component<any, State> {
             <div>
                 {filtersBtn}
                 {filtersModal}
-                {this.state.useServerFilter &&
-                <div style={{display: 'inline-block'}}>
-                    {this.state.serverFilters
-                        .filter((f: any) => f['enable'] === true && f['operation'] && f['datasetColumn'])
-                        .map((f: any) =>
-                            f.type === 'Date' || f.type === 'Timestamp'
-                                ?
-                                <div style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
-                                    <span style={{color: 'gray'}}>{f.datasetColumn}: </span>
-                                    <DatePicker
-                                        defaultValue={moment(f.value)}
-                                        format={'DD.MM.YYYY'}
-                                        onChange={ (e: any) => this.updateTableData(e)}
-                                    />
-                                </div>
-                                 :
-                                f['operation'].includes('Null')
+                {
+                    this.state.serverFilters !== undefined && this.state.useServerFilter &&
+                    <div style={{display: 'inline-block'}}>
+                        {this.state.serverFilters
+                            .filter((f: any) => f['enable'] === true && f['operation'] && f['datasetColumn'])
+                            .map((f: any) =>
+                                f.type === 'Date' || f.type === 'Timestamp'
                                     ?
-                                    <Select
-                                        key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
-                                        defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
-                                        style={{ width: 'auto', marginLeft: '10px' }}
-                                        allowClear={true}
-                                        showArrow={false}
-                                        onChange={ () => this.changeEnableServerFilters(f) }
-                                    >
-                                    </Select>
+                                    <div style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
+                                        <span style={{color: 'gray'}}>{f.datasetColumn}: </span>
+                                        <DatePicker
+                                            defaultValue={moment(f.value)}
+                                            format={'DD.MM.YYYY'}
+                                            onChange={(e: any) => this.updateTableData(e)}
+                                        />
+                                    </div>
                                     :
-                                    f['value']
+                                    f['operation'].includes('Null')
                                         ?
                                         <Select
-                                            key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                            defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                            style={{ width: 'auto', marginLeft: '10px' }}
+                                            key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
+                                            defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
+                                            style={{width: 'auto', marginLeft: '10px'}}
                                             allowClear={true}
                                             showArrow={false}
-                                            onChange={ () => this.changeEnableServerFilters(f) }
+                                            onChange={() => this.changeEnableServerFilters(f)}
                                         >
                                         </Select>
                                         :
-                                        <div/>
-                        )
-                    }
+                                        f['value']
+                                            ?
+                                            <Select
+                                                key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                                defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
+                                                style={{width: 'auto', marginLeft: '10px'}}
+                                                allowClear={true}
+                                                showArrow={false}
+                                                onChange={() => this.changeEnableServerFilters(f)}
+                                            >
+                                            </Select>
+                                            :
+                                            <div/>
+                            )
+                        }
                 </div>
                 }
             </div>
