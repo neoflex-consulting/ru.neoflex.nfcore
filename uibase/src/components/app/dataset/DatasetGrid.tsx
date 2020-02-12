@@ -7,7 +7,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
-import {Button, Dropdown, Menu,} from 'antd';
+import {Button, Dropdown, Menu, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
@@ -15,6 +15,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
+import SaveDatasetComponent from "./SaveDatasetComponent";
 
 const rowPerPageMapper_: any = rowPerPageMapper;
 
@@ -44,7 +45,8 @@ class DatasetGrid extends React.Component<any, any> {
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
-            rowData: []
+            rowData: [],
+            saveMenuVisible: false
         };
 
         this.grid = React.createRef();
@@ -105,6 +107,9 @@ class DatasetGrid extends React.Component<any, any> {
         if (e.key.split('.').includes('rowPerPage')) {
             this.setSelectedKeys(e.key.split('.')[1])
             this.onPageSizeChanged(e.key.split('.')[1])
+        }
+        if (e.key === 'saveReport') {
+            this.handleSaveMenu()
         }
     }
 
@@ -194,6 +199,10 @@ class DatasetGrid extends React.Component<any, any> {
         }
     }
 
+    handleSaveMenu = () => {
+        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+    };
+
     render() {
         const { gridOptions, t } = this.props;
         let selectedKeys = this.setSelectedKeys();
@@ -216,7 +225,7 @@ class DatasetGrid extends React.Component<any, any> {
                 <Menu.Item>
                     Format
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key='saveReport'>
                     Save Report
                 </Menu.Item>
                 <Menu.Item>
@@ -294,6 +303,16 @@ class DatasetGrid extends React.Component<any, any> {
                     </AgGridReact>
                     }
                 </div>
+                <Modal
+                    key="save_menu"
+                    width={'500px'}
+                    title={t('saveReport')}
+                    visible={this.state.saveMenuVisible}
+                    footer={null}
+                    onCancel={this.handleSaveMenu}
+                >
+                    <SaveDatasetComponent {...this.props}/>
+                </Modal>
             </div>
         )
     }

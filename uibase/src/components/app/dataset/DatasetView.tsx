@@ -11,22 +11,22 @@ import {operationsMapper} from '../../../utils/consts';
 
 const operationsMapper_: any = operationsMapper;
 
-const Option = Select.Option;
+const { Option, OptGroup } = Select;
 
 interface Props {
 }
 
 interface State {
-    allDatasetComponents: Ecore.Resource[];
+    allDatasetComponents: any[];
     currentDatasetComponent: Ecore.Resource;
     columnDefs: any[];
     rowData: any[];
     serverFilters: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
-    modalResourceVisible: boolean;
     allOperations: any[];
     updateData: boolean;
+    filtersMenuVisible: boolean;
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -39,23 +39,32 @@ class DatasetView extends React.Component<any, State> {
         serverFilters: [],
         useServerFilter: false,
         datasetComponentsData: undefined,
-        modalResourceVisible: false,
         allOperations: [],
-        updateData: false
+        updateData: false,
+        filtersMenuVisible: false,
     };
 
     getAllDatasetComponents() {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent')
+            let allDatasetComponents: any[] = [];
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
-                    .then((allDatasetComponents: Ecore.Resource[]) => {
-                        let currentDatasetComponent = allDatasetComponents
+                    .then((result: Ecore.Resource[]) => {
+                        let currentDatasetComponent = result
                             .find( (d: Ecore.Resource) =>
-                                d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name'))
+                                d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
                         if (currentDatasetComponent) {
                             this.setState({currentDatasetComponent})
                             this.findColumnDefs(currentDatasetComponent)
+                        }
+                        result.forEach( (d: Ecore.Resource) => {
+                            if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
+                                allDatasetComponents.push(d)
+                            }
+                        });
+                        if (allDatasetComponents.length !== 0) {
+                            this.setState({allDatasetComponents})
                         }
                     })
             }
@@ -205,12 +214,8 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleFilterModal = () => {
-        this.state.modalResourceVisible
-            ?
-            this.setState({ modalResourceVisible: false })
-            :
-            this.setState({ modalResourceVisible: true })
+    handleFiltersMenu = () => {
+        this.state.filtersMenuVisible ? this.setState({ filtersMenuVisible: false }) : this.setState({ filtersMenuVisible: true })
     };
 
     updateTableData(e: any): void  {
@@ -253,11 +258,36 @@ class DatasetView extends React.Component<any, State> {
         this.setState({serverFilters})
     }
 
+    handleChange(e: any) {
+        let currentDatasetComponent = this.state.allDatasetComponents
+            .filter((c: any) => c.eContents()[0].get('name') === e)
+        this.setState({currentDatasetComponent: currentDatasetComponent[0]})
+        this.findColumnDefs(currentDatasetComponent[0])
+        // let serverFilters = this.state.serverFilters!.map( (f: any) => {
+        //     if (f.index.toString() === target['index'].toString()) {
+        //         const targetColumn = this.props.columnDefs!.find( (c: any) =>
+        //             c.get('field') === (f.datasetColumn || target['value'])
+        //         );
+        //         return {index: f.index,
+        //             datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
+        //             operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
+        //             value: target['columnName'] === 'value' ? target['value'] : f.value,
+        //             enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
+        //             type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
+        //     } else {
+        //         return f
+        //     }
+        // });
+        //
+        // this.setState({serverFilters})
+        // this.props.onChangeServerFilter!(serverFilters, false)
+    }
+
     render() {
         const { t } = this.props;
         const filtersBtn = (
             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
-            onClick={this.handleFilterModal}
+            onClick={this.handleFiltersMenu}
             >
                 <FontAwesomeIcon icon={faFilter} size='xs'/>
             </Button>);
@@ -266,8 +296,8 @@ class DatasetView extends React.Component<any, State> {
                 placement='right'
                 title={t('filters')}
                 width={'700px'}
-                visible={this.state.modalResourceVisible}
-                onClose={this.handleFilterModal}
+                visible={this.state.filtersMenuVisible}
+                onClose={this.handleFiltersMenu}
                 mask={false}
                 maskClosable={false}
             >
@@ -289,6 +319,60 @@ class DatasetView extends React.Component<any, State> {
         );
         return (
             <div>
+                {
+                    this.state.allDatasetComponents.length !== 0 &&
+                    <div style={{display: 'inline-block'}}>
+                        <Select
+                            style={{ width: '250px'}}
+                            showSearch={true}
+                            allowClear={true}
+                            value={this.state.currentDatasetComponent.eContents()[0].get('name')}
+                            onChange={(e: any) => {
+                                this.handleChange(e)
+                            }}
+                        >
+                            <OptGroup label='Default'>
+                                {
+                                    this.state.allDatasetComponents
+                                        .filter((c: any) => c.eContents()[0].get('access') === 'Default')
+                                        .map( (c: any) =>
+                                            <Option
+                                                key={c.eContents()[0].get('name')}
+                                                value={c.eContents()[0].get('name')}>
+                                                {c.eContents()[0].get('name')}
+                                            </Option>)
+                                }
+                            </OptGroup>
+                            <OptGroup label='Private'>
+                                {
+                                    this.state.allDatasetComponents
+                                        .filter((c: any) => c.eContents()[0].get('access') === 'Private')
+                                        .map( (c: any) =>
+                                            <Option
+                                                key={c.eContents()[0].get('name')}
+                                                value={c.eContents()[0].get('name')}>
+                                                {c.eContents()[0].get('name')}
+                                            </Option>)
+                                }
+                            </OptGroup>
+                            <OptGroup label='Public'>
+                                {
+                                    this.state.allDatasetComponents
+                                        .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
+                                        .map( (c: any) =>
+                                            <Option
+                                                key={c.eContents()[0].get('name')}
+                                                value={c.eContents()[0].get('name')}>
+                                                {c.eContents()[0].get('name')}
+                                            </Option>)
+                                }
+                            </OptGroup>
+                        </Select>
+                    </div>
+                }
+                <div style={{display: 'inline-block', height: '30px',
+                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
                 {filtersBtn}
                 {filtersModal}
                 {

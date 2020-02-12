@@ -74,7 +74,7 @@ class DatasetColumn {
 }
 
 abstract class DatasetColumnView {
-    QName name
+    String name
     contains Typography headerName //название столбца
     refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     String headerTooltip
@@ -154,8 +154,9 @@ enum Sort {
 }
 
 enum Access {
-    Public //A Number Filter for number comparisons.
-    Private //A Text Filter for string comparisons.
+    Public
+    Private
+    Default
 }
 
 enum Filter {

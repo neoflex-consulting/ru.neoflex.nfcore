@@ -103,7 +103,6 @@ class ResourceEditor extends React.Component<any, State> {
         const newResourceJSON: { [key: string]: any } = {}
 
         newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
-        newResourceJSON._id = '/'
         newResourceJSON.name = name
 
         const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
@@ -578,27 +577,24 @@ class ResourceEditor extends React.Component<any, State> {
     save = () => {
         this.state.mainEObject.eResource().clear()
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-        const targetObject: { [key: string]: any } = this.state.targetObject
-
         if (resource) {
             this.setState({ isSaving: true })
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 const nestedJSON = nestUpdaters(resource.eResource().to(), null)
-                const updatedTargetObject = findObjectById(nestedJSON, targetObject._id)
+                const updatedTargetObject = findObjectById(nestedJSON, resource.get('uri'))
                 this.setState({
                     isSaving: false,
                     mainEObject: resource.eResource().eContents()[0],
                     resourceJSON: nestedJSON,
                     targetObject: updatedTargetObject,
                     resource: resource
-                })
-                this.props.match.params.id === 'new' &&
+                });
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
             }).catch(() => {
                 this.setState({ isSaving: false })
             })
         }
-    }
+    };
 
     componentWillUnmount() {
         window.removeEventListener("click", this.hideRightClickMenu);
