@@ -4,7 +4,7 @@ import {
     Button, Select, Row, Col,
     Menu, Layout
 } from 'antd';
-import Ecore from "ecore";
+import Ecore, {EObject} from "ecore";
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import { API } from "../modules/api";
@@ -555,10 +555,12 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     cloneResource = () => {
-        const resourceJSON = {...this.state.resourceJSON, _id: null}
         this.state.mainEObject.eResource().clear()
-        const resource = this.state.mainEObject.eResource().parse(resourceJSON as unknown as Ecore.EObject)
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
+        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)]
+        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null})
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`)
+        resource.set('uri', null)
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
                 const targetObject: { [key: string]: any } = this.state.targetObject
