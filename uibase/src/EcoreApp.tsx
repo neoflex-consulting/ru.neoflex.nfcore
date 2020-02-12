@@ -46,7 +46,8 @@ class EcoreApp extends React.Component<any, State> {
         const context: IMainContext = {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
-            runQuery: this.runQuery
+            runQuery: this.runQuery,
+            notification: this.notification
         };
         this.state = {
             principal: undefined,
@@ -78,36 +79,69 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    runQuery = (resource_: Ecore.Resource, componentParams?: Object[]) => {
+    notification = (title: string, description: string, notificationType: string) => {
+        const {t} = this.props;
+        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+            {t("closeall")}
+        </Button>);
+        let key = title + description;
+        if (notificationType === "success") {
+            return (
+                notification.success({
+                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                }))
+        }
+        else if (notificationType === "error") {
+            return (
+                notification.error({
+                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                }))
+        }
+        else if (notificationType === "info") {
+            return (
+                notification.info({
+                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                }))
+        }
+        else if (notificationType === "warning") {
+            return (
+                notification.warning({
+                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                }))
+        }
+        else if (notificationType === "open") {
+            return (
+                notification.open({
+                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                }))
+        }
+
+    };
+
+    runQuery = (resource_: Ecore.Resource, componentParams: Object[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
-        const currentApp = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1])))[JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split("/app/")[1]))).length - 1];
         let resourceSet = Ecore.ResourceSet.create();
         let resourceParameters = resourceSet.create({ uri: '/parameter' });
-        let params: EObject[];
-        params = componentParams === undefined
+        let params: EObject[] =
+            componentParams === undefined
             ?
-            currentApp.params !== undefined && currentApp.params.map( (p: any) => {
-                return (
-                    this.state.conditionDtoPattern!.create({
-                        datasetColumn: p['datasetColumn'],
-                        operation: p['operation'],
-                        value: p['value'],
-                        enable: p['enable']
-                    })
-                )})
-            :
-            componentParams.map( (p: any) => {
-                return (
-                    this.state.conditionDtoPattern!.create({
-                        datasetColumn: p['datasetColumn'],
-                        operation: p['operation'],
-                        value: p['value'],
-                        enable: p['enable']
-                    })
-                )
-            });
+                componentParams
+                :
+                componentParams
+                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
+                    .map( (p: any) => {
+                        return (
+                            this.state.conditionDtoPattern!.create({
+                                datasetColumn: p['datasetColumn'],
+                                operation: p['operation'],
+                                value: p['value'],
+                                enable: p['enable'],
+                                type: p['type']
+                            })
+                        )
+                    });
         resourceParameters.addAll(params);
         let resourceStringList: Ecore.EObject[] = params.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
         return API.instance().call(ref, methodName, [resourceStringList])

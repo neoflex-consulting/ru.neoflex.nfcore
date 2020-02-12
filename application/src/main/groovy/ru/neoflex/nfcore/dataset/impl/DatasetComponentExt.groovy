@@ -132,7 +132,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def queryColumns = []
         def serverFilters = []
 
-        def reportDate = conditions.find{ condition -> condition.datasetColumn.toLowerCase() == 'reportdate' }
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
                 if (column[i].class.toString().toLowerCase().contains('rdbms')) {
@@ -140,14 +139,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                     } else {
                         queryColumns.add("t.\"${column[i].datasetColumn.name}\"")
-                        if (column[i].datasetColumn.name.toLowerCase() == "reportdate" && reportDate != null) {
-                            def map = [:]
-                            map["column"] = column[i].datasetColumn.name
-                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(DAY FROM CAST('${reportDate.value}' AS DATE)) AND " +
-                                    "EXTRACT(MONTH FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(MONTH FROM CAST('${reportDate.value}' AS DATE)) AND " +
-                                    "EXTRACT(YEAR FROM CAST(t.\"reportDate\" AS DATE)) = EXTRACT(YEAR FROM CAST('${reportDate.value}' AS DATE)))"
-                            serverFilters.add(map)
-                        }
                     }
                 } else {
                     def valueCustomColumn
@@ -164,74 +155,49 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     } else {
                         queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"")
                     }
-
-                    if (column[i].headerName.name.toLowerCase() == "reportdate" && reportDate != null) {
-                        def map = [:]
-                        map["column"] = column[i].datasetColumn.name
-                        map["select"] = "t.${column[i].datasetColumn.name} = ${reportDate.value}"
-                        serverFilters.add(map)
-                    }
                 }
             }
         }
 
         if (conditions) {
             for (int i = 0; i <= conditions.size() - 1; ++i) {
-                if (conditions[i].datasetColumn.toLowerCase() != 'reportdate' && conditions[i].enable) {
-                    def map = [:]
-                    map["column"] = conditions[i].datasetColumn
-                    def operator = getConvertOperator(conditions[i].operation.toString().toLowerCase())
-                    if (operator == 'LIKE') {
-                        map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') OR " +
+                if (column.name.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
+                    def currentColumn = column.find{ column -> column.name.toLowerCase() == conditions[i].datasetColumn.toLowerCase() }
+                    def type = currentColumn.datasetColumn.convertDataType
+
+                    if (type == DataType.DATE || type == DataType.TIMESTAMP) {
+                        def map = [:]
+                        map["column"] = currentColumn.datasetColumn.name
+                        map["select"] = "(EXTRACT(DAY FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(DAY FROM CAST('${conditions[i].value}' AS DATE)) AND " +
+                                "EXTRACT(MONTH FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(MONTH FROM CAST('${conditions[i].value}' AS DATE)) AND " +
+                                "EXTRACT(YEAR FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(YEAR FROM CAST('${conditions[i].value}' AS DATE)))"
+                        serverFilters.add(map)
+                    }
+                    else {
+                        def map = [:]
+                        map["column"] = conditions[i].datasetColumn
+                        def operator = getConvertOperator(conditions[i].operation.toString().toLowerCase())
+                        if (operator == 'LIKE') {
+                            map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') OR " +
                                 "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') OR " +
                                 "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') OR " +
                                 "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
-                    }
-                    else if (operator == 'NOT LIKE') {
-                        map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') AND " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') AND " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') AND " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
-                    }
-                    else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
-                        map["select"] = "t.${conditions[i].datasetColumn} ${operator}"
-                    }
-                    else {
-                        map["select"] = "t.${conditions[i].datasetColumn} ${operator} ${conditions[i].value}"
-                    }
-                    if (!serverFilters.contains(map)) {
-                        serverFilters.add(map)
-                    }
-                }
-            }
-        }
-
-        if (serverFilter) {
-            for (int i = 0; i <= serverFilter.size() - 1; ++i) {
-                if (serverFilter[i].enable) {
-                    def map = [:]
-                    map["column"] = serverFilter[i].datasetColumn.name
-                    def operator = getConvertOperator(serverFilter[i].operation.toString().toLowerCase())
-                    if (operator == 'LIKE') {
-                        map["select"] = "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') OR " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') OR " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') OR " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
-                    }
-                    else if (operator == 'NOT LIKE') {
-                        map["select"] = "(LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}') AND " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}') AND " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('${serverFilter[i].value}%') AND " +
-                                "LOWER(CAST(t.${serverFilter[i].datasetColumn.name} AS TEXT)) ${operator} LOWER('%${serverFilter[i].value}%'))"
-                    }
-                    else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
-                        map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator}"
-                    }
-                    else {
-                        map["select"] = "t.${serverFilter[i].datasetColumn.name} ${operator} ${serverFilter[i].value}"
-                    }
-                    if (!serverFilters.contains(map)) {
-                        serverFilters.add(map)
+                        }
+                        else if (operator == 'NOT LIKE') {
+                            map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') AND " +
+                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') AND " +
+                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') AND " +
+                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
+                        }
+                        else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
+                            map["select"] = "t.${conditions[i].datasetColumn} ${operator}"
+                        }
+                        else {
+                            map["select"] = "t.${conditions[i].datasetColumn} ${operator} ${conditions[i].value}"
+                        }
+                        if (!serverFilters.contains(map)) {
+                            serverFilters.add(map)
+                        }
                     }
                 }
             }
