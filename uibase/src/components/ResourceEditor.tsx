@@ -555,9 +555,10 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     cloneResource = () => {
+        const resourceJSON = {...this.state.resourceJSON, _id: null}
         this.state.mainEObject.eResource().clear()
-        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-        resource.set('uri', '/')
+        const resource = this.state.mainEObject.eResource().parse(resourceJSON as unknown as Ecore.EObject)
+        resource.set('uri', null)
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`)
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {

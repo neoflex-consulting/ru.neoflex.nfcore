@@ -204,7 +204,7 @@ export class API implements IErrorHandler {
     }
 
     static fixReferences(object: any, rootId: string): void {
-        if (!object || typeof object !== 'object') {
+        if (!object || typeof object !== 'object' || !rootId) {
             return;
         }
         let ref = object.$ref;
