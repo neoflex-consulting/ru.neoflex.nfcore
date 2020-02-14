@@ -214,6 +214,7 @@ class EcoreApp extends React.Component<any, State> {
         if (e.key === "logout") {
             API.instance().logout().then(() => {
                 this.setState({principal : undefined});
+                this.state.context.updateContext!(({userProfile: undefined}))
             });
             this.props.history.push('')
         }
@@ -238,6 +239,7 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
+        this.checkUserProfile(principal)
         if (this.props.history.location.pathname === "/") {
             this.changeURL("home")
         }
@@ -527,10 +529,47 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
+    checkUserProfile(principal: any):void {
+        const userName = principal.name;
+        API.instance().fetchAllClasses(false).then(classes => {
+            const classUserProfile = classes.find((c: Ecore.EObject) => c._id === '//UserProfile')
+            if (classUserProfile !== undefined) {
+                API.instance().findByKind(classUserProfile,  {contents: {eClass: classUserProfile.eURI()}})
+                    .then((result: Ecore.Resource[]) => {
+                        if (result !== undefined) {
+                            let currentUserProfile = result.filter( (r: EObject) => r.eContents()[0].get('userName') === userName)
+                            if (currentUserProfile.length === 0) {
+                                this.createUserProfile(currentUserProfile, classUserProfile, userName);
+                            }
+                            else {
+                                this.state.context.updateContext!(({userProfile: currentUserProfile[0].eContents()[0]}))
+                            }
+                        }
+                        else {
+                            let currentUserProfile: any[] = [];
+                            this.createUserProfile(currentUserProfile, classUserProfile, userName);
+                        }
+                    })
+            }
+        })
+    }
+
+    private createUserProfile(currentUserProfile: any, classUserProfile: any, userName: string) {
+        currentUserProfile.push(classUserProfile!.create({userName: userName}).eResource())
+        API.instance().saveResource(currentUserProfile[0], 99999)
+            .then((newResource: Ecore.Resource) => {
+                this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
+            });
+    }
+
     componentDidMount(): void {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.languages.length) this.getLanguages();
-        if (!this.state.applications.length) {this.getAllApplication()}
+        if (!this.state.applications.length) {
+            this.getAllApplication()
+        }
+
+
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;
         let errorHandler : IErrorHandler = {

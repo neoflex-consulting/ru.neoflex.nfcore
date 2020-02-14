@@ -12,4 +12,5 @@ export interface IMainContext {
     runQuery?: (resource: Ecore.Resource, componentParams: Object[]) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
+    userProfile?: Ecore.EObject;
 }

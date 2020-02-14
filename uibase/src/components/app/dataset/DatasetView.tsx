@@ -100,7 +100,7 @@ class DatasetView extends React.Component<any, State> {
         });
         this.setState({columnDefs});
         this.findServerFilters(resource as Ecore.Resource, columnDefs);
-        this.updateContext(columnDefs, undefined)
+        this.updateContext(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
     findServerFilters(resource: Ecore.Resource, columnDefs: Object[]){
@@ -178,7 +178,7 @@ class DatasetView extends React.Component<any, State> {
                 .then((result: string) => {
                     this.props.context.notification('Filters notification','Request completed', 'success')
                     this.setState({rowData: JSON.parse(result)});
-                        this.updateContext(undefined, JSON.parse(result))
+                        this.updateContext(undefined, JSON.parse(result), this.state.currentDatasetComponent.eContents()[0].get('name'))
                     }
                 )
         }
@@ -193,19 +193,18 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.updateContext({datasetComponents: undefined})
     }
 
-    updateContext(columnDefs: any, rowData: any){
-        const datasetComponentName: string = this.props.viewObject.get('datasetComponent').get('name');
+    updateContext(columnDefs: any, rowData: any, datasetComponentName: string){
         let currentDataset = {
             [datasetComponentName] : {
-                columnDefs: this.state.columnDefs.length !== 0 ? this.state.columnDefs : columnDefs,
-                rowData: this.state.rowData.length !== 0 ? this.state.rowData : rowData,
+                columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
+                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : []
             }
         };
         if (this.props.context.datasetComponents) {
             let datasetComponents = this.props.context.datasetComponents;
             datasetComponents[datasetComponentName] = {
-                columnDefs: this.state.columnDefs.length !== 0 ? this.state.columnDefs : columnDefs,
-                rowData: this.state.rowData.length !== 0 ? this.state.rowData : rowData,
+                columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
+                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : []
             };
                 this.props.context.updateContext({datasetComponents: datasetComponents})
 
@@ -258,11 +257,47 @@ class DatasetView extends React.Component<any, State> {
         this.setState({serverFilters})
     }
 
-    handleChange(e: any) {
-        let currentDatasetComponent = this.state.allDatasetComponents
+    saveResource = (currentDatasetComponent: EObject) => {
+        this.props.viewObject.set('datasetComponent', currentDatasetComponent.eContents()[0])
+        API.instance().saveResource(this.props.viewObject.eResource(), 99999)
+            .then((newResource: Ecore.Resource) => {
+                const newResourceSet: Ecore.ResourceSet = newResource.eContainer as Ecore.ResourceSet
+                const newViewObject: Ecore.EObject[] = newResourceSet.elements()
+                    .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+                    .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+                    .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+
+
+                let allDatasetComponents: any[] = [];
+                this.state.allDatasetComponents.forEach( (d: Ecore.Resource) => {
+                    if (d.eContents()[0].get('name') === newViewObject[0].get('name')) {
+                        allDatasetComponents.push(newResource)
+                    }
+                    else {
+                        allDatasetComponents.push(d)
+                    }
+                });
+                if (allDatasetComponents.length !== 0) {
+                    this.setState({allDatasetComponents})
+                }
+            })};
+
+    handleChange(e: any): void {
+        let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
             .filter((c: any) => c.eContents()[0].get('name') === e)
+
         this.setState({currentDatasetComponent: currentDatasetComponent[0]})
         this.findColumnDefs(currentDatasetComponent[0])
+        this.saveResource(currentDatasetComponent[0])
+
+
+        // if (!this.props.context.datasetComponents[currentDatasetComponent[0].eContents()[0].get('name')]) {
+        //
+        // }
+        // else {
+        //     this.updateContext(undefined, undefined, currentDatasetComponent[0].eContents()[0].get('name'))
+        //}
         // let serverFilters = this.state.serverFilters!.map( (f: any) => {
         //     if (f.index.toString() === target['index'].toString()) {
         //         const targetColumn = this.props.columnDefs!.find( (c: any) =>

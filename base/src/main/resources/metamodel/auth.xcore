@@ -9,11 +9,12 @@ package ru.neoflex.nfcore.base.auth
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EBoolean
+import org.eclipse.emf.ecore.EStringToStringMapEntry
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
-import org.eclipse.emf.ecore.EBoolean
 
 class Audit {
     String createdBy
@@ -62,6 +63,11 @@ class ReferencePermission extends Permission {
 class ObjectPermission extends Permission {
     refers EObject eObject
     op Integer priority() {4}
+}
+
+class UserProfile {
+    QName userName
+    contains EStringToStringMapEntry[] params
 }
 
 enum GrantStatus {
