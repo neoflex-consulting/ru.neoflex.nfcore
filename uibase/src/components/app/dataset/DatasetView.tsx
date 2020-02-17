@@ -27,21 +27,32 @@ interface State {
     allOperations: any[];
     updateData: boolean;
     filtersMenuVisible: boolean;
+    parameterPattern?: EObject;
 }
 
 class DatasetView extends React.Component<any, State> {
 
-    state = {
-        allDatasetComponents: [],
-        currentDatasetComponent: {} as Ecore.Resource,
-        columnDefs: [],
-        rowData: [],
-        serverFilters: [],
-        useServerFilter: false,
-        datasetComponentsData: undefined,
-        allOperations: [],
-        updateData: false,
-        filtersMenuVisible: false,
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            allDatasetComponents: [],
+            currentDatasetComponent: {} as Ecore.Resource,
+            columnDefs: [],
+            rowData: [],
+            serverFilters: [],
+            useServerFilter: false,
+            datasetComponentsData: undefined,
+            allOperations: [],
+            updateData: false,
+            filtersMenuVisible: false
+        }
+    }
+
+    getParameterPattern() {
+        API.instance().findClass('auth', 'Parameter')
+            .then( (parameterPattern: EObject ) => {
+                this.setState({parameterPattern})
+            })
     };
 
     getAllDatasetComponents() {
@@ -51,9 +62,11 @@ class DatasetView extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
                     .then((result: Ecore.Resource[]) => {
-                        let currentDatasetComponent = result
-                            .find( (d: Ecore.Resource) =>
-                                d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
+                        const userComponentName = this.props.context.userProfile.get('params').array()
+                            .filter( (p: any) => p.get('key') === this.props.viewObject._id);
+                        const currentDatasetComponent = userComponentName.length === 0 ?
+                            result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
+                            : result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === userComponentName[0].get('value'))
                         if (currentDatasetComponent) {
                             this.setState({currentDatasetComponent})
                             this.findColumnDefs(currentDatasetComponent)
@@ -187,6 +200,7 @@ class DatasetView extends React.Component<any, State> {
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents()}
         if (this.state.allOperations.length === 0) {this.getAllOperations()}
+        if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
     }
 
     componentWillUnmount() {
@@ -284,38 +298,34 @@ class DatasetView extends React.Component<any, State> {
             })};
 
     handleChange(e: any): void {
+        let params: EObject = this.state.parameterPattern!.create({key: this.props.viewObject._id, value: e})
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
             .filter((c: any) => c.eContents()[0].get('name') === e)
 
         this.setState({currentDatasetComponent: currentDatasetComponent[0]})
-        this.findColumnDefs(currentDatasetComponent[0])
-        this.saveResource(currentDatasetComponent[0])
+        this.findColumnDefs(currentDatasetComponent[0]);
+        let updatedUserProfile;
+        let updatedParams;
+        if (this.props.context.userProfile.get('params').size() !== 0) {
+            updatedParams = this.props.context.userProfile.get('params').array()
+                .filter( (p:any) => p.get('key') !== this.props.viewObject._id);
+        }
+        if (updatedParams.length === 0) {
+            updatedUserProfile = this.props.context.userProfile
+            updatedUserProfile.get('params').clear();
+            updatedUserProfile.get('params').add(params)
+        }
+        else if (updatedParams.length !== 0) {
+            updatedUserProfile = this.props.context.userProfile
+            updatedUserProfile.get('params').clear();
+            updatedUserProfile.get('params').addAll(updatedParams)
+            updatedUserProfile.get('params').addAll(params)
+        }
 
-
-        // if (!this.props.context.datasetComponents[currentDatasetComponent[0].eContents()[0].get('name')]) {
-        //
-        // }
-        // else {
-        //     this.updateContext(undefined, undefined, currentDatasetComponent[0].eContents()[0].get('name'))
-        //}
-        // let serverFilters = this.state.serverFilters!.map( (f: any) => {
-        //     if (f.index.toString() === target['index'].toString()) {
-        //         const targetColumn = this.props.columnDefs!.find( (c: any) =>
-        //             c.get('field') === (f.datasetColumn || target['value'])
-        //         );
-        //         return {index: f.index,
-        //             datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
-        //             operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
-        //             value: target['columnName'] === 'value' ? target['value'] : f.value,
-        //             enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
-        //             type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
-        //     } else {
-        //         return f
-        //     }
-        // });
-        //
-        // this.setState({serverFilters})
-        // this.props.onChangeServerFilter!(serverFilters, false)
+        API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
+            (newResource: Ecore.Resource) =>
+                this.props.context.updateContext!(({userProfile: newResource.eContents()[0]}))
+        )
     }
 
     render() {

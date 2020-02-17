@@ -10,7 +10,6 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EBoolean
-import org.eclipse.emf.ecore.EStringToStringMapEntry
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
@@ -67,7 +66,12 @@ class ObjectPermission extends Permission {
 
 class UserProfile {
     QName userName
-    contains EStringToStringMapEntry[] params
+    contains Parameter[] params
+}
+
+class Parameter {
+    String key
+    String value
 }
 
 enum GrantStatus {

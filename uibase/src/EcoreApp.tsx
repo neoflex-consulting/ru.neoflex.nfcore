@@ -37,6 +37,7 @@ interface State {
     pathFull: any[];
     appModuleName: string;
     conditionDtoPattern?: EObject;
+    userProfilePattern?: EObject;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -239,7 +240,6 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
-        this.checkUserProfile(principal)
         if (this.props.history.location.pathname === "/") {
             this.changeURL("home")
         }
@@ -496,7 +496,6 @@ class EcoreApp extends React.Component<any, State> {
                 {context => {
                     return <MainApp
                         {...this.props}
-
                         context={context}
                         pathFull={this.state.pathFull}
                         appModuleName={this.state.appModuleName}
@@ -529,46 +528,53 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
+    getUserProfilePattern() {
+        API.instance().findClass('auth', 'UserProfile')
+            .then( (userProfilePattern: EObject ) => {
+                this.setState({userProfilePattern})
+                this.checkUserProfile(this.state.principal)
+            })
+    };
+
     checkUserProfile(principal: any):void {
         const userName = principal.name;
-        API.instance().fetchAllClasses(false).then(classes => {
-            const classUserProfile = classes.find((c: Ecore.EObject) => c._id === '//UserProfile')
-            if (classUserProfile !== undefined) {
-                API.instance().findByKind(classUserProfile,  {contents: {eClass: classUserProfile.eURI()}})
+            if (this.state.userProfilePattern !== undefined) {
+                API.instance().findByKind(this.state.userProfilePattern,  {contents: {eClass: this.state.userProfilePattern.eURI()}})
                     .then((result: Ecore.Resource[]) => {
-                        if (result !== undefined) {
+                        if (result.length !== 0) {
                             let currentUserProfile = result.filter( (r: EObject) => r.eContents()[0].get('userName') === userName)
                             if (currentUserProfile.length === 0) {
-                                this.createUserProfile(currentUserProfile, classUserProfile, userName);
+                                this.createUserProfile(userName);
                             }
                             else {
                                 this.state.context.updateContext!(({userProfile: currentUserProfile[0].eContents()[0]}))
                             }
                         }
                         else {
-                            let currentUserProfile: any[] = [];
-                            this.createUserProfile(currentUserProfile, classUserProfile, userName);
+                            this.createUserProfile(userName);
                         }
                     })
             }
-        })
     }
 
-    private createUserProfile(currentUserProfile: any, classUserProfile: any, userName: string) {
-        currentUserProfile.push(classUserProfile!.create({userName: userName}).eResource())
-        API.instance().saveResource(currentUserProfile[0], 99999)
-            .then((newResource: Ecore.Resource) => {
-                this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
-            });
+   private createUserProfile(userName: string) {
+       let resourceSet = Ecore.ResourceSet.create()
+       let resourceParameters = resourceSet.create({ uri: '/params' });
+       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({userName: userName})
+       resourceParameters.add(newUserProfilePattern)
+       API.instance().saveResource(newUserProfilePattern.eResource(), 99999)
+           .then((newResource: Ecore.Resource) => {
+               this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
+           });
     }
 
     componentDidMount(): void {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
+        if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applications.length) {
             this.getAllApplication()
         }
-
 
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;
