@@ -214,7 +214,7 @@ class EcoreApp extends React.Component<any, State> {
     onRightMenu(e : any) {
         if (e.key === "logout") {
             API.instance().logout().then(() => {
-                this.setState({principal : undefined});
+                this.setState({principal : undefined})
                 this.state.context.updateContext!(({userProfile: undefined}))
             });
             this.props.history.push('')
@@ -243,6 +243,7 @@ class EcoreApp extends React.Component<any, State> {
         if (this.props.history.location.pathname === "/") {
             this.changeURL("home")
         }
+        this.checkUserProfile(this.state.principal)
     };
 
     getAllApplication() {
@@ -519,6 +520,9 @@ class EcoreApp extends React.Component<any, State> {
         if (prevProps.location.pathname !== this.props.location.pathname) {
             this.setBreadcrumb()
         }
+        if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined) {
+            this.checkUserProfile(this.state.principal)
+        }
     }
 
     getConditionDtoPattern() {
@@ -532,7 +536,6 @@ class EcoreApp extends React.Component<any, State> {
         API.instance().findClass('auth', 'UserProfile')
             .then( (userProfilePattern: EObject ) => {
                 this.setState({userProfilePattern})
-                this.checkUserProfile(this.state.principal)
             })
     };
 

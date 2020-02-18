@@ -73,7 +73,15 @@ class DatasetView extends React.Component<any, State> {
                         }
                         result.forEach( (d: Ecore.Resource) => {
                             if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                allDatasetComponents.push(d)
+                                if (this.props.context.userProfile.get('userName') === 'admin') {
+                                    allDatasetComponents.push(d)
+                                }
+                                else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('audit').get('createdBy')) {
+                                    allDatasetComponents.push(d)
+                                }
+                                else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === 'Public') {
+                                    allDatasetComponents.push(d)
+                                }
                             }
                         });
                         if (allDatasetComponents.length !== 0) {
@@ -174,7 +182,7 @@ class DatasetView extends React.Component<any, State> {
                     type: undefined})
         }
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
-        this.runQuery(this.state.currentDatasetComponent, true, serverFilters);
+        this.runQuery(resource/*this.state.currentDatasetComponent*/, true, serverFilters);
     }
 
     componentDidUpdate(prevProps: any): void {
@@ -310,7 +318,7 @@ class DatasetView extends React.Component<any, State> {
             updatedParams = this.props.context.userProfile.get('params').array()
                 .filter( (p:any) => p.get('key') !== this.props.viewObject._id);
         }
-        if (updatedParams.length === 0) {
+        if (updatedParams === undefined || updatedParams.length === 0) {
             updatedUserProfile = this.props.context.userProfile
             updatedUserProfile.get('params').clear();
             updatedUserProfile.get('params').add(params)

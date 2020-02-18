@@ -191,11 +191,11 @@ class DatasetGrid extends React.Component<any, any> {
                     this.setState({rowData})
                 }
             }
-            if (prevState.rowData !== this.props.context.datasetComponents[componentName]['rowData']) {
+            if (JSON.stringify(prevState.rowData) !== JSON.stringify(this.props.context.datasetComponents[componentName]['rowData'])) {
                 const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                 this.setState({rowData})
             }
-            if (prevState.columnDefs !== this.props.context.datasetComponents[componentName]['columnDefs']) {
+            if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
                 const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
                 this.setState({columnDefs})
             }
