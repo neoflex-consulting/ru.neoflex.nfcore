@@ -186,7 +186,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 style={{ width: '110px', marginRight: '10px' }}
                                                 allowClear={true}
                                                 onChange={(e: any) => this.handleChange(
-                                                    JSON.stringify({index: e.target.id, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
+                                                    JSON.stringify({index: serverFilter.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                                                 )}
                                                 id={serverFilter.index}
                                             />

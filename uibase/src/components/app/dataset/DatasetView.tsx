@@ -332,7 +332,6 @@ class DatasetView extends React.Component<any, State> {
         this.findColumnDefs(currentDatasetComponent)
     }
 
-
     render() {
         const { t } = this.props;
         const filtersBtn = (
@@ -421,8 +420,7 @@ class DatasetView extends React.Component<any, State> {
                     </div>
                 }
                 <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginLeft: '10px'}}
-                        onClick={ () => this.refresh(this.state.currentDatasetComponent)}
-                >
+                        onClick={ ()=>this.refresh(this.state.currentDatasetComponent)}>
                     <FontAwesomeIcon icon={faSync} size='xs'/>
                 </Button>
                 <div style={{display: 'inline-block', height: '30px',
