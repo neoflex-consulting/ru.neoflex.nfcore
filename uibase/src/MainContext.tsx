@@ -13,4 +13,5 @@ export interface IMainContext {
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;
+    changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
 }

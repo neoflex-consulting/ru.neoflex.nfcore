@@ -39,7 +39,7 @@ class DatasetGrid extends React.Component<any, any> {
             themes: [],
             currentTheme: this.props.viewObject.get('theme') || 'balham',
             rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'All',
+            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'all',
             operations: [],
             selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
@@ -97,7 +97,7 @@ class DatasetGrid extends React.Component<any, any> {
     };
 
     onPageSizeChanged(newPageSize: any) {
-        this.grid.current.api.paginationSetPageSize(Number(newPageSize));
+        this.grid.current.api.paginationSetPageSize(Number(rowPerPageMapper_[newPageSize]));
     }
 
     onActionMenu(e : any) {
@@ -119,10 +119,12 @@ class DatasetGrid extends React.Component<any, any> {
             if (parameter && this.state.themes.includes(parameter)) {
                 selectedKeys.push(`theme.${parameter}`)
                 this.setState({currentTheme: parameter})
+                this.props.viewObject.set('theme', parameter)
             }
             else if (this.state.currentTheme === null) {
                 selectedKeys.push(`theme.${this.state.themes[0]}`)
                 this.setState({currentTheme: this.state.themes[0]})
+                this.props.viewObject.set('theme', this.state.themes[0])
             }
             else {
                 selectedKeys.push(`theme.${this.state.currentTheme}`)
@@ -132,10 +134,12 @@ class DatasetGrid extends React.Component<any, any> {
             if (parameter && this.state.rowPerPages.includes(parameter)) {
                 selectedKeys.push(`rowPerPage.${parameter}`)
                 this.setState({paginationPageSize: parameter})
+                this.props.viewObject.set('rowPerPage', parameter)
             }
             else if (this.state.paginationPageSize === null) {
                 selectedKeys.push(`rowPerPage.${this.state.rowPerPages[0]}`)
                 this.setState({paginationPageSize: this.state.rowPerPages[0]})
+                this.props.viewObject.set('rowPerPage', this.state.rowPerPages[0])
             }
             else {
                 selectedKeys.push(`rowPerPage.${this.state.paginationPageSize}`)
@@ -158,7 +162,7 @@ class DatasetGrid extends React.Component<any, any> {
         API.instance().findEnum('application', 'RowPerPage')
             .then((result: Ecore.EObject[]) => {
                 let rowPerPages = result.map( (t: any) => {
-                    return rowPerPageMapper_[t.get('name')]
+                    return t.get('name') /*rowPerPageMapper_[t.get('name')]*/
                 });
                 this.setState({rowPerPages})
             })
@@ -171,14 +175,19 @@ class DatasetGrid extends React.Component<any, any> {
         if (this.state.rowPerPages.length === 0) {
             this.getAllRowPerPage()
         }
+        this.changeSettings();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const userComponentName = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
-        const componentName = userComponentName.length === 0 ?
+
+        if (JSON.stringify(prevProps.context.userProfile.eResource().to()) !== JSON.stringify(this.props.context.userProfile.eResource().to())) {
+            this.changeSettings();
+        }
+        const componentName = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
             this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
-            : userComponentName[0].get('value')
+            : JSON.parse(userComponentName[0].get('value'))['name']
         if (this.props.context.datasetComponents
             && this.props.context.datasetComponents[componentName] !== undefined) {
             if (this.state.columnDefs.length === 0
@@ -202,6 +211,24 @@ class DatasetGrid extends React.Component<any, any> {
         }
     }
 
+    private changeSettings() {
+        this.props.context.userProfile.get('params').array()
+            .forEach((p: any) => {
+                if (p.get('key') === this.props.viewObject.get('datasetView')._id) {
+                    if (JSON.parse(p.get('value'))['theme'] !== undefined) {
+                        this.setState({currentTheme: JSON.parse(p.get('value'))['theme']})
+                    }
+                    if (JSON.parse(p.get('value'))['showUniqRow'] !== undefined) {
+                        this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
+                    }
+                    if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
+                        this.setState({paginationPageSize: JSON.parse(p.get('value'))['rowPerPage']})
+                    }
+
+                }
+            });
+    }
+
     handleSaveMenu = () => {
         this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
     };
@@ -219,9 +246,9 @@ class DatasetGrid extends React.Component<any, any> {
                     Select Columns
                 </Menu.Item>
                 <Menu.SubMenu title={'Rows Per Page'}>
-                    {this.state.rowPerPages.map((rowPerPage: string) =>
-                        <Menu.Item key={`rowPerPage.${rowPerPage}`} style={{width: '65px'}}>
-                            {rowPerPage}
+                    {this.state.rowPerPages.map((p: string) =>
+                        <Menu.Item key={`rowPerPage.${p}`} style={{width: '65px'}}>
+                            {rowPerPageMapper_[p]}
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
@@ -314,7 +341,9 @@ class DatasetGrid extends React.Component<any, any> {
                     footer={null}
                     onCancel={this.handleSaveMenu}
                 >
-                    <SaveDatasetComponent {...this.props}/>
+                    <SaveDatasetComponent
+                        {...this.props}
+                    />
                 </Modal>
             </div>
         )

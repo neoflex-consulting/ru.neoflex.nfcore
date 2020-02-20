@@ -38,6 +38,8 @@ interface State {
     appModuleName: string;
     conditionDtoPattern?: EObject;
     userProfilePattern?: EObject;
+    parameterPattern?: EObject;
+    getUserProfile: boolean;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -48,7 +50,8 @@ class EcoreApp extends React.Component<any, State> {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             runQuery: this.runQuery,
-            notification: this.notification
+            notification: this.notification,
+            changeUserProfile: this.changeUserProfile
         };
         this.state = {
             principal: undefined,
@@ -58,7 +61,8 @@ class EcoreApp extends React.Component<any, State> {
             applications: [],
             context,
             pathFull: [],
-            appModuleName: props.appModuleName
+            appModuleName: props.appModuleName,
+            getUserProfile: true
         }
     }
 
@@ -79,6 +83,57 @@ class EcoreApp extends React.Component<any, State> {
             return null
         }
     }
+
+    getParameterPattern() {
+        API.instance().findClass('auth', 'Parameter')
+            .then( (parameterPattern: EObject ) => {
+                this.setState({parameterPattern})
+            })
+    };
+
+    changeUserProfile = (viewObjectId: string, userProfileParams: any) => {
+        let updatedUserProfile: EObject = this.state.context.userProfile!;
+        if (this.state.context.userProfile!.get('params').size() === 0) {
+            let newParams: EObject = this.state.parameterPattern!.create({
+                key: viewObjectId,
+                value: JSON.stringify(userProfileParams)
+            });
+            updatedUserProfile.get('params').addAll(newParams)
+        }
+        else if (this.state.context.userProfile!.get('params').size() !== 0) {
+            let otherObjects;
+            let updatedObject;
+            otherObjects = this.state.context.userProfile!.get('params').array()
+                .filter( (p:any) => p.get('key') !== viewObjectId);
+            updatedObject = this.state.context.userProfile!.get('params').array()
+                .filter( (p:any) => p.get('key') === viewObjectId);
+
+            if (updatedObject === undefined || updatedObject.length === 0) {
+                updatedObject = this.state.parameterPattern!.create({
+                    key: viewObjectId,
+                    value: JSON.stringify(userProfileParams)
+                });
+            }
+            else {
+                let newParams: any = {
+                    name: userProfileParams['name'] || JSON.parse(updatedObject[0].get('value'))['name'],
+                    theme: userProfileParams['theme'] || JSON.parse(updatedObject[0].get('value'))['theme'],
+                    showUniqRow: userProfileParams['showUniqRow'] || JSON.parse(updatedObject[0].get('value'))['showUniqRow'],
+                    rowPerPage: userProfileParams['rowPerPage'] || JSON.parse(updatedObject[0].get('value'))['rowPerPage']
+                };
+                updatedObject[0].set('value', JSON.stringify(newParams))
+            }
+            updatedUserProfile.get('params').clear();
+            if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}
+            updatedUserProfile.get('params').addAll(updatedObject[0])
+        }
+        API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
+            (newResource: Ecore.Resource) => {
+                this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
+                this.state.context.notification!('Update User Profile','Updated', 'success')
+            }
+        )
+    };
 
     notification = (title: string, description: string, notificationType: string) => {
         const {t} = this.props;
@@ -214,7 +269,7 @@ class EcoreApp extends React.Component<any, State> {
     onRightMenu(e : any) {
         if (e.key === "logout") {
             API.instance().logout().then(() => {
-                this.setState({principal : undefined})
+                this.setState({principal : undefined, getUserProfile: true});
                 this.state.context.updateContext!(({userProfile: undefined}))
             });
             this.props.history.push('')
@@ -243,7 +298,6 @@ class EcoreApp extends React.Component<any, State> {
         if (this.props.history.location.pathname === "/") {
             this.changeURL("home")
         }
-        this.checkUserProfile(this.state.principal)
     };
 
     getAllApplication() {
@@ -520,8 +574,9 @@ class EcoreApp extends React.Component<any, State> {
         if (prevProps.location.pathname !== this.props.location.pathname) {
             this.setBreadcrumb()
         }
-        if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined) {
-            this.checkUserProfile(this.state.principal)
+        if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
+            this.setState({getUserProfile: false})
+            this.getUserProfile(this.state.principal)
         }
     }
 
@@ -539,7 +594,7 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
-    checkUserProfile(principal: any):void {
+    getUserProfile(principal: any):void {
         const userName = principal.name;
             if (this.state.userProfilePattern !== undefined) {
                 API.instance().findByKind(this.state.userProfilePattern,  {contents: {eClass: this.state.userProfilePattern.eURI()}})
@@ -578,6 +633,7 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.applications.length) {
             this.getAllApplication()
         }
+        if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
 
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;

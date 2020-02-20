@@ -42,7 +42,7 @@ export class MainApp extends React.Component<any, State> {
             const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
             if (ePackage) {
                 const eClass = ePackage.eContents().find(c => c.get("name") === objectClass) as Ecore.EClass;
-                API.instance().findByKindAndName(eClass, name).then(resources => {
+                API.instance().findByKindAndName(eClass, name, 9999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
 
