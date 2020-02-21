@@ -43,6 +43,14 @@ import java.util.HashSet;
 @Configuration("ru.neoflex.nfcore.base.configuration.Security")
 @EnableWebSecurity
 public class Security extends WebSecurityConfigurerAdapter {
+    private static final String[] AUTH_WHITELIST = {
+
+            // -- swagger ui
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/v2/api-docs",
+            "/webjars/**"
+    };
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -62,6 +70,7 @@ public class Security extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
+                .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/emf/**").authenticated()
                 .antMatchers("/system/**").authenticated()
                 .antMatchers("/app/**").authenticated()
