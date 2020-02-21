@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.nfcore.base.auth.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class XcoreTests {
 
     @Test

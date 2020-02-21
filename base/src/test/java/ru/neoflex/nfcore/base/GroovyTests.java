@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class GroovyTests {
     @Autowired
     Groovy groovy;

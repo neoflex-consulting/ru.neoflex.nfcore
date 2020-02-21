@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class ObjectMapperTests {
     @Autowired
     Context context;

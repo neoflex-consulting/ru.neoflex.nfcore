@@ -17,7 +17,7 @@ import ru.neoflex.nfcore.base.services.Context;
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class GitDBTests {
     @Autowired
     Context context;

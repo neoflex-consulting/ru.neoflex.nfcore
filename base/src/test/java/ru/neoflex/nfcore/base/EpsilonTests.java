@@ -29,7 +29,7 @@ import java.util.HashMap;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class EpsilonTests {
     @Autowired
     Context context;
@@ -103,20 +103,21 @@ public class EpsilonTests {
     @Test
     public void testClassLoader() throws Exception {
         TransactionClassLoader.withClassLoader(()->{
-            String text = context.getStore().inTransaction(false, (transaction)->{
-                Transaction tx = (Transaction)transaction;
-                ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
-                Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
-                Path newResourcePath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
-                Files.createDirectories(newResourcePath.getParent());
-                Files.copy(resourcePath, newResourcePath, REPLACE_EXISTING);
-                String program = "[%import \"Utils2.egl\";%]" +
-                        "[%=toValidName('12,')%]";
-                Path newProgramPath = tx.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
-                Files.write(newProgramPath, program.getBytes());
-                String result = context.getEpsilon().generate("ToValid2.egl", null, resourceSet);
-                tx.commit("Written Utils2.egl, ToValid2.egl", "orlov", "");
-                return result;
+            String text = context.getStore().inTransaction(true, tx -> {
+                return context.getWorkspace().getDatabase().inTransaction("master", Transaction.LockType.WRITE, tx1 -> {
+                    ResourceSet resourceSet = getUserFinder().execute().getResourceSet();
+                    Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils.egl").toURI());
+                    Path newResourcePath = tx1.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/Utils2.egl");
+                    Files.createDirectories(newResourcePath.getParent());
+                    Files.copy(resourcePath, newResourcePath, REPLACE_EXISTING);
+                    String program = "[%import \"Utils2.egl\";%]" +
+                            "[%=toValidName('12,')%]";
+                    Path newProgramPath = tx1.getFileSystem().getPath("/" + Epsilon.EPSILON_TEMPLATE_ROOT + "/ToValid2.egl");
+                    Files.write(newProgramPath, program.getBytes());
+                    String result = context.getEpsilon().generate("ToValid2.egl", null, resourceSet);
+                    tx1.commit("Written Utils2.egl, ToValid2.egl", "orlov", "");
+                    return result;
+                });
             });
             Assert.assertEquals("_12_", text);
             try (Transaction tx = context.getWorkspace().createTransaction(Transaction.LockType.WRITE)) {
