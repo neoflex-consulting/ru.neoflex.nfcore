@@ -18,7 +18,6 @@
 
     <modules>
         <module>emfjson-jackson</module>
-        <module>emfjson-couchdb</module>
         <module>emf-git</module>
         <module>base</module>
         <module>application</module>
