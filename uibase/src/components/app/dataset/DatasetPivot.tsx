@@ -1,7 +1,6 @@
 import * as React from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
 import JqxPivotGrid, { IPivotGridProps, jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxpivotgrid';
-import {MainContext} from "../../../MainContext";
 
 interface Props {
 }
@@ -61,16 +60,11 @@ class DatasetPivot extends React.PureComponent<WithTranslation, IPivotGridProps>
 
     render() {
         return (
-
-            <MainContext.Consumer>
-                { context => (
-                    <div style={{borderColor: "black"}}>
-                        This is Pivot (Test)
-                        <JqxPivotGrid style={{ width: "100%", height: 600, border: "3px solid lightgray" }} source={this.state.source}
-                                      treeStyleRows={false} autoResize={false} multipleSelectionEnabled={true} />
-                    </div>
-                )}
-            </MainContext.Consumer>
+            <div style={{borderColor: "black"}}>
+                This is Pivot (Test)
+                <JqxPivotGrid style={{ width: "100%", height: 600, border: "3px solid lightgray" }} source={this.state.source}
+                              treeStyleRows={false} autoResize={false} multipleSelectionEnabled={true} />
+            </div>
         )
     }
 
