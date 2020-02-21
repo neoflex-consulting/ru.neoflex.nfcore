@@ -179,8 +179,10 @@ class DatasetView extends React.Component<any, State> {
 
     componentDidUpdate(prevProps: any): void {
         if (this.state.currentDatasetComponent.rev !== undefined) {
-            let refresh = this.props.context.userProfile.eResource().to().params
+            let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
+                this.props.context.userProfile.eResource().to().params
                 .find( (p: any) => JSON.parse(p.value).name === this.state.currentDatasetComponent.eResource().to().name)
+                : undefined
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
             }
