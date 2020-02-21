@@ -11,14 +11,14 @@ import ru.neoflex.nfcore.base.auth.*;
 import ru.neoflex.nfcore.base.services.Context;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testbase"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class StoreTests {
     @Autowired
     Context context;
 
     @Test
     public void loadAndStore() throws Exception {
-        context.getStore().inTransaction(true, tx -> {
+        context.getStore().inTransaction(false, tx -> {
             Role superAdminRole = createSuperAdminRole();
             User superAdminUser = createSuperAdminUser();
             superAdminUser.getRoles().add(superAdminRole);
@@ -35,7 +35,7 @@ public class StoreTests {
 
     public static Role createSuperAdminRole() {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
-        superAdmin.setName("SuperAdminRole_FORTEST");
+        superAdmin.setName("SuperAdminRole_FORTEST2");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
         allPermission.setGrantStatus(GrantStatus.GRANTED);
         allPermission.getActionTypes().add(ActionType.ALL);
@@ -45,7 +45,7 @@ public class StoreTests {
 
     public static User createSuperAdminUser() {
         User superAdminUser = AuthFactory.eINSTANCE.createUser();
-        superAdminUser.setName("SuperAdminUser_FORTEST");
+        superAdminUser.setName("SuperAdminUser_FORTEST2");
         superAdminUser.setEmail("admin@neoflex.ru");
         PasswordAuthenticator password = AuthFactory.eINSTANCE.createPasswordAuthenticator();
         password.setPassword("secret");

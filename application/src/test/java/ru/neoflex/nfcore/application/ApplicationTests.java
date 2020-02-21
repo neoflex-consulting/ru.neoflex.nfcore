@@ -15,7 +15,7 @@ import ru.neoflex.nfcore.locales.LocalesPackage;
 import java.nio.file.Files;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"repo.name=testapp"})
+@SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
 public class ApplicationTests {
     @Autowired
     Context context;

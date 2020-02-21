@@ -13,7 +13,7 @@ import ru.neoflex.nfcore.base.services.Workspace;
 import java.io.IOException;
 
 @Service
-@ConditionalOnProperty(name = "dbtype", havingValue = "gitdb", matchIfMissing = true)
+@ConditionalOnProperty(name = "dbtype", havingValue = "gitdb", matchIfMissing = false)
 public class GitDBStoreProvider implements StoreSPI {
     @Autowired
     Workspace workspace;

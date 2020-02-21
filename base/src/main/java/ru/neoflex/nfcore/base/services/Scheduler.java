@@ -29,8 +29,10 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledFuture;
 
 @Service
 @DependsOn({"ru.neoflex.nfcore.base.configuration.Security"})
@@ -51,14 +53,13 @@ public class Scheduler {
 
     @PostConstruct
     void init() {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.schedule(() -> {
+        taskScheduler.scheduleWithFixedDelay(() -> {
             try {
                 refreshScheduler();
             } catch (Exception e) {
                 logger.error("Scheduler: ", e);
             }
-        }, 10, TimeUnit.SECONDS);
+        }, Duration.ofSeconds(10));
     }
 
     public synchronized ObjectNode refreshScheduler() throws Exception {

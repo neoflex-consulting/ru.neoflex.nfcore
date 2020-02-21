@@ -17,9 +17,9 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 @Service
-@ConditionalOnProperty(name = "dbtype", havingValue = "orientdb", matchIfMissing = false)
+@ConditionalOnProperty(name = "dbtype", havingValue = "orientdb", matchIfMissing = true)
 public class OrientDBStoreProvider extends AbstractStoreSPI {
-    @Value("${orientdb.home:${user.home}/.orientdb/home}")
+    @Value("${orientdb.home:${user.home}/.orientdb}")
     String home;
     @Value("${orientdb.dbname:models}")
     String dbName;
