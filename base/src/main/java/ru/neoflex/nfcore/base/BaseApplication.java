@@ -15,12 +15,14 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
 @ComponentScan("ru.neoflex.nfcore")
+@EnableSwagger2
 public class BaseApplication {
 
     @Value("${repo.base:${user.home}/.gitdb}")
@@ -72,6 +74,6 @@ public class BaseApplication {
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
-                .build().pathMapping("/");
+                .build();
     }
 }
