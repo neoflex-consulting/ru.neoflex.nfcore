@@ -3,9 +3,13 @@ package ru.neoflex.nfcore.base.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.components.Publisher;
+import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 
 import java.util.concurrent.Callable;
 
@@ -75,6 +79,33 @@ public class Context {
 
     public<R> R inContextWithClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
         return inContext(()->workspace.withClassLoader(()->store.inTransaction(readOnly, tx -> {return f.call();})));
+    }
+
+    public<R> R transact(String message, Callable<R> f) throws Exception {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String author = authentication != null ? authentication.getName() : null;
+        return inContext(()->workspace.withClassLoader(()->store.inTransaction(message == null, tx -> {
+            R result;
+            if (store.getProvider() instanceof GitDBStoreProvider) {
+                result = f.call();
+                if (message != null) {
+                    tx.commit(message, author, "");
+                }
+            }
+            else {
+                result = workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), message == null ? Transaction.LockType.READ : Transaction.LockType.WRITE, tx1 -> {
+                    R result1 = f.call();
+                    if (message != null) {
+                        tx1.commit(message);
+                    }
+                    return result1;
+                });
+                if (message != null) {
+                    tx.commit(message, author, "");
+                }
+            }
+            return result;
+        })));
     }
 
     public Scheduler getScheduler() {
