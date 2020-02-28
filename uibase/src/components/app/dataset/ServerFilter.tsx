@@ -80,6 +80,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
 
     render() {
         const { getFieldDecorator, getFieldValue } = this.props.form;
+        const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 {
@@ -89,7 +90,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
                             const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
                             const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
-
                             return (
                                 <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
                                     <span>{serverFilter.index}</span>
@@ -106,7 +106,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 }]
                                             })(
                                             <Select
-                                                style={{ width: '300px', marginRight: '10px', marginLeft: '10px' }}
+                                                placeholder={t('columnname')}
+                                                style={{ width: '290px', marginRight: '10px', marginLeft: '10px' }}
                                                 showSearch={true}
                                                 allowClear={true}
                                                 onChange={(e: any) => {
@@ -140,7 +141,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 }]
                                             })(
                                             <Select
-                                                style={{ width: '100px', marginRight: '10px' }}
+                                                placeholder={t('operation')}
+                                                style={{ width: '110px', marginRight: '10px' }}
                                                 allowClear={true}
                                                 onChange={(e: any) => {
                                                     const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
@@ -182,6 +184,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 }]
                                             })(
                                             <Input
+                                                placeholder={t('value')}
                                                 disabled={serverFilter.operation === 'IsNull' || serverFilter.operation === 'IsNotNull'}
                                                 style={{ width: '110px', marginRight: '10px' }}
                                                 allowClear={true}

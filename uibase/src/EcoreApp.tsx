@@ -296,7 +296,7 @@ class EcoreApp extends React.Component<any, State> {
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
         if (this.props.history.location.pathname === "/") {
-            this.changeURL("home")
+            this.changeURL('home')
         }
     };
 
@@ -620,7 +620,7 @@ class EcoreApp extends React.Component<any, State> {
        let resourceParameters = resourceSet.create({ uri: '/params' });
        let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({userName: userName})
        resourceParameters.add(newUserProfilePattern)
-       API.instance().saveResource(newUserProfilePattern.eResource(), 99999)
+       API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {
                this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
            });
