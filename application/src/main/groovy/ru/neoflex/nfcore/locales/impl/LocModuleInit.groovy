@@ -31,12 +31,14 @@ class LocModuleInit extends LocModuleImpl {
     static def addCaptions(LocNS ns, ResourceSet langs, String name) {
         def nameCaption = captionFromCamel(name)
         langs.resources.each {it.contents.each {Lang lang->
-            def caption = ns.captions.find {it.lang.name == lang.name}
-            if (caption == null) {
-                caption = LocalesFactory.eINSTANCE.createStringResource()
-                caption.lang = lang
-                caption.caption = nameCaption
-                ns.captions.add(caption)
+            if (lang != null) {
+                def caption = ns.captions.find {it.lang.name == lang.name}
+                if (caption == null) {
+                    caption = LocalesFactory.eINSTANCE.createStringResource()
+                    caption.lang = lang
+                    caption.caption = nameCaption
+                    ns.captions.add(caption)
+                }
             }
         }}
     }
