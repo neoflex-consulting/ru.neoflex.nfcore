@@ -32,7 +32,7 @@ public class TestBase {
     }
 
     public static File getHomeFile() throws IOException {
-        return new File(System.getProperty("user.home"), ".orientdb/home");
+        return new File(System.getProperty("user.home"), ".orientdb");
     }
 
     public static Server refreshDatabase(List<EPackage> ePackageList) throws Exception {
