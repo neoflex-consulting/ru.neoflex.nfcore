@@ -452,12 +452,16 @@ class EcoreApp extends React.Component<any, State> {
                                                 title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Notification</span>}>
                                                 {localStorage.getItem('notifierDuration') === '3' ?
-                                                    <Menu.Item key={'showNotifications'}>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor}}
+                                                        key={'showNotifications'}>
                                                         <FontAwesomeIcon icon={faEye} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Disable autohiding</Menu.Item>
                                                     :
-                                                    <Menu.Item key={'autoHideNotifications'}>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor}}
+                                                        key={'autoHideNotifications'}>
                                                         <FontAwesomeIcon icon={faClock} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Autohide</Menu.Item>}

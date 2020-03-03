@@ -73,7 +73,7 @@ class ApplicationInit {
                 catalogNode1.name = "CatalogNodeAdmin"
 
                 def catalogNode2 = ApplicationFactory.eINSTANCE.createCatalogNode()
-                catalogNode2.name = "Права доступа"
+                catalogNode2.name = "Журналы"
                 def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
                 viewNode1.name = 'Журнал активности пользователей'
                def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
