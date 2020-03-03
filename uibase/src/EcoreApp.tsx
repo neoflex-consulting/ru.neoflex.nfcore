@@ -32,7 +32,8 @@ interface State {
     languages: string[];
     notifierDuration: number;
     breadcrumb: string[];
-    applications: string[];
+    applications: EObject[];
+    applicationNames: string[];
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
@@ -59,6 +60,7 @@ class EcoreApp extends React.Component<any, State> {
             notifierDuration: 0,
             breadcrumb: [],
             applications: [],
+            applicationNames: [],
             context,
             pathFull: [],
             appModuleName: props.appModuleName,
@@ -214,7 +216,7 @@ class EcoreApp extends React.Component<any, State> {
                 params: params
             };
             let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applications.includes(appModuleName)){
+            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
                 path.push(urlElement)
             }
             else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
@@ -305,11 +307,11 @@ class EcoreApp extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applicationsObjects) => {
-                        let applications = applicationsObjects.map( (a:any) =>
+                    .then((applications) => {
+                        let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
-                        this.setState({applications})
+                        this.setState({applicationNames, applications})
                     })
             }
         })
@@ -415,7 +417,7 @@ class EcoreApp extends React.Component<any, State> {
                                             </Menu.Item>
                                             <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Applications</span>}>
-                                                {this.state.applications.map((a: any) =>
+                                                {this.state.applicationNames.map((a: any) =>
                                                     <Menu.Item key={`app.${a}`}>
                                                         {a}
                                                     </Menu.Item>
@@ -466,8 +468,8 @@ class EcoreApp extends React.Component<any, State> {
 
     private setSelectedKeys() {
         let selectedKeys = ['developer', 'test'];
-        if (this.state.applications) {
-            this.state.applications.map((a: any) =>
+        if (this.state.applicationNames) {
+            this.state.applicationNames.map((a: any) =>
                 selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
@@ -630,7 +632,7 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
-        if (!this.state.applications.length) {
+        if (!this.state.applicationNames.length) {
             this.getAllApplication()
         }
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};

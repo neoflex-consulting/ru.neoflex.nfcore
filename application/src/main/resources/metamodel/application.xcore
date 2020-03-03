@@ -38,6 +38,7 @@ class AppModule {
 }
 
 class Application extends AppModule {
+    IconName iconName = "faUser"
 }
 
 /* Views */
@@ -155,8 +156,8 @@ class Typography extends ViewElement {
     refers GradientStyle gradientStyle
 }
 
-class GradientStyle {
-    QName name
+class GradientStyle extends Style {
+    String position
     Color[] colors
 }
 
@@ -269,13 +270,13 @@ enum InputType {
 }
 
 enum RowPerPage {
-    one,
-    ten,
-    twenty,
-    fifty,
-    oneHundred,
-    fiveHundred,
-    oneThousand,
+    one
+    ten
+    twenty
+    fifty
+    oneHundred
+    fiveHundred
+    oneThousand
     all
 }
 
@@ -311,4 +312,17 @@ enum Operations {
     IsNotNull
     IncludeIn
     NotIncludeIn
+}
+
+enum IconName {
+    faUser
+    faCogs
+    faWrench
+    faLaravel
+    faShieldAlt
+    faSpa
+    faFile
+    faCoins
+    faCubes
+    faEye
 }
