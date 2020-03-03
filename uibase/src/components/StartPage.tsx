@@ -42,6 +42,8 @@ export class StartPage extends React.Component<any, State> {
                         this.props.applications.map(
                         (app: any) =>
                             <Button
+                                type="primary"
+                                style={{background: "rgb(255, 255, 255)", borderColor: "rgb(213, 213, 213)", color: "rgb(18, 18, 18)"}}
                                 className="button"
                                 onClick={ ()=> this.selectApplication(app.eContents()[0].get('name'))}
                             >
