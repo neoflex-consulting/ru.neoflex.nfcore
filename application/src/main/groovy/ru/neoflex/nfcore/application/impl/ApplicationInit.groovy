@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
+import ru.neoflex.nfcore.application.IconName
 import ru.neoflex.nfcore.application.TextAlign
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
@@ -36,6 +37,7 @@ class ApplicationInit {
 
             if (name == "Налоговая отчетность") {
                 application.name = name
+                application.iconName = IconName.FA_EYE
 
                 def userComponent5 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Page Not Found", "PageNotFound",false)
 
@@ -46,28 +48,34 @@ class ApplicationInit {
             }
             else if (name == "Администрирование") {
                 application.name = name
+                application.iconName = IconName.FA_COGS
+                def row = ApplicationFactory.eINSTANCE.createRow()
+                row.name = "row1"
+                row.textAlign = TextAlign.LEFT
+                row.borderBottom = true
+                row.height = '80px'
 
-               def row = ApplicationFactory.eINSTANCE.createRow()
-               row.name = "row1"
-               row.textAlign = TextAlign.LEFT
+                def column = ApplicationFactory.eINSTANCE.createColumn()
+                column.name = "column1"
+                column.span = "9"
 
-               def column = ApplicationFactory.eINSTANCE.createColumn()
-               column.name = "column1"
+                def typography = ApplicationFactory.eINSTANCE.createTypography()
+                typography.name = "Администрирование системы"
 
-               def typography = ApplicationFactory.eINSTANCE.createTypography()
-               typography.name = "Администрирование системы"
+                def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+                typography.setTypographyStyle(typographyStyle)
 
-               column.children.add(typography)
-               row.children.add(column)
-               application.setView(row)
+                column.children.add(typography)
+                row.children.add(column)
+                application.setView(row)
 
-               def catalogNode1 = ApplicationFactory.eINSTANCE.createCatalogNode()
-               catalogNode1.name = "CatalogNodeAdmin"
+                def catalogNode1 = ApplicationFactory.eINSTANCE.createCatalogNode()
+                catalogNode1.name = "CatalogNodeAdmin"
 
-               def catalogNode2 = ApplicationFactory.eINSTANCE.createCatalogNode()
-               catalogNode2.name = "Права доступа"
-               def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
-               viewNode1.name = 'Журнал активности пользователей'
+                def catalogNode2 = ApplicationFactory.eINSTANCE.createCatalogNode()
+                catalogNode2.name = "Права доступа"
+                def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
+                viewNode1.name = 'Журнал активности пользователей'
                def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
                viewNode2.name = 'Журнал обновлений системы'
                def viewNode3 = ApplicationFactory.eINSTANCE.createViewNode()

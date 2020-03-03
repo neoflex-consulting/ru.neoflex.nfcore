@@ -24,6 +24,8 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
+import {green} from "color-name";
+const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
 
@@ -367,7 +369,7 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const langMenu = () => <Menu style={{ marginTop: '24px' }}>
+        const langMenu = () => <Menu style={{ marginTop: '24px', backgroundColor: backgroundColor }}>
             {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
                     <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
@@ -377,7 +379,7 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
-                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: 'white'}}>
+                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: backgroundColor}}>
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
@@ -394,43 +396,60 @@ class EcoreApp extends React.Component<any, State> {
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
                                 <Col span={5}>
-                                    <Menu selectedKeys={selectedKeys} className="header-menu" theme="light"
+                                    <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
-                                        <Menu.SubMenu title={<span style={{
+                                        <Menu.SubMenu
+                                            style={{float: "right", height: '100%'}}
+                                            title={<span style={{
                                             fontVariantCaps: 'petite-caps',
                                             fontSize: '18px',
                                             lineHeight: '39px'
                                         }}>
-                                    <FontAwesomeIcon icon={faUser} size="xs"
-                                                     style={{marginRight: "7px"}}/>{principal.name}</span>}
-                                                      style={{float: "right", height: '100%'}}>
-                                            <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg"
-                                                                                       flip="both"
-                                                                                       style={{marginRight: "10px"}}/>{t('logout')}
+                                                <FontAwesomeIcon icon={faUser} size="xs" style={{marginRight: "7px"}}/>{principal.name}</span>}
+                                        >
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'logout'}>
+                                                <FontAwesomeIcon
+                                                    icon={faSignOutAlt} size="lg"
+                                                    flip="both"
+                                                    style={{marginRight: "10px"}}
+                                                />
+                                                {t('logout')}
                                             </Menu.Item>
-                                            <Menu.Item key={'developer'}>
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'developer'}>
                                                 <Link to={`/developer/data`}>
                                                     <FontAwesomeIcon icon={faTools} size="lg"
                                                                      style={{marginRight: "10px"}}/>
                                                     {t('developer')}
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
+                                            <Menu.SubMenu
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                title={<span><FontAwesomeIcon icon={faSketch} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Applications</span>}>
                                                 {this.state.applicationNames.map((a: any) =>
-                                                    <Menu.Item key={`app.${a}`}>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor, marginTop: '-8px', marginBottom: '-1px'}}
+                                                        key={`app.${a}`}>
                                                         {a}
                                                     </Menu.Item>
                                                 )}
                                             </Menu.SubMenu>
-                                            <Menu.Item key={'test'}>
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'test'}>
                                                 <Link to={`/test`}>
                                                     <FontAwesomeIcon icon={faBuffer} size="lg"
                                                                      style={{marginRight: "10px"}}/>
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
+                                            <Menu.SubMenu
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Notification</span>}>
                                                 {localStorage.getItem('notifierDuration') === '3' ?
                                                     <Menu.Item key={'showNotifications'}>

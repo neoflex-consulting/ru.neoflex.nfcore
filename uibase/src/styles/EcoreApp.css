@@ -7,9 +7,9 @@
 	height: 40px !important; 
 	display: inline-flex;
 	box-shadow: 1px 1px 10px #e1e1e1;
-	background: #ffffff; 
+	/*background: #ffffff;*/
 	margin-bottom: 2px;
-	background-color: #fbfbfb;
+	background-color: #fdfdfd;
 }
   
 .panel-button {
@@ -74,6 +74,7 @@
 	height: 100%;
 	border: none;
 	padding-top: 7px;
+	background-color: #fdfdfd;
 }
 
 .lang-label{

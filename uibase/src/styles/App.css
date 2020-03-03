@@ -1,5 +1,5 @@
 .app-logo {
-  background-color: #fff;
+  background-color: #fdfdfd;
   color: #262626;
   font-weight: lighter;
   font-size: 23px;
@@ -28,7 +28,7 @@
 .app-header {
   height: '55px'; 
   padding: '0px'; 
-  background-color: 'white';
+  background-color: #fdfdfd;
   border-bottom: 1px solid #e8e8e8;
 }
 
