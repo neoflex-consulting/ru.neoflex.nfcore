@@ -172,11 +172,21 @@ class ApplicationInit {
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "DatasetViewRow"
             datasetViewRow.textAlign = TextAlign.LEFT
+            datasetViewRow.marginTop = "20px"
+            datasetViewRow.marginLeft = "20px"
+            datasetViewRow.marginBottom = "20px"
+
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "DatasetGridRow"
             datasetGridRow.textAlign = TextAlign.LEFT
+            datasetGridRow.marginTop = "20px"
+            datasetGridRow.marginLeft = "20px"
+            datasetGridRow.marginBottom = "20px"
             def lineDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             lineDiagramRow.name = "LineDiagramRow"
+            lineDiagramRow.marginTop = "20px"
+            lineDiagramRow.marginLeft = "20px"
+            lineDiagramRow.marginBottom = "20px"
             lineFrom.children.add(datasetViewRow)
             lineFrom.children.add(datasetGridRow)
             lineFrom.children.add(lineDiagramRow)
@@ -231,11 +241,20 @@ class ApplicationInit {
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "ViewDatasetRow"
             datasetViewRow.textAlign = TextAlign.LEFT
+            datasetViewRow.marginTop = "20px"
+            datasetViewRow.marginLeft = "20px"
+            datasetViewRow.marginBottom = "20px"
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "GridDatasetRow"
             datasetGridRow.textAlign = TextAlign.LEFT
+            datasetGridRow.marginTop = "20px"
+            datasetGridRow.marginLeft = "20px"
+            datasetGridRow.marginBottom = "20px"
             def pieDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             pieDiagramRow.name = "PieRow"
+            pieDiagramRow.marginTop = "20px"
+            pieDiagramRow.marginLeft = "20px"
+            pieDiagramRow.marginBottom = "20px"
             pieFrom.children.add(datasetViewRow)
             pieFrom.children.add(datasetGridRow)
             pieFrom.children.add(pieDiagramRow)
@@ -288,11 +307,20 @@ class ApplicationInit {
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "ViewDatasetRow"
             datasetViewRow.textAlign = TextAlign.LEFT
+            datasetViewRow.marginTop = "20px"
+            datasetViewRow.marginLeft = "20px"
+            datasetViewRow.marginBottom = "20px"
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "GridDatasetRow"
             datasetGridRow.textAlign = TextAlign.LEFT
+            datasetGridRow.marginTop = "20px"
+            datasetGridRow.marginLeft = "20px"
+            datasetGridRow.marginBottom = "20px"
             def barDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             barDiagramRow.name = "BarRow"
+            barDiagramRow.marginTop = "20px"
+            barDiagramRow.marginLeft = "20px"
+            barDiagramRow.marginBottom = "20px"
             barFrom.children.add(datasetViewRow)
             barFrom.children.add(datasetGridRow)
             barFrom.children.add(barDiagramRow)
