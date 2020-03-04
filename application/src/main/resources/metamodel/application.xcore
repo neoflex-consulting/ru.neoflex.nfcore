@@ -109,6 +109,17 @@ class DatasetPivotView extends DataView {
 
 class DatasetDiagramView extends DataView {
     op JSON getDatasetDiagrams() // для чего?
+    //TODO выбор из dataset
+    String IndexBy
+    String keyColumn
+    String valueColumn
+    LegendAnchorPositionType legendAnchorPosition
+    AxisXPositionType axisXPosition
+    String axisXLegend
+    AxisYPositionType axisYPosition
+    String axisYLegend
+    String colorSchema
+    DiagramType diagramType
 }
 
 class TabsViewReport extends ViewContainer {
@@ -311,4 +322,33 @@ enum Operations {
     IsNotNull
     IncludeIn
     NotIncludeIn
+}
+
+enum DiagramType {
+    Line
+    Bar
+    Pie
+}
+
+enum LegendAnchorPositionType {
+    //TODO переименновать с большой буквы
+    topLeft
+    top
+    topRight
+    left
+    center
+    right
+    bottomLeft
+    bottom
+    bottomRight
+}
+
+enum AxisXPositionType {
+    Top
+    Bottom
+}
+
+enum AxisYPositionType {
+    Left
+    Right
 }

@@ -119,7 +119,7 @@ class DatasetView extends React.Component<any, State> {
     findServerFilters(resource: Ecore.Resource, columnDefs: Object[]){
         let serverFilters: any = [];
         const params = this.props.pathFull[this.props.pathFull.length - 1].params;
-        if (params.length !== 0) {
+        if (params !== undefined && params.length !== 0) {
             params.forEach( (f: any) => {
                 if (f) {
                     columnDefs.forEach( (c: any) => {
