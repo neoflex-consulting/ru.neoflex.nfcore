@@ -70,8 +70,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
                 this.props.onChangeServerFilter!(this.state.serverFilters!, true)
-                this.props.context.notification('Filters notification','Request started', 'success')
-            }
+                }
             else {
                 this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
             }

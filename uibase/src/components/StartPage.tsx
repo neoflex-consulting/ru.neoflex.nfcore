@@ -50,7 +50,7 @@ export class StartPage extends React.Component<any, State> {
                                 <FontAwesomeIcon icon={
                                     app.eContents()[0].get('iconName') === null ?
                                         this.state.icons.faUser : this.state.icons[app.eContents()[0].get('iconName')]
-                                } size={"2x"} className="icon"/>
+                                } size={"2x"} className="icon-start-page"/>
                                 <div className="app-name">
                                     {app.eContents()[0].get('name')}
                                 </div>

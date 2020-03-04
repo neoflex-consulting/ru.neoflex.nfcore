@@ -45,8 +45,6 @@ class AppModuleInit {
         if (rs.resources.empty) {
 
             def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "DatasetPivot",true)
-            def userComponent2 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Rich Grid", "DatasetGrid",true)
-            def userComponent3 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Diagram", "DatasetDiagram",true)
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
@@ -55,14 +53,14 @@ class AppModuleInit {
             tabs.name = 'View Report'
 
             def componentElement4 = ApplicationFactory.eINSTANCE.createForm()
-            componentElement4.name = "TwoGridWithDifferentDataset"
+            componentElement4.name = "Two Grids With Different Datasets"
 
             def row1 = ApplicationFactory.eINSTANCE.createRow()
             row1.name = 'row1'
             row1.textAlign = TextAlign.LEFT
-            row1.marginTop = "20"
-            row1.marginLeft = "20"
-            row1.marginBottom = "20"
+            row1.marginTop = "20px"
+            row1.marginLeft = "20px"
+            row1.marginBottom = "20px"
 
             def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView1.name = "DatasetViewTest_1"
@@ -74,9 +72,9 @@ class AppModuleInit {
             def row2 = ApplicationFactory.eINSTANCE.createRow()
             row2.name = 'row2'
             row2.textAlign = TextAlign.LEFT
-            row2.marginLeft = "20"
-            row2.marginBottom = "20"
-            row2.marginRight = "20"
+            row2.marginLeft = "20px"
+            row2.marginBottom = "20px"
+            row2.marginRight = "20px"
 
             def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGridView1.name = 'DatasetGridTest'
@@ -92,8 +90,8 @@ class AppModuleInit {
             def row3 = ApplicationFactory.eINSTANCE.createRow()
             row3.name = 'row3'
             row3.textAlign = TextAlign.LEFT
-            row3.marginLeft = "20"
-            row3.marginBottom = "20"
+            row3.marginLeft = "20px"
+            row3.marginBottom = "20px"
 
             def datasetView2 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView2.name = "DatasetViewTest_2"
@@ -105,9 +103,9 @@ class AppModuleInit {
             def row4 = ApplicationFactory.eINSTANCE.createRow()
             row4.name = 'row4'
             row4.textAlign = TextAlign.LEFT
-            row4.marginLeft = "20"
-            row4.marginBottom = "20"
-            row4.marginRight = "20"
+            row4.marginLeft = "20px"
+            row4.marginBottom = "20px"
+            row4.marginRight = "20px"
 
             def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGridView2.name = 'DatasetGridTestAAA'
@@ -121,17 +119,9 @@ class AppModuleInit {
             componentElement4.children.add(row4)
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
-            def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
-            def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
             componentElement1.name = 'Pivot'
-            componentElement2.name = 'Rich Grid'
-            componentElement3.name = 'Diagram'
             componentElement1.setComponent(userComponent1)
-            componentElement2.setComponent(userComponent2)
-            componentElement3.setComponent(userComponent3)
             tabs.children.add(componentElement1)
-            tabs.children.add(componentElement2)
-            tabs.children.add(componentElement3)
             tabs.children.add(componentElement4)
             application.view = tabs
 

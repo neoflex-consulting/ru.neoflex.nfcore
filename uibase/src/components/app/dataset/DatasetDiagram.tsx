@@ -74,7 +74,29 @@ class DatasetDiagram extends React.Component<any, any> {
                 this.setState({rowData})
             }
         }
+        if ((this.props.viewObject.get('diagramType') === null && this.state.diagramType !== "Line")
+            ||
+            (this.props.viewObject.get('diagramType') !== null && this.state.diagramType !== this.props.viewObject.get('diagramType'))) {
+
+            this.setState({diagramType: this.props.viewObject.get('diagramType') || "Line",
+                IndexBy: this.props.viewObject.get('IndexBy') || "",
+                keyColumn: this.props.viewObject.get('keyColumn') || "",
+                valueColumn: this.props.viewObject.get('valueColumn') || "",
+                legendAnchorPosition: this.props.viewObject.get('legendAnchorPosition')|| "top-Left"
+                    .replace("topLeft","top-Left")
+                    .replace("topRight","top-right")
+                    .replace("bottomLeft","bottom-left")
+                    .replace("bottomRight","bottom-right"),
+                AxisXPosition: this.props.viewObject.get('AxisXPosition') || "Top",
+                AxisXLegend: this.props.viewObject.get('AxisXLegend') || "",
+                AxisYPosition: this.props.viewObject.get('AxisYPosition') || "Left",
+                AxisYLegend: this.props.viewObject.get('AxisYLegend') || "",
+                //Пока цвет задаётся через цветовые схемы
+                colorSchema: this.props.viewObject.get('colorSchema') || ""
+            })
+        }
     }
+
 
     private drawBar() {
         function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
