@@ -24,6 +24,8 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
+import {green} from "color-name";
+const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
 
@@ -32,7 +34,8 @@ interface State {
     languages: string[];
     notifierDuration: number;
     breadcrumb: string[];
-    applications: string[];
+    applications: EObject[];
+    applicationNames: string[];
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
@@ -59,6 +62,7 @@ class EcoreApp extends React.Component<any, State> {
             notifierDuration: 0,
             breadcrumb: [],
             applications: [],
+            applicationNames: [],
             context,
             pathFull: [],
             appModuleName: props.appModuleName,
@@ -214,7 +218,7 @@ class EcoreApp extends React.Component<any, State> {
                 params: params
             };
             let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applications.includes(appModuleName)){
+            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
                 path.push(urlElement)
             }
             else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
@@ -296,7 +300,7 @@ class EcoreApp extends React.Component<any, State> {
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init)
         if (this.props.history.location.pathname === "/") {
-            this.changeURL("home")
+            this.changeURL('home')
         }
     };
 
@@ -305,11 +309,11 @@ class EcoreApp extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applicationsObjects) => {
-                        let applications = applicationsObjects.map( (a:any) =>
+                    .then((applications) => {
+                        let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
-                        this.setState({applications})
+                        this.setState({applicationNames, applications})
                     })
             }
         })
@@ -365,7 +369,7 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const langMenu = () => <Menu style={{ marginTop: '24px' }}>
+        const langMenu = () => <Menu style={{ marginTop: '24px', backgroundColor: backgroundColor }}>
             {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
                     <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
@@ -375,7 +379,7 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
-                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: 'white'}}>
+                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: backgroundColor}}>
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
@@ -392,51 +396,72 @@ class EcoreApp extends React.Component<any, State> {
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
                                 <Col span={5}>
-                                    <Menu selectedKeys={selectedKeys} className="header-menu" theme="light"
+                                    <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
-                                        <Menu.SubMenu title={<span style={{
+                                        <Menu.SubMenu
+                                            style={{float: "right", height: '100%'}}
+                                            title={<span style={{
                                             fontVariantCaps: 'petite-caps',
                                             fontSize: '18px',
                                             lineHeight: '39px'
                                         }}>
-                                    <FontAwesomeIcon icon={faUser} size="xs"
-                                                     style={{marginRight: "7px"}}/>{principal.name}</span>}
-                                                      style={{float: "right", height: '100%'}}>
-                                            <Menu.Item key={'logout'}><FontAwesomeIcon icon={faSignOutAlt} size="lg"
-                                                                                       flip="both"
-                                                                                       style={{marginRight: "10px"}}/>{t('logout')}
+                                                <FontAwesomeIcon icon={faUser} size="xs" style={{marginRight: "7px"}}/>{principal.name}</span>}
+                                        >
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'logout'}>
+                                                <FontAwesomeIcon
+                                                    icon={faSignOutAlt} size="lg"
+                                                    flip="both"
+                                                    style={{marginRight: "10px"}}
+                                                />
+                                                {t('logout')}
                                             </Menu.Item>
-                                            <Menu.Item key={'developer'}>
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'developer'}>
                                                 <Link to={`/developer/data`}>
                                                     <FontAwesomeIcon icon={faTools} size="lg"
                                                                      style={{marginRight: "10px"}}/>
                                                     {t('developer')}
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faSketch} size="lg"
+                                            <Menu.SubMenu
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                title={<span><FontAwesomeIcon icon={faSketch} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Applications</span>}>
-                                                {this.state.applications.map((a: any) =>
-                                                    <Menu.Item key={`app.${a}`}>
+                                                {this.state.applicationNames.map((a: any) =>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor, marginTop: '-8px', marginBottom: '-1px'}}
+                                                        key={`app.${a}`}>
                                                         {a}
                                                     </Menu.Item>
                                                 )}
                                             </Menu.SubMenu>
-                                            <Menu.Item key={'test'}>
+                                            <Menu.Item
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                key={'test'}>
                                                 <Link to={`/test`}>
                                                     <FontAwesomeIcon icon={faBuffer} size="lg"
                                                                      style={{marginRight: "10px"}}/>
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
+                                            <Menu.SubMenu
+                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
+                                                title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Notification</span>}>
                                                 {localStorage.getItem('notifierDuration') === '3' ?
-                                                    <Menu.Item key={'showNotifications'}>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor}}
+                                                        key={'showNotifications'}>
                                                         <FontAwesomeIcon icon={faEye} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Disable autohiding</Menu.Item>
                                                     :
-                                                    <Menu.Item key={'autoHideNotifications'}>
+                                                    <Menu.Item
+                                                        style={{backgroundColor: backgroundColor}}
+                                                        key={'autoHideNotifications'}>
                                                         <FontAwesomeIcon icon={faClock} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Autohide</Menu.Item>}
@@ -466,8 +491,8 @@ class EcoreApp extends React.Component<any, State> {
 
     private setSelectedKeys() {
         let selectedKeys = ['developer', 'test'];
-        if (this.state.applications) {
-            this.state.applications.map((a: any) =>
+        if (this.state.applicationNames) {
+            this.state.applicationNames.map((a: any) =>
                 selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
@@ -620,7 +645,7 @@ class EcoreApp extends React.Component<any, State> {
        let resourceParameters = resourceSet.create({ uri: '/params' });
        let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({userName: userName})
        resourceParameters.add(newUserProfilePattern)
-       API.instance().saveResource(newUserProfilePattern.eResource(), 99999)
+       API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {
                this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
            });
@@ -630,7 +655,7 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
-        if (!this.state.applications.length) {
+        if (!this.state.applicationNames.length) {
             this.getAllApplication()
         }
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};

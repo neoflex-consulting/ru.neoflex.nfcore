@@ -154,27 +154,15 @@ class DatasetView extends React.Component<any, State> {
                 })
             }
         });
-        if (serverFilters.length < 9) {
-            for (let i = serverFilters.length + 1; i <= 9; i++) {
-                serverFilters.push(
-                    {index: i,
-                        datasetColumn: undefined,
-                        operation: undefined,
-                        value: undefined,
-                        enable: undefined,
-                        type: undefined})
-            }
-        } else {
-            serverFilters.push(
-                {index: serverFilters.length + 1,
-                    datasetColumn: undefined,
-                    operation: undefined,
-                    value: undefined,
-                    enable: undefined,
-                    type: undefined})
-        }
+        serverFilters.push(
+            {index: serverFilters.length + 1,
+                datasetColumn: undefined,
+                operation: undefined,
+                value: undefined,
+                enable: undefined,
+                type: undefined});
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
-        this.runQuery(resource/*this.state.currentDatasetComponent*/, true, serverFilters);
+        this.runQuery(resource, true, serverFilters);
     }
 
     componentDidUpdate(prevProps: any): void {

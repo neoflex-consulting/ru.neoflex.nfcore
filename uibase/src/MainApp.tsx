@@ -8,7 +8,7 @@ import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import {Tree} from 'antd'
 const FooterHeight = '2em';
-const backgroundColor = "white";
+const backgroundColor = "#fdfdfd";
 
 interface State {
     pathBreadcrumb: string[];

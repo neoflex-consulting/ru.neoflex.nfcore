@@ -8,11 +8,11 @@ import DatasetPivot from './components/app/dataset/DatasetPivot';
 import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
-import {colorScheme} from './utils/consts';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
+import {text} from "@fortawesome/fontawesome-svg-core";
 
 const { TabPane } = Tabs;
-const { Paragraph, Text } = Typography;
+const { Paragraph } = Typography;
 const marginBottom = '20px';
 
 let startResource: Object;
@@ -118,10 +118,12 @@ class DatasetDiagramView_ extends ViewContainer {
 
 class Row_ extends ViewContainer {
     render = () => {
-        const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}px`;
-        const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}px`;
-        const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}px`;
-        const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}px`;
+        const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}`;
+        const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}`;
+        const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}`;
+        const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}`;
+        const borderBottom = this.props.viewObject.get('borderBottom') === true ? '1px solid #eeeff0' : 'none';
+        const height = this.props.viewObject.get('height') === null ? '50px' : `${this.props.viewObject.get('height')}`;
         return (
             <Row
                 style={{
@@ -129,7 +131,9 @@ class Row_ extends ViewContainer {
                     marginRight: marginRight,
                     marginBottom: marginBottom,
                     marginTop: marginTop,
-                    marginLeft: marginLeft
+                    marginLeft: marginLeft,
+                    borderBottom: borderBottom,
+                    height: height
                 }}
                 gutter={[this.props.viewObject.get('horizontalGutter') || 0, this.props.viewObject.get('verticalGutter') || 0]}
             >
@@ -302,49 +306,51 @@ class Typography_ extends ViewContainer {
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
     render = () => {
-        const colorScheme_: any = colorScheme;
-        const step = colorScheme_.length/this.props.viewObject.get('name').length;
-        if (this.props.viewObject.get('pageTitle')) {
-            return (
-                <div style={{
-                    marginTop: '12px',
-                    borderBottom: '1px solid #eeeff0',
-                    fontSize: '34px',
-                    textIndent: '20px',
-                    height: '70px',
-                    fontWeight: 'lighter',
-                    textAlign: this.props.viewObject.get('textAlign') || 'center'
-                }}>
-                    {this.props.viewObject.get('name').split('').map( (name: string, index: any) =>
-                        <Text style={{
-                            color: index === 0 ? colorScheme_[1]
-                                : index === this.props.viewObject.get('name').length - 1 ? colorScheme_[colorScheme_.length - 1]
-                                    : colorScheme_[Math.round(1 + step*index)]
-                        }}
-                        >
-                            {name}
-                        </Text>
-                    )}
-                </div>
-            )
-        } else {
-            return (
-                <Paragraph
-                    style={{marginBottom: marginBottom}}
-                    copyable={this.props.viewObject.get('buttonCopyable')}
-                    editable={this.props.viewObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
-                    code={this.props.viewObject.get('codeStyle')}
-                    delete={this.props.viewObject.get('deleteStyle')}
-                    disabled={this.props.viewObject.get('disabledStyle')}
-                    ellipsis={{rows: this.props.viewObject.get('ellipsisRow'), expandable: false}}
-                    mark={this.props.viewObject.get('markStyle')}
-                    underline={this.props.viewObject.get('underlineStyle')}
-                    strong={this.props.viewObject.get('strongStyle')}
-                >
-                    {this.props.viewObject.get('name')}
-                </Paragraph>
-            )
+        let drawObject = this.props.viewObject;
+        if (this.props.viewObject.get('typographyStyle') !== null) {
+            drawObject = this.props.viewObject.get('typographyStyle')
         }
+        let gradients: string = "";
+        if (drawObject.get('gradientStyle') !== null) {
+            drawObject.get('gradientStyle').get('colors').array().forEach( (c: any) => {
+                if (gradients === "") {gradients = c.get('name')}
+                else {gradients = gradients + ',' + c.get('name')}
+            })
+        }
+        return (
+            <Paragraph
+                style={{
+                    marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
+                    fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
+                    textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
+                    height: drawObject.get('height') === null ? '0px' : `${drawObject.get('height')}`,
+                    fontWeight: drawObject.get('fontWeight') || "inherit",
+                    textAlign: drawObject.get('textAlign') || "center",
+                    color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
+                        drawObject.get('color') : undefined,
+                    background: drawObject.get('backgroundColor') !== null && drawObject.get('gradientStyle') === null
+                        ?
+                        drawObject.get('backgroundColor')
+                        :
+                        drawObject.get('gradientStyle') !== null
+                            ? `linear-gradient(${drawObject.get('gradientStyle').get('position')}, ${gradients})`
+                            : undefined,
+                    WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
+                    WebkitTextFillColor: gradients !== "" ? "transparent" : "unset"
+                }}
+                copyable={drawObject.get('buttonCopyable')}
+                editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
+                code={drawObject.get('codeStyle')}
+                delete={drawObject.get('deleteStyle')}
+                disabled={drawObject.get('disabledStyle')}
+                ellipsis={{rows: drawObject.get('ellipsisRow'), expandable: false}}
+                mark={drawObject.get('markStyle')}
+                underline={drawObject.get('underlineStyle')}
+                strong={drawObject.get('strongStyle')}
+            >
+                {this.props.viewObject.get('name')}
+            </Paragraph>
+        )
     }
 }
 

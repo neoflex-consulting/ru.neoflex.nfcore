@@ -156,7 +156,8 @@ export class API implements IErrorHandler {
                     found.add(object.$ref);
                 }
                 else {
-                    object.$ref = rootId + "#" + (fragment === "/" ? id : fragment);
+//                    object.$ref = rootId + "#" + (fragment === "/" ? id : fragment);
+                    object.$ref = (fragment === "/" ? id : fragment);
                 }
             }
         }
@@ -173,7 +174,7 @@ export class API implements IErrorHandler {
             return found;
         }
         let id = object._id;
-        if (id) {
+        if (!!id && id !== "/") {
             found.add(id);
         }
         for (var i in object) {
@@ -210,7 +211,8 @@ export class API implements IErrorHandler {
         let ref = object.$ref;
         if (ref) {
             if (!ref.includes("#")) {
-                object.$ref = rootId + '#' + ref;
+//                object.$ref = rootId + '#' + ref;
+                object.$ref = rootId === "/" ? ref :  rootId + '#' + ref;
             }
         }
         for (var i in object) {
@@ -226,10 +228,12 @@ export class API implements IErrorHandler {
         if (uri) {
             let {id} = API.parseRef(uri);
             let rev = resource.rev;
-            if (rev) {
+            if (id && rev) {
                 id = id + '?rev=' + rev;
             }
-            url = url + '?ref=' + encodeURIComponent(id);
+            if (id) {
+                url = url + '?ref=' + encodeURIComponent(id);
+            }
         }
         let obj = resource.to()
         API.fixReferences(obj, obj._id)

@@ -29,7 +29,6 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
@@ -53,13 +52,13 @@ public class Scheduler {
 
     @PostConstruct
     void init() {
-        taskScheduler.scheduleWithFixedDelay(() -> {
-            try {
-                refreshScheduler();
-            } catch (Exception e) {
-                logger.error("Scheduler: ", e);
-            }
-        }, Duration.ofSeconds(10));
+//        taskScheduler.scheduleWithFixedDelay(() -> {
+//            try {
+//                refreshScheduler();
+//            } catch (Exception e) {
+//                logger.error("Scheduler: ", e);
+//            }
+//        }, Duration.ofSeconds(10));
     }
 
     public synchronized ObjectNode refreshScheduler() throws Exception {

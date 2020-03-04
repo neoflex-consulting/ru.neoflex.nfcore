@@ -1,15 +1,33 @@
 import * as React from "react";
-import {Layout} from "antd";
-import CheckableTag from "antd/lib/tag/CheckableTag";
+import {Button} from "antd";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import './../styles/StartPage.css';
+import {faEye, faFile, faUser} from "@fortawesome/free-regular-svg-icons";
+import {faCogs, faCoins, faCubes, faShieldAlt, faSpa, faWrench} from "@fortawesome/free-solid-svg-icons";
+import {faLaravel} from "@fortawesome/free-brands-svg-icons";
 
 interface State {
+    icons: {[key:string]: any}
 }
 
 export class StartPage extends React.Component<any, State> {
 
     constructor(props: any) {
         super(props);
-        this.state = {}
+        this.state = {
+            icons: {
+                'faUser': faUser,
+                'faCogs': faCogs,
+                'faWrench': faWrench,
+                'faLaravel': faLaravel,
+                'faShieldAlt': faShieldAlt,
+                'faSpa': faSpa,
+                'faFile': faFile,
+                'faCoins': faCoins,
+                'faCubes': faCubes,
+                'faEye': faEye
+            }
+        }
     }
 
     selectApplication(applicationName: string): void  {
@@ -17,29 +35,33 @@ export class StartPage extends React.Component<any, State> {
     }
 
     render() {
-        const applications: { push(div: any): void } = [];
-        if (this.props.applications) {
-            this.props.applications.every(
-                (app: any) =>
-                    applications.push(
-                        <div style={{
-                            display: "table-caption",
-                            width: "300px",
-                            textAlign: "left",
-                        }}>
-                            <CheckableTag checked={true} onChange={ e => this.selectApplication(app)}
-                            >
-                                {app}
-                            </CheckableTag>
-                        </div>
-                    )
-            )
-        }
-
         return (
-            <Layout>
-                {applications}
-            </Layout>
+            <div className="page">
+                <div>
+                    {
+                        this.props.applications.map(
+                        (app: any) =>
+                            <Button
+                                type="primary"
+                                style={{background: "rgb(255, 255, 255)", borderColor: "rgb(213, 213, 213)", color: "rgb(18, 18, 18)"}}
+                                className="button"
+                                onClick={ ()=> this.selectApplication(app.eContents()[0].get('name'))}
+                            >
+                                <FontAwesomeIcon icon={
+                                    app.eContents()[0].get('iconName') === null ?
+                                        this.state.icons.faUser : this.state.icons[app.eContents()[0].get('iconName')]
+                                } size={"2x"} className="icon"/>
+                                <div className="app-name">
+                                    {app.eContents()[0].get('name')}
+                                </div>
+                                <div className="description">
+                                   Описание приложения
+                                </div>
+                            </Button>
+                        )
+                    }
+                </div>
+            </div>
         )
     }
 

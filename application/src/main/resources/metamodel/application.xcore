@@ -14,7 +14,6 @@ import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.DatasetColumnView
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.JSON
-import ru.neoflex.nfcore.base.types.Color
 
 /* Components */
 abstract class Component {
@@ -38,6 +37,7 @@ class AppModule {
 }
 
 class Application extends AppModule {
+    IconName iconName = "faUser"
 }
 
 /* Views */
@@ -139,10 +139,12 @@ class Row extends ViewContainer {
     String horizontalGutter = "0"
     String verticalGutter = "0"
     TextAlign textAlign
-    String marginRight = "0"
-    String marginBottom = "0"
-    String marginTop = "0"
-    String marginLeft = "0"
+    String marginRight = "0px"
+    String marginBottom = "0px"
+    String marginTop = "0px"
+    String marginLeft = "0px"
+    boolean borderBottom
+    String height = "50px"
 }
 
 class Typography extends ViewElement {
@@ -158,17 +160,22 @@ class Typography extends ViewElement {
     boolean underlineStyle
     boolean strongStyle
     String marginTop
-    String borderBottom
     String fontSize
     String textIndent
     String height
-    String fontWeight
+    String fontWeight = 'inherit'
+    String color
+    String backgroundColor
     refers GradientStyle gradientStyle
 }
 
-class GradientStyle {
-    QName name
-    Color[] colors
+class Color {
+    String name
+}
+
+class GradientStyle extends Style {
+    String position
+    contains Color[] colors
 }
 
 class Select extends ViewElement {
@@ -206,7 +213,24 @@ abstract class Style {
 }
 
 class TypographyStyle extends Style {
-    contains Typography typography
+    TextAlign textAlign
+    boolean buttonCopyable
+    boolean buttonEditable
+    String ellipsisRow = "999"
+    boolean codeStyle
+    boolean deleteStyle
+    boolean disabledStyle
+    boolean markStyle
+    boolean underlineStyle
+    boolean strongStyle
+    String marginTop
+    String fontSize
+    String textIndent
+    String height
+    String fontWeight = 'inherit'
+    String color
+    String backgroundColor
+    refers GradientStyle gradientStyle
 }
 
 class ButtonStyle extends Style {
@@ -280,13 +304,13 @@ enum InputType {
 }
 
 enum RowPerPage {
-    one,
-    ten,
-    twenty,
-    fifty,
-    oneHundred,
-    fiveHundred,
-    oneThousand,
+    one
+    ten
+    twenty
+    fifty
+    oneHundred
+    fiveHundred
+    oneThousand
     all
 }
 
@@ -322,6 +346,19 @@ enum Operations {
     IsNotNull
     IncludeIn
     NotIncludeIn
+}
+
+enum IconName {
+    faUser
+    faCogs
+    faWrench
+    faLaravel
+    faShieldAlt
+    faSpa
+    faFile
+    faCoins
+    faCubes
+    faEye
 }
 
 enum DiagramType {
