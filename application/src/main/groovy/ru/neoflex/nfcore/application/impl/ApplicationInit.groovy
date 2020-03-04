@@ -171,8 +171,10 @@ class ApplicationInit {
             lineFrom.name = "LineForm"
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "DatasetViewRow"
+            datasetViewRow.textAlign = TextAlign.LEFT
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "DatasetGridRow"
+            datasetGridRow.textAlign = TextAlign.LEFT
             def lineDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             lineDiagramRow.name = "LineDiagramRow"
             lineFrom.children.add(datasetViewRow)
@@ -228,8 +230,10 @@ class ApplicationInit {
             pieFrom.name = "PieForm"
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "ViewDatasetRow"
+            datasetViewRow.textAlign = TextAlign.LEFT
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "GridDatasetRow"
+            datasetGridRow.textAlign = TextAlign.LEFT
             def pieDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             pieDiagramRow.name = "PieRow"
             pieFrom.children.add(datasetViewRow)
@@ -283,8 +287,10 @@ class ApplicationInit {
             barFrom.name = "BarForm"
             def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
             datasetViewRow.name = "ViewDatasetRow"
+            datasetViewRow.textAlign = TextAlign.LEFT
             def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
             datasetGridRow.name = "GridDatasetRow"
+            datasetGridRow.textAlign = TextAlign.LEFT
             def barDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             barDiagramRow.name = "BarRow"
             barFrom.children.add(datasetViewRow)

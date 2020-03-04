@@ -368,16 +368,15 @@ enum DiagramType {
 }
 
 enum LegendAnchorPositionType {
-    //TODO переименновать с большой буквы
-    topLeft
-    top
-    topRight
-    left
-    center
-    right
-    bottomLeft
-    bottom
-    bottomRight
+    TopLeft
+    Top
+    TopRight
+    Left
+    Center
+    Right
+    BottomLeft
+    Bottom
+    BottomRight
 }
 
 enum AxisXPositionType {

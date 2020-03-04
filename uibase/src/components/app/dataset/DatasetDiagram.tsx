@@ -23,6 +23,15 @@ class DatasetDiagram extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
+        const anchorMap = new Map;
+        anchorMap.set("TopLeft","top-Left");
+        anchorMap.set("Top","top");
+        anchorMap.set("TopRight","top-right");
+        anchorMap.set("Left","left");
+        anchorMap.set("Center","center");
+        anchorMap.set("BottomLeft","bottom-left");
+        anchorMap.set("Bottom","bottom");
+        anchorMap.set("BottomRight","bottom-right");
         this.state = {
             themes: [],
             currentTheme: this.props.viewObject.get('theme') || 'balham',
@@ -38,15 +47,11 @@ class DatasetDiagram extends React.Component<any, any> {
             IndexBy: this.props.viewObject.get('IndexBy') || "",
             keyColumn: this.props.viewObject.get('keyColumn') || "",
             valueColumn: this.props.viewObject.get('valueColumn') || "",
-            legendAnchorPosition: this.props.viewObject.get('legendAnchorPosition')|| "top-Left"
-                .replace("topLeft","top-Left")
-                .replace("topRight","top-right")
-                .replace("bottomLeft","bottom-left")
-                .replace("bottomRight","bottom-right"),
-            AxisXPosition: this.props.viewObject.get('AxisXPosition') || "Top",
-            AxisXLegend: this.props.viewObject.get('AxisXLegend') || "",
-            AxisYPosition: this.props.viewObject.get('AxisYPosition') || "Left",
-            AxisYLegend: this.props.viewObject.get('AxisYLegend') || "",
+            legendAnchorPosition: anchorMap.get((this.props.viewObject.get('legendAnchorPosition')|| "TopLeft")),
+            AxisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
+            AxisXLegend: this.props.viewObject.get('axisXLegend') || "",
+            AxisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
+            AxisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
             diagramType: this.props.viewObject.get('diagramType') || "Line"
