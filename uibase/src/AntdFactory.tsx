@@ -123,7 +123,7 @@ class Row_ extends ViewContainer {
         const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}`;
         const marginLeft = this.props.viewObject.get('marginLeft') === null ? '0px' : `${this.props.viewObject.get('marginLeft')}`;
         const borderBottom = this.props.viewObject.get('borderBottom') === true ? '1px solid #eeeff0' : 'none';
-        const height = this.props.viewObject.get('height') === null ? '50px' : `${this.props.viewObject.get('height')}`;
+        const height = this.props.viewObject.get('height');
         return (
             <Row
                 style={{

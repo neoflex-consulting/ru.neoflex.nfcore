@@ -144,7 +144,7 @@ class Row extends ViewContainer {
     String marginTop = "0px"
     String marginLeft = "0px"
     boolean borderBottom
-    String height = "50px"
+    String height
 }
 
 class Typography extends ViewElement {
