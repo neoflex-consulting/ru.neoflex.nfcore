@@ -1,9 +1,10 @@
 import * as React from "react";
 import {withTranslation} from 'react-i18next';
 import {Axis, ResponsiveBar} from "@nivo/bar";
-import { ResponsiveLine } from "@nivo/line";
-import { ResponsivePie } from "@nivo/pie";
-import { AxisProps } from "@nivo/axes"
+import {ResponsiveLine} from "@nivo/line";
+import {ResponsivePie} from "@nivo/pie";
+import {AxisProps} from "@nivo/axes"
+import {diagramAnchorMap} from "../../../utils/consts";
 
 interface Props {
 }
@@ -12,43 +13,26 @@ interface State {
 }
 
 function getUniqueFromData(data: any[], indexed: string) {
-    const keys = []
+    const keys = [];
     for (let i of data) {
         keys.push(i[indexed])
     }
     return Array.from(new Set(keys))
 }
 
-const anchorMap: any = {
-    "TopLeft":"top-Left",
-    "Top": "top",
-    "TopRight": "top-right",
-    "Left": "left",
-    "Center": "center",
-    "BottomLeft": "bottom-left",
-    "Bottom": "bottom",
-    "BottomRight": "bottom-right"
-}
+const diagramAnchorMap_: any = diagramAnchorMap;
+
 class DatasetDiagram extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
         this.state = {
-            themes: [],
-            currentTheme: this.props.viewObject.get('theme') || 'balham',
-            rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'all',
-            operations: [],
-            selectedServerFilters: [],
-            showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
             rowData: [],
-            saveMenuVisible: false,
             IndexBy: (this.props.viewObject.get('IndexBy') !== undefined ) ? this.props.viewObject.get('IndexBy').values.name : "",
             keyColumn: (this.props.viewObject.get('keyColumn') !== undefined ) ? this.props.viewObject.get('keyColumn').values.name : "",
             valueColumn: (this.props.viewObject.get('valueColumn') !== undefined ) ? this.props.viewObject.get('valueColumn').values.name : "",
-            legendAnchorPosition: anchorMap[this.props.viewObject.get('legendAnchorPosition')] || anchorMap["TopLeft"],
+            legendAnchorPosition: diagramAnchorMap_[this.props.viewObject.get('legendAnchorPosition')] || diagramAnchorMap_["TopLeft"],
             AxisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
             AxisXLegend: this.props.viewObject.get('axisXLegend') || "",
             AxisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
@@ -68,7 +52,7 @@ class DatasetDiagram extends React.Component<any, any> {
             .filter( (p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
         const componentName = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
             this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
-            : JSON.parse(userComponentName[0].get('value'))['name']
+            : JSON.parse(userComponentName[0].get('value'))['name'];
         if (this.props.context.datasetComponents
             && this.props.context.datasetComponents[componentName] !== undefined) {
             if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
@@ -88,7 +72,7 @@ class DatasetDiagram extends React.Component<any, any> {
                 IndexBy: this.props.viewObject.get('IndexBy') || "",
                 keyColumn: this.props.viewObject.get('keyColumn') || "",
                 valueColumn: this.props.viewObject.get('valueColumn') || "",
-                legendAnchorPosition: anchorMap[this.props.viewObject.get('legendAnchorPosition')] || anchorMap["TopLeft"],
+                legendAnchorPosition: diagramAnchorMap_[this.props.viewObject.get('legendAnchorPosition')] || diagramAnchorMap_["TopLeft"],
                 AxisXPosition: this.props.viewObject.get('AxisXPosition') || "Top",
                 AxisXLegend: this.props.viewObject.get('AxisXLegend') || "",
                 AxisYPosition: this.props.viewObject.get('AxisYPosition') || "Left",
@@ -101,14 +85,14 @@ class DatasetDiagram extends React.Component<any, any> {
 
     private drawBar() {
         function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
-            const distIndexes = getUniqueFromData(rowData, indexedBy)
+            const distIndexes = getUniqueFromData(rowData, indexedBy);
             let dataForChart = [];
 
             if (distIndexes.length !== 0) {
                 for (let i = 0; i < distIndexes.length; i++) {
                     let dataObject = {};
                     //Подписи под столбцом
-                    Object.defineProperty(dataObject, indexedBy, {value : distIndexes[i]})
+                    Object.defineProperty(dataObject, indexedBy, {value : distIndexes[i]});
                     for (let j = 0; j < rowData.length; j++) {
                         if (rowData[j][indexedBy] === distIndexes[i]) {
                             //Данные
@@ -120,7 +104,7 @@ class DatasetDiagram extends React.Component<any, any> {
             }
             return dataForChart
         }
-        const distKeys = getUniqueFromData(this.state.rowData, this.state.keyColumn)
+        const distKeys = getUniqueFromData(this.state.rowData, this.state.keyColumn);
         const axisX : Axis  = {
             tickSize: 5,
             tickPadding: 5,
@@ -188,7 +172,7 @@ class DatasetDiagram extends React.Component<any, any> {
 
     private drawLine() {
         function prepareData(indexedBy: string, xColumn: string, yColumn: string, rowData: any) : any[] {
-            const distIndexes = getUniqueFromData(rowData, indexedBy)
+            const distIndexes = getUniqueFromData(rowData, indexedBy);
             let dataForChart = [];
             if (distIndexes.length !== 0) {
                 for (let i = 0; i < distIndexes.length; i++) {
@@ -284,11 +268,11 @@ class DatasetDiagram extends React.Component<any, any> {
                     //TODO нужно суммирование по id - data[i][headerColumn]
                     let dataObject = {};
                     //id
-                    Object.defineProperty(dataObject, "id", {value : data[i][IndexedBy]})
+                    Object.defineProperty(dataObject, "id", {value : data[i][IndexedBy]});
                     //label
-                    Object.defineProperty(dataObject, "label", {value : data[i][keyColumn]})
+                    Object.defineProperty(dataObject, "label", {value : data[i][keyColumn]});
                     //value
-                    Object.defineProperty(dataObject, "value", {value : data[i][valueColumn]})
+                    Object.defineProperty(dataObject, "value", {value : data[i][valueColumn]});
                     dataForChart.push(dataObject)
                 }
             }
@@ -346,11 +330,11 @@ class DatasetDiagram extends React.Component<any, any> {
     render() {
         switch (this.state.diagramType) {
                 case "Line":
-                    return this.drawLine()
+                    return this.drawLine();
                 case "Bar":
-                    return this.drawBar()
+                    return this.drawBar();
                 case "Pie":
-                    return this.drawPie()
+                    return this.drawPie();
                 default:
                     return <div>default</div>
             }
