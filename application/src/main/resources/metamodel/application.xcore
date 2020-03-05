@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.DatasetColumnView
+import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.JSON
 
@@ -110,9 +111,12 @@ class DatasetPivotView extends DataView {
 class DatasetDiagramView extends DataView {
     op JSON getDatasetDiagrams() // для чего?
     //TODO выбор из dataset
-    String IndexBy
-    String keyColumn
-    String valueColumn
+    //String IndexBy
+    //String keyColumn
+    //String valueColumn
+    refers DatasetColumn IndexBy
+    refers DatasetColumn keyColumn
+    refers DatasetColumn valueColumn
     LegendAnchorPositionType legendAnchorPosition
     AxisXPositionType axisXPosition
     String axisXLegend
@@ -120,6 +124,7 @@ class DatasetDiagramView extends DataView {
     String axisYLegend
     String colorSchema
     DiagramType diagramType
+    //refers DatasetColumn datasetColumn
 }
 
 class TabsViewReport extends ViewContainer {
