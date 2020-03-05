@@ -24,7 +24,6 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
-import {green} from "color-name";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;

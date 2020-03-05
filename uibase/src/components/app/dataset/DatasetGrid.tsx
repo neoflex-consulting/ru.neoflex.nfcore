@@ -17,6 +17,7 @@ import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
 
+const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
 
 interface Props {
@@ -278,7 +279,7 @@ class DatasetGrid extends React.Component<any, any> {
         );
         return (
             <div
-                style={{boxSizing: 'border-box', height: '100%' }}
+                style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor }}
                 className={'ag-theme-' + this.state.currentTheme}
             >
                 <Dropdown overlay={menu} placement='bottomLeft'>

@@ -19,19 +19,20 @@ function getUniqueFromData(data: any[], indexed: string) {
     return Array.from(new Set(keys))
 }
 
+const anchorMap: any = {
+    "TopLeft":"top-Left",
+    "Top": "top",
+    "TopRight": "top-right",
+    "Left": "left",
+    "Center": "center",
+    "BottomLeft": "bottom-left",
+    "Bottom": "bottom",
+    "BottomRight": "bottom-right"
+}
 class DatasetDiagram extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        const anchorMap = new Map;
-        anchorMap.set("TopLeft","top-Left");
-        anchorMap.set("Top","top");
-        anchorMap.set("TopRight","top-right");
-        anchorMap.set("Left","left");
-        anchorMap.set("Center","center");
-        anchorMap.set("BottomLeft","bottom-left");
-        anchorMap.set("Bottom","bottom");
-        anchorMap.set("BottomRight","bottom-right");
         this.state = {
             themes: [],
             currentTheme: this.props.viewObject.get('theme') || 'balham',
@@ -47,7 +48,7 @@ class DatasetDiagram extends React.Component<any, any> {
             IndexBy: (this.props.viewObject.get('IndexBy') !== undefined ) ? this.props.viewObject.get('IndexBy').values.name : "",
             keyColumn: (this.props.viewObject.get('keyColumn') !== undefined ) ? this.props.viewObject.get('keyColumn').values.name : "",
             valueColumn: (this.props.viewObject.get('valueColumn') !== undefined ) ? this.props.viewObject.get('valueColumn').values.name : "",
-            legendAnchorPosition: anchorMap.get((this.props.viewObject.get('legendAnchorPosition')|| "TopLeft")),
+            legendAnchorPosition: anchorMap[this.props.viewObject.get('legendAnchorPosition')] || anchorMap["TopLeft"],
             AxisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
             AxisXLegend: this.props.viewObject.get('axisXLegend') || "",
             AxisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
@@ -78,6 +79,23 @@ class DatasetDiagram extends React.Component<any, any> {
                 const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                 this.setState({rowData})
             }
+        }
+        if ((this.props.viewObject.get('diagramType') === null && this.state.diagramType !== "Line")
+            ||
+            (this.props.viewObject.get('diagramType') !== null && this.state.diagramType !== this.props.viewObject.get('diagramType'))) {
+
+            this.setState({diagramType: this.props.viewObject.get('diagramType') || "Line",
+                IndexBy: this.props.viewObject.get('IndexBy') || "",
+                keyColumn: this.props.viewObject.get('keyColumn') || "",
+                valueColumn: this.props.viewObject.get('valueColumn') || "",
+                legendAnchorPosition: anchorMap[this.props.viewObject.get('legendAnchorPosition')] || anchorMap["TopLeft"],
+                AxisXPosition: this.props.viewObject.get('AxisXPosition') || "Top",
+                AxisXLegend: this.props.viewObject.get('AxisXLegend') || "",
+                AxisYPosition: this.props.viewObject.get('AxisYPosition') || "Left",
+                AxisYLegend: this.props.viewObject.get('AxisYLegend') || "",
+                //Пока цвет задаётся через цветовые схемы
+                colorSchema: this.props.viewObject.get('colorSchema') || ""
+            })
         }
     }
 

@@ -14,7 +14,8 @@
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
-    color: rgb(135,75,199);
+    /*color: rgb(135,75,199);*/
+    color: rgba(0, 0, 0, 0.65);
 
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -30,7 +31,8 @@
     --text-color-light: #ccc;
     --border-color: #eee;
     --bg-color: #f9f9f9;
-    --neutral-color: #fff;
+    /*--neutral-color: #fff;*/
+    --neutral-color: #fdfdfd;
 }
 
 /*!* GENERAL *!*/
@@ -52,7 +54,8 @@
 }
 
 .col-text {
-    color: rgb(135,75,199);
+   /* color: rgb(135,75,199);*/
+    color: rgba(0, 0, 0, 0.65);
     font-weight: initial;
 }
 
@@ -106,6 +109,7 @@
     font-size: 115%;
     padding: 1.5em 0;
     border-bottom: 1px solid var(--border-color);
+    height: 70px;
 }
 
 .calendar .header .icon {

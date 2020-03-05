@@ -165,7 +165,7 @@ class DatasetView extends React.Component<any, State> {
         this.runQuery(resource, true, serverFilters);
     }
 
-    componentDidUpdate(prevProps: any): void {
+    componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -174,8 +174,12 @@ class DatasetView extends React.Component<any, State> {
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
             }
-            else if (refresh === undefined || refresh.length === 0) {
+            else if ((refresh === undefined || refresh.length === 0) &&
+                this.props.context.userProfile.eResource().to().params !== undefined) {
                 this.getAllDatasetComponents(false)
+            }
+            else if (this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name')) {
+                this.getAllDatasetComponents(true)
             }
         }
     }
@@ -184,7 +188,6 @@ class DatasetView extends React.Component<any, State> {
         if (updateData) {
             this.props.context.runQuery(resource, componentParams)
                 .then((result: string) => {
-                    this.props.context.notification('Filters notification','Request completed', 'success')
                     this.setState({rowData: JSON.parse(result)});
                         this.updateContext(undefined, JSON.parse(result), this.state.currentDatasetComponent.eContents()[0].get('name'))
                     }
