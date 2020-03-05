@@ -175,11 +175,9 @@ class DatasetView extends React.Component<any, State> {
                 this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
             }
             else if ((refresh === undefined || refresh.length === 0) &&
+                this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name') &&
                 this.props.context.userProfile.eResource().to().params !== undefined) {
                 this.getAllDatasetComponents(false)
-            }
-            else if (this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name')) {
-                this.getAllDatasetComponents(true)
             }
         }
     }

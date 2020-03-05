@@ -602,12 +602,6 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({getUserProfile: false})
             this.getUserProfile(this.state.principal)
         }
-        if (this.state.context.viewObject !== undefined) {
-            if (this.state.context.viewObject.eResource().eContents()[0].get('name') !== this.state.pathFull[0].appModule
-                && this.state.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
-                this.state.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
-            }
-        }
     }
 
     getConditionDtoPattern() {

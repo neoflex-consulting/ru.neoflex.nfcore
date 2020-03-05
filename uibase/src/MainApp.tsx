@@ -42,7 +42,7 @@ export class MainApp extends React.Component<any, State> {
             const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
             if (ePackage) {
                 const eClass = ePackage.eContents().find(c => c.get("name") === objectClass) as Ecore.EClass;
-                API.instance().findByKindAndName(eClass, name, 9999).then(resources => {
+                API.instance().findByKindAndName(eClass, name, 999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
 
@@ -80,6 +80,12 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: any, prevState: any): void {
+        if (this.props.context.viewObject !== undefined) {
+            if (this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[0].appModule
+                && this.props.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
+                this.props.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
+            }
+        }
         if (prevProps.location.pathname !== this.props.location.pathname) {
             this.loadObject()
         }
