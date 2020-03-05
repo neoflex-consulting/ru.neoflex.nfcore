@@ -243,7 +243,19 @@ export class MainApp extends React.Component<any, State> {
                                         height: '100%',
                                         width: '100%',
                                         backgroundColor: backgroundColor
-                                    }}>{this.renderContent()}</div>
+                                    }}>
+                                        {
+                                            this.props.context.viewObject === undefined ||
+                                            this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[this.props.pathFull.length - 1].appModule
+                                                ?
+                                                <div className="loader">
+                                                    <div className="inner one"/>
+                                                    <div className="inner two"/>
+                                                    <div className="inner three"/>
+                                                </div>
+                                                : this.renderContent()
+                                        }
+                                    </div>
                                 </div>
                                 <div style={{
                                     height: '100%',

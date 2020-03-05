@@ -574,11 +574,11 @@ class EcoreApp extends React.Component<any, State> {
             <MainContext.Consumer>
                 {context => {
                     return <MainApp
-                        {...this.props}
-                        context={context}
-                        pathFull={this.state.pathFull}
-                        appModuleName={this.state.appModuleName}
-                    />;
+                            {...this.props}
+                            context={context}
+                            pathFull={this.state.pathFull}
+                            appModuleName={this.state.appModuleName}
+                        />
                 }}
             </MainContext.Consumer>
         )
@@ -601,6 +601,12 @@ class EcoreApp extends React.Component<any, State> {
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
             this.setState({getUserProfile: false})
             this.getUserProfile(this.state.principal)
+        }
+        if (this.state.context.viewObject !== undefined) {
+            if (this.state.context.viewObject.eResource().eContents()[0].get('name') !== this.state.pathFull[0].appModule
+                && this.state.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
+                this.state.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
+            }
         }
     }
 
