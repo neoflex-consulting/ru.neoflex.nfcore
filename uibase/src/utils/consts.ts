@@ -22,6 +22,17 @@ const operationsMapper = {
     "IsNotNull": "!= null",
 };
 
+const diagramAnchorMap: any = {
+    "TopLeft":"top-Left",
+    "Top": "top",
+    "TopRight": "top-right",
+    "Left": "left",
+    "Center": "center",
+    "BottomLeft": "bottom-left",
+    "Bottom": "bottom",
+    "BottomRight": "bottom-right"
+}
+
 const colorScheme = [
     // "#8056CD",
     // "#5680cd",
@@ -65,3 +76,4 @@ const colorScheme = [
 export {rowPerPageMapper};
 export {operationsMapper};
 export {colorScheme};
+export {diagramAnchorMap};
