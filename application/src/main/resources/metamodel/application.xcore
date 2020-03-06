@@ -110,11 +110,7 @@ class DatasetPivotView extends DataView {
 
 class DatasetDiagramView extends DataView {
     op JSON getDatasetDiagrams() // для чего?
-    //TODO выбор из dataset
-    //String IndexBy
-    //String keyColumn
-    //String valueColumn
-    refers DatasetColumn IndexBy
+    refers DatasetColumn indexBy
     refers DatasetColumn keyColumn
     refers DatasetColumn valueColumn
     LegendAnchorPositionType legendAnchorPosition
