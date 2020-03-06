@@ -13,6 +13,9 @@ import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component("ru.neoflex.nfcore.base.components.StartUp")
 @DependsOn({"ru.neoflex.nfcore.base.components.PackageRegistry"})
@@ -30,7 +33,9 @@ public class StartUp {
     @PostConstruct
     void init() throws Exception {
         context.transact("StartUp", () -> {
-            for (EPackage ePackage: registry.getEPackages()) {
+            List<EPackage> packages = new ArrayList<>(registry.getEPackages());
+            Collections.reverse(packages);
+            for (EPackage ePackage: packages) {
                 String nsURI = ePackage.getNsURI();
                 String name = StringUtils.capitalize(ePackage.getName());
                 String initClassName = nsURI + ".impl." + name + "PackageInit";
@@ -44,7 +49,9 @@ public class StartUp {
                     logger.error(initClassName, e);
                 }
             }
-            for (EClassifier eClassifier: registry.getEClassifiers()) {
+            List<EClassifier> classifiers = new ArrayList<>(registry.getEClassifiers());
+            Collections.reverse(classifiers);
+            for (EClassifier eClassifier: classifiers) {
                 String nsURI = eClassifier.getEPackage().getNsURI();
                 String name = StringUtils.capitalize(eClassifier.getName());
                 String initClassName = nsURI + ".impl." + name + "Init";

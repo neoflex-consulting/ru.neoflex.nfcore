@@ -38,23 +38,4 @@ class AuditInit extends AuditImpl {
         return eObject
     }
 
-    {
-        // set audit info before save EObject
-        Context.current.publisher.subscribe(new Publisher.BeforeSaveHandler<EObject>(null) {
-            @Override
-            EObject handleEObject(EObject eObject) {
-                return setAuditInfo(eObject)
-            }
-
-        })
-        // AuditInfo for gitdb
-        Context.current.workspace.database.events.registerBeforeSave(new Events.BeforeSave() {
-            @Override
-            void handle(Resource old, Resource resource, Transaction tx) throws IOException {
-                if (resource.contents.isEmpty()) return
-                def eObject = resource.contents.get(0)
-                setAuditInfo(eObject)
-            }
-        })
-    }
 }
