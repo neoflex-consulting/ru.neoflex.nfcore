@@ -25,7 +25,6 @@ interface Props {
     onCtrlShiftA?: Function,
     headerSelection?: boolean,
     onHeaderSelection?: Function,
-    gridOptions?: { [ key:string ]: any },
     activeReportDateField: boolean
 }
 
@@ -47,7 +46,14 @@ class DatasetGrid extends React.Component<any, any> {
             highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
             rowData: [],
-            saveMenuVisible: false
+            saveMenuVisible: false,
+            gridOptions: {
+                defaultColDef: {
+                    resizable: true,
+                    filter: true,
+                    sortable: true
+                },
+            }
         };
 
         this.grid = React.createRef();
@@ -235,15 +241,17 @@ class DatasetGrid extends React.Component<any, any> {
     };
 
     render() {
-        const { gridOptions, t } = this.props;
+        const { t } = this.props;
+        const {gridOptions} = this.state;
         let selectedKeys = this.setSelectedKeys();
         const menu = (
             <Menu
+                key='actionMenu'
                 onClick={(e) => this.onActionMenu(e)}
                 selectedKeys={selectedKeys}
                 style={{width: '150px'}}
             >
-                <Menu.Item>
+                <Menu.Item key='selectColumns'>
                     Select Columns
                 </Menu.Item>
                 <Menu.SubMenu title={'Rows Per Page'}>
@@ -253,13 +261,13 @@ class DatasetGrid extends React.Component<any, any> {
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
-                <Menu.Item>
+                <Menu.Item key='format'>
                     Format
                 </Menu.Item>
                 <Menu.Item key='saveReport'>
                     Save Report
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key='reset'>
                     Reset
                 </Menu.Item>
                 <Menu.SubMenu title={'Theme'}>
@@ -269,10 +277,10 @@ class DatasetGrid extends React.Component<any, any> {
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
-                <Menu.Item>
+                <Menu.Item key='help'>
                     Help
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key='download'>
                     Download
                 </Menu.Item>
             </Menu>
@@ -304,18 +312,13 @@ class DatasetGrid extends React.Component<any, any> {
                         headerHeight={40} //высота header в px (25 по умолчанию)
                         suppressRowClickSelection //строки не выделяются при нажатии на них
                         pagination={true}
-
-                        enableColResize={true}
-                        // //pivotHeaderHeight={true}
-                        enableSorting={true}
-                        // //sortingOrder={['desc', 'asc', null]}
-                        enableFilter={true}
-                        gridAutoHeight={true}
+                        domLayout='autoHeight'
                         paginationPageSize={Number(this.state.paginationPageSize)}
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>
                                 <AgGridColumn
+                                    key={col.get('field')}
                                     field={col.get('field')}
                                     headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
                                     headerTooltip={col.get('headerTooltip')}

@@ -9,7 +9,6 @@ import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
-import {text} from "@fortawesome/fontawesome-svg-core";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -26,19 +25,21 @@ abstract class ViewContainer extends View {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
         let childrenView = children.map(
             (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
-        return <div>{childrenView}</div>
+        return <div key={this.viewObject._id.toString() + '_2'}>{childrenView}</div>
 
     };
 
     render = () => {
-        return <div>{this.renderChildren()}</div>
+        return <div key={this.viewObject._id.toString() + '_3'}>{this.renderChildren()}</div>
     }
 }
 
 class Col_ extends ViewContainer {
     render = () => {
         return (
-            <Col span={this.props.viewObject.get('span') || 24} style={{
+            <Col span={this.props.viewObject.get('span') || 24}
+                 key={this.viewObject._id}
+                 style={{
                 borderRight: this.props.viewObject.get('borderRight') ? '1px solid #eeeff0' : 'none',
                 borderBottom: this.props.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
                 borderTop: this.props.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
@@ -54,7 +55,7 @@ class Col_ extends ViewContainer {
 class Form_ extends ViewContainer {
     render = () => {
         return (
-            <Form style={{marginBottom: marginBottom}}>
+            <Form style={{marginBottom: marginBottom}} key={this.viewObject._id.toString() + '_4'}>
                 {this.renderChildren()}
             </Form>
         )
@@ -82,37 +83,32 @@ class ComponentElement_ extends ViewContainer {
     render = () => {
         if (this.props.viewObject.eClass.get('name') === 'ComponentElement' && this.props.viewObject.get('component')) {
             const componentClassName = this.props.viewObject.get('component').get('componentClassName')
-            return<UserComponent {...this.props} componentClassName={componentClassName}/>
+            return<UserComponent key={this.viewObject._id} {...this.props} componentClassName={componentClassName}/>
         } else return <div>Not found</div>
     }
 }
 
 class DatasetView_ extends ViewContainer {
     render = () => {
-        // if (this.props.viewObject.get('defaultDatasetGrid') !== null) {
-        return <DatasetView {...this.props}/>
-        // }
-        // else {
-            // return <div> DatasetGrid not found </div>
-        // }
+        return <DatasetView {...this.props} key={this.viewObject._id.toString() + '_5'}/>
     }
 }
 
 class DatasetGridView_ extends ViewContainer {
     render = () => {
-        return <DatasetGrid {...this.props}/>
+        return <DatasetGrid {...this.props} key={this.viewObject._id.toString() + '_6'}/>
     };
 }
 
 class DatasetPivotView_ extends ViewContainer {
     render = () => {
-        return <DatasetPivot {...this.props}/>
+        return <DatasetPivot {...this.props} key={this.viewObject._id}/>
     }
 }
 
 class DatasetDiagramView_ extends ViewContainer {
     render = () => {
-        return <DatasetDiagram {...this.props}/>
+        return <DatasetDiagram {...this.props} key={this.viewObject._id}/>
     }
 }
 
@@ -126,6 +122,7 @@ class Row_ extends ViewContainer {
         const height = this.props.viewObject.get('height');
         return (
             <Row
+                key={this.viewObject._id.toString() + '_7'}
                 style={{
                     textAlign: this.props.viewObject.get('textAlign') || 'center',
                     marginRight: marginRight,
@@ -172,7 +169,7 @@ class Button_ extends ViewContainer {
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
-        return <div >
+        return <div key={this.viewObject._id}>
             {this.props.viewObject.get('buttonCancel') === true &&
             <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
                 {t('cancel')}
@@ -218,13 +215,14 @@ class Select_ extends ViewContainer {
     render = () => {
         if (this.state.selectData.length === 0) {
             this.getSelectData();
-            return (<div></div>)
+            return (<div key={this.viewObject._id}></div>)
         }
         else {
             const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
                 <div style={{marginBottom: marginBottom}}>
                     <Select
+                        key={this.viewObject._id}
                         disabled={this.props.viewObject.get('disabled')}
                         showSearch={this.props.viewObject.get('showSearch')}
                         placeholder={this.props.viewObject.get('placeholder')}
@@ -264,7 +262,9 @@ class Input_ extends ViewContainer {
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
         if (this.props.viewObject.get('inputType') === 'InputNumber' ) {
             return(
-                <div style={{marginBottom: marginBottom}}>
+                <div
+                    key={this.viewObject._id}
+                    style={{marginBottom: marginBottom}}>
                     <InputNumber
                         style={{width: width}}
                         min={this.props.viewObject.get('minValue') || 1}
@@ -280,7 +280,8 @@ class Input_ extends ViewContainer {
             )
         } else {
             return(
-                <div style={{marginBottom: marginBottom}}>
+                <div key={this.viewObject._id}
+                     style={{marginBottom: marginBottom}}>
                     <Input
                         style={{width: width}}
                         placeholder={this.props.viewObject.get('placeholder')}
@@ -319,6 +320,7 @@ class Typography_ extends ViewContainer {
         }
         return (
             <Paragraph
+                key={this.viewObject._id}
                 style={{
                     marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
                     fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
@@ -385,7 +387,7 @@ class AntdFactory implements ViewFactory {
         }
 
         return (
-            <Component {...props} key={viewObject.get('uri')} viewObject={viewObject} viewFactory={this} />
+            <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} />
         )
 
     }

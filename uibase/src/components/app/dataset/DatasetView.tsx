@@ -64,15 +64,17 @@ class DatasetView extends React.Component<any, State> {
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                         }
                         result.forEach( (d: Ecore.Resource) => {
-                            if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                if (this.props.context.userProfile.get('userName') === 'admin') {
-                                    allDatasetComponents.push(d)
-                                }
-                                else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('audit').get('createdBy')) {
-                                    allDatasetComponents.push(d)
-                                }
-                                else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === 'Public') {
-                                    allDatasetComponents.push(d)
+                            if (d.eContents()[0].get('dataset')) {
+                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
+                                    if (this.props.context.userProfile.get('userName') === 'admin') {
+                                        allDatasetComponents.push(d)
+                                    }
+                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('audit').get('createdBy')) {
+                                        allDatasetComponents.push(d)
+                                    }
+                                    else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
+                                        allDatasetComponents.push(d)
+                                    }
                                 }
                             }
                         });
@@ -340,8 +342,7 @@ class DatasetView extends React.Component<any, State> {
         );
         return (
             <div>
-                {
-                    this.state.allDatasetComponents.length !== 0 &&
+                {this.state.allDatasetComponents.length !== 0 &&
                     <div style={{display: 'inline-block'}}>
                         <Select
                             style={{ width: '250px'}}
@@ -352,7 +353,8 @@ class DatasetView extends React.Component<any, State> {
                                 this.handleChange(e)
                             }}
                         >
-                            <OptGroup label='Default'>
+                            <OptGroup
+                                label='Default'>
                                 {
                                     this.state.allDatasetComponents
                                         .filter((c: any) => c.eContents()[0].get('access') === 'Default')
@@ -391,8 +393,9 @@ class DatasetView extends React.Component<any, State> {
                         </Select>
                     </div>
                 }
-                <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginLeft: '10px'}}
-                        onClick={ ()=>this.refresh(this.state.currentDatasetComponent)}>
+                <Button
+                    title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginLeft: '10px'}}
+                    onClick={ ()=>this.refresh(this.state.currentDatasetComponent)}>
                     <FontAwesomeIcon icon={faSync} size='xs'/>
                 </Button>
                 <div style={{display: 'inline-block', height: '30px',
@@ -408,7 +411,9 @@ class DatasetView extends React.Component<any, State> {
                             .map((f: any) =>
                                 f.type === 'Date' || f.type === 'Timestamp'
                                     ?
-                                    <div style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
+                                    <div
+                                        key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
+                                        style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
                                         <span style={{color: 'gray'}}>{f.datasetColumn}: </span>
                                         <DatePicker
                                             defaultValue={moment(f.value)}
