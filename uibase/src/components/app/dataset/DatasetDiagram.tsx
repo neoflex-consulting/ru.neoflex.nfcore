@@ -5,6 +5,11 @@ import {ResponsiveLine} from "@nivo/line";
 import {ResponsivePie} from "@nivo/pie";
 import {AxisProps} from "@nivo/axes"
 import {diagramAnchorMap} from "../../../utils/consts";
+import {Button, Dropdown, Menu} from "antd";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
+import {API} from "../../../modules/api";
+import Ecore from "ecore";
 
 interface Props {
 }
@@ -29,21 +34,70 @@ class DatasetDiagram extends React.Component<any, any> {
         this.state = {
             columnDefs: [],
             rowData: [],
-            IndexBy: (this.props.viewObject.get('IndexBy') !== undefined ) ? this.props.viewObject.get('IndexBy').values.name : "",
+            //Enums
+            AxisXPositionType: [],
+            AxisYPositionType: [],
+            LegendAnchorPositionType: [],
+
+            indexBy: (this.props.viewObject.get('indexBy') !== undefined ) ? this.props.viewObject.get('indexBy').values.name : "",
             keyColumn: (this.props.viewObject.get('keyColumn') !== undefined ) ? this.props.viewObject.get('keyColumn').values.name : "",
             valueColumn: (this.props.viewObject.get('valueColumn') !== undefined ) ? this.props.viewObject.get('valueColumn').values.name : "",
             legendAnchorPosition: diagramAnchorMap_[this.props.viewObject.get('legendAnchorPosition')] || diagramAnchorMap_["TopLeft"],
-            AxisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
-            AxisXLegend: this.props.viewObject.get('axisXLegend') || "",
-            AxisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
-            AxisYLegend: this.props.viewObject.get('axisYLegend') || "",
+            axisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
+            axisXLegend: this.props.viewObject.get('axisXLegend') || "",
+            axisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
+            axisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
             diagramType: this.props.viewObject.get('diagramType') || "Line"
         };
     }
 
+    //2.Добавление в action handler
+    onActionMenu(e : any) {
+        if (e.key.split('.').includes('axisXPosition')) {
+            this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
+        }
+        if (e.key.split('.').includes('axisYPosition')) {
+            this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
+        }
+        if (e.key.split('.').includes('legendAnchorPosition')) {
+            this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
+        }
+    }
+
+    //3.Добавление в getSelectedKeys
+    private getSelectedKeys() {
+        let selectedKeys: string[] = [];
+        selectedKeys.push(`axisXPosition.${this.state.axisXPosition}`);
+        selectedKeys.push(`axisYPosition.${this.state.axisYPosition}`);
+        selectedKeys.push(`legendAnchorPosition.${this.state.legendAnchorPosition}`);
+        return selectedKeys;
+    }
+
+    //4. Добавить считывание enum
     componentDidMount(): void {
+        if (this.state.AxisXPositionType.length === 0) {
+            this.getAllEnumValues("AxisXPositionType")
+        }
+        if (this.state.AxisYPositionType.length === 0) {
+            this.getAllEnumValues("AxisYPositionType")
+        }
+        if (this.state.LegendAnchorPositionType.length === 0) {
+            this.getAllEnumValues("LegendAnchorPositionType", function(str : string) {
+                return diagramAnchorMap[str];
+            })
+        }
+    }
+    private setSelectedKey(parameterKey?: string, parameterValue?: string) {
+        if (this.state.AxisXPositionType.length !== 0) {
+            if (parameterKey && parameterValue) {
+                let selectedKey: any = {};
+                selectedKey[parameterKey] = parameterValue;
+                this.setState(selectedKey);
+                this.props.viewObject.set(parameterKey, parameterValue);
+            }
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -69,19 +123,36 @@ class DatasetDiagram extends React.Component<any, any> {
             (this.props.viewObject.get('diagramType') !== null && this.state.diagramType !== this.props.viewObject.get('diagramType'))) {
 
             this.setState({diagramType: this.props.viewObject.get('diagramType') || "Line",
-                IndexBy: this.props.viewObject.get('IndexBy') || "",
+                indexBy: this.props.viewObject.get('indexBy') || "",
                 keyColumn: this.props.viewObject.get('keyColumn') || "",
                 valueColumn: this.props.viewObject.get('valueColumn') || "",
                 legendAnchorPosition: diagramAnchorMap_[this.props.viewObject.get('legendAnchorPosition')] || diagramAnchorMap_["TopLeft"],
-                AxisXPosition: this.props.viewObject.get('AxisXPosition') || "Top",
-                AxisXLegend: this.props.viewObject.get('AxisXLegend') || "",
-                AxisYPosition: this.props.viewObject.get('AxisYPosition') || "Left",
-                AxisYLegend: this.props.viewObject.get('AxisYLegend') || "",
+                axisXPosition: this.props.viewObject.get('axisXPosition') || "Top",
+                axisXLegend: this.props.viewObject.get('axisXLegend') || "",
+                axisYPosition: this.props.viewObject.get('axisYPosition') || "Left",
+                axisYLegend: this.props.viewObject.get('axisYLegend') || "",
                 //Пока цвет задаётся через цветовые схемы
                 colorSchema: this.props.viewObject.get('colorSchema') || ""
             })
         }
     }
+
+    getAllEnumValues(enumName: string, mapFunction: any = undefined) {
+        let enumValues : Array<string> = [];
+        API.instance().findEnum('application', enumName)
+            .then((result: Ecore.EObject[]) => {
+                enumValues = result.map( (t: any) => {
+                    return t.get('name')
+                });
+                //Переводим из модели в нужные типы
+                if (mapFunction !== undefined) {
+                    enumValues = enumValues.map(mapFunction);
+                }
+                let attrName: any = {};
+                attrName[enumName] = enumValues;
+                this.setState(attrName)
+            });
+    };
 
     private drawBar() {
         function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
@@ -109,7 +180,7 @@ class DatasetDiagram extends React.Component<any, any> {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: this.state.AxisXLegend,
+            legend: this.state.axisXLegend,
             legendPosition: 'middle',
             legendOffset: 0
         };
@@ -117,25 +188,25 @@ class DatasetDiagram extends React.Component<any, any> {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: this.state.AxisYLegend,
+            legend: this.state.axisYLegend,
             legendPosition: 'middle',
             legendOffset: 0
         };
         return <div style={{height:"300px"}}>
             <ResponsiveBar
-                data={prepareData(this.state.IndexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
+                data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 keys={distKeys}
-                indexBy={this.state.IndexBy}
+                indexBy={this.state.indexBy}
                 margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
                 padding={0.3}
                 colors={{ scheme: this.state.colorSchema }}
                 defs={[]}
                 fill={[]}
                 borderColor={{ from: 'color', modifiers: [ [ 'darker', 1.6 ] ] }}
-                axisTop={(this.state.AxisXPosition === "Top") ? axisX : null}
-                axisRight={(this.state.AxisYPosition === "Right") ? axisY : null}
-                axisBottom={(this.state.AxisXPosition === "Bottom") ? axisX : null}
-                axisLeft={(this.state.AxisYPosition === "Left") ? axisY : null}
+                axisTop={(this.state.axisXPosition === "Top") ? axisX : null}
+                axisRight={(this.state.axisYPosition === "Right") ? axisY : null}
+                axisBottom={(this.state.axisXPosition === "Bottom") ? axisX : null}
+                axisLeft={(this.state.axisYPosition === "Left") ? axisY : null}
                 labelSkipWidth={12}
                 labelSkipHeight={12}
                 labelTextColor={{ from: 'color', modifiers: [ [ 'darker', 1.6 ] ] }}
@@ -200,7 +271,7 @@ class DatasetDiagram extends React.Component<any, any> {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: this.state.AxisXLegend,
+            legend: this.state.axisXLegend,
             legendPosition: 'middle',
             legendOffset: 0
         };
@@ -208,20 +279,57 @@ class DatasetDiagram extends React.Component<any, any> {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: this.state.AxisYLegend,
+            legend: this.state.axisYLegend,
             legendPosition: 'middle',
             legendOffset: 0
         };
+        let selectedKeys = this.getSelectedKeys();
+        const menu = (
+            //1.Добавление в меню
+            <Menu
+                onClick={(e) => this.onActionMenu(e)}
+                selectedKeys={selectedKeys}
+                style={{width: '180px'}}
+            >
+                <Menu.SubMenu title={'axisXPosition'}>
+                    {this.state.AxisXPositionType.map((p: string) =>
+                        <Menu.Item key={`axisXPosition.${p}`} style={{width: '65px'}}>
+                            {p}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+                <Menu.SubMenu title={'axisYPosition'}>
+                    {this.state.AxisYPositionType.map((p: string) =>
+                        <Menu.Item key={`axisYPosition.${p}`} style={{width: '65px'}}>
+                            {p}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+                <Menu.SubMenu title={'legendAnchorPosition'}>
+                    {this.state.LegendAnchorPositionType.map((p: string) =>
+                        <Menu.Item key={`legendAnchorPosition.${p}`} style={{width: '120px'}}>
+                            {p}
+                        </Menu.Item>
+                    )}
+                </Menu.SubMenu>
+            </Menu>
+        );
         return <div style={{height:"300px"}}>
+            <Dropdown overlay={menu} placement='bottomLeft'>
+                <Button style={{color: 'rgb(151, 151, 151)'}}>
+                    <FontAwesomeIcon icon={faChevronDown} size='xs'
+                                     style={{marginLeft: '5px'}}/>
+                </Button>
+            </Dropdown>
             <ResponsiveLine
-                data={prepareData(this.state.IndexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
+                data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
                 xScale={{ type: 'point' }}
                 yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
-                axisTop={(this.state.AxisXPosition === "Top") ? axisX : null}
-                axisRight={(this.state.AxisYPosition === "Right") ? axisY : null}
-                axisBottom={(this.state.AxisXPosition === "Bottom") ? axisX : null}
-                axisLeft={(this.state.AxisYPosition === "Left") ? axisY : null}
+                axisTop={(this.state.axisXPosition === "Top") ? axisX : null}
+                axisRight={(this.state.axisYPosition === "Right") ? axisY : null}
+                axisBottom={(this.state.axisXPosition === "Bottom") ? axisX : null}
+                axisLeft={(this.state.axisYPosition === "Left") ? axisY : null}
                 colors={{ scheme: this.state.colorSchema }}
                 pointSize={10}
                 pointColor={{ theme: 'background' }}
@@ -280,7 +388,7 @@ class DatasetDiagram extends React.Component<any, any> {
         }
         return <div style={{height:"300px"}}>
             <ResponsivePie
-                data={prepareData(this.state.IndexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
+                data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                 innerRadius={0.5}
                 padAngle={0.7}
