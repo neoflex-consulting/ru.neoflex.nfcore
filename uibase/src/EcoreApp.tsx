@@ -574,11 +574,11 @@ class EcoreApp extends React.Component<any, State> {
             <MainContext.Consumer>
                 {context => {
                     return <MainApp
-                        {...this.props}
-                        context={context}
-                        pathFull={this.state.pathFull}
-                        appModuleName={this.state.appModuleName}
-                    />;
+                            {...this.props}
+                            context={context}
+                            pathFull={this.state.pathFull}
+                            appModuleName={this.state.appModuleName}
+                        />
                 }}
             </MainContext.Consumer>
         )
