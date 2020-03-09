@@ -1,25 +1,21 @@
 package ru.neoflex.nfcore.dataset.impl
 
-import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-
-import ru.neoflex.nfcore.dataset.DatasetFactory
-import ru.neoflex.nfcore.dataset.DatasetPackage
-import ru.neoflex.nfcore.dataset.DataType
-import ru.neoflex.nfcore.dataset.JdbcDataset
-import ru.neoflex.nfcore.dataset.QueryType
+import ru.neoflex.nfcore.dataset.*
 
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
-import java.sql.SQLException
 import java.sql.Statement
 
 class JdbcDatasetExt extends JdbcDatasetImpl {
+    private static final Logger logger = LoggerFactory.getLogger(JdbcDatasetExt.class);
 
     @Override
     String runQueryDataset() {
@@ -109,25 +105,10 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
     }
 
     Connection connectionToDB() {
-        try {
-            Class.forName(connection.driver.driverClassName)
-        } catch (ClassNotFoundException e) {
-            logger.info("connectionToDB", "Driver " + connection.driver.driverClassName + " is not found")
-            e.printStackTrace()
-            return
-        }
-        logger.info("connectionToDB", "Driver successfully connected")
-        Connection jdbcConnection
-        try {
-            jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
-        } catch (SQLException e) {
-            logger.info("connectionToDB", "Connection to database " + connection.url + " failed")
-            e.printStackTrace()
-            return
-        }
-        if (jdbcConnection != null) {
-            logger.info("connectionToDB", "You successfully connected to database " + connection.url)
-        }
+        Class.forName(connection.driver.driverClassName)
+        logger.info("Driver %s loaded", connection.driver.driverClassName)
+        Connection jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
+        logger.info("Connected to " + connection.url)
         return jdbcConnection
     }
 
@@ -145,7 +126,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 currentQuery = "SELECT * FROM (${query}) t"
             }
         }
-        logger.info("connectionToDB", currentQuery)
+        logger.info(currentQuery)
         Statement st = jdbcConnection.createStatement()
         ResultSet resultSet = st.executeQuery(currentQuery)
         return resultSet
@@ -170,6 +151,4 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         else {return DataType.STRING}
     }
 
-    private static final ClassLogger logger =
-            new ClassLogger("javax.management.remote.misc", "EnvHelp")
 }
