@@ -122,7 +122,7 @@ class EcoreApp extends React.Component<any, State> {
             }
             updatedUserProfile.get('params').clear();
             if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}
-            updatedUserProfile.get('params').addAll(updatedObject[0])
+            updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
         }
         API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
             (newResource: Ecore.Resource) => {
