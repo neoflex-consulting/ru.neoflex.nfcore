@@ -85,10 +85,8 @@ export class Login extends React.Component<any, State> {
                 <div>
                     <div className="login-box">
                         <div className="app-logo" style={{ width: '100%', paddingRight: '20px', textAlign: 'center' }}>
-                         {/*   <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />*/}
                             <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px' }}/>
                             <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
-
                         </div>
                         <div className="login-form">
                             <input
