@@ -24,6 +24,7 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
+import pony from "./pony.png";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
@@ -377,9 +378,8 @@ class EcoreApp extends React.Component<any, State> {
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}>
-                                <Icon type='appstore'
-                                      style={{color: '#1890ff', marginRight: '2px', marginLeft: '10px'}}/>
-                                <span style={{fontVariantCaps: 'petite-caps'}}>{t('appname')}</span>
+                                <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px', marginLeft: '20px' }}/>
+                                <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
                             </div>
                         </Col>
                         <Col style={{marginLeft: "291px"}}>

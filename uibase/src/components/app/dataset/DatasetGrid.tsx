@@ -39,7 +39,7 @@ class DatasetGrid extends React.Component<any, any> {
             themes: [],
             currentTheme: this.props.viewObject.get('theme') || 'material',
             rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || '10',
+            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             operations: [],
             selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
@@ -65,7 +65,7 @@ class DatasetGrid extends React.Component<any, any> {
     //      const { onCtrlA, onCtrlShiftA } = this.props
     //      const rowData = this.grid.current.api.getSelectedRows()
     //      const focusedCell = this.grid.current.api.getFocusedCell()
-    //      const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
+    //      const row = this.grid.current.api.getDisplayedRowAtMIndex(focusedCell.rowIndex);
     //
     //      let charCode = String.fromCharCode(event.which).toLowerCase()
     //      if (rowData.length > 0 && focusedCell) {

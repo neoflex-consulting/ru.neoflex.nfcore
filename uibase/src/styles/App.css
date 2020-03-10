@@ -1,7 +1,7 @@
 .app-logo {
   background-color: #fdfdfd;
   color: #262626;
-  font-weight: lighter;
+  font-weight: 600;
   font-size: 23px;
   height: 55px;
   line-height: 55px;
@@ -10,12 +10,13 @@
   padding-left: 14px;
   border-bottom: 1px solid #e8e8e8;
   user-select: none;
+  margin-top: -15px;
 }
 
 .app-logo-settings {
-  background-color: #232f3e;
-  color: white;
-  font-weight: lighter;
+  background-color: #fdfdfd;
+  color: #fdfdfd;
+  font-weight: 600;
   font-size: 23px;
   height: 55px;
   line-height: 55px;
@@ -33,7 +34,7 @@
 }
 
 .app-content{
-  background-color: #f9f9fc;
+  background-color: #fdfdfd;
 }
 
 #edit:hover {
@@ -60,7 +61,7 @@
 .login-box{
   width: 300px;
   height: 414px;
-  background-color: #ffffff;
+  background-color: #fdfdfd;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -74,7 +75,7 @@
 }
 
 .input-login:focus {
-  border-color: #64b3f8;
+  border-color: rgb(18, 18, 18);
   border-width: 1.5px;
 }
 
@@ -85,13 +86,14 @@
   outline: none;
   font-size: 15px;
   color: #7e7e7e;
+  background-color: #fdfdfd;
   /*расстрояние между кнопками - what is that?*/
   margin-bottom: 3vh;
 }
 
 /*Form for login and password*/
 .login-form {
-  margin-top: 30px;
+  margin-top: 40px;
   padding: 18px;
 }
 
@@ -103,16 +105,16 @@
 
 /*Button Sing in*/
 .login-button {
-  background-color: #3799f3;
+  background-color: rgb(18, 18, 18) /*#3799f3*/;
   border: none;
-  color: white;
+  color: #fdfdfd;
   padding: 8px 90px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
   margin-top: 85px;
-  font-weight: lighter;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -128,7 +130,7 @@
     float: right;
     margin-top: -25px;
     margin-right: 15px;
-    color: #189dff;
+    color: rgb(18, 18, 18);
     text-shadow: 1px 1px 2px #d8d8d8;
     font-weight: 100;
   }
@@ -155,7 +157,6 @@
   height: 98px;
   margin-left: -104px;
   margin-top: -91px;
-
 }
 
 /*style for spinner*/
