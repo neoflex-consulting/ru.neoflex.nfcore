@@ -118,13 +118,7 @@ class EcoreApp extends React.Component<any, State> {
                 });
             }
             else {
-                let newParams: any = {
-                    name: userProfileParams['name'] || JSON.parse(updatedObject[0].get('value'))['name'],
-                    theme: userProfileParams['theme'] || JSON.parse(updatedObject[0].get('value'))['theme'],
-                    showUniqRow: userProfileParams['showUniqRow'] || JSON.parse(updatedObject[0].get('value'))['showUniqRow'],
-                    rowPerPage: userProfileParams['rowPerPage'] || JSON.parse(updatedObject[0].get('value'))['rowPerPage']
-                };
-                updatedObject[0].set('value', JSON.stringify(newParams))
+                updatedObject[0].set('value', JSON.stringify(userProfileParams))
             }
             updatedUserProfile.get('params').clear();
             if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}

@@ -37,9 +37,9 @@ class DatasetGrid extends React.Component<any, any> {
 
         this.state = {
             themes: [],
-            currentTheme: this.props.viewObject.get('theme') || 'balham',
+            currentTheme: this.props.viewObject.get('theme') || 'material',
             rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'all',
+            paginationPageSize: this.props.viewObject.get('rowPerPage') || '10',
             operations: [],
             selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
@@ -229,9 +229,9 @@ class DatasetGrid extends React.Component<any, any> {
                         this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
                     }
                     if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
-                        this.setState({paginationPageSize: JSON.parse(p.get('value'))['rowPerPage']})
+                        const newPageSize = JSON.parse(p.get('value'))['rowPerPage']
+                        this.setState({paginationPageSize: newPageSize})
                     }
-
                 }
             });
     }
@@ -313,7 +313,7 @@ class DatasetGrid extends React.Component<any, any> {
                         suppressRowClickSelection //строки не выделяются при нажатии на них
                         pagination={true}
                         domLayout='autoHeight'
-                        paginationPageSize={Number(this.state.paginationPageSize)}
+                        paginationPageSize={Number(rowPerPageMapper_[this.state.paginationPageSize])}
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>

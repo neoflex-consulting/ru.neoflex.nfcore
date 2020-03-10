@@ -27,6 +27,7 @@ interface State {
     allOperations: any[];
     updateData: boolean;
     filtersMenuVisible: boolean;
+    conditionPattern?: EObject;
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -164,7 +165,7 @@ class DatasetView extends React.Component<any, State> {
                 enable: undefined,
                 type: undefined});
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
-        this.runQuery(resource, true, serverFilters);
+        this.runQuery(resource, true, serverFilters, false);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -184,20 +185,43 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    private runQuery(resource: Ecore.Resource, updateData: boolean, componentParams: Object[]) {
+    getConditionPattern() {
+        API.instance().findClass('dataset', 'Condition')
+            .then( (conditionPattern: EObject ) => {
+                this.setState({conditionPattern})
+            })
+    };
+
+    private runQuery(resource: Ecore.Resource, updateData: boolean, componentParams: Object[], updateViewObject: boolean) {
         if (updateData) {
             this.props.context.runQuery(resource, componentParams)
                 .then((result: string) => {
                     this.setState({rowData: JSON.parse(result)});
-                        this.updateContext(undefined, JSON.parse(result), this.state.currentDatasetComponent.eContents()[0].get('name'))
+                    this.updateContext(undefined, JSON.parse(result), this.state.currentDatasetComponent.eContents()[0].get('name'))
+                    if (updateViewObject) {
+                        this.props.viewObject.get('datasetComponent').get('serverFilter').clear();
+                        this.state.serverFilters.forEach( (f: any) => {
+                            if (f['operation'] !== undefined) {
+                                const datasetColumn = this.props.viewObject.get('dataset').get('datasetColumn').array().filter( (c:any) => c.get('name') === f['datasetColumn']);
+                                const params = this.state.conditionPattern!.create({
+                                    datasetColumn: datasetColumn[0],
+                                    operation: f['operation'],
+                                    value: f['value'],
+                                    enable: f['enable'],
+                                    type: f['type']
+                                });
+                                this.props.viewObject.get('datasetComponent').get('serverFilter').add(params)
+                            }
+                        })
                     }
-                )
+                })
         }
     }
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllOperations()}
+        if (!this.state.conditionPattern) this.getConditionPattern();
     }
 
     componentWillUnmount() {
@@ -243,7 +267,7 @@ class DatasetView extends React.Component<any, State> {
 
     onChangeServerFilter = (newServerFilter: any[], updateData: boolean): void => {
         this.setState({serverFilters: newServerFilter});
-        this.runQuery(this.state.currentDatasetComponent, updateData, newServerFilter);
+        this.runQuery(this.state.currentDatasetComponent, updateData, newServerFilter, true);
     };
 
     changeEnableServerFilters(filter: any): void {
@@ -252,6 +276,7 @@ class DatasetView extends React.Component<any, State> {
                 if (filter['datasetColumn'] === f['datasetColumn']
                     && filter['operation'] === f['operation']
                     && filter['value'] === f['value']) {
+                    this.props.viewObject.get('datasetComponent').get('serverFilter').array()[f['index'] - 1].set('enable', false)
                     return {
                         index: f['index'],
                         datasetColumn: f['datasetColumn'],
@@ -265,7 +290,9 @@ class DatasetView extends React.Component<any, State> {
                     return f
                 }
         });
+
         this.setState({serverFilters})
+
     }
 
     saveResource = (currentDatasetComponent: EObject) => {

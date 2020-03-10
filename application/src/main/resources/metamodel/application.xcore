@@ -98,9 +98,9 @@ abstract class DataView extends ViewElement {
 @Ecore(constraints="IsValid")
 class DatasetGridView extends DataView {
     op JSON getDatasetGrids() // для чего?
-    RowPerPage rowPerPage = "all"
+    RowPerPage rowPerPage = "ten"
     contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
-    Theme theme = "Balham"
+    Theme theme = "Material"
     boolean showUniqRow//Показывать только уникальные строки
 }
 
