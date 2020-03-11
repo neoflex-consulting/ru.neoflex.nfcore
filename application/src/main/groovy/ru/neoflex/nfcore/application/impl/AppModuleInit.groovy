@@ -79,8 +79,6 @@ class AppModuleInit {
             def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGridView1.name = 'DatasetGridTest'
             datasetGridView1.setDatasetView(datasetView1)
-            datasetGridView1.rowPerPage = RowPerPage.ALL
-            datasetGridView1.theme = Theme.BALHAM
 
             row1.children.add(datasetView1)
             row2.children.add(datasetGridView1)
@@ -110,8 +108,6 @@ class AppModuleInit {
             def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGridView2.name = 'DatasetGridTestAAA'
             datasetGridView2.setDatasetView(datasetView2)
-            datasetGridView2.rowPerPage = RowPerPage.ALL
-            datasetGridView2.theme = Theme.BALHAM
 
             row3.children.add(datasetView2)
             row4.children.add(datasetGridView2)

@@ -4,7 +4,7 @@ import EcoreApp from "./EcoreApp";
 
 const App: React.FC = (props) => {
     return (
-        <div className="App">
+        <div>
             <Suspense fallback={<div className="loader"/>}>
                 <EcoreApp {...props} />
             </Suspense>

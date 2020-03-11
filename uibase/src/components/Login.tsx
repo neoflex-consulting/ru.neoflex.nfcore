@@ -1,9 +1,10 @@
 import * as React from "react";
-import {Icon, Dropdown, Menu} from 'antd'
+import {Dropdown, Menu} from 'antd'
 import { API } from "../modules/api";
 import logo from '../logo.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
+import pony from '../pony.png';
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -49,11 +50,9 @@ export class Login extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages()
-        // if (this.state.userName !== undefined && this.state.password !== undefined) {
-            this.authenticate().catch(() => {
-                this.setState({ waitMinute: false })
-            })
-        // }
+        this.authenticate().catch(() => {
+            this.setState({ waitMinute: false })
+        })
     }
 
     render() {
@@ -64,10 +63,10 @@ export class Login extends React.Component<any, State> {
         };
         const storeLangValue = String(localStorage.getItem('i18nextLng'))
 
-        const langMenu = () => <Menu style={{ marginTop: '24px' }}>
+        const langMenu = () => <Menu style={{ marginTop: '24px', color: 'black' }}>
             {_map(languages, (lang:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
-                    <span style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
+                <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px', backgroundColor: '#fdfdfd' }}>
+                    <span style={{ fontVariantCaps: 'petite-caps', color: 'black' }}>{lang}</span>
                 </Menu.Item>
             )}
         </Menu>;
@@ -86,9 +85,8 @@ export class Login extends React.Component<any, State> {
                 <div>
                     <div className="login-box">
                         <div className="app-logo" style={{ width: '100%', paddingRight: '20px', textAlign: 'center' }}>
-                            <Icon type='appstore' style={{ color: '#1890ff', marginRight: '2px', marginLeft: '10px' }} />
-                            <span style={{ fontVariantCaps: 'petite-caps' }}>{t('appname')}</span>
-
+                            <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px' }}/>
+                            <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
                         </div>
                         <div className="login-form">
                             <input
@@ -118,7 +116,7 @@ export class Login extends React.Component<any, State> {
                         </div>
                         {this.state.languages.length !== 0 &&
                         <Dropdown overlay={langMenu} placement="bottomCenter">
-                            <div className="lang-label-login" style={{ fontVariantCaps: 'petite-caps' }}>
+                            <div className="lang-label-login" style={{ fontVariantCaps: 'petite-caps', color: 'black' }}>
                                 {languages.includes(storeLangValue.toUpperCase()) ? storeLangValue.toUpperCase() : 'US'}
                             </div>
                         </Dropdown>

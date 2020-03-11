@@ -3,7 +3,7 @@ import { withTranslation } from 'react-i18next';
 import {Button, Checkbox, Input} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
-import {EObject} from "ecore";
+import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 
 interface Props {
@@ -26,13 +26,24 @@ class SaveDatasetComponent extends React.Component<any, State> {
         };
     }
 
-    changeUserProfile(): void {
-        let datasetViewId = this.props.viewObject.get('datasetView')._id;
+    onClick(): void {
+        this.saveDatasetComponentOptions()
+        if (this.state.changeCurrent){
+            const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
+            this.updateViewObject(resource)
+        }
+        else {
+            this.cloneResource()
+        }
+    }
+
+    saveDatasetComponentOptions(): void {
+        let objectId = this.props.viewObject.get('datasetView')._id;
         let params: any = {};
         if (this.props.viewObject.get('theme') !== null) {params['theme'] = this.props.viewObject.get('theme')}
         if (this.props.viewObject.get('showUniqRow') !== null) {params['showUniqRow'] = this.props.viewObject.get('showUniqRow')}
         if (this.props.viewObject.get('rowPerPage') !== null) {params['rowPerPage'] = this.props.viewObject.get('rowPerPage')}
-        this.props.context.changeUserProfile(datasetViewId, params);
+        this.props.context.changeUserProfile(objectId, params);
     }
 
     cloneResource(): void {
@@ -49,25 +60,22 @@ class SaveDatasetComponent extends React.Component<any, State> {
         resource.set('uri', null)
         if (resource) {
             this.props.context.changeUserProfile(this.props.viewObject.get('datasetView')._id, {name: this.state.componentName})
-            API.instance().saveResource(resource)
-                .then(() => {
-                    this.props.context.notification('Save component','Created', 'success')
-                });
+            this.updateViewObject(resource);
         }
     }
 
-    saveResource(): void {
-        if (this.state.changeCurrent){
-            this.changeUserProfile()
-            const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
-            API.instance().saveResource(resource, 99999)
-                .then(() => {
-                    this.props.context.notification('Save component','Changes saved', 'success')
-                })
-        }
-        else {
-            this.cloneResource()
-        }
+    private updateViewObject(resource: Resource) {
+        API.instance().saveResource(resource)
+            .then((newDatasetComponent: any) => {
+                this.props.context.notification('Save component', 'Created', 'success')
+                this.props.viewObject.get('datasetView').set('datasetComponent', newDatasetComponent.eContents()[0])
+                const newResourceSet: Ecore.ResourceSet = this.props.viewObject.eResource().eContainer as Ecore.ResourceSet
+                const newViewObject: Ecore.EObject[] = newResourceSet.elements()
+                    .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+                    .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+                    .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+            });
     }
 
     onChangeName(e: any): void {
@@ -109,7 +117,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     Public
                 </Checkbox>
                 <div>
-                <Button title={t('save')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.saveResource()}>
+                <Button title={t('save')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.onClick()}>
                     <FontAwesomeIcon icon={faSave} size='1x'/>
                 </Button>
                 </div>

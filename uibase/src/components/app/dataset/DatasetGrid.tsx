@@ -37,9 +37,9 @@ class DatasetGrid extends React.Component<any, any> {
 
         this.state = {
             themes: [],
-            currentTheme: this.props.viewObject.get('theme') || 'balham',
+            currentTheme: this.props.viewObject.get('theme') || 'material',
             rowPerPages: [],
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'all',
+            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             operations: [],
             selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
@@ -65,7 +65,7 @@ class DatasetGrid extends React.Component<any, any> {
     //      const { onCtrlA, onCtrlShiftA } = this.props
     //      const rowData = this.grid.current.api.getSelectedRows()
     //      const focusedCell = this.grid.current.api.getFocusedCell()
-    //      const row = this.grid.current.api.getDisplayedRowAtIndex(focusedCell.rowIndex);
+    //      const row = this.grid.current.api.getDisplayedRowAtMIndex(focusedCell.rowIndex);
     //
     //      let charCode = String.fromCharCode(event.which).toLowerCase()
     //      if (rowData.length > 0 && focusedCell) {
@@ -229,9 +229,9 @@ class DatasetGrid extends React.Component<any, any> {
                         this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
                     }
                     if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
-                        this.setState({paginationPageSize: JSON.parse(p.get('value'))['rowPerPage']})
+                        const newPageSize = JSON.parse(p.get('value'))['rowPerPage']
+                        this.setState({paginationPageSize: newPageSize})
                     }
-
                 }
             });
     }
@@ -313,7 +313,7 @@ class DatasetGrid extends React.Component<any, any> {
                         suppressRowClickSelection //строки не выделяются при нажатии на них
                         pagination={true}
                         domLayout='autoHeight'
-                        paginationPageSize={Number(this.state.paginationPageSize)}
+                        paginationPageSize={Number(rowPerPageMapper_[this.state.paginationPageSize])}
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>
