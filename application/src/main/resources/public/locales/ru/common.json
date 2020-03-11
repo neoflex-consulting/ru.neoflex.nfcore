@@ -46,7 +46,22 @@
         "theme": "Тема",
         "username": "Имя пользователя",
         "value": "Значение",
-        "tools": "Утилиты"
+        "tools": "Утилиты",
+
+        "EqualTo": "равно",
+        "NotEqual": "не равно",
+        "LessThan": "меньше",
+        "LessThenOrEqualTo": "меньше или равно",
+        "GreaterThan": "больше",
+        "GreaterThanOrEqualTo": "больше или равно",
+        "IncludeIn": "содержит",
+        "NotIncludeIn": "не содержит",
+        "IsEmpty": "пусто",
+        "IsNotEmpty": "не пусто",
+        "StartWith": "начинается с",
+        "NotStartWith": "не начинается с",
+        "EndOn": "заканчивается на",
+        "NotEndOn": "не заканчивается на"
 }
 
 

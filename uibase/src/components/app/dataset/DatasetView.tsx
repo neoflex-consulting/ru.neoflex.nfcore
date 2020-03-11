@@ -88,7 +88,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getAllOperations() {
-        API.instance().findEnum('application', 'Operations')
+        API.instance().findEnum('dataset', 'Operations')
             .then((result: EObject[]) => {
                 let allOperations = result.map( (o: any) => {return o});
                 this.setState({allOperations})

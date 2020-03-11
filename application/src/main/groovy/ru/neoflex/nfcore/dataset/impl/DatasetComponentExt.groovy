@@ -45,6 +45,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 typography.name = columns[i].name
                                 rdbmsColumn.headerName = typography
                                 rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
+                                rdbmsColumn.sortable = true
                                 rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
                                         ? Filter.DATE_COLUMN_FILTER :
                                         columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
@@ -192,8 +193,20 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
                             map["select"] = "t.${conditions[i].datasetColumn} ${operator}"
                         }
+                        else if (operator == 'LIKE_START' ) {
+                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) LIKE LOWER('${conditions[i].value}%')"
+                        }
+                        else if (operator == 'LIKE_NOT_START' ) {
+                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('${conditions[i].value}%')"
+                        }
+                        else if (operator == 'LIKE_END' ) {
+                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) LIKE LOWER('%${conditions[i].value}')"
+                        }
+                        else if (operator == 'LIKE_NOT_END' ) {
+                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('%${conditions[i].value}')"
+                        }
                         else {
-                            map["select"] = "t.${conditions[i].datasetColumn} ${operator} ${conditions[i].value}"
+                            map["select"] = "t.${conditions[i].datasetColumn} ${operator} '${conditions[i].value}'"
                         }
                         if (!serverFilters.contains(map)) {
                             serverFilters.add(map)
@@ -224,12 +237,16 @@ class DatasetComponentExt extends DatasetComponentImpl {
         else if (operator == Operations.LESS_THEN_OR_EQUAL_TO.toString().toLowerCase()) {return '<='}
         else if (operator== Operations.EQUAL_TO.toString().toLowerCase()) {return '='}
         else if (operator == Operations.GREATER_THAN.toString().toLowerCase()) {return '>'}
-        else if (operator == Operations.GREATER_THEN_OR_EQUAL_TO.toString().toLowerCase()) {return '>='}
+        else if (operator == Operations.GREATER_THAN_OR_EQUAL_TO.toString().toLowerCase()) {return '>='}
         else if (operator == Operations.NOT_EQUAL.toString().toLowerCase()) {return '!='}
         else if (operator == Operations.INCLUDE_IN.toString().toLowerCase()) {return 'LIKE'}
         else if (operator == Operations.NOT_INCLUDE_IN.toString().toLowerCase()) {return 'NOT LIKE'}
-        else if (operator == Operations.IS_NULL.toString().toLowerCase()) {return 'IS NULL'}
-        else if (operator == Operations.IS_NOT_NULL.toString().toLowerCase()) {return 'IS NOT NULL'}
+        else if (operator == Operations.IS_EMPTY.toString().toLowerCase()) {return 'IS NULL'}
+        else if (operator == Operations.IS_NOT_EMPTY.toString().toLowerCase()) {return 'IS NOT NULL'}
+        else if (operator == Operations.START_WITH.toString().toLowerCase()) {return 'LIKE_START'}
+        else if (operator == Operations.NOT_START_WITH.toString().toLowerCase()) {return 'LIKE_NOT_START'}
+        else if (operator == Operations.END_ON.toString().toLowerCase()) {return 'LIKE_END'}
+        else if (operator == Operations.NOT_END_ON.toString().toLowerCase()) {return 'LIKE_NOT_END'}
     }
 
     private static final ClassLogger logger =

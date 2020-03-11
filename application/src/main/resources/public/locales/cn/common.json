@@ -46,5 +46,20 @@
         "theme": "主題",
         "username": "用戶名",
         "value": "值",
-        "tools": "工具"
+        "tools": "工具",
+
+        "EqualTo": "等於",
+        "NotEqual": "不平等",
+        "LessThan": "少於",
+        "LessThenOrEqualTo": "小於或等於",
+        "GreaterThan": "比...更棒",
+        "GreaterThanOrEqualTo": "小於或等於",
+        "IncludeIn": "包括",
+        "NotIncludeIn": "不包括",
+        "IsEmpty": "等於空",
+        "IsNotEmpty": "不等於空",
+        "StartWith": "從...開始",
+        "NotStartWith": "不以",
+        "EndOn": "結束於",
+        "NotEndOn": "沒有結束"
 }

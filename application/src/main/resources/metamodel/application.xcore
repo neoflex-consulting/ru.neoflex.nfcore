@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.dataset.DatasetColumnView
 import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.JSON
+import ru.neoflex.nfcore.dataset.Operations
 
 /* Components */
 abstract class Component {
@@ -334,19 +335,6 @@ enum Colors {
     Blue
     Orange
     Red
-}
-
-enum Operations {
-    EqualTo
-    NotEqual
-    LessThan
-    LessThenOrEqualTo
-    GreaterThan
-    GreaterThenOrEqualTo
-    IsNull
-    IsNotNull
-    IncludeIn
-    NotIncludeIn
 }
 
 enum IconName {
