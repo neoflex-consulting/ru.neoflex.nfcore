@@ -10,6 +10,11 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
+import { Resizable } from "re-resizable";
+import { saveAs } from "file-saver"
+import { Document, Packer, Paragraph, Media } from "docx"
+import domtoimage from 'dom-to-image';
+
 
 interface Props {
 }
@@ -27,10 +32,23 @@ function getUniqueFromData(data: any[], indexed: string) {
 
 const diagramAnchorMap_: any = diagramAnchorMap;
 
+const resizeStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "solid 1px #ddd",
+    background: "#ffffff"
+};
+
 class DatasetDiagram extends React.Component<any, any> {
+
+    private chartRef: React.RefObject<HTMLDivElement>;
+    private resizebleRef: React.RefObject<Resizable>;
 
     constructor(props: any) {
         super(props);
+        this.chartRef = React.createRef<HTMLDivElement>();
+        this.resizebleRef = React.createRef<Resizable>();
         this.state = {
             columnDefs: [],
             rowData: [],
@@ -49,7 +67,9 @@ class DatasetDiagram extends React.Component<any, any> {
             axisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
-            diagramType: this.props.viewObject.get('diagramType') || "Line"
+            diagramType: this.props.viewObject.get('diagramType') || "Line",
+            //Docx
+            imageBlob: Blob
         };
     }
 
@@ -64,6 +84,9 @@ class DatasetDiagram extends React.Component<any, any> {
         if (e.key.split('.').includes('legendAnchorPosition')) {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
+        if (e.key === 'exportToDocx') {
+            this.handleExportDocx()
+        }
     }
 
     //3.Добавление в getSelectedKeys
@@ -75,7 +98,7 @@ class DatasetDiagram extends React.Component<any, any> {
         return selectedKeys;
     }
 
-    //4. Добавить считывание enum
+    //4. Добавление считывания enum
     componentDidMount(): void {
         if (this.state.AxisXPositionType.length === 0) {
             this.getAllEnumValues("AxisXPositionType")
@@ -89,6 +112,7 @@ class DatasetDiagram extends React.Component<any, any> {
             })
         }
     }
+
     private setSelectedKey(parameterKey?: string, parameterValue?: string) {
         if (this.state.AxisXPositionType.length !== 0) {
             if (parameterKey && parameterValue) {
@@ -98,6 +122,16 @@ class DatasetDiagram extends React.Component<any, any> {
                 this.props.viewObject.set(parameterKey, parameterValue);
             }
         }
+    }
+
+    private handleExportDocx() {
+        //Через document.getElementById не работает
+        let node = this.chartRef.current;
+        // @ts-ignore
+        domtoimage.toBlob(node)
+            .then((blob: any) => {
+                this.setState({imageBlob: blob})
+            });
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -134,6 +168,24 @@ class DatasetDiagram extends React.Component<any, any> {
                 //Пока цвет задаётся через цветовые схемы
                 colorSchema: this.props.viewObject.get('colorSchema') || ""
             })
+        }
+        //TODO выгрузку должен осущаствлять вышестоящий элемент (возможно уровня application)
+        if (this.state.imageBlob !== null && JSON.stringify(prevState.imageBlob) !== JSON.stringify(this.state.imageBlob)) {
+            let width = (this.resizebleRef.current) ? this.resizebleRef.current.size.width : 1200;
+            let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
+            const doc = new Document();
+            const image = Media.addImage(doc, this.state.imageBlob, width, height);
+            doc.addSection({
+                children: [
+                    new Paragraph(image)
+                ],
+            });
+            Packer.toBlob(doc).then(blob => {
+                console.log(blob);
+                saveAs(blob, "example.docx");
+                console.log("Document created successfully");
+            });
+            this.setState({imageBlob: null})
         }
     }
 
@@ -312,59 +364,73 @@ class DatasetDiagram extends React.Component<any, any> {
                         </Menu.Item>
                     )}
                 </Menu.SubMenu>
+                <Menu.Item key='exportToDocx'>
+                    exportToDocx
+                </Menu.Item>
             </Menu>
         );
-        return <div style={{height:"300px"}}>
+
+        return <div>
             <Dropdown overlay={menu} placement='bottomLeft'>
                 <Button style={{color: 'rgb(151, 151, 151)'}}>
                     <FontAwesomeIcon icon={faChevronDown} size='xs'
                                      style={{marginLeft: '5px'}}/>
                 </Button>
             </Dropdown>
-            <ResponsiveLine
-                data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
-                margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-                xScale={{ type: 'point' }}
-                yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
-                axisTop={(this.state.axisXPosition === "Top") ? axisX : null}
-                axisRight={(this.state.axisYPosition === "Right") ? axisY : null}
-                axisBottom={(this.state.axisXPosition === "Bottom") ? axisX : null}
-                axisLeft={(this.state.axisYPosition === "Left") ? axisY : null}
-                colors={{ scheme: this.state.colorSchema }}
-                pointSize={10}
-                pointColor={{ theme: 'background' }}
-                pointBorderWidth={2}
-                pointBorderColor={{ from: 'serieColor' }}
-                pointLabel="y"
-                pointLabelYOffset={-12}
-                useMesh={true}
-                legends={[
-                    {
-                        anchor: this.state.legendAnchorPosition,
-                        direction: 'column',
-                        justify: false,
-                        translateX: 100,
-                        translateY: 0,
-                        itemsSpacing: 0,
-                        itemDirection: 'left-to-right',
-                        itemWidth: 80,
-                        itemHeight: 20,
-                        itemOpacity: 0.75,
-                        symbolSize: 12,
-                        symbolShape: 'circle',
-                        symbolBorderColor: 'rgba(0, 0, 0, .5)',
-                        effects: [
-                            {
-                                on: 'hover',
-                                style: {
-                                    itemBackground: 'rgba(0, 0, 0, .03)',
-                                    itemOpacity: 1
+            {/*Ссылка для выгрузки диаграммы в png*/}
+            <div ref={this.chartRef}>
+            <Resizable ref={this.resizebleRef}
+            style={resizeStyle}
+            defaultSize={{
+                width: 1200,
+                height: 400
+            }}>
+                <ResponsiveLine
+                    data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
+                    margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+                    xScale={{ type: 'point' }}
+                    yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
+                    axisTop={(this.state.axisXPosition === "Top") ? axisX : null}
+                    axisRight={(this.state.axisYPosition === "Right") ? axisY : null}
+                    axisBottom={(this.state.axisXPosition === "Bottom") ? axisX : null}
+                    axisLeft={(this.state.axisYPosition === "Left") ? axisY : null}
+                    colors={{ scheme: this.state.colorSchema }}
+                    pointSize={10}
+                    pointColor={{ theme: 'background' }}
+                    pointBorderWidth={2}
+                    pointBorderColor={{ from: 'serieColor' }}
+                    pointLabel="y"
+                    pointLabelYOffset={-12}
+                    useMesh={true}
+                    legends={[
+                        {
+                            anchor: this.state.legendAnchorPosition,
+                            direction: 'column',
+                            justify: false,
+                            translateX: 100,
+                            translateY: 0,
+                            itemsSpacing: 0,
+                            itemDirection: 'left-to-right',
+                            itemWidth: 80,
+                            itemHeight: 20,
+                            itemOpacity: 0.75,
+                            symbolSize: 12,
+                            symbolShape: 'circle',
+                            symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                            effects: [
+                                {
+                                    on: 'hover',
+                                    style: {
+                                        itemBackground: 'rgba(0, 0, 0, .03)',
+                                        itemOpacity: 1
+                                    }
                                 }
-                            }
-                        ]
-                    }
-                ]}
-            />
+                            ]
+                        }
+                    ]}
+                />
+        </Resizable>
+        </div>
         </div>
     }
 
