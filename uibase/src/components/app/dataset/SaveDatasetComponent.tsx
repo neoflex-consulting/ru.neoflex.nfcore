@@ -27,14 +27,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     }
 
     onClick(): void {
-        this.saveDatasetComponentOptions()
-        if (this.state.changeCurrent){
-            const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
-            this.updateViewObject(resource)
-        }
-        else {
-            this.cloneResource()
-        }
+       this.saveDatasetComponentOptions()
     }
 
     saveDatasetComponentOptions(): void {
@@ -43,7 +36,15 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (this.props.viewObject.get('theme') !== null) {params['theme'] = this.props.viewObject.get('theme')}
         if (this.props.viewObject.get('showUniqRow') !== null) {params['showUniqRow'] = this.props.viewObject.get('showUniqRow')}
         if (this.props.viewObject.get('rowPerPage') !== null) {params['rowPerPage'] = this.props.viewObject.get('rowPerPage')}
-        this.props.context.changeUserProfile(objectId, params);
+        this.props.context.changeUserProfile(objectId, params).then (()=> {
+            if (this.state.changeCurrent){
+                const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
+                this.updateViewObject(resource)
+            }
+            else {
+                this.cloneResource()
+            }
+        });
     }
 
     cloneResource(): void {
