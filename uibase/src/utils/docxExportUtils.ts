@@ -9,7 +9,11 @@ export enum docxElementExportType {
 
 export interface docxExportObject {
     docxComponentType: docxElementExportType;
-    diagramData?: Buffer,
+    diagramData?: {
+        blob: Buffer,
+        width: number,
+        height: number
+    },
     gridData?: string[][],
     textData?: string
 }
@@ -21,7 +25,7 @@ async function handleExportDocx(context: any) {
         const docxData: docxExportObject = await context.docxHandlers[i]();
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
-            const image = Media.addImage(doc, docxData.diagramData, 1400, 400);
+            const image = Media.addImage(doc, docxData.diagramData.blob, docxData.diagramData.width, docxData.diagramData.height);
             paragraphs.push(new Paragraph(image))
         }
         if (docxData.docxComponentType === docxElementExportType.grid && docxData.gridData !== undefined) {

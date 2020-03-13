@@ -14,6 +14,7 @@ import { Resizable } from "re-resizable";
 import domtoimage from 'dom-to-image';
 import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
 import { handleExportExcel, excelExportObject, excelElementExportType } from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
 
 interface Props {
 }
@@ -41,11 +42,11 @@ const resizeStyle = {
 
 class DatasetDiagram extends React.Component<any, any> {
 
-    private chartRef: React.RefObject<HTMLDivElement>;
+    private node: (Resizable|null);
 
     constructor(props: any) {
         super(props);
-        this.chartRef = React.createRef<HTMLDivElement>();
+
         this.state = {
             columnDefs: [],
             rowData: [],
@@ -85,7 +86,9 @@ class DatasetDiagram extends React.Component<any, any> {
         if (e.key === 'exportToExcel') {
             handleExportExcel(this.props.context)
         }
-
+        if (e.key === 'getImage') {
+            this.getImage()
+        }
     }
 
     //3.Добавление в getSelectedKeys
@@ -122,6 +125,9 @@ class DatasetDiagram extends React.Component<any, any> {
         if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
             this.props.context.docxHandlers.pop()
         }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
     }
 
     private setSelectedKey(parameterKey?: string, parameterValue?: string) {
@@ -136,25 +142,35 @@ class DatasetDiagram extends React.Component<any, any> {
     }
 
     private getDocxData(): docxExportObject {
-        // let width = (this.resizebleRef.current) ? this.resizebleRef.current.size.width : 1200;
-        // let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
         return {
             docxComponentType : docxElementExportType.diagram,
-            // Через document.getElementById не работает
-            // @ts-ignore
-            diagramData: domtoimage.toBlob(this.chartRef.current)
+            diagramData: {
+                //@ts-ignore
+                blob: domtoimage.toBlob(this.node?.resizable),
+                width: (this.node) ? this.node.size.width : 800,
+                height: (this.node) ? this.node.size.height : 600
+            }
         };
     }
 
     private getExcelData() : excelExportObject {
         return  {
             excelComponentType : excelElementExportType.diagram,
-            // Через document.getElementById не работает
-            // @ts-ignore
-            diagramData: domtoimage.toBlob(this.chartRef.current)
+            diagramData: {
+                //@ts-ignore
+                blob: domtoimage.toBlob(this.node?.resizable),
+                width: (this.node) ? this.node.size.width : 800,
+                height: (this.node) ? this.node.size.height : 600
+            }
         };
     }
 
+    private getImage() {
+        // @ts-ignore
+        domtoimage.toBlob(this.node?.resizable).then((blob) => {
+            saveAs(blob, 'image.png')
+        });
+    }
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         //Вычитать и отобразить данные
         const userComponentName = this.props.context.userProfile.get('params').array()
@@ -248,8 +264,8 @@ class DatasetDiagram extends React.Component<any, any> {
             legendOffset: 0
         };
         return <div>
-            <div ref={this.chartRef}>
-            <Resizable style={resizeStyle}
+            <Resizable ref={(n) => { this.node = n}}
+                       style={resizeStyle}
                        defaultSize={{
                            width: 700,
                            height: 400
@@ -300,7 +316,6 @@ class DatasetDiagram extends React.Component<any, any> {
                 motionDamping={15}
             />
             </Resizable>
-            </div>
         </div>
     }
 
@@ -381,8 +396,13 @@ class DatasetDiagram extends React.Component<any, any> {
                 <Menu.Item key='exportToExcel'>
                     exportToExcel
                 </Menu.Item>
+                <Menu.Item key='getImage'>
+                    getImage
+                </Menu.Item>
             </Menu>
         );
+
+        //let responsiveLine =
 
         return <div>
             <Dropdown overlay={menu} placement='bottomLeft'>
@@ -392,8 +412,7 @@ class DatasetDiagram extends React.Component<any, any> {
                 </Button>
             </Dropdown>
             {/*Ссылка для выгрузки диаграммы в png*/}
-            <div ref={this.chartRef}>
-            <Resizable
+            <Resizable ref={(n) => { this.node = n}}
             style={resizeStyle}
             defaultSize={{
                 width: 700,
@@ -445,7 +464,6 @@ class DatasetDiagram extends React.Component<any, any> {
                 />
         </Resizable>
         </div>
-        </div>
     }
 
     private drawPie() {
@@ -467,8 +485,7 @@ class DatasetDiagram extends React.Component<any, any> {
             return dataForChart
         }
         return <div>
-            <div ref={this.chartRef}>
-            <Resizable
+            <Resizable ref={(n) => { this.node = n}}
                        style={resizeStyle}
                        defaultSize={{
                            width: 700,
@@ -520,7 +537,6 @@ class DatasetDiagram extends React.Component<any, any> {
                 ]}
             />
             </Resizable>
-            </div>
         </div>
     }
 

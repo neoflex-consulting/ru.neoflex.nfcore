@@ -8,7 +8,11 @@ export enum excelElementExportType {
 
 export interface excelExportObject {
     excelComponentType: excelElementExportType;
-    diagramData?: Buffer,
+    diagramData?: {
+        blob: Buffer,
+        width: number,
+        height: number
+    },
     gridData?: {
         tableName:string,
         columns:any[],
@@ -26,18 +30,16 @@ async function handleExportExcel(context: any) {
         const excelData: excelExportObject = await context.excelHandlers[i]();
         if (excelData.excelComponentType === excelElementExportType.diagram && excelData.diagramData !== undefined) {
             //Добавление диаграммы в png
-            const width = 1400;
-            const height = 400;
             const image = workbook.addImage({
-                buffer: excelData.diagramData,
+                buffer: excelData.diagramData.blob,
                 extension: 'png',
             });
             worksheet.addImage(image, {
                 tl: { col: 0, row: offset },
-                ext: { width: width, height: height }
+                ext: { width: excelData.diagramData.width, height: excelData.diagramData.height }
             });
             //20px ширина стандартной ячейки excel
-            offset += Math.ceil(height/20);
+            offset += Math.ceil(excelData.diagramData.height/20);
         }
         if (excelData.excelComponentType === excelElementExportType.grid && excelData.gridData !== undefined) {
             //Добавление таблицы

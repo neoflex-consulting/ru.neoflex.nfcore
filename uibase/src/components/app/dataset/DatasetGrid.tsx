@@ -250,6 +250,9 @@ class DatasetGrid extends React.Component<any, any> {
         if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
             this.props.context.docxHandlers.pop()
         }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
