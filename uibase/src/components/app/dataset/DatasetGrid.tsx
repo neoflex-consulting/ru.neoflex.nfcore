@@ -181,7 +181,7 @@ class DatasetGrid extends React.Component<any, any> {
         }
         return  {
             docxComponentType : docxElementExportType.grid,
-            gridData: tableData
+            gridData:(tableData.length == 0) ? [[]] : tableData
         };
     }
 
@@ -201,8 +201,9 @@ class DatasetGrid extends React.Component<any, any> {
         return  {
             excelComponentType : excelElementExportType.grid,
             gridData: {
+                tableName: this.props.viewObject.get('name'),
                 columns: header,
-                rows: tableData
+                rows: (tableData.length == 0) ? [[]] : tableData
             }
         };
     }

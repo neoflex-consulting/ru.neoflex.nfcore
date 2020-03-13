@@ -42,12 +42,10 @@ const resizeStyle = {
 class DatasetDiagram extends React.Component<any, any> {
 
     private chartRef: React.RefObject<HTMLDivElement>;
-    private resizebleRef: React.RefObject<Resizable>;
 
     constructor(props: any) {
         super(props);
         this.chartRef = React.createRef<HTMLDivElement>();
-        this.resizebleRef = React.createRef<Resizable>();
         this.state = {
             columnDefs: [],
             rowData: [],
@@ -249,7 +247,13 @@ class DatasetDiagram extends React.Component<any, any> {
             legendPosition: 'middle',
             legendOffset: 0
         };
-        return <div style={{height:"300px"}}>
+        return <div>
+            <div ref={this.chartRef}>
+            <Resizable style={resizeStyle}
+                       defaultSize={{
+                           width: 700,
+                           height: 400
+                       }}>
             <ResponsiveBar
                 data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 keys={distKeys}
@@ -295,6 +299,8 @@ class DatasetDiagram extends React.Component<any, any> {
                 motionStiffness={90}
                 motionDamping={15}
             />
+            </Resizable>
+            </div>
         </div>
     }
 
@@ -387,7 +393,7 @@ class DatasetDiagram extends React.Component<any, any> {
             </Dropdown>
             {/*Ссылка для выгрузки диаграммы в png*/}
             <div ref={this.chartRef}>
-            <Resizable ref={this.resizebleRef}
+            <Resizable
             style={resizeStyle}
             defaultSize={{
                 width: 700,
@@ -460,7 +466,14 @@ class DatasetDiagram extends React.Component<any, any> {
             }
             return dataForChart
         }
-        return <div style={{height:"300px"}}>
+        return <div>
+            <div ref={this.chartRef}>
+            <Resizable
+                       style={resizeStyle}
+                       defaultSize={{
+                           width: 700,
+                           height: 400
+                       }}>
             <ResponsivePie
                 data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
@@ -506,6 +519,8 @@ class DatasetDiagram extends React.Component<any, any> {
                     }
                 ]}
             />
+            </Resizable>
+            </div>
         </div>
     }
 

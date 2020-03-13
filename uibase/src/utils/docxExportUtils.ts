@@ -30,7 +30,7 @@ async function handleExportDocx(context: any) {
             for (const row of docxData.gridData) {
                 let tableRow: TableCell[] = [];
                 for (const cell of row) {
-                    tableRow.push(new TableCell({children: [new Paragraph(cell)]}));
+                    tableRow.push(new TableCell({children: [new Paragraph((cell === null)? "" : cell)]}));
                 }
                 tableRows.push(new TableRow({
                     children: tableRow
