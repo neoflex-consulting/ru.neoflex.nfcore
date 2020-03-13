@@ -16,9 +16,12 @@ import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
+import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
+
+
 
 interface Props {
     onCtrlA?: Function,
@@ -120,6 +123,9 @@ class DatasetGrid extends React.Component<any, any> {
         if (e.key === 'saveReport') {
             this.handleSaveMenu()
         }
+        if (e.key === 'exportToDocx') {
+            handleExportDocx(this.props.context)
+        }
     }
 
     private setSelectedKeys(parameter?: string) {
@@ -157,6 +163,26 @@ class DatasetGrid extends React.Component<any, any> {
         return selectedKeys;
     }
 
+    private getDocxData() : docxExportObject {
+        let header = [];
+        for (const elem of this.state.columnDefs) {
+            header.push(elem.get("headerName"))
+        }
+        let tableData = [];
+        tableData.push(header);
+        for (const elem of this.state.rowData) {
+            let dataRow = [];
+            for (const prop in elem) {
+                dataRow.push(elem[prop])
+            }
+            tableData.push(dataRow)
+        }
+        return  {
+            docxComponentType : docxElementExportType.grid,
+            gridData: tableData
+        };
+    }
+
     getAllThemes() {
         API.instance().findEnum('application', 'Theme')
             .then((result: Ecore.EObject[]) => {
@@ -178,6 +204,9 @@ class DatasetGrid extends React.Component<any, any> {
     };
 
     componentDidMount(): void {
+        if (this.props.context.docxHandlers !== undefined) {
+            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
+        } 
         if (this.state.themes.length === 0) {
             this.getAllThemes()
         }
@@ -185,6 +214,12 @@ class DatasetGrid extends React.Component<any, any> {
             this.getAllRowPerPage()
         }
         this.changeSettings();
+    }
+
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -284,6 +319,9 @@ class DatasetGrid extends React.Component<any, any> {
                 </Menu.Item>
                 <Menu.Item key='download'>
                     Download
+                </Menu.Item>
+                <Menu.Item key='exportToDocx'>
+                    exportToDocx
                 </Menu.Item>
             </Menu>
         );

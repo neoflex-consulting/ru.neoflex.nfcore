@@ -689,6 +689,9 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
+
+        //TODO добавить отдельный метод по аналогии createUserProfile?
+        this.updateContext({docxHandlers: []});
     }
 
     render = () => {
