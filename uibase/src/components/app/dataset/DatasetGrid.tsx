@@ -103,8 +103,10 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     onGridReady = (params: any) => {
-        this.grid.current.api = params.api;
-        this.grid.current.columnApi = params.columnApi;
+        if (this.grid.current !== null) {
+            this.grid.current.api = params.api;
+            this.grid.current.columnApi = params.columnApi;
+        }
     };
 
     onPageSizeChanged(newPageSize: any) {

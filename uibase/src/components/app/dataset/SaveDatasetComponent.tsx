@@ -13,6 +13,7 @@ interface State {
     changeCurrent: boolean;
     accessPublic: boolean;
     componentName: string;
+    allDatasetComponents: any[];
 }
 
 class SaveDatasetComponent extends React.Component<any, State> {
@@ -22,7 +23,8 @@ class SaveDatasetComponent extends React.Component<any, State> {
         this.state = {
             changeCurrent: false,
             accessPublic: true,
-            componentName: ''
+            componentName: '',
+            allDatasetComponents: []
         };
     }
 
@@ -30,16 +32,42 @@ class SaveDatasetComponent extends React.Component<any, State> {
        this.saveDatasetComponentOptions()
     }
 
+    getAllDatasetComponents() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent')
+            if (temp !== undefined) {
+                API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
+                    .then((allDatasetComponents: Ecore.Resource[]) => {
+                        this.setState({allDatasetComponents})
+                    })
+            }
+        })
+    };
+
     saveDatasetComponentOptions(): void {
-        let objectId = this.props.viewObject.get('datasetView')._id;
+        let objectId = this.props.viewObject._id;
         let params: any = {};
         if (this.props.viewObject.get('theme') !== null) {params['theme'] = this.props.viewObject.get('theme')}
         if (this.props.viewObject.get('showUniqRow') !== null) {params['showUniqRow'] = this.props.viewObject.get('showUniqRow')}
         if (this.props.viewObject.get('rowPerPage') !== null) {params['rowPerPage'] = this.props.viewObject.get('rowPerPage')}
         this.props.context.changeUserProfile(objectId, params).then (()=> {
             if (this.state.changeCurrent){
-                const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
-                this.updateViewObject(resource)
+
+                const userProfile = this.props.context.userProfile.get('params').array()
+                    .filter( (p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
+                if (userProfile.length === 0) {
+                    const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
+                    this.updateViewObject(resource)
+                }
+                else {
+                    const userComponentName = JSON.parse(userProfile[0].get('value'))['name']
+                    const currentDatasetComponent =  this.state.allDatasetComponents.find( (d: Ecore.Resource) =>
+                        d.eContents()[0].get('name') === userComponentName)
+
+                    // const resource = this.props.viewObject.get('datasetView').get('datasetComponent').eResource()
+                    // this.updateViewObject(resource)
+                }
+
             }
             else {
                 this.cloneResource()
@@ -89,6 +117,10 @@ class SaveDatasetComponent extends React.Component<any, State> {
 
     onChangeAccess(): void {
         this.state.accessPublic ? this.setState({accessPublic: false}) : this.setState({accessPublic: true})
+    }
+
+    componentDidMount(): void {
+        if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents()}
     }
 
     render() {

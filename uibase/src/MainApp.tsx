@@ -26,11 +26,12 @@ export class MainApp extends React.Component<any, State> {
         super(props);
         this.state = {
             pathBreadcrumb: [],
-            hideReferences: false,
+            hideReferences: true,
         }
     }
 
     loadObject = () => {
+        this.setState({hideReferences: true})
         let name: string;
         let objectPackage: string;
         let objectClass: string;
@@ -53,25 +54,25 @@ export class MainApp extends React.Component<any, State> {
                                     ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
                                 )
                             });
-
                         }
                         else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
                             let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
                             let currentTree: any[] = currentAppModule['tree']
-
                             for (let i = 0; i <= currentTree.length - 1; i++) {
                                 for (let t of treeChildren
                                     .filter((t: any) => t.get('name') === currentTree[i])) {
                                     treeChildren = t.eContents();
                                 }
                             }
-
                             this.props.context.updateContext!(
                                 ({
                                     viewObject: treeChildren[0],
                                     applicationReferenceTree: objectApp.get('referenceTree')})
-                            )
+                            );
+                        }
+                        if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
+                            this.setState({hideReferences: false})
                         }
                     }
                 })
@@ -80,7 +81,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        if (this.props.context.viewObject !== undefined) {
+        if (this.props.context.viewObject !== undefined && this.props.context.viewObject !== null) {
             if (this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[0].appModule
                 && this.props.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
                 this.props.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
@@ -251,15 +252,19 @@ export class MainApp extends React.Component<any, State> {
                                         backgroundColor: backgroundColor
                                     }}>
                                         {
-                                            this.props.context.viewObject === undefined ||
-                                            this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[this.props.pathFull.length - 1].appModule
+                                            this.props.context.viewObject === null
                                                 ?
-                                                <div className="loader">
-                                                    <div className="inner one"/>
-                                                    <div className="inner two"/>
-                                                    <div className="inner three"/>
-                                                </div>
-                                                : this.renderContent()
+                                                this.renderContent()
+                                                :
+                                                this.props.context.viewObject === undefined ||
+                                                this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[this.props.pathFull.length - 1].appModule
+                                                    ?
+                                                    <div className="loader">
+                                                        <div className="inner one"/>
+                                                        <div className="inner two"/>
+                                                        <div className="inner three"/>
+                                                    </div>
+                                                    : this.renderContent()
                                         }
                                     </div>
                                 </div>
