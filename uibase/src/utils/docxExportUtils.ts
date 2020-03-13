@@ -9,7 +9,7 @@ export enum docxElementExportType {
 
 export interface docxExportObject {
     docxComponentType: docxElementExportType;
-    diagramData?: Uint8Array,
+    diagramData?: Buffer,
     gridData?: string[][],
     textData?: string
 }
@@ -18,7 +18,7 @@ async function handleExportDocx(context: any) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
     for (let i = 0; i < context.docxHandlers.length; i++) {
-        let docxData: docxExportObject = await context.docxHandlers[i]();
+        const docxData: docxExportObject = await context.docxHandlers[i]();
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
             const image = Media.addImage(doc, docxData.diagramData, 1400, 400);

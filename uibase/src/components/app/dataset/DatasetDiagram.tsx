@@ -13,6 +13,7 @@ import Ecore from "ecore";
 import { Resizable } from "re-resizable";
 import domtoimage from 'dom-to-image';
 import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
+import { handleExportExcel, excelExportObject, excelElementExportType } from "../../../utils/excelExportUtils";
 
 interface Props {
 }
@@ -83,6 +84,10 @@ class DatasetDiagram extends React.Component<any, any> {
         if (e.key === 'exportToDocx') {
             handleExportDocx(this.props.context)
         }
+        if (e.key === 'exportToExcel') {
+            handleExportExcel(this.props.context)
+        }
+
     }
 
     //3.Добавление в getSelectedKeys
@@ -98,7 +103,10 @@ class DatasetDiagram extends React.Component<any, any> {
     componentDidMount(): void {
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        } 
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
+        }
         if (this.state.AxisXPositionType.length === 0) {
             this.getAllEnumValues("AxisXPositionType")
         }
@@ -134,6 +142,15 @@ class DatasetDiagram extends React.Component<any, any> {
         // let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
         return {
             docxComponentType : docxElementExportType.diagram,
+            // Через document.getElementById не работает
+            // @ts-ignore
+            diagramData: domtoimage.toBlob(this.chartRef.current)
+        };
+    }
+
+    private getExcelData() : excelExportObject {
+        return  {
+            excelComponentType : excelElementExportType.diagram,
             // Через document.getElementById не работает
             // @ts-ignore
             diagramData: domtoimage.toBlob(this.chartRef.current)
@@ -354,6 +371,9 @@ class DatasetDiagram extends React.Component<any, any> {
                 </Menu.SubMenu>
                 <Menu.Item key='exportToDocx'>
                     exportToDocx
+                </Menu.Item>
+                <Menu.Item key='exportToExcel'>
+                    exportToExcel
                 </Menu.Item>
             </Menu>
         );
