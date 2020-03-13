@@ -28,7 +28,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (prevProps.serverFilters !== this.props.serverFilters) {
+        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
             this.setState({serverFilters: this.props.serverFilters})
         }
     }
@@ -96,8 +96,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                     <Button
                         title="add row"
                         style={{ width: '40px', marginRight: '10px' }}
-                        key={'runQueryButton'}
-                        value={'runQueryButton'}
+                        key={'createNewRowButton'}
+                        value={'createNewRowButton'}
                         onClick={this.createNewRow}
                         >
                         <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
@@ -105,8 +105,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                     <Button
                         title="run query"
                         style={{ width: '40px' }}
-                        key={'createNewRowButton'}
-                        value={'createNewRowButton'}
+                        key={'runQueryButton'}
+                        value={'runQueryButton'}
                         htmlType="submit"
                         >
                         <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>

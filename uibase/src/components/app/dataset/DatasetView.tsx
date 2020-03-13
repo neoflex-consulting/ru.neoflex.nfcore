@@ -116,7 +116,7 @@ class DatasetView extends React.Component<any, State> {
         });
         this.setState({columnDefs});
         this.findServerFilters(resource as Ecore.Resource, columnDefs);
-        this.updateContext(columnDefs, undefined, resource.eContents()[0].get('name'))
+        this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
     findServerFilters(resource: Ecore.Resource, columnDefs: Object[]){
@@ -192,31 +192,42 @@ class DatasetView extends React.Component<any, State> {
             })
     };
 
+
     private runQuery(resource: Ecore.Resource, updateData: boolean, componentParams: Object[], updateViewObject: boolean) {
         if (updateData) {
+            const datasetComponentName = resource.eContents()[0].get('name');
             this.props.context.runQuery(resource, componentParams)
                 .then((result: string) => {
                     this.setState({rowData: JSON.parse(result)});
-                    this.updateContext(undefined, JSON.parse(result), this.state.currentDatasetComponent.eContents()[0].get('name'))
-                    if (updateViewObject) {
-                        this.props.viewObject.get('datasetComponent').get('serverFilter').clear();
-                        this.state.serverFilters.forEach( (f: any) => {
-                            if (f['operation'] !== undefined) {
-                                const datasetColumn = this.props.viewObject.get('dataset').get('datasetColumn').array().filter( (c:any) => c.get('name') === f['datasetColumn']);
-                                const params = this.state.conditionPattern!.create({
-                                    datasetColumn: datasetColumn[0],
-                                    operation: f['operation'],
-                                    value: f['value'],
-                                    enable: f['enable'],
-                                    type: f['type']
-                                });
-                                this.props.viewObject.get('datasetComponent').get('serverFilter').add(params)
-                            }
-                        })
-                    }
-                })
+                    this.updatedDatasetComponents(undefined, JSON.parse(result), datasetComponentName)
+                });
+            if (updateViewObject){
+                const objectId = this.props.viewObject._id;
+                this.props.context.changeUserProfile(objectId, {serverFilters: componentParams})
+            }
+
         }
+        // if (updateViewObject) {
+        //     this.updateViewObject(componentParams);
+        // }
     }
+
+    // private updateViewObject(componentParams: Object[]) {
+    //     this.props.viewObject.get('datasetComponent').get('serverFilter').clear();
+    //     componentParams.forEach((f: any) => {
+    //         if (f['operation'] !== undefined) {
+    //             const datasetColumn = this.props.viewObject.get('dataset').get('datasetColumn').array().filter((c: any) => c.get('name') === f['datasetColumn']);
+    //             const params = this.state.conditionPattern!.create({
+    //                 datasetColumn: datasetColumn[0],
+    //                 operation: f['operation'],
+    //                 value: f['value'],
+    //                 enable: f['enable'],
+    //                 type: f['type']
+    //             });
+    //             this.props.viewObject.get('datasetComponent').get('serverFilter').add(params)
+    //         }
+    //     })
+    // }
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
@@ -228,7 +239,7 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.updateContext({datasetComponents: undefined})
     }
 
-    updateContext(columnDefs: any, rowData: any, datasetComponentName: string){
+    updatedDatasetComponents(columnDefs: any, rowData: any, datasetComponentName: string){
         let currentDataset = {
             [datasetComponentName] : {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
@@ -252,74 +263,36 @@ class DatasetView extends React.Component<any, State> {
         this.state.filtersMenuVisible ? this.setState({ filtersMenuVisible: false }) : this.setState({ filtersMenuVisible: true })
     };
 
-    updateTableData(e: any): void  {
-        if (e !== null) {
-            let params: Object[] = [{
-                datasetColumn: 'reportDate',
-                operation: 'EqualTo',
-                value: e._d,
-                enable: true,
-                type: 'Date'
-            }];
-            this.props.context.changeURL!(this.props.pathFull[this.props.pathFull.length - 1].appModule, undefined, params)
-        }
-    }
-
     onChangeServerFilter = (newServerFilter: any[], updateData: boolean): void => {
         this.setState({serverFilters: newServerFilter});
         this.runQuery(this.state.currentDatasetComponent, updateData, newServerFilter, true);
     };
 
-    changeEnableServerFilters(filter: any): void {
-        const serverFilters = this.state.serverFilters
-            .map( (f: any) => {
-                if (filter['datasetColumn'] === f['datasetColumn']
-                    && filter['operation'] === f['operation']
-                    && filter['value'] === f['value']) {
-                    this.props.viewObject.get('datasetComponent').get('serverFilter').array()[f['index'] - 1].set('enable', false)
-                    return {
-                        index: f['index'],
-                        datasetColumn: f['datasetColumn'],
-                        operation: f['operation'],
-                        value: f['value'],
-                        enable: false,
-                        type: f['type']
-                    }
-                }
-                else {
-                    return f
-                }
-        });
-
-        this.setState({serverFilters})
-
-    }
-
-    saveResource = (currentDatasetComponent: EObject) => {
-        this.props.viewObject.set('datasetComponent', currentDatasetComponent.eContents()[0])
-        API.instance().saveResource(this.props.viewObject.eResource(), 99999)
-            .then((newResource: Ecore.Resource) => {
-                const newResourceSet: Ecore.ResourceSet = newResource.eContainer as Ecore.ResourceSet
-                const newViewObject: Ecore.EObject[] = newResourceSet.elements()
-                    .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-                    .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-                    .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}))
-
-
-                let allDatasetComponents: any[] = [];
-                this.state.allDatasetComponents.forEach( (d: Ecore.Resource) => {
-                    if (d.eContents()[0].get('name') === newViewObject[0].get('name')) {
-                        allDatasetComponents.push(newResource)
-                    }
-                    else {
-                        allDatasetComponents.push(d)
-                    }
-                });
-                if (allDatasetComponents.length !== 0) {
-                    this.setState({allDatasetComponents})
-                }
-            })};
+    // saveResource = (currentDatasetComponent: EObject) => {
+    //     this.props.viewObject.set('datasetComponent', currentDatasetComponent.eContents()[0])
+    //     API.instance().saveResource(this.props.viewObject.eResource(), 99999)
+    //         .then((newResource: Ecore.Resource) => {
+    //             const newResourceSet: Ecore.ResourceSet = newResource.eContainer as Ecore.ResourceSet
+    //             const newViewObject: Ecore.EObject[] = newResourceSet.elements()
+    //                 .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+    //                 .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+    //                 .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+    //             this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+    //
+    //
+    //             let allDatasetComponents: any[] = [];
+    //             this.state.allDatasetComponents.forEach( (d: Ecore.Resource) => {
+    //                 if (d.eContents()[0].get('name') === newViewObject[0].get('name')) {
+    //                     allDatasetComponents.push(newResource)
+    //                 }
+    //                 else {
+    //                     allDatasetComponents.push(d)
+    //                 }
+    //             });
+    //             if (allDatasetComponents.length !== 0) {
+    //                 this.setState({allDatasetComponents})
+    //             }
+    //         })};
 
     handleChange(e: any): void {
         let params: any = {name: e}
@@ -430,54 +403,6 @@ class DatasetView extends React.Component<any, State> {
                     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
                 {filtersBtn}
                 {filtersModal}
-                {
-                    this.state.serverFilters !== undefined && this.state.useServerFilter &&
-                    <div style={{display: 'inline-block'}}>
-                        {this.state.serverFilters
-                            .filter((f: any) => f['enable'] === true && f['operation'] && f['datasetColumn'])
-                            .map((f: any) =>
-                                f.type === 'Date' || f.type === 'Timestamp'
-                                    ?
-                                    <div
-                                        key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
-                                        style={{marginLeft: '10px', width: 'auto', display: 'inline-block'}}>
-                                        <span style={{color: 'gray'}}>{f.datasetColumn}: </span>
-                                        <DatePicker
-                                            defaultValue={moment(f.value)}
-                                            format={'DD.MM.YYYY'}
-                                            onChange={(e: any) => this.updateTableData(e)}
-                                        />
-                                    </div>
-                                    :
-                                    f['operation'].includes('Null')
-                                        ?
-                                        <Select
-                                            key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
-                                            defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]}`}
-                                            style={{width: 'auto', marginLeft: '10px'}}
-                                            allowClear={true}
-                                            showArrow={false}
-                                            onChange={() => this.changeEnableServerFilters(f)}
-                                        >
-                                        </Select>
-                                        :
-                                        f['value']
-                                            ?
-                                            <Select
-                                                key={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                                defaultValue={`${f['datasetColumn']} ${operationsMapper_[f['operation']]} ${f['value']}`}
-                                                style={{width: 'auto', marginLeft: '10px'}}
-                                                allowClear={true}
-                                                showArrow={false}
-                                                onChange={() => this.changeEnableServerFilters(f)}
-                                            >
-                                            </Select>
-                                            :
-                                            <div/>
-                            )
-                        }
-                </div>
-                }
             </div>
         )
     }

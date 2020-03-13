@@ -125,12 +125,9 @@ class EcoreApp extends React.Component<any, State> {
             if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}
             updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
         }
-        // let resource = updatedUserProfile.eResource()
-        // resource.set('uri', null)
         return API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
             (newResource: Ecore.Resource) => {
                 this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
-                this.state.context.notification!('Update User Profile','Updated', 'success')
             }
         )
     };
@@ -241,17 +238,23 @@ class EcoreApp extends React.Component<any, State> {
                     }
                 });
             } else if (appModuleName !== this.state.appModuleName) {
-                this.state.pathFull.forEach( (p:any) => {
-                    path.push(p)
-                });
-                urlElement.appModule = appModuleName;
-                urlElement.tree = treeValue !== undefined ? treeValue.split('/') : []
-                urlElement.params = params;
-                path.push(urlElement)
+                const splitPathFull = this.state.pathFull.map( (p:any, index: any) => {
+                    if (p.appModule === appModuleName) {return index}
+                })
+                    .filter ((p: any)=> p !== undefined);
+                if (splitPathFull.length === 0) {
+                    this.state.pathFull.forEach( (p:any) => {
+                        path.push(p)
+                    });
+                    urlElement.appModule = appModuleName;
+                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                    urlElement.params = params;
+                    path.push(urlElement)
+                } else {
+                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
+                }
             } else if (appModuleName === this.state.appModuleName) {
-                this.state.pathFull.forEach( (p:any) => {
-                    path.push(p)
-                });
+                path = this.state.pathFull
             }
             this.setState({pathFull: path});
             this.props.history.push(`/app/${
