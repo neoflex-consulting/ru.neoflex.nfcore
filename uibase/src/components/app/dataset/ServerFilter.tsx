@@ -2,11 +2,9 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Form, Input, Select} from 'antd';
-import {operationsMapper} from '../../../utils/consts';
 import {FormComponentProps} from "antd/lib/form";
-//import './../../../styles/ServerFilter.css';
-
-const operationsMapper_: any = operationsMapper;
+import {faPlay, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 interface Props {
     serverFilters?: Array<EObject>;
@@ -66,6 +64,18 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
         this.refresh();
     };
 
+    createNewRow = () => {
+        let serverFilters: any = this.state.serverFilters;
+        serverFilters.push(
+            {index: serverFilters.length + 1,
+                datasetColumn: undefined,
+                operation: undefined,
+                value: undefined,
+                enable: undefined,
+                type: undefined});
+        this.setState({serverFilters})
+    };
+
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
@@ -82,6 +92,26 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
         const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+                <Form.Item  style={{ marginTop: '-38px', textAlign: "right", marginBottom: '40px' }}>
+                    <Button
+                        title="add row"
+                        style={{ width: '40px', marginRight: '10px' }}
+                        key={'runQueryButton'}
+                        value={'runQueryButton'}
+                        onClick={this.createNewRow}
+                        >
+                        <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
+                    </Button>
+                    <Button
+                        title="run query"
+                        style={{ width: '40px' }}
+                        key={'createNewRowButton'}
+                        value={'createNewRowButton'}
+                        htmlType="submit"
+                        >
+                        <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
+                    </Button>
+                </Form.Item>
                 {
                     this.state.serverFilters!
                         .map((serverFilter: any) => {
@@ -106,7 +136,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             })(
                                             <Select
                                                 placeholder={t('columnname')}
-                                                style={{ width: '290px', marginRight: '10px', marginLeft: '10px' }}
+                                                style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
                                                 showSearch={true}
                                                 allowClear={true}
                                                 onChange={(e: any) => {
@@ -130,7 +160,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                     <Form.Item style={{ display: 'inline-block' }}>
                                         {getFieldDecorator(`${idOperation}`,
                                             {
-                                                initialValue: operationsMapper_[serverFilter.operation],
+                                                initialValue: `${t(serverFilter.operation)}` || undefined,
                                                 rules: [{
                                                     required:
                                                         getFieldValue(`${idDatasetColumn}`) ||
@@ -141,7 +171,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             })(
                                             <Select
                                                 placeholder={t('operation')}
-                                                style={{ width: '110px', marginRight: '10px' }}
+                                                style={{ width: '189px', marginRight: '10px' }}
                                                 allowClear={true}
                                                 onChange={(e: any) => {
                                                     const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
@@ -155,7 +185,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                                 key={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
                                                                 value={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
                                                             >
-                                                                {operationsMapper_[o.get('name')]}
+                                                                {t(o.get('name'))}
                                                             </Select.Option>)
                                                 }
                                             </Select>
@@ -170,8 +200,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     required:
                                                         (
                                                             (
-                                                                JSON.parse(idOperation)['value'] !== 'IsNotNull' &&
-                                                                JSON.parse(idOperation)['value'] !== 'IsNull')
+                                                                JSON.parse(idOperation)['value'] !== 'IsNotEmpty' &&
+                                                                JSON.parse(idOperation)['value'] !== 'IsEmpty')
                                                             &&
                                                             (
                                                                getFieldValue(`${idOperation}`) ||
@@ -184,15 +214,15 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             })(
                                             <Input
                                                 placeholder={t('value')}
-                                                disabled={serverFilter.operation === 'IsNull' || serverFilter.operation === 'IsNotNull'}
+                                                disabled={serverFilter.operation === 'IsEmpty' || serverFilter.operation === 'IsNotEmpty'}
                                                 style={{ width: '110px', marginRight: '10px' }}
                                                 allowClear={true}
                                                 onChange={(e: any) => this.handleChange(
                                                     JSON.stringify({index: serverFilter.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                                                 )}
+                                                title={serverFilter.value}
                                                 id={serverFilter.index}
                                             />
-
                                         )}
                                     </Form.Item>
                                     <Form.Item style={{ display: 'inline-block' }}>
@@ -209,7 +239,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             })(
                                             <Select
                                                 allowClear={true}
-                                                style={{width: '75px'}}
+                                                style={{width: '66px'}}
                                                 onChange={(e: any) => {
                                                     const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'enable', value: undefined})
                                                     this.handleChange(event)
@@ -233,9 +263,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                 </Form.Item>
                             )})
                         }
-                        <Form.Item  style={{ marginTop: '-30px', marginLeft: '30px' }}>
-                            <Button key={'buttonServerFilter'} value={'buttonServerFilter'} htmlType="submit">Apply</Button>
-                        </Form.Item>
             </Form>
         )
     }

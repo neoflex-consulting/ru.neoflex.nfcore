@@ -129,11 +129,15 @@ enum Operations {
     LessThan
     LessThenOrEqualTo
     GreaterThan
-    GreaterThenOrEqualTo
-    IsNull
-    IsNotNull
+    GreaterThanOrEqualTo
+    IsEmpty
+    IsNotEmpty
     IncludeIn
     NotIncludeIn
+    StartWith
+    NotStartWith
+    EndOn
+    NotEndOn
 }
 
 enum Aggregate {

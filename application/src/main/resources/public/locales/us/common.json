@@ -46,5 +46,20 @@
         "theme": "Theme",
         "username": "User Name",
         "value": "Value",
-        "tools": "Tools"
+        "tools": "Tools",
+
+        "EqualTo": "equals",
+        "NotEqual": "does not equal",
+        "LessThan": "is less than",
+        "LessThenOrEqualTo": "is less then or equal to",
+        "GreaterThan": "is greater than",
+        "GreaterThanOrEqualTo": "is greater then or equal to",
+        "IncludeIn": "contains",
+        "NotIncludeIn": "does not contain",
+        "IsEmpty": "empty",
+        "IsNotEmpty": "does not empty",
+        "StartWith": "begins with",
+        "NotStartWith": "does not begin with",
+        "EndOn": "ends with",
+        "NotEndOn": "does not end with"
 }

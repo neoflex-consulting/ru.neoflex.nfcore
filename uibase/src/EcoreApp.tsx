@@ -125,7 +125,9 @@ class EcoreApp extends React.Component<any, State> {
             if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}
             updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
         }
-        API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
+        // let resource = updatedUserProfile.eResource()
+        // resource.set('uri', null)
+        return API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
             (newResource: Ecore.Resource) => {
                 this.state.context.updateContext!(({userProfile: newResource.eContents()[0]}))
                 this.state.context.notification!('Update User Profile','Updated', 'success')
