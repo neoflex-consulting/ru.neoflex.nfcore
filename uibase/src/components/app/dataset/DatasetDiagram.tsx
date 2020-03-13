@@ -11,10 +11,8 @@ import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
 import { Resizable } from "re-resizable";
-import { saveAs } from "file-saver"
-import { Document, Packer, Paragraph, Media } from "docx"
 import domtoimage from 'dom-to-image';
-
+import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
 
 interface Props {
 }
@@ -67,9 +65,7 @@ class DatasetDiagram extends React.Component<any, any> {
             axisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
-            diagramType: this.props.viewObject.get('diagramType') || "Line",
-            //Docx
-            imageBlob: Blob
+            diagramType: this.props.viewObject.get('diagramType') || "Line"
         };
     }
 
@@ -85,7 +81,7 @@ class DatasetDiagram extends React.Component<any, any> {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
         if (e.key === 'exportToDocx') {
-            this.handleExportDocx()
+            handleExportDocx(this.props.context)
         }
     }
 
@@ -100,6 +96,9 @@ class DatasetDiagram extends React.Component<any, any> {
 
     //4. Добавление считывания enum
     componentDidMount(): void {
+        if (this.props.context.docxHandlers !== undefined) {
+            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
+        } 
         if (this.state.AxisXPositionType.length === 0) {
             this.getAllEnumValues("AxisXPositionType")
         }
@@ -110,6 +109,12 @@ class DatasetDiagram extends React.Component<any, any> {
             this.getAllEnumValues("LegendAnchorPositionType", function(str : string) {
                 return diagramAnchorMap[str];
             })
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
         }
     }
 
@@ -124,14 +129,15 @@ class DatasetDiagram extends React.Component<any, any> {
         }
     }
 
-    private handleExportDocx() {
-        //Через document.getElementById не работает
-        let node = this.chartRef.current;
-        // @ts-ignore
-        domtoimage.toBlob(node)
-            .then((blob: any) => {
-                this.setState({imageBlob: blob})
-            });
+    private getDocxData(): docxExportObject {
+        // let width = (this.resizebleRef.current) ? this.resizebleRef.current.size.width : 1200;
+        // let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
+        return {
+            docxComponentType : docxElementExportType.diagram,
+            // Через document.getElementById не работает
+            // @ts-ignore
+            diagramData: domtoimage.toBlob(this.chartRef.current)
+        };
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -168,24 +174,6 @@ class DatasetDiagram extends React.Component<any, any> {
                 //Пока цвет задаётся через цветовые схемы
                 colorSchema: this.props.viewObject.get('colorSchema') || ""
             })
-        }
-        //TODO выгрузку должен осущаствлять вышестоящий элемент (возможно уровня application)
-        if (this.state.imageBlob !== null && JSON.stringify(prevState.imageBlob) !== JSON.stringify(this.state.imageBlob)) {
-            let width = (this.resizebleRef.current) ? this.resizebleRef.current.size.width : 1200;
-            let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
-            const doc = new Document();
-            const image = Media.addImage(doc, this.state.imageBlob, width, height);
-            doc.addSection({
-                children: [
-                    new Paragraph(image)
-                ],
-            });
-            Packer.toBlob(doc).then(blob => {
-                console.log(blob);
-                saveAs(blob, "example.docx");
-                console.log("Document created successfully");
-            });
-            this.setState({imageBlob: null})
         }
     }
 
@@ -382,7 +370,7 @@ class DatasetDiagram extends React.Component<any, any> {
             <Resizable ref={this.resizebleRef}
             style={resizeStyle}
             defaultSize={{
-                width: 1200,
+                width: 700,
                 height: 400
             }}>
                 <ResponsiveLine
