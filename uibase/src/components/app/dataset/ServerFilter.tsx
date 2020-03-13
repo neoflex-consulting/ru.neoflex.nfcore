@@ -38,7 +38,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     }
 
     handleChange(e: any) {
-        const target = JSON.parse(e)
+        const target = JSON.parse(e);
         let serverFilters = this.state.serverFilters!.map( (f: any) => {
             if (f.index.toString() === target['index'].toString()) {
                 const targetColumn = this.props.columnDefs!.find( (c: any) =>
@@ -54,9 +54,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                 return f
             }
         });
-
         this.setState({serverFilters})
-        this.props.onChangeServerFilter!(serverFilters, false)
     }
 
     handleSubmit = (e: any) => {
@@ -79,7 +77,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverFilters!, true)
+                this.props.onChangeServerFilter!(this.state.serverFilters!)
                 }
             else {
                 this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
