@@ -18,6 +18,7 @@ import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
 import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
@@ -125,10 +126,17 @@ class DatasetGrid extends React.Component<any, any> {
             this.handleSaveMenu()
         }
         if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context)
+            handleExportDocx(this.props.context).then(blob => {
+                saveAs(blob, "example.docx");
+                console.log("Document created successfully");
+            });
         }
         if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context)
+            handleExportExcel(this.props.context).then((blob) => {
+                    saveAs(new Blob([blob]), 'example.xlsx')
+                    console.log("Document created successfully");
+                }
+            );
         }
     }
 

@@ -20,6 +20,7 @@ export interface excelExportObject {
     }
 }
 
+//context приложения EcoreApp
 async function handleExportExcel(context: any) {
     //Смещение отностиельно 0 ячейки
     let offset = 1;
@@ -60,10 +61,7 @@ async function handleExportExcel(context: any) {
         }
         offset += 1;
     }
-    workbook.xlsx.writeBuffer().then((buf) => {
-            saveAs(new Blob([buf]), 'example.xlsx')
-        }
-    );
+    return workbook.xlsx.writeBuffer()
 }
 
 export {handleExportExcel};

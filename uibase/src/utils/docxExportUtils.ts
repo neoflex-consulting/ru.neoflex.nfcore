@@ -1,5 +1,5 @@
 import {Document, Media, Packer, Paragraph, Table, TableCell, TableRow, TextRun} from "docx";
-import {saveAs} from "file-saver";
+
 
 export enum docxElementExportType {
     diagram,
@@ -18,6 +18,7 @@ export interface docxExportObject {
     textData?: string
 }
 
+//context приложения EcoreApp
 async function handleExportDocx(context: any) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
@@ -66,11 +67,7 @@ async function handleExportDocx(context: any) {
         properties: {},
         children: paragraphs
     });
-    Packer.toBlob(doc).then(blob => {
-        console.log(blob);
-        saveAs(blob, "example.docx");
-        console.log("Document created successfully");
-    });
+    return Packer.toBlob(doc)
 }
 
 export {handleExportDocx};
