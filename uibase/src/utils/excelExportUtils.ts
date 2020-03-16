@@ -1,5 +1,5 @@
-import {saveAs} from "file-saver";
 import * as ExcelJS from "exceljs";
+import {saveAs} from "file-saver";
 
 export enum excelElementExportType {
     diagram,
@@ -9,7 +9,7 @@ export enum excelElementExportType {
 export interface excelExportObject {
     excelComponentType: excelElementExportType;
     diagramData?: {
-        blob: Buffer,
+        blob: Promise<Blob>,
         width: number,
         height: number
     },
@@ -27,11 +27,13 @@ async function handleExportExcel(context: any) {
     const worksheet = workbook.addWorksheet();
 
     for (let i = 0; i < context.excelHandlers.length; i++) {
-        const excelData: excelExportObject = await context.excelHandlers[i]();
+        const excelData: excelExportObject = context.excelHandlers[i]();
         if (excelData.excelComponentType === excelElementExportType.diagram && excelData.diagramData !== undefined) {
             //Добавление диаграммы в png
+            //cast to ArrayBuffer
+            const arrayBuffer = await (await excelData.diagramData.blob).arrayBuffer();
             const image = workbook.addImage({
-                buffer: excelData.diagramData.blob,
+                buffer: arrayBuffer,
                 extension: 'png',
             });
             worksheet.addImage(image, {

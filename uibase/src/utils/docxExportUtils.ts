@@ -10,7 +10,7 @@ export enum docxElementExportType {
 export interface docxExportObject {
     docxComponentType: docxElementExportType;
     diagramData?: {
-        blob: Buffer,
+        blob: Promise<Blob>,
         width: number,
         height: number
     },
@@ -22,10 +22,12 @@ async function handleExportDocx(context: any) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
     for (let i = 0; i < context.docxHandlers.length; i++) {
-        const docxData: docxExportObject = await context.docxHandlers[i]();
+        const docxData: docxExportObject = context.docxHandlers[i]();
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
-            const image = Media.addImage(doc, docxData.diagramData.blob, docxData.diagramData.width, docxData.diagramData.height);
+            //cast to ArrayBuffer
+            const arrayBuffer = await (await docxData.diagramData.blob).arrayBuffer();
+            const image = Media.addImage(doc, arrayBuffer, docxData.diagramData.width, docxData.diagramData.height);
             paragraphs.push(new Paragraph(image))
         }
         if (docxData.docxComponentType === docxElementExportType.grid && docxData.gridData !== undefined) {

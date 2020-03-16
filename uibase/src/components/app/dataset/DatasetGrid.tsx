@@ -16,8 +16,8 @@ import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
-import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
-import { handleExportExcel, excelExportObject, excelElementExportType } from "../../../utils/excelExportUtils";
+import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;

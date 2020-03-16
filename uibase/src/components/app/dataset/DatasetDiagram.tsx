@@ -10,10 +10,10 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
-import { Resizable } from "re-resizable";
+import {Resizable } from "re-resizable";
 import domtoimage from 'dom-to-image';
-import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
-import { handleExportExcel, excelExportObject, excelElementExportType } from "../../../utils/excelExportUtils";
+import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
 
 interface Props {
@@ -86,9 +86,6 @@ class DatasetDiagram extends React.Component<any, any> {
         if (e.key === 'exportToExcel') {
             handleExportExcel(this.props.context)
         }
-        if (e.key === 'getImage') {
-            this.getImage()
-        }
     }
 
     //3.Добавление в getSelectedKeys
@@ -142,35 +139,43 @@ class DatasetDiagram extends React.Component<any, any> {
     }
 
     private getDocxData(): docxExportObject {
-        return {
-            docxComponentType : docxElementExportType.diagram,
-            diagramData: {
-                //@ts-ignore
-                blob: domtoimage.toBlob(this.node?.resizable),
-                width: (this.node) ? this.node.size.width : 800,
-                height: (this.node) ? this.node.size.height : 600
-            }
-        };
+        const width = (this.node) ? this.node.size.width : 700;
+        const height = (this.node) ? this.node.size.height : 400;
+        if (this.node && this.node?.resizable !== null) {
+            return {
+                docxComponentType : docxElementExportType.diagram,
+                diagramData: {
+                    blob: domtoimage.toBlob(this.node?.resizable,{
+                        width: width,
+                        height: height
+                    }),
+                    width: width,
+                    height: height
+                }
+            };
+        }
+        return {docxComponentType: docxElementExportType.diagram}
     }
 
-    private getExcelData() : excelExportObject {
-        return  {
-            excelComponentType : excelElementExportType.diagram,
-            diagramData: {
-                //@ts-ignore
-                blob: domtoimage.toBlob(this.node?.resizable),
-                width: (this.node) ? this.node.size.width : 800,
-                height: (this.node) ? this.node.size.height : 600
-            }
-        };
+    private getExcelData(): excelExportObject {
+        const width = (this.node) ? this.node.size.width : 700;
+        const height = (this.node) ? this.node.size.height : 400;
+        if (this.node && this.node?.resizable !== null) {
+            return {
+                excelComponentType: excelElementExportType.diagram,
+                diagramData: {
+                    blob: domtoimage.toBlob(this.node?.resizable, {
+                        width: width,
+                        height: height
+                    }),
+                    width: width,
+                    height: height
+                }
+            };
+        }
+        return {excelComponentType: excelElementExportType.diagram}
     }
 
-    private getImage() {
-        // @ts-ignore
-        domtoimage.toBlob(this.node?.resizable).then((blob) => {
-            saveAs(blob, 'image.png')
-        });
-    }
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         //Вычитать и отобразить данные
         const userComponentName = this.props.context.userProfile.get('params').array()
@@ -396,14 +401,8 @@ class DatasetDiagram extends React.Component<any, any> {
                 <Menu.Item key='exportToExcel'>
                     exportToExcel
                 </Menu.Item>
-                <Menu.Item key='getImage'>
-                    getImage
-                </Menu.Item>
             </Menu>
         );
-
-        //let responsiveLine =
-
         return <div>
             <Dropdown overlay={menu} placement='bottomLeft'>
                 <Button style={{color: 'rgb(151, 151, 151)'}}>
