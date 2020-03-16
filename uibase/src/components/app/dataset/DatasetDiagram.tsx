@@ -5,7 +5,7 @@ import {ResponsiveLine} from "@nivo/line";
 import {ResponsivePie} from "@nivo/pie";
 import {AxisProps} from "@nivo/axes"
 import {diagramAnchorMap} from "../../../utils/consts";
-import {Button, Dropdown, Menu} from "antd";
+import {Button, Dropdown, Menu, Modal} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
@@ -15,6 +15,7 @@ import domtoimage from 'dom-to-image';
 import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
 import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
+import SaveDatasetComponent from "./SaveDatasetComponent";
 
 interface Props {
 }
@@ -65,12 +66,16 @@ class DatasetDiagram extends React.Component<any, any> {
             axisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
-            diagramType: this.props.viewObject.get('diagramType') || "Line"
+            diagramType: this.props.viewObject.get('diagramType') || "Line",
+            saveMenuVisible: false
         };
     }
 
     //2.Добавление в action handler
     onActionMenu(e : any) {
+        if (e.key === 'saveReport') {
+            this.handleSaveMenu()
+        }
         if (e.key.split('.').includes('axisXPosition')) {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
@@ -237,6 +242,10 @@ class DatasetDiagram extends React.Component<any, any> {
             });
     };
 
+    handleSaveMenu = () => {
+        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+    };
+
     private drawBar() {
         function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
             const distIndexes = getUniqueFromData(rowData, indexedBy);
@@ -276,6 +285,7 @@ class DatasetDiagram extends React.Component<any, any> {
             legendOffset: 0
         };
         return <div>
+
             <Resizable ref={(n) => { this.node = n}}
                        style={resizeStyle}
                        defaultSize={{
@@ -374,6 +384,7 @@ class DatasetDiagram extends React.Component<any, any> {
             legendOffset: 0
         };
         let selectedKeys = this.getSelectedKeys();
+        const { t } = this.props;
         const menu = (
             //1.Добавление в меню
             <Menu
@@ -381,6 +392,9 @@ class DatasetDiagram extends React.Component<any, any> {
                 selectedKeys={selectedKeys}
                 style={{width: '180px'}}
             >
+                <Menu.Item key='saveReport'>
+                    Save Report
+                </Menu.Item>
                 <Menu.SubMenu title={'axisXPosition'}>
                     {this.state.AxisXPositionType.map((p: string) =>
                         <Menu.Item key={`axisXPosition.${p}`} style={{width: '65px'}}>
@@ -411,6 +425,18 @@ class DatasetDiagram extends React.Component<any, any> {
             </Menu>
         );
         return <div>
+            <Modal
+                key="save_menu"
+                width={'500px'}
+                title={t('saveReport')}
+                visible={this.state.saveMenuVisible}
+                footer={null}
+                onCancel={this.handleSaveMenu}
+            >
+                <SaveDatasetComponent
+                    {...this.props}
+                />
+            </Modal>
             <Dropdown overlay={menu} placement='bottomLeft'>
                 <Button style={{color: 'rgb(151, 151, 151)'}}>
                     <FontAwesomeIcon icon={faChevronDown} size='xs'
