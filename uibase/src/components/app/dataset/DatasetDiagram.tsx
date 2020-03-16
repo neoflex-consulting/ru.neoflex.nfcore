@@ -81,13 +81,13 @@ class DatasetDiagram extends React.Component<any, any> {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
         if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context).then(blob => {
+            handleExportDocx(this.props.context.docxHandlers).then(blob => {
                 saveAs(blob, "example.docx");
                 console.log("Document created successfully");
             });
         }
         if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context).then((blob) => {
+            handleExportExcel(this.props.context.excelHandlers).then((blob) => {
                 saveAs(new Blob([blob]), 'example.xlsx')
                 console.log("Document created successfully");
                 }

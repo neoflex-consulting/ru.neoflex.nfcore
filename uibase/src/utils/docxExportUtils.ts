@@ -18,12 +18,11 @@ export interface docxExportObject {
     textData?: string
 }
 
-//context приложения EcoreApp
-async function handleExportDocx(context: any) {
+async function handleExportDocx(handlers: any[]) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
-    for (let i = 0; i < context.docxHandlers.length; i++) {
-        const docxData: docxExportObject = context.docxHandlers[i]();
+    for (let i = 0; i < handlers.length; i++) {
+        const docxData: docxExportObject = handlers[i]();
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
             //cast to ArrayBuffer

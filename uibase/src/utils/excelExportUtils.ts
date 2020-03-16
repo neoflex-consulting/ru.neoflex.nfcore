@@ -20,15 +20,14 @@ export interface excelExportObject {
     }
 }
 
-//context приложения EcoreApp
-async function handleExportExcel(context: any) {
+async function handleExportExcel(handlers: any[]) {
     //Смещение отностиельно 0 ячейки
     let offset = 1;
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet();
 
-    for (let i = 0; i < context.excelHandlers.length; i++) {
-        const excelData: excelExportObject = context.excelHandlers[i]();
+    for (let i = 0; i < handlers.length; i++) {
+        const excelData: excelExportObject = handlers[i]();
         if (excelData.excelComponentType === excelElementExportType.diagram && excelData.diagramData !== undefined) {
             //Добавление диаграммы в png
             //cast to ArrayBuffer
