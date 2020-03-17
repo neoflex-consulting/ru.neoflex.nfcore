@@ -246,9 +246,6 @@ class EcoreApp extends React.Component<any, State> {
                 this.state.pathFull.forEach((p: any, index: any) => {
                     if (p.appModule === appModuleName) {splitPathFull.push(index)}
                 })
-                // const splitPathFull = this.state.pathFull
-                //     .map( (p:any, index: any) => {if (p.appModule === appModuleName) {return index}})
-                //     .filter ((p: any)=> p !== undefined);
                 if (splitPathFull.length === 0) {
                     this.state.pathFull.forEach( (p:any) => {
                         path.push(p)
