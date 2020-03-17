@@ -696,6 +696,7 @@ class EcoreApp extends React.Component<any, State> {
 
         //TODO добавить отдельный метод по аналогии createUserProfile?
         this.updateContext({docxHandlers: []});
+        this.updateContext({excelHandlers: []});
     }
 
     render = () => {

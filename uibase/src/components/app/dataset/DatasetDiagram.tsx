@@ -5,14 +5,17 @@ import {ResponsiveLine} from "@nivo/line";
 import {ResponsivePie} from "@nivo/pie";
 import {AxisProps} from "@nivo/axes"
 import {diagramAnchorMap} from "../../../utils/consts";
-import {Button, Dropdown, Menu} from "antd";
+import {Button, Dropdown, Menu, Modal} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown} from "@fortawesome/free-solid-svg-icons";
 import {API} from "../../../modules/api";
 import Ecore from "ecore";
-import { Resizable } from "re-resizable";
+import {Resizable } from "re-resizable";
 import domtoimage from 'dom-to-image';
-import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
+import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
+import SaveDatasetComponent from "./SaveDatasetComponent";
 
 interface Props {
 }
@@ -40,13 +43,11 @@ const resizeStyle = {
 
 class DatasetDiagram extends React.Component<any, any> {
 
-    private chartRef: React.RefObject<HTMLDivElement>;
-    private resizebleRef: React.RefObject<Resizable>;
+    private node: (Resizable|null);
 
     constructor(props: any) {
         super(props);
-        this.chartRef = React.createRef<HTMLDivElement>();
-        this.resizebleRef = React.createRef<Resizable>();
+
         this.state = {
             columnDefs: [],
             rowData: [],
@@ -65,12 +66,16 @@ class DatasetDiagram extends React.Component<any, any> {
             axisYLegend: this.props.viewObject.get('axisYLegend') || "",
             //Пока цвет задаётся через цветовые схемы
             colorSchema: this.props.viewObject.get('colorSchema') || "",
-            diagramType: this.props.viewObject.get('diagramType') || "Line"
+            diagramType: this.props.viewObject.get('diagramType') || "Line",
+            saveMenuVisible: false
         };
     }
 
     //2.Добавление в action handler
     onActionMenu(e : any) {
+        if (e.key === 'saveReport') {
+            this.handleSaveMenu()
+        }
         if (e.key.split('.').includes('axisXPosition')) {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
@@ -81,7 +86,17 @@ class DatasetDiagram extends React.Component<any, any> {
             this.setSelectedKey(e.key.split('.')[0], e.key.split('.')[1])
         }
         if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context)
+            handleExportDocx(this.props.context.docxHandlers).then(blob => {
+                saveAs(blob, "example.docx");
+                console.log("Document created successfully");
+            });
+        }
+        if (e.key === 'exportToExcel') {
+            handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                saveAs(new Blob([blob]), 'example.xlsx')
+                console.log("Document created successfully");
+                }
+            );
         }
     }
 
@@ -98,7 +113,10 @@ class DatasetDiagram extends React.Component<any, any> {
     componentDidMount(): void {
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        } 
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
+        }
         if (this.state.AxisXPositionType.length === 0) {
             this.getAllEnumValues("AxisXPositionType")
         }
@@ -116,6 +134,9 @@ class DatasetDiagram extends React.Component<any, any> {
         if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
             this.props.context.docxHandlers.pop()
         }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
     }
 
     private setSelectedKey(parameterKey?: string, parameterValue?: string) {
@@ -130,14 +151,41 @@ class DatasetDiagram extends React.Component<any, any> {
     }
 
     private getDocxData(): docxExportObject {
-        // let width = (this.resizebleRef.current) ? this.resizebleRef.current.size.width : 1200;
-        // let height = (this.resizebleRef.current) ? this.resizebleRef.current.size.height : 400;
-        return {
-            docxComponentType : docxElementExportType.diagram,
-            // Через document.getElementById не работает
-            // @ts-ignore
-            diagramData: domtoimage.toBlob(this.chartRef.current)
-        };
+        const width = (this.node) ? this.node.size.width : 700;
+        const height = (this.node) ? this.node.size.height : 400;
+        if (this.node && this.node?.resizable !== null) {
+            return {
+                docxComponentType : docxElementExportType.diagram,
+                diagramData: {
+                    blob: domtoimage.toBlob(this.node?.resizable,{
+                        width: width,
+                        height: height
+                    }),
+                    width: width,
+                    height: height
+                }
+            };
+        }
+        return {docxComponentType: docxElementExportType.diagram}
+    }
+
+    private getExcelData(): excelExportObject {
+        const width = (this.node) ? this.node.size.width : 700;
+        const height = (this.node) ? this.node.size.height : 400;
+        if (this.node && this.node?.resizable !== null) {
+            return {
+                excelComponentType: excelElementExportType.diagram,
+                diagramData: {
+                    blob: domtoimage.toBlob(this.node?.resizable, {
+                        width: width,
+                        height: height
+                    }),
+                    width: width,
+                    height: height
+                }
+            };
+        }
+        return {excelComponentType: excelElementExportType.diagram}
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -194,6 +242,10 @@ class DatasetDiagram extends React.Component<any, any> {
             });
     };
 
+    handleSaveMenu = () => {
+        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+    };
+
     private drawBar() {
         function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
             const distIndexes = getUniqueFromData(rowData, indexedBy);
@@ -232,7 +284,14 @@ class DatasetDiagram extends React.Component<any, any> {
             legendPosition: 'middle',
             legendOffset: 0
         };
-        return <div style={{height:"300px"}}>
+        return <div>
+
+            <Resizable ref={(n) => { this.node = n}}
+                       style={resizeStyle}
+                       defaultSize={{
+                           width: 700,
+                           height: 400
+                       }}>
             <ResponsiveBar
                 data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 keys={distKeys}
@@ -278,6 +337,7 @@ class DatasetDiagram extends React.Component<any, any> {
                 motionStiffness={90}
                 motionDamping={15}
             />
+            </Resizable>
         </div>
     }
 
@@ -324,6 +384,7 @@ class DatasetDiagram extends React.Component<any, any> {
             legendOffset: 0
         };
         let selectedKeys = this.getSelectedKeys();
+        const { t } = this.props;
         const menu = (
             //1.Добавление в меню
             <Menu
@@ -331,6 +392,9 @@ class DatasetDiagram extends React.Component<any, any> {
                 selectedKeys={selectedKeys}
                 style={{width: '180px'}}
             >
+                <Menu.Item key='saveReport'>
+                    Save Report
+                </Menu.Item>
                 <Menu.SubMenu title={'axisXPosition'}>
                     {this.state.AxisXPositionType.map((p: string) =>
                         <Menu.Item key={`axisXPosition.${p}`} style={{width: '65px'}}>
@@ -355,10 +419,24 @@ class DatasetDiagram extends React.Component<any, any> {
                 <Menu.Item key='exportToDocx'>
                     exportToDocx
                 </Menu.Item>
+                <Menu.Item key='exportToExcel'>
+                    exportToExcel
+                </Menu.Item>
             </Menu>
         );
-
         return <div>
+            <Modal
+                key="save_menu"
+                width={'500px'}
+                title={t('saveReport')}
+                visible={this.state.saveMenuVisible}
+                footer={null}
+                onCancel={this.handleSaveMenu}
+            >
+                <SaveDatasetComponent
+                    {...this.props}
+                />
+            </Modal>
             <Dropdown overlay={menu} placement='bottomLeft'>
                 <Button style={{color: 'rgb(151, 151, 151)'}}>
                     <FontAwesomeIcon icon={faChevronDown} size='xs'
@@ -366,8 +444,7 @@ class DatasetDiagram extends React.Component<any, any> {
                 </Button>
             </Dropdown>
             {/*Ссылка для выгрузки диаграммы в png*/}
-            <div ref={this.chartRef}>
-            <Resizable ref={this.resizebleRef}
+            <Resizable ref={(n) => { this.node = n}}
             style={resizeStyle}
             defaultSize={{
                 width: 700,
@@ -419,7 +496,6 @@ class DatasetDiagram extends React.Component<any, any> {
                 />
         </Resizable>
         </div>
-        </div>
     }
 
     private drawPie() {
@@ -440,7 +516,13 @@ class DatasetDiagram extends React.Component<any, any> {
             }
             return dataForChart
         }
-        return <div style={{height:"300px"}}>
+        return <div>
+            <Resizable ref={(n) => { this.node = n}}
+                       style={resizeStyle}
+                       defaultSize={{
+                           width: 700,
+                           height: 400
+                       }}>
             <ResponsivePie
                 data={prepareData(this.state.indexBy, this.state.keyColumn, this.state.valueColumn, this.state.rowData)}
                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
@@ -486,6 +568,7 @@ class DatasetDiagram extends React.Component<any, any> {
                     }
                 ]}
             />
+            </Resizable>
         </div>
     }
 

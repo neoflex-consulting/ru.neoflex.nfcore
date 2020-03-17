@@ -16,7 +16,9 @@ import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
-import { handleExportDocx, docxExportObject, docxElementExportType } from "../../../utils/docxExportUtils";
+import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
@@ -124,7 +126,17 @@ class DatasetGrid extends React.Component<any, any> {
             this.handleSaveMenu()
         }
         if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context)
+            handleExportDocx(this.props.context.docxHandlers).then(blob => {
+                saveAs(blob, "example.docx");
+                console.log("Document created successfully");
+            });
+        }
+        if (e.key === 'exportToExcel') {
+            handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                    saveAs(new Blob([blob]), 'example.xlsx')
+                    console.log("Document created successfully");
+                }
+            );
         }
     }
 
@@ -179,7 +191,30 @@ class DatasetGrid extends React.Component<any, any> {
         }
         return  {
             docxComponentType : docxElementExportType.grid,
-            gridData: tableData
+            gridData:(tableData.length == 0) ? [[]] : tableData
+        };
+    }
+
+    private getExcelData() : excelExportObject {
+        let header = [];
+        for (const elem of this.state.columnDefs) {
+            header.push({name: elem.get("headerName"), filterButton: true})
+        }
+        let tableData = [];
+        for (const elem of this.state.rowData) {
+            let dataRow = [];
+            for (const prop in elem) {
+                dataRow.push(elem[prop])
+            }
+            tableData.push(dataRow)
+        }
+        return  {
+            excelComponentType : excelElementExportType.grid,
+            gridData: {
+                tableName: this.props.viewObject.get('name'),
+                columns: header,
+                rows: (tableData.length == 0) ? [[]] : tableData
+            }
         };
     }
 
@@ -206,7 +241,10 @@ class DatasetGrid extends React.Component<any, any> {
     componentDidMount(): void {
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        } 
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
+        }
         if (this.state.themes.length === 0) {
             this.getAllThemes()
         }
@@ -219,6 +257,9 @@ class DatasetGrid extends React.Component<any, any> {
     componentWillUnmount(): void {
         if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
             this.props.context.docxHandlers.pop()
+        }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
         }
     }
 
@@ -322,6 +363,9 @@ class DatasetGrid extends React.Component<any, any> {
                 </Menu.Item>
                 <Menu.Item key='exportToDocx'>
                     exportToDocx
+                </Menu.Item>
+                <Menu.Item key='exportToExcel'>
+                    exportToExcel
                 </Menu.Item>
             </Menu>
         );
