@@ -27,7 +27,7 @@
     "@nivo/axes": "^0.61.0",
     "ag-grid-community": "23.0.0",
     "ag-grid-react": "23.0.0",
-    "antd": "4.0.3",
+    "antd": "3.26.7",
     "brace": "^0.11.1",
     "date-fns": "^2.9.0",
     "docx": "^5.0.2",

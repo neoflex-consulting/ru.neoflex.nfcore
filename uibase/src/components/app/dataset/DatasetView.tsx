@@ -4,12 +4,8 @@ import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faSync} from '@fortawesome/free-solid-svg-icons';
-import {Button, DatePicker, Drawer, Select} from 'antd';
+import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
-import moment from 'moment';
-import {operationsMapper} from '../../../utils/consts';
-
-const operationsMapper_: any = operationsMapper;
 
 const { Option, OptGroup } = Select;
 
@@ -258,11 +254,10 @@ class DatasetView extends React.Component<any, State> {
         this.runQuery(this.state.currentDatasetComponent, newServerFilter);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         let serverFilters: any[] = [];
-        newServerFilter.map( (f: any) => {
-            if (f.datasetColumn !== undefined && f.datasetColumn !== null) {
-                serverFilters.push(f)
-            }
-        });
+        newServerFilter
+            .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+            .forEach((f: any)=> serverFilters.push(f)
+        )
         this.props.context.changeUserProfile(datasetComponentId, {serverFilters: serverFilters})
     };
 
