@@ -16,6 +16,7 @@ import {handleExportDocx, docxExportObject, docxElementExportType} from "../../.
 import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
 import SaveDatasetComponent from "./SaveDatasetComponent";
+import _ from 'lodash';
 
 interface Props {
 }
@@ -49,7 +50,6 @@ class DatasetDiagram extends React.Component<any, any> {
         super(props);
 
         this.state = {
-            columnDefs: [],
             rowData: [],
             //Enums
             AxisXPositionType: [],
@@ -93,7 +93,7 @@ class DatasetDiagram extends React.Component<any, any> {
         }
         if (e.key === 'exportToExcel') {
             handleExportExcel(this.props.context.excelHandlers).then((blob) => {
-                saveAs(new Blob([blob]), 'example.xlsx')
+                saveAs(new Blob([blob]), 'example.xlsx');
                 console.log("Document created successfully");
                 }
             );
@@ -197,10 +197,6 @@ class DatasetDiagram extends React.Component<any, any> {
             : JSON.parse(userComponentName[0].get('value'))['name'];
         if (this.props.context.datasetComponents
             && this.props.context.datasetComponents[componentName] !== undefined) {
-            if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
-                const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
-                this.setState({columnDefs})
-            }
             if (JSON.stringify(prevState.rowData) !== JSON.stringify(this.props.context.datasetComponents[componentName]['rowData'])) {
                 const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                 this.setState({rowData})
@@ -247,23 +243,17 @@ class DatasetDiagram extends React.Component<any, any> {
     };
 
     private drawBar() {
-        function prepareData(indexedBy: string, keyColumn: string, dataColumn: string, rowData: any) {
-            const distIndexes = getUniqueFromData(rowData, indexedBy);
-            let dataForChart = [];
-
-            if (distIndexes.length !== 0) {
-                for (let i = 0; i < distIndexes.length; i++) {
-                    let dataObject = {};
-                    //Подписи под столбцом
-                    Object.defineProperty(dataObject, indexedBy, {value : distIndexes[i]});
-                    for (let j = 0; j < rowData.length; j++) {
-                        if (rowData[j][indexedBy] === distIndexes[i]) {
-                            //Данные
-                            Object.defineProperty(dataObject, rowData[j][keyColumn], {value : rowData[j][dataColumn]})
-                        }
-                    }
-                    dataForChart.push(dataObject)
-                }
+        function prepareData(indexedBy: string, keyColumn: string, valueColumn: string, rowData: any) {
+            let dataForChart: any[] = [];
+            const groups = _.groupBy(rowData, indexedBy);
+            for (const group of Object.keys(groups)) {
+                let xyData = groups[group].map(r => {
+                    return {[keyColumn]: r[keyColumn], [valueColumn]: r[valueColumn]}
+                });
+                dataForChart.push(xyData.reduce((acc, curr)=> {
+                    acc[curr[keyColumn]] = curr[valueColumn]
+                    return acc
+                }, {[indexedBy]: group}));
             }
             return dataForChart
         }
@@ -342,29 +332,20 @@ class DatasetDiagram extends React.Component<any, any> {
     }
 
     private drawLine() {
-        function prepareData(indexedBy: string, xColumn: string, yColumn: string, rowData: any) : any[] {
-            const distIndexes = getUniqueFromData(rowData, indexedBy);
-            let dataForChart = [];
-            if (distIndexes.length !== 0) {
-                for (let i = 0; i < distIndexes.length; i++) {
-                    let lineDataObject = []; //Координаты отдельной линии
-                    //id - одна линия
-                    for (let j = 0; j < rowData.length; j++) {
-                        //Разбиваем датасет на линии
-                        if (rowData[j][indexedBy] === distIndexes[i]) {
-                            //Данные
-                            lineDataObject.push({
-                                "x": rowData[j][xColumn],
-                                "y": rowData[j][yColumn]
-                            })
-                        }
-                    }
+        function prepareData(indexedBy: string, keyColumn: string, valueColumn: string, rowData: any) : any[] {
+            let dataForChart: any[] = [];
+                const groups = _.groupBy(rowData, indexedBy);
+                for (const group of Object.keys(groups)) {
+                    let xyData = groups[group].map(r => {
+                        return {[keyColumn]: r[keyColumn], [valueColumn]: r[valueColumn], [indexedBy]:r[indexedBy]}
+                    });
                     dataForChart.push({
-                        "id":distIndexes[i],
-                        "data":lineDataObject
-                    })
+                        "id": group,
+                        "data": xyData.map(r => {
+                            return {"x": r[keyColumn], "y": r[valueColumn]}
+                        })
+                    });
                 }
-            }
             return dataForChart
         }
         const axisX : AxisProps  = {
@@ -499,20 +480,16 @@ class DatasetDiagram extends React.Component<any, any> {
     }
 
     private drawPie() {
-        function prepareData(IndexedBy: string, keyColumn: string, valueColumn: string, data: any) : any[] {
-            let dataForChart = [];
-            if (data.length !== 0) {
-                for (let i = 0; i < data.length; i++) {
-                    //TODO нужно суммирование по id - data[i][headerColumn]
-                    let dataObject = {};
-                    //id
-                    Object.defineProperty(dataObject, "id", {value : data[i][IndexedBy]});
-                    //label
-                    Object.defineProperty(dataObject, "label", {value : data[i][keyColumn]});
-                    //value
-                    Object.defineProperty(dataObject, "value", {value : data[i][valueColumn]});
-                    dataForChart.push(dataObject)
-                }
+        function prepareData(indexedBy: string, keyColumn: string, valueColumn: string, rowData: any[]) : any[] {
+            let dataForChart: any[] = [];
+            const groups = _.groupBy(rowData, indexedBy);
+            for (const group of Object.keys(groups)) {
+                let xyData = groups[group].map(r => {
+                    return {[keyColumn]: r[keyColumn], [valueColumn]: r[valueColumn]}
+                });
+                dataForChart.push(xyData.reduce((acc, curr) => {
+                    return {"id": group, "value": curr[valueColumn], "label": curr[keyColumn]}
+                },{}));
             }
             return dataForChart
         }
