@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.dataset.impl
 
 import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.ApplicationFactory
+import ru.neoflex.nfcore.base.auth.AuthPackage
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DataType
@@ -25,6 +26,8 @@ class DatasetComponentInit {
         if (rs.resources.empty) {
             def datasetComponent = DatasetFactory.eINSTANCE.createDatasetComponent()
             datasetComponent.name = name
+            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
+            datasetComponent.setOwner(owner)
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
                 datasetComponent.setDataset(dataset)
@@ -37,6 +40,8 @@ class DatasetComponentInit {
             def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
             def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
+            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
+            datasetComponent.setOwner(owner)
             if (dataset) {
                 datasetComponent.setDataset(dataset)
                 datasetComponent.useServerFilter = true

@@ -133,24 +133,6 @@ class ApplicationInit {
                 componentElement1.name = 'Mandatory Reporting'
                 componentElement1.setComponent(userComponent1)
                 application.view = componentElement1
-
-                def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
-                referenceTree.name = "CatalogNode1"
-                def componentElement3 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement3.name = 'Mandatory Reporting'
-                componentElement3.setComponent(userComponent1)
-                def viewNode1 = ApplicationFactory.eINSTANCE.createViewNode()
-                viewNode1.name = 'Mandatory Reporting'
-                viewNode1.view = componentElement3
-                referenceTree.children.add(viewNode1)
-                def componentElement2 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement2.name = 'Tax Reporting'
-                componentElement2.setComponent(userComponent6)
-                def viewNode2 = ApplicationFactory.eINSTANCE.createViewNode()
-                viewNode2.name = 'Tax Reporting'
-                viewNode2.view = componentElement2
-                referenceTree.children.add(viewNode2)
-                application.setReferenceTree(referenceTree)
             }
 
             rs.resources.add(Context.current.store.createEObject(application))

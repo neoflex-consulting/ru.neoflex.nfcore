@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
+import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.application.Typography
 
 /*JdbcDriver*/
@@ -54,6 +55,7 @@ class JdbcDataset extends Dataset {
 /*View*/
 class DatasetComponent {
      QName name //default сделать по умолчанию (не редактируемый)
+     refers User owner
      contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
      Access access //Публичный, закрытый доступ
      op JSON createAllColumns()

@@ -4,12 +4,8 @@ import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faSync} from '@fortawesome/free-solid-svg-icons';
-import {Button, DatePicker, Drawer, Select} from 'antd';
+import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
-import moment from 'moment';
-import {operationsMapper} from '../../../utils/consts';
-
-const operationsMapper_: any = operationsMapper;
 
 const { Option, OptGroup } = Select;
 
@@ -27,7 +23,6 @@ interface State {
     allOperations: any[];
     updateData: boolean;
     filtersMenuVisible: boolean;
-    conditionPattern?: EObject;
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -57,9 +52,13 @@ class DatasetView extends React.Component<any, State> {
                     .then((result: Ecore.Resource[]) => {
                         const userComponentName = this.props.context.userProfile.get('params').array()
                             .filter( (p: any) => p.get('key') === this.props.viewObject._id);
-                        const currentDatasetComponent = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
+                        let currentDatasetComponent = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
                             result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
                             : result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === JSON.parse(userComponentName[0].get('value'))['name'])
+                        if (currentDatasetComponent === undefined) {
+                            currentDatasetComponent = result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
+                            this.props.context.changeUserProfile(this.props.viewObject._id, undefined)
+                        }
                         if (currentDatasetComponent) {
                             this.setState({currentDatasetComponent})
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
@@ -70,7 +69,7 @@ class DatasetView extends React.Component<any, State> {
                                     if (this.props.context.userProfile.get('userName') === 'admin') {
                                         allDatasetComponents.push(d)
                                     }
-                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('audit').get('createdBy')) {
+                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner')) {
                                         allDatasetComponents.push(d)
                                     }
                                     else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
@@ -124,7 +123,17 @@ class DatasetView extends React.Component<any, State> {
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
         if (userProfileValue.length !== 0) {
-            serverFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
+            let userProfileServerFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
+            userProfileServerFilters.forEach((f: any, index: any) =>
+                serverFilters.push({
+                    index: serverFilters.length + 1,
+                    datasetColumn: f.datasetColumn,
+                    operation: f.operation || 'EqualTo',
+                    value: f.value,
+                    enable: (f.enable !== null ? f.enable : false),
+                    type: f.type
+                })
+            )
         }
         else {
             resource.eContents()[0].get('serverFilter').array().forEach( (f: Ecore.Resource) => {
@@ -137,7 +146,7 @@ class DatasetView extends React.Component<any, State> {
                     serverFilters.push({
                         index: serverFilters.length + 1,
                         datasetColumn: f.get('datasetColumn').get('name'),
-                        operation: f.get('operation'),
+                        operation: f.get('operation') || 'EqualTo',
                         value: f.get('value'),
                         enable: (f.get('enable') !== null ? f.get('enable') : false),
                         type: f.get('datasetColumn').get('convertDataType')
@@ -154,7 +163,7 @@ class DatasetView extends React.Component<any, State> {
                             serverFilters.push({
                                 index: serverFilters.length + 1,
                                 datasetColumn: f.datasetColumn,
-                                operation: f.operation,
+                                operation: f.operation || 'EqualTo',
                                 value: f.value,
                                 enable: (f.enable !== null ? f.enable : false),
                                 type: f.type
@@ -189,16 +198,14 @@ class DatasetView extends React.Component<any, State> {
                 this.props.context.userProfile.eResource().to().params !== undefined) {
                 this.getAllDatasetComponents(false)
             }
+            else if (prevState.allDatasetComponents.length !== 0 &&
+                this.props.viewObject.get('datasetComponent').get('name') === this.state.currentDatasetComponent.eContents()[0].get('name')
+                && JSON.stringify(this.props.viewObject.get('datasetComponent').eResource().to()) !== JSON.stringify(this.state.currentDatasetComponent.to())
+            ) {
+                this.getAllDatasetComponents(false)
+            }
         }
     }
-
-    getConditionPattern() {
-        API.instance().findClass('dataset', 'Condition')
-            .then( (conditionPattern: EObject ) => {
-                this.setState({conditionPattern})
-            })
-    };
-
 
     private runQuery(resource: Ecore.Resource, componentParams: Object[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
@@ -209,32 +216,9 @@ class DatasetView extends React.Component<any, State> {
             });
     }
 
-    //updateUserProfile(resource: Ecore.Resource, componentParams: Object[]) {
-    //     //const datasetComponentName = resource.eContents()[0].get('name');
-    //     const datasetComponentId = resource.eContents()[0]._id;
-    //     //const datasetComponentViewId = this.props.viewObject._id;
-    //     this.props.context.changeUserProfile(datasetComponentId, {serverFilters: componentParams})
-
-        //this.props.viewObject.get('datasetComponent').get('serverFilter').clear();
-        // componentParams.forEach((f: any) => {
-        //     if (f['operation'] !== undefined) {
-        //         const datasetColumn = this.props.viewObject.get('dataset').get('datasetColumn').array().filter((c: any) => c.get('name') === f['datasetColumn']);
-        //         const params = this.state.conditionPattern!.create({
-        //             datasetColumn: datasetColumn[0],
-        //             operation: f['operation'],
-        //             value: f['value'],
-        //             enable: f['enable'],
-        //             type: f['type']
-        //         });
-        //         //this.props.viewObject.get('datasetComponent').get('serverFilter').add(params)
-        //     }
-        // })
-    //}
-
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllOperations()}
-        if (!this.state.conditionPattern) this.getConditionPattern();
     }
 
     componentWillUnmount() {
@@ -270,39 +254,12 @@ class DatasetView extends React.Component<any, State> {
         this.runQuery(this.state.currentDatasetComponent, newServerFilter);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         let serverFilters: any[] = [];
-        newServerFilter.map( (f: any) => {
-            if (f.datasetColumn !== undefined && f.datasetColumn !== null) {
-                serverFilters.push(f)
-            }
-        });
+        newServerFilter
+            .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+            .forEach((f: any)=> serverFilters.push(f)
+        )
         this.props.context.changeUserProfile(datasetComponentId, {serverFilters: serverFilters})
     };
-
-    // saveResource = (currentDatasetComponent: EObject) => {
-    //     this.props.viewObject.set('datasetComponent', currentDatasetComponent.eContents()[0])
-    //     API.instance().saveResource(this.props.viewObject.eResource(), 99999)
-    //         .then((newResource: Ecore.Resource) => {
-    //             const newResourceSet: Ecore.ResourceSet = newResource.eContainer as Ecore.ResourceSet
-    //             const newViewObject: Ecore.EObject[] = newResourceSet.elements()
-    //                 .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-    //                 .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-    //                 .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-    //             this.props.context.updateContext!(({viewObject: newViewObject[0]}))
-    //
-    //
-    //             let allDatasetComponents: any[] = [];
-    //             this.state.allDatasetComponents.forEach( (d: Ecore.Resource) => {
-    //                 if (d.eContents()[0].get('name') === newViewObject[0].get('name')) {
-    //                     allDatasetComponents.push(newResource)
-    //                 }
-    //                 else {
-    //                     allDatasetComponents.push(d)
-    //                 }
-    //             });
-    //             if (allDatasetComponents.length !== 0) {
-    //                 this.setState({allDatasetComponents})
-    //             }
-    //         })};
 
     handleChange(e: any): void {
         let params: any = {name: e}
@@ -321,7 +278,7 @@ class DatasetView extends React.Component<any, State> {
         const { t } = this.props;
         return (
             <div>
-                {this.state.allDatasetComponents.length !== 0 &&
+                {this.state.allDatasetComponents.length !== 0 && this.state.currentDatasetComponent !== undefined &&
                     <div style={{display: 'inline-block'}}>
                         <Select
                             style={{ width: '250px'}}

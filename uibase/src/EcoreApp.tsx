@@ -118,12 +118,16 @@ class EcoreApp extends React.Component<any, State> {
                     value: JSON.stringify(userProfileParams)
                 });
             }
-            else {
+            else if (userProfileParams !== undefined) {
                 updatedObject[0].set('value', JSON.stringify(userProfileParams))
             }
             updatedUserProfile.get('params').clear();
-            if (otherObjects !== undefined && otherObjects.length !== 0 ) {updatedUserProfile.get('params').addAll(otherObjects)}
-            updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
+            if (otherObjects !== undefined && otherObjects.length !== 0 ) {
+                updatedUserProfile.get('params').addAll(otherObjects)
+            }
+            if (userProfileParams !== undefined) {
+                updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
+            }
         }
         return API.instance().saveResource(updatedUserProfile.eResource(), 99999).then(
             (newResource: Ecore.Resource) => {
@@ -238,10 +242,10 @@ class EcoreApp extends React.Component<any, State> {
                     }
                 });
             } else if (appModuleName !== this.state.appModuleName) {
-                const splitPathFull = this.state.pathFull.map( (p:any, index: any) => {
-                    if (p.appModule === appModuleName) {return index}
+                let splitPathFull: any = []
+                this.state.pathFull.forEach((p: any, index: any) => {
+                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
                 })
-                    .filter ((p: any)=> p !== undefined);
                 if (splitPathFull.length === 0) {
                     this.state.pathFull.forEach( (p:any) => {
                         path.push(p)
