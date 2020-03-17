@@ -73,7 +73,7 @@ class DatasetView extends React.Component<any, State> {
                                     if (this.props.context.userProfile.get('userName') === 'admin') {
                                         allDatasetComponents.push(d)
                                     }
-                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('audit').get('createdBy')) {
+                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner')) {
                                         allDatasetComponents.push(d)
                                     }
                                     else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
