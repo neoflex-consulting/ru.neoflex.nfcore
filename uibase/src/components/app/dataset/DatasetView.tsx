@@ -66,10 +66,10 @@ class DatasetView extends React.Component<any, State> {
                         result.forEach( (d: Ecore.Resource) => {
                             if (d.eContents()[0].get('dataset')) {
                                 if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    if (this.props.context.userProfile.get('userName') === 'admin') {
+                                    if (this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
                                         allDatasetComponents.push(d)
                                     }
-                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner')) {
+                                    else if (this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
                                         allDatasetComponents.push(d)
                                     }
                                     else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
@@ -250,15 +250,22 @@ class DatasetView extends React.Component<any, State> {
     };
 
     onChangeServerFilter = (newServerFilter: any[]): void => {
-        this.setState({serverFilters: newServerFilter});
-        this.runQuery(this.state.currentDatasetComponent, newServerFilter);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
-        let serverFilters: any[] = [];
-        newServerFilter
-            .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
-            .forEach((f: any)=> serverFilters.push(f)
-        )
-        this.props.context.changeUserProfile(datasetComponentId, {serverFilters: serverFilters})
+        if (newServerFilter !== undefined) {
+            this.setState({serverFilters: newServerFilter});
+            this.runQuery(this.state.currentDatasetComponent, newServerFilter);
+            let serverFilters: any[] = [];
+            newServerFilter
+                .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+                .forEach((f: any)=> serverFilters.push(f)
+                )
+            this.props.context.changeUserProfile(datasetComponentId, {serverFilters: serverFilters})
+        }
+        else {
+            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
+                this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs)
+            )
+        }
     };
 
     handleChange(e: any): void {

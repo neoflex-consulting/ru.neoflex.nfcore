@@ -5,6 +5,7 @@ import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.auth.AuthPackage
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.dataset.Access
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -28,6 +29,7 @@ class DatasetComponentInit {
             datasetComponent.name = name
             def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
             datasetComponent.setOwner(owner)
+            datasetComponent.access = Access.DEFAULT
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             if (dataset) {
                 datasetComponent.setDataset(dataset)
@@ -42,6 +44,7 @@ class DatasetComponentInit {
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
             def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
             datasetComponent.setOwner(owner)
+            datasetComponent.access = Access.DEFAULT
             if (dataset) {
                 datasetComponent.setDataset(dataset)
                 datasetComponent.useServerFilter = true
