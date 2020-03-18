@@ -277,10 +277,6 @@ class DatasetView extends React.Component<any, State> {
         this.findColumnDefs(currentDatasetComponent[0]);
     }
 
-    refresh(currentDatasetComponent: Ecore.Resource) {
-        this.findColumnDefs(currentDatasetComponent)
-    }
-
     render() {
         const { t } = this.props;
         return (
@@ -336,11 +332,6 @@ class DatasetView extends React.Component<any, State> {
                         </Select>
                     </div>
                 }
-                <Button
-                    title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginLeft: '10px'}}
-                    onClick={ ()=>this.refresh(this.state.currentDatasetComponent)}>
-                    <FontAwesomeIcon icon={faSync} size='xs'/>
-                </Button>
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
