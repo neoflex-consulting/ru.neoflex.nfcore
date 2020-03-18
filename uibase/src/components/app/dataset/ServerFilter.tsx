@@ -1,10 +1,11 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Form, Input, Select} from 'antd';
+import {Button, Col, Form, Input, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Column from "antd/lib/table/Column";
 
 interface Props {
     serverFilters?: Array<EObject>;
@@ -100,34 +101,42 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
         const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
-                <Form.Item  style={{ marginTop: '-38px', textAlign: "right", marginBottom: '40px' }}>
-                    <Button
-                        title="reset"
-                        style={{ width: '40px', marginRight: '10px' }}
-                        key={'resetButton'}
-                        value={'resetButton'}
-                        onClick={this.reset}
-                    >
-                        <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                    </Button>
-                    <Button
-                        title="add row"
-                        style={{ width: '40px', marginRight: '10px' }}
-                        key={'createNewRowButton'}
-                        value={'createNewRowButton'}
-                        onClick={this.createNewRow}
+                <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
+                    <Col span={12}>
+                        <div style={{display: "inherit"}}>Системные фильтры</div>
+                    </Col>
+                    <Col span={12} style={{textAlign: "right"}}>
+                        <Button
+                            title="reset"
+                            style={{width: '40px', marginRight: '10px'}}
+                            key={'resetButton'}
+                            value={'resetButton'}
+                            onClick={this.reset}
                         >
-                        <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-                    </Button>
-                    <Button
-                        title="run query"
-                        style={{ width: '40px' }}
-                        key={'runQueryButton'}
-                        value={'runQueryButton'}
-                        htmlType="submit"
+                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
+                        </Button>
+                        <Button
+                            title="add row"
+                            style={{width: '40px', marginRight: '10px'}}
+                            key={'createNewRowButton'}
+                            value={'createNewRowButton'}
+                            onClick={this.createNewRow}
                         >
-                        <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-                    </Button>
+                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
+                        </Button>
+                        <Button
+                            title="run query"
+                            style={{width: '40px'}}
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                        >
+                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
+                        </Button>
+                    </Col>
+
+
+
                 </Form.Item>
                 {
                     this.state.serverFilters !== undefined && this.state.serverFilters!
@@ -245,7 +254,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                     <Form.Item style={{ display: 'inline-block' }}>
                                         {getFieldDecorator(`${idEnable}`,
                                             {
-                                                initialValue: serverFilter.enable !== undefined ? serverFilter.enable.toString() : undefined,
+                                                initialValue: serverFilter.enable !== undefined ? t(serverFilter.enable.toString()) : undefined,
                                                 rules: [{
                                                     required:
                                                         getFieldValue(`${idDatasetColumn}`) ||
@@ -266,13 +275,13 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
                                                     value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
                                                 >
-                                                    false
+                                                    {t('false')}
                                                 </Select.Option>
                                                 <Select.Option
                                                     key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
                                                     value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
                                                 >
-                                                    true
+                                                    {t('true')}
                                                 </Select.Option>
                                             </Select>
                                         )}
