@@ -26,7 +26,7 @@ async function handleExportDocx(handlers: any[]) {
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
             //cast to ArrayBuffer
-            const arrayBuffer = await (await docxData.diagramData.blob).arrayBuffer();
+            const arrayBuffer = await new Response(await docxData.diagramData.blob).arrayBuffer();
             const image = Media.addImage(doc, arrayBuffer, docxData.diagramData.width, docxData.diagramData.height);
             paragraphs.push(new Paragraph(image))
         }

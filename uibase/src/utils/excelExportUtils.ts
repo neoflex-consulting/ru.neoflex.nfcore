@@ -31,7 +31,7 @@ async function handleExportExcel(handlers: any[]) {
         if (excelData.excelComponentType === excelElementExportType.diagram && excelData.diagramData !== undefined) {
             //Добавление диаграммы в png
             //cast to ArrayBuffer
-            const arrayBuffer = await (await excelData.diagramData.blob).arrayBuffer();
+            const arrayBuffer = await new Response(await excelData.diagramData.blob).arrayBuffer();
             const image = workbook.addImage({
                 buffer: arrayBuffer,
                 extension: 'png',
