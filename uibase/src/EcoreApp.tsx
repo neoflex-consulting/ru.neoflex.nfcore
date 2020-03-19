@@ -212,7 +212,8 @@ class EcoreApp extends React.Component<any, State> {
                         return (
                             this.state.aggregationDtoPattern!.create({
                                 datasetColumn: p['datasetColumn'],
-                                operation: p['operation']
+                                operation: p['operation'],
+                                enable: p['enable']
                             })
                         )
                     });

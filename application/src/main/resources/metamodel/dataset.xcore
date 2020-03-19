@@ -123,11 +123,13 @@ class ConditionDTO {
 class Aggregation {
     refers DatasetColumn datasetColumn
     Aggregate operation
+    boolean enable
 }
 
 class AggregationDTO {
     String datasetColumn
     String operation
+    boolean enable
 }
 
 enum QueryType {

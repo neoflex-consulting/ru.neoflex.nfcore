@@ -153,7 +153,7 @@ class DatasetView extends React.Component<any, State> {
                     serverFilters.push({
                         index: serverFilters.length + 1,
                         datasetColumn: f.datasetColumn,
-                        operation: f.operation || 'EqualTo',
+                        operation: f.operation,
                         value: f.value,
                         enable: (f.enable !== null ? f.enable : false),
                         type: f.type
@@ -167,6 +167,7 @@ class DatasetView extends React.Component<any, State> {
                         index: serverAggregates.length + 1,
                         datasetColumn: f.datasetColumn,
                         operation: f.operation,
+                        enable: (f.enable !== null ? f.enable : false),
                         type: f.type
                     })
                 )
@@ -221,6 +222,7 @@ class DatasetView extends React.Component<any, State> {
             {index: serverAggregates.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
+                enable: undefined,
                 type: undefined});
         this.setState({serverFilters, serverAggregates,  useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
         this.runQuery(resource, serverFilters, serverAggregates);
@@ -320,7 +322,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleChange(e: any): void {
-        let params: any = {name: e}
+        let params: any = {name: e};
         this.props.context.changeUserProfile(this.props.viewObject._id, params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
             .filter((c: any) => c.eContents()[0].get('name') === e);

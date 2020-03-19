@@ -111,6 +111,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations) {
+        logger.info("connectionToDB", "aggregations = " + aggregations.toString())
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -223,7 +224,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (aggregations) {
             //Aggregate
             for (int i = 0; i <= aggregations.size() - 1; ++i) {
-                if (column.name.contains(aggregations[i].datasetColumn)) {
+                if (column.name.contains(aggregations[i].datasetColumn) && aggregations[i].enable == true) {
                     def map = [:]
                     map["column"] = aggregations[i].datasetColumn
                     def operator = getConvertAggregate(aggregations[i].operation.toString().toLowerCase())

@@ -19,6 +19,7 @@ interface State {
         index: string,
         datasetColumn: string,
         operation: string,
+        enable: boolean,
         type: string
     }[] | undefined;
 }
@@ -51,6 +52,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 return {index: f.index,
                     datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
                     operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
+                    enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
                     type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
             } else {
                 return f
@@ -70,6 +72,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
             {index: serverAggregates.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
+                enable: undefined,
                 type: undefined});
         this.setState({serverAggregates})
     };
@@ -115,6 +118,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 .map((serverAggregate: any) => {
                     const idDatasetColumn = `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`;
                     const idOperation = `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`;
+                    const idEnable = `${JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: serverAggregate.enable})}`;
                     return (
                         <Form.Item key={serverAggregate.index} style={{ marginTop: '-30px' }}>
                     <span>{serverAggregate.index}</span>
@@ -124,7 +128,8 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                             initialValue: serverAggregate.datasetColumn,
                             rules: [{
                                 required:
-                                    getFieldValue(`${idOperation}`),
+                                    getFieldValue(`${idOperation}`)||
+                                    getFieldValue(`${idEnable}`),
                                 message: ' '
                             },{
                                 validator: (rule: any, value: any, callback: any) => {
@@ -187,7 +192,8 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                             initialValue: `${t(serverAggregate.operation)}` || undefined,
                             rules: [{
                                 required:
-                                    getFieldValue(`${idDatasetColumn}`),
+                                    getFieldValue(`${idDatasetColumn}`)||
+                                    getFieldValue(`${idEnable}`),
                                 message: ' '
                             }]
                         })(
@@ -213,6 +219,40 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                         </Select>
 
                     )}
+                    </Form.Item>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {getFieldDecorator(`${idEnable}`,
+                            {
+                                initialValue: serverAggregate.enable !== undefined ? serverAggregate.enable.toString() : undefined,
+                                rules: [{
+                                    required:
+                                        getFieldValue(`${idDatasetColumn}`) ||
+                                        getFieldValue(`${idOperation}`),
+                                    message: ' '
+                                }]
+                            })(
+                            <Select
+                                allowClear={true}
+                                style={{width: '66px'}}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: undefined})
+                                    this.handleChange(event)
+                                }}
+                            >
+                                <Select.Option
+                                    key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
+                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
+                                >
+                                    false
+                                </Select.Option>
+                                <Select.Option
+                                    key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
+                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
+                                >
+                                    true
+                                </Select.Option>
+                            </Select>
+                        )}
                     </Form.Item>
                     </Form.Item>
                 )})
