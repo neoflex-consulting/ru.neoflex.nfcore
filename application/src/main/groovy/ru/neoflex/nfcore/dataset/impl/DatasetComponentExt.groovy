@@ -166,7 +166,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
         if (conditions) {
             for (int i = 0; i <= conditions.size() - 1; ++i) {
-                logger.info("connectionToDB", "Current condition column " + conditions[i].datasetColumn.toLowerCase() + " operation " + getConvertOperator(conditions[i].operation.toString().toLowerCase()))
                 if (column.name.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
                     def currentColumn = column.find{ column -> column.name.toLowerCase() == conditions[i].datasetColumn.toLowerCase() }
                     def type = currentColumn.datasetColumn.convertDataType
@@ -275,10 +274,17 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     " WHERE ${serverFilters.select.join(' AND ')}"
         }
         if (serverAggregations) {
-            currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverAggregations.select.join(' , ')}" +
-                    " FROM (${currentQuery}) t" +
-                    " GROUP BY ${serverGroupBy.select.join(' , ')}"
+            if (serverGroupBy) {
+                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverAggregations.select.join(' , ')}" +
+                        " FROM (${currentQuery}) t" +
+                        " GROUP BY ${serverGroupBy.select.join(' , ')}"
+            } else {
+                currentQuery = "SELECT ${serverAggregations.select.join(' , ')}" +
+                        " FROM (${currentQuery}) t"
+            }
         }
+
+        logger.info("connectionToDB", "Starting query = " + currentQuery)
 
         Statement st = jdbcConnection.createStatement()
         ResultSet rs = st.executeQuery(currentQuery)

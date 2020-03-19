@@ -11,12 +11,19 @@ interface Props {
     serverAggregates?: Array<EObject>;
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
+    onChangeServerAggregation?: (newServerFilter: any[], paramName: paramType) => void;
 }
 
 interface State {
-    serverAggregates: EObject[] | undefined;
+    serverAggregates: {
+        index: string,
+        datasetColumn: string,
+        operation: string,
+        type: string
+    }[] | undefined;
 }
+
+
 
 class ServerAggregate extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
 
@@ -33,10 +40,6 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
             this.setState({serverAggregates: this.props.serverAggregates})
         }
     }
-
-    /*updateTableData(): void  {
-        this.props.onChangeServerFilter!(this.state.serverAggregates!, true)
-    }*/
 
     handleChange(e: any) {
         const target = JSON.parse(e);
@@ -74,7 +77,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverAggregates!, paramType.aggregate)
+                this.props.onChangeServerAggregation!(this.state.serverAggregates!, paramType.aggregate)
             }
             else {
                 this.props.context.notification('Aggregates notification','Please, correct the mistakes', 'error')
@@ -123,6 +126,36 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                 required:
                                     getFieldValue(`${idOperation}`),
                                 message: ' '
+                            },{
+                                validator: (rule: any, value: any, callback: any) => {
+                                    let isDuplicate: boolean = false;
+                                    if (this.state.serverAggregates !== undefined) {
+                                        const valueArr = this.state.serverAggregates
+                                            .filter((currentObject) => {
+                                                let currentField: string;
+                                                try {
+                                                    //Либо объект при валидации отдельного поля
+                                                    currentField = JSON.parse(rule.value).value
+                                                } catch (e) {
+                                                    //Либо значение этого поля при валидации перед запуском
+                                                    currentField = value
+                                                }
+                                                return (currentField)? currentObject.datasetColumn === currentField: false
+                                            })
+                                            .map(function (currentObject) {
+                                                return currentObject.datasetColumn
+                                        });
+                                        isDuplicate = valueArr.some(function (item, idx) {
+                                            return valueArr.indexOf(item) != idx
+                                        });
+                                    }
+                                    if (isDuplicate) {
+                                        callback('Error message');
+                                        return;
+                                    }
+                                    callback();
+                                },
+                                message: 'duplicate row',
                             }]
                         })(
                         <Select

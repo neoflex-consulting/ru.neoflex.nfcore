@@ -16,6 +16,11 @@ export enum paramType {
     order
 }
 
+enum changebleParams {
+    "allOperations",
+    "allAggregates"
+}
+
 interface Props {
 }
 
@@ -30,6 +35,7 @@ interface State {
     datasetComponentsData: any;
     allOperations: any[];
     allAggregates: any[];
+    allSorts: any[];
     updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
@@ -50,6 +56,7 @@ class DatasetView extends React.Component<any, State> {
             datasetComponentsData: undefined,
             allOperations: [],
             allAggregates: [],
+            allSorts: [],
             updateData: false,
             filtersMenuVisible: false,
             aggregatesMenuVisible: false
@@ -99,19 +106,13 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    getAllOperations() {
-        API.instance().findEnum('dataset', 'Operations')
+    getAllEnumValues(enumName:string, paramName:string) {
+        API.instance().findEnum('dataset', enumName)
             .then((result: EObject[]) => {
-                let allOperations = result.map( (o: any) => {return o});
-                this.setState({allOperations})
-            })
-    };
-
-    getAllAggregates() {
-        API.instance().findEnum('dataset', 'Aggregate')
-            .then((result: EObject[]) => {
-                let allAggregates = result.map( (o: any) => {return o});
-                this.setState({allAggregates})
+                let paramValue = result.map( (o: any) => {return o});
+                this.setState<never>({
+                    [paramName]: paramValue
+                })
             })
     };
 
@@ -220,8 +221,6 @@ class DatasetView extends React.Component<any, State> {
             {index: serverAggregates.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                value: undefined,
-                enable: undefined,
                 type: undefined});
         this.setState({serverFilters, serverAggregates,  useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
         this.runQuery(resource, serverFilters, serverAggregates);
@@ -261,8 +260,8 @@ class DatasetView extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
-        if (this.state.allOperations.length === 0) {this.getAllOperations()}
-        if (this.state.allAggregates.length === 0) {this.getAllAggregates()}
+        if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
+        if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
     }
 
     componentWillUnmount() {
@@ -324,8 +323,8 @@ class DatasetView extends React.Component<any, State> {
         let params: any = {name: e}
         this.props.context.changeUserProfile(this.props.viewObject._id, params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
-            .filter((c: any) => c.eContents()[0].get('name') === e)
-        this.setState({currentDatasetComponent: currentDatasetComponent[0]})
+            .filter((c: any) => c.eContents()[0].get('name') === e);
+        this.setState({currentDatasetComponent: currentDatasetComponent[0]});
         this.findColumnDefs(currentDatasetComponent[0]);
     }
 
@@ -449,7 +448,7 @@ class DatasetView extends React.Component<any, State> {
                                 serverAggregates={this.state.serverAggregates}
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
-                                onChangeServerFilter={this.onChangeServerParams}
+                                onChangeServerAggregation={this.onChangeServerParams}
                             />
                             :
                             <ServerAggregate/>
