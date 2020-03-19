@@ -24,7 +24,7 @@ class NotificationInstanceInit {
             def notificationInstance1 = NotificationFactory.eINSTANCE.createNotificationInstance()
             notificationInstance1.name = name
             notificationInstance1.date = new Date()
-            def notification = findOrCreateEObject(NotificationPackage.Literals.REPORT, "A 1993",false) as Notification
+            def notification = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1993",false) as Notification
             notificationInstance1.setNotification(notification)
             rs.resources.add(Context.current.store.createEObject(notificationInstance1))
         }
