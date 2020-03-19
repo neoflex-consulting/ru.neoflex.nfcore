@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
-import ru.neoflex.nfcore.application.impl.InstanceReportInit
-import ru.neoflex.nfcore.application.impl.ReportInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
+import ru.neoflex.nfcore.notification.impl.NotificationInit
+import ru.neoflex.nfcore.notification.impl.NotificationInstanceInit
 
 class DatasetPackageInit {
     private static final Logger logger = LoggerFactory.getLogger(DatasetPackageInit.class);
@@ -53,15 +53,15 @@ class DatasetPackageInit {
         /*ApplicationPackage*/
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
-        InstanceReportInit.deleteInstanceReport("InstanceReport1")
-        ReportInit.deleteReport("A 1993")
+        NotificationInstanceInit.deleteNotificationInstance("NotificationInstance1")
+        NotificationInit.deleteNotification("A 1993")
         AppModuleInit.deletedAppModule("ReportSingle")
         ApplicationInit.recreateApplication("Обязательная отчетность")
         ApplicationInit.recreateApplication("Налоговая отчетность")
         ApplicationInit.recreateApplication("Администрирование")
         AppModuleInit.recreateAppModule("ReportSingle")
-        ReportInit.recreateReport("A 1993")
-        InstanceReportInit.recreateInstanceReport("InstanceReport1")
+        NotificationInit.recreateNotification("A 1993")
+        NotificationInstanceInit.recreateNotificationInstance("NotificationInstance1")
         ApplicationInit.recreateApplicationLine("Линейная диаграмма")
         ApplicationInit.recreateApplicationPie("Круговая диаграмма")
         ApplicationInit.recreateApplicationBar("Ступенчатая диаграмма")

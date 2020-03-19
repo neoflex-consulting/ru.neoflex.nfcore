@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.dataset.Operations
+import ru.neoflex.nfcore.notification.Notification
 
 /* Components */
 abstract class Component {
@@ -54,6 +55,10 @@ abstract class ViewContainer extends ViewElement {
 }
 
 abstract class Icon extends ViewElement {	
+}
+
+class Calendar extends ViewElement {
+    contains Notification[] notification
 }
 
 class ClassFeature extends FormItem {

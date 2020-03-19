@@ -1,0 +1,51 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.reports/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.notification
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.application.AppModule
+import ru.neoflex.nfcore.base.types.JSON
+
+class ReportingDateOn {
+    String name
+}
+
+class Notification {
+	QName name
+	String shortName
+	refers AppModule AppModule
+	refers NotificationStatus defaultStatus
+	boolean archive
+	boolean weekendReporting
+	Periodicity periodicity
+	contains ReportingDateOn[] reportingDateOn
+	String deadlineDay
+	String deadlineTime
+	Periodicity calculationInterval
+    op JSON getNotificationInstances(String dateFrom, String dateTo)
+}
+
+class NotificationInstance {
+    QName name
+    refers Notification notification
+	Date date
+	contains NotificationStatus[] status
+}
+
+class NotificationStatus {
+	QName name
+	String[1] color
+	String description
+}
+
+enum Periodicity {
+    Day
+    Month
+    Quarter
+    Year
+}

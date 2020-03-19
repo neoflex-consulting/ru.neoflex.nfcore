@@ -86,10 +86,10 @@ class DatasetView extends React.Component<any, State> {
                         result.forEach( (d: Ecore.Resource) => {
                             if (d.eContents()[0].get('dataset')) {
                                 if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    if (this.props.context.userProfile.get('userName') === 'admin') {
+                                    if (this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
                                         allDatasetComponents.push(d)
                                     }
-                                    else if (this.props.viewObject.get('datasetComponent').get('audit') !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner')) {
+                                    else if (this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
                                         allDatasetComponents.push(d)
                                     }
                                     else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
@@ -300,24 +300,38 @@ class DatasetView extends React.Component<any, State> {
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
-        if (paramName === paramType.filter) {
-            this.setState({serverFilters: newServerParam});
-            this.runQuery(this.state.currentDatasetComponent, newServerParam, this.state.serverAggregates);
-        }
-        if (paramName === paramType.aggregate) {
-            this.setState({serverAggregates: newServerParam});
-            this.runQuery(this.state.currentDatasetComponent, this.state.serverFilters, newServerParam);
-        }
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
-        let ServerParam: any[] = [];
-        newServerParam
-            .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
-            .forEach((f: any)=> ServerParam.push(f));
-        if (paramName === paramType.filter) {
-            this.props.context.changeUserProfile(datasetComponentId, {serverFilters: ServerParam, serverAggregates: this.state.serverAggregates})
+        if (newServerParam !== undefined) {
+            if (paramName === paramType.filter) {
+                this.setState({serverFilters: newServerParam});
+                this.runQuery(this.state.currentDatasetComponent, newServerParam, this.state.serverAggregates);
+            }
+            if (paramName === paramType.aggregate) {
+                this.setState({serverAggregates: newServerParam});
+                this.runQuery(this.state.currentDatasetComponent, this.state.serverFilters, newServerParam);
+            }
+            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+            let ServerParam: any[] = [];
+            newServerParam
+                .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+                .forEach((f: any) => ServerParam.push(f));
+            if (paramName === paramType.filter) {
+                this.props.context.changeUserProfile(datasetComponentId, {
+                    serverFilters: ServerParam,
+                    serverAggregates: this.state.serverAggregates
+                })
+            }
+            if (paramName === paramType.aggregate) {
+                this.props.context.changeUserProfile(datasetComponentId, {
+                    serverFilters: this.state.serverFilters,
+                    serverAggregates: ServerParam
+                })
+            }
         }
-        if (paramName === paramType.aggregate) {
-            this.props.context.changeUserProfile(datasetComponentId, {serverFilters: this.state.serverFilters, serverAggregates: ServerParam})
+        else {
+            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
+                this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs)
+            )
         }
     };
 
@@ -328,10 +342,6 @@ class DatasetView extends React.Component<any, State> {
             .filter((c: any) => c.eContents()[0].get('name') === e);
         this.setState({currentDatasetComponent: currentDatasetComponent[0]});
         this.findColumnDefs(currentDatasetComponent[0]);
-    }
-
-    refresh(currentDatasetComponent: Ecore.Resource) {
-        this.findColumnDefs(currentDatasetComponent)
     }
 
     render() {
@@ -389,11 +399,6 @@ class DatasetView extends React.Component<any, State> {
                         </Select>
                     </div>
                 }
-                <Button
-                    title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginLeft: '10px'}}
-                    onClick={ ()=>this.refresh(this.state.currentDatasetComponent)}>
-                    <FontAwesomeIcon icon={faSync} size='xs'/>
-                </Button>
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
