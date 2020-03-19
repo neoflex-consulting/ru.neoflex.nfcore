@@ -6,12 +6,13 @@ import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Column from "antd/lib/table/Column";
+import {paramType} from "./DatasetView"
 
 interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], updateData: boolean) => void;
+    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
 }
 
 interface State {

@@ -63,7 +63,7 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(ConditionDTO[] conditions)
+     op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations)
      boolean useServerFilter
      contains Condition[] serverFilter //Состав серверного фильтра
 }
@@ -116,6 +116,18 @@ class ConditionDTO {
     String datasetColumn
     String operation
     String value
+    boolean enable
+}
+
+class Aggregation {
+    refers DatasetColumn datasetColumn
+    Aggregate operation
+    boolean enable
+}
+
+class AggregationDTO {
+    String datasetColumn
+    String operation
     boolean enable
 }
 
@@ -185,3 +197,4 @@ enum DataType {
     String
     Timestamp
 }
+

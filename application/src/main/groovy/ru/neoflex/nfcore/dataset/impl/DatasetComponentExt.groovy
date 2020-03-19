@@ -8,6 +8,7 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.dataset.AggregationDTO
 import ru.neoflex.nfcore.dataset.ConditionDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
@@ -15,6 +16,7 @@ import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Filter
 import ru.neoflex.nfcore.dataset.Operations
+import ru.neoflex.nfcore.dataset.Aggregate
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -88,9 +90,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<ConditionDTO> conditions) {
+    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations) {
         if (column) {
-            ResultSet rs = connectionToDB(conditions)
+            ResultSet rs = connectionToDB(conditions, aggregations)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -108,7 +110,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<ConditionDTO> conditions) {
+    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations) {
+        logger.info("connectionToDB", "aggregations = " + aggregations.toString())
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -132,6 +135,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
         /*Execute query*/
         def queryColumns = []
         def serverFilters = []
+        def serverAggregations = []
+        def serverGroupBy = []
 
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
@@ -216,16 +221,71 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        if (aggregations) {
+            //Aggregate
+            for (int i = 0; i <= aggregations.size() - 1; ++i) {
+                if (column.name.contains(aggregations[i].datasetColumn) && aggregations[i].enable == true) {
+                    def map = [:]
+                    map["column"] = aggregations[i].datasetColumn
+                    def operator = getConvertAggregate(aggregations[i].operation.toString().toLowerCase())
+                    if (operator == 'AVG' ) {
+                        map["select"] = "AVG(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'COUNT' ) {
+                        map["select"] = "COUNT(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'COUNT_DISTINCT' ) {
+                        map["select"] = "COUNT(DISTINCT t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'MAX' ) {
+                        map["select"] = "MAX(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'MEDIAN' ) {
+                        //TODO
+                    }
+                    if (operator == 'MIN' ) {
+                        map["select"] = "MIN(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'SUM' ) {
+                        map["select"] = "SUM(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                    }
+                    if (operator == 'UNDEFINED' ) {
+                    }
+                    if (!serverAggregations.contains(map)) {
+                        serverAggregations.add(map)
+                    }
+                }
+            }
+            //Group by
+            for (int i = 0; i <= column.size() - 1; ++i) {
+                def map = [:]
+                if (!serverAggregations.column.contains(column[i].name)) {
+                    map["select"] = "t.${column[i].name}"
+                    if (!serverGroupBy.contains(map)) {
+                        serverGroupBy.add(map)
+                    }
+                }
+            }
+        }
+
         String currentQuery
+        currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
         if (serverFilters) {
-            currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t" +
+            currentQuery = currentQuery +
                     " WHERE ${serverFilters.select.join(' AND ')}"
-            logger.info("connectionToDB", currentQuery)
         }
-        else {
-            currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
-            logger.info("connectionToDB", currentQuery)
+        if (serverAggregations) {
+            if (serverGroupBy) {
+                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverAggregations.select.join(' , ')}" +
+                        " FROM (${currentQuery}) t" +
+                        " GROUP BY ${serverGroupBy.select.join(' , ')}"
+            } else {
+                currentQuery = "SELECT ${serverAggregations.select.join(' , ')}" +
+                        " FROM (${currentQuery}) t"
+            }
         }
+
+        logger.info("connectionToDB", "Starting query = " + currentQuery)
 
         Statement st = jdbcConnection.createStatement()
         ResultSet rs = st.executeQuery(currentQuery)
@@ -235,7 +295,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     String getConvertOperator(String operator) {
         if (operator == Operations.LESS_THAN.toString().toLowerCase()) {return '<'}
         else if (operator == Operations.LESS_THEN_OR_EQUAL_TO.toString().toLowerCase()) {return '<='}
-        else if (operator== Operations.EQUAL_TO.toString().toLowerCase()) {return '='}
+        else if (operator == Operations.EQUAL_TO.toString().toLowerCase()) {return '='}
         else if (operator == Operations.GREATER_THAN.toString().toLowerCase()) {return '>'}
         else if (operator == Operations.GREATER_THAN_OR_EQUAL_TO.toString().toLowerCase()) {return '>='}
         else if (operator == Operations.NOT_EQUAL.toString().toLowerCase()) {return '!='}
@@ -247,6 +307,17 @@ class DatasetComponentExt extends DatasetComponentImpl {
         else if (operator == Operations.NOT_START_WITH.toString().toLowerCase()) {return 'LIKE_NOT_START'}
         else if (operator == Operations.END_ON.toString().toLowerCase()) {return 'LIKE_END'}
         else if (operator == Operations.NOT_END_ON.toString().toLowerCase()) {return 'LIKE_NOT_END'}
+    }
+
+    String getConvertAggregate(String aggregate) {
+        if (aggregate == Aggregate.AVERAGE.toString().toLowerCase()) {return 'AVG'}
+        else if (aggregate == Aggregate.COUNT.toString().toLowerCase()) {return 'COUNT'}
+        else if (aggregate == Aggregate.COUNT_DISTINCT.toString().toLowerCase()) {return 'COUNT_DISTINCT'}
+        else if (aggregate == Aggregate.MAXIMUM.toString().toLowerCase()) {return 'MAX'}
+        else if (aggregate == Aggregate.MEDIAN.toString().toLowerCase()) {return 'MEDIAN'}
+        else if (aggregate == Aggregate.MINIMUM.toString().toLowerCase()) {return 'MIN'}
+        else if (aggregate == Aggregate.SUM.toString().toLowerCase()) {return 'SUM'}
+        else if (aggregate == Aggregate.UNDEFINED.toString().toLowerCase()) {return 'UNDEFINED'}
     }
 
     private static final ClassLogger logger =
