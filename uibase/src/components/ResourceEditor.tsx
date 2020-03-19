@@ -490,13 +490,17 @@ class ResourceEditor extends React.Component<any, State> {
 
     addRef = (eObjects: Ecore.EObject[]): void => {
         const targetObject: { [key: string]: any } = this.state.targetObject
-        const { addRefPropertyName } = this.state
+        const { addRefPropertyName, currentNode } = this.state
         let updatedJSON: Object = {}
         let refsArray: Array<Object>
-        //too explosive?
-        const feature = this.state.mainEObject.eClass.get('eAllStructuralFeatures').find((feature: Ecore.EObject) => feature.get('name') === addRefPropertyName)
-        const upperBound = feature && feature.get('upperBound')
-        //res.eContents()[0] may not be null, I hope
+        let upperBound;
+        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+        contents(this.state.mainEObject).forEach(eObject => {
+            const feature = eObject.eClass.get('eAllStructuralFeatures').find((f: any)=> f.get('name') === addRefPropertyName)
+            if (feature !== undefined) {
+                upperBound = feature.get('upperBound')
+            }
+        });
         if (upperBound === -1) {
             refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
             eObjects.forEach((eObject) => {
@@ -504,7 +508,7 @@ class ResourceEditor extends React.Component<any, State> {
                     $ref: eObject.eURI(),
                     eClass: eObject.eClass.eURI()
                 })
-            })
+            });
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
             const firstEObject = eObjects.find((eObject: Ecore.EObject) => eObject.eURI() === this.state.selectedRefUries[0])

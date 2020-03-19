@@ -348,6 +348,9 @@ class DatasetView extends React.Component<any, State> {
         const { t } = this.props;
         return (
             <div>
+
+
+
                 {this.state.allDatasetComponents.length !== 0 && this.state.currentDatasetComponent !== undefined &&
                     <div style={{display: 'inline-block'}}>
                         <Select
@@ -423,6 +426,8 @@ class DatasetView extends React.Component<any, State> {
                     onClose={this.handleFiltersMenu}
                     mask={false}
                     maskClosable={false}
+
+
                 >
                     {
                         this.state.serverFilters
