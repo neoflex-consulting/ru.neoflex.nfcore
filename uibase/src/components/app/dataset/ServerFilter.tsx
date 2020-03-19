@@ -89,7 +89,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverFilters!)
+                this.props.onChangeServerFilter!(this.state.serverFilters!, paramType.filter)
                 }
             else {
                 this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
