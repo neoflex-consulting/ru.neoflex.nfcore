@@ -58,7 +58,7 @@ abstract class Icon extends ViewElement {
 }
 
 class Calendar extends ViewElement {
-    contains Notification[] notification
+    refers Notification[] notifications
 }
 
 class ClassFeature extends FormItem {
