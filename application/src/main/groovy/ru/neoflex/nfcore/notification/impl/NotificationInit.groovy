@@ -1,14 +1,14 @@
-package ru.neoflex.nfcore.application.impl
+package ru.neoflex.nfcore.notification.impl
 
 import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.AppModule
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.reports.ReportsFactory
-import ru.neoflex.nfcore.reports.ReportsPackage
+import ru.neoflex.nfcore.notification.NotificationFactory
+import ru.neoflex.nfcore.notification.NotificationPackage
 
-class ReportInit {
+class NotificationInit {
     static def findOrCreateEObject(EClass eClass, String name, boolean replace = false) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet
@@ -18,21 +18,21 @@ class ReportInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateReport(String name) {
-        def rs = DocFinder.create(Context.current.store, ReportsPackage.Literals.REPORT, [name: name])
+    static def recreateNotification(String name) {
+        def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
-            def report = ReportsFactory.eINSTANCE.createReport()
-            report.name = name
+            def notification = NotificationFactory.eINSTANCE.createNotification()
+            notification.name = name
             def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle",false) as AppModule
-            report.setAppModule(appModule1)
-            rs.resources.add(Context.current.store.createEObject(report))
+            notification.setAppModule(appModule1)
+            rs.resources.add(Context.current.store.createEObject(notification))
         }
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def deleteReport(String name) {
-        def rs = DocFinder.create(Context.current.store, ReportsPackage.Literals.REPORT, [name: name])
+    static def deleteNotification(String name) {
+        def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         while (!rs.resources.empty) {
             Context.current.store.deleteResource(rs.resources.remove(0).getURI())

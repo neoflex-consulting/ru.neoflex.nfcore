@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
-import ru.neoflex.nfcore.application.impl.InstanceReportInit
-import ru.neoflex.nfcore.application.impl.ReportInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
 
 class DatasetPackageInit {
@@ -53,15 +51,15 @@ class DatasetPackageInit {
         /*ApplicationPackage*/
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
-        InstanceReportInit.deleteInstanceReport("InstanceReport1")
-        ReportInit.deleteReport("A 1993")
+        //InstanceReportInit.deleteInstanceReport("InstanceReport1")
+        //ReportInit.deleteReport("A 1993")
         AppModuleInit.deletedAppModule("ReportSingle")
         ApplicationInit.recreateApplication("Обязательная отчетность")
         ApplicationInit.recreateApplication("Налоговая отчетность")
         ApplicationInit.recreateApplication("Администрирование")
         AppModuleInit.recreateAppModule("ReportSingle")
-        ReportInit.recreateReport("A 1993")
-        InstanceReportInit.recreateInstanceReport("InstanceReport1")
+       // ReportInit.recreateReport("A 1993")
+        //InstanceReportInit.recreateInstanceReport("InstanceReport1")
         ApplicationInit.recreateApplicationLine("Линейная диаграмма")
         ApplicationInit.recreateApplicationPie("Круговая диаграмма")
         ApplicationInit.recreateApplicationBar("Ступенчатая диаграмма")
