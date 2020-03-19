@@ -3,9 +3,10 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter, faSync} from '@fortawesome/free-solid-svg-icons';
+import {faFilter, faSync, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
+import ServerAggregate from './ServerAggregate';
 
 const { Option, OptGroup } = Select;
 
@@ -18,11 +19,14 @@ interface State {
     columnDefs: any[];
     rowData: any[];
     serverFilters: any[];
+    serverAggregates: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
     allOperations: any[];
+    allAggregates: any[];
     updateData: boolean;
     filtersMenuVisible: boolean;
+    aggregatesMenuVisible: boolean;
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -35,11 +39,14 @@ class DatasetView extends React.Component<any, State> {
             columnDefs: [],
             rowData: [],
             serverFilters: [],
+            serverAggregates: [],
             useServerFilter: false,
             datasetComponentsData: undefined,
             allOperations: [],
+            allAggregates: [],
             updateData: false,
-            filtersMenuVisible: false
+            filtersMenuVisible: false,
+            aggregatesMenuVisible: false
         }
     }
 
@@ -94,6 +101,14 @@ class DatasetView extends React.Component<any, State> {
             })
     };
 
+    getAllAggregates() {
+        API.instance().findEnum('dataset', 'Aggregate')
+            .then((result: EObject[]) => {
+                let allAggregates = result.map( (o: any) => {return o});
+                this.setState({allAggregates})
+            })
+    };
+
     findColumnDefs(resource: Ecore.Resource){
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
@@ -123,7 +138,8 @@ class DatasetView extends React.Component<any, State> {
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
         if (userProfileValue.length !== 0) {
-            let userProfileServerFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
+            //TODO разкомменитрвать, падает при добавлению фильтрации для аггрегации
+            /*let userProfileServerFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
             userProfileServerFilters.forEach((f: any, index: any) =>
                 serverFilters.push({
                     index: serverFilters.length + 1,
@@ -133,7 +149,7 @@ class DatasetView extends React.Component<any, State> {
                     enable: (f.enable !== null ? f.enable : false),
                     type: f.type
                 })
-            )
+            )*/
         }
         else {
             resource.eContents()[0].get('serverFilter').array().forEach( (f: Ecore.Resource) => {
@@ -181,7 +197,8 @@ class DatasetView extends React.Component<any, State> {
                 enable: undefined,
                 type: undefined});
         this.setState({serverFilters, useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
-        this.runQuery(resource, serverFilters);
+        //TODO передавать аггрегирующую функцию
+        this.runQuery(resource, serverFilters, []);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -207,9 +224,9 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    private runQuery(resource: Ecore.Resource, componentParams: Object[]) {
+    private runQuery(resource: Ecore.Resource, componentParams: Object[], aggregationParams: Object[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
-        this.props.context.runQuery(resource, componentParams)
+        this.props.context.runQuery(resource, componentParams, aggregationParams)
             .then((result: string) => {
                 this.setState({rowData: JSON.parse(result)});
                 this.updatedDatasetComponents(undefined, JSON.parse(result), datasetComponentName)
@@ -219,6 +236,7 @@ class DatasetView extends React.Component<any, State> {
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllOperations()}
+        if (this.state.allAggregates.length === 0) {this.getAllAggregates()}
     }
 
     componentWillUnmount() {
@@ -249,16 +267,32 @@ class DatasetView extends React.Component<any, State> {
         this.state.filtersMenuVisible ? this.setState({ filtersMenuVisible: false }) : this.setState({ filtersMenuVisible: true })
     };
 
+    handleAggregatesMenu = () => {
+        this.state.aggregatesMenuVisible ? this.setState({ aggregatesMenuVisible: false }) : this.setState({ aggregatesMenuVisible: true })
+    };
+
     onChangeServerFilter = (newServerFilter: any[]): void => {
         this.setState({serverFilters: newServerFilter});
-        this.runQuery(this.state.currentDatasetComponent, newServerFilter);
+        //TODO передавать аггрегирующие функции
+        this.runQuery(this.state.currentDatasetComponent, newServerFilter, []);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         let serverFilters: any[] = [];
         newServerFilter
             .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
-            .forEach((f: any)=> serverFilters.push(f)
-        )
+            .forEach((f: any)=> serverFilters.push(f))
         this.props.context.changeUserProfile(datasetComponentId, {serverFilters: serverFilters})
+    };
+
+    onChangeServerAggregate = (newServerAggregate: any[]): void => {
+        //TODO для смены аггрегирующей функции
+        this.setState({serverAggregates: newServerAggregate});
+        this.runQuery(this.state.currentDatasetComponent, [], newServerAggregate);
+        const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+        let serverAggregates: any[] = [];
+        newServerAggregate
+            .filter( (f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+            .forEach((f: any)=> serverAggregates.push(f))
+        this.props.context.changeUserProfile(datasetComponentId, {serverAggregates: serverAggregates})
     };
 
     handleChange(e: any): void {
@@ -342,6 +376,14 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <FontAwesomeIcon icon={faFilter} size='xs'/>
                 </Button>
+                <div style={{display: 'inline-block', height: '30px',
+                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <Button title={t('Aggregation')} style={{color: 'rgb(151, 151, 151)'}}
+                        onClick={this.handleAggregatesMenu}
+                >
+                    <FontAwesomeIcon icon={faObjectGroup} size='xs'/>
+                </Button>
                 <Drawer
                     placement='right'
                     title={t('filters')}
@@ -363,6 +405,29 @@ class DatasetView extends React.Component<any, State> {
                             />
                             :
                             <ServerFilter/>
+                    }
+                </Drawer>
+                <Drawer
+                    placement='right'
+                    title={t('groups')}
+                    width={'700px'}
+                    visible={this.state.aggregatesMenuVisible}
+                    onClose={this.handleAggregatesMenu}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        this.state.serverFilters
+                            ?
+                            <ServerAggregate
+                                {...this.props}
+                                serverAggregates={this.state.serverAggregates}
+                                columnDefs={this.state.columnDefs}
+                                allAggregates={this.state.allAggregates}
+                                onChangeServerFilter={this.onChangeServerAggregate}
+                            />
+                            :
+                            <ServerAggregate/>
                     }
                 </Drawer>
             </div>
