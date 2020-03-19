@@ -5,12 +5,13 @@ import {Button, Form, Input, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {paramType} from "./DatasetView"
 
 interface Props {
     serverAggregates?: Array<EObject>;
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], updateData: boolean) => void;
+    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
 }
 
 interface State {
@@ -73,7 +74,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverAggregates!)
+                this.props.onChangeServerFilter!(this.state.serverAggregates!, paramType.aggregate)
             }
             else {
                 this.props.context.notification('Aggregates notification','Please, correct the mistakes', 'error')

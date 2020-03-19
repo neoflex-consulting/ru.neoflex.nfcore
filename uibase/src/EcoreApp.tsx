@@ -181,8 +181,8 @@ class EcoreApp extends React.Component<any, State> {
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         let resourceSet = Ecore.ResourceSet.create();
-        let resourceParameters = resourceSet.create({ uri: '/parameterFilter' });
-        let resourceParameters1 = resourceSet.create({ uri: '/parameterAggregation' });
+        let resourceParameterFilters = resourceSet.create({ uri: '/parameterFilter' });
+        let resourceParameterAggregations = resourceSet.create({ uri: '/parameterAggregation' });
         let filters: EObject[] =
             componentParams === undefined
             ?
@@ -216,11 +216,11 @@ class EcoreApp extends React.Component<any, State> {
                             })
                         )
                     });
-        resourceParameters.addAll(filters);
-        let resourceStringList: Ecore.EObject[] = filters.length === 1 ? [resourceParameters.to()] : resourceParameters.to();
-        resourceParameters1.addAll(aggregations);
-        let resourceStringList1: Ecore.EObject[] = aggregations.length === 1 ? [resourceParameters1.to()] : resourceParameters1.to();
-        return API.instance().call(ref, methodName, [resourceStringList, resourceStringList1])
+        resourceParameterFilters.addAll(filters);
+        let resourceStringListFilters: Ecore.EObject[] = filters.length === 1 ? [resourceParameterFilters.to()] : resourceParameterFilters.to();
+        resourceParameterAggregations.addAll(aggregations);
+        let resourceStringListAggregations: Ecore.EObject[] = aggregations.length === 1 ? [resourceParameterAggregations.to()] : resourceParameterAggregations.to();
+        return API.instance().call(ref, methodName, [resourceStringListFilters, resourceStringListAggregations])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {

@@ -5,12 +5,13 @@ import {Button, Form, Input, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {paramType} from "./DatasetView"
 
 interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], updateData: boolean) => void;
+    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
 }
 
 interface State {
@@ -77,7 +78,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverFilters!)
+                this.props.onChangeServerFilter!(this.state.serverFilters!, paramType.filter)
                 }
             else {
                 this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
