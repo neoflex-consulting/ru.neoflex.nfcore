@@ -151,7 +151,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                                     return currentObject.datasetColumn
                                                                 });
                                                             isDuplicate = valueArr.some(function (item, idx) {
-                                                                return valueArr.indexOf(item) != idx
+                                                                return valueArr.indexOf(item) !== idx
                                                             });
                                                         }
                                                         if (isDuplicate) {
