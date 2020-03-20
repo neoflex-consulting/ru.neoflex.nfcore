@@ -41,6 +41,7 @@ interface State {
     appModuleName: string;
     conditionDtoPattern?: EObject;
     aggregationDtoPattern?: EObject;
+    sortDtoPattern?: EObject;
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
@@ -176,13 +177,15 @@ class EcoreApp extends React.Component<any, State> {
 
     };
 
-    runQuery = (resource_: Ecore.Resource, componentParams: Object[], aggregationParams: Object[]) => {
+    runQuery = (resource_: Ecore.Resource, componentParams: Object[], aggregationParams: Object[], sortParams: Object[]) => {
+        //TODO переписать
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         let resourceSet = Ecore.ResourceSet.create();
         let resourceParameterFilters = resourceSet.create({ uri: '/parameterFilter' });
         let resourceParameterAggregations = resourceSet.create({ uri: '/parameterAggregation' });
+        let resourceParameterSorts = resourceSet.create({ uri: '/parameterSort' });
         let filters: EObject[] =
             componentParams === undefined
             ?
@@ -217,11 +220,29 @@ class EcoreApp extends React.Component<any, State> {
                             })
                         )
                     });
+        let sorts: EObject[] =
+            sortParams === undefined
+                ?
+                sortParams
+                :
+                sortParams
+                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined)
+                    .map( (p: any) => {
+                        return (
+                            this.state.sortDtoPattern!.create({
+                                datasetColumn: p['datasetColumn'],
+                                operation: p['operation'],
+                                enable: p['enable']
+                            })
+                        )
+                    });
         resourceParameterFilters.addAll(filters);
         let resourceStringListFilters: Ecore.EObject[] = filters.length === 1 ? [resourceParameterFilters.to()] : resourceParameterFilters.to();
         resourceParameterAggregations.addAll(aggregations);
         let resourceStringListAggregations: Ecore.EObject[] = aggregations.length === 1 ? [resourceParameterAggregations.to()] : resourceParameterAggregations.to();
-        return API.instance().call(ref, methodName, [resourceStringListFilters, resourceStringListAggregations])
+        resourceParameterSorts.addAll(sorts);
+        let resourceStringListsorts: Ecore.EObject[] = sorts.length === 1 ? [resourceParameterSorts.to()] : resourceParameterSorts.to();
+        return API.instance().call(ref, methodName, [resourceStringListFilters, resourceStringListAggregations, resourceStringListsorts])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
@@ -641,6 +662,13 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
+    getSortDtoPattern() {
+        API.instance().findClass('dataset', 'QuerySortDTO')
+            .then( (sortDtoPattern: EObject ) => {
+                this.setState({sortDtoPattern})
+            })
+    };
+
     getUserProfilePattern() {
         API.instance().findClass('auth', 'UserProfile')
             .then( (userProfilePattern: EObject ) => {
@@ -682,7 +710,8 @@ class EcoreApp extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
-        if (!this.state.conditionDtoPattern) this.getAggregationDtoPattern();
+        if (!this.state.aggregationDtoPattern) this.getAggregationDtoPattern();
+        if (!this.state.sortDtoPattern) this.getSortDtoPattern();
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applicationNames.length) {

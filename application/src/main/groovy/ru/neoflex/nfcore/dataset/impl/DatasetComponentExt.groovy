@@ -10,6 +10,7 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.AggregationDTO
 import ru.neoflex.nfcore.dataset.ConditionDTO
+import ru.neoflex.nfcore.dataset.QuerySortDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -17,6 +18,7 @@ import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Filter
 import ru.neoflex.nfcore.dataset.Operations
 import ru.neoflex.nfcore.dataset.Aggregate
+import ru.neoflex.nfcore.dataset.Sort
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -90,9 +92,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations) {
+    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts) {
+        logger.info("runQuery", "conditions = " + conditions.toString())
+        logger.info("runQuery", "aggregations = " + aggregations.toString())
+        logger.info("runQuery", "sorts = " + sorts.toString())
         if (column) {
-            ResultSet rs = connectionToDB(conditions, aggregations)
+            ResultSet rs = connectionToDB(conditions, aggregations, sorts)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -110,8 +115,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations) {
-        logger.info("connectionToDB", "aggregations = " + aggregations.toString())
+    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts) {
+        logger.info("connectionToDB", "sorts = " + sorts.toString())
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -137,6 +142,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def serverFilters = []
         def serverAggregations = []
         def serverGroupBy = []
+        def serverSorts = []
 
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
@@ -250,8 +256,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         map["select"] = "SUM(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
                     }
                     if (operator == 'UNDEFINED' ) {
+                        map = null
                     }
-                    if (!serverAggregations.contains(map)) {
+                    if (!serverAggregations.contains(map) && map) {
                         serverAggregations.add(map)
                     }
                 }
@@ -268,6 +275,29 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        if (sorts) {
+            for (int i = 0; i <= sorts.size() - 1; ++i) {
+                if (column.name.contains(sorts[i].datasetColumn) && sorts[i].enable == true) {
+                    def map = [:]
+                    map["column"] = sorts[i].datasetColumn
+                    def operator = getConvertSort(sorts[i].operation.toString().toLowerCase())
+                    if (operator == 'ASC' ) {
+                        map["select"] = "t.${sorts[i].datasetColumn}"
+                    }
+                    if (operator == 'DESC' ) {
+                        map["select"] = "t.${sorts[i].datasetColumn}"
+                    }
+                    if (operator == 'UNDEFINED' ) {
+                        map = null
+                    }
+                    if (!serverSorts.contains(map) && map) {
+                        serverSorts.add(map)
+                    }
+                }
+            }
+        }
+
+
         String currentQuery
         currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
         if (serverFilters) {
@@ -283,6 +313,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 currentQuery = "SELECT ${serverAggregations.select.join(' , ')}" +
                         " FROM (${currentQuery}) t"
             }
+        }
+        if (serverSorts) {
+            currentQuery = "SELECT *" +
+                    " FROM (${currentQuery}) t" +
+                    " ORDER BY ${serverSorts.select.join(' , ')}"
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)
@@ -318,6 +353,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
         else if (aggregate == Aggregate.MINIMUM.toString().toLowerCase()) {return 'MIN'}
         else if (aggregate == Aggregate.SUM.toString().toLowerCase()) {return 'SUM'}
         else if (aggregate == Aggregate.UNDEFINED.toString().toLowerCase()) {return 'UNDEFINED'}
+    }
+
+    String getConvertSort(String sort) {
+        if (sort == Sort.FROM_ATO_Z.toString().toLowerCase()) {return 'ASC'}
+        else if (sort == Sort.FROM_ZTO_A.toString().toLowerCase()) {return 'DESC'}
+        else if (sort == Sort.UNDEFINED.toString().toLowerCase()) {return 'UNDEFINED'}
     }
 
     private static final ClassLogger logger =

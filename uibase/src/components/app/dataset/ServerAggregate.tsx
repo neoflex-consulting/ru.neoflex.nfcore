@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Form, Input, Select} from 'antd';
+import {Button, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -11,7 +11,7 @@ interface Props {
     serverAggregates?: Array<EObject>;
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
-    onChangeServerAggregation?: (newServerFilter: any[], paramName: paramType) => void;
+    onChangeServerAggregation?: (newServerAggregation: any[], paramName: paramType) => void;
 }
 
 interface State {
@@ -151,7 +151,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                                 return currentObject.datasetColumn
                                         });
                                         isDuplicate = valueArr.some(function (item, idx) {
-                                            return valueArr.indexOf(item) != idx
+                                            return valueArr.indexOf(item) !== idx
                                         });
                                     }
                                     if (isDuplicate) {
