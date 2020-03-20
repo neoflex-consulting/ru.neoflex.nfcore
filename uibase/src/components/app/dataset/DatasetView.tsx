@@ -3,7 +3,7 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter, faSync, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
+import {faFilter, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
 import ServerAggregate from './ServerAggregate';
@@ -14,11 +14,6 @@ export enum paramType {
     filter,
     aggregate,
     order
-}
-
-enum changebleParams {
-    "allOperations",
-    "allAggregates"
 }
 
 interface Props {

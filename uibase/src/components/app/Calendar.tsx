@@ -12,8 +12,8 @@ import {Button} from "antd";
 interface State {
     currentMonth: Date;
     selectedDate: Date;
-    ReportStatus: Ecore.EObject[];
-    InstanceReports: Ecore.EObject[];
+    NotificationStatus: Ecore.EObject[];
+    NotificationInstances: Ecore.EObject[];
     calendarLanguage: string;
 }
 
@@ -26,18 +26,18 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
     state = {
         currentMonth: new Date(),
         selectedDate: new Date(),
-        ReportStatus: [],
-        InstanceReports: [],
+        NotificationStatus: [],
+        NotificationInstances: [],
         calendarLanguage: ""
     };
 
-    getAllInstanceReports() {
+    getAllNotificationInstances() {
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//InstanceReport");
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationInstance");
             if (temp !== undefined) {
                 API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}, 999)
                     .then((resources) => {
-                        this.setState({InstanceReports: resources})
+                        this.setState({NotificationInstances: resources})
                     })
             }
         })
@@ -45,11 +45,11 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
 
     getAllStatuses() {
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//ReportStatus");
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((statuses) => {
-                        this.setState({ReportStatus: statuses})
+                        this.setState({NotificationStatus: statuses})
                     })
             }
         })
@@ -101,16 +101,16 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
         return <div className="days row">{days}</div>;
     }
 
-    openReport(report: any, context: any): void  {
+    openNotification(notification: any, context: any): void  {
         let params: Object[] = [{
             datasetColumn: 'reportDate',
             operation: 'EqualTo',
-            value: report.eContents()[0].get('date'),
+            value: notification.eContents()[0].get('date'),
             enable: true,
             type: 'Date'
         }];
         context.changeURL(
-            report.eContents()[0].get('report').get('AppModule').get('name'),
+            notification.eContents()[0].get('notification').get('AppModule').get('name'),
             undefined,
             params
         )
@@ -152,14 +152,14 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                 ?
                                 content.map( (r: any) =>
                                     <Button
-                                        onClick={ () => this.openReport(r, context)}
+                                        onClick={ () => this.openNotification(r, context)}
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"
-                                        style={{width: "150px", display: "flex", color: "black", backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').get('color') : "white"}}
-                                        title={`${r.eContents()[0].get('report').get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                        style={{width: "150px", display: "flex", color: "black"/*, backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').array().get('color') : "white"*/}}
+                                        title={`${r.eContents()[0].get('notification').get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                     >
-                                        {r.eContents()[0].get('report').get('name')}
+                                        {r.eContents()[0].get('notification').get('name')}
                                     </Button>
                                 )
                                 : ""}
@@ -185,7 +185,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
     private getContents(day: any) {
         let temp: any = [];
         if (this.props.reporting === 1) {
-            this.state.InstanceReports.filter((r: any) =>
+            this.state.NotificationInstances.filter((r: any) =>
                 dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
                 && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
                 && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
@@ -217,7 +217,7 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
 
     componentDidMount(): void {
         this.getAllStatuses();
-        this.getAllInstanceReports();
+        this.getAllNotificationInstances();
     }
 
     render() {

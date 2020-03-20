@@ -490,7 +490,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     addRef = (eObjects: Ecore.EObject[]): void => {
         const targetObject: { [key: string]: any } = this.state.targetObject
-        const { addRefPropertyName, currentNode } = this.state
+        const { addRefPropertyName } = this.state
         let updatedJSON: Object = {}
         let refsArray: Array<Object>
         let upperBound;
