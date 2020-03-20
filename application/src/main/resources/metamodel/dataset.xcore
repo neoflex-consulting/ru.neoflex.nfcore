@@ -167,7 +167,6 @@ enum Operations {
 }
 
 enum Aggregate {
-    Undefined
     Average
     Count
     CountDistinct
@@ -178,7 +177,6 @@ enum Aggregate {
 }
 
 enum Sort {
-    Undefined
     FromAtoZ
     FromZtoA
 }
