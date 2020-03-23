@@ -3,19 +3,19 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
+import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
 import ServerAggregate from './ServerAggregate';
+import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 
 const { Option, OptGroup } = Select;
 
 export enum paramType {
-    filter,
-    aggregate,
-    order,
-    highlight
+    filter="serverFilters",
+    aggregate="serverAggregates",
+    sort="serverSorts"
 }
 
 interface Props {
@@ -29,6 +29,7 @@ interface State {
     serverFilters: any[];
     highlights: any[];
     serverAggregates: any[];
+    serverSorts: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
     allOperations: any[];
@@ -37,6 +38,7 @@ interface State {
     updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
+    sortsMenuVisible: boolean;
     allHighlightType: any[];
 }
 
@@ -52,6 +54,7 @@ class DatasetView extends React.Component<any, State> {
             serverFilters: [],
             highlights: [],
             serverAggregates: [],
+            serverSorts: [],
             useServerFilter: false,
             datasetComponentsData: undefined,
             allOperations: [],
@@ -60,6 +63,7 @@ class DatasetView extends React.Component<any, State> {
             updateData: false,
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
+            sortsMenuVisible: false,
             allHighlightType: []
         }
     }
@@ -137,43 +141,49 @@ class DatasetView extends React.Component<any, State> {
             columnDefs.push(rowData);
         });
         this.setState({columnDefs});
-        this.findServerFilters(resource as Ecore.Resource, columnDefs);
+        this.findServerParams(resource as Ecore.Resource, columnDefs);
         this.findHighlights(resource as Ecore.Resource, columnDefs);
         this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
     //Поиск сохранённых фильтров по id компоненты
-    findServerFilters(resource: Ecore.Resource, columnDefs: Object[]){
+    findServerParams(resource: Ecore.Resource, columnDefs: Object[]){
+        function getParamsFromUserProfile (userProfileParams: any) {
+            let serverParam: any[] = [];
+            if (userProfileParams !== undefined) {
+                userProfileParams.forEach((f: any, index: any) => {
+                        if (f.datasetColumn !== undefined) {
+                            serverParam.push({
+                                index: serverParam.length + 1,
+                                datasetColumn: f.datasetColumn,
+                                operation: f.operation,
+                                value: f.value,
+                                enable: (f.enable !== null ? f.enable : false),
+                                type: f.type
+                            })
+                        }
+                    }
+                )
+            }
+            serverParam.push(
+                {index: serverParam.length + 1,
+                    datasetColumn: undefined,
+                    operation: undefined,
+                    value: undefined,
+                    enable: undefined,
+                    type: undefined});
+            return serverParam
+        }
+        //TODO переписать
         let serverFilters: any = [];
         let serverAggregates: any = [];
+        let serverSorts: any = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
         if (userProfileValue.length !== 0) {
-            let userProfileParams = JSON.parse(userProfileValue[0].get('value')).serverFilters;
-            if (userProfileParams !== undefined) {
-                userProfileParams.forEach((f: any, index: any) =>
-                    serverFilters.push({
-                        index: serverFilters.length + 1,
-                        datasetColumn: f.datasetColumn,
-                        operation: f.operation,
-                        value: f.value,
-                        enable: (f.enable !== null ? f.enable : false),
-                        type: f.type
-                    })
-                )
-            }
-            userProfileParams = JSON.parse(userProfileValue[0].get('value')).serverAggregates;
-            if (userProfileParams !== undefined) {
-                userProfileParams.forEach((f: any, index: any) =>
-                    serverAggregates.push({
-                        index: serverAggregates.length + 1,
-                        datasetColumn: f.datasetColumn,
-                        operation: f.operation,
-                        enable: (f.enable !== null ? f.enable : false),
-                        type: f.type
-                    })
-                )
-            }
+            serverFilters = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverFilters);
+            serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
+            serverSorts = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverSorts);
         }
         else {
             resource.eContents()[0].get('serverFilter').array().forEach( (f: Ecore.Resource) => {
@@ -213,21 +223,8 @@ class DatasetView extends React.Component<any, State> {
                 }
             })
         }
-        serverFilters.push(
-            {index: serverFilters.length + 1,
-                datasetColumn: undefined,
-                operation: undefined,
-                value: undefined,
-                enable: undefined,
-                type: undefined});
-        serverAggregates.push(
-            {index: serverAggregates.length + 1,
-                datasetColumn: undefined,
-                operation: undefined,
-                enable: undefined,
-                type: undefined});
-        this.setState({serverFilters, serverAggregates,  useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
-        this.runQuery(resource, serverFilters, serverAggregates);
+        this.setState({serverFilters, serverAggregates, serverSorts,  useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
+        this.runQuery(resource, serverFilters, serverAggregates, serverSorts);
     }
 
     findHighlights(resource: Ecore.Resource, columnDefs: Object[]){
@@ -298,7 +295,7 @@ class DatasetView extends React.Component<any, State> {
                 .find( (p: any) => JSON.parse(p.value).name === this.state.currentDatasetComponent.eResource().to().name)
                 : undefined;
             if (prevProps.location.pathname !== this.props.location.pathname) {
-                this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
+                this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs);
                 this.findHighlights(this.state.currentDatasetComponent, this.state.columnDefs);
             }
             else if ((refresh === undefined || refresh.length === 0) &&
@@ -315,19 +312,25 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    private runQuery(resource: Ecore.Resource, componentParams: Object[], aggregationParams: Object[]) {
+    private async runQuery(resource: Ecore.Resource, componentParams: Object[], aggregationParams: Object[], sortParams: Object[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
-        this.props.context.runQuery(resource, componentParams, aggregationParams)
-            .then((result: string) => {
-                this.setState({rowData: JSON.parse(result)});
-                this.updatedDatasetComponents(undefined, JSON.parse(result), datasetComponentName)
-            });
+        let result: Object[] = JSON.parse(await this.props.context.runQuery(resource, componentParams, [], sortParams));
+        //Получение итогов по столбцу отдельным запросом
+        aggregationParams = aggregationParams.filter((param: any)=>{
+           return param["datasetColumn"] !== undefined
+        });
+        if (aggregationParams.length !== 0) {
+            result = result.concat(JSON.parse(await this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams)));
+        }
+        this.setState({rowData: result});
+        this.updatedDatasetComponents(undefined, result, datasetComponentName)
     }
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
         if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
+        if (this.state.allSorts.length === 0) {this.getAllEnumValues("Sort", "allSorts")}
         if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
     }
 
@@ -357,55 +360,72 @@ class DatasetView extends React.Component<any, State> {
 
     handleFiltersMenu = () => {
         this.state.filtersMenuVisible ? this.setState({ filtersMenuVisible: false }) : this.setState({ filtersMenuVisible: true })
+        this.setState({ aggregatesMenuVisible: false })
+        this.setState({ sortsMenuVisible: false })
     };
 
     handleAggregatesMenu = () => {
         this.state.aggregatesMenuVisible ? this.setState({ aggregatesMenuVisible: false }) : this.setState({ aggregatesMenuVisible: true })
+        this.setState({ filtersMenuVisible: false })
+        this.setState({ sortsMenuVisible: false })
+    };
+
+    handleSortsMenu = () => {
+        this.state.sortsMenuVisible ? this.setState({ sortsMenuVisible: false }) : this.setState({ sortsMenuVisible: true })
+        this.setState({ filtersMenuVisible: false })
+        this.setState({ aggregatesMenuVisible: false })
     };
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         if (newServerParam !== undefined) {
-            if (paramName === paramType.filter) {
-                this.setState({serverFilters: newServerParam});
-                this.runQuery(this.state.currentDatasetComponent, newServerParam, this.state.serverAggregates);
-            }
-            if (paramName === paramType.aggregate) {
-                this.setState({serverAggregates: newServerParam});
-                this.runQuery(this.state.currentDatasetComponent, this.state.serverFilters, newServerParam);
-            }
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
-            let ServerParam: any[] = [];
+            let serverParam: any[] = [];
             newServerParam
                 .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
-                .forEach((f: any) => ServerParam.push(f));
-            if (paramName === paramType.filter) {
-                this.props.context.changeUserProfile(datasetComponentId, {
-                    serverFilters: ServerParam,
-                    serverAggregates: this.state.serverAggregates
-                })
-            }
-            if (paramName === paramType.aggregate) {
-                this.props.context.changeUserProfile(datasetComponentId, {
-                    serverFilters: this.state.serverFilters,
-                    serverAggregates: ServerParam
-                })
-            }
-            if (paramName === paramType.highlight) {
-                this.props.context.changeUserProfile(datasetComponentId, {
-                    serverFilters: this.state.serverFilters,
-                    serverAggregates: this.state.serverAggregates,
-                    highlights: ServerParam
-                })
-                this.setState({highlights: ServerParam})
-            }
+                .forEach((f: any) => serverParam.push(f));
+
+            this.setState<never>({[paramName]: newServerParam});
+            this.runQuery(this.state.currentDatasetComponent,
+                          (paramName === paramType.filter)? newServerParam: this.state.serverFilters,
+                          (paramName === paramType.aggregate)? newServerParam: this.state.serverAggregates,
+                                (paramName === paramType.sort)? newServerParam: this.state.serverSorts
+                         );
+            this.props.context.changeUserProfile(datasetComponentId, {
+                serverFilters: (paramName === paramType.filter)? newServerParam: this.state.serverFilters,
+                serverAggregates: (paramName === paramType.aggregate)? newServerParam: this.state.serverAggregates,
+                serverSorts:  (paramName === paramType.sort)? newServerParam: this.state.serverSorts,
+                highlights: this.state.highlights
+            });
         }
         else {
-            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=> {
-                this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs)
+            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
+                this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs)
+            )
+        }
+    };
+
+    onChangeHighlights = (newHighlights: any[]): void => {
+        const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+        if (newHighlights !== undefined) {
+            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+            let highlightsParam: any[] = [];
+            newHighlights
+                .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+                .forEach((f: any) => highlightsParam.push(f));
+            this.setState({highlights: newHighlights});
+            this.props.context.changeUserProfile(datasetComponentId, {
+                serverFilters: this.state.serverFilters,
+                serverAggregates: this.state.serverAggregates,
+                serverSorts: this.state.serverSorts,
+                highlights: highlightsParam
+            });
+        }
+        else {
+            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
                 this.findHighlights(this.state.currentDatasetComponent, this.state.columnDefs)
-            })
+            )
         }
     };
 
@@ -492,6 +512,14 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <FontAwesomeIcon icon={faObjectGroup} size='xs'/>
                 </Button>
+                <div style={{display: 'inline-block', height: '30px',
+                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <Button title={t('Aggregation')} style={{color: 'rgb(151, 151, 151)'}}
+                        onClick={this.handleSortsMenu}
+                >
+                    <FontAwesomeIcon icon={faArrowsAltV} size='xs'/>
+                </Button>
                 <Drawer
                     placement='right'
                     title={t('filters')}
@@ -523,7 +551,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
                                 allHighlightType={this.state.allHighlightType}
-                                onChangeHighlights={this.onChangeServerParams}
+                                onChangeHighlights={this.onChangeHighlights}
                             />
                             :
                             <Highlight/>
@@ -531,7 +559,7 @@ class DatasetView extends React.Component<any, State> {
                 </Drawer>
                 <Drawer
                     placement='right'
-                    title={t('groups')}
+                    title={t('Aggregations')}
                     width={'700px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={this.handleAggregatesMenu}
@@ -539,7 +567,7 @@ class DatasetView extends React.Component<any, State> {
                     maskClosable={false}
                 >
                     {
-                        this.state.serverFilters
+                        this.state.serverAggregates
                             ?
                             <ServerAggregate
                                 {...this.props}
@@ -550,6 +578,29 @@ class DatasetView extends React.Component<any, State> {
                             />
                             :
                             <ServerAggregate/>
+                    }
+                </Drawer>
+                <Drawer
+                    placement='right'
+                    title={t('Sorts')}
+                    width={'700px'}
+                    visible={this.state.sortsMenuVisible}
+                    onClose={this.handleSortsMenu}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        this.state.serverSorts
+                            ?
+                            <ServerSort
+                                {...this.props}
+                                serverSorts={this.state.serverSorts}
+                                columnDefs={this.state.columnDefs}
+                                allSorts={this.state.allSorts}
+                                onChangeServerSort={this.onChangeServerParams}
+                            />
+                            :
+                            <ServerSort/>
                     }
                 </Drawer>
             </div>

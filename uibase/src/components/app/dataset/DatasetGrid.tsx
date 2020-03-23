@@ -10,7 +10,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {Button, Dropdown, Menu, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
@@ -22,8 +22,6 @@ import {saveAs} from "file-saver";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
-
-
 
 interface Props {
     onCtrlA?: Function,
@@ -49,6 +47,7 @@ class DatasetGrid extends React.Component<any, any> {
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             columnDefs: [],
             rowData: [],
+            highlights: [],
             saveMenuVisible: false,
             gridOptions: {
                 defaultColDef: {
@@ -210,7 +209,7 @@ class DatasetGrid extends React.Component<any, any> {
         API.instance().findEnum('application', 'RowPerPage')
             .then((result: Ecore.EObject[]) => {
                 let rowPerPages = result.map( (t: any) => {
-                    return t.get('name') /*rowPerPageMapper_[t.get('name')]*/
+                    return t.get('name')
                 });
                 this.setState({rowPerPages})
             })
@@ -275,21 +274,59 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     private changeSettings() {
-        this.props.context.userProfile.get('params').array()
-            .forEach((p: any) => {
-                if (p.get('key') === this.props.viewObject.get('datasetView')._id) {
-                    if (JSON.parse(p.get('value'))['theme'] !== undefined) {
-                        this.setState({currentTheme: JSON.parse(p.get('value'))['theme']})
-                    }
-                    if (JSON.parse(p.get('value'))['showUniqRow'] !== undefined) {
-                        this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
-                    }
-                    if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
-                        const newPageSize = JSON.parse(p.get('value'))['rowPerPage']
-                        this.setState({paginationPageSize: newPageSize})
-                    }
+        const {gridOptions} = this.state
+        const getUserProfile = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
+
+        if (getUserProfile !== undefined) {
+            if (getUserProfile[0].get('key') === this.props.viewObject.get('datasetView')._id) {
+                if (JSON.parse(getUserProfile[0].get('value'))['theme'] !== undefined) {
+                    this.setState({currentTheme: JSON.parse(getUserProfile[0].get('value'))['theme']})
                 }
-            });
+                if (JSON.parse(getUserProfile[0].get('value'))['showUniqRow'] !== undefined) {
+                    this.setState({showUniqRow: JSON.parse(getUserProfile[0].get('value'))['showUniqRow']})
+                }
+                if (JSON.parse(getUserProfile[0].get('value'))['rowPerPage'] !== undefined) {
+                    const newPageSize = JSON.parse(getUserProfile[0].get('value'))['rowPerPage']
+                    this.setState({paginationPageSize: newPageSize})
+                }
+            }
+        }
+        else {
+           // gridOptions.getRowStyle
+            // getRowStyle: function(params: any) {
+            // if (Number(params.data.e_id) === 42098) {
+            //     return { background: 'grey' }
+            // }
+            // if (params.data.name.includes('test')) {
+            //     return { background: 'red' }
+            // }
+            // }
+            const highlights: any[] = this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+            if (highlights){
+                // this.setState({highlights})
+                highlights.forEach((h:EObject) => {
+                    if (h.get('highlightType') === 'Row') {
+                        gridOptions.getRowStyle = function(params: any) {
+                            if (h.get('datasetColumn').get('convertDataType') === 'Integer') {
+                                if (h.get('operation') === null) {
+                                    if (Number(params.data[h.get('datasetColumn').get('name')]) < Number(h.get('value'))) {
+                                        return { background: h.get('backgroundColor'), color: h.get('color') }
+                                    }
+                                }
+                                else if (h.get('operation') === 'EqualTo') {
+                                    if (Number(params.data[h.get('datasetColumn').get('name')]) === Number(h.get('value'))) {
+                                        return { background: h.get('backgroundColor'), color: h.get('color') }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                })
+
+            }
+        }
     }
 
     handleSaveMenu = () => {

@@ -41,6 +41,7 @@ interface State {
     appModuleName: string;
     conditionDtoPattern?: EObject;
     aggregationDtoPattern?: EObject;
+    sortDtoPattern?: EObject;
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
@@ -176,23 +177,18 @@ class EcoreApp extends React.Component<any, State> {
 
     };
 
-    runQuery = (resource_: Ecore.Resource, componentParams: Object[], aggregationParams: Object[]) => {
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'runQuery';
-        let resourceSet = Ecore.ResourceSet.create();
-        let resourceParameterFilters = resourceSet.create({ uri: '/parameterFilter' });
-        let resourceParameterAggregations = resourceSet.create({ uri: '/parameterAggregation' });
-        let filters: EObject[] =
-            componentParams === undefined
-            ?
-                componentParams
+    prepareServerQueryParam = (resourceSet: any, pattern: any, param: Object[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
                 :
-                componentParams
+                param
                     .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
                     .map( (p: any) => {
                         return (
-                            this.state.conditionDtoPattern!.create({
+                            pattern.create({
                                 datasetColumn: p['datasetColumn'],
                                 operation: p['operation'],
                                 value: p['value'],
@@ -201,27 +197,18 @@ class EcoreApp extends React.Component<any, State> {
                             })
                         )
                     });
-        let aggregations: EObject[] =
-            aggregationParams === undefined
-                ?
-                aggregationParams
-                :
-                aggregationParams
-                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined)
-                    .map( (p: any) => {
-                        return (
-                            this.state.aggregationDtoPattern!.create({
-                                datasetColumn: p['datasetColumn'],
-                                operation: p['operation'],
-                                enable: p['enable']
-                            })
-                        )
-                    });
-        resourceParameterFilters.addAll(filters);
-        let resourceStringListFilters: Ecore.EObject[] = filters.length === 1 ? [resourceParameterFilters.to()] : resourceParameterFilters.to();
-        resourceParameterAggregations.addAll(aggregations);
-        let resourceStringListAggregations: Ecore.EObject[] = aggregations.length === 1 ? [resourceParameterAggregations.to()] : resourceParameterAggregations.to();
-        return API.instance().call(ref, methodName, [resourceStringListFilters, resourceStringListAggregations])
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
+    runQuery = (resource_: Ecore.Resource, filterParams: Object[], aggregationParams: Object[], sortParams: Object[]) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'runQuery';
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.conditionDtoPattern!, filterParams, '/parameterFilter'),
+            this.prepareServerQueryParam(resourceSet, this.state.aggregationDtoPattern!, aggregationParams, '/parameterAggregation'),
+            this.prepareServerQueryParam(resourceSet, this.state.sortDtoPattern!, sortParams, '/parameterSort')])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
@@ -641,6 +628,13 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
+    getSortDtoPattern() {
+        API.instance().findClass('dataset', 'QuerySortDTO')
+            .then( (sortDtoPattern: EObject ) => {
+                this.setState({sortDtoPattern})
+            })
+    };
+
     getUserProfilePattern() {
         API.instance().findClass('auth', 'UserProfile')
             .then( (userProfilePattern: EObject ) => {
@@ -682,7 +676,8 @@ class EcoreApp extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
-        if (!this.state.conditionDtoPattern) this.getAggregationDtoPattern();
+        if (!this.state.aggregationDtoPattern) this.getAggregationDtoPattern();
+        if (!this.state.sortDtoPattern) this.getSortDtoPattern();
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applicationNames.length) {

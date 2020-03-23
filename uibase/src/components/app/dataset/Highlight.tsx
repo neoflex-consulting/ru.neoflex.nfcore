@@ -5,15 +5,13 @@ import {Button, Col, Form, Input, Row, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {paramType} from "./DatasetView"
-import {API} from "../../../modules/api";
 import {SliderPicker} from 'react-color';
 
 interface Props {
     highlights?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeHighlights?: (newHighlight: any[], paramName: paramType) => void;
+    onChangeHighlights?: (newHighlights: any[]) => void;
     allHighlightType?: Array<EObject>;
 }
 
@@ -31,20 +29,20 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
         this.handleChange = this.handleChange.bind(this);
     }
 
-    // componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-    //     if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)) {
-    //         this.setState({highlights: this.props.highlights})
-    //     }
-    //     else if (JSON.stringify(prevProps.highlights) === JSON.stringify(this.props.highlights)
-    //         && JSON.stringify(prevState.highlights) === JSON.stringify(this.state.highlights)
-    //         && JSON.stringify(this.props.highlights) !== JSON.stringify(this.state.highlights)
-    //     ) {
-    //         this.setState({highlights: this.props.highlights})
-    //     }
-    // }
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)) {
+            this.setState({highlights: this.props.highlights})
+        }
+        else if (JSON.stringify(prevProps.highlights) === JSON.stringify(this.props.highlights)
+            && JSON.stringify(prevState.highlights) === JSON.stringify(this.state.highlights)
+            && JSON.stringify(this.props.highlights) !== JSON.stringify(this.state.highlights)
+        ) {
+            this.setState({highlights: this.props.highlights})
+        }
+    }
 
     updateTableData(): void  {
-        this.props.onChangeHighlights!(this.state.highlights!, paramType.highlight)
+        this.props.onChangeHighlights!(this.state.highlights!)
     }
 
     handleChange(e: any) {
@@ -93,13 +91,13 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     };
 
     reset = () => {
-       // this.props.onChangeHighlights!(undefined)
+        this.props.onChangeHighlights!(undefined)
     };
 
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeHighlights!(this.state.highlights!, paramType.highlight)
+                this.props.onChangeHighlights!(this.state.highlights!)
                 }
             else {
                 this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')

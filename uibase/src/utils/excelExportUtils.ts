@@ -1,5 +1,4 @@
 import * as ExcelJS from "exceljs";
-import {saveAs} from "file-saver";
 
 export enum excelElementExportType {
     diagram,

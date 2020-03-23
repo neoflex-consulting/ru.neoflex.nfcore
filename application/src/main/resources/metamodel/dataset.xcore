@@ -63,7 +63,7 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations)
+     op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations, QuerySortDTO[] sorts)
      boolean useServerFilter
      contains Condition[] serverFilter //Состав серверного фильтра
      contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
@@ -142,6 +142,18 @@ class AggregationDTO {
     boolean enable
 }
 
+class QuerySort {
+    refers DatasetColumn datasetColumn
+    Sort operation
+    boolean enable
+}
+
+class QuerySortDTO {
+    String datasetColumn
+    String operation
+    boolean enable
+}
+
 enum QueryType {
     UseTableName
     UseQuery
@@ -165,7 +177,6 @@ enum Operations {
 }
 
 enum Aggregate {
-    Undefined
     Average
     Count
     CountDistinct
@@ -176,7 +187,6 @@ enum Aggregate {
 }
 
 enum Sort {
-    Undefined
     FromAtoZ
     FromZtoA
 }

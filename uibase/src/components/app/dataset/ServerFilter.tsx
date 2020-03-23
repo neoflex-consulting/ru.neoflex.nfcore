@@ -4,7 +4,7 @@ import {EObject} from 'ecore';
 import {Button, Col, Form, Input, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {paramType} from "./DatasetView"
 
 interface Props {
