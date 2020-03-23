@@ -287,9 +287,7 @@ class DatasetView extends React.Component<any, State> {
         const datasetComponentName = resource.eContents()[0].get('name');
         this.props.context.runQuery(resource, componentParams, [], sortParams).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
-                aggregationParams = aggregationParams.filter((param: any)=>{
-                    return param["datasetColumn"] !== undefined
-                });
+                aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
@@ -361,19 +359,19 @@ class DatasetView extends React.Component<any, State> {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
             let serverParam: any[] = [];
             newServerParam
-                .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null)
+                .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
                 .forEach((f: any) => serverParam.push(f));
 
             this.setState<never>({[paramName]: newServerParam});
             this.runQuery(this.state.currentDatasetComponent,
-                          (paramName === paramType.filter)? newServerParam: this.state.serverFilters,
-                          (paramName === paramType.aggregate)? newServerParam: this.state.serverAggregates,
-                                (paramName === paramType.sort)? newServerParam: this.state.serverSorts
+                          (paramName === paramType.filter)? serverParam: this.state.serverFilters,
+                          (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates,
+                                (paramName === paramType.sort)? serverParam: this.state.serverSorts
                          );
             this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? newServerParam: this.state.serverFilters,
-                serverAggregates: (paramName === paramType.aggregate)? newServerParam: this.state.serverAggregates,
-                serverSorts:  (paramName === paramType.sort)? newServerParam: this.state.serverSorts
+                serverFilters: (paramName === paramType.filter)? serverParam: this.state.serverFilters,
+                serverAggregates: (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates,
+                serverSorts:  (paramName === paramType.sort)? serverParam: this.state.serverSorts
             });
         }
         else {
