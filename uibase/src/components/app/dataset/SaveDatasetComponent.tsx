@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
+import {IServerQueryParam} from '../../../MainContext';
 
 interface Props {
 }
@@ -68,7 +69,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     value: f['value'],
                     enable: f['enable'],
                     type: f['type']
-                });
+                } as IServerQueryParam);
                 currentDatasetComponent.get(componentName).add(params)
             }
         })

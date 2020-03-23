@@ -8,6 +8,7 @@ import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
 import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
+import {IServerQueryParam} from '../../../MainContext';
 
 const { Option, OptGroup } = Select;
 
@@ -148,10 +149,10 @@ class DatasetView extends React.Component<any, State> {
 
     //Поиск сохранённых фильтров по id компоненты
     findServerParams(resource: Ecore.Resource, columnDefs: Object[]){
-        function getParamsFromUserProfile (userProfileParams: any) {
-            let serverParam: any[] = [];
+        function getParamsFromUserProfile (userProfileParams: any): IServerQueryParam[]{
+            let serverParam: IServerQueryParam[] = [];
             if (userProfileParams !== undefined) {
-                userProfileParams.forEach((f: any, index: any) => {
+                userProfileParams.forEach((f: any) => {
                         if (f.datasetColumn !== undefined) {
                             serverParam.push({
                                 index: serverParam.length + 1,
@@ -174,11 +175,11 @@ class DatasetView extends React.Component<any, State> {
                     type: undefined});
             return serverParam
         }
-        function getParamsFromComponent (resource: Ecore.EObject, componentName: string) {
+        function getParamsFromComponent (resource: Ecore.EObject, componentName: string): IServerQueryParam[] {
             function isValidComponentName(value: string): value is keyof typeof defaultComponentValues {
                 return value in defaultComponentValues;
             }
-            let serverParam: any[] = [];
+            let serverParam: IServerQueryParam[] = [];
             if (isValidComponentName(componentName)) {
                 resource.eContents()[0].get(componentName).array().forEach( (f: Ecore.Resource) => {
                     if (serverParam.filter( (filter: any) =>
@@ -207,8 +208,8 @@ class DatasetView extends React.Component<any, State> {
                     type: undefined});
             return serverParam
         }
-        function getParamsFromURL (params: any[], columnDefs: any[]) {
-            let serverParam: any[] = [];
+        function getParamsFromURL (params: any[], columnDefs: any[]): IServerQueryParam[] {
+            let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
                 params.forEach((f: any) => {
                     if (f) {
@@ -255,7 +256,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverSorts = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
         }
-        this.setState({serverFilters, serverAggregates, serverSorts,  useServerFilter: resource.eContents()[0].get('useServerFilter') || false});
+        this.setState({serverFilters, serverAggregates, serverSorts,  useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
         this.runQuery(resource, serverFilters, serverAggregates, serverSorts);
     }
 
@@ -282,18 +283,26 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    private async runQuery(resource: Ecore.Resource, componentParams: Object[], aggregationParams: Object[], sortParams: Object[]) {
+    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
-        let result: Object[] = JSON.parse(await this.props.context.runQuery(resource, componentParams, [], sortParams));
-        //Получение итогов по столбцу отдельным запросом
-        aggregationParams = aggregationParams.filter((param: any)=>{
-           return param["datasetColumn"] !== undefined
-        });
-        if (aggregationParams.length !== 0) {
-            result = result.concat(JSON.parse(await this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams)));
-        }
-        this.setState({rowData: result});
-        this.updatedDatasetComponents(undefined, result, datasetComponentName)
+        this.props.context.runQuery(resource, componentParams, [], sortParams).then((json: string) => {
+                let result: Object[] = JSON.parse(json);
+                aggregationParams = aggregationParams.filter((param: any)=>{
+                    return param["datasetColumn"] !== undefined
+                });
+                if (aggregationParams.length !== 0) {
+                    this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams).then((aggJson: string) => {
+                        result = result.concat(JSON.parse(aggJson));
+                        this.setState({rowData: result});
+                        this.updatedDatasetComponents(undefined, result, datasetComponentName)
+                    })
+                } else {
+                    this.setState({rowData: result});
+                    this.updatedDatasetComponents(undefined, result, datasetComponentName)
+                }
+            }
+        )
+
     }
 
     componentDidMount(): void {
