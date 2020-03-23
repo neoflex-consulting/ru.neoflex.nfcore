@@ -82,7 +82,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     };
 
     reset = () => {
-        this.props.onChangeServerFilter!(undefined)
+        this.props.onChangeServerFilter!(undefined, paramType.filter)
     };
 
     refresh = () => {

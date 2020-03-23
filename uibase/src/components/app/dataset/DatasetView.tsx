@@ -461,7 +461,7 @@ class DatasetView extends React.Component<any, State> {
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('Aggregation')} style={{color: 'rgb(151, 151, 151)'}}
+                <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={this.handleAggregatesMenu}
                 >
                     <FontAwesomeIcon icon={faObjectGroup} size='xs'/>
@@ -469,7 +469,7 @@ class DatasetView extends React.Component<any, State> {
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('Aggregation')} style={{color: 'rgb(151, 151, 151)'}}
+                <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={this.handleSortsMenu}
                 >
                     <FontAwesomeIcon icon={faArrowsAltV} size='xs'/>
@@ -501,7 +501,7 @@ class DatasetView extends React.Component<any, State> {
                 </Drawer>
                 <Drawer
                     placement='right'
-                    title={t('Aggregations')}
+                    title={t('aggregations')}
                     width={'700px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={this.handleAggregatesMenu}
@@ -524,7 +524,7 @@ class DatasetView extends React.Component<any, State> {
                 </Drawer>
                 <Drawer
                     placement='right'
-                    title={t('Sorts')}
+                    title={t('sorts')}
                     width={'700px'}
                     visible={this.state.sortsMenuVisible}
                     onClose={this.handleSortsMenu}
