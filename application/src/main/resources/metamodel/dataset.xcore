@@ -65,7 +65,10 @@ class DatasetComponent {
      contains DatasetColumnView[] column
      op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations, QuerySortDTO[] sorts)
      boolean useServerFilter
-     contains Condition[] serverFilter //Состав серверного фильтра
+     //Состав серверного фильтра
+     contains Condition[] serverFilter
+     contains Aggregation[] serverAggregation
+     contains QuerySort[] serverSort
      //String clientFilterExpression //выражение в клиентском фильтре
 }
 

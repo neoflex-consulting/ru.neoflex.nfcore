@@ -31,7 +31,7 @@ const diagramAnchorMap: any = {
     "BottomLeft": "bottom-left",
     "Bottom": "bottom",
     "BottomRight": "bottom-right"
-}
+};
 
 const colorScheme = [
     // "#8056CD",
