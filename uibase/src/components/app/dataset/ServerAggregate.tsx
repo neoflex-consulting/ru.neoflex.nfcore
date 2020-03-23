@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Form, Select} from 'antd';
+import {Button, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 
@@ -38,6 +38,12 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)) {
+            this.setState({serverAggregates: this.props.serverAggregates})
+        }
+        else if (JSON.stringify(prevProps.serverAggregates) === JSON.stringify(this.props.serverAggregates)
+            && JSON.stringify(prevState.serverAggregates) === JSON.stringify(this.state.serverAggregates)
+            && JSON.stringify(this.props.serverAggregates) !== JSON.stringify(this.state.serverAggregates)
+        ) {
             this.setState({serverAggregates: this.props.serverAggregates})
         }
     }
@@ -77,6 +83,10 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
         this.setState({serverAggregates})
     };
 
+    reset = () => {
+        this.props.onChangeServerAggregation!(undefined, paramType.aggregate)
+    };
+
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
@@ -93,28 +103,42 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
         const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
-        <Form.Item  style={{ marginTop: '-38px', textAlign: "right", marginBottom: '40px' }}>
-        <Button
-            title="add row"
-        style={{ width: '40px', marginRight: '10px' }}
-        key={'createNewRowButton'}
-        value={'createNewRowButton'}
-        onClick={this.createNewRow}
-        >
-        <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-            </Button>
-            <Button
-        title="run query"
-        style={{ width: '40px' }}
-        key={'runQueryButton'}
-        value={'runQueryButton'}
-        htmlType="submit"
-        >
-        <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-            </Button>
-            </Form.Item>
+        <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
+            <Col span={12}>
+                <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Итоговые группы</div>
+            </Col>
+            <Col span={12} style={{textAlign: "right"}}>
+                <Button
+                    title="reset"
+                    style={{width: '40px', marginRight: '10px'}}
+                    key={'resetButton'}
+                    value={'resetButton'}
+                    onClick={this.reset}
+                >
+                    <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
+                </Button>
+                <Button
+                    title="add row"
+                    style={{width: '40px', marginRight: '10px'}}
+                    key={'createNewRowButton'}
+                    value={'createNewRowButton'}
+                    onClick={this.createNewRow}
+                >
+                    <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
+                </Button>
+                <Button
+                    title="run query"
+                    style={{width: '40px'}}
+                    key={'runQueryButton'}
+                    value={'runQueryButton'}
+                    htmlType="submit"
+                >
+                    <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
+                </Button>
+            </Col>
+        </Form.Item>
         {
-            this.state.serverAggregates!
+            this.state.serverAggregates !== undefined && this.state.serverAggregates!
                 .map((serverAggregate: any) => {
                     const idDatasetColumn = `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`;
                     const idOperation = `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`;

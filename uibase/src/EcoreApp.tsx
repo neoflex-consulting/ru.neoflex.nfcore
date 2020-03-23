@@ -21,7 +21,7 @@ import {faClock, faEye, faUser} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
-import {IMainContext, MainContext} from "./MainContext";
+import {IMainContext, MainContext, IServerQueryParam} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./pony.png";
@@ -177,7 +177,7 @@ class EcoreApp extends React.Component<any, State> {
 
     };
 
-    prepareServerQueryParam = (resourceSet: any, pattern: any, param: Object[], uri: string) => {
+    prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
         let resourceParameter = resourceSet.create({ uri: uri });
         let serverOperations: EObject[] =
             param === undefined
@@ -194,14 +194,14 @@ class EcoreApp extends React.Component<any, State> {
                                 value: p['value'],
                                 enable: p['enable'],
                                 type: p['type']
-                            })
+                            } as IServerQueryParam)
                         )
                     });
         resourceParameter.addAll(serverOperations);
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: Object[], aggregationParams: Object[], sortParams: Object[]) => {
+    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';

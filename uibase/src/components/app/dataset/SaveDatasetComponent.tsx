@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
+import {IServerQueryParam} from '../../../MainContext';
 
 interface Props {
 }
@@ -15,6 +16,8 @@ interface State {
     componentName: string;
     allDatasetComponents: any[];
     conditionPattern?: EObject;
+    aggregationPattern?: EObject;
+    sortPattern?: EObject;
 }
 
 class SaveDatasetComponent extends React.Component<any, State> {
@@ -33,10 +36,12 @@ class SaveDatasetComponent extends React.Component<any, State> {
        this.saveDatasetComponentOptions()
     }
 
-    getConditionPattern() {
-        API.instance().findClass('dataset', 'Condition')
-            .then( (conditionPattern: EObject ) => {
-                this.setState({conditionPattern})
+    getPattern(className:string, paramName:string) {
+        API.instance().findClass('dataset', className)
+            .then( (paramValue: EObject ) => {
+                this.setState<never>({
+                    [paramName]: paramValue
+                })
             })
     };
 
@@ -48,6 +53,24 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     .then((allDatasetComponents: Ecore.Resource[]) => {
                         this.setState({allDatasetComponents})
                     })
+            }
+        })
+    };
+
+    addComponentServerParam(currentDatasetComponent: Ecore.EObject, pattern: Ecore.EObject, userProfileValue: Ecore.EObject[], paramName: string, componentName: string): void {
+        currentDatasetComponent.get(componentName).clear();
+        JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
+            if (f['operation'] !== undefined) {
+                const datasetColumn = currentDatasetComponent.get('dataset').get('datasetColumn').array()
+                    .filter((c: any) => c.get('name') === f['datasetColumn']);
+                const params = pattern.create({
+                    datasetColumn: datasetColumn[0],
+                    operation: f['operation'],
+                    value: f['value'],
+                    enable: f['enable'],
+                    type: f['type']
+                } as IServerQueryParam);
+                currentDatasetComponent.get(componentName).add(params)
             }
         })
     };
@@ -69,7 +92,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     d.eContents()[0].get('name') === datasetComponentName)
                 currentDatasetComponent = currentDatasetComponentArr.eContents()[0]
             }
-            else {currentDatasetComponent = this.props.viewObject.get('datasetView').get('datasetComponent')}
+            else {
+                currentDatasetComponent = this.props.viewObject.get('datasetView').get('datasetComponent')
+            }
             currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public')
             if (!this.state.changeCurrent) {
                 currentDatasetComponent.get('audit').get('createdBy', null)
@@ -80,25 +105,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
             const userProfileValue = this.props.context.userProfile.get('params').array()
                 .filter( (p: any) => p.get('key') === currentDatasetComponent._id);
             if (userProfileValue.length !== 0) {
-                currentDatasetComponent.get('serverFilter').clear();
-
-                let serverFilters;
-                serverFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
-
-                serverFilters.forEach((f: any) => {
-                    if (f['operation'] !== undefined) {
-                        const datasetColumn = currentDatasetComponent.get('dataset').get('datasetColumn').array()
-                            .filter((c: any) => c.get('name') === f['datasetColumn']);
-                        const params = this.state.conditionPattern!.create({
-                            datasetColumn: datasetColumn[0],
-                            operation: f['operation'],
-                            value: f['value'],
-                            enable: f['enable'],
-                            type: f['type']
-                        });
-                        currentDatasetComponent.get('serverFilter').add(params)
-                    }
-                })
+                this.addComponentServerParam(currentDatasetComponent, this.state.conditionPattern!, userProfileValue, 'serverFilters', 'serverFilter');
+                this.addComponentServerParam(currentDatasetComponent, this.state.aggregationPattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
+                this.addComponentServerParam(currentDatasetComponent, this.state.sortPattern!, userProfileValue, 'serverSorts', 'serverSort');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource()
@@ -137,25 +146,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === currentDatasetComponent._id);
         if (userProfileValue.length !== 0) {
-            currentDatasetComponent.get('serverFilter').clear();
-
-            let serverFilters;
-            serverFilters = JSON.parse(userProfileValue[0].get('value')).serverFilters
-
-            serverFilters.forEach((f: any) => {
-                if (f['operation'] !== undefined) {
-                    const datasetColumn = currentDatasetComponent.get('dataset').get('datasetColumn').array()
-                        .filter((c: any) => c.get('name') === f['datasetColumn']);
-                    const params = this.state.conditionPattern!.create({
-                        datasetColumn: datasetColumn[0],
-                        operation: f['operation'],
-                        value: f['value'],
-                        enable: f['enable'],
-                        type: f['type']
-                    });
-                    currentDatasetComponent.get('serverFilter').add(params)
-                }
-            })
+            this.addComponentServerParam(currentDatasetComponent, this.state.conditionPattern!, userProfileValue, 'serverFilters', 'serverFilter');
+            this.addComponentServerParam(currentDatasetComponent, this.state.aggregationPattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
+            this.addComponentServerParam(currentDatasetComponent, this.state.sortPattern!, userProfileValue, 'serverSorts', 'serverSort');
         }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource()
@@ -203,7 +196,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents()}
-        if (!this.state.conditionPattern) this.getConditionPattern();
+        if (!this.state.conditionPattern) this.getPattern('Condition', 'conditionPattern');
+        if (!this.state.aggregationPattern) this.getPattern('Aggregation', 'aggregationPattern');
+        if (!this.state.sortPattern) this.getPattern('QuerySort', 'sortPattern');
     }
 
     render() {
