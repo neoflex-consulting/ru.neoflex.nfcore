@@ -44,7 +44,6 @@ class Col_ extends ViewContainer {
                 borderBottom: this.props.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
                 borderTop: this.props.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
                 borderLeft: this.props.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
-
             }}>
                 {this.renderChildren()}
             </Col>

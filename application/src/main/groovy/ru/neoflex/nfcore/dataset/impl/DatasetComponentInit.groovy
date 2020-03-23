@@ -21,7 +21,7 @@ class DatasetComponentInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateDatasetComponent(String name, String JdbcDataset) {
+    static def createDatasetComponent(String name, String JdbcDataset) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
@@ -38,19 +38,19 @@ class DatasetComponentInit {
             rs.resources.add(Context.current.store.createEObject(datasetComponent))
             return rs.resources.get(0).contents.get(0) as DatasetComponent
         }
-        else if ((rs.resources.get(0).contents.get(0) as DatasetComponent).dataset == null) {
-            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
-            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
-            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
-            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
-            datasetComponent.setOwner(owner)
-            datasetComponent.access = Access.DEFAULT
-            if (dataset) {
-                datasetComponent.setDataset(dataset)
-                datasetComponent.useServerFilter = true
-            }
-            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
-        }
+//        else if ((rs.resources.get(0).contents.get(0) as DatasetComponent).dataset == null) {
+//            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+//            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
+//            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
+//            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
+//            datasetComponent.setOwner(owner)
+//            datasetComponent.access = Access.DEFAULT
+//            if (dataset) {
+//                datasetComponent.setDataset(dataset)
+//                datasetComponent.useServerFilter = true
+//            }
+//            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+//        }
     }
 
     static def createAllColumn(String name) {

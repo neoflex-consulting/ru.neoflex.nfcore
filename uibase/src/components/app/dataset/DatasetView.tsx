@@ -7,13 +7,15 @@ import {faFilter, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
 import ServerFilter from './ServerFilter';
 import ServerAggregate from './ServerAggregate';
+import Highlight from "./Highlight";
 
 const { Option, OptGroup } = Select;
 
 export enum paramType {
     filter,
     aggregate,
-    order
+    order,
+    highlight
 }
 
 interface Props {
@@ -25,6 +27,7 @@ interface State {
     columnDefs: any[];
     rowData: any[];
     serverFilters: any[];
+    highlights: any[];
     serverAggregates: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
@@ -34,6 +37,7 @@ interface State {
     updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
+    allHighlightType: any[];
 }
 
 class DatasetView extends React.Component<any, State> {
@@ -46,6 +50,7 @@ class DatasetView extends React.Component<any, State> {
             columnDefs: [],
             rowData: [],
             serverFilters: [],
+            highlights: [],
             serverAggregates: [],
             useServerFilter: false,
             datasetComponentsData: undefined,
@@ -54,7 +59,8 @@ class DatasetView extends React.Component<any, State> {
             allSorts: [],
             updateData: false,
             filtersMenuVisible: false,
-            aggregatesMenuVisible: false
+            aggregatesMenuVisible: false,
+            allHighlightType: []
         }
     }
 
@@ -132,6 +138,7 @@ class DatasetView extends React.Component<any, State> {
         });
         this.setState({columnDefs});
         this.findServerFilters(resource as Ecore.Resource, columnDefs);
+        this.findHighlights(resource as Ecore.Resource, columnDefs);
         this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
@@ -223,6 +230,67 @@ class DatasetView extends React.Component<any, State> {
         this.runQuery(resource, serverFilters, serverAggregates);
     }
 
+    findHighlights(resource: Ecore.Resource, columnDefs: Object[]){
+        let highlights: any = [];
+        const userProfileValue = this.props.context.userProfile.get('params').array()
+            .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
+        if (userProfileValue.length !== 0) {
+            let userProfileParams = JSON.parse(userProfileValue[0].get('value')).highlights;
+            if (userProfileParams !== undefined) {
+                userProfileParams.forEach((f: any, index: any) =>
+                    highlights.push({
+                        index: highlights.length + 1,
+                        datasetColumn: f.datasetColumn,
+                        operation: f.operation,
+                        value: f.value,
+                        enable: (f.enable !== null ? f.enable : false),
+                        type: f.type,
+                        highlightType: f.highlightType,
+                        backgroundColor: f.backgroundColor,
+                        color: f.color
+                    })
+                )
+            }
+        }
+        else {
+            resource.eContents()[0].get('highlight').array().forEach( (f: Ecore.Resource) => {
+                if (highlights.filter( (filter: any) =>
+                    filter['datasetColumn'] === f.get('datasetColumn').get('name') &&
+                    filter['operation'] === f.get('operation') &&
+                    filter['value'] === f.get('value') &&
+                    filter['enable'] === (f.get('enable') !== null ? f.get('enable') : false) &&
+                    filter['highlightType'] === f.get('highlightType') &&
+                    filter['backgroundColor'] === f.get('backgroundColor') &&
+                    filter['color'] === f.get('color')
+                ).length === 0) {
+                    highlights.push({
+                        index: highlights.length + 1,
+                        datasetColumn: f.get('datasetColumn').get('name'),
+                        operation: f.get('operation') || 'EqualTo',
+                        value: f.get('value'),
+                        enable: (f.get('enable') !== null ? f.get('enable') : false),
+                        type: f.get('datasetColumn').get('convertDataType'),
+                        highlightType: f.get('highlightType'),
+                        backgroundColor: f.get('backgroundColor'),
+                        color: f.get('color')
+                    })
+                }
+            });
+        }
+        highlights.push(
+            {index: highlights.length + 1,
+                datasetColumn: undefined,
+                operation: undefined,
+                value: undefined,
+                enable: undefined,
+                type: undefined,
+                highlightType: undefined,
+                backgroundColor: undefined,
+                color: undefined
+            });
+        this.setState({highlights});
+    }
+
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
@@ -231,6 +299,7 @@ class DatasetView extends React.Component<any, State> {
                 : undefined;
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs);
+                this.findHighlights(this.state.currentDatasetComponent, this.state.columnDefs);
             }
             else if ((refresh === undefined || refresh.length === 0) &&
                 this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name') &&
@@ -259,6 +328,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
         if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
+        if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
     }
 
     componentWillUnmount() {
@@ -322,11 +392,20 @@ class DatasetView extends React.Component<any, State> {
                     serverAggregates: ServerParam
                 })
             }
+            if (paramName === paramType.highlight) {
+                this.props.context.changeUserProfile(datasetComponentId, {
+                    serverFilters: this.state.serverFilters,
+                    serverAggregates: this.state.serverAggregates,
+                    highlights: ServerParam
+                })
+                this.setState({highlights: ServerParam})
+            }
         }
         else {
-            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
+            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=> {
                 this.findServerFilters(this.state.currentDatasetComponent, this.state.columnDefs)
-            )
+                this.findHighlights(this.state.currentDatasetComponent, this.state.columnDefs)
+            })
         }
     };
 
@@ -416,13 +495,11 @@ class DatasetView extends React.Component<any, State> {
                 <Drawer
                     placement='right'
                     title={t('filters')}
-                    width={'700px'}
+                    width={'720px'}
                     visible={this.state.filtersMenuVisible}
                     onClose={this.handleFiltersMenu}
                     mask={false}
                     maskClosable={false}
-
-
                 >
                     {
                         this.state.serverFilters
@@ -436,6 +513,20 @@ class DatasetView extends React.Component<any, State> {
                             />
                             :
                             <ServerFilter/>
+                    }
+                    {
+                        this.state.highlights && this.state.allHighlightType
+                            ?
+                            <Highlight
+                                {...this.props}
+                                highlights={this.state.highlights}
+                                columnDefs={this.state.columnDefs}
+                                allOperations={this.state.allOperations}
+                                allHighlightType={this.state.allHighlightType}
+                                onChangeHighlights={this.onChangeServerParams}
+                            />
+                            :
+                            <Highlight/>
                     }
                 </Drawer>
                 <Drawer

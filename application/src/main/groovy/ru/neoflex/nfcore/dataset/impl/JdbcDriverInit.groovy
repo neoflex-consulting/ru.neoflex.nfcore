@@ -7,7 +7,7 @@ import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.JdbcDriver
 
 class JdbcDriverInit {
-    static def recreateDriver(String name) {
+    static def createDriver(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DRIVER, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {

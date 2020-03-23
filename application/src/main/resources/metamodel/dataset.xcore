@@ -66,6 +66,7 @@ class DatasetComponent {
      op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations)
      boolean useServerFilter
      contains Condition[] serverFilter //Состав серверного фильтра
+     contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
 }
 
 class DatasetColumn {
@@ -109,7 +110,7 @@ class Condition {
     refers DatasetColumn datasetColumn
     Operations operation
     String value
-    boolean enable //включен ли фильтр
+    boolean enable
 }
 
 class ConditionDTO {
@@ -117,6 +118,16 @@ class ConditionDTO {
     String operation
     String value
     boolean enable
+}
+
+class Highlight {
+    HighlightType highlightType
+    refers DatasetColumn datasetColumn
+    Operations operation
+    String value
+    boolean enable
+    String backgroundColor
+    String color
 }
 
 class Aggregation {
@@ -196,5 +207,11 @@ enum DataType {
     Integer
     String
     Timestamp
+}
+
+enum HighlightType {
+    Cell
+    Column
+    Row
 }
 

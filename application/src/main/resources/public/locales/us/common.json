@@ -64,5 +64,9 @@
         "StartWith": "begins with",
         "NotStartWith": "does not begin with",
         "EndOn": "ends with",
-        "NotEndOn": "does not end with"
+        "NotEndOn": "does not end with",
+
+        "Cell": "cell",
+        "Column": "column",
+        "Row": "row"
 }

@@ -64,5 +64,9 @@
         "StartWith": "從...開始",
         "NotStartWith": "不以",
         "EndOn": "結束於",
-        "NotEndOn": "沒有結束"
+        "NotEndOn": "沒有結束",
+
+        "Cell": "細胞",
+        "Column": "柱",
+        "Row": "行"
 }

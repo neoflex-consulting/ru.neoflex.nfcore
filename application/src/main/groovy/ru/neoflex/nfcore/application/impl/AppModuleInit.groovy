@@ -36,12 +36,9 @@ class AppModuleInit {
         }
     }
 
-    static def recreateAppModule(String name) {
+    static def createAppModule(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
         if (rs.resources.empty) {
 
             def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "DatasetPivot",true)

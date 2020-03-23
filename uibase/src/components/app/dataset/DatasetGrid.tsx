@@ -46,9 +46,7 @@ class DatasetGrid extends React.Component<any, any> {
             rowPerPages: [],
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             operations: [],
-            selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
             rowData: [],
             saveMenuVisible: false,
@@ -56,51 +54,31 @@ class DatasetGrid extends React.Component<any, any> {
                 defaultColDef: {
                     resizable: true,
                     filter: true,
-                    sortable: true
+                    sortable: true,
+                    // cellStyle: function(params: any) {
+                        /*Так залить ячейку*/
+                        // if (params.value !== null && params.value.includes('test')) {
+                        //     return { background: 'red' }
+                        // }
+                        /*Так залить столбец*/
+                        // if (params.data.dtype === params.value) {
+                        //     return { background: 'red' }
+                        // }
+                    }
+
                 },
-            }
+            /*так залить строку*/
+                // getRowStyle: function(params: any) {
+                    // if (Number(params.data.e_id) === 42098) {
+                    //     return { background: 'grey' }
+                    // }
+                    // if (params.data.name.includes('test')) {
+                    //     return { background: 'red' }
+                    // }
+                // }
+            // }
         };
-
         this.grid = React.createRef();
-        this.exportToCSV = this.exportToCSV.bind(this);
-        // this.handleKeyDown = this.handleKeyDown.bind(this);
-    }
-
-    // handleKeyDown(event: { [key:string]: any }) {
-    //      const { onCtrlA, onCtrlShiftA } = this.props
-    //      const rowData = this.grid.current.api.getSelectedRows()
-    //      const focusedCell = this.grid.current.api.getFocusedCell()
-    //      const row = this.grid.current.api.getDisplayedRowAtMIndex(focusedCell.rowIndex);
-    //
-    //      let charCode = String.fromCharCode(event.which).toLowerCase()
-    //      if (rowData.length > 0 && focusedCell) {
-    //          const cellData = row.data[focusedCell.column.colId]
-    //          if (event.ctrlKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //          // For MAC
-    //          if (event.metaKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlA) {
-    //          if (event.ctrlKey && charCode === 'a') {
-    //              onCtrlA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlShiftA) {
-    //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
-    //              onCtrlShiftA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //  }
-
-    exportToCSV(name: string) {
-        this.grid.current.api.exportDataAsCsv({ fileName: name })
     }
 
     onGridReady = (params: any) => {
@@ -416,6 +394,16 @@ class DatasetGrid extends React.Component<any, any> {
                                     resizable={col.get('resizable') || false}
                                     sortable={col.get('sortable') || false}
                                     suppressMenu={col.get('suppressMenu') || false}
+
+                                    // cellStyle={
+                                    //     function(params: any) {
+                                    //         if ( !== null && params.value.includes('test')) {
+                                    //             return { background: 'red' }
+                                    //         }params.value
+                                    //     }
+                                    // }
+
+
                                 />
                                 )}
                     </AgGridReact>

@@ -14,36 +14,36 @@ class DatasetPackageInit {
 
     {
         /*DatasetPackage*/
-        JdbcDriverInit.recreateDriver("JdbcDriverPostgresqlTest")
-        JdbcConnectionInit.recreateConnection("JdbcConnectionPostgresqlTest")
-        JdbcConnectionInit.recreateConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
+        JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest")
+        JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest")
+        JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
 
 
         try {
-            JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
+            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTest")
-            DatasetComponentInit.recreateDatasetComponent("DatasetGridTest", "JdbcDatasetTest")
+            DatasetComponentInit.createDatasetComponent("DatasetGridTest", "JdbcDatasetTest")
             DatasetComponentInit.createAllColumn("DatasetGridTest")
             DatasetComponentInit.createServerFilters("DatasetGridTest", "JdbcDatasetTest")
 
-            JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetTestAAA", "aaa_test", "public", "JdbcConnectionPostgresqlTest")
+            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTestAAA", "aaa_test", "public", "JdbcConnectionPostgresqlTest")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTestAAA")
-            DatasetComponentInit.recreateDatasetComponent("DatasetGridTestAAA", "JdbcDatasetTestAAA")
+            DatasetComponentInit.createDatasetComponent("DatasetGridTestAAA", "JdbcDatasetTestAAA")
             DatasetComponentInit.createAllColumn("DatasetGridTestAAA")
 
-            JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetLine","\"lineDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
+            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetLine","\"lineDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetLine")
-            DatasetComponentInit.recreateDatasetComponent("DatasetGridLine", "JdbcDatasetLine")
+            DatasetComponentInit.createDatasetComponent("DatasetGridLine", "JdbcDatasetLine")
             DatasetComponentInit.createAllColumn("DatasetGridLine")
 
-            JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetPie","\"pieDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
+            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetPie","\"pieDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetPie")
-            DatasetComponentInit.recreateDatasetComponent("DatasetGridPie", "JdbcDatasetPie")
+            DatasetComponentInit.createDatasetComponent("DatasetGridPie", "JdbcDatasetPie")
             DatasetComponentInit.createAllColumn("DatasetGridPie")
 
-            JdbcDatasetInit.recreateJdbcDatasetInit("JdbcDatasetBar","\"barDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
+            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetBar","\"barDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
-            DatasetComponentInit.recreateDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
+            DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
             DatasetComponentInit.createAllColumn("DatasetGridBar")
         }
         catch (Throwable e) {
@@ -56,14 +56,14 @@ class DatasetPackageInit {
         NotificationInstanceInit.deleteNotificationInstance("NotificationInstance1")
         NotificationInit.deleteNotification("A 1993")
         AppModuleInit.deletedAppModule("ReportSingle")
-        ApplicationInit.recreateApplication("Обязательная отчетность")
-        ApplicationInit.recreateApplication("Налоговая отчетность")
-        ApplicationInit.recreateApplication("Администрирование")
-        AppModuleInit.recreateAppModule("ReportSingle")
-        NotificationInit.recreateNotification("A 1993")
-        NotificationInstanceInit.recreateNotificationInstance("NotificationInstance1")
-        ApplicationInit.recreateApplicationLine("Линейная диаграмма")
-        ApplicationInit.recreateApplicationPie("Круговая диаграмма")
-        ApplicationInit.recreateApplicationBar("Ступенчатая диаграмма")
+        ApplicationInit.createApplication("Обязательная отчетность")
+        ApplicationInit.createApplication("Налоговая отчетность")
+        ApplicationInit.createApplication("Администрирование")
+        AppModuleInit.createAppModule("ReportSingle")
+        NotificationInit.createNotification("A 1993")
+        NotificationInstanceInit.createNotificationInstance("NotificationInstance1")
+        ApplicationInit.createApplicationLine("Линейная диаграмма")
+        ApplicationInit.createApplicationPie("Круговая диаграмма")
+        ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
     }
 }
