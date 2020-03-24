@@ -279,15 +279,15 @@ class DatasetGrid extends React.Component<any, any> {
             .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
 
         if (getUserProfile !== undefined) {
-            if (getUserProfile[0].get('key') === this.props.viewObject.get('datasetView')._id) {
-                if (JSON.parse(getUserProfile[0].get('value'))['theme'] !== undefined) {
-                    this.setState({currentTheme: JSON.parse(getUserProfile[0].get('value'))['theme']})
+            if (getUserProfile.get('key') === this.props.viewObject.get('datasetView')._id) {
+                if (JSON.parse(getUserProfile.get('value'))['theme'] !== undefined) {
+                    this.setState({currentTheme: JSON.parse(getUserProfile.get('value'))['theme']})
                 }
-                if (JSON.parse(getUserProfile[0].get('value'))['showUniqRow'] !== undefined) {
-                    this.setState({showUniqRow: JSON.parse(getUserProfile[0].get('value'))['showUniqRow']})
+                if (JSON.parse(getUserProfile.get('value'))['showUniqRow'] !== undefined) {
+                    this.setState({showUniqRow: JSON.parse(getUserProfile.get('value'))['showUniqRow']})
                 }
-                if (JSON.parse(getUserProfile[0].get('value'))['rowPerPage'] !== undefined) {
-                    const newPageSize = JSON.parse(getUserProfile[0].get('value'))['rowPerPage']
+                if (JSON.parse(getUserProfile.get('value'))['rowPerPage'] !== undefined) {
+                    const newPageSize = JSON.parse(getUserProfile.get('value'))['rowPerPage']
                     this.setState({paginationPageSize: newPageSize})
                 }
             }
