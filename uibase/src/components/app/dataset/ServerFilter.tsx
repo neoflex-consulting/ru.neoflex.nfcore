@@ -13,6 +13,7 @@ interface Props {
     allOperations?: Array<EObject>;
     onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
     onChangeVisibility?: (newServerSort: any[], paramName: paramType) => void;
+    isVisible?: boolean;
 }
 
 interface State {
@@ -30,6 +31,14 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                this.props.onChangeVisibility!(this.state.serverFilters!, paramType.filter)
+                if (err) {
+                    this.props.context.notification('Filter notification','Please, correct the mistakes', 'error')
+                }
+            });
+        }
         if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
             this.setState({serverFilters: this.props.serverFilters})
         }

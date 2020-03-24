@@ -40,7 +40,6 @@ interface State {
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
-    onChangeVisibility: boolean;
     allHighlightType: any[];
 }
 
@@ -72,7 +71,6 @@ class DatasetView extends React.Component<any, State> {
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
-            onChangeVisibility: false,
             allHighlightType: []
         }
     }
@@ -592,6 +590,7 @@ class DatasetView extends React.Component<any, State> {
                                 allOperations={this.state.allOperations}
                                 onChangeServerFilter={this.onChangeServerParams}
                                 onChangeVisibility={this.onChangeVisibility}
+                                isVisible={this.state.filtersMenuVisible}
                             />
                             :
                             <ServerFilter/>
@@ -630,6 +629,7 @@ class DatasetView extends React.Component<any, State> {
                                 allAggregates={this.state.allAggregates}
                                 onChangeServerAggregation={this.onChangeServerParams}
                                 onChangeVisibility={this.onChangeVisibility}
+                                isVisible={this.state.aggregatesMenuVisible}
                             />
                             :
                             <ServerAggregate/>
@@ -654,6 +654,7 @@ class DatasetView extends React.Component<any, State> {
                                 allSorts={this.state.allSorts}
                                 onChangeServerSort={this.onChangeServerParams}
                                 onChangeVisibility={this.onChangeVisibility}
+                                isVisible={this.state.sortsMenuVisible}
                             />
                             :
                             <ServerSort/>
