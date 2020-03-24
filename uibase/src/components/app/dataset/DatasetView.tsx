@@ -38,6 +38,7 @@ interface State {
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
+    onChangeVisibility: boolean;
 }
 
 const defaultComponentValues = {
@@ -66,7 +67,8 @@ class DatasetView extends React.Component<any, State> {
             updateData: false,
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
-            sortsMenuVisible: false
+            sortsMenuVisible: false,
+            onChangeVisibility: false
         }
     }
 
@@ -352,6 +354,8 @@ class DatasetView extends React.Component<any, State> {
         this.setState({ aggregatesMenuVisible: false });
     };
 
+
+
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
@@ -379,6 +383,10 @@ class DatasetView extends React.Component<any, State> {
                 this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs)
             )
         }
+    };
+
+    onChangeVisibility = (newServerParam: any[], paramName: paramType): void => {
+        this.setState<never>({[paramName]: newServerParam});
     };
 
     handleChange(e: any): void {
@@ -492,6 +500,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
                                 onChangeServerFilter={this.onChangeServerParams}
+                                onChangeVisibility={this.onChangeVisibility}
                             />
                             :
                             <ServerFilter/>
@@ -515,6 +524,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
                                 onChangeServerAggregation={this.onChangeServerParams}
+                                onChangeVisibility={this.onChangeVisibility}
                             />
                             :
                             <ServerAggregate/>
@@ -538,6 +548,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allSorts={this.state.allSorts}
                                 onChangeServerSort={this.onChangeServerParams}
+                                onChangeVisibility={this.onChangeVisibility}
                             />
                             :
                             <ServerSort/>

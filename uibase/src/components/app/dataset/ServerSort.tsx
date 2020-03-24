@@ -12,6 +12,7 @@ interface Props {
     columnDefs?:  Array<any>;
     allSorts?: Array<EObject>;
     onChangeServerSort?: (newServerSort: any[], paramName: paramType) => void;
+    onChangeVisibility?: (newServerSort: any[], paramName: paramType) => void;
 }
 
 interface State {
@@ -37,6 +38,14 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (JSON.stringify(prevProps.sortsMenuVisible) !== JSON.stringify(this.props.sortsMenuVisible) && !this.props.sortsMenuVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                this.props.onChangeUserProfile!(this.state.serverSorts!, paramType.sort)
+                if (err) {
+                    this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
+                }
+            });
+        }
         if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)) {
             this.setState({serverSorts: this.props.serverSorts})
         }
