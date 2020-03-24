@@ -440,14 +440,27 @@ class DatasetView extends React.Component<any, State> {
                                 (paramName === paramType.sort)? serverParam: this.state.serverSorts
                          );
             this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? serverParam: this.state.serverFilters,
-                serverAggregates: (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates,
-                serverSorts:  (paramName === paramType.sort)? serverParam: this.state.serverSorts,
+                serverFilters: (paramName === paramType.filter)? serverParam: this.state.serverFilters
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverAggregates: (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverSorts:  (paramName === paramType.sort)? serverParam: this.state.serverSorts
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
                 highlights: this.state.highlights
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
             });
         }
         else {
-            this.props.context.changeUserProfile(datasetComponentId, undefined).then(()=>
+            this.props.context.changeUserProfile(datasetComponentId, {
+                serverFilters: (paramName === paramType.filter)? undefined: this.state.serverFilters
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverAggregates: (paramName === paramType.aggregate)? undefined: this.state.serverAggregates
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverSorts:  (paramName === paramType.sort)? undefined: this.state.serverSorts
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                highlights: this.state.highlights
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
+            }).then(()=>
                 this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs)
             )
         }
@@ -493,9 +506,6 @@ class DatasetView extends React.Component<any, State> {
         const { t } = this.props;
         return (
             <div>
-
-
-
                 {this.state.allDatasetComponents.length !== 0 && this.state.currentDatasetComponent !== undefined &&
                     <div style={{display: 'inline-block'}}>
                         <Select
