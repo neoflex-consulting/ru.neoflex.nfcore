@@ -33,19 +33,14 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
             this.props.form.validateFields((err: any, values: any) => {
-                this.props.onChangeVisibility!(this.state.serverFilters!, paramType.filter)
-                if (err) {
+                if (!err) {
+                    this.props.onChangeVisibility!(this.state.serverFilters!, paramType.filter)
+                } else {
                     this.props.context.notification('Filter notification','Please, correct the mistakes', 'error')
                 }
             });
         }
         if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
-            this.setState({serverFilters: this.props.serverFilters})
-        }
-        else if (JSON.stringify(prevProps.serverFilters) === JSON.stringify(this.props.serverFilters)
-            && JSON.stringify(prevState.serverFilters) === JSON.stringify(this.state.serverFilters)
-            && JSON.stringify(this.props.serverFilters) !== JSON.stringify(this.state.serverFilters)
-        ) {
             this.setState({serverFilters: this.props.serverFilters})
         }
     }

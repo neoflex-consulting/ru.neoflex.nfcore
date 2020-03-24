@@ -41,19 +41,14 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
             this.props.form.validateFields((err: any, values: any) => {
-                this.props.onChangeVisibility!(this.state.serverAggregates!, paramType.aggregate)
-                if (err) {
-                    this.props.context.notification('Aggregation notification','Please, correct the mistakes', 'error')
+                if (!err) {
+                    this.props.onChangeVisibility!(this.state.serverAggregates!, paramType.aggregate);
+                 } else {
+                    this.props.context.notification('Aggregation notification','Please, correct the mistakes', 'error');
                 }
             });
         }
         if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)) {
-            this.setState({serverAggregates: this.props.serverAggregates})
-        }
-        else if (JSON.stringify(prevProps.serverAggregates) === JSON.stringify(this.props.serverAggregates)
-            && JSON.stringify(prevState.serverAggregates) === JSON.stringify(this.state.serverAggregates)
-            && JSON.stringify(this.props.serverAggregates) !== JSON.stringify(this.state.serverAggregates)
-        ) {
             this.setState({serverAggregates: this.props.serverAggregates})
         }
     }

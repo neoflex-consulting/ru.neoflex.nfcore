@@ -41,19 +41,14 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
             this.props.form.validateFields((err: any, values: any) => {
-                this.props.onChangeVisibility!(this.state.serverSorts!, paramType.sort)
-                if (err) {
+                if (!err) {
+                    this.props.onChangeVisibility!(this.state.serverSorts!, paramType.sort)
+                } else {
                     this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
                 }
             });
         }
         if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)) {
-            this.setState({serverSorts: this.props.serverSorts})
-        }
-        else if (JSON.stringify(prevProps.serverSorts) === JSON.stringify(this.props.serverSorts)
-            && JSON.stringify(prevState.serverSorts) === JSON.stringify(this.state.serverSorts)
-            && JSON.stringify(this.props.serverSorts) !== JSON.stringify(this.state.serverSorts)
-        ) {
             this.setState({serverSorts: this.props.serverSorts})
         }
     }
