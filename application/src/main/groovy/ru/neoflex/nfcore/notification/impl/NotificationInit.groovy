@@ -18,7 +18,7 @@ class NotificationInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateNotification(String name) {
+    static def createNotification(String name) {
         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {

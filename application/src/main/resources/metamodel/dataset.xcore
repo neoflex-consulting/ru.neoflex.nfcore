@@ -69,7 +69,7 @@ class DatasetComponent {
      contains Condition[] serverFilter
      contains Aggregation[] serverAggregation
      contains QuerySort[] serverSort
-     //String clientFilterExpression //выражение в клиентском фильтре
+     contains Highlight[] highlight
 }
 
 class DatasetColumn {
@@ -113,7 +113,7 @@ class Condition {
     refers DatasetColumn datasetColumn
     Operations operation
     String value
-    boolean enable //включен ли фильтр
+    boolean enable
 }
 
 class ConditionDTO {
@@ -121,6 +121,16 @@ class ConditionDTO {
     String operation
     String value
     boolean enable
+}
+
+class Highlight {
+    HighlightType highlightType
+    refers DatasetColumn datasetColumn
+    Operations operation
+    String value
+    boolean enable
+    String backgroundColor
+    String color
 }
 
 class Aggregation {
@@ -210,5 +220,11 @@ enum DataType {
     Integer
     String
     Timestamp
+}
+
+enum HighlightType {
+    Cell
+    Column
+    Row
 }
 

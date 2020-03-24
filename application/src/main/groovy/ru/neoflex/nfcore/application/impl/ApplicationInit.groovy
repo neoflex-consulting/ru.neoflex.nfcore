@@ -31,12 +31,9 @@ class ApplicationInit {
             return resources.resources.get(0).contents.get(0)
         }
 
-    static def recreateApplication(String name) {
+    static def createApplication(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
                 .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
         if (rs.resources.empty) {
 
             def application = ApplicationFactory.eINSTANCE.createApplication()
@@ -140,12 +137,9 @@ class ApplicationInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def recreateApplicationLine(String name) {
+    static def createApplicationLine(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
                 .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
         if (rs.resources.empty) {
 
             def application = ApplicationFactory.eINSTANCE.createApplication()
@@ -209,12 +203,9 @@ class ApplicationInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def recreateApplicationPie(String name) {
+    static def createApplicationPie(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
                 .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
         if (rs.resources.empty) {
             def application = ApplicationFactory.eINSTANCE.createApplication()
             application.name = name
@@ -276,12 +267,9 @@ class ApplicationInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def recreateApplicationBar(String name) {
+    static def createApplicationBar(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
                 .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
         if (rs.resources.empty) {
             def application = ApplicationFactory.eINSTANCE.createApplication()
             application.name = name

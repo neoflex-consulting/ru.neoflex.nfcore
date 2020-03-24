@@ -10,7 +10,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {Button, Dropdown, Menu, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
@@ -22,8 +22,6 @@ import {saveAs} from "file-saver";
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
-
-
 
 interface Props {
     onCtrlA?: Function,
@@ -46,61 +44,40 @@ class DatasetGrid extends React.Component<any, any> {
             rowPerPages: [],
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             operations: [],
-            selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
             rowData: [],
+            highlights: [],
             saveMenuVisible: false,
             gridOptions: {
                 defaultColDef: {
                     resizable: true,
                     filter: true,
-                    sortable: true
+                    sortable: true,
+                    // cellStyle: function(params: any) {
+                        /*Так залить ячейку*/
+                        // if (params.value !== null && params.value.includes('test')) {
+                        //     return { background: 'red' }
+                        // }
+                        /*Так залить столбец*/
+                        // if (params.data.dtype === params.value) {
+                        //     return { background: 'red' }
+                        // }
+                    }
+
                 },
-            }
+            /*так залить строку*/
+                // getRowStyle: function(params: any) {
+                    // if (Number(params.data.e_id) === 42098) {
+                    //     return { background: 'grey' }
+                    // }
+                    // if (params.data.name.includes('test')) {
+                    //     return { background: 'red' }
+                    // }
+                // }
+            // }
         };
-
         this.grid = React.createRef();
-        this.exportToCSV = this.exportToCSV.bind(this);
-        // this.handleKeyDown = this.handleKeyDown.bind(this);
-    }
-
-    // handleKeyDown(event: { [key:string]: any }) {
-    //      const { onCtrlA, onCtrlShiftA } = this.props
-    //      const rowData = this.grid.current.api.getSelectedRows()
-    //      const focusedCell = this.grid.current.api.getFocusedCell()
-    //      const row = this.grid.current.api.getDisplayedRowAtMIndex(focusedCell.rowIndex);
-    //
-    //      let charCode = String.fromCharCode(event.which).toLowerCase()
-    //      if (rowData.length > 0 && focusedCell) {
-    //          const cellData = row.data[focusedCell.column.colId]
-    //          if (event.ctrlKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //          // For MAC
-    //          if (event.metaKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlA) {
-    //          if (event.ctrlKey && charCode === 'a') {
-    //              onCtrlA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlShiftA) {
-    //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
-    //              onCtrlShiftA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //  }
-
-    exportToCSV(name: string) {
-        this.grid.current.api.exportDataAsCsv({ fileName: name })
     }
 
     onGridReady = (params: any) => {
@@ -232,7 +209,7 @@ class DatasetGrid extends React.Component<any, any> {
         API.instance().findEnum('application', 'RowPerPage')
             .then((result: Ecore.EObject[]) => {
                 let rowPerPages = result.map( (t: any) => {
-                    return t.get('name') /*rowPerPageMapper_[t.get('name')]*/
+                    return t.get('name')
                 });
                 this.setState({rowPerPages})
             })
@@ -297,21 +274,59 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     private changeSettings() {
-        this.props.context.userProfile.get('params').array()
-            .forEach((p: any) => {
-                if (p.get('key') === this.props.viewObject.get('datasetView')._id) {
-                    if (JSON.parse(p.get('value'))['theme'] !== undefined) {
-                        this.setState({currentTheme: JSON.parse(p.get('value'))['theme']})
-                    }
-                    if (JSON.parse(p.get('value'))['showUniqRow'] !== undefined) {
-                        this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
-                    }
-                    if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
-                        const newPageSize = JSON.parse(p.get('value'))['rowPerPage']
-                        this.setState({paginationPageSize: newPageSize})
-                    }
+        const {gridOptions} = this.state
+        const getUserProfile = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
+
+        if (getUserProfile !== undefined) {
+            if (getUserProfile[0].get('key') === this.props.viewObject.get('datasetView')._id) {
+                if (JSON.parse(getUserProfile[0].get('value'))['theme'] !== undefined) {
+                    this.setState({currentTheme: JSON.parse(getUserProfile[0].get('value'))['theme']})
                 }
-            });
+                if (JSON.parse(getUserProfile[0].get('value'))['showUniqRow'] !== undefined) {
+                    this.setState({showUniqRow: JSON.parse(getUserProfile[0].get('value'))['showUniqRow']})
+                }
+                if (JSON.parse(getUserProfile[0].get('value'))['rowPerPage'] !== undefined) {
+                    const newPageSize = JSON.parse(getUserProfile[0].get('value'))['rowPerPage']
+                    this.setState({paginationPageSize: newPageSize})
+                }
+            }
+        }
+        else {
+           // gridOptions.getRowStyle
+            // getRowStyle: function(params: any) {
+            // if (Number(params.data.e_id) === 42098) {
+            //     return { background: 'grey' }
+            // }
+            // if (params.data.name.includes('test')) {
+            //     return { background: 'red' }
+            // }
+            // }
+            const highlights: any[] = this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+            if (highlights){
+                // this.setState({highlights})
+                highlights.forEach((h:EObject) => {
+                    if (h.get('highlightType') === 'Row') {
+                        gridOptions.getRowStyle = function(params: any) {
+                            if (h.get('datasetColumn').get('convertDataType') === 'Integer') {
+                                if (h.get('operation') === null) {
+                                    if (Number(params.data[h.get('datasetColumn').get('name')]) < Number(h.get('value'))) {
+                                        return { background: h.get('backgroundColor'), color: h.get('color') }
+                                    }
+                                }
+                                else if (h.get('operation') === 'EqualTo') {
+                                    if (Number(params.data[h.get('datasetColumn').get('name')]) === Number(h.get('value'))) {
+                                        return { background: h.get('backgroundColor'), color: h.get('color') }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                })
+
+            }
+        }
     }
 
     handleSaveMenu = () => {
@@ -416,6 +431,16 @@ class DatasetGrid extends React.Component<any, any> {
                                     resizable={col.get('resizable') || false}
                                     sortable={col.get('sortable') || false}
                                     suppressMenu={col.get('suppressMenu') || false}
+
+                                    // cellStyle={
+                                    //     function(params: any) {
+                                    //         if ( !== null && params.value.includes('test')) {
+                                    //             return { background: 'red' }
+                                    //         }params.value
+                                    //     }
+                                    // }
+
+
                                 />
                                 )}
                     </AgGridReact>

@@ -14,7 +14,7 @@ class JdbcDatasetInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateJdbcDatasetInit(String name, String tableName, String schemaName, String connectionName) {
+    static def createJdbcDatasetInit(String name, String tableName, String schemaName, String connectionName) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
