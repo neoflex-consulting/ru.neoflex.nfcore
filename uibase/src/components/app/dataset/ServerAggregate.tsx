@@ -252,7 +252,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                     <Form.Item style={{ display: 'inline-block' }}>
                         {getFieldDecorator(`${idEnable}`,
                             {
-                                initialValue: serverAggregate.enable !== undefined ? serverAggregate.enable.toString() : undefined,
+                                initialValue: serverAggregate.enable !== undefined ? t(serverAggregate.enable.toString()) : undefined,
                                 rules: [{
                                     required:
                                         getFieldValue(`${idDatasetColumn}`) ||
@@ -262,7 +262,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                             })(
                             <Select
                                 allowClear={true}
-                                style={{width: '66px'}}
+                                style={{width: '82px'}}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: undefined})
                                     this.handleChange(event)
@@ -272,13 +272,13 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                     key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
                                     value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
                                 >
-                                    false
+                                    {t('false')}
                                 </Select.Option>
                                 <Select.Option
                                     key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
                                     value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
                                 >
-                                    true
+                                    {t('true')}
                                 </Select.Option>
                             </Select>
                         )}

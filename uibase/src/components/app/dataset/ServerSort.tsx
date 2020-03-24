@@ -252,7 +252,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                     <Form.Item style={{ display: 'inline-block' }}>
                                         {getFieldDecorator(`${idEnable}`,
                                             {
-                                                initialValue: serverSort.enable !== undefined ? serverSort.enable.toString() : undefined,
+                                                initialValue: serverSort.enable !== undefined ? t(serverSort.enable.toString()) : undefined,
                                                 rules: [{
                                                     required:
                                                         getFieldValue(`${idDatasetColumn}`) ||
@@ -262,7 +262,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                             })(
                                             <Select
                                                 allowClear={true}
-                                                style={{width: '66px'}}
+                                                style={{width: '82px'}}
                                                 onChange={(e: any) => {
                                                     const event = e ? e : JSON.stringify({index: serverSort.index, columnName: 'enable', value: undefined})
                                                     this.handleChange(event)
@@ -272,13 +272,13 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                     key={JSON.stringify({index: serverSort.index, columnName: 'enable', value: false})}
                                                     value={JSON.stringify({index: serverSort.index, columnName: 'enable', value: false})}
                                                 >
-                                                    false
+                                                    {t('false')}
                                                 </Select.Option>
                                                 <Select.Option
                                                     key={JSON.stringify({index: serverSort.index, columnName: 'enable', value: true})}
                                                     value={JSON.stringify({index: serverSort.index, columnName: 'enable', value: true})}
                                                 >
-                                                    true
+                                                    {t('true')}
                                                 </Select.Option>
                                             </Select>
                                         )}
