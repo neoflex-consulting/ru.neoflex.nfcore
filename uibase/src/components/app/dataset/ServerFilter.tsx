@@ -11,8 +11,8 @@ interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
-    onChangeVisibility?: (newServerSort: any[], paramName: paramType) => void;
+    onChangeServerFilter?: (newServerParam: any[], paramName: paramType) => void;
+    onChangeVisibility?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 

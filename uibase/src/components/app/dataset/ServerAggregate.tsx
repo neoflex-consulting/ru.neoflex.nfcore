@@ -11,8 +11,8 @@ interface Props {
     serverAggregates?: Array<EObject>;
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
-    onChangeServerAggregation?: (newServerAggregation: any[], paramName: paramType) => void;
-    onChangeVisibility?: (newServerSort: any[], paramName: paramType) => void;
+    onChangeServerAggregation?: (newServerParam: any[], paramName: paramType) => void;
+    onChangeVisibility?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 

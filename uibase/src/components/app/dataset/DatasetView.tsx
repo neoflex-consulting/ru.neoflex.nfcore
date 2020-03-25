@@ -10,13 +10,15 @@ import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
 import {IServerQueryParam} from '../../../MainContext';
 import Highlight from "./Highlight";
+import ServerGroupBy from "./ServerGroupBy";
 
 const { Option, OptGroup } = Select;
 
 export enum paramType {
     filter="serverFilters",
     aggregate="serverAggregates",
-    sort="serverSorts"
+    sort="serverSorts",
+    group="groupBy"
 }
 
 interface Props {
@@ -31,6 +33,7 @@ interface State {
     highlights: any[];
     serverAggregates: any[];
     serverSorts: any[];
+    serverGroupBy: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
     allOperations: any[];
@@ -62,6 +65,7 @@ class DatasetView extends React.Component<any, State> {
             highlights: [],
             serverAggregates: [],
             serverSorts: [],
+            serverGroupBy: [],
             useServerFilter: false,
             datasetComponentsData: undefined,
             allOperations: [],
@@ -243,27 +247,31 @@ class DatasetView extends React.Component<any, State> {
                     type: undefined});
             return serverParam
         }
-        let serverFilters: any = [];
-        let serverAggregates: any = [];
-        let serverSorts: any = [];
+        let serverFilters: any[] = [];
+        let serverAggregates: any[] = [];
+        let serverSorts: any[] = [];
+        let serverGroupBy: any[] = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
         if (userProfileValue.length !== 0) {
             serverFilters = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverFilters);
             serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
             serverSorts = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverSorts);
+            serverGroupBy = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupBy);
         }
         else if (resource !== undefined) {
             serverFilters = getParamsFromComponent(resource, 'serverFilter');
             serverAggregates = getParamsFromComponent(resource, 'serverAggregation');
             serverSorts = getParamsFromComponent(resource, 'serverSort');
+            serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
         } else if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             serverFilters = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverAggregates = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverSorts = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
+            serverGroupBy = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
         }
-        this.setState({serverFilters, serverAggregates, serverSorts,  useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.runQuery(resource, serverFilters, serverAggregates, serverSorts);
+        this.setState({serverFilters, serverAggregates, serverSorts, serverGroupBy,  useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        this.runQuery(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy);
     }
 
     findHighlights(resource: Ecore.Resource, columnDefs: Object[]){
@@ -351,13 +359,13 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[]) {
+    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
-        this.props.context.runQuery(resource, componentParams, [], sortParams).then((json: string) => {
+        this.props.context.runQuery(resource, componentParams, [], sortParams, groupByParams).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null);
                 if (aggregationParams.length !== 0) {
-                    this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams).then((aggJson: string) => {
+                    this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams, groupByParams).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
                         this.setState({rowData: result});
                         this.updatedDatasetComponents(undefined, result, datasetComponentName)
@@ -437,7 +445,8 @@ class DatasetView extends React.Component<any, State> {
             this.runQuery(this.state.currentDatasetComponent,
                           (paramName === paramType.filter)? serverParam: this.state.serverFilters,
                           (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates,
-                                (paramName === paramType.sort)? serverParam: this.state.serverSorts
+                                (paramName === paramType.sort)? serverParam: this.state.serverSorts,
+                             (paramName === paramType.group)? serverParam: this.state.serverGroupBy,
                          );
             this.props.context.changeUserProfile(datasetComponentId, {
                 serverFilters: (paramName === paramType.filter)? serverParam: this.state.serverFilters
@@ -445,6 +454,8 @@ class DatasetView extends React.Component<any, State> {
                 serverAggregates: (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
                 serverSorts:  (paramName === paramType.sort)? serverParam: this.state.serverSorts
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverGroupBy:  (paramName === paramType.group)? serverParam: this.state.serverGroupBy
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
                 highlights: this.state.highlights
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
@@ -457,6 +468,8 @@ class DatasetView extends React.Component<any, State> {
                 serverAggregates: (paramName === paramType.aggregate)? undefined: this.state.serverAggregates
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
                 serverSorts:  (paramName === paramType.sort)? undefined: this.state.serverSorts
+                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
+                serverGroupBy:  (paramName === paramType.group)? undefined: this.state.serverGroupBy
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
                 highlights: this.state.highlights
                     .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
@@ -643,6 +656,21 @@ class DatasetView extends React.Component<any, State> {
                             />
                             :
                             <ServerAggregate/>
+                    }
+                    {
+                        this.state.serverGroupBy
+                            ?
+                            <ServerGroupBy
+                                {...this.props}
+                                serverGroupBy={this.state.serverGroupBy}
+                                columnDefs={this.state.columnDefs}
+                                allAggregates={this.state.allAggregates}
+                                onChangeServerGroupBy={this.onChangeServerParams}
+                                onChangeVisibility={this.onChangeVisibility}
+                                isVisible={this.state.aggregatesMenuVisible}
+                            />
+                            :
+                            <ServerGroupBy/>
                     }
                 </Drawer>
                 <Drawer

@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.AggregationDTO
 import ru.neoflex.nfcore.dataset.ConditionDTO
 import ru.neoflex.nfcore.dataset.QuerySortDTO
+import ru.neoflex.nfcore.dataset.GroupByDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -92,9 +93,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts) {
+    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts, EList<GroupByDTO> groupBy) {
         if (column) {
-            ResultSet rs = connectionToDB(conditions, aggregations, sorts)
+            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -112,7 +113,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts) {
+    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts, EList<GroupByDTO> groupBy) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -137,6 +138,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def queryColumns = []
         def serverFilters = []
         def serverAggregations = []
+        def serverGroupByAggregation = []
         def serverGroupBy = []
         def serverSorts = []
 
@@ -223,50 +225,48 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
-        /*if (aggregations) {
-            //Aggregate
-            for (int i = 0; i <= aggregations.size() - 1; ++i) {
-                if (column.name.contains(aggregations[i].datasetColumn) && aggregations[i].enable == true) {
+        if (groupBy) {
+            for (int i = 0; i <= groupBy.size() - 1; ++i) {
+                if (column.name.contains(groupBy[i].datasetColumn) && groupBy[i].enable == true) {
                     def map = [:]
-                    map["column"] = aggregations[i].datasetColumn
-                    def operator = getConvertAggregate(aggregations[i].operation.toString().toLowerCase())
+                    map["column"] = groupBy[i].datasetColumn
+                    def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                     if (operator == 'AVG' ) {
-                        map["select"] = "AVG(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "AVG(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
                     if (operator == 'COUNT' ) {
-                        map["select"] = "COUNT(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "COUNT(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
                     if (operator == 'COUNT_DISTINCT' ) {
-                        map["select"] = "COUNT(DISTINCT t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "COUNT(DISTINCT t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
                     if (operator == 'MAX' ) {
-                        map["select"] = "MAX(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "MAX(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
                     if (operator == 'MEDIAN' ) {
                         //TODO
                     }
                     if (operator == 'MIN' ) {
-                        map["select"] = "MIN(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "MIN(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
                     if (operator == 'SUM' ) {
-                        map["select"] = "SUM(t.${aggregations[i].datasetColumn}) as ${aggregations[i].datasetColumn}"
+                        map["select"] = "SUM(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
                     }
-                    if (!serverAggregations.contains(map)) {
-                        serverAggregations.add(map)
+                    if (!serverGroupByAggregation.contains(map)) {
+                        serverGroupByAggregation.add(map)
                     }
                 }
             }
-            //Group by
             for (int i = 0; i <= column.size() - 1; ++i) {
                 def map = [:]
-                if (!serverAggregations.column.contains(column[i].name)) {
+                if (!serverGroupByAggregation.column.contains(column[i].name)) {
                     map["select"] = "t.${column[i].name}"
                     if (!serverGroupBy.contains(map)) {
                         serverGroupBy.add(map)
                     }
                 }
             }
-        }*/
+        }
 
         if (aggregations) {
             for (int i = 0; i <= column.size() - 1; ++i) {
@@ -341,16 +341,16 @@ class DatasetComponentExt extends DatasetComponentImpl {
             currentQuery = currentQuery +
                     " WHERE ${serverFilters.select.join(' AND ')}"
         }
-        /*if (serverAggregations) {
+        if (serverGroupByAggregation) {
             if (serverGroupBy) {
-                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverAggregations.select.join(' , ')}" +
+                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverGroupByAggregation.select.join(' , ')}" +
                         " FROM (${currentQuery}) t" +
                         " GROUP BY ${serverGroupBy.select.join(' , ')}"
             } else {
-                currentQuery = "SELECT ${serverAggregations.select.join(' , ')}" +
+                currentQuery = "SELECT ${serverGroupByAggregation.select.join(' , ')}" +
                         " FROM (${currentQuery}) t"
             }
-        }*/
+        }
         if (serverSorts && !serverAggregations) {
             currentQuery = "SELECT *" +
                     " FROM (${currentQuery}) t" +

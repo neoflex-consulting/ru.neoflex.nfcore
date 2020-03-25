@@ -42,6 +42,7 @@ interface State {
     conditionDtoPattern?: EObject;
     aggregationDtoPattern?: EObject;
     sortDtoPattern?: EObject;
+    groupByDtoPattern?: EObject;
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
@@ -201,14 +202,15 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[]) => {
+    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         let resourceSet = Ecore.ResourceSet.create();
         return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.conditionDtoPattern!, filterParams, '/parameterFilter'),
             this.prepareServerQueryParam(resourceSet, this.state.aggregationDtoPattern!, aggregationParams, '/parameterAggregation'),
-            this.prepareServerQueryParam(resourceSet, this.state.sortDtoPattern!, sortParams, '/parameterSort')])
+            this.prepareServerQueryParam(resourceSet, this.state.sortDtoPattern!, sortParams, '/parameterSort'),
+            this.prepareServerQueryParam(resourceSet, this.state.groupByDtoPattern!, groupByParams, '/parameterGroupBy')])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
@@ -635,6 +637,13 @@ class EcoreApp extends React.Component<any, State> {
             })
     };
 
+    getGroupByDtoPattern() {
+        API.instance().findClass('dataset', 'GroupByDTO')
+            .then( (groupByDtoPattern: EObject ) => {
+                this.setState({groupByDtoPattern})
+            })
+    };
+
     getUserProfilePattern() {
         API.instance().findClass('auth', 'UserProfile')
             .then( (userProfilePattern: EObject ) => {
@@ -678,6 +687,7 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
         if (!this.state.aggregationDtoPattern) this.getAggregationDtoPattern();
         if (!this.state.sortDtoPattern) this.getSortDtoPattern();
+        if (!this.state.groupByDtoPattern) this.getGroupByDtoPattern();
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applicationNames.length) {
