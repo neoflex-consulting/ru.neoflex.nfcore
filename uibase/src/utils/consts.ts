@@ -9,19 +9,6 @@ const rowPerPageMapper = {
     "all": "All"
 };
 
-const operationsMapper = {
-    "EqualTo": "=",
-    "NotEqual": "!=",
-    "LessThan": "<",
-    "LessThenOrEqualTo": "<=",
-    "GreaterThan": ">",
-    "GreaterThenOrEqualTo": ">=",
-    "IncludeIn": "include",
-    "NotIncludeIn": "not include",
-    "IsNull": "= null",
-    "IsNotNull": "!= null",
-};
-
 const diagramAnchorMap: any = {
     "TopLeft":"top-Left",
     "Top": "top",
@@ -74,6 +61,5 @@ const colorScheme = [
 ];
 
 export {rowPerPageMapper};
-export {operationsMapper};
 export {colorScheme};
 export {diagramAnchorMap};
