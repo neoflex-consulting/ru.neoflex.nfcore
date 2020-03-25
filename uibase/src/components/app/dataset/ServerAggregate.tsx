@@ -12,7 +12,7 @@ interface Props {
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
     onChangeServerAggregation?: (newServerParam: any[], paramName: paramType) => void;
-    onChangeVisibility?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 
@@ -39,17 +39,27 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
+            && JSON.stringify(this.props.serverAggregates) !== JSON.stringify(this.state.serverAggregates)) {
             this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
-                    this.props.onChangeVisibility!(this.state.serverAggregates!, paramType.aggregate);
-                 } else {
+                if (err) {
                     this.props.context.notification('Aggregation notification','Please, correct the mistakes', 'error');
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)) {
+        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)
+            && JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates)) {
             this.setState({serverAggregates: this.props.serverAggregates})
+        }
+        if (JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates) && this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (!err) {
+                    this.props.saveChanges!(this.state.serverAggregates!, paramType.aggregate);
+                }
+            });
+        }
+        if (this.state.serverAggregates?.length === 0) {
+            this.createNewRow()
         }
     }
 
@@ -69,7 +79,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 return f
             }
         });
-        this.setState({serverAggregates})
+        this.setState({serverAggregates});
     }
 
     handleSubmit = (e: any) => {
@@ -89,7 +99,8 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     };
 
     reset = () => {
-        this.props.onChangeServerAggregation!(undefined, paramType.aggregate)
+        this.props.onChangeServerAggregation!(undefined, paramType.aggregate);
+        this.setState({serverAggregates:[]});
     };
 
     refresh = () => {

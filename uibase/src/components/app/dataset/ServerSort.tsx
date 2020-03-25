@@ -12,7 +12,7 @@ interface Props {
     columnDefs?:  Array<any>;
     allSorts?: Array<EObject>;
     onChangeServerSort?: (newServerParam: any[], paramName: paramType) => void;
-    onChangeVisibility?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 
@@ -39,17 +39,27 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
+            && JSON.stringify(this.props.serverSorts) !== JSON.stringify(this.state.serverSorts)) {
             this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
-                    this.props.onChangeVisibility!(this.state.serverSorts!, paramType.sort)
-                } else {
+                if (err) {
                     this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)) {
+        if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)
+            && JSON.stringify(prevState.serverSorts) !== JSON.stringify(this.state.serverSorts)) {
             this.setState({serverSorts: this.props.serverSorts})
+        }
+        if (JSON.stringify(prevState.serverSorts) !== JSON.stringify(this.state.serverSorts) && this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (!err) {
+                    this.props.saveChanges!(this.state.serverSorts!, paramType.sort);
+                }
+            });
+        }
+        if (this.state.serverSorts?.length === 0) {
+            this.createNewRow()
         }
     }
 
@@ -89,7 +99,8 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
     };
 
     reset = () => {
-        this.props.onChangeServerSort!(undefined, paramType.sort)
+        this.props.onChangeServerSort!(undefined, paramType.sort);
+        this.setState({serverSorts:[]});
     };
 
     refresh = () => {

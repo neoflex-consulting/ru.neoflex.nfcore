@@ -63,13 +63,13 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(ConditionDTO[] conditions, AggregationDTO[] aggregations, QuerySortDTO[] sorts, GroupByDTO[] groupBy)
+     op JSON runQuery(QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy)
      boolean useServerFilter
      //Состав серверного фильтра
-     contains Condition[] serverFilter
-     contains Aggregation[] serverAggregation
+     contains QueryFilter[] serverFilter
+     contains QueryAggregate[] serverAggregation
      contains QuerySort[] serverSort
-     contains GroupBy[] serverGroupBy
+     contains QueryGroupBy[] serverGroupBy
      contains Highlight[] highlight
 }
 
@@ -110,18 +110,39 @@ class FormatMask {
     String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
 }
 
-class Condition {
+class QueryFilter {
     refers DatasetColumn datasetColumn
     Operations operation
     String value
     boolean enable
 }
 
-class ConditionDTO {
+class QueryAggregate {
+    refers DatasetColumn datasetColumn
+    Aggregate operation
+    boolean enable
+}
+
+class QuerySort {
+    refers DatasetColumn datasetColumn
+    Sort operation
+    boolean enable
+}
+
+class QueryGroupBy {
+    refers DatasetColumn datasetColumn
+    Aggregate operation
+    boolean enable
+}
+
+class QueryConditionDTO {
     String datasetColumn
     String operation
-    String value
     boolean enable
+}
+
+class QueryFilterDTO extends QueryConditionDTO {
+    String value
 }
 
 class Highlight {
@@ -132,42 +153,6 @@ class Highlight {
     boolean enable
     String backgroundColor
     String color
-}
-
-class Aggregation {
-    refers DatasetColumn datasetColumn
-    Aggregate operation
-    boolean enable
-}
-
-class AggregationDTO {
-    String datasetColumn
-    String operation
-    boolean enable
-}
-
-class GroupBy {
-    refers DatasetColumn datasetColumn
-    Aggregate operation
-    boolean enable
-}
-
-class GroupByDTO {
-    String datasetColumn
-    String operation
-    boolean enable
-}
-
-class QuerySort {
-    refers DatasetColumn datasetColumn
-    Sort operation
-    boolean enable
-}
-
-class QuerySortDTO {
-    String datasetColumn
-    String operation
-    boolean enable
 }
 
 enum QueryType {

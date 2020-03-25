@@ -15,10 +15,11 @@ import ServerGroupBy from "./ServerGroupBy";
 const { Option, OptGroup } = Select;
 
 export enum paramType {
+    //Название совпадает со state параметрами
     filter="serverFilters",
     aggregate="serverAggregates",
     sort="serverSorts",
-    group="groupBy"
+    group="serverGroupBy"
 }
 
 interface Props {
@@ -49,6 +50,7 @@ interface State {
 const defaultComponentValues = {
     serverFilter:"EqualTo",
     serverAggregation: "Average",
+    serverGroupBy: "Average",
     serverSort: "FromAtoZ",
 };
 
@@ -479,7 +481,7 @@ class DatasetView extends React.Component<any, State> {
         }
     };
 
-    onChangeVisibility = (newServerParam: any[], paramName: paramType): void => {
+    changeDatasetViewState = (newServerParam: any[], paramName: paramType): void => {
         this.setState<never>({[paramName]: newServerParam});
     };
 
@@ -612,7 +614,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
                                 onChangeServerFilter={this.onChangeServerParams}
-                                onChangeVisibility={this.onChangeVisibility}
+                                saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                             />
                             :
@@ -651,7 +653,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
                                 onChangeServerAggregation={this.onChangeServerParams}
-                                onChangeVisibility={this.onChangeVisibility}
+                                saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                             />
                             :
@@ -666,7 +668,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
                                 onChangeServerGroupBy={this.onChangeServerParams}
-                                onChangeVisibility={this.onChangeVisibility}
+                                saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                             />
                             :
@@ -691,7 +693,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allSorts={this.state.allSorts}
                                 onChangeServerSort={this.onChangeServerParams}
-                                onChangeVisibility={this.onChangeVisibility}
+                                saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.sortsMenuVisible}
                             />
                             :

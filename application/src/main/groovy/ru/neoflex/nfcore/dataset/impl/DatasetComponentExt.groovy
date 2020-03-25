@@ -8,10 +8,8 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.AggregationDTO
-import ru.neoflex.nfcore.dataset.ConditionDTO
-import ru.neoflex.nfcore.dataset.QuerySortDTO
-import ru.neoflex.nfcore.dataset.GroupByDTO
+import ru.neoflex.nfcore.dataset.QueryFilterDTO
+import ru.neoflex.nfcore.dataset.QueryConditionDTO
 import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
@@ -93,7 +91,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts, EList<GroupByDTO> groupBy) {
+    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
         if (column) {
             ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy)
             def columnCount = rs.metaData.columnCount
@@ -113,7 +111,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<ConditionDTO> conditions, EList<AggregationDTO> aggregations, EList<QuerySortDTO> sorts, EList<GroupByDTO> groupBy) {
+    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -333,7 +331,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
         }
-
 
         String currentQuery
         currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"

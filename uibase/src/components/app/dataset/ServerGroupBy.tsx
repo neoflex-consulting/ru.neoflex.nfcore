@@ -12,17 +12,17 @@ interface Props {
     columnDefs?:  Array<any>;
     allAggregates?: Array<EObject>;
     onChangeServerGroupBy?: (newServerParam: any[], paramName: paramType) => void;
-    onChangeVisibility?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 
 interface State {
     serverGroupBy: {
-        index: string,
-        datasetColumn: string,
-        operation: string,
-        enable: boolean,
-        type: string
+        index: number,
+        datasetColumn?: string,
+        operation?: string,
+        enable?: boolean,
+        type?: string
     }[] | undefined;
 }
 
@@ -39,17 +39,31 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible) {
+        //on change props.isVisible
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
+            && JSON.stringify(this.props.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)) {
             this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
-                    this.props.onChangeVisibility!(this.state.serverGroupBy!, paramType.group);
-                } else {
+                if (err) {
                     this.props.context.notification('Aggregation notification','Please, correct the mistakes', 'error');
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverGroupBy) !== JSON.stringify(this.props.serverGroupBy)) {
+        //load from profile
+        if (JSON.stringify(prevProps.serverGroupBy) !== JSON.stringify(this.props.serverGroupBy)
+            && JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)) {
             this.setState({serverGroupBy: this.props.serverGroupBy})
+        }
+        //handleChange on form
+        if (JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy) && this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (!err) {
+                    this.props.saveChanges!(this.state.serverGroupBy!, paramType.group);
+                }
+            });
+        }
+        //reset
+        if (this.state.serverGroupBy?.length === 0) {
+            this.createNewRow()
         }
     }
 
@@ -69,7 +83,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                 return f
             }
         });
-        this.setState({serverGroupBy})
+        this.setState({serverGroupBy});
     }
 
     handleSubmit = (e: any) => {
@@ -89,7 +103,8 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
     };
 
     reset = () => {
-        this.props.onChangeServerGroupBy!(undefined, paramType.group)
+        this.props.onChangeServerGroupBy!(undefined, paramType.group);
+        this.setState({serverGroupBy:[]});
     };
 
     refresh = () => {

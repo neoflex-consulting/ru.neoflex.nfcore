@@ -96,7 +96,7 @@ class DatasetComponentInit {
 
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
-            def serverFilter1 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter1 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter1.setDatasetColumn(datasetColumn1)
             serverFilter1.operation = Operations.LESS_THAN
@@ -104,7 +104,7 @@ class DatasetComponentInit {
             serverFilter1.enable = true
             datasetComponent.serverFilter.add(serverFilter1)
 
-            def serverFilter2 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter2 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter2.setDatasetColumn(datasetColumn2)
             serverFilter2.operation = Operations.LESS_THAN
@@ -112,7 +112,7 @@ class DatasetComponentInit {
             serverFilter2.enable = false
             datasetComponent.serverFilter.add(serverFilter2)
 
-            def serverFilter3 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter3 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
             serverFilter3.setDatasetColumn(datasetColumn3)
             serverFilter3.operation = Operations.INCLUDE_IN
