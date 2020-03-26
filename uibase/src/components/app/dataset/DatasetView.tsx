@@ -442,7 +442,6 @@ class DatasetView extends React.Component<any, State> {
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
-        const serverParam = filterParam(newServerParam);
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
         const serverSorts = filterParam(this.state.serverSorts);
@@ -450,6 +449,7 @@ class DatasetView extends React.Component<any, State> {
         const highlights = filterParam(this.state.highlights)
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         if (newServerParam !== undefined) {
+            const serverParam = filterParam(newServerParam);
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam});
