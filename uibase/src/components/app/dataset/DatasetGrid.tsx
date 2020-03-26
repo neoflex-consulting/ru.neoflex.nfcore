@@ -248,7 +248,7 @@ class DatasetGrid extends React.Component<any, any> {
         const datasetComponent = this.props.context.userProfile.get('params').array()
             .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
         if (datasetComponent !== undefined) {
-            if (JSON.parse(datasetComponent.get('value'))['highlights'].length !== 0 &&
+            if (JSON.parse(datasetComponent.get('value'))['highlights'] &&
                 !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])) {
                 this.changeSettings();
             }
@@ -436,6 +436,10 @@ class DatasetGrid extends React.Component<any, any> {
                 this.grid.current.api.gridOptionsWrapper.gridOptions.getRowStyle = rowStyle;
                 this.grid.current.api.redrawRows()
             }
+        } else if (this.grid.current) {
+            //Reset highlight
+            this.grid.current.api.gridOptionsWrapper.gridOptions.getRowStyle = null;
+            this.grid.current.api.redrawRows()
         }
     }
 

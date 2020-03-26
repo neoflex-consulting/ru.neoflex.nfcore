@@ -39,8 +39,31 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)) {
+        //on change props.isVisible
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
+            && JSON.stringify(this.props.highlights) !== JSON.stringify(this.state.highlights)) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (err) {
+                    this.props.context.notification('Filter notification','Please, correct the mistakes', 'error');
+                }
+            });
+        }
+        //load from profile
+        if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)
+            && JSON.stringify(prevState.highlights) !== JSON.stringify(this.state.highlights)) {
             this.setState({highlights: this.props.highlights})
+        }
+        //handleChange on form
+        if (JSON.stringify(prevState.highlights) !== JSON.stringify(this.state.highlights) && this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (!err) {
+                    this.props.saveChanges!(this.state.highlights!, paramType.highlights);
+                }
+            });
+        }
+        //reset
+        if (this.state.highlights?.length === 0) {
+            this.createNewRow()
         }
     }
 
@@ -96,7 +119,8 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     };
 
     reset = () => {
-        this.props.onChangeHighlights!(undefined, paramType.highlights)
+        this.props.onChangeHighlights!(undefined, paramType.highlights);
+        this.setState({highlights:[]});
     };
 
     refresh = () => {
