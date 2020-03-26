@@ -39,9 +39,8 @@ interface State {
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
-    conditionDtoPattern?: EObject;
-    aggregationDtoPattern?: EObject;
-    sortDtoPattern?: EObject;
+    queryConditionDTOPattern?: EObject;
+    queryFilterDTOPattern?: EObject;
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
@@ -80,7 +79,7 @@ class EcoreApp extends React.Component<any, State> {
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
         if (nextProps.location.pathname.includes("app")) {
-            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])))
+            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
             return {
                 pathFull: pathFull,
                 appModuleName: pathFull[pathFull.length - 1].appModule
@@ -201,14 +200,15 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[]) => {
+    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         let resourceSet = Ecore.ResourceSet.create();
-        return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.conditionDtoPattern!, filterParams, '/parameterFilter'),
-            this.prepareServerQueryParam(resourceSet, this.state.aggregationDtoPattern!, aggregationParams, '/parameterAggregation'),
-            this.prepareServerQueryParam(resourceSet, this.state.sortDtoPattern!, sortParams, '/parameterSort')])
+        return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy')])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
@@ -252,7 +252,7 @@ class EcoreApp extends React.Component<any, State> {
                 let splitPathFull: any = []
                 this.state.pathFull.forEach((p: any, index: any) => {
                     if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                })
+                });
                 if (splitPathFull.length === 0) {
                     this.state.pathFull.forEach( (p:any) => {
                         path.push(p)
@@ -308,7 +308,7 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     setPrincipal = (principal: any)=>{
-        this.setState({principal}, API.instance().init)
+        this.setState({principal}, API.instance().init);
         if (this.props.history.location.pathname === "/") {
             this.changeURL('home')
         }
@@ -348,7 +348,7 @@ class EcoreApp extends React.Component<any, State> {
     setBreadcrumb(breadcrumbValue? : string) {
         if (breadcrumbValue) {
             if (breadcrumbValue === "home") {
-                this.changeURL("home")
+                this.changeURL("home");
                 this.setState({breadcrumb: []});
             } else {
                 let indexBreadcrumb = this.state.breadcrumb.indexOf(breadcrumbValue);
@@ -614,31 +614,20 @@ class EcoreApp extends React.Component<any, State> {
         }
     }
 
-    getConditionDtoPattern() {
-        API.instance().findClass('dataset', 'ConditionDTO')
-            .then( (conditionDtoPattern: EObject ) => {
-                this.setState({conditionDtoPattern})
-            })
-    };
-
-    getAggregationDtoPattern() {
-        API.instance().findClass('dataset', 'AggregationDTO')
-            .then( (aggregationDtoPattern: EObject ) => {
-                this.setState({aggregationDtoPattern})
-            })
-    };
-
-    getSortDtoPattern() {
-        API.instance().findClass('dataset', 'QuerySortDTO')
-            .then( (sortDtoPattern: EObject ) => {
-                this.setState({sortDtoPattern})
-            })
-    };
-
     getUserProfilePattern() {
         API.instance().findClass('auth', 'UserProfile')
             .then( (userProfilePattern: EObject ) => {
                 this.setState({userProfilePattern})
+            })
+    };
+
+
+    getEobjectByClass(ePackageName:string, className:string, paramName:string) {
+        API.instance().findClass(ePackageName, className)
+            .then((result: EObject) => {
+                this.setState<never>({
+                    [paramName]: result
+                })
             })
     };
 
@@ -675,10 +664,12 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        if (!this.state.conditionDtoPattern) this.getConditionDtoPattern();
-        if (!this.state.aggregationDtoPattern) this.getAggregationDtoPattern();
-        if (!this.state.sortDtoPattern) this.getSortDtoPattern();
+        if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
+        if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
+        //if (!this.state.userProfilePattern) this.getEobjectByClass("auth","UserProfile", "userProfilePattern");
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
+
+
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applicationNames.length) {
             this.getAllApplication()

@@ -64,7 +64,10 @@ class DatasetGrid extends React.Component<any, any> {
                         // if (params.data.dtype === params.value) {
                         //     return { background: 'red' }
                         // }
-                    }
+                    },
+                columnApi: {
+                    autoresizecolumns: true
+                }
 
                 },
             /*так залить строку*/

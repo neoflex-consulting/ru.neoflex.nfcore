@@ -68,6 +68,17 @@
         "EndOn": "結束於",
         "NotEndOn": "沒有結束",
 
+        "Average": "平均",
+        "Count": "计数",
+        "CountDistinct":"非重复计数",
+        "Maximum": "最大值",
+        "Median": "中位数",
+        "Minimum": "最低",
+        "Sum": "和",
+
+        "FromAtoZ": "从A到Z",
+        "FromZtoA": "从Z到A",
+
         "Cell": "細胞",
         "Column": "柱",
         "Row": "行"

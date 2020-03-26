@@ -11,7 +11,9 @@ interface Props {
     serverFilters?: Array<EObject>;
     columnDefs?:  Array<any>;
     allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerFilter: any[], paramName: paramType) => void;
+    onChangeServerFilter?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
+    isVisible?: boolean;
 }
 
 interface State {
@@ -29,14 +31,27 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
+        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
+            && JSON.stringify(this.props.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (err) {
+                    this.props.context.notification('Filter notification','Please, correct the mistakes', 'error')
+                }
+            });
+        }
+        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)
+            && JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
             this.setState({serverFilters: this.props.serverFilters})
         }
-        else if (JSON.stringify(prevProps.serverFilters) === JSON.stringify(this.props.serverFilters)
-            && JSON.stringify(prevState.serverFilters) === JSON.stringify(this.state.serverFilters)
-            && JSON.stringify(this.props.serverFilters) !== JSON.stringify(this.state.serverFilters)
-        ) {
-            this.setState({serverFilters: this.props.serverFilters})
+        if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters) && this.props.isVisible) {
+            this.props.form.validateFields((err: any, values: any) => {
+                if (!err) {
+                    this.props.saveChanges!(this.state.serverFilters!, paramType.filter);
+                }
+            });
+        }
+        if (this.state.serverFilters?.length === 0) {
+            this.createNewRow()
         }
     }
 
@@ -61,7 +76,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                 return f
             }
         });
-        this.setState({serverFilters})
+        this.setState({serverFilters});
     }
 
     handleSubmit = (e: any) => {
@@ -82,7 +97,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     };
 
     reset = () => {
-        this.props.onChangeServerFilter!(undefined, paramType.filter)
+        this.props.onChangeServerFilter!(undefined, paramType.filter);
+        this.setState({serverFilters:[]});
     };
 
     refresh = () => {

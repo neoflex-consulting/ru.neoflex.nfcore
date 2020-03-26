@@ -68,6 +68,17 @@
         "EndOn": "ends with",
         "NotEndOn": "does not end with",
 
+        "Average": "average",
+        "Count": "count",
+        "CountDistinct":"distinct count",
+        "Maximum": "maximum",
+        "Median": "median",
+        "Minimum": "minimum",
+        "Sum": "sum",
+
+        "FromAtoZ": "A to Z",
+        "FromZtoA": "Z to A",
+
         "Cell": "cell",
         "Column": "column",
         "Row": "row"
