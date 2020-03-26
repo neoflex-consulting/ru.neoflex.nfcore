@@ -19,7 +19,8 @@ export enum paramType {
     filter="serverFilters",
     aggregate="serverAggregates",
     sort="serverSorts",
-    group="serverGroupBy"
+    group="serverGroupBy",
+    highlights="highlights"
 }
 
 interface Props {
@@ -437,34 +438,34 @@ class DatasetView extends React.Component<any, State> {
         this.setState({ aggregatesMenuVisible: false });
     };
 
-
-
     //Меняем фильтры, выполняем запрос и пишем в userProfile
-    onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
+    onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
         const serverSorts = filterParam(this.state.serverSorts);
         const serverGroupBy = filterParam(this.state.serverGroupBy);
-        const highlights = filterParam(this.state.highlights)
+        const highlights = filterParam(this.state.highlights);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         if (newServerParam !== undefined) {
             const serverParam = filterParam(newServerParam);
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam});
-            this.runQuery(this.state.currentDatasetComponent,
-                          (paramName === paramType.filter)? serverParam: serverFilter,
-                          (paramName === paramType.aggregate)? serverParam: serverAggregates,
-                                (paramName === paramType.sort)? serverParam: serverSorts,
-                             (paramName === paramType.group)? serverParam: serverGroupBy,
-                         );
+            if (paramName in [paramType.filter, paramType.aggregate, paramType.sort, paramType.group]) {
+                this.runQuery(this.state.currentDatasetComponent,
+                              (paramName === paramType.filter)? serverParam: serverFilter,
+                              (paramName === paramType.aggregate)? serverParam: serverAggregates,
+                                    (paramName === paramType.sort)? serverParam: serverSorts,
+                                (paramName === paramType.group)? serverParam: serverGroupBy,
+                             );
+            }
             this.props.context.changeUserProfile(datasetComponentId, {
                 serverFilters: (paramName === paramType.filter)? serverParam: serverFilter,
                 serverAggregates: (paramName === paramType.aggregate)? serverParam: serverAggregates,
                 serverSorts:  (paramName === paramType.sort)? serverParam: serverSorts,
                 serverGroupBy:  (paramName === paramType.group)? serverParam: serverGroupBy,
-                highlights: highlights
+                highlights: (paramName === paramType.highlights)? serverParam: highlights
             });
         }
         else {
@@ -473,7 +474,7 @@ class DatasetView extends React.Component<any, State> {
                 serverAggregates: (paramName === paramType.aggregate)? undefined: serverAggregates,
                 serverSorts:  (paramName === paramType.sort)? undefined: serverSorts,
                 serverGroupBy:  (paramName === paramType.group)? undefined: serverGroupBy,
-                highlights: highlights
+                highlights: (paramName === paramType.highlights)? undefined: highlights
             }).then(()=>
                 this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs)
             )
@@ -484,7 +485,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newServerParam});
     };
 
-    onChangeHighlights = (newHighlights: any[]): void => {
+    /*onChangeHighlights = (newHighlights: any[]): void => {
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         if (newHighlights !== undefined) {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
@@ -505,7 +506,7 @@ class DatasetView extends React.Component<any, State> {
                 this.findHighlights(this.state.currentDatasetComponent, this.state.columnDefs)
             )
         }
-    };
+    };*/
 
     handleChange(e: any): void {
         let params: any = {name: e};
@@ -612,7 +613,7 @@ class DatasetView extends React.Component<any, State> {
                                 serverFilters={this.state.serverFilters}
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
-                                onChangeServerFilter={this.onChangeServerParams}
+                                onChangeServerFilter={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                             />
@@ -628,7 +629,7 @@ class DatasetView extends React.Component<any, State> {
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
                                 allHighlightType={this.state.allHighlightType}
-                                onChangeHighlights={this.onChangeHighlights}
+                                onChangeHighlights={this.onChangeParams}
                             />
                             :
                             <Highlight/>
@@ -651,7 +652,7 @@ class DatasetView extends React.Component<any, State> {
                                 serverAggregates={this.state.serverAggregates}
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
-                                onChangeServerAggregation={this.onChangeServerParams}
+                                onChangeServerAggregation={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                             />
@@ -666,7 +667,7 @@ class DatasetView extends React.Component<any, State> {
                                 serverGroupBy={this.state.serverGroupBy}
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
-                                onChangeServerGroupBy={this.onChangeServerParams}
+                                onChangeServerGroupBy={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                             />
@@ -691,7 +692,7 @@ class DatasetView extends React.Component<any, State> {
                                 serverSorts={this.state.serverSorts}
                                 columnDefs={this.state.columnDefs}
                                 allSorts={this.state.allSorts}
-                                onChangeServerSort={this.onChangeServerParams}
+                                onChangeServerSort={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.sortsMenuVisible}
                             />

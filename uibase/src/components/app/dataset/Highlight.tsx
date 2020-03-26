@@ -1,17 +1,18 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Drawer, Form, Input, Modal, Row, Select} from 'antd';
+import {Button, Col, Form, Input, Modal, Row, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPaintBrush, faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {SliderPicker} from 'react-color';
+import {paramType} from "./DatasetView";
 
 interface Props {
     highlights?: Array<any>;
     columnDefs?: Array<any>;
     allOperations?: Array<EObject>;
-    onChangeHighlights?: (newHighlights: any[]) => void;
+    onChangeHighlights?: (newServerParam: any[], paramName: paramType) => void;
     allHighlightType?: Array<EObject>;
 }
 
@@ -44,7 +45,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     }
 
     updateTableData(): void {
-        this.props.onChangeHighlights!(this.state.highlights!)
+        this.props.onChangeHighlights!(this.state.highlights!, paramType.highlights)
     }
 
     handleChange(e: any) {
@@ -95,13 +96,13 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     };
 
     reset = () => {
-        this.props.onChangeHighlights!(undefined)
+        this.props.onChangeHighlights!(undefined, paramType.highlights)
     };
 
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeHighlights!(this.state.highlights!)
+                this.props.onChangeHighlights!(this.state.highlights!, paramType.highlights)
             } else {
                 this.props.context.notification('Filters notification', 'Please, correct the mistakes', 'error')
             }
