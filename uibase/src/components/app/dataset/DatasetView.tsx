@@ -363,11 +363,17 @@ class DatasetView extends React.Component<any, State> {
 
     private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
-        this.props.context.runQuery(resource, componentParams, [], sortParams, groupByParams).then((json: string) => {
+        this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)
+                                            ,[]
+                                            , sortParams.filter((f: any) => f.enable)
+                                            , groupByParams.filter((f: any) => f.enable)).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
-                aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null);
+                aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
-                    this.props.context.runQuery(resource, componentParams, aggregationParams, sortParams, groupByParams).then((aggJson: string) => {
+                    this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)
+                                                        , aggregationParams.filter((f: any) => f.enable)
+                                                        , sortParams.filter((f: any) => f.enable)
+                                                        , groupByParams.filter((f: any) => f.enable)).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
                         this.setState({rowData: result});
                         this.updatedDatasetComponents(undefined, result, datasetComponentName)
@@ -435,46 +441,39 @@ class DatasetView extends React.Component<any, State> {
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeServerParams = (newServerParam: any[], paramName: paramType): void => {
+        const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
+        const serverParam = filterParam(newServerParam);
+        const serverFilter = filterParam(this.state.serverFilters);
+        const serverAggregates = filterParam(this.state.serverAggregates);
+        const serverSorts = filterParam(this.state.serverSorts);
+        const serverGroupBy = filterParam(this.state.serverGroupBy);
+        const highlights = filterParam(this.state.highlights)
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
         if (newServerParam !== undefined) {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
-            let serverParam: any[] = [];
-            newServerParam
-                .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
-                .forEach((f: any) => serverParam.push(f));
 
             this.setState<never>({[paramName]: newServerParam});
             this.runQuery(this.state.currentDatasetComponent,
-                          (paramName === paramType.filter)? serverParam: this.state.serverFilters,
-                          (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates,
-                                (paramName === paramType.sort)? serverParam: this.state.serverSorts,
-                             (paramName === paramType.group)? serverParam: this.state.serverGroupBy,
+                          (paramName === paramType.filter)? serverParam: serverFilter,
+                          (paramName === paramType.aggregate)? serverParam: serverAggregates,
+                                (paramName === paramType.sort)? serverParam: serverSorts,
+                             (paramName === paramType.group)? serverParam: serverGroupBy,
                          );
             this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? serverParam: this.state.serverFilters
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverAggregates: (paramName === paramType.aggregate)? serverParam: this.state.serverAggregates
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverSorts:  (paramName === paramType.sort)? serverParam: this.state.serverSorts
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverGroupBy:  (paramName === paramType.group)? serverParam: this.state.serverGroupBy
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                highlights: this.state.highlights
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
+                serverFilters: (paramName === paramType.filter)? serverParam: serverFilter,
+                serverAggregates: (paramName === paramType.aggregate)? serverParam: serverAggregates,
+                serverSorts:  (paramName === paramType.sort)? serverParam: serverSorts,
+                serverGroupBy:  (paramName === paramType.group)? serverParam: serverGroupBy,
+                highlights: highlights
             });
         }
         else {
             this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? undefined: this.state.serverFilters
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverAggregates: (paramName === paramType.aggregate)? undefined: this.state.serverAggregates
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverSorts:  (paramName === paramType.sort)? undefined: this.state.serverSorts
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                serverGroupBy:  (paramName === paramType.group)? undefined: this.state.serverGroupBy
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true),
-                highlights: this.state.highlights
-                    .filter((f: any) => f.datasetColumn !== undefined && f.datasetColumn !== null && f.enable !== undefined && f.enable === true)
+                serverFilters: (paramName === paramType.filter)? undefined: serverFilter,
+                serverAggregates: (paramName === paramType.aggregate)? undefined: serverAggregates,
+                serverSorts:  (paramName === paramType.sort)? undefined: serverSorts,
+                serverGroupBy:  (paramName === paramType.group)? undefined: serverGroupBy,
+                highlights: highlights
             }).then(()=>
                 this.findServerParams(this.state.currentDatasetComponent, this.state.columnDefs)
             )
