@@ -351,72 +351,85 @@ class DatasetGrid extends React.Component<any, any> {
                     const backgroundColor = h['backgroundColor'];
                     const color = h['color'];
 
+                    let columnValue;
+                    let filterValue;
                     if (type === 'Integer' || type === 'Decimal') {
-                        if (operation === 'EqualTo') {
-                            if (Number(params.data[columnName]) === Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'NotEqual') {
-                            if (Number(params.data[columnName]) !== Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'LessThan') {
-                            if (Number(params.data[columnName]) < Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'LessThenOrEqualTo') {
-                            if (Number(params.data[columnName]) <= Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'GreaterThan') {
-                            if (Number(params.data[columnName]) > Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'GreaterThanOrEqualTo') {
-                            if (Number(params.data[columnName]) >= Number(value)) {
-                                return {background: backgroundColor, color: color}
-                            }
-                        } else if (params.data[columnName] !== null) {
-                            if (operation === 'IsNotEmpty') {
-                                return {background: backgroundColor, color: color}
-                            } else if (operation === 'IncludeIn') {
-                                if (params.data[columnName].includes(value)) {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotIncludeIn') {
-                                if (!params.data[columnName].includes(value)) {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'StartWith') {
-                                if (params.data[columnName].split(value)[0] === "") {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotStartWith') {
-                                if (params.data[columnName].split(value)[0] !== "") {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'EndOn') {
-                                if (params.data[columnName].split(value)[1] === "") {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotEndOn') {
-                                if (params.data[columnName].split(value)[1] !== "") {
-                                    return {background: backgroundColor, color: color}
-                                }
-                            }
+                        columnValue = Number(params.data[columnName]);
+                        filterValue = Number(value)
+                    }
+                    else if (type === 'Date' || type === 'Timestamp') {
+                        columnValue = new Date(params.data[columnName]);
+                        filterValue = new Date(value)
+                    }
+                    else if (type === 'String' || type === 'Boolean') {
+                        columnValue = params.data[columnName];
+                        filterValue = value
+                    }
+
+                    if (operation === 'EqualTo') {
+                        if (columnValue === filterValue) {
+                            return {background: backgroundColor, color: color}
                         }
-                        else if (params.data[columnName] === null) {
-                            if (operation === 'IsEmpty' ||
-                                operation === 'NotIncludeIn' ||
-                                operation === 'NotEndOn' ||
-                                operation === 'NotStartWith') {
+                    } else if (operation === 'NotEqual') {
+                        if (columnValue !== filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThan') {
+                        if (columnValue < filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThenOrEqualTo') {
+                        if (columnValue <= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThan') {
+                        if (columnValue > filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThanOrEqualTo') {
+                        if (columnValue >= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (params.data[columnName] !== null) {
+                        if (operation === 'IsNotEmpty') {
+                            return {background: backgroundColor, color: color}
+                        } else if (operation === 'IncludeIn') {
+                            if (params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotIncludeIn') {
+                            if (!params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'StartWith') {
+                            if (params.data[columnName].split(value)[0] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotStartWith') {
+                            if (params.data[columnName].split(value)[0] !== "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'EndOn') {
+                            if (params.data[columnName].split(value)[1] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotEndOn') {
+                            if (params.data[columnName].split(value)[1] !== "") {
                                 return {background: backgroundColor, color: color}
                             }
                         }
                     }
+                    else if (params.data[columnName] === null) {
+                        if (operation === 'IsEmpty' ||
+                            operation === 'NotIncludeIn' ||
+                            operation === 'NotEndOn' ||
+                            operation === 'NotStartWith') {
+                            return {background: backgroundColor, color: color}
+                        }
+                    }
                 });
                 return temp !== undefined ? {background: temp['backgroundColor'], color: temp['color']} : undefined
-            }
+            };
             if (this.grid.current === null) {
                 gridOptions.getRowStyle = rowStyle
             } else {
