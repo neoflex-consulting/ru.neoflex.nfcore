@@ -49,6 +49,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 rdbmsColumn.headerName = typography
                                 rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                                 rdbmsColumn.sortable = true
+                                rdbmsColumn.resizable = true
                                 rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
                                         ? Filter.DATE_COLUMN_FILTER :
                                         columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL

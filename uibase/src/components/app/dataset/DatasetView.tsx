@@ -280,7 +280,7 @@ class DatasetView extends React.Component<any, State> {
         let highlights: any = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
-        if (userProfileValue.length !== 0) {
+        if (userProfileValue.length !== 0 && JSON.parse(userProfileValue[0].get('value')).highlights.length !== 0) {
             let userProfileParams = JSON.parse(userProfileValue[0].get('value')).highlights;
             if (userProfileParams !== undefined) {
                 userProfileParams.forEach((f: any, index: any) =>

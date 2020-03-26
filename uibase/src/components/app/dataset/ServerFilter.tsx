@@ -71,7 +71,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                     operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
                     value: target['columnName'] === 'value' ? target['value'] : f.value,
                     enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
-                    type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
+                    type: (targetColumn ? targetColumn.get('type') : undefined) || f.type}
             } else {
                 return f
             }

@@ -10,6 +10,9 @@ export interface IServerQueryParam {
     value?: string,
     enable?: boolean,
     type?: string
+    highlightType?: string,
+    backgroundColor?: string,
+    color?: string
 }
 
 export interface IMainContext {

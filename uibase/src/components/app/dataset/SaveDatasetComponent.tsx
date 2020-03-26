@@ -8,6 +8,7 @@ import {API} from "../../../modules/api";
 import {IServerQueryParam} from '../../../MainContext';
 
 interface Props {
+    closeModal?: () => void;
 }
 
 interface State {
@@ -19,6 +20,8 @@ interface State {
     queryAggregatePattern?: EObject;
     querySortPattern?: EObject;
     queryGroupByPattern?: EObject;
+    highlightPattern?: EObject;
+    user?: EObject;
 }
 
 class SaveDatasetComponent extends React.Component<any, State> {
@@ -58,6 +61,19 @@ class SaveDatasetComponent extends React.Component<any, State> {
         })
     };
 
+    getUser() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === '//User')
+            if (temp !== undefined) {
+                API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
+                    .then((users: Ecore.Resource[]) => {
+                        const user = users.find( (u: Ecore.Resource) => u.eContents()[0].get('name') === this.props.context.userProfile.get('userName'))
+                        this.setState({user})
+                    })
+            }
+        })
+    };
+
     addComponentServerParam(currentDatasetComponent: Ecore.EObject, pattern: Ecore.EObject, userProfileValue: Ecore.EObject[], paramName: string, componentName: string): void {
         currentDatasetComponent.get(componentName).clear();
         JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
@@ -69,7 +85,10 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     operation: f['operation'],
                     value: f['value'],
                     enable: f['enable'],
-                    type: f['type']
+                    type: f['type'],
+                    highlightType: f['highlightType'],
+                    backgroundColor: f['backgroundColor'],
+                    color: f['color']
                 } as IServerQueryParam);
                 currentDatasetComponent.get(componentName).add(params)
             }
@@ -110,6 +129,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
                 this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+                this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource();
@@ -145,6 +165,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         currentDatasetComponent.get('audit').set('created', null);
         currentDatasetComponent.get('audit').set('modifiedBy', null);
         currentDatasetComponent.get('audit').set('modified', null);
+        currentDatasetComponent.set('owner', this.state.user);
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === currentDatasetComponent._id);
         if (userProfileValue.length !== 0) {
@@ -152,6 +173,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
             this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
             this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
             this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+            this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
         }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource();
@@ -171,7 +193,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     private saveDatasetComponent(resource: Resource) {
         API.instance().saveResource(resource)
             .then((newDatasetComponent: any) => {
-                this.props.context.notification('Save component', 'Created', 'success');
+                this.props.closeModal!();
                 this.props.viewObject.get('datasetView').set('datasetComponent', newDatasetComponent.eContents()[0]);
                 const newResourceSet: Ecore.ResourceSet = this.props.viewObject.eResource().eContainer as Ecore.ResourceSet;
                 const newViewObject: Ecore.EObject[] = newResourceSet.elements()
@@ -203,6 +225,8 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.queryAggregatePattern) this.getPattern('QueryAggregate', 'queryAggregatePattern');
         if (!this.state.querySortPattern) this.getPattern('QuerySort', 'querySortPattern');
         if (!this.state.queryGroupByPattern) this.getPattern('QueryGroupBy', 'queryGroupByPattern');
+        if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
+        if (!this.state.user) this.getUser();
     }
 
     render() {

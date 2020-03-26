@@ -69,6 +69,8 @@ class DatasetComponentInit {
                         def typography = ApplicationFactory.eINSTANCE.createTypography()
                         typography.name = columns[i].name
                         rdbmsColumn.headerName = typography
+                        rdbmsColumn.sortable = true
+                        rdbmsColumn.resizable = true
                         rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                         rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
                                 ? Filter.DATE_COLUMN_FILTER :
