@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Form, Input, Modal, Row, Select} from 'antd';
+import {Button, Checkbox, Col, Form, Input, Modal, Row, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -13,7 +13,9 @@ interface Props {
     columnDefs?: Array<any>;
     allOperations?: Array<EObject>;
     onChangeHighlights?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     allHighlightType?: Array<EObject>;
+    isVisible?: boolean;
 }
 
 interface State {
@@ -54,7 +56,9 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
             this.setState({highlights: this.props.highlights})
         }
         //handleChange on form
-        if (JSON.stringify(prevState.highlights) !== JSON.stringify(this.state.highlights) && this.props.isVisible) {
+        if (JSON.stringify(prevState.highlights) !== JSON.stringify(this.state.highlights)
+            && this.props.isVisible
+            && this.state.highlights?.length !== 0) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (!err) {
                     this.props.saveChanges!(this.state.highlights!, paramType.highlights);
@@ -215,9 +219,9 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         initialValue: highlight.datasetColumn,
                                                         rules: [{
                                                             required:
-                                                                getFieldValue(`${idOperation}`) ||
-                                                                getFieldValue(`${idValue}`) ||
-                                                                getFieldValue(`${idEnable}`),
+                                                                highlight.operation ||
+                                                                highlight.value ||
+                                                                highlight.enable,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -268,9 +272,9 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         initialValue: `${t(highlight.operation)}` || undefined,
                                                         rules: [{
                                                             required:
-                                                                getFieldValue(`${idDatasetColumn}`) ||
-                                                                getFieldValue(`${idValue}`) ||
-                                                                getFieldValue(`${idEnable}`),
+                                                                highlight.datasetColumn ||
+                                                                highlight.value ||
+                                                                highlight.enable,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -316,17 +320,9 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         initialValue: highlight.value,
                                                         rules: [{
                                                             required:
-                                                                (
-                                                                    (
-                                                                        JSON.parse(idOperation)['value'] !== 'IsNotEmpty' &&
-                                                                        JSON.parse(idOperation)['value'] !== 'IsEmpty')
-                                                                    &&
-                                                                    (
-                                                                        getFieldValue(`${idOperation}`) ||
-                                                                        getFieldValue(`${idDatasetColumn}`) ||
-                                                                        getFieldValue(`${idEnable}`)
-                                                                    )
-                                                                ),
+                                                                highlight.datasetColumn ||
+                                                                highlight.operation ||
+                                                                highlight.enable,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -343,65 +339,24 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                             })
                                                         )}
                                                         title={highlight.value}
-                                                        id={highlight.index}
+                                                        id={highlight.index.toString()}
                                                     />
                                                 )}
                                             </Form.Item>
                                         </Col>
                                         <Col span={3} style={{marginLeft: '7px'}}>
-                                            <Form.Item style={{display: 'inline-block'}}>
+                                            <Form.Item style={{ display: 'inline-block' }}>
                                                 {getFieldDecorator(`${idEnable}`,
                                                     {
-                                                        initialValue: highlight.enable !== undefined ? t(highlight.enable.toString()) : undefined,
-                                                        rules: [{
-                                                            required:
-                                                                getFieldValue(`${idDatasetColumn}`) ||
-                                                                getFieldValue(`${idOperation}`) ||
-                                                                getFieldValue(`${idValue}`),
-                                                            message: ' '
-                                                        }]
+                                                        initialValue: highlight.enable !== undefined ? highlight.enable : false,
+                                                        valuePropName: 'checked',
                                                     })(
-                                                    <Select
-                                                        allowClear={true}
-                                                        style={{width: '82px'}}
+                                                    <Checkbox
                                                         onChange={(e: any) => {
-                                                            const event = e ? e : JSON.stringify({
-                                                                index: highlight.index,
-                                                                columnName: 'enable',
-                                                                value: undefined
-                                                            })
+                                                            const event = JSON.stringify({index: highlight.index, columnName: 'enable', value: e.target?.checked});
                                                             this.handleChange(event)
-                                                        }}
-                                                    >
-                                                        <Select.Option
-                                                            key={JSON.stringify({
-                                                                index: highlight.index,
-                                                                columnName: 'enable',
-                                                                value: false
-                                                            })}
-                                                            value={JSON.stringify({
-                                                                index: highlight.index,
-                                                                columnName: 'enable',
-                                                                value: false
-                                                            })}
-                                                        >
-                                                            {t('false')}
-                                                        </Select.Option>
-                                                        <Select.Option
-                                                            key={JSON.stringify({
-                                                                index: highlight.index,
-                                                                columnName: 'enable',
-                                                                value: true
-                                                            })}
-                                                            value={JSON.stringify({
-                                                                index: highlight.index,
-                                                                columnName: 'enable',
-                                                                value: true
-                                                            })}
-                                                        >
-                                                            {t('true')}
-                                                        </Select.Option>
-                                                    </Select>
+                                                        }}>
+                                                    </Checkbox>
                                                 )}
                                             </Form.Item>
                                         </Col>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Form, Input, Select} from 'antd';
+import {Button, Col, Form, Input, Select, Checkbox} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -43,7 +43,9 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
             && JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
             this.setState({serverFilters: this.props.serverFilters})
         }
-        if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters) && this.props.isVisible) {
+        if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)
+            && this.props.isVisible
+            && this.state.serverFilters?.length !== 0) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (!err) {
                     this.props.saveChanges!(this.state.serverFilters!, paramType.filter);
@@ -150,9 +152,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
                         </Button>
                     </Col>
-
-
-
                 </Form.Item>
                 {
                     this.state.serverFilters !== undefined && this.state.serverFilters!
@@ -173,9 +172,9 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     initialValue: serverFilter.datasetColumn,
                                                     rules: [{
                                                         required:
-                                                            getFieldValue(`${idOperation}`) ||
-                                                            getFieldValue(`${idValue}`) ||
-                                                            getFieldValue(`${idEnable}`),
+                                                            serverFilter.operation ||
+                                                            serverFilter.value ||
+                                                            serverFilter.enable,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -210,9 +209,9 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     initialValue: `${t(serverFilter.operation)}` || undefined,
                                                     rules: [{
                                                         required:
-                                                            getFieldValue(`${idDatasetColumn}`) ||
-                                                            getFieldValue(`${idValue}`) ||
-                                                            getFieldValue(`${idEnable}`),
+                                                            serverFilter.datasetColumn ||
+                                                            serverFilter.value ||
+                                                            serverFilter.enable,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -247,17 +246,9 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     initialValue: serverFilter.value,
                                                     rules: [{
                                                         required:
-                                                            (
-                                                                (
-                                                                    JSON.parse(idOperation)['value'] !== 'IsNotEmpty' &&
-                                                                    JSON.parse(idOperation)['value'] !== 'IsEmpty')
-                                                                &&
-                                                                (
-                                                                   getFieldValue(`${idOperation}`) ||
-                                                                   getFieldValue(`${idDatasetColumn}`) ||
-                                                                   getFieldValue(`${idEnable}`)
-                                                                )
-                                                            ),
+                                                            serverFilter.datasetColumn ||
+                                                            serverFilter.operation ||
+                                                            serverFilter.enable,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -270,45 +261,24 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                         JSON.stringify({index: serverFilter.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                                                     )}
                                                     title={serverFilter.value}
-                                                    id={serverFilter.index}
+                                                    id={serverFilter.index.toString()}
                                                 />
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={3} style={{marginLeft: '7px'}}>
+                                    <Col  span={3} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idEnable}`,
                                                 {
-                                                    initialValue: serverFilter.enable !== undefined ? t(serverFilter.enable.toString()) : undefined,
-                                                    rules: [{
-                                                        required:
-                                                            getFieldValue(`${idDatasetColumn}`) ||
-                                                            getFieldValue(`${idOperation}`) ||
-                                                            getFieldValue(`${idValue}`),
-                                                        message: ' '
-                                                    }]
+                                                    initialValue: serverFilter.enable !== undefined ? serverFilter.enable : false,
+                                                    valuePropName: 'checked',
                                                 })(
-                                                <Select
-                                                    allowClear={true}
-                                                    style={{width: '82px'}}
+                                                <Checkbox
                                                     onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'enable', value: undefined})
+                                                        const event = JSON.stringify({index: serverFilter.index, columnName: 'enable', value: e.target?.checked});
                                                         this.handleChange(event)
-                                                    }}
-                                                >
-                                                    <Select.Option
-                                                        key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
-                                                        value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: false})}
-                                                    >
-                                                        {t('false')}
-                                                    </Select.Option>
-                                                    <Select.Option
-                                                        key={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
-                                                        value={JSON.stringify({index: serverFilter.index, columnName: 'enable', value: true})}
-                                                    >
-                                                        {t('true')}
-                                                    </Select.Option>
-                                                </Select>
+                                                    }}>
+                                                </Checkbox>
                                             )}
                                         </Form.Item>
                                     </Col>

@@ -571,6 +571,8 @@ class DatasetView extends React.Component<any, State> {
                                 allOperations={this.state.allOperations}
                                 allHighlightType={this.state.allHighlightType}
                                 onChangeHighlights={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.filtersMenuVisible}
                             />
                             :
                             <Highlight/>

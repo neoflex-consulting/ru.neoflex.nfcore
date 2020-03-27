@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Form, Select} from 'antd';
+import {Button, Checkbox, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -54,7 +54,9 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
             this.setState({serverGroupBy: this.props.serverGroupBy})
         }
         //handleChange on form
-        if (JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy) && this.props.isVisible) {
+        if (JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)
+            && this.props.isVisible
+            && this.state.serverGroupBy?.length !== 0) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (!err) {
                     this.props.saveChanges!(this.state.serverGroupBy!, paramType.group);
@@ -165,139 +167,127 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                             const idEnable = `${JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: serverGroupBy.enable})}`;
                             return (
                                 <Form.Item key={serverGroupBy.index} style={{ marginTop: '-30px' }}>
-                                    <span>{serverGroupBy.index}</span>
-                                    <Form.Item style={{ display: 'inline-block' }}>
-                                        {getFieldDecorator(`${idDatasetColumn}`,
-                                            {
-                                                initialValue: serverGroupBy.datasetColumn,
-                                                rules: [{
-                                                    required:
-                                                        getFieldValue(`${idOperation}`)||
-                                                        getFieldValue(`${idEnable}`),
-                                                    message: ' '
-                                                },{
-                                                    validator: (rule: any, value: any, callback: any) => {
-                                                        let isDuplicate: boolean = false;
-                                                        if (this.state.serverGroupBy !== undefined) {
-                                                            const valueArr = this.state.serverGroupBy
-                                                                .filter((currentObject) => {
-                                                                    let currentField: string;
-                                                                    try {
-                                                                        //Либо объект при валидации отдельного поля
-                                                                        currentField = JSON.parse(rule.value).value
-                                                                    } catch (e) {
-                                                                        //Либо значение этого поля при валидации перед запуском
-                                                                        currentField = value
-                                                                    }
-                                                                    return (currentField)? currentObject.datasetColumn === currentField: false
-                                                                })
-                                                                .map(function (currentObject) {
-                                                                    return currentObject.datasetColumn
+                                    <Col span={1}>
+                                        <span>{serverGroupBy.index}</span>
+                                    </Col>
+                                    <Col span={9} style={{marginLeft: '-21px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator(`${idDatasetColumn}`,
+                                                {
+                                                    initialValue: serverGroupBy.datasetColumn,
+                                                    rules: [{
+                                                        required:
+                                                            serverGroupBy.operation ||
+                                                            serverGroupBy.enable,
+                                                        message: ' '
+                                                    },{
+                                                        validator: (rule: any, value: any, callback: any) => {
+                                                            let isDuplicate: boolean = false;
+                                                            if (this.state.serverGroupBy !== undefined) {
+                                                                const valueArr = this.state.serverGroupBy
+                                                                    .filter((currentObject) => {
+                                                                        let currentField: string;
+                                                                        try {
+                                                                            //Либо объект при валидации отдельного поля
+                                                                            currentField = JSON.parse(rule.value).value
+                                                                        } catch (e) {
+                                                                            //Либо значение этого поля при валидации перед запуском
+                                                                            currentField = value
+                                                                        }
+                                                                        return (currentField)? currentObject.datasetColumn === currentField: false
+                                                                    })
+                                                                    .map(function (currentObject) {
+                                                                        return currentObject.datasetColumn
+                                                                    });
+                                                                isDuplicate = valueArr.some(function (item, idx) {
+                                                                    return valueArr.indexOf(item) !== idx
                                                                 });
-                                                            isDuplicate = valueArr.some(function (item, idx) {
-                                                                return valueArr.indexOf(item) !== idx
-                                                            });
-                                                        }
-                                                        if (isDuplicate) {
-                                                            callback('Error message');
-                                                            return;
-                                                        }
-                                                        callback();
-                                                    },
-                                                    message: 'duplicate row',
-                                                }]
-                                            })(
-                                            <Select
-                                                placeholder={t('columnname')}
-                                                style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
-                                                showSearch={true}
-                                                allowClear={true}
-                                                onChange={(e: any) => {
-                                                    const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: undefined})
-                                                    this.handleChange(event)
-                                                }}
-                                            >
+                                                            }
+                                                            if (isDuplicate) {
+                                                                callback('Error message');
+                                                                return;
+                                                            }
+                                                            callback();
+                                                        },
+                                                        message: 'duplicate row',
+                                                    }]
+                                                })(
+                                                <Select
+                                                    placeholder={t('columnname')}
+                                                    style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                                                    showSearch={true}
+                                                    allowClear={true}
+                                                    onChange={(e: any) => {
+                                                        const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: undefined})
+                                                        this.handleChange(event)
+                                                    }}
+                                                >
+                                                    {
+                                                        this.props.columnDefs!
+                                                            .map((c: any) =>
+                                                                <Select.Option
+                                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                                >
+                                                                    {c.get('field')}
+                                                                </Select.Option>)
+                                                    }
+                                                </Select>
+                                            )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={7} style={{marginLeft: '9px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator(`${idOperation}`,
                                                 {
-                                                    this.props.columnDefs!
-                                                        .map((c: any) =>
-                                                            <Select.Option
-                                                                key={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                value={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                            >
-                                                                {c.get('field')}
-                                                            </Select.Option>)
-                                                }
-                                            </Select>
-                                        )}
-                                    </Form.Item>
-                                    <Form.Item style={{ display: 'inline-block' }}>
-                                        {getFieldDecorator(`${idOperation}`,
-                                            {
-                                                initialValue: `${t(serverGroupBy.operation)}` || undefined,
-                                                rules: [{
-                                                    required:
-                                                        getFieldValue(`${idDatasetColumn}`)||
-                                                        getFieldValue(`${idEnable}`),
-                                                    message: ' '
-                                                }]
-                                            })(
-                                            <Select
-                                                placeholder={t('operation')}
-                                                style={{ width: '189px', marginRight: '10px' }}
-                                                allowClear={true}
-                                                onChange={(e: any) => {
-                                                    const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: undefined})
-                                                    this.handleChange(event)
-                                                }}
-                                            >
-                                                {
-                                                    this.props.allAggregates!
-                                                        .map((o: any) =>
-                                                            <Select.Option
-                                                                key={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
-                                                                value={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
-                                                            >
-                                                                {t(o.get('name'))}
-                                                            </Select.Option>)
-                                                }
-                                            </Select>
+                                                    initialValue: `${t(serverGroupBy.operation)}` || undefined,
+                                                    rules: [{
+                                                        required:
+                                                            serverGroupBy.datasetColumn ||
+                                                            serverGroupBy.enable,
+                                                        message: ' '
+                                                    }]
+                                                })(
+                                                <Select
+                                                    placeholder={t('operation')}
+                                                    style={{ width: '189px', marginRight: '10px' }}
+                                                    allowClear={true}
+                                                    onChange={(e: any) => {
+                                                        const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: undefined})
+                                                        this.handleChange(event)
+                                                    }}
+                                                >
+                                                    {
+                                                        this.props.allAggregates!
+                                                            .map((o: any) =>
+                                                                <Select.Option
+                                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
+                                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
+                                                                >
+                                                                    {t(o.get('name'))}
+                                                                </Select.Option>)
+                                                    }
+                                                </Select>
 
-                                        )}
-                                    </Form.Item>
-                                    <Form.Item style={{ display: 'inline-block' }}>
-                                        {getFieldDecorator(`${idEnable}`,
-                                            {
-                                                initialValue: serverGroupBy.enable !== undefined ? t(serverGroupBy.enable.toString()) : undefined,
-                                                rules: [{
-                                                    required:
-                                                        getFieldValue(`${idDatasetColumn}`) ||
-                                                        getFieldValue(`${idOperation}`),
-                                                    message: ' '
-                                                }]
-                                            })(
-                                            <Select
-                                                allowClear={true}
-                                                style={{width: '82px'}}
-                                                onChange={(e: any) => {
-                                                    const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: undefined})
-                                                    this.handleChange(event)
-                                                }}
-                                            >
-                                                <Select.Option
-                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: false})}
-                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: false})}
-                                                >
-                                                    {t('false')}
-                                                </Select.Option>
-                                                <Select.Option
-                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: true})}
-                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: true})}
-                                                >
-                                                    {t('true')}
-                                                </Select.Option>
-                                            </Select>
-                                        )}
-                                    </Form.Item>
+                                            )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col  span={3} style={{marginLeft: '7px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator(`${idEnable}`,
+                                                {
+                                                    initialValue: serverGroupBy.enable !== undefined ? serverGroupBy.enable : false,
+                                                    valuePropName: 'checked',
+                                                })(
+                                                <Checkbox
+                                                    onChange={(e: any) => {
+                                                        const event = JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: e.target?.checked});
+                                                        this.handleChange(event)
+                                                    }}>
+                                                </Checkbox>
+                                            )}
+                                        </Form.Item>
+                                    </Col>
                                 </Form.Item>
                             )})
                 }
