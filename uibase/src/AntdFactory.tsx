@@ -309,6 +309,15 @@ class Typography_ extends ViewContainer {
         }
     }
 
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
+        }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
+    }
+
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
