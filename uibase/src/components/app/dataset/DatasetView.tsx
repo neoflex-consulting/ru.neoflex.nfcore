@@ -11,6 +11,7 @@ import ServerSort from './ServerSort';
 import {IServerQueryParam} from '../../../MainContext';
 import Highlight from "./Highlight";
 import ServerGroupBy from "./ServerGroupBy";
+import '../../../styles/AggregateHighlight.css'
 
 const { Option, OptGroup } = Select;
 
@@ -187,7 +188,7 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: undefined,
                     operation: undefined,
                     value: undefined,
-                    enable: undefined,
+                    enable: true,
                     type: undefined,
                     highlightType: undefined,
                     backgroundColor: undefined,
@@ -229,7 +230,7 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: undefined,
                     operation: undefined,
                     value: undefined,
-                    enable: undefined,
+                    enable: true,
                     type: undefined,
                     highlightType: undefined,
                     backgroundColor: undefined,
@@ -265,7 +266,7 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: undefined,
                     operation: undefined,
                     value: undefined,
-                    enable: undefined,
+                    enable: true,
                     type: undefined,
                     highlightType: undefined,
                     backgroundColor: undefined,

@@ -111,7 +111,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                 datasetColumn: undefined,
                 operation: undefined,
                 value: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined});
         this.setState({serverFilters})
     };
@@ -178,7 +178,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
                             const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
                             const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
-                            const idDelete = `${JSON.stringify({index: serverFilter.index})}`;
                             return (
                                 <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
                                     <Col span={1}>
@@ -192,8 +191,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     rules: [{
                                                         required:
                                                             serverFilter.operation ||
-                                                            serverFilter.value ||
-                                                            serverFilter.enable,
+                                                            serverFilter.value,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -229,8 +227,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     rules: [{
                                                         required:
                                                             serverFilter.datasetColumn ||
-                                                            serverFilter.value ||
-                                                            serverFilter.enable,
+                                                            serverFilter.value,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -266,8 +263,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     rules: [{
                                                         required:
                                                             serverFilter.datasetColumn ||
-                                                            serverFilter.operation ||
-                                                            serverFilter.enable,
+                                                            serverFilter.operation,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -303,8 +299,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                     </Col>
                                     <Col  span={1} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idDelete}`,
-                                                {})(
                                             <Button
                                                 title="delete row"
                                                 style={{width: '40px'}}
@@ -313,7 +307,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 onClick={(e: any) => {this.deleteRow({index: serverFilter.index})}}
                                             >
                                                 <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                            </Button>)}
+                                            </Button>
                                         </Form.Item>
                                     </Col>
                                 </Form.Item>

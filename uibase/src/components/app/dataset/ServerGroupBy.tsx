@@ -110,7 +110,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
             {index: serverGroupBy.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined});
         this.setState({serverGroupBy})
     };
@@ -187,8 +187,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                                 {
                                                     initialValue: serverGroupBy.datasetColumn,
                                                     rules: [{
-                                                        required:serverGroupBy.operation||
-                                                                 serverGroupBy.enable,
+                                                        required:serverGroupBy.operation,
                                                         message: ' '
                                                     },{
                                                         validator: (rule: any, value: any, callback: any) => {
@@ -253,8 +252,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                                     initialValue: `${t(serverGroupBy.operation)}` || undefined,
                                                     rules: [{
                                                         required:
-                                                            serverGroupBy.datasetColumn ||
-                                                            serverGroupBy.enable,
+                                                            serverGroupBy.datasetColumn,
                                                         message: ' '
                                                     }]
                                                 })(

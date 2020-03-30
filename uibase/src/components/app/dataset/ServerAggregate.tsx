@@ -106,7 +106,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
             {index: serverAggregates.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined});
         this.setState({serverAggregates})
     };
@@ -172,7 +172,6 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                     const idDatasetColumn = `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`;
                     const idOperation = `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`;
                     const idEnable = `${JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: serverAggregate.enable})}`;
-                    const idDelete = `${JSON.stringify({index: serverAggregate.index})}`;
                     return (
                         <Form.Item key={serverAggregate.index} style={{ marginTop: '-30px' }}>
                             <Col span={1}>
@@ -185,8 +184,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                 initialValue: serverAggregate.datasetColumn,
                                 rules: [{
                                     required:
-                                        serverAggregate.operation ||
-                                        serverAggregate.enable,
+                                        serverAggregate.operation,
                                     message: ' '
                                 },{
                                     validator: (rule: any, value: any, callback: any) => {
@@ -251,8 +249,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                 initialValue: `${t(serverAggregate.operation)}` || undefined,
                                 rules: [{
                                     required:
-                                        serverAggregate.datasetColumn ||
-                                        serverAggregate.enable,
+                                        serverAggregate.datasetColumn,
                                     message: ' '
                                 }]
                             })(
@@ -298,8 +295,6 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                     </Col>
                     <Col  span={2} style={{marginLeft: '7px'}}>
                         <Form.Item style={{ display: 'inline-block' }}>
-                            {getFieldDecorator(`${idDelete}`,
-                                {})(
                                 <Button
                                     title="delete row"
                                     style={{width: '40px'}}
@@ -308,7 +303,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                     onClick={(e: any) => {this.deleteRow({index: serverAggregate.index})}}
                                 >
                                     <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                </Button>)}
+                                </Button>
                         </Form.Item>
                     </Col>
                     </Form.Item>

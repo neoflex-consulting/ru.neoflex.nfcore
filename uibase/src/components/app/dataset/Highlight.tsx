@@ -228,7 +228,6 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                             const idValue = `${JSON.stringify({index: highlight.index, columnName: 'value', value: highlight.value})}`;
                             const idEnable = `${JSON.stringify({index: highlight.index, columnName: 'enable', value: highlight.enable})}`;
                             const idHighlightType = `${JSON.stringify({index: highlight.index, columnName: 'highlightType', value: highlight.highlightType})}`;
-                            const idDelete = `${JSON.stringify({index: highlight.index})}`;
                             return (
                                 <Form.Item key={highlight.index} style={{marginTop: '-30px'}}>
                                     <Form.Item>
@@ -243,8 +242,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         rules: [{
                                                             required:
                                                                 highlight.operation ||
-                                                                highlight.value ||
-                                                                highlight.enable,
+                                                                highlight.value,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -296,8 +294,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         rules: [{
                                                             required:
                                                                 highlight.datasetColumn ||
-                                                                highlight.value ||
-                                                                highlight.enable,
+                                                                highlight.value,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -344,8 +341,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         rules: [{
                                                             required:
                                                                 highlight.datasetColumn ||
-                                                                highlight.operation ||
-                                                                highlight.enable,
+                                                                highlight.operation,
                                                             message: ' '
                                                         }]
                                                     })(
@@ -385,8 +381,6 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                         </Col>
                                         <Col  span={1} style={{marginLeft: '7px'}}>
                                             <Form.Item style={{ display: 'inline-block' }}>
-                                                {getFieldDecorator(`${idDelete}`,
-                                                    {})(
                                                     <Button
                                                         title="delete row"
                                                         style={{width: '40px'}}
@@ -395,7 +389,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         onClick={(e: any) => {this.deleteRow({index: highlight.index})}}
                                                     >
                                                         <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                                    </Button>)}
+                                                    </Button>
                                             </Form.Item>
                                         </Col>
                                     </Form.Item>

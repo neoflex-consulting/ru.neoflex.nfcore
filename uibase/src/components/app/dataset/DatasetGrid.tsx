@@ -252,12 +252,18 @@ class DatasetGrid extends React.Component<any, any> {
                 !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])) {
                 this.changeSettings();
             }
+            if (JSON.parse(datasetComponent.get('value'))['serverAggregates']) {
+                this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['serverAggregates']);
+            }
         }
         else {
             if (this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array().filter((h:any) => h.get('enable') === true).length !== 0 &&
                 !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
             ){
                 this.changeSettings();
+            }
+            if (this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation')) {
+                this.highlightAggregate(this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation').array());
             }
         }
 
@@ -289,10 +295,26 @@ class DatasetGrid extends React.Component<any, any> {
         }
     }
 
+    private highlightAggregate(agr: any) {
+        if (this.grid.current) {
+            if (agr.filter((f:any)=>{return f.enable && f.datasetColumn}).length !== 0) {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
+                    if (params.node.lastChild) {
+                        return 'aggregate-highlight';
+                    }
+                }
+            }
+            else {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            }
+            this.grid.current.api.refreshRows();
+        }
+    }
+
     private changeSettings() {
-        const {gridOptions} = this.state
+        const {gridOptions} = this.state;
         const userProfile = this.props.context.userProfile.get('params').array()
-            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
         if (userProfile !== undefined) {
             if (userProfile.get('key') === this.props.viewObject.get('datasetView')._id) {
                 if (JSON.parse(userProfile.get('value'))['theme'] !== undefined) {

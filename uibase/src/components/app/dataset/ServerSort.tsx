@@ -106,7 +106,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
             {index: serverSorts.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined});
         this.setState({serverSorts})
     };
@@ -172,7 +172,6 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                             const idDatasetColumn = `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`;
                             const idEnable = `${JSON.stringify({index: serverSort.index, columnName: 'enable', value: serverSort.enable})}`;
-                            const idDelete = `${JSON.stringify({index: serverSort.index})}`;
                             return (
                                 <Form.Item key={serverSort.index} style={{ marginTop: '-30px' }}>
                                     <Col span={1}>
@@ -185,8 +184,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                     initialValue: serverSort.datasetColumn,
                                                     rules: [{
                                                         required:
-                                                            serverSort.operation ||
-                                                            serverSort.enable,
+                                                            serverSort.operation,
                                                         message: ' '
                                                     },{
                                                         validator: (rule: any, value: any, callback: any) => {
@@ -251,8 +249,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                     initialValue: `${t(serverSort.operation)}` || undefined,
                                                     rules: [{
                                                         required:
-                                                            serverSort.datasetColumn ||
-                                                            serverSort.enable,
+                                                            serverSort.datasetColumn,
                                                         message: ' '
                                                     }]
                                                 })(
@@ -281,6 +278,9 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                         </Form.Item>
                                     </Col>
                                     <Col span={1} style={{marginLeft: '7px'}}>
+
+                                    </Col>
+                                    <Col span={2} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idEnable}`,
                                                 {
@@ -295,12 +295,8 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                 </Checkbox>
                                             )}
                                         </Form.Item>
-                                    </Col>
-                                    <Col span={2} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idDelete}`,
-                                                {})(
-                                                <Button
+                                            <Button
                                                     title="delete row"
                                                     style={{width: '40px'}}
                                                     key={'deleteRowButton'}
@@ -308,7 +304,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                     onClick={(e: any) => {this.deleteRow({index: serverSort.index})}}
                                                 >
                                                     <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                                </Button>)}
+                                                </Button>
                                         </Form.Item>
                                     </Col>
                                 </Form.Item>
