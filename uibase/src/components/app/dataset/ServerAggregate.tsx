@@ -3,9 +3,10 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Checkbox, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     serverAggregates?: Array<EObject>;
@@ -17,13 +18,7 @@ interface Props {
 }
 
 interface State {
-    serverAggregates: {
-        index: string,
-        datasetColumn: string,
-        operation: string,
-        enable: boolean,
-        type: string
-    }[] | undefined;
+    serverAggregates: IServerQueryParam[] | undefined;
 }
 
 
@@ -87,6 +82,22 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
     handleSubmit = (e: any) => {
         e.preventDefault();
         this.refresh();
+    };
+
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.serverAggregates?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type
+                })}
+        });
+        this.setState({serverAggregates: newServerParam})
     };
 
     createNewRow = () => {
@@ -161,6 +172,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                     const idDatasetColumn = `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`;
                     const idOperation = `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`;
                     const idEnable = `${JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: serverAggregate.enable})}`;
+                    const idDelete = `${JSON.stringify({index: serverAggregate.index})}`;
                     return (
                         <Form.Item key={serverAggregate.index} style={{ marginTop: '-30px' }}>
                             <Col span={1}>
@@ -232,7 +244,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                         )}
                         </Form.Item>
                     </Col>
-                    <Col span={7} style={{marginLeft: '9px'}}>
+                    <Col span={10} style={{marginLeft: '9px'}}>
                         <Form.Item style={{ display: 'inline-block' }}>
                         {getFieldDecorator(`${idOperation}`,
                             {
@@ -268,11 +280,11 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                         )}
                         </Form.Item>
                     </Col>
-                    <Col  span={3} style={{marginLeft: '7px'}}>
+                    <Col  span={1} style={{marginLeft: '7px'}}>
                         <Form.Item style={{ display: 'inline-block' }}>
                             {getFieldDecorator(`${idEnable}`,
                                 {
-                                    initialValue: serverAggregate.enable !== undefined ? serverAggregate.enable : false,
+                                    initialValue: serverAggregate.enable !== undefined ? serverAggregate.enable : true,
                                     valuePropName: 'checked',
                                 })(
                                 <Checkbox
@@ -282,6 +294,21 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                                     }}>
                                 </Checkbox>
                             )}
+                        </Form.Item>
+                    </Col>
+                    <Col  span={2} style={{marginLeft: '7px'}}>
+                        <Form.Item style={{ display: 'inline-block' }}>
+                            {getFieldDecorator(`${idDelete}`,
+                                {})(
+                                <Button
+                                    title="delete row"
+                                    style={{width: '40px'}}
+                                    key={'deleteRowButton'}
+                                    value={'deleteRowButton'}
+                                    onClick={(e: any) => {this.deleteRow({index: serverAggregate.index})}}
+                                >
+                                    <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                </Button>)}
                         </Form.Item>
                     </Col>
                     </Form.Item>

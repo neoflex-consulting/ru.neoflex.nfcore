@@ -3,9 +3,10 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Col, Form, Input, Select, Checkbox} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {paramType} from "./DatasetView"
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     serverFilters?: Array<EObject>;
@@ -17,7 +18,7 @@ interface Props {
 }
 
 interface State {
-    serverFilters: EObject[] | undefined;
+    serverFilters: IServerQueryParam[] | undefined;
 }
 
 class ServerFilter extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
@@ -84,6 +85,23 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     handleSubmit = (e: any) => {
         e.preventDefault();
         this.refresh();
+    };
+
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.serverFilters?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    value: element.value,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type
+                })}
+        });
+        this.setState({serverFilters: newServerParam})
     };
 
     createNewRow = () => {
@@ -160,6 +178,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
                             const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
                             const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
+                            const idDelete = `${JSON.stringify({index: serverFilter.index})}`;
                             return (
                                 <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
                                     <Col span={1}>
@@ -266,11 +285,11 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={3} style={{marginLeft: '7px'}}>
+                                    <Col  span={1} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idEnable}`,
                                                 {
-                                                    initialValue: serverFilter.enable !== undefined ? serverFilter.enable : false,
+                                                    initialValue: serverFilter.enable !== undefined ? serverFilter.enable : true,
                                                     valuePropName: 'checked',
                                                 })(
                                                 <Checkbox
@@ -280,6 +299,21 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                     }}>
                                                 </Checkbox>
                                             )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col  span={1} style={{marginLeft: '7px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator(`${idDelete}`,
+                                                {})(
+                                            <Button
+                                                title="delete row"
+                                                style={{width: '40px'}}
+                                                key={'deleteRowButton'}
+                                                value={'deleteRowButton'}
+                                                onClick={(e: any) => {this.deleteRow({index: serverFilter.index})}}
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                            </Button>)}
                                         </Form.Item>
                                     </Col>
                                 </Form.Item>

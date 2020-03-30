@@ -3,9 +3,10 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Checkbox, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     serverSorts?: Array<EObject>;
@@ -17,13 +18,7 @@ interface Props {
 }
 
 interface State {
-    serverSorts: {
-        index: string,
-        datasetColumn: string,
-        operation: string,
-        enable: boolean,
-        type: string
-    }[] | undefined;
+    serverSorts: IServerQueryParam[] | undefined;
 }
 
 
@@ -82,7 +77,23 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
             }
         });
         this.setState({serverSorts})
-    }
+    };
+
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.serverSorts?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type
+                })}
+        });
+        this.setState({serverSorts: newServerParam})
+    };
 
     handleSubmit = (e: any) => {
         e.preventDefault();
@@ -161,10 +172,11 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                             const idDatasetColumn = `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`;
                             const idEnable = `${JSON.stringify({index: serverSort.index, columnName: 'enable', value: serverSort.enable})}`;
+                            const idDelete = `${JSON.stringify({index: serverSort.index})}`;
                             return (
                                 <Form.Item key={serverSort.index} style={{ marginTop: '-30px' }}>
                                     <Col span={1}>
-                                        <span>{serverSort.index}</span>
+                                        {serverSort.index}
                                     </Col>
                                     <Col span={9} style={{marginLeft: '-21px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
@@ -232,7 +244,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={7} style={{marginLeft: '9px'}}>
+                                    <Col span={10} style={{marginLeft: '9px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
@@ -268,11 +280,11 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={3} style={{marginLeft: '7px'}}>
+                                    <Col span={1} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idEnable}`,
                                                 {
-                                                    initialValue: serverSort.enable !== undefined ? serverSort.enable : false,
+                                                    initialValue: serverSort.enable !== undefined ? serverSort.enable : true,
                                                     valuePropName: 'checked',
                                                 })(
                                                 <Checkbox
@@ -282,6 +294,21 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                     }}>
                                                 </Checkbox>
                                             )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={2} style={{marginLeft: '7px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator(`${idDelete}`,
+                                                {})(
+                                                <Button
+                                                    title="delete row"
+                                                    style={{width: '40px'}}
+                                                    key={'deleteRowButton'}
+                                                    value={'deleteRowButton'}
+                                                    onClick={(e: any) => {this.deleteRow({index: serverSort.index})}}
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                                </Button>)}
                                         </Form.Item>
                                     </Col>
                                 </Form.Item>

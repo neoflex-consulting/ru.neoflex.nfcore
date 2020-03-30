@@ -3,9 +3,10 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Checkbox, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     serverGroupBy?: Array<EObject>;
@@ -17,13 +18,7 @@ interface Props {
 }
 
 interface State {
-    serverGroupBy: {
-        index: number,
-        datasetColumn?: string,
-        operation?: string,
-        enable?: boolean,
-        type?: string
-    }[] | undefined;
+    serverGroupBy: IServerQueryParam[] | undefined;
 }
 
 
@@ -91,6 +86,22 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
     handleSubmit = (e: any) => {
         e.preventDefault();
         this.refresh();
+    };
+
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.serverGroupBy?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type
+                })}
+        });
+        this.setState({serverGroupBy: newServerParam})
     };
 
     createNewRow = () => {
@@ -161,7 +172,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                 </Form.Item>
                 {
                     this.state.serverGroupBy !== undefined && this.state.serverGroupBy!
-                        .map((serverGroupBy: any) => {
+                        .map((serverGroupBy: IServerQueryParam) => {
                             const idDatasetColumn = `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`;
                             const idEnable = `${JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: serverGroupBy.enable})}`;
@@ -176,9 +187,8 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                                 {
                                                     initialValue: serverGroupBy.datasetColumn,
                                                     rules: [{
-                                                        required:
-                                                            serverGroupBy.operation ||
-                                                            serverGroupBy.enable,
+                                                        required:serverGroupBy.operation||
+                                                                 serverGroupBy.enable,
                                                         message: ' '
                                                     },{
                                                         validator: (rule: any, value: any, callback: any) => {
@@ -236,7 +246,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={7} style={{marginLeft: '9px'}}>
+                                    <Col span={10} style={{marginLeft: '9px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
@@ -272,11 +282,11 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={3} style={{marginLeft: '7px'}}>
+                                    <Col  span={1} style={{marginLeft: '7px'}}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idEnable}`,
                                                 {
-                                                    initialValue: serverGroupBy.enable !== undefined ? serverGroupBy.enable : false,
+                                                    initialValue: serverGroupBy.enable !== undefined ? serverGroupBy.enable : true,
                                                     valuePropName: 'checked',
                                                 })(
                                                 <Checkbox
@@ -286,6 +296,19 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                                     }}>
                                                 </Checkbox>
                                             )}
+                                        </Form.Item>
+                                    </Col>
+                                    <Col  span={2} style={{marginLeft: '7px'}}>
+                                        <Form.Item style={{ display: 'inline-block' }}>
+                                            <Button
+                                                    title="delete row"
+                                                    style={{width: '40px'}}
+                                                    key={'deleteRowButton'}
+                                                    value={'deleteRowButton'}
+                                                    onClick={(e: any) => {this.deleteRow({index: serverGroupBy.index})}}
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                            </Button>
                                         </Form.Item>
                                     </Col>
                                 </Form.Item>

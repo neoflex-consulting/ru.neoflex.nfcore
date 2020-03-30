@@ -3,10 +3,11 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Checkbox, Col, Form, Input, Modal, Row, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPalette, faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {SliderPicker} from 'react-color';
 import {paramType} from "./DatasetView";
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     highlights?: Array<any>;
@@ -19,7 +20,7 @@ interface Props {
 }
 
 interface State {
-    highlights: any[] | undefined;
+    highlights: IServerQueryParam[] | undefined;
     backgroundColorVisible: boolean;
     textColorVisible: boolean;
     colorIndex: any;
@@ -105,7 +106,28 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
         this.refresh();
     };
 
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newFilter: IServerQueryParam[] = [];
+        this.state.highlights?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newFilter.push({
+                    index: newFilter.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    value: element.value,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type,
+                    highlightType: element.highlightType,
+                    backgroundColor: element.backgroundColor,
+                    color: element.color
+                })}
+        });
+        this.setState({highlights: newFilter})
+    };
+
     createNewRow = () => {
+        this.props.form.resetFields();
         let highlights: any = this.state.highlights;
         highlights.push(
             {
@@ -206,6 +228,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                             const idValue = `${JSON.stringify({index: highlight.index, columnName: 'value', value: highlight.value})}`;
                             const idEnable = `${JSON.stringify({index: highlight.index, columnName: 'enable', value: highlight.enable})}`;
                             const idHighlightType = `${JSON.stringify({index: highlight.index, columnName: 'highlightType', value: highlight.highlightType})}`;
+                            const idDelete = `${JSON.stringify({index: highlight.index})}`;
                             return (
                                 <Form.Item key={highlight.index} style={{marginTop: '-30px'}}>
                                     <Form.Item>
@@ -344,11 +367,11 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                 )}
                                             </Form.Item>
                                         </Col>
-                                        <Col span={3} style={{marginLeft: '7px'}}>
+                                        <Col span={1} style={{marginLeft: '7px'}}>
                                             <Form.Item style={{ display: 'inline-block' }}>
                                                 {getFieldDecorator(`${idEnable}`,
                                                     {
-                                                        initialValue: highlight.enable !== undefined ? highlight.enable : false,
+                                                        initialValue: highlight.enable !== undefined ? highlight.enable : true,
                                                         valuePropName: 'checked',
                                                     })(
                                                     <Checkbox
@@ -358,6 +381,21 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         }}>
                                                     </Checkbox>
                                                 )}
+                                            </Form.Item>
+                                        </Col>
+                                        <Col  span={1} style={{marginLeft: '7px'}}>
+                                            <Form.Item style={{ display: 'inline-block' }}>
+                                                {getFieldDecorator(`${idDelete}`,
+                                                    {})(
+                                                    <Button
+                                                        title="delete row"
+                                                        style={{width: '40px'}}
+                                                        key={'deleteRowButton'}
+                                                        value={'deleteRowButton'}
+                                                        onClick={(e: any) => {this.deleteRow({index: highlight.index})}}
+                                                    >
+                                                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                                    </Button>)}
                                             </Form.Item>
                                         </Col>
                                     </Form.Item>
