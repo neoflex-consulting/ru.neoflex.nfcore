@@ -127,7 +127,6 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
     };
 
     createNewRow = () => {
-        this.props.form.resetFields();
         let highlights: any = this.state.highlights;
         highlights.push(
             {
@@ -299,6 +298,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         }]
                                                     })(
                                                     <Select
+                                                        disabled={highlight.highlightType === 'Column'}
                                                         placeholder={t('operation')}
                                                         style={{width: '189px', marginRight: '10px'}}
                                                         allowClear={true}
@@ -347,7 +347,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     })(
                                                     <Input
                                                         placeholder={t('value')}
-                                                        disabled={highlight.operation === 'IsEmpty' || highlight.operation === 'IsNotEmpty'}
+                                                        disabled={highlight.operation === 'IsEmpty' || highlight.operation === 'IsNotEmpty' || highlight.highlightType === 'Column'}
                                                         style={{width: '110px', marginRight: '10px'}}
                                                         allowClear={true}
                                                         onChange={(e: any) => this.handleChange(
