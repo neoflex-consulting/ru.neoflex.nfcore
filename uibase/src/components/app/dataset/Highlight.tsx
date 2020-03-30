@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Drawer, Form, Input, Modal, Row, Select} from 'antd';
+import {Button, Col, Form, Input, Modal, Row, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPaintBrush, faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPalette, faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {SliderPicker} from 'react-color';
 
@@ -250,6 +250,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                         }]
                                                     })(
                                                     <Select
+                                                        disabled={highlight.highlightType === 'Column'}
                                                         placeholder={t('operation')}
                                                         style={{width: '189px', marginRight: '10px'}}
                                                         allowClear={true}
@@ -307,7 +308,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     })(
                                                     <Input
                                                         placeholder={t('value')}
-                                                        disabled={highlight.operation === 'IsEmpty' || highlight.operation === 'IsNotEmpty'}
+                                                        disabled={highlight.operation === 'IsEmpty' || highlight.operation === 'IsNotEmpty' || highlight.highlightType === 'Column'}
                                                         style={{width: '110px', marginRight: '10px'}}
                                                         allowClear={true}
                                                         onChange={(e: any) => this.handleChange(

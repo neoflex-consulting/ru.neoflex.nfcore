@@ -1,73 +1,91 @@
-import * as React from "react";
-import {withTranslation, WithTranslation} from "react-i18next";
-import JqxPivotGrid, { IPivotGridProps, jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxpivotgrid';
+import React from 'react';
+import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
+import '@ag-grid-community/core/dist/styles/ag-grid.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
+import {AllCommunityModules} from "@ag-grid-community/all-modules";
+import {Button} from "antd";
 
 interface Props {
 }
 
-class DatasetPivot extends React.PureComponent<WithTranslation, IPivotGridProps> {
+class DatasetPivot extends React.Component<any, any>  {
 
-    constructor(props: WithTranslation) {
-        super(props);
-        const pivotDataSource = this.createPivotDataSource();
-        this.state = {
-            source: pivotDataSource
-        }
+        private grid: React.RefObject<any>;
+
+        constructor(props: any) {
+            super(props);
+
+            this.state = {
+                columnDefs: [
+                    { headerName: "Make", field: "make" },
+                    { headerName: "Model", field: "model" },
+                    { headerName: "Price", field: "price" }],
+                rowData: [
+                    { make: "Toyota", model: "Celica", price: 35000 },
+                    { make: "Ford", model: "Mondeo", price: 32000 },
+                    { make: "Porsche", model: "Boxter", price: 72000 }],
+                currentStyle: 1,
+                cellStyle: function(params: any) {
+                    if (Number(params.value) === 35000) {
+                        return { background: 'red' }
+                    }
+                }
+            };
+        this.grid = React.createRef()
     }
 
-    private createPivotDataSource(): any {
-        // prepare sample data
-        const data = [];
-        const reports = [
-            'Report1', 'Report2', 'Report3', 'Report4', 'Report5', 'Report6'];
-        const reportTime = [
-            '2.25', '1.5', '3.0', '3.3', '4.5', '3.6', '3.8', '2.5', '5.0', '1.75', '3.25', '4.0'
-        ];
-        for (let i = 0; i < reports.length * 2; i++) {
-            const row: any = {};
-            const value = parseFloat(reportTime[Math.round((Math.random() * 100)) % reportTime.length]);
-            row.report = reports[i % reports.length];
-            row.value = value;
-            data[i] = row;
+    onGridReady = (params: any) => {
+        if (this.grid.current !== null) {
+            this.grid.current.api = params.api;
+            this.grid.current.columnApi = params.columnApi;
         }
-        // create a data source and data adapter
-        const source = {
-            datafields: [
-                { name: 'report', type: 'string' },
-                { name: 'value', type: 'number' }
-            ],
-            datatype: 'array',
-            localdata: data
-        };
-        const dataAdapter = new jqx.dataAdapter(source);
-        dataAdapter.dataBind();
-        // create a pivot data source from the dataAdapter
-        const pivotDataSource = new jqx.pivot(
-            dataAdapter,
-            {
-                columns: [],
-                pivotValuesOnRows: false,
-                rows: [{ dataField: 'report', width: 190 }],
-                values: [
-                    { dataField: 'value', width: 400, 'function': 'min', text: 'Min Time (days)', formatSettings: { align: 'left', prefix: '', decimalPlaces: 2 } },
-                    { dataField: 'value', width: 400, 'function': 'max', text: 'Average Time (days)', formatSettings: { align: 'center', prefix: '', decimalPlaces: 2 } },
-                    { dataField: 'value', width: 400, 'function': 'average', text: 'Max Time (days)', formatSettings: { align: 'right', prefix: '', decimalPlaces: 2 } }
-                ]
+    };
+
+    CLICK = () => {
+        const one = function(params: any) {
+            if (Number(params.value) === 35000) {
+                return { background: 'red' }
             }
-        );
-        return pivotDataSource;
-    }
+        }
+        const two = function(params: any) {
+            if (Number(params.value) === 35000) {
+                return { background: 'grey' }
+            }
+        }
+        this.state.currentStyle === 0 ? this.setState({
+            currentStyle: 1,
+                cellStyle: one
+        }) :
+            this.setState({
+                currentStyle: 0,
+                cellStyle: two
+            })
+
+    };
 
     render() {
+        const {gridOptions} = this.state;
         return (
-            <div style={{borderColor: "black"}}>
-                This is Pivot (Test)
-                <JqxPivotGrid style={{ width: "100%", height: 600, border: "3px solid lightgray" }} source={this.state.source}
-                              treeStyleRows={false} autoResize={false} multipleSelectionEnabled={true} />
+            <div className="ag-theme-material" style={ {height: '800px', width: '1200px'} }>
+                <AgGridReact
+                    ref={this.grid}
+                    rowData={this.state.rowData}
+                    modules={AllCommunityModules}
+                    onGridReady={this.onGridReady} //инициализация грида
+                    {...gridOptions}
+                >
+                    {this.state.columnDefs.map((col: any) =>
+                        <AgGridColumn
+                            headerName={col['headerName']}
+                            field={col['field']}
+                            cellStyle = {this.state.cellStyle}
+                        />
+                    )}
+                </AgGridReact>
+                <Button onClick={this.CLICK}>CLICK</Button>
             </div>
-        )
+        );
     }
-
 }
 
-export default withTranslation()(DatasetPivot)
+export default (DatasetPivot)
