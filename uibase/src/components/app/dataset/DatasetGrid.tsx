@@ -227,7 +227,6 @@ class DatasetGrid extends React.Component<any, any> {
             .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
         if (datasetComponent !== undefined) {
             if (JSON.parse(datasetComponent.get('value'))['highlights'].length !== 0 &&
-                this.state.highlights.length !== 0 &&
                 !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])) {
                 this.changeSettings();
             }
@@ -287,6 +286,36 @@ class DatasetGrid extends React.Component<any, any> {
             }
         }
 
+        const datasetComponent = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
+        let highlights: any[] = [];
+        if (datasetComponent !== undefined) {
+            JSON.parse(datasetComponent.get('value'))['highlights']
+                .filter((h:any) => h['enable'] === true)
+                .forEach((h:any) => highlights.push(h));
+            this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+        }
+        else {
+            this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+                .filter((h:any) => h.get('enable') === true)
+                .forEach((h:any) => highlights.push(
+                    {
+                        index: highlights.length + 1,
+                        datasetColumn: h.get('datasetColumn').get('name'),
+                        operation: h.get('operation') || 'EqualTo',
+                        value: h.get('value'),
+                        enable: (h.get('enable') !== null ? h.get('enable') : false),
+                        type: h.get('datasetColumn').get('convertDataType'),
+                        highlightType: h.get('highlightType'),
+                        backgroundColor: h.get('backgroundColor'),
+                        color: h.get('color')
+                    }
+                ));
+            if (highlights.length !== 0) {
+                this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+            }
+        }
+
         const newCellStyle = (params: any) => {
             const datasetComponent = this.props.context.userProfile.get('params').array()
                 .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
@@ -295,7 +324,6 @@ class DatasetGrid extends React.Component<any, any> {
                 JSON.parse(datasetComponent.get('value'))['highlights']
                     .filter((h:any) => h['enable'] === true)
                     .forEach((h:any) => highlights.push(h));
-                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
             }
             else {
                 this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
@@ -311,14 +339,11 @@ class DatasetGrid extends React.Component<any, any> {
                             highlightType: h.get('highlightType'),
                             backgroundColor: h.get('backgroundColor'),
                             color: h.get('color')
-                        }
-                    ));
-                if (highlights.length !== 0) {
-                    this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
-                }
+                        })
+                    );
             }
             if (highlights.length !== 0) {
-                const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell');
+                const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
                 const temp: any = cellHighlights.find((h: any) => {
 
                     const type = h['type'];
@@ -436,7 +461,6 @@ class DatasetGrid extends React.Component<any, any> {
                 JSON.parse(datasetComponent.get('value'))['highlights']
                     .filter((h:any) => h['enable'] === true)
                     .forEach((h:any) => highlights.push(h));
-                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
             }
             else {
                 this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
@@ -452,11 +476,8 @@ class DatasetGrid extends React.Component<any, any> {
                             highlightType: h.get('highlightType'),
                             backgroundColor: h.get('backgroundColor'),
                             color: h.get('color')
-                        }
-                    ));
-                if (highlights.length !== 0) {
-                    this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
-                }
+                        })
+                    );
             }
             if (highlights.length !== 0) {
                 const rowHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Row');

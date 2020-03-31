@@ -291,7 +291,7 @@ class DatasetView extends React.Component<any, State> {
                         value: f.value,
                         enable: (f.enable !== null ? f.enable : false),
                         type: f.type,
-                        highlightType: f.highlightType,
+                        highlightType: (f.highlightType !== null ? f.highlightType : 'Cell'),
                         backgroundColor: f.backgroundColor,
                         color: f.color
                     })
@@ -316,7 +316,7 @@ class DatasetView extends React.Component<any, State> {
                         value: f.get('value'),
                         enable: (f.get('enable') !== null ? f.get('enable') : false),
                         type: f.get('datasetColumn').get('convertDataType'),
-                        highlightType: f.get('highlightType'),
+                        highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
                         backgroundColor: f.get('backgroundColor'),
                         color: f.get('color')
                     })
