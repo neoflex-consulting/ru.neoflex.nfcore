@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Checkbox, Col, Form, Select} from 'antd';
+import {Button, Row, Col, Form, Select, Switch} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -173,10 +173,11 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                             const idEnable = `${JSON.stringify({index: serverSort.index, columnName: 'enable', value: serverSort.enable})}`;
                             return (
                                 <Form.Item key={serverSort.index} style={{ marginTop: '-30px' }}>
+                                    <Row gutter={[8, 0]}>
                                     <Col span={1}>
                                         {serverSort.index}
                                     </Col>
-                                    <Col span={9} style={{marginLeft: '-21px'}}>
+                                    <Col span={10}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idDatasetColumn}`,
                                                 {
@@ -241,7 +242,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={10} style={{marginLeft: '9px'}}>
+                                    <Col span={9}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
@@ -254,7 +255,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                 })(
                                                 <Select
                                                     placeholder={t('operation')}
-                                                    style={{ width: '189px', marginRight: '10px' }}
+                                                    style={{ width: '219px', marginRight: '10px' }}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
                                                         const event = e ? e : JSON.stringify({index: serverSort.index, columnName: 'operation', value: undefined})
@@ -276,28 +277,21 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={1} style={{marginLeft: '7px'}}>
-
-                                    </Col>
-                                    <Col span={2} style={{marginLeft: '7px'}}>
+                                    <Col span={2}>
                                         <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idEnable}`,
-                                                {
-                                                    initialValue: serverSort.enable !== undefined ? serverSort.enable : true,
-                                                    valuePropName: 'checked',
-                                                })(
-                                                <Checkbox
-                                                    onChange={(e: any) => {
-                                                        const event = JSON.stringify({index: serverSort.index, columnName: 'enable', value: e.target?.checked});
-                                                        this.handleChange(event)
-                                                    }}>
-                                                </Checkbox>
-                                            )}
+                                            <Switch
+                                                defaultChecked={serverSort.enable !== undefined ? serverSort.enable : true}
+                                                onChange={(e: any) => {
+                                                    const event = JSON.stringify({index: serverSort.index, columnName: 'enable', value: e});
+                                                    this.handleChange(event)
+                                                }}>
+                                            </Switch>
                                         </Form.Item>
-                                        <Form.Item style={{ display: 'inline-block' }}>
+                                    </Col>
+                                    <Col span={2}>
+                                        <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                                             <Button
                                                     title="delete row"
-                                                    style={{width: '40px'}}
                                                     key={'deleteRowButton'}
                                                     value={'deleteRowButton'}
                                                     onClick={(e: any) => {this.deleteRow({index: serverSort.index})}}
@@ -306,6 +300,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                                 </Button>
                                         </Form.Item>
                                     </Col>
+                                    </Row>
                                 </Form.Item>
                             )})
                 }

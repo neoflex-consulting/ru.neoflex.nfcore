@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Form, Input, Select, Checkbox} from 'antd';
+import {Button, Row, Col, Form, Input, Select, Switch} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -179,10 +179,11 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
                             return (
                                 <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
+                                    <Row gutter={[8, 0]}>
                                     <Col span={1}>
                                         <span>{serverFilter.index}</span>
                                     </Col>
-                                    <Col span={9} style={{marginLeft: '-21px'}}>
+                                    <Col span={7}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idDatasetColumn}`,
                                                 {
@@ -196,7 +197,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 })(
                                                 <Select
                                                     placeholder={t('columnname')}
-                                                    style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                                                    style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
                                                     showSearch={true}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
@@ -218,7 +219,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={7} style={{marginLeft: '9px'}}>
+                                    <Col span={7}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
@@ -232,7 +233,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                 })(
                                                 <Select
                                                     placeholder={t('operation')}
-                                                    style={{ width: '189px', marginRight: '10px' }}
+                                                    style={{ width: '179px', marginLeft: '5px' }}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
                                                         const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
@@ -254,7 +255,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={4} style={{marginLeft: '5px'}}>
+                                    <Col span={5}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idValue}`,
                                                 {
@@ -280,27 +281,21 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={1} style={{marginLeft: '7px'}}>
+                                    <Col  span={2}>
                                         <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idEnable}`,
-                                                {
-                                                    initialValue: serverFilter.enable !== undefined ? serverFilter.enable : true,
-                                                    valuePropName: 'checked',
-                                                })(
-                                                <Checkbox
-                                                    onChange={(e: any) => {
-                                                        const event = JSON.stringify({index: serverFilter.index, columnName: 'enable', value: e.target?.checked});
-                                                        this.handleChange(event)
-                                                    }}>
-                                                </Checkbox>
-                                            )}
+                                            <Switch
+                                                defaultChecked={serverFilter.enable !== undefined ? serverFilter.enable : true}
+                                                onChange={(e: any) => {
+                                                    const event = JSON.stringify({index: serverFilter.index, columnName: 'enable', value: e});
+                                                    this.handleChange(event)
+                                                }}>
+                                            </Switch>
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={1} style={{marginLeft: '7px'}}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
+                                    <Col span={2}>
+                                        <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                                             <Button
                                                 title="delete row"
-                                                style={{width: '40px'}}
                                                 key={'deleteRowButton'}
                                                 value={'deleteRowButton'}
                                                 onClick={(e: any) => {this.deleteRow({index: serverFilter.index})}}
@@ -309,6 +304,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             </Button>
                                         </Form.Item>
                                     </Col>
+                                </Row>
                                 </Form.Item>
                             )})
                         }

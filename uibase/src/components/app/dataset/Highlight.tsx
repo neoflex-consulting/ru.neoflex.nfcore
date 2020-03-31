@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Checkbox, Col, Form, Input, Modal, Row, Select} from 'antd';
+import {Button, Switch, Row, Col, Form, Input, Modal, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPalette, faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -229,10 +229,11 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                             return (
                                 <Form.Item key={highlight.index} style={{marginTop: '-30px'}}>
                                     <Form.Item>
+                                        <Row gutter={[8, 0]}>
                                         <Col span={1}>
                                             <span>{highlight.index}</span>
                                         </Col>
-                                        <Col span={9} style={{marginLeft: '-21px'}}>
+                                        <Col span={7}>
                                             <Form.Item style={{display: 'inline-block'}}>
                                                 {getFieldDecorator(`${idDatasetColumn}`,
                                                     {
@@ -247,7 +248,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     <Select
                                                         placeholder={t('columnname')}
                                                         style={{
-                                                            width: '239px',
+                                                            width: '179px',
                                                             marginRight: '10px',
                                                             marginLeft: '10px'
                                                         }}
@@ -284,7 +285,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                 )}
                                             </Form.Item>
                                         </Col>
-                                        <Col span={7} style={{marginLeft: '9px'}}>
+                                        <Col span={7}>
                                             <Form.Item style={{display: 'inline-block'}}>
                                                 {getFieldDecorator(`${idOperation}`,
                                                     {
@@ -299,7 +300,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     <Select
                                                         disabled={highlight.highlightType === 'Column'}
                                                         placeholder={t('operation')}
-                                                        style={{width: '189px', marginRight: '10px'}}
+                                                        style={{width: '179px', marginLeft: '5px'}}
                                                         allowClear={true}
                                                         onChange={(e: any) => {
                                                             const event = e ? e : JSON.stringify({
@@ -332,7 +333,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                 )}
                                             </Form.Item>
                                         </Col>
-                                        <Col span={4} style={{marginLeft: '5px'}}>
+                                        <Col span={5}>
                                             <Form.Item style={{display: 'inline-block'}}>
                                                 {getFieldDecorator(`${idValue}`,
                                                     {
@@ -362,27 +363,21 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                 )}
                                             </Form.Item>
                                         </Col>
-                                        <Col span={1} style={{marginLeft: '7px'}}>
+                                        <Col span={2}>
                                             <Form.Item style={{ display: 'inline-block' }}>
-                                                {getFieldDecorator(`${idEnable}`,
-                                                    {
-                                                        initialValue: highlight.enable !== undefined ? highlight.enable : true,
-                                                        valuePropName: 'checked',
-                                                    })(
-                                                    <Checkbox
-                                                        onChange={(e: any) => {
-                                                            const event = JSON.stringify({index: highlight.index, columnName: 'enable', value: e.target?.checked});
-                                                            this.handleChange(event)
-                                                        }}>
-                                                    </Checkbox>
-                                                )}
+                                                <Switch
+                                                    defaultChecked={highlight.enable !== undefined ? highlight.enable : true}
+                                                    onChange={(e: any) => {
+                                                        const event = JSON.stringify({index: highlight.index, columnName: 'enable', value: e});
+                                                        this.handleChange(event)
+                                                    }}>
+                                                </Switch>
                                             </Form.Item>
                                         </Col>
-                                        <Col  span={1} style={{marginLeft: '7px'}}>
-                                            <Form.Item style={{ display: 'inline-block' }}>
+                                        <Col span={2}>
+                                            <Form.Item style={{ display: 'inline-block', marginLeft: '6px' }}>
                                                     <Button
                                                         title="delete row"
-                                                        style={{width: '40px'}}
                                                         key={'deleteRowButton'}
                                                         value={'deleteRowButton'}
                                                         onClick={(e: any) => {this.deleteRow({index: highlight.index})}}
@@ -391,6 +386,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     </Button>
                                             </Form.Item>
                                         </Col>
+                                        </Row>
                                     </Form.Item>
                                     <Form.Item style={{marginTop: '-17px'}}>
                                         <Row>
@@ -401,7 +397,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                                                     })(
                                                     <Select
                                                         allowClear={true}
-                                                        style={{width: '100px'}}
+                                                        style={{width: '100px', marginLeft: '21px'}}
                                                         onChange={(e: any) => {
                                                             const event = e ? e : JSON.stringify({
                                                                 index: highlight.index,

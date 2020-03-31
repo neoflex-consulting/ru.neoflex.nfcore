@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Checkbox, Col, Form, Select} from 'antd';
+import {Button, Switch, Row, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -177,10 +177,11 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                             const idEnable = `${JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: serverGroupBy.enable})}`;
                             return (
                                 <Form.Item key={serverGroupBy.index} style={{ marginTop: '-30px' }}>
+                                    <Row gutter={[8, 0]}>
                                     <Col span={1}>
-                                        <span>{serverGroupBy.index}</span>
+                                        {serverGroupBy.index}
                                     </Col>
-                                    <Col span={9} style={{marginLeft: '-21px'}}>
+                                    <Col span={10}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idDatasetColumn}`,
                                                 {
@@ -244,7 +245,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={10} style={{marginLeft: '9px'}}>
+                                    <Col span={9}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
@@ -257,7 +258,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                                 })(
                                                 <Select
                                                     placeholder={t('operation')}
-                                                    style={{ width: '189px', marginRight: '10px' }}
+                                                    style={{ width: '219px', marginRight: '10px' }}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
                                                         const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: undefined})
@@ -279,27 +280,21 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={1} style={{marginLeft: '7px'}}>
+                                    <Col span={2}>
                                         <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idEnable}`,
-                                                {
-                                                    initialValue: serverGroupBy.enable !== undefined ? serverGroupBy.enable : true,
-                                                    valuePropName: 'checked',
-                                                })(
-                                                <Checkbox
-                                                    onChange={(e: any) => {
-                                                        const event = JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: e.target?.checked});
-                                                        this.handleChange(event)
-                                                    }}>
-                                                </Checkbox>
-                                            )}
+                                            <Switch
+                                                defaultChecked={serverGroupBy.enable !== undefined ? serverGroupBy.enable : true}
+                                                onChange={(e: any) => {
+                                                    const event = JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: e});
+                                                    this.handleChange(event)
+                                                }}>
+                                            </Switch>
                                         </Form.Item>
                                     </Col>
-                                    <Col  span={2} style={{marginLeft: '7px'}}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
+                                    <Col span={2}>
+                                        <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                                             <Button
                                                     title="delete row"
-                                                    style={{width: '40px'}}
                                                     key={'deleteRowButton'}
                                                     value={'deleteRowButton'}
                                                     onClick={(e: any) => {this.deleteRow({index: serverGroupBy.index})}}
@@ -308,6 +303,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                                             </Button>
                                         </Form.Item>
                                     </Col>
+                                    </Row>
                                 </Form.Item>
                             )})
                 }
