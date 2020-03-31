@@ -52,8 +52,7 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
             });
         }
         //load from profile
-        if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)
-            && JSON.stringify(prevState.highlights) !== JSON.stringify(this.state.highlights)) {
+        if (JSON.stringify(prevProps.highlights) !== JSON.stringify(this.props.highlights)) {
             this.setState({highlights: this.props.highlights})
         }
         //handleChange on form

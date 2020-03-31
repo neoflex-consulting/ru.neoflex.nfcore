@@ -44,8 +44,7 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
             });
         }
         //load from profile
-        if (JSON.stringify(prevProps.serverGroupBy) !== JSON.stringify(this.props.serverGroupBy)
-            && JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)) {
+        if (JSON.stringify(prevProps.serverGroupBy) !== JSON.stringify(this.props.serverGroupBy)) {
             this.setState({serverGroupBy: this.props.serverGroupBy})
         }
         //handleChange on form

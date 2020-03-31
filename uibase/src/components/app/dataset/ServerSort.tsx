@@ -42,8 +42,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)
-            && JSON.stringify(prevState.serverSorts) !== JSON.stringify(this.state.serverSorts)) {
+        if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)) {
             this.setState({serverSorts: this.props.serverSorts})
         }
         if (JSON.stringify(prevState.serverSorts) !== JSON.stringify(this.state.serverSorts)

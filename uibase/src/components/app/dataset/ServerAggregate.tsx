@@ -42,8 +42,7 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)
-            && JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates)) {
+        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)) {
             this.setState({serverAggregates: this.props.serverAggregates})
         }
         if (JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates)

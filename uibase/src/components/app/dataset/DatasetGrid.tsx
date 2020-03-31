@@ -286,7 +286,7 @@ class DatasetGrid extends React.Component<any, any> {
             else {
                 this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
             }
-            this.grid.current.api.refreshRows();
+            this.grid.current.api.refreshCells();
         }
     }
 

@@ -40,8 +40,7 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)
-            && JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
+        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
             this.setState({serverFilters: this.props.serverFilters})
         }
         if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)
