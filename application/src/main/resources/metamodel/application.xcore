@@ -6,16 +6,15 @@
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
 package ru.neoflex.nfcore.application
-import ru.neoflex.nfcore.base.types.QName
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import ru.neoflex.nfcore.dataset.DatasetComponent
-import ru.neoflex.nfcore.dataset.DatasetColumnView
 import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
-import ru.neoflex.nfcore.dataset.Operations
+import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.notification.Notification
 
 /* Components */
@@ -59,6 +58,16 @@ abstract class Icon extends ViewElement {
 
 class Calendar extends ViewElement {
     refers Notification[] notifications
+    refers DaysOnTheCalendar workingDaysCalendar
+}
+
+class DaysOnTheCalendar {
+    QName name
+    contains Day[] days
+}
+
+class Day {
+    String name
 }
 
 class ClassFeature extends FormItem {

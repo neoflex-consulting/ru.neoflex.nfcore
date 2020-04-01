@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import Calendar from "./Calendar";
 import './../../styles/MandatoryReporting.css';
 import {Form} from "antd";
@@ -11,7 +11,7 @@ interface Props {
 interface State {
 }
 
-class TaxReporting extends React.Component<WithTranslation, any> {
+class CalendarWrapper extends React.Component<any, any> {
 
     render() {
         const {t} = this.props;
@@ -19,14 +19,14 @@ class TaxReporting extends React.Component<WithTranslation, any> {
             <Form>
                 <div className="headerCalendar col-text">
                     <div id="logo">
-                        {t('taxreporting')}
+                        {this.props.viewObject.get('name')}
                     </div>
                 </div>
                 <StatusLegend />
-                <Calendar reporting={2}/>
+                <Calendar {...this.props}/>
             </Form>
         );
     }
 }
 
-export default withTranslation()(TaxReporting)
+export default withTranslation()(CalendarWrapper)

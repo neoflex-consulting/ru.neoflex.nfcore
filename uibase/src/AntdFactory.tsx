@@ -12,6 +12,7 @@ import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import domtoimage from "dom-to-image";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
+import CalendarWrapper from "./components/app/CalendarWrapper";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -87,30 +88,6 @@ class ComponentElement_ extends ViewContainer {
             const componentClassName = this.props.viewObject.get('component').get('componentClassName')
             return<UserComponent key={this.viewObject._id} {...this.props} componentClassName={componentClassName}/>
         } else return <div>Not found</div>
-    }
-}
-
-class DatasetView_ extends ViewContainer {
-    render = () => {
-        return <DatasetView {...this.props} key={this.viewObject._id.toString() + '_5'}/>
-    }
-}
-
-class DatasetGridView_ extends ViewContainer {
-    render = () => {
-        return <DatasetGrid {...this.props} key={this.viewObject._id.toString() + '_6'}/>
-    };
-}
-
-class DatasetPivotView_ extends ViewContainer {
-    render = () => {
-        return <DatasetPivot {...this.props} key={this.viewObject._id}/>
-    }
-}
-
-class DatasetDiagramView_ extends ViewContainer {
-    render = () => {
-        return <DatasetDiagram {...this.props} key={this.viewObject._id}/>
     }
 }
 
@@ -391,6 +368,36 @@ class Typography_ extends ViewContainer {
     }
 }
 
+class DatasetView_ extends ViewContainer {
+    render = () => {
+        return <DatasetView {...this.props} key={this.viewObject._id.toString() + '_5'}/>
+    }
+}
+
+class DatasetGridView_ extends ViewContainer {
+    render = () => {
+        return <DatasetGrid {...this.props} key={this.viewObject._id.toString() + '_6'}/>
+    };
+}
+
+class DatasetPivotView_ extends ViewContainer {
+    render = () => {
+        return <DatasetPivot {...this.props} key={this.viewObject._id}/>
+    }
+}
+
+class DatasetDiagramView_ extends ViewContainer {
+    render = () => {
+        return <DatasetDiagram {...this.props} key={this.viewObject._id}/>
+    }
+}
+
+class Calendar_ extends ViewContainer {
+    render = () => {
+        return <CalendarWrapper {...this.props} key={this.viewObject._id}/>
+    }
+}
+
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof View>();
@@ -409,6 +416,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
+        this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
     }
 
 
