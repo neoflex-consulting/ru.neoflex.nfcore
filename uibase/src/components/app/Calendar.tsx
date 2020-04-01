@@ -1,10 +1,10 @@
 import React from 'react';
 import * as dateFns from "date-fns";
-import Ecore from "ecore";
+import Ecore, {EObject} from "ecore";
 import {API} from "../../modules/api";
 import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
-import {WithTranslation, withTranslation} from "react-i18next";
+import {withTranslation} from "react-i18next";
 import {MainContext} from "../../MainContext";
 import {Button} from "antd";
 
@@ -18,10 +18,9 @@ interface State {
 }
 
 interface Props {
-    reporting: number
 }
 
-class Calendar extends React.Component<Props & WithTranslation, State> {
+class Calendar extends React.Component<any, State> {
 
     state = {
         currentMonth: new Date(),
@@ -37,8 +36,17 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
             if (temp !== undefined) {
                 API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}, 999)
                     .then((resources) => {
-                        this.setState({NotificationInstances: resources})
+                        let notificationInstances: Ecore.EObject[] = [];
+                        this.props.viewObject.get('notifications').array().forEach( (n: any) => {
+                            resources.forEach((r: any) => {
+                                if (r.eContents()[0].get('notification').get('name') === n.get('name')) {
+                                    notificationInstances.push(r)
+                                }
+                            })
+                        });
+                        this.setState({NotificationInstances: notificationInstances})
                     })
+
             }
         })
     };
@@ -156,10 +164,10 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
                                         key={`${r.get('uri')}/${r.rev}`}
                                         size="small"
                                         style={{width: "150px", display: "flex", color: "black"/*, backgroundColor: r.eContents()[0].get('status') ? r.eContents()[0].get('status').array().get('color') : "white"*/}}
-                                        title={`${r.eContents()[0].get('notification').get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
+                                        title={`${r.eContents()[0].get('notification').get('shortName') || r.eContents()[0].get('notification').get('name')}\n${dateFns.format(dateFns.parseISO(r.eContents()[0].get('date')), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                     >
-                                        {r.eContents()[0].get('notification').get('name')}
+                                        {r.eContents()[0].get('notification').get('shortName') || r.eContents()[0].get('notification').get('name')}
                                     </Button>
                                 )
                                 : ""}
@@ -184,17 +192,12 @@ class Calendar extends React.Component<Props & WithTranslation, State> {
 
     private getContents(day: any) {
         let temp: any = [];
-        if (this.props.reporting === 1) {
-            this.state.NotificationInstances.filter((r: any) =>
-                dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
-                && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
-                && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
-            ).map((r) => temp.push(r))
-            return temp;
-        } else if (this.props.reporting === 2) {
-            //Тут написать, что будет в налоговой отчетности вместо отчетов
-            return []
-        }
+        this.state.NotificationInstances.filter((r: any) =>
+            dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
+            && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
+            && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
+        ).map((r) => temp.push(r))
+        return temp;
     }
     
     onDateClick = (day: any) => {

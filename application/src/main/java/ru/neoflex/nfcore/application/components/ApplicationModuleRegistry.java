@@ -11,6 +11,8 @@ import ru.neoflex.nfcore.locales.LocalesPackage;
 import ru.neoflex.nfcore.notification.NotificationPackage;
 import ru.neoflex.nfcore.dataset.impl.DatasetFactoryExt;
 import ru.neoflex.nfcore.dataset.impl.DatasetValidatorExt;
+import ru.neoflex.nfcore.notification.impl.NotificationFactoryExt;
+import ru.neoflex.nfcore.notification.impl.NotificationValidatorExt;
 
 @SpringBootApplication
 @ComponentScan("ru.neoflex.nfcore")
@@ -20,6 +22,6 @@ public class ApplicationModuleRegistry extends ModuleRegistryImpl {
         registerEPackage(ApplicationPackage.eINSTANCE, new ApplicationValidatorExt());
         registerEPackage(DatasetPackage.eNS_URI, ()->DatasetPackage.eINSTANCE, new DatasetFactoryExt(), new DatasetValidatorExt());
         registerEPackage(LocalesPackage.eINSTANCE);
-        registerEPackage(NotificationPackage.eINSTANCE);
+        registerEPackage(NotificationPackage.eNS_URI, ()->NotificationPackage.eINSTANCE, new NotificationFactoryExt(), new NotificationValidatorExt());
     }
 }

@@ -24,7 +24,7 @@
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
         <ecore-xcore-version>1.7.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
-        <orientdb-version>3.0.28</orientdb-version>
+        <orientdb-version>3.0.29</orientdb-version>
         <argLine>-XX:MaxDirectMemorySize=512g</argLine>
     </properties>
     <dependencies>

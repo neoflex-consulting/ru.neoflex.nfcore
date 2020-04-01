@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.locales.impl
 import org.apache.commons.lang3.StringUtils
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.meta.emfgit.Transaction
 import ru.neoflex.nfcore.locales.LocalesFactory
 import ru.neoflex.nfcore.locales.LocalesPackage
@@ -31,14 +32,12 @@ class LocModuleInit extends LocModuleImpl {
     static def addCaptions(LocNS ns, ResourceSet langs, String name) {
         def nameCaption = captionFromCamel(name)
         langs.resources.each {it.contents.each {Lang lang->
-            if (lang != null) {
-                def caption = ns.captions.find {it.lang.name == lang.name}
-                if (caption == null) {
-                    caption = LocalesFactory.eINSTANCE.createStringResource()
-                    caption.lang = lang
-                    caption.caption = nameCaption
-                    ns.captions.add(caption)
-                }
+            def caption = ns.captions.find {it.lang.name == lang.name}
+            if (caption == null) {
+                caption = LocalesFactory.eINSTANCE.createStringResource()
+                caption.lang = lang
+                caption.caption = nameCaption
+                ns.captions.add(caption)
             }
         }}
     }
@@ -50,6 +49,9 @@ class LocModuleInit extends LocModuleImpl {
             def eObject = LocalesFactory.eINSTANCE.createLocModule()
             eObject.name = name
             rs.getResources().add(Context.current.store.createEObject(eObject))
+        }
+        else {
+            EcoreUtil.resolveAll(rs)
         }
         return rs.getResources().get(0).contents.get(0) as LocModule
     }

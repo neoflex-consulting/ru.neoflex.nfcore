@@ -14,22 +14,23 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.DatasetPackage
+import ru.neoflex.nfcore.notification.NotificationPackage
 
 class ApplicationInit {
-        static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false) {
-            def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                    .execute().resourceSet
-            while (replace && !resources.resources.empty) {
-                Context.current.store.deleteResource(resources.resources.remove(0).getURI())
-            }
-            if (resources.resources.empty) {
-                def eObject = EcoreUtil.create(eClass)
-                eObject.eSet(eClass.getEStructuralFeature("name"), name)
-                if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
-                resources.resources.add(Context.current.store.createEObject(eObject))
-            }
-            return resources.resources.get(0).contents.get(0)
+    static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false) {
+        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
+                .execute().resourceSet
+        while (replace && !resources.resources.empty) {
+            Context.current.store.deleteResource(resources.resources.remove(0).getURI())
         }
+        if (resources.resources.empty) {
+            def eObject = EcoreUtil.create(eClass)
+            eObject.eSet(eClass.getEStructuralFeature("name"), name)
+            if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
+            resources.resources.add(Context.current.store.createEObject(eObject))
+        }
+        return resources.resources.get(0).contents.get(0)
+    }
 
     static def createApplication(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
@@ -52,11 +53,21 @@ class ApplicationInit {
             else if (name == "Администрирование") {
                 application.name = name
                 application.iconName = IconName.FA_COGS
-                def row = ApplicationFactory.eINSTANCE.createRow()
-                row.name = "row1"
-                row.textAlign = TextAlign.LEFT
-                row.borderBottom = true
-                row.height = '80px'
+                def row1 = ApplicationFactory.eINSTANCE.createRow()
+                row1.name = "row1"
+                row1.textAlign = TextAlign.LEFT
+                row1.borderBottom = true
+
+                def row2 = ApplicationFactory.eINSTANCE.createRow()
+                row2.name = "row2"
+                row2.textAlign = TextAlign.LEFT
+                row2.borderBottom = true
+                row2.height = '80px'
+
+                def row3 = ApplicationFactory.eINSTANCE.createRow()
+                row3.name = "row3"
+                row3.textAlign = TextAlign.LEFT
+                row3.borderBottom = true
 
                 def column = ApplicationFactory.eINSTANCE.createColumn()
                 column.name = "column1"
@@ -68,9 +79,22 @@ class ApplicationInit {
                 def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
                 typography.setTypographyStyle(typographyStyle)
 
+                def calendar = ApplicationFactory.eINSTANCE.createCalendar()
+                calendar.name = "Мониторинг"
+                def notification1 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1993", "",false)
+                def notification2 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Ф 2020", "",false)
+                def notification3 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Проверить почту", "",false)
+
+                calendar.notifications.add(notification1)
+                calendar.notifications.add(notification2)
+                calendar.notifications.add(notification3)
+
                 column.children.add(typography)
-                row.children.add(column)
-                application.setView(row)
+                row1.children.add(row2)
+                row1.children.add(row3)
+                row2.children.add(column)
+                row3.children.add(calendar)
+                application.setView(row1)
 
                 def catalogNode1 = ApplicationFactory.eINSTANCE.createCatalogNode()
                 catalogNode1.name = "CatalogNodeAdmin"
@@ -122,7 +146,6 @@ class ApplicationInit {
            }
             else {
                 def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",false)
-                def userComponent6 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Tax Reporting", "TaxReporting",false)
 
                 application.name = name
 

@@ -15,6 +15,7 @@ class ReportingDateOn {
     String name
 }
 
+@Ecore(constraints="IsValid")
 class Notification {
 	QName name
 	String shortName
@@ -30,6 +31,7 @@ class Notification {
     op JSON getNotificationInstances(String dateFrom, String dateTo)
 }
 
+@Ecore(constraints="IsValid")
 class NotificationInstance {
     QName name
     refers Notification notification
@@ -37,6 +39,7 @@ class NotificationInstance {
 	contains NotificationStatus[] status
 }
 
+@Ecore(constraints="IsValid")
 class NotificationStatus {
 	QName name
 	String[1] color

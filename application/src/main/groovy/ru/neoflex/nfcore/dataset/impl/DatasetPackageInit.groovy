@@ -4,10 +4,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
+import ru.neoflex.nfcore.application.impl.DaysOnTheCalendarInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
 import ru.neoflex.nfcore.notification.impl.NotificationInit
 import ru.neoflex.nfcore.notification.impl.NotificationInstanceInit
+import ru.neoflex.nfcore.notification.impl.NotificationStatusInit
 
 class DatasetPackageInit {
     private static final Logger logger = LoggerFactory.getLogger(DatasetPackageInit.class);
@@ -50,18 +52,32 @@ class DatasetPackageInit {
             logger.error("DatasetPackage", e)
         }
 
+        /*NotificationPackage*/
+        NotificationStatusInit.createNotificationStatus('Отчет не рассчитан','#add1ff')
+        NotificationStatusInit.createNotificationStatus('Отчёт за дату проверен','#ff9b9b')
+        NotificationStatusInit.createNotificationStatus('Отчёт не сдаётся из NR','#d9d9d9')
+        NotificationStatusInit.createNotificationStatus('Расчет отчета за дату произведён','#fbf751')
+        NotificationStatusInit.createNotificationStatus('Отчёт по нормативам за дату проверен','#0084e7')
+        NotificationStatusInit.createNotificationStatus('Отчёт сдан в проверяющий орган','#f9c4ff')
+
         /*ApplicationPackage*/
+        DaysOnTheCalendarInit.createDaysOnTheCalendar("Календарь рабочих дней 2020(рус)")
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
-        NotificationInstanceInit.deleteNotificationInstance("NotificationInstance1")
-        NotificationInit.deleteNotification("A 1993")
-        AppModuleInit.deletedAppModule("ReportSingle")
+
+        AppModuleInit.createAppModule("ReportSingle")
+        NotificationInit.createNotification("A 1993")
+        NotificationInit.createEmptyNotification("Ф 2020")
+        NotificationInit.createEmptyNotification("Проверить почту")
+//        NotificationInstanceInit.createNotificationInstance("NotificationInstance1")
+//        NotificationInstanceInit.deleteNotificationInstance("NotificationInstance1")
+//        NotificationInit.deleteNotification("A 1993")
+//        NotificationInit.deleteNotification("Ф 2020")
+//        NotificationInit.deleteNotification("Проверить почту")
+//        AppModuleInit.deletedAppModule("ReportSingle")
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
         ApplicationInit.createApplication("Администрирование")
-        AppModuleInit.createAppModule("ReportSingle")
-        NotificationInit.createNotification("A 1993")
-        NotificationInstanceInit.createNotificationInstance("NotificationInstance1")
         ApplicationInit.createApplicationLine("Линейная диаграмма")
         ApplicationInit.createApplicationPie("Круговая диаграмма")
         ApplicationInit.createApplicationBar("Ступенчатая диаграмма")

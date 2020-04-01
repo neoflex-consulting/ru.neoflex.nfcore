@@ -37,7 +37,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     }
 
     onClick(): void {
-       this.saveDatasetComponentOptions()
+       this.saveDatasetComponentOptions();
     }
 
     getPattern(className:string, paramName:string) {
