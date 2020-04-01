@@ -7,7 +7,7 @@ import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
-import {SortableContainer, SortableElement} from 'react-sortable-hoc';
+import {SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 

@@ -10,7 +10,6 @@ import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
-import domtoimage from "dom-to-image";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import CalendarWrapper from "./components/app/CalendarWrapper";
 

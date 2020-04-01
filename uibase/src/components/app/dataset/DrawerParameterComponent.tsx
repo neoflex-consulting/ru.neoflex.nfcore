@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
-import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch} from 'antd';
+import {Button, Row, Col, Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
