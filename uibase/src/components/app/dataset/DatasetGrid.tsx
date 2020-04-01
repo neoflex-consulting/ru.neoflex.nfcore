@@ -40,6 +40,9 @@ class DatasetGrid extends React.Component<any, any> {
         super(props);
 
         this.state = {
+            currentDatasetComponent: undefined,
+            allDatasetComponent: [],
+            updateCurrentDatasetComponent: true,
             themes: [],
             currentTheme: this.props.viewObject.get('theme') || 'material',
             rowPerPages: [],
@@ -198,6 +201,7 @@ class DatasetGrid extends React.Component<any, any> {
     };
 
     componentDidMount(): void {
+        if (this.state.currentDatasetComponent === undefined) {this.getCurrentDatasetComponents()}
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this))
         }
@@ -210,7 +214,6 @@ class DatasetGrid extends React.Component<any, any> {
         if (this.state.rowPerPages.length === 0) {
             this.getAllRowPerPage()
         }
-        this.changeSettings();
     }
 
     componentWillUnmount(): void {
@@ -223,107 +226,170 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        const datasetComponent = this.props.context.userProfile.get('params').array()
-            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
-        if (datasetComponent !== undefined) {
-            if (JSON.parse(datasetComponent.get('value'))['highlights'].length !== 0 &&
-                !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])) {
-                this.changeSettings();
-            }
-        }
-        else {
-            if (this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array().filter((h:any) => h.get('enable') === true).length !== 0 &&
-                this.state.highlights.length !== 0 &&
-                !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
-            ){
-                this.changeSettings();
-            }
-        }
+        if (this.state.currentDatasetComponent !== undefined) {
+            const datasetView = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
 
-        const userComponentName = this.props.context.userProfile.get('params').array()
-            .filter( (p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
-        const componentName = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
-            this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
-            : JSON.parse(userComponentName[0].get('value'))['name']
-        if (this.props.context.datasetComponents
-            && this.props.context.datasetComponents[componentName] !== undefined) {
-            if (this.state.columnDefs.length === 0 && this.state.rowData.length === 0) {
-                if (this.props.context.datasetComponents[componentName]['columnDefs'] !== undefined
-                    && this.props.context.datasetComponents[componentName]['rowData'] !== undefined) {
-                    const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
-                    this.setState({columnDefs});
+            if (datasetView !== undefined) {
+                if (JSON.parse(datasetView.get('value'))['name'] !== this.state.currentDatasetComponent.eContents()[0].get('name') &&
+                    this.state.updateCurrentDatasetComponent
+                ) {
+                    this.getCurrentDatasetComponents()
+                }
+                else {
+                    const datasetComponent = this.props.context.userProfile.get('params').array()
+                        .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id);
+                    if (datasetComponent !== undefined &&
+                        !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])
+                    ) {
+                        this.changeSettings();
+                    }
+                    else if (datasetComponent === undefined &&
+                        !_.isEqual(this.state.highlights, this.state.currentDatasetComponent.eContents()[0].get('highlight').array()) &&
+                        this.state.currentDatasetComponent.eContents()[0].get('name') === this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
+                    ) {
+                        this.changeSettings();
+                    }
+                }
+            }
+            else if (datasetView === undefined) {
+                const datasetComponent = this.props.context.userProfile.get('params').array()
+                    .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id);
+                if (datasetComponent !== undefined &&
+                    !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])
+                ) {
+                    this.changeSettings();
+                }
+                else if (datasetComponent === undefined &&
+                    !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
+                ) {
+                    this.changeSettings();
+                }
+            }
+
+            const componentName = datasetView === undefined || JSON.parse(datasetView.get('value'))['name'] === undefined ?
+                this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
+                : JSON.parse(datasetView.get('value'))['name']
+            if (this.props.context.datasetComponents
+                && this.props.context.datasetComponents[componentName] !== undefined) {
+                if (this.state.columnDefs.length === 0 && this.state.rowData.length === 0) {
+                    if (this.props.context.datasetComponents[componentName]['columnDefs'] !== undefined
+                        && this.props.context.datasetComponents[componentName]['rowData'] !== undefined) {
+                        const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
+                        this.setState({columnDefs});
+                        const rowData = this.props.context.datasetComponents[componentName]['rowData'];
+                        this.setState({rowData})
+                    }
+                }
+                if (JSON.stringify(prevState.rowData) !== JSON.stringify(this.props.context.datasetComponents[componentName]['rowData'])) {
                     const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                     this.setState({rowData})
                 }
-            }
-            if (JSON.stringify(prevState.rowData) !== JSON.stringify(this.props.context.datasetComponents[componentName]['rowData'])) {
-                const rowData = this.props.context.datasetComponents[componentName]['rowData'];
-                this.setState({rowData})
-            }
-            if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
-                const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
-                this.setState({columnDefs})
+                if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
+                    const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
+                    this.setState({columnDefs})
+                }
             }
         }
     }
 
-    private changeSettings() {
-        const {gridOptions} = this.state
-        const userProfile = this.props.context.userProfile.get('params').array()
+    getCurrentDatasetComponents() {
+        this.setState({updateCurrentDatasetComponent: false});
+        const runChangeSettings = this.state.allDatasetComponent.length === 0;
+        const datasetView = this.props.context.userProfile.get('params').array()
             .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
-        if (userProfile !== undefined) {
-            if (userProfile.get('key') === this.props.viewObject.get('datasetView')._id) {
-                if (JSON.parse(userProfile.get('value'))['theme'] !== undefined) {
-                    this.setState({currentTheme: JSON.parse(userProfile.get('value'))['theme']})
+        const datasetComponent = this.state.allDatasetComponent.find( (c:any) =>
+            datasetView !== undefined ?
+                c.eContents()[0].get('name') === JSON.parse(datasetView.get('value'))['name']
+                : c.eContents()[0].get('name') === this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
+        );
+        if (datasetComponent !== undefined) {
+            this.setState({
+                currentDatasetComponent: datasetComponent,
+                updateCurrentDatasetComponent: true});
+            this.changeSettings()
+        }
+        else {
+            API.instance().fetchAllClasses(false).then(classes => {
+                const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent');
+                if (temp !== undefined) {
+                    API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
+                        .then((result: Ecore.Resource[]) => {
+                            if (result.length !== 0) {
+                                const datasetView = this.props.context.userProfile.get('params').array()
+                                    .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id)
+                                const datasetComponent = result.find( (c:any) =>
+                                    datasetView !== undefined ?
+                                        c.eContents()[0].get('name') === JSON.parse(datasetView.get('value'))['name']
+                                        : c.eContents()[0].get('name') === this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
+                                );
+                                this.setState({
+                                    allDatasetComponent: result,
+                                    currentDatasetComponent: datasetComponent,
+                                    updateCurrentDatasetComponent: true});
+                                if (runChangeSettings) {
+                                    this.changeSettings()
+                                }
+                            }
+                        })
                 }
-                if (JSON.parse(userProfile.get('value'))['showUniqRow'] !== undefined) {
-                    this.setState({showUniqRow: JSON.parse(userProfile.get('value'))['showUniqRow']})
+            })
+        }
+    };
+
+    private changeSettings() {
+        const {gridOptions} = this.state;
+        let highlights: any[] = [];
+        const datasetView = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
+        const datasetComponent = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id)
+        if (datasetView !== undefined) {
+            if (datasetView.get('key') === this.props.viewObject.get('datasetView')._id) {
+                if (JSON.parse(datasetView.get('value'))['theme'] !== undefined) {
+                    this.setState({currentTheme: JSON.parse(datasetView.get('value'))['theme']})
                 }
-                if (JSON.parse(userProfile.get('value'))['rowPerPage'] !== undefined) {
-                    const newPageSize = JSON.parse(userProfile.get('value'))['rowPerPage']
+                if (JSON.parse(datasetView.get('value'))['showUniqRow'] !== undefined) {
+                    this.setState({showUniqRow: JSON.parse(datasetView.get('value'))['showUniqRow']})
+                }
+                if (JSON.parse(datasetView.get('value'))['rowPerPage'] !== undefined) {
+                    const newPageSize = JSON.parse(datasetView.get('value'))['rowPerPage'];
                     this.setState({paginationPageSize: newPageSize})
                 }
             }
-        }
-
-        const datasetComponent = this.props.context.userProfile.get('params').array()
-            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
-        let highlights: any[] = [];
-        if (datasetComponent !== undefined) {
-            JSON.parse(datasetComponent.get('value'))['highlights']
-                .filter((h:any) => h['enable'] === true)
-                .forEach((h:any) => highlights.push(h));
-            this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
-        }
-        else {
-            this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
-                .filter((h:any) => h.get('enable') === true)
-                .forEach((h:any) => highlights.push(
-                    {
-                        index: highlights.length + 1,
-                        datasetColumn: h.get('datasetColumn').get('name'),
-                        operation: h.get('operation') || 'EqualTo',
-                        value: h.get('value'),
-                        enable: (h.get('enable') !== null ? h.get('enable') : false),
-                        type: h.get('datasetColumn').get('convertDataType'),
-                        highlightType: h.get('highlightType'),
-                        backgroundColor: h.get('backgroundColor'),
-                        color: h.get('color')
-                    }
-                ));
-            if (highlights.length !== 0) {
-                this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
-            }
-        }
-
-        const newCellStyle = (params: any) => {
-            const datasetComponent = this.props.context.userProfile.get('params').array()
-                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
-            let highlights: any[] = [];
             if (datasetComponent !== undefined) {
                 JSON.parse(datasetComponent.get('value'))['highlights']
                     .filter((h:any) => h['enable'] === true)
                     .forEach((h:any) => highlights.push(h));
+                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+            }
+            else {
+                this.state.currentDatasetComponent.eContents()[0].get('highlight').array()
+                    .filter((h:any) => h.get('enable') === true)
+                    .forEach((h:any) => highlights.push(
+                        {
+                            index: highlights.length + 1,
+                            datasetColumn: h.get('datasetColumn').get('name'),
+                            operation: h.get('operation') || 'EqualTo',
+                            value: h.get('value'),
+                            enable: (h.get('enable') !== null ? h.get('enable') : false),
+                            type: h.get('datasetColumn').get('convertDataType'),
+                            highlightType: h.get('highlightType'),
+                            backgroundColor: h.get('backgroundColor'),
+                            color: h.get('color')
+                        }
+                    ));
+                if (highlights.length !== 0) {
+                    this.setState({highlights: this.state.currentDatasetComponent.eContents()[0].get('highlight').array()})
+                }
+            }
+        }
+        else {
+            if (datasetComponent !== undefined) {
+                JSON.parse(datasetComponent.get('value'))['highlights']
+                    .filter((h:any) => h['enable'] === true)
+                    .forEach((h:any) => highlights.push(h));
+                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
             }
             else {
                 this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
@@ -339,8 +405,74 @@ class DatasetGrid extends React.Component<any, any> {
                             highlightType: h.get('highlightType'),
                             backgroundColor: h.get('backgroundColor'),
                             color: h.get('color')
-                        })
-                    );
+                        }
+                    ));
+                if (highlights.length !== 0) {
+                    this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+                }
+            }
+        }
+        const newCellStyle = (params: any) => {
+            let highlights: any[] = [];
+            const datasetView = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
+            const datasetComponent = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id)
+            if (datasetView !== undefined) {
+                if (datasetComponent !== undefined) {
+                    JSON.parse(datasetComponent.get('value'))['highlights']
+                        .filter((h:any) => h['enable'] === true)
+                        .forEach((h:any) => highlights.push(h));
+                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+                }
+                else {
+                    this.state.currentDatasetComponent.eContents()[0].get('highlight').array()
+                        .filter((h:any) => h.get('enable') === true)
+                        .forEach((h:any) => highlights.push(
+                            {
+                                index: highlights.length + 1,
+                                datasetColumn: h.get('datasetColumn').get('name'),
+                                operation: h.get('operation') || 'EqualTo',
+                                value: h.get('value'),
+                                enable: (h.get('enable') !== null ? h.get('enable') : false),
+                                type: h.get('datasetColumn').get('convertDataType'),
+                                highlightType: h.get('highlightType'),
+                                backgroundColor: h.get('backgroundColor'),
+                                color: h.get('color')
+                            }
+                        ));
+                    // if (highlights.length !== 0) {
+                    //     this.setState({highlights: this.state.currentDatasetComponent.eContents()[0].get('highlight').array()})
+                    // }
+                }
+            }
+            else {
+                if (datasetComponent !== undefined) {
+                    JSON.parse(datasetComponent.get('value'))['highlights']
+                        .filter((h:any) => h['enable'] === true)
+                        .forEach((h:any) => highlights.push(h));
+                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+                }
+                else {
+                    this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+                        .filter((h:any) => h.get('enable') === true)
+                        .forEach((h:any) => highlights.push(
+                            {
+                                index: highlights.length + 1,
+                                datasetColumn: h.get('datasetColumn').get('name'),
+                                operation: h.get('operation') || 'EqualTo',
+                                value: h.get('value'),
+                                enable: (h.get('enable') !== null ? h.get('enable') : false),
+                                type: h.get('datasetColumn').get('convertDataType'),
+                                highlightType: h.get('highlightType'),
+                                backgroundColor: h.get('backgroundColor'),
+                                color: h.get('color')
+                            }
+                        ));
+                    // if (highlights.length !== 0) {
+                    //     this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+                    // }
+                }
             }
             if (highlights.length !== 0) {
                 const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
@@ -454,30 +586,66 @@ class DatasetGrid extends React.Component<any, any> {
         };
 
         const rowStyle = (params: any) => {
-            const datasetComponent = this.props.context.userProfile.get('params').array()
-                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
             let highlights: any[] = [];
-            if (datasetComponent !== undefined) {
-                JSON.parse(datasetComponent.get('value'))['highlights']
-                    .filter((h:any) => h['enable'] === true)
-                    .forEach((h:any) => highlights.push(h));
+            const datasetView = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
+            const datasetComponent = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id)
+            if (datasetView !== undefined) {
+                if (datasetComponent !== undefined) {
+                    JSON.parse(datasetComponent.get('value'))['highlights']
+                        .filter((h:any) => h['enable'] === true)
+                        .forEach((h:any) => highlights.push(h));
+                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+                }
+                else {
+                    this.state.currentDatasetComponent.eContents()[0].get('highlight').array()
+                        .filter((h:any) => h.get('enable') === true)
+                        .forEach((h:any) => highlights.push(
+                            {
+                                index: highlights.length + 1,
+                                datasetColumn: h.get('datasetColumn').get('name'),
+                                operation: h.get('operation') || 'EqualTo',
+                                value: h.get('value'),
+                                enable: (h.get('enable') !== null ? h.get('enable') : false),
+                                type: h.get('datasetColumn').get('convertDataType'),
+                                highlightType: h.get('highlightType'),
+                                backgroundColor: h.get('backgroundColor'),
+                                color: h.get('color')
+                            }
+                        ));
+                    // if (highlights.length !== 0) {
+                    //     this.setState({highlights: this.state.currentDatasetComponent.eContents()[0].get('highlight').array()})
+                    // }
+                }
             }
             else {
-                this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
-                    .filter((h:any) => h.get('enable') === true)
-                    .forEach((h:any) => highlights.push(
-                        {
-                            index: highlights.length + 1,
-                            datasetColumn: h.get('datasetColumn').get('name'),
-                            operation: h.get('operation') || 'EqualTo',
-                            value: h.get('value'),
-                            enable: (h.get('enable') !== null ? h.get('enable') : false),
-                            type: h.get('datasetColumn').get('convertDataType'),
-                            highlightType: h.get('highlightType'),
-                            backgroundColor: h.get('backgroundColor'),
-                            color: h.get('color')
-                        })
-                    );
+                if (datasetComponent !== undefined) {
+                    JSON.parse(datasetComponent.get('value'))['highlights']
+                        .filter((h:any) => h['enable'] === true)
+                        .forEach((h:any) => highlights.push(h));
+                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+                }
+                else {
+                    this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+                        .filter((h:any) => h.get('enable') === true)
+                        .forEach((h:any) => highlights.push(
+                            {
+                                index: highlights.length + 1,
+                                datasetColumn: h.get('datasetColumn').get('name'),
+                                operation: h.get('operation') || 'EqualTo',
+                                value: h.get('value'),
+                                enable: (h.get('enable') !== null ? h.get('enable') : false),
+                                type: h.get('datasetColumn').get('convertDataType'),
+                                highlightType: h.get('highlightType'),
+                                backgroundColor: h.get('backgroundColor'),
+                                color: h.get('color')
+                            }
+                        ));
+                    // if (highlights.length !== 0) {
+                    //     this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+                    // }
+                }
             }
             if (highlights.length !== 0) {
                 const rowHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Row');
@@ -578,7 +746,7 @@ class DatasetGrid extends React.Component<any, any> {
             this.setState({cellStyle: newCellStyle})
         } else {
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowStyle = rowStyle;
-            this.setState({cellStyle: newCellStyle})
+            this.setState({cellStyle: newCellStyle});
             this.grid.current.api.redrawRows()
         }
     }

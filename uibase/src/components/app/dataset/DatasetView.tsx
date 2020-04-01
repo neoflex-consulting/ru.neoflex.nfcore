@@ -498,6 +498,7 @@ class DatasetView extends React.Component<any, State> {
                 serverFilters: this.state.serverFilters,
                 serverAggregates: this.state.serverAggregates,
                 serverSorts: this.state.serverSorts,
+                serverGroupBy: this.state.serverGroupBy,
                 highlights: highlightsParam
             });
         }
