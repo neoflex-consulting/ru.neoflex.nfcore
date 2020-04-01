@@ -149,7 +149,7 @@ class value extends DrawerParameterComponent<Props, State> {
                     <Form.Item style={{display: 'inline-block'}}>
                         {this.getFieldDecorator(`${value.idOperation}`,
                             {
-                                initialValue: `${this.t(value.operation)}` || undefined,
+                                initialValue: this.t(value.operation) || undefined,
                                 rules: [{
                                     required:
                                         value.datasetColumn ||

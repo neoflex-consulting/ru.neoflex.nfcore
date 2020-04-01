@@ -262,14 +262,14 @@ class DatasetGrid extends React.Component<any, any> {
                     !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])
                 ) {
                     this.changeSettings();
+                    if (JSON.parse(datasetComponent.get('value'))['highlights']) {
+                        this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['highlights']);
+                    }
                 }
                 else if (datasetComponent === undefined &&
                     !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
                 ) {
                     this.changeSettings();
-                }
-                if (JSON.parse(datasetComponent?.get('value'))['highlights']) {
-                    this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['highlights']);
                 }
             }
 
