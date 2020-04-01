@@ -251,6 +251,9 @@ class DatasetGrid extends React.Component<any, any> {
                         this.changeSettings();
                     }
                 }
+                if (JSON.parse(datasetView.get('value'))['serverAggregates']) {
+                    this.highlightAggregate(JSON.parse(datasetView.get('value'))['serverAggregates']);
+                }
             }
             else if (datasetView === undefined) {
                 const datasetComponent = this.props.context.userProfile.get('params').array()
@@ -264,6 +267,9 @@ class DatasetGrid extends React.Component<any, any> {
                     !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
                 ) {
                     this.changeSettings();
+                }
+                if (this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation')) {
+                    this.highlightAggregate(this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation').array());
                 }
             }
 
@@ -337,13 +343,29 @@ class DatasetGrid extends React.Component<any, any> {
         }
     };
 
+    private highlightAggregate(agr: any) {
+        if (this.grid.current) {
+            if (agr.filter((f:any)=>{return f.enable && f.datasetColumn}).length !== 0) {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
+                    if (params.node.lastChild) {
+                        return 'aggregate-highlight';
+                    }
+                }
+            }
+            else {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            }
+            this.grid.current.api.refreshCells();
+        }
+    }
+
     private changeSettings() {
         const {gridOptions} = this.state;
         let highlights: any[] = [];
         const datasetView = this.props.context.userProfile.get('params').array()
             .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
         const datasetComponent = this.props.context.userProfile.get('params').array()
-            .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id)
+            .find((p: any) => p.get('key') === this.state.currentDatasetComponent.eContents()[0]._id);
         if (datasetView !== undefined) {
             if (datasetView.get('key') === this.props.viewObject.get('datasetView')._id) {
                 if (JSON.parse(datasetView.get('value'))['theme'] !== undefined) {
@@ -423,7 +445,6 @@ class DatasetGrid extends React.Component<any, any> {
                     JSON.parse(datasetComponent.get('value'))['highlights']
                         .filter((h:any) => h['enable'] === true)
                         .forEach((h:any) => highlights.push(h));
-                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
                 }
                 else {
                     this.state.currentDatasetComponent.eContents()[0].get('highlight').array()
@@ -441,9 +462,6 @@ class DatasetGrid extends React.Component<any, any> {
                                 color: h.get('color')
                             }
                         ));
-                    // if (highlights.length !== 0) {
-                    //     this.setState({highlights: this.state.currentDatasetComponent.eContents()[0].get('highlight').array()})
-                    // }
                 }
             }
             else {
@@ -451,7 +469,6 @@ class DatasetGrid extends React.Component<any, any> {
                     JSON.parse(datasetComponent.get('value'))['highlights']
                         .filter((h:any) => h['enable'] === true)
                         .forEach((h:any) => highlights.push(h));
-                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
                 }
                 else {
                     this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
@@ -469,9 +486,6 @@ class DatasetGrid extends React.Component<any, any> {
                                 color: h.get('color')
                             }
                         ));
-                    // if (highlights.length !== 0) {
-                    //     this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
-                    // }
                 }
             }
             if (highlights.length !== 0) {
@@ -596,7 +610,6 @@ class DatasetGrid extends React.Component<any, any> {
                     JSON.parse(datasetComponent.get('value'))['highlights']
                         .filter((h:any) => h['enable'] === true)
                         .forEach((h:any) => highlights.push(h));
-                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
                 }
                 else {
                     this.state.currentDatasetComponent.eContents()[0].get('highlight').array()
@@ -614,9 +627,6 @@ class DatasetGrid extends React.Component<any, any> {
                                 color: h.get('color')
                             }
                         ));
-                    // if (highlights.length !== 0) {
-                    //     this.setState({highlights: this.state.currentDatasetComponent.eContents()[0].get('highlight').array()})
-                    // }
                 }
             }
             else {
@@ -624,7 +634,6 @@ class DatasetGrid extends React.Component<any, any> {
                     JSON.parse(datasetComponent.get('value'))['highlights']
                         .filter((h:any) => h['enable'] === true)
                         .forEach((h:any) => highlights.push(h));
-                    // this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
                 }
                 else {
                     this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
@@ -642,9 +651,6 @@ class DatasetGrid extends React.Component<any, any> {
                                 color: h.get('color')
                             }
                         ));
-                    // if (highlights.length !== 0) {
-                    //     this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
-                    // }
                 }
             }
             if (highlights.length !== 0) {

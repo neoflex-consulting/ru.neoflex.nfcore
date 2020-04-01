@@ -1,11 +1,12 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Col, Form, Select} from 'antd';
+import {Button, Switch, Row, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
+import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
     serverAggregates?: Array<EObject>;
@@ -17,13 +18,7 @@ interface Props {
 }
 
 interface State {
-    serverAggregates: {
-        index: string,
-        datasetColumn: string,
-        operation: string,
-        enable: boolean,
-        type: string
-    }[] | undefined;
+    serverAggregates: IServerQueryParam[] | undefined;
 }
 
 
@@ -47,11 +42,12 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)
-            && JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates)) {
+        if (JSON.stringify(prevProps.serverAggregates) !== JSON.stringify(this.props.serverAggregates)) {
             this.setState({serverAggregates: this.props.serverAggregates})
         }
-        if (JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates) && this.props.isVisible) {
+        if (JSON.stringify(prevState.serverAggregates) !== JSON.stringify(this.state.serverAggregates)
+            && this.props.isVisible
+            && this.state.serverAggregates?.length !== 0) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (!err) {
                     this.props.saveChanges!(this.state.serverAggregates!, paramType.aggregate);
@@ -87,13 +83,29 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
         this.refresh();
     };
 
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.serverAggregates?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index != e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type
+                })}
+        });
+        this.setState({serverAggregates: newServerParam})
+    };
+
     createNewRow = () => {
         let serverAggregates: any = this.state.serverAggregates;
         serverAggregates.push(
             {index: serverAggregates.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined});
         this.setState({serverAggregates})
     };
@@ -161,139 +173,134 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                     const idEnable = `${JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: serverAggregate.enable})}`;
                     return (
                         <Form.Item key={serverAggregate.index} style={{ marginTop: '-30px' }}>
-                    <span>{serverAggregate.index}</span>
-                    <Form.Item style={{ display: 'inline-block' }}>
-                    {getFieldDecorator(`${idDatasetColumn}`,
-                        {
-                            initialValue: serverAggregate.datasetColumn,
-                            rules: [{
-                                required:
-                                    getFieldValue(`${idOperation}`)||
-                                    getFieldValue(`${idEnable}`),
-                                message: ' '
-                            },{
-                                validator: (rule: any, value: any, callback: any) => {
-                                    let isDuplicate: boolean = false;
-                                    if (this.state.serverAggregates !== undefined) {
-                                        const valueArr = this.state.serverAggregates
-                                            .filter((currentObject) => {
-                                                let currentField: string;
-                                                try {
-                                                    //Либо объект при валидации отдельного поля
-                                                    currentField = JSON.parse(rule.value).value
-                                                } catch (e) {
-                                                    //Либо значение этого поля при валидации перед запуском
-                                                    currentField = value
-                                                }
-                                                return (currentField)? currentObject.datasetColumn === currentField: false
-                                            })
-                                            .map(function (currentObject) {
-                                                return currentObject.datasetColumn
-                                        });
-                                        isDuplicate = valueArr.some(function (item, idx) {
-                                            return valueArr.indexOf(item) !== idx
-                                        });
-                                    }
-                                    if (isDuplicate) {
-                                        callback('Error message');
-                                        return;
-                                    }
-                                    callback();
-                                },
-                                message: 'duplicate row',
-                            }]
-                        })(
-                        <Select
-                            placeholder={t('columnname')}
-                        style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
-                        showSearch={true}
-                        allowClear={true}
-                        onChange={(e: any) => {
-                        const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: undefined})
-                        this.handleChange(event)
-                    }}
-                    >
-                        {
-                            this.props.columnDefs!
-                                .map((c: any) =>
-                                    <Select.Option
-                                        key={JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: c.get('field')})}
-                            value={JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                >
-                                {c.get('field')}
-                                </Select.Option>)
-                        }
-                        </Select>
-                    )}
-                    </Form.Item>
-                    <Form.Item style={{ display: 'inline-block' }}>
-                    {getFieldDecorator(`${idOperation}`,
-                        {
-                            initialValue: `${t(serverAggregate.operation)}` || undefined,
-                            rules: [{
-                                required:
-                                    getFieldValue(`${idDatasetColumn}`)||
-                                    getFieldValue(`${idEnable}`),
-                                message: ' '
-                            }]
-                        })(
-                        <Select
-                            placeholder={t('operation')}
-                        style={{ width: '189px', marginRight: '10px' }}
-                        allowClear={true}
-                        onChange={(e: any) => {
-                        const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: undefined})
-                        this.handleChange(event)
-                    }}
-                    >
-                        {
-                            this.props.allAggregates!
-                                .map((o: any) =>
-                                    <Select.Option
-                                        key={JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: o.get('name')})}
-                            value={JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: o.get('name')})}
-                                >
-                                {t(o.get('name'))}
-                            </Select.Option>)
-                        }
-                        </Select>
-
-                    )}
-                    </Form.Item>
-                    <Form.Item style={{ display: 'inline-block' }}>
-                        {getFieldDecorator(`${idEnable}`,
-                            {
-                                initialValue: serverAggregate.enable !== undefined ? t(serverAggregate.enable.toString()) : undefined,
-                                rules: [{
-                                    required:
-                                        getFieldValue(`${idDatasetColumn}`) ||
-                                        getFieldValue(`${idOperation}`),
-                                    message: ' '
-                                }]
-                            })(
-                            <Select
+                            <Row gutter={[8, 0]}>
+                            <Col span={1}>
+                                {serverAggregate.index}
+                            </Col>
+                            <Col span={10}>
+                            <Form.Item style={{ display: 'inline-block' }}>
+                            {getFieldDecorator(`${idDatasetColumn}`,
+                                {
+                                    initialValue: serverAggregate.datasetColumn,
+                                    rules: [{
+                                        required:
+                                            serverAggregate.operation,
+                                        message: ' '
+                                    },{
+                                        validator: (rule: any, value: any, callback: any) => {
+                                            let isDuplicate: boolean = false;
+                                            if (this.state.serverAggregates !== undefined) {
+                                                const valueArr = this.state.serverAggregates
+                                                    .filter((currentObject) => {
+                                                        let currentField: string;
+                                                        try {
+                                                            //Либо объект при валидации отдельного поля
+                                                            currentField = JSON.parse(rule.value).value
+                                                        } catch (e) {
+                                                            //Либо значение этого поля при валидации перед запуском
+                                                            currentField = value
+                                                        }
+                                                        return (currentField)? currentObject.datasetColumn === currentField: false
+                                                    })
+                                                    .map(function (currentObject) {
+                                                        return currentObject.datasetColumn
+                                                });
+                                                isDuplicate = valueArr.some(function (item, idx) {
+                                                    return valueArr.indexOf(item) !== idx
+                                                });
+                                            }
+                                            if (isDuplicate) {
+                                                callback('Error message');
+                                                return;
+                                            }
+                                            callback();
+                                        },
+                                        message: 'duplicate row',
+                                    }]
+                                })(
+                                <Select
+                                    placeholder={t('columnname')}
+                                style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                                showSearch={true}
                                 allowClear={true}
-                                style={{width: '82px'}}
                                 onChange={(e: any) => {
-                                    const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: undefined})
-                                    this.handleChange(event)
-                                }}
+                                const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: undefined})
+                                this.handleChange(event)
+                            }}
                             >
-                                <Select.Option
-                                    key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
-                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: false})}
-                                >
-                                    {t('false')}
-                                </Select.Option>
-                                <Select.Option
-                                    key={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
-                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: true})}
-                                >
-                                    {t('true')}
-                                </Select.Option>
-                            </Select>
-                        )}
-                    </Form.Item>
+                                {
+                                    this.props.columnDefs!
+                                        .map((c: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                        >
+                                        {c.get('field')}
+                                        </Select.Option>)
+                                }
+                                </Select>
+                            )}
+                            </Form.Item>
+                        </Col>
+                        <Col span={9}>
+                            <Form.Item style={{ display: 'inline-block' }}>
+                            {getFieldDecorator(`${idOperation}`,
+                                {
+                                    initialValue: `${t(serverAggregate.operation)}` || undefined,
+                                    rules: [{
+                                        required:
+                                            serverAggregate.datasetColumn,
+                                        message: ' '
+                                    }]
+                                })(
+                                <Select
+                                    placeholder={t('operation')}
+                                style={{ width: '219px', marginRight: '10px' }}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                const event = e ? e : JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: undefined})
+                                this.handleChange(event)
+                            }}
+                            >
+                                {
+                                    this.props.allAggregates!
+                                        .map((o: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: o.get('name')})}
+                                    value={JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: o.get('name')})}
+                                        >
+                                        {t(o.get('name'))}
+                                    </Select.Option>)
+                                }
+                                </Select>
+
+                            )}
+                            </Form.Item>
+                        </Col>
+                        <Col  span={2}>
+                            <Form.Item style={{ display: 'inline-block' }}>
+                                <Switch
+                                    defaultChecked={serverAggregate.enable !== undefined ? serverAggregate.enable : true}
+                                    onChange={(e: any) => {
+                                        const event = JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: e});
+                                        this.handleChange(event)
+                                    }}>
+                                </Switch>
+                            </Form.Item>
+                        </Col>
+                        <Col span={2}>
+                            <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
+                                    <Button
+                                        title="delete row"
+                                        key={'deleteRowButton'}
+                                        value={'deleteRowButton'}
+                                        onClick={(e: any) => {this.deleteRow({index: serverAggregate.index})}}
+                                    >
+                                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                    </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                     </Form.Item>
                 )})
         }
