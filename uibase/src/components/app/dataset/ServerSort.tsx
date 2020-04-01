@@ -7,6 +7,9 @@ import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
+import {SortableContainer, SortableElement} from 'react-sortable-hoc';
+import '../../../styles/Draggable.css';
+import arrayMove from "array-move";
 
 interface Props {
     serverSorts?: Array<EObject>;
@@ -21,9 +24,13 @@ interface State {
     serverSorts: IServerQueryParam[] | undefined;
 }
 
-
-
 class ServerSort extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+
+    /*const { getFieldDecorator } = this.props.form;
+    const { t } = this.props;*/
+
+    t: any;
+    getFieldDecorator: any;
 
     constructor(props: any) {
         super(props);
@@ -31,6 +38,8 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
             serverSorts: this.props.serverSorts,
         };
         this.handleChange = this.handleChange.bind(this);
+        this.t = this.props.t;
+        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -126,9 +135,156 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
         });
     };
 
+    SortableItem = SortableElement(({value}: any) => {
+        return <li className="SortableItem">
+            <Row gutter={[8, 0]}>
+                <Col span={1}>
+                    {value.index}
+                </Col>
+                <Col span={10}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {this.getFieldDecorator(`${value.idDatasetColumn}`,
+                            {
+                                initialValue: value.datasetColumn,
+                                rules: [{
+                                    required:
+                                    value.operation,
+                                    message: ' '
+                                },{
+                                    validator: (rule: any, value: any, callback: any) => {
+                                        let isDuplicate: boolean = false;
+                                        if (this.state.serverSorts !== undefined) {
+                                            const valueArr = this.state.serverSorts
+                                                .filter((currentObject) => {
+                                                    let currentField: string;
+                                                    try {
+                                                        //Либо объект при валидации отдельного поля
+                                                        currentField = JSON.parse(rule.value).value
+                                                    } catch (e) {
+                                                        //Либо значение этого поля при валидации перед запуском
+                                                        currentField = value
+                                                    }
+                                                    return (currentField)? currentObject.datasetColumn === currentField: false
+                                                })
+                                                .map(function (currentObject) {
+                                                    return currentObject.datasetColumn
+                                                });
+                                            isDuplicate = valueArr.some(function (item, idx) {
+                                                return valueArr.indexOf(item) !== idx
+                                            });
+                                        }
+                                        if (isDuplicate) {
+                                            callback('Error message');
+                                            return;
+                                        }
+                                        callback();
+                                    },
+                                    message: 'duplicate row',
+                                }]
+                            })(
+                            <Select
+                                placeholder={this.t('columnname')}
+                                style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                                showSearch={true}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
+                                    this.handleChange(event)
+                                }}
+                            >
+                                {
+                                    this.props.columnDefs!
+                                        .map((c: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                            >
+                                                {c.get('field')}
+                                            </Select.Option>)
+                                }
+                            </Select>
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={9}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {this.getFieldDecorator(`${value.idOperation}`,
+                            {
+                                initialValue: `${this.t(value.operation)}` || undefined,
+                                rules: [{
+                                    required:
+                                    value.datasetColumn,
+                                    message: ' '
+                                }]
+                            })(
+                            <Select
+                                placeholder={this.t('operation')}
+                                style={{ width: '219px', marginRight: '10px' }}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
+                                    this.handleChange(event)
+                                }}
+                            >
+                                {
+                                    this.props.allSorts!
+                                        .map((o: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                                value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                            >
+                                                {this.t(o.get('name'))}
+                                            </Select.Option>)
+                                }
+                            </Select>
+
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={2}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        <Switch
+                            defaultChecked={value.enable !== undefined ? value.enable : true}
+                            onChange={(e: any) => {
+                                const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                                this.handleChange(event)
+                            }}>
+                        </Switch>
+                    </Form.Item>
+                </Col>
+                <Col span={2}>
+                    <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
+                        <Button
+                            title="delete row"
+                            key={'deleteRowButton'}
+                            value={'deleteRowButton'}
+                            onClick={(e: any) => {this.deleteRow({index: value.index})}}
+                        >
+                            <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                        </Button>
+                    </Form.Item>
+                </Col>
+            </Row>
+        </li>
+    });
+
+    onSortEnd = ({oldIndex, newIndex}:any) => {
+        let newState: IServerQueryParam[] = arrayMove(this.state.serverSorts!, oldIndex, newIndex)
+        newState.forEach( (serverSort, index) => serverSort.index = index+1 );
+        this.setState({serverSorts: newState});
+    };
+
+    SortableList = SortableContainer(({items}:any) => {
+        return (
+            <ul className="SortableList">
+                {items.map((value:any) => (
+                    <this.SortableItem key={`item-${value}`} index={value.index-1} value={value} />
+                ))}
+            </ul>
+        );
+    });
+
     render() {
-        const { getFieldDecorator, getFieldValue } = this.props.form;
-        const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
@@ -166,143 +322,15 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                     </Col>
                 </Form.Item>
                 <Form.Item>
-                {
-                    this.state.serverSorts !== undefined && this.state.serverSorts!
-                        .map((serverSort: any) => {
-                            const idDatasetColumn = `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`;
-                            const idOperation = `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`;
-                            return (
-
-                                    <Row gutter={[8, 0]}>
-                                    <Col span={1}>
-                                        {serverSort.index}
-                                    </Col>
-                                    <Col span={10}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idDatasetColumn}`,
-                                                {
-                                                    initialValue: serverSort.datasetColumn,
-                                                    rules: [{
-                                                        required:
-                                                            serverSort.operation,
-                                                        message: ' '
-                                                    },{
-                                                        validator: (rule: any, value: any, callback: any) => {
-                                                            let isDuplicate: boolean = false;
-                                                            if (this.state.serverSorts !== undefined) {
-                                                                const valueArr = this.state.serverSorts
-                                                                    .filter((currentObject) => {
-                                                                        let currentField: string;
-                                                                        try {
-                                                                            //Либо объект при валидации отдельного поля
-                                                                            currentField = JSON.parse(rule.value).value
-                                                                        } catch (e) {
-                                                                            //Либо значение этого поля при валидации перед запуском
-                                                                            currentField = value
-                                                                        }
-                                                                        return (currentField)? currentObject.datasetColumn === currentField: false
-                                                                    })
-                                                                    .map(function (currentObject) {
-                                                                        return currentObject.datasetColumn
-                                                                    });
-                                                                isDuplicate = valueArr.some(function (item, idx) {
-                                                                    return valueArr.indexOf(item) !== idx
-                                                                });
-                                                            }
-                                                            if (isDuplicate) {
-                                                                callback('Error message');
-                                                                return;
-                                                            }
-                                                            callback();
-                                                        },
-                                                        message: 'duplicate row',
-                                                    }]
-                                                })(
-                                                <Select
-                                                    placeholder={t('columnname')}
-                                                    style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
-                                                    showSearch={true}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: undefined})
-                                                        this.handleChange(event)
-                                                    }}
-                                                >
-                                                    {
-                                                        this.props.columnDefs!
-                                                            .map((c: any) =>
-                                                                <Select.Option
-                                                                    key={JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                    value={JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                >
-                                                                    {c.get('field')}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={9}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idOperation}`,
-                                                {
-                                                    initialValue: `${t(serverSort.operation)}` || undefined,
-                                                    rules: [{
-                                                        required:
-                                                            serverSort.datasetColumn,
-                                                        message: ' '
-                                                    }]
-                                                })(
-                                                <Select
-                                                    placeholder={t('operation')}
-                                                    style={{ width: '219px', marginRight: '10px' }}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverSort.index, columnName: 'operation', value: undefined})
-                                                        this.handleChange(event)
-                                                    }}
-                                                >
-                                                    {
-                                                        this.props.allSorts!
-                                                            .map((o: any) =>
-                                                                <Select.Option
-                                                                    key={JSON.stringify({index: serverSort.index, columnName: 'operation', value: o.get('name')})}
-                                                                    value={JSON.stringify({index: serverSort.index, columnName: 'operation', value: o.get('name')})}
-                                                                >
-                                                                    {t(o.get('name'))}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={2}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            <Switch
-                                                defaultChecked={serverSort.enable !== undefined ? serverSort.enable : true}
-                                                onChange={(e: any) => {
-                                                    const event = JSON.stringify({index: serverSort.index, columnName: 'enable', value: e});
-                                                    this.handleChange(event)
-                                                }}>
-                                            </Switch>
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={2}>
-                                        <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
-                                            <Button
-                                                    title="delete row"
-                                                    key={'deleteRowButton'}
-                                                    value={'deleteRowButton'}
-                                                    onClick={(e: any) => {this.deleteRow({index: serverSort.index})}}
-                                                >
-                                                    <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                                </Button>
-                                        </Form.Item>
-                                    </Col>
-                                    </Row>
-                            )})
-                }
+                    {
+                        <this.SortableList items={this.state.serverSorts!
+                            .map((serverSort: any) => (
+                                {
+                                    ...serverSort,
+                                    idDatasetColumn : `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
+                                }))} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                    }
                 </Form.Item>
             </Form>
         )
