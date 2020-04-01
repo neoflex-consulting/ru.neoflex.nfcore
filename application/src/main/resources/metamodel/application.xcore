@@ -105,7 +105,6 @@ abstract class DataView extends ViewElement {
 class DatasetGridView extends DataView {
     op JSON getDatasetGrids() // для чего?
     RowPerPage rowPerPage = "ten"
-    contains Highlight[] highlight//При условии таком-то, строки заливаются таким-то цветом
     Theme theme = "Material"
     boolean showUniqRow//Показывать только уникальные строки
 }
@@ -275,16 +274,6 @@ class ViewNode extends TreeNode {
     refers EObject eObject
 }
 
-class Highlight {
-    QName name
-    HighlightType highlightType
-    Colors backgroundColor
-    Colors textColor
-    refers DatasetColumnView datasetColumnView
-    Operations operation
-    String value
-}
-
 enum TextAlign {
     Center
     Justify
@@ -319,11 +308,6 @@ enum RowPerPage {
     fiveHundred
     oneThousand
     all
-}
-
-enum HighlightType {
-    Row
-    Column
 }
 
 enum Theme {

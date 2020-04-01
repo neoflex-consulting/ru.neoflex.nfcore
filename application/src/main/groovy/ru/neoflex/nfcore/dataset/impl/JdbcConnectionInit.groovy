@@ -14,7 +14,7 @@ class JdbcConnectionInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateConnection(String name) {
+    static def createConnection(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_CONNECTION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
@@ -32,7 +32,7 @@ class JdbcConnectionInit {
         return rs.resources.get(0).contents.get(0) as JdbcConnection
     }
 
-    static def recreateConnectionLine(String name) {
+    static def createConnectionLine(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_CONNECTION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {

@@ -1,84 +1,85 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Input, Select, Switch} from 'antd';
+import {Button, Switch, Row, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 
 interface Props {
-    serverFilters?: Array<EObject>;
+    serverGroupBy?: Array<EObject>;
     columnDefs?:  Array<any>;
-    allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerParam: any[], paramName: paramType) => void;
+    allAggregates?: Array<EObject>;
+    onChangeServerGroupBy?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
 }
 
 interface State {
-    serverFilters: IServerQueryParam[] | undefined;
+    serverGroupBy: IServerQueryParam[] | undefined;
 }
 
-class ServerFilter extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+
+
+class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
 
     constructor(props: any) {
         super(props);
         this.state = {
-            serverFilters: this.props.serverFilters
+            serverGroupBy: this.props.serverGroupBy,
         };
         this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        //on change props.isVisible
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
-            && JSON.stringify(this.props.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
+            && JSON.stringify(this.props.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (err) {
-                    this.props.context.notification('Filter notification','Please, correct the mistakes', 'error')
+                    this.props.context.notification('Aggregation notification','Please, correct the mistakes', 'error');
                 }
             });
         }
-        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
-            this.setState({serverFilters: this.props.serverFilters})
+        //load from profile
+        if (JSON.stringify(prevProps.serverGroupBy) !== JSON.stringify(this.props.serverGroupBy)) {
+            this.setState({serverGroupBy: this.props.serverGroupBy})
         }
-        if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)
+        //handleChange on form
+        if (JSON.stringify(prevState.serverGroupBy) !== JSON.stringify(this.state.serverGroupBy)
             && this.props.isVisible
-            && this.state.serverFilters?.length !== 0) {
+            && this.state.serverGroupBy?.length !== 0) {
             this.props.form.validateFields((err: any, values: any) => {
                 if (!err) {
-                    this.props.saveChanges!(this.state.serverFilters!, paramType.filter);
+                    this.props.saveChanges!(this.state.serverGroupBy!, paramType.group);
                 }
             });
         }
-        if (this.state.serverFilters?.length === 0) {
+        //reset
+        if (this.state.serverGroupBy?.length === 0) {
             this.createNewRow()
         }
     }
 
-    updateTableData(): void  {
-        this.props.onChangeServerFilter!(this.state.serverFilters!, true)
-    }
-
     handleChange(e: any) {
         const target = JSON.parse(e);
-        let serverFilters = this.state.serverFilters!.map( (f: any) => {
+        let serverGroupBy = this.state.serverGroupBy!.map( (f: any) => {
             if (f.index.toString() === target['index'].toString()) {
                 const targetColumn = this.props.columnDefs!.find( (c: any) =>
                     c.get('field') === (f.datasetColumn || target['value'])
-                 );
+                );
                 return {index: f.index,
                     datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
                     operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
-                    value: target['columnName'] === 'value' ? target['value'] : f.value,
                     enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
-                    type: (targetColumn ? targetColumn.get('type') : undefined) || f.type}
+                    type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
             } else {
                 return f
             }
         });
-        this.setState({serverFilters});
+        this.setState({serverGroupBy});
     }
 
     handleSubmit = (e: any) => {
@@ -89,44 +90,42 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
     deleteRow = (e: any) => {
         this.props.form.resetFields();
         let newServerParam: IServerQueryParam[] = [];
-        this.state.serverFilters?.forEach((element:IServerQueryParam, index:number) => {
+        this.state.serverGroupBy?.forEach((element:IServerQueryParam, index:number) => {
             if (element.index != e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
                     datasetColumn: element.datasetColumn,
                     operation: element.operation,
-                    value: element.value,
                     enable: (element.enable !== null ? element.enable : false),
                     type: element.type
                 })}
         });
-        this.setState({serverFilters: newServerParam})
+        this.setState({serverGroupBy: newServerParam})
     };
 
     createNewRow = () => {
-        let serverFilters: any = this.state.serverFilters;
-        serverFilters.push(
-            {index: serverFilters.length + 1,
+        let serverGroupBy: any = this.state.serverGroupBy;
+        serverGroupBy.push(
+            {index: serverGroupBy.length + 1,
                 datasetColumn: undefined,
                 operation: undefined,
-                value: undefined,
                 enable: true,
                 type: undefined});
-        this.setState({serverFilters})
+        this.setState({serverGroupBy})
     };
 
     reset = () => {
-        this.props.onChangeServerFilter!(undefined, paramType.filter);
-        this.setState({serverFilters:[]});
+        this.props.onChangeServerGroupBy!(undefined, paramType.group);
+        this.setState({serverGroupBy:[]});
     };
 
     refresh = () => {
         this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverFilters!, paramType.filter)
-                }
+                this.props.onChangeServerGroupBy!(this.state.serverGroupBy!, paramType.group)
+            }
             else {
-                this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
+                this.props.context.notification('Aggregates notification','Please, correct the mistakes', 'error')
             }
         });
     };
@@ -138,9 +137,9 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Системные фильтры</div>
+                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Серверная группировка</div>
                     </Col>
-                    <Col span={12} style={{textAlign: "right", marginLeft: '-2px'}}>
+                    <Col span={12} style={{textAlign: "right"}}>
                         <Button
                             title="reset"
                             style={{width: '40px', marginRight: '10px'}}
@@ -171,37 +170,64 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                     </Col>
                 </Form.Item>
                 {
-                    this.state.serverFilters !== undefined && this.state.serverFilters!
-                        .map((serverFilter: any) => {
-                            const idDatasetColumn = `${JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`;
-                            const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
-                            const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
-                            const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
+                    this.state.serverGroupBy !== undefined && this.state.serverGroupBy!
+                        .map((serverGroupBy: IServerQueryParam) => {
+                            const idDatasetColumn = `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`;
+                            const idOperation = `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`;
+                            const idEnable = `${JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: serverGroupBy.enable})}`;
                             return (
-                                <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
+                                <Form.Item key={serverGroupBy.index} style={{ marginTop: '-30px' }}>
                                     <Row gutter={[8, 0]}>
                                     <Col span={1}>
-                                        <span>{serverFilter.index}</span>
+                                        {serverGroupBy.index}
                                     </Col>
-                                    <Col span={7}>
+                                    <Col span={10}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idDatasetColumn}`,
                                                 {
-                                                    initialValue: serverFilter.datasetColumn,
+                                                    initialValue: serverGroupBy.datasetColumn,
                                                     rules: [{
-                                                        required:
-                                                            serverFilter.operation ||
-                                                            serverFilter.value,
+                                                        required:serverGroupBy.operation,
                                                         message: ' '
+                                                    },{
+                                                        validator: (rule: any, value: any, callback: any) => {
+                                                            let isDuplicate: boolean = false;
+                                                            if (this.state.serverGroupBy !== undefined) {
+                                                                const valueArr = this.state.serverGroupBy
+                                                                    .filter((currentObject) => {
+                                                                        let currentField: string;
+                                                                        try {
+                                                                            //Либо объект при валидации отдельного поля
+                                                                            currentField = JSON.parse(rule.value).value
+                                                                        } catch (e) {
+                                                                            //Либо значение этого поля при валидации перед запуском
+                                                                            currentField = value
+                                                                        }
+                                                                        return (currentField)? currentObject.datasetColumn === currentField: false
+                                                                    })
+                                                                    .map(function (currentObject) {
+                                                                        return currentObject.datasetColumn
+                                                                    });
+                                                                isDuplicate = valueArr.some(function (item, idx) {
+                                                                    return valueArr.indexOf(item) !== idx
+                                                                });
+                                                            }
+                                                            if (isDuplicate) {
+                                                                callback('Error message');
+                                                                return;
+                                                            }
+                                                            callback();
+                                                        },
+                                                        message: 'duplicate row',
                                                     }]
                                                 })(
                                                 <Select
                                                     placeholder={t('columnname')}
-                                                    style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
+                                                    style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
                                                     showSearch={true}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: undefined})
+                                                        const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: undefined})
                                                         this.handleChange(event)
                                                     }}
                                                 >
@@ -209,8 +235,8 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                                         this.props.columnDefs!
                                                             .map((c: any) =>
                                                                 <Select.Option
-                                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: c.get('field')})}
                                                                 >
                                                                     {c.get('field')}
                                                                 </Select.Option>)
@@ -219,33 +245,32 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={7}>
+                                    <Col span={9}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             {getFieldDecorator(`${idOperation}`,
                                                 {
-                                                    initialValue: `${t(serverFilter.operation)}` || undefined,
+                                                    initialValue: `${t(serverGroupBy.operation)}` || undefined,
                                                     rules: [{
                                                         required:
-                                                            serverFilter.datasetColumn ||
-                                                            serverFilter.value,
+                                                            serverGroupBy.datasetColumn,
                                                         message: ' '
                                                     }]
                                                 })(
                                                 <Select
                                                     placeholder={t('operation')}
-                                                    style={{ width: '179px', marginLeft: '5px' }}
+                                                    style={{ width: '219px', marginRight: '10px' }}
                                                     allowClear={true}
                                                     onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
+                                                        const event = e ? e : JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: undefined})
                                                         this.handleChange(event)
                                                     }}
                                                 >
                                                     {
-                                                        this.props.allOperations!
+                                                        this.props.allAggregates!
                                                             .map((o: any) =>
                                                                 <Select.Option
-                                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
-                                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
+                                                                    key={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
+                                                                    value={JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: o.get('name')})}
                                                                 >
                                                                     {t(o.get('name'))}
                                                                 </Select.Option>)
@@ -255,38 +280,12 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                             )}
                                         </Form.Item>
                                     </Col>
-                                    <Col span={5}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idValue}`,
-                                                {
-                                                    initialValue: serverFilter.value,
-                                                    rules: [{
-                                                        required:
-                                                            serverFilter.datasetColumn ||
-                                                            serverFilter.operation,
-                                                        message: ' '
-                                                    }]
-                                                })(
-                                                <Input
-                                                    placeholder={t('value')}
-                                                    disabled={serverFilter.operation === 'IsEmpty' || serverFilter.operation === 'IsNotEmpty'}
-                                                    style={{ width: '110px', marginRight: '10px' }}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => this.handleChange(
-                                                        JSON.stringify({index: serverFilter.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
-                                                    )}
-                                                    title={serverFilter.value}
-                                                    id={serverFilter.index.toString()}
-                                                />
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col  span={2}>
+                                    <Col span={2}>
                                         <Form.Item style={{ display: 'inline-block' }}>
                                             <Switch
-                                                defaultChecked={serverFilter.enable !== undefined ? serverFilter.enable : true}
+                                                defaultChecked={serverGroupBy.enable !== undefined ? serverGroupBy.enable : true}
                                                 onChange={(e: any) => {
-                                                    const event = JSON.stringify({index: serverFilter.index, columnName: 'enable', value: e});
+                                                    const event = JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: e});
                                                     this.handleChange(event)
                                                 }}>
                                             </Switch>
@@ -295,22 +294,22 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                                     <Col span={2}>
                                         <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                                             <Button
-                                                title="delete row"
-                                                key={'deleteRowButton'}
-                                                value={'deleteRowButton'}
-                                                onClick={(e: any) => {this.deleteRow({index: serverFilter.index})}}
-                                            >
-                                                <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                                                    title="delete row"
+                                                    key={'deleteRowButton'}
+                                                    value={'deleteRowButton'}
+                                                    onClick={(e: any) => {this.deleteRow({index: serverGroupBy.index})}}
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                                             </Button>
                                         </Form.Item>
                                     </Col>
-                                </Row>
+                                    </Row>
                                 </Form.Item>
                             )})
-                        }
+                }
             </Form>
         )
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerFilter))
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupBy))

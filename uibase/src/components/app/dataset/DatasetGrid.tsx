@@ -10,7 +10,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {Button, Dropdown, Menu, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 import {API} from '../../../modules/api';
@@ -19,11 +19,10 @@ import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
 import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
+import _ from 'lodash';
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
-
-
 
 interface Props {
     onCtrlA?: Function,
@@ -46,61 +45,21 @@ class DatasetGrid extends React.Component<any, any> {
             rowPerPages: [],
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             operations: [],
-            selectedServerFilters: [],
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            highlight: this.props.viewObject.get('highlight') || [],
             columnDefs: [],
             rowData: [],
+            highlights: [],
             saveMenuVisible: false,
             gridOptions: {
                 defaultColDef: {
                     resizable: true,
                     filter: true,
-                    sortable: true
-                },
-            }
+                    sortable: true,
+                }
+            },
+            cellStyle: {}
         };
-
         this.grid = React.createRef();
-        this.exportToCSV = this.exportToCSV.bind(this);
-        // this.handleKeyDown = this.handleKeyDown.bind(this);
-    }
-
-    // handleKeyDown(event: { [key:string]: any }) {
-    //      const { onCtrlA, onCtrlShiftA } = this.props
-    //      const rowData = this.grid.current.api.getSelectedRows()
-    //      const focusedCell = this.grid.current.api.getFocusedCell()
-    //      const row = this.grid.current.api.getDisplayedRowAtMIndex(focusedCell.rowIndex);
-    //
-    //      let charCode = String.fromCharCode(event.which).toLowerCase()
-    //      if (rowData.length > 0 && focusedCell) {
-    //          const cellData = row.data[focusedCell.column.colId]
-    //          if (event.ctrlKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //          // For MAC
-    //          if (event.metaKey && charCode === 'c') {
-    //              copyIntoClipboard!(cellData)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlA) {
-    //          if (event.ctrlKey && charCode === 'a') {
-    //              onCtrlA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //      if (this.props.onCtrlShiftA) {
-    //          if (event.ctrlKey && event.shiftKey && charCode === 'a') {
-    //              onCtrlShiftA!(event)
-    //              event.preventDefault()
-    //          }
-    //      }
-    //  }
-
-    exportToCSV(name: string) {
-        this.grid.current.api.exportDataAsCsv({ fileName: name })
     }
 
     onGridReady = (params: any) => {
@@ -232,7 +191,7 @@ class DatasetGrid extends React.Component<any, any> {
         API.instance().findEnum('application', 'RowPerPage')
             .then((result: Ecore.EObject[]) => {
                 let rowPerPages = result.map( (t: any) => {
-                    return t.get('name') /*rowPerPageMapper_[t.get('name')]*/
+                    return t.get('name')
                 });
                 this.setState({rowPerPages})
             })
@@ -264,19 +223,38 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const datasetComponent = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
+        if (datasetComponent !== undefined) {
+            if (JSON.parse(datasetComponent.get('value'))['highlights'].length !== 0 &&
+                this.state.highlights.length !== 0 &&
+                !_.isEqual(this.state.highlights, JSON.parse(datasetComponent.get('value'))['highlights'])) {
+                this.changeSettings();
+            }
+            if (JSON.parse(datasetComponent.get('value'))['serverAggregates']) {
+                this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['serverAggregates']);
+            }
+        }
+        else {
+            if (this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array().filter((h:any) => h.get('enable') === true).length !== 0 &&
+                this.state.highlights.length !== 0 &&
+                !_.isEqual(this.state.highlights, this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array())
+            ){
+                this.changeSettings();
+            }
+            if (this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation')) {
+                this.highlightAggregate(this.props.viewObject.get('datasetView').get('datasetComponent').get('serverAggregation').array());
+            }
+        }
+
         const userComponentName = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
-
-        if (JSON.stringify(prevProps.context.userProfile.eResource().to()) !== JSON.stringify(this.props.context.userProfile.eResource().to())) {
-            this.changeSettings();
-        }
         const componentName = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
             this.props.viewObject.get('datasetView').get('datasetComponent').get('name')
             : JSON.parse(userComponentName[0].get('value'))['name']
         if (this.props.context.datasetComponents
             && this.props.context.datasetComponents[componentName] !== undefined) {
-            if (this.state.columnDefs.length === 0
-                && this.state.rowData.length === 0) {
+            if (this.state.columnDefs.length === 0 && this.state.rowData.length === 0) {
                 if (this.props.context.datasetComponents[componentName]['columnDefs'] !== undefined
                     && this.props.context.datasetComponents[componentName]['rowData'] !== undefined) {
                     const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
@@ -296,22 +274,314 @@ class DatasetGrid extends React.Component<any, any> {
         }
     }
 
-    private changeSettings() {
-        this.props.context.userProfile.get('params').array()
-            .forEach((p: any) => {
-                if (p.get('key') === this.props.viewObject.get('datasetView')._id) {
-                    if (JSON.parse(p.get('value'))['theme'] !== undefined) {
-                        this.setState({currentTheme: JSON.parse(p.get('value'))['theme']})
-                    }
-                    if (JSON.parse(p.get('value'))['showUniqRow'] !== undefined) {
-                        this.setState({showUniqRow: JSON.parse(p.get('value'))['showUniqRow']})
-                    }
-                    if (JSON.parse(p.get('value'))['rowPerPage'] !== undefined) {
-                        const newPageSize = JSON.parse(p.get('value'))['rowPerPage']
-                        this.setState({paginationPageSize: newPageSize})
+    private highlightAggregate(agr: any) {
+        if (this.grid.current) {
+            if (agr.filter((f:any)=>{return f.enable && f.datasetColumn}).length !== 0) {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
+                    if (params.node.lastChild) {
+                        return 'aggregate-highlight';
                     }
                 }
-            });
+            }
+            else {
+                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            }
+            this.grid.current.api.refreshCells();
+        }
+    }
+
+    private changeSettings() {
+        const {gridOptions} = this.state;
+        const userProfile = this.props.context.userProfile.get('params').array()
+            .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView')._id);
+        if (userProfile !== undefined) {
+            if (userProfile.get('key') === this.props.viewObject.get('datasetView')._id) {
+                if (JSON.parse(userProfile.get('value'))['theme'] !== undefined) {
+                    this.setState({currentTheme: JSON.parse(userProfile.get('value'))['theme']})
+                }
+                if (JSON.parse(userProfile.get('value'))['showUniqRow'] !== undefined) {
+                    this.setState({showUniqRow: JSON.parse(userProfile.get('value'))['showUniqRow']})
+                }
+                if (JSON.parse(userProfile.get('value'))['rowPerPage'] !== undefined) {
+                    const newPageSize = JSON.parse(userProfile.get('value'))['rowPerPage']
+                    this.setState({paginationPageSize: newPageSize})
+                }
+            }
+        }
+
+        const newCellStyle = (params: any) => {
+            const datasetComponent = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
+            let highlights: any[] = [];
+            if (datasetComponent !== undefined) {
+                JSON.parse(datasetComponent.get('value'))['highlights']
+                    .filter((h:any) => h['enable'] === true)
+                    .forEach((h:any) => highlights.push(h));
+                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+            }
+            else {
+                this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+                    .filter((h:any) => h.get('enable') === true)
+                    .forEach((h:any) => highlights.push(
+                        {
+                            index: highlights.length + 1,
+                            datasetColumn: h.get('datasetColumn').get('name'),
+                            operation: h.get('operation') || 'EqualTo',
+                            value: h.get('value'),
+                            enable: (h.get('enable') !== null ? h.get('enable') : false),
+                            type: h.get('datasetColumn').get('convertDataType'),
+                            highlightType: h.get('highlightType'),
+                            backgroundColor: h.get('backgroundColor'),
+                            color: h.get('color')
+                        }
+                    ));
+                if (highlights.length !== 0) {
+                    this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+                }
+            }
+            if (highlights.length !== 0) {
+                const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell');
+                const temp: any = cellHighlights.find((h: any) => {
+
+                    const type = h['type'];
+                    const columnName = h['datasetColumn'];
+                    const operation = h['operation'];
+                    const value = h['value'];
+                    const backgroundColor = h['backgroundColor'];
+                    const color = h['color'];
+
+                    let columnValue;
+                    let filterValue;
+                    if (type === 'Integer' || type === 'Decimal') {
+                        columnValue = Number(params.value);
+                        filterValue = Number(value)
+                    }
+                    else if (type === 'Date' || type === 'Timestamp') {
+                        columnValue = new Date(params.value);
+                        filterValue = new Date(value)
+                    }
+                    else if (type === 'String' || type === 'Boolean') {
+                        columnValue = params.value;
+                        filterValue = value
+                    }
+
+                    if (operation === 'EqualTo') {
+                        if (columnValue === filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'NotEqual') {
+                        if (columnValue !== filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThan') {
+                        if (columnValue < filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThenOrEqualTo') {
+                        if (columnValue <= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThan') {
+                        if (columnValue > filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThanOrEqualTo') {
+                        if (columnValue >= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (params.data[columnName] !== null) {
+                        if (operation === 'IsNotEmpty') {
+                            return {background: backgroundColor, color: color}
+                        } else if (operation === 'IncludeIn') {
+                            if (params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotIncludeIn') {
+                            if (!params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'StartWith') {
+                            if (params.data[columnName].split(value)[0] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotStartWith') {
+                            if (params.data[columnName].split(value)[0] !== "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'EndOn') {
+                            if (params.data[columnName].split(value)[1] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotEndOn') {
+                            if (params.data[columnName].split(value)[1] !== "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        }
+                    }
+                    else if (params.data[columnName] === null) {
+                        if (operation === 'IsEmpty' ||
+                            operation === 'NotIncludeIn' ||
+                            operation === 'NotEndOn' ||
+                            operation === 'NotStartWith') {
+                            return {background: backgroundColor, color: color}
+                        }
+                    }
+                });
+                if (temp !== undefined) {
+                    return {background: temp['backgroundColor'], color: temp['color']}
+                }
+                else {
+                    const columnHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Column');
+                    const temp: any = columnHighlights.find((h: any) => {
+                        const columnName = h['datasetColumn'];
+                        const backgroundColor = h['backgroundColor'];
+                        const color = h['color'];
+                        if (params.data[columnName] === params.value) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    });
+                    if (temp !== undefined) {
+                        return {background: temp['backgroundColor'], color: temp['color']}
+                    }
+                }
+            }
+            else {
+                return {background: undefined, color: undefined}
+            }
+        };
+
+        const rowStyle = (params: any) => {
+            const datasetComponent = this.props.context.userProfile.get('params').array()
+                .find((p: any) => p.get('key') === this.props.viewObject.get('datasetView').get('datasetComponent')._id)
+            let highlights: any[] = [];
+            if (datasetComponent !== undefined) {
+                JSON.parse(datasetComponent.get('value'))['highlights']
+                    .filter((h:any) => h['enable'] === true)
+                    .forEach((h:any) => highlights.push(h));
+                this.setState({highlights: JSON.parse(datasetComponent.get('value'))['highlights']});
+            }
+            else {
+                this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()
+                    .filter((h:any) => h.get('enable') === true)
+                    .forEach((h:any) => highlights.push(
+                        {
+                            index: highlights.length + 1,
+                            datasetColumn: h.get('datasetColumn').get('name'),
+                            operation: h.get('operation') || 'EqualTo',
+                            value: h.get('value'),
+                            enable: (h.get('enable') !== null ? h.get('enable') : false),
+                            type: h.get('datasetColumn').get('convertDataType'),
+                            highlightType: h.get('highlightType'),
+                            backgroundColor: h.get('backgroundColor'),
+                            color: h.get('color')
+                        }
+                    ));
+                if (highlights.length !== 0) {
+                    this.setState({highlights: this.props.viewObject.get('datasetView').get('datasetComponent').get('highlight').array()})
+                }
+            }
+            if (highlights.length !== 0) {
+                const rowHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Row');
+                const temp: any = rowHighlights.find((h: any) => {
+
+                    const type = h['type'];
+                    const columnName = h['datasetColumn'];
+                    const operation = h['operation'];
+                    const value = h['value'];
+                    const backgroundColor = h['backgroundColor'];
+                    const color = h['color'];
+
+                    let columnValue;
+                    let filterValue;
+                    if (type === 'Integer' || type === 'Decimal') {
+                        columnValue = Number(params.data[columnName]);
+                        filterValue = Number(value)
+                    }
+                    else if (type === 'Date' || type === 'Timestamp') {
+                        columnValue = new Date(params.data[columnName]);
+                        filterValue = new Date(value)
+                    }
+                    else if (type === 'String' || type === 'Boolean') {
+                        columnValue = params.data[columnName];
+                        filterValue = value
+                    }
+
+                    if (operation === 'EqualTo') {
+                        if (columnValue === filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'NotEqual') {
+                        if (columnValue !== filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThan') {
+                        if (columnValue < filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'LessThenOrEqualTo') {
+                        if (columnValue <= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThan') {
+                        if (columnValue > filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (operation === 'GreaterThanOrEqualTo') {
+                        if (columnValue >= filterValue) {
+                            return {background: backgroundColor, color: color}
+                        }
+                    } else if (params.data[columnName] !== null) {
+                        if (operation === 'IsNotEmpty') {
+                            return {background: backgroundColor, color: color}
+                        } else if (operation === 'IncludeIn') {
+                            if (params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotIncludeIn') {
+                            if (!params.data[columnName].includes(value)) {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'StartWith') {
+                            if (params.data[columnName].split(value)[0] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotStartWith') {
+                            if (params.data[columnName].split(value)[0] !== "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'EndOn') {
+                            if (params.data[columnName].split(value)[1] === "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        } else if (operation === 'NotEndOn') {
+                            if (params.data[columnName].split(value)[1] !== "") {
+                                return {background: backgroundColor, color: color}
+                            }
+                        }
+                    }
+                    else if (params.data[columnName] === null) {
+                        if (operation === 'IsEmpty' ||
+                            operation === 'NotIncludeIn' ||
+                            operation === 'NotEndOn' ||
+                            operation === 'NotStartWith') {
+                            return {background: backgroundColor, color: color}
+                        }
+                    }
+                });
+                return temp !== undefined ? {background: temp['backgroundColor'], color: temp['color']} : undefined
+            } else {
+                return {background: undefined, color: undefined}
+            }
+        };
+
+        if (this.grid.current === null) {
+            gridOptions.getRowStyle = rowStyle;
+            this.setState({cellStyle: newCellStyle})
+        } else {
+            this.grid.current.api.gridOptionsWrapper.gridOptions.getRowStyle = rowStyle;
+            this.setState({cellStyle: newCellStyle})
+            this.grid.current.api.redrawRows()
+        }
     }
 
     handleSaveMenu = () => {
@@ -383,7 +653,6 @@ class DatasetGrid extends React.Component<any, any> {
                 <div style={{ marginTop: '30px'}}>
                     {this.state.columnDefs.length !== 0 && <AgGridReact
                         ref={this.grid}
-                        //columnDefs={this.state.columnDefs}
                         rowData={this.state.rowData}
                         modules={AllCommunityModules}
                         rowSelection='multiple' //выделение строки
@@ -416,6 +685,7 @@ class DatasetGrid extends React.Component<any, any> {
                                     resizable={col.get('resizable') || false}
                                     sortable={col.get('sortable') || false}
                                     suppressMenu={col.get('suppressMenu') || false}
+                                    cellStyle = {this.state.cellStyle}
                                 />
                                 )}
                     </AgGridReact>
@@ -430,6 +700,7 @@ class DatasetGrid extends React.Component<any, any> {
                     onCancel={this.handleSaveMenu}
                 >
                     <SaveDatasetComponent
+                        closeModal={this.handleSaveMenu}
                         {...this.props}
                     />
                 </Modal>

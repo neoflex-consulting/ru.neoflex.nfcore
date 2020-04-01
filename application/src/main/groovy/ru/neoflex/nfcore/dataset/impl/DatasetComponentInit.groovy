@@ -21,7 +21,7 @@ class DatasetComponentInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def recreateDatasetComponent(String name, String JdbcDataset) {
+    static def createDatasetComponent(String name, String JdbcDataset) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
@@ -38,19 +38,19 @@ class DatasetComponentInit {
             rs.resources.add(Context.current.store.createEObject(datasetComponent))
             return rs.resources.get(0).contents.get(0) as DatasetComponent
         }
-        else if ((rs.resources.get(0).contents.get(0) as DatasetComponent).dataset == null) {
-            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
-            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
-            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
-            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
-            datasetComponent.setOwner(owner)
-            datasetComponent.access = Access.DEFAULT
-            if (dataset) {
-                datasetComponent.setDataset(dataset)
-                datasetComponent.useServerFilter = true
-            }
-            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
-        }
+//        else if ((rs.resources.get(0).contents.get(0) as DatasetComponent).dataset == null) {
+//            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+//            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
+//            def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset)
+//            def owner = findOrCreateEObject(AuthPackage.Literals.USER, 'admin')
+//            datasetComponent.setOwner(owner)
+//            datasetComponent.access = Access.DEFAULT
+//            if (dataset) {
+//                datasetComponent.setDataset(dataset)
+//                datasetComponent.useServerFilter = true
+//            }
+//            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+//        }
     }
 
     static def createAllColumn(String name) {
@@ -69,6 +69,8 @@ class DatasetComponentInit {
                         def typography = ApplicationFactory.eINSTANCE.createTypography()
                         typography.name = columns[i].name
                         rdbmsColumn.headerName = typography
+                        rdbmsColumn.sortable = true
+                        rdbmsColumn.resizable = true
                         rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                         rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
                                 ? Filter.DATE_COLUMN_FILTER :
@@ -96,7 +98,7 @@ class DatasetComponentInit {
 
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
-            def serverFilter1 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter1 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter1.setDatasetColumn(datasetColumn1)
             serverFilter1.operation = Operations.LESS_THAN
@@ -104,7 +106,7 @@ class DatasetComponentInit {
             serverFilter1.enable = true
             datasetComponent.serverFilter.add(serverFilter1)
 
-            def serverFilter2 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter2 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
             serverFilter2.setDatasetColumn(datasetColumn2)
             serverFilter2.operation = Operations.LESS_THAN
@@ -112,7 +114,7 @@ class DatasetComponentInit {
             serverFilter2.enable = false
             datasetComponent.serverFilter.add(serverFilter2)
 
-            def serverFilter3 = DatasetFactory.eINSTANCE.createCondition()
+            def serverFilter3 = DatasetFactory.eINSTANCE.createQueryFilter()
             def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
             serverFilter3.setDatasetColumn(datasetColumn3)
             serverFilter3.operation = Operations.INCLUDE_IN

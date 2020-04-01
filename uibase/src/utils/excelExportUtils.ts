@@ -1,9 +1,9 @@
 import * as ExcelJS from "exceljs";
-import {saveAs} from "file-saver";
 
 export enum excelElementExportType {
     diagram,
-    grid
+    grid,
+    text
 }
 
 export interface excelExportObject {
@@ -17,7 +17,8 @@ export interface excelExportObject {
         tableName:string,
         columns:any[],
         rows:string[][]
-    }
+    },
+    textData?: string
 }
 
 async function handleExportExcel(handlers: any[]) {
@@ -57,6 +58,13 @@ async function handleExportExcel(handlers: any[]) {
                 rows: excelData.gridData.rows,
             });
             offset += 1 + excelData.gridData.rows.length;
+        }
+        if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
+            //Добавление таблицы
+            var cell = worksheet.getCell('A' + offset);
+            // Modify/Add individual cell
+            cell.value = excelData.textData;
+            offset += 1;
         }
         offset += 1;
     }

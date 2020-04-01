@@ -27,7 +27,13 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                     } else if (options && options.operation === "unset") {
                         updatedData = update(currentObject as any, { $unset: [updaterProperty] })
                     } else if (options && options.operation === "move") {
-                        let oldIndexValue = currentObject.children[options.oldIndex];
+                        let oldIndexValue
+                        if (currentObject.children !== undefined) {
+                            oldIndexValue = currentObject.children[options.oldIndex]
+                        }
+                        else {
+                            oldIndexValue = currentObject[updaterProperty][options.oldIndex]
+                        }
                         let temp = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } });
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {

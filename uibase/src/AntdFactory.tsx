@@ -9,6 +9,9 @@ import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
+import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
+import domtoimage from "dom-to-image";
+import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -44,7 +47,6 @@ class Col_ extends ViewContainer {
                 borderBottom: this.props.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
                 borderTop: this.props.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
                 borderLeft: this.props.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
-
             }}>
                 {this.renderChildren()}
             </Col>
@@ -297,6 +299,39 @@ class Input_ extends ViewContainer {
 }
 
 class Typography_ extends ViewContainer {
+
+    componentDidMount(): void {
+        if (this.props.context.docxHandlers !== undefined) {
+            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
+        }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
+    }
+
+    private getDocxData(): docxExportObject {
+        return {
+            docxComponentType : docxElementExportType.text,
+            textData: this.props.viewObject.get('name')
+        };
+    }
+
+    private getExcelData(): excelExportObject {
+        return {
+            excelComponentType : excelElementExportType.text,
+            textData: this.props.viewObject.get('name')
+        };
+    }
+
     onChange = (str: string) => {
         this.props.viewObject.set('name', str);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
