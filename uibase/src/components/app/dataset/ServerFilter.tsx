@@ -1,146 +1,182 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Input, Select, Switch} from 'antd';
+import {Button, Row, Col, Form, Select, Switch, Input} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
+import {SortableElement} from 'react-sortable-hoc';
+import '../../../styles/Draggable.css';
+import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
-    serverFilters?: Array<EObject>;
+    parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
-    allOperations?: Array<EObject>;
-    onChangeServerFilter?: (newServerParam: any[], paramName: paramType) => void;
+    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
+    allOperations?: Array<EObject>;
+    componentType?: paramType;
 }
+
 
 interface State {
-    serverFilters: IServerQueryParam[] | undefined;
+    parametersArray: IServerQueryParam[] | undefined;
 }
 
-class ServerFilter extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+class ServerFilter extends DrawerParameterComponent<Props, State> {
 
     constructor(props: any) {
         super(props);
         this.state = {
-            serverFilters: this.props.serverFilters
+            parametersArray: this.props.parametersArray,
         };
         this.handleChange = this.handleChange.bind(this);
+        this.t = this.props.t;
+        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
-            && JSON.stringify(this.props.serverFilters) !== JSON.stringify(this.state.serverFilters)) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (err) {
-                    this.props.context.notification('Filter notification','Please, correct the mistakes', 'error')
-                }
-            });
-        }
-        if (JSON.stringify(prevProps.serverFilters) !== JSON.stringify(this.props.serverFilters)) {
-            this.setState({serverFilters: this.props.serverFilters})
-        }
-        if (JSON.stringify(prevState.serverFilters) !== JSON.stringify(this.state.serverFilters)
-            && this.props.isVisible
-            && this.state.serverFilters?.length !== 0) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
-                    this.props.saveChanges!(this.state.serverFilters!, paramType.filter);
-                }
-            });
-        }
-        if (this.state.serverFilters?.length === 0) {
-            this.createNewRow()
-        }
-    }
+    SortableItem = SortableElement(({value}: any) => {
+        return <div className="SortableItem">
+            <Row gutter={[8, 0]}>
+                <Col span={1}>
+                    <span>{value.index}</span>
+                </Col>
+                <Col span={7}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {this.getFieldDecorator(`${value.idDatasetColumn}`,
+                            {
+                                initialValue: value.datasetColumn,
+                                rules: [{
+                                    required:
+                                        value.operation ||
+                                        value.value,
+                                    message: ' '
+                                }]
+                            })(
+                            <Select
+                                placeholder={this.t('columnname')}
+                                style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
+                                showSearch={true}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
+                                    this.handleChange(event)
+                                }}
+                            >
+                                {
+                                    this.props.columnDefs!
+                                        .map((c: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                                value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                            >
+                                                {c.get('field')}
+                                            </Select.Option>)
+                                }
+                            </Select>
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={7}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {this.getFieldDecorator(`${value.idOperation}`,
+                            {
+                                initialValue: `${this.t(value.operation)}` || undefined,
+                                rules: [{
+                                    required:
+                                        value.datasetColumn ||
+                                        value.value,
+                                    message: ' '
+                                }]
+                            })(
+                            <Select
+                                placeholder={this.t('operation')}
+                                style={{ width: '179px', marginLeft: '5px' }}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
+                                    this.handleChange(event)
+                                }}
+                            >
+                                {
+                                    this.props.allOperations!
+                                        .map((o: any) =>
+                                            <Select.Option
+                                                key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                                value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                            >
+                                                {this.t(o.get('name'))}
+                                            </Select.Option>)
+                                }
+                            </Select>
 
-    updateTableData(): void  {
-        this.props.onChangeServerFilter!(this.state.serverFilters!, true)
-    }
-
-    handleChange(e: any) {
-        const target = JSON.parse(e);
-        let serverFilters = this.state.serverFilters!.map( (f: any) => {
-            if (f.index.toString() === target['index'].toString()) {
-                const targetColumn = this.props.columnDefs!.find( (c: any) =>
-                    c.get('field') === (f.datasetColumn || target['value'])
-                 );
-                return {index: f.index,
-                    datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
-                    operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
-                    value: target['columnName'] === 'value' ? target['value'] : f.value,
-                    enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
-                    type: (targetColumn ? targetColumn.get('type') : undefined) || f.type}
-            } else {
-                return f
-            }
-        });
-        this.setState({serverFilters});
-    }
-
-    handleSubmit = (e: any) => {
-        e.preventDefault();
-        this.refresh();
-    };
-
-    deleteRow = (e: any) => {
-        this.props.form.resetFields();
-        let newServerParam: IServerQueryParam[] = [];
-        this.state.serverFilters?.forEach((element:IServerQueryParam, index:number) => {
-            if (element.index != e.index) {
-                newServerParam.push({
-                    index: newServerParam.length + 1,
-                    datasetColumn: element.datasetColumn,
-                    operation: element.operation,
-                    value: element.value,
-                    enable: (element.enable !== null ? element.enable : false),
-                    type: element.type
-                })}
-        });
-        this.setState({serverFilters: newServerParam})
-    };
-
-    createNewRow = () => {
-        let serverFilters: any = this.state.serverFilters;
-        serverFilters.push(
-            {index: serverFilters.length + 1,
-                datasetColumn: undefined,
-                operation: undefined,
-                value: undefined,
-                enable: true,
-                type: undefined});
-        this.setState({serverFilters})
-    };
-
-    reset = () => {
-        this.props.onChangeServerFilter!(undefined, paramType.filter);
-        this.setState({serverFilters:[]});
-    };
-
-    refresh = () => {
-        this.props.form.validateFields((err: any, values: any) => {
-            if (!err) {
-                this.props.onChangeServerFilter!(this.state.serverFilters!, paramType.filter)
-                }
-            else {
-                this.props.context.notification('Filters notification','Please, correct the mistakes', 'error')
-            }
-        });
-    };
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col span={5}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        {this.getFieldDecorator(`${value.idValue}`,
+                            {
+                                initialValue: value.value,
+                                rules: [{
+                                    required:
+                                        value.datasetColumn ||
+                                        value.operation,
+                                    message: ' '
+                                }]
+                            })(
+                            <Input
+                                placeholder={this.t('value')}
+                                disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty'}
+                                style={{ width: '110px', marginRight: '10px' }}
+                                allowClear={true}
+                                onChange={(e: any) => this.handleChange(
+                                    JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
+                                )}
+                                title={value.value}
+                                id={value.index.toString()}
+                            />
+                        )}
+                    </Form.Item>
+                </Col>
+                <Col  span={2}>
+                    <Form.Item style={{ display: 'inline-block' }}>
+                        <Switch
+                            defaultChecked={value.enable !== undefined ? value.enable : true}
+                            onChange={(e: any) => {
+                                const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                                this.handleChange(event)
+                            }}>
+                        </Switch>
+                    </Form.Item>
+                </Col>
+                <Col span={2}>
+                    <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
+                        <Button
+                            title="delete row"
+                            key={'deleteRowButton'}
+                            value={'deleteRowButton'}
+                            onClick={(e: any) => {this.deleteRow({index: value.index})}}
+                        >
+                            <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                        </Button>
+                    </Form.Item>
+                </Col>
+            </Row>
+        </div>
+    });
 
     render() {
-        const { getFieldDecorator, getFieldValue } = this.props.form;
-        const { t } = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
                         <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Системные фильтры</div>
                     </Col>
-                    <Col span={12} style={{textAlign: "right", marginLeft: '-2px'}}>
+                    <Col span={12} style={{textAlign: "right"}}>
                         <Button
                             title="reset"
                             style={{width: '40px', marginRight: '10px'}}
@@ -170,143 +206,18 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                         </Button>
                     </Col>
                 </Form.Item>
-                {
-                    this.state.serverFilters !== undefined && this.state.serverFilters!
-                        .map((serverFilter: any) => {
-                            const idDatasetColumn = `${JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`;
-                            const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
-                            const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
-                            return (
-                                <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
-                                    <Row gutter={[8, 0]}>
-                                    <Col span={1}>
-                                        <span>{serverFilter.index}</span>
-                                    </Col>
-                                    <Col span={7}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idDatasetColumn}`,
-                                                {
-                                                    initialValue: serverFilter.datasetColumn,
-                                                    rules: [{
-                                                        required:
-                                                            serverFilter.operation ||
-                                                            serverFilter.value,
-                                                        message: ' '
-                                                    }]
-                                                })(
-                                                <Select
-                                                    placeholder={t('columnname')}
-                                                    style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
-                                                    showSearch={true}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: undefined})
-                                                        this.handleChange(event)
-                                                    }}
-                                                >
-                                                    {
-                                                        this.props.columnDefs!
-                                                            .map((c: any) =>
-                                                                <Select.Option
-                                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                                                >
-                                                                    {c.get('field')}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={7}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idOperation}`,
-                                                {
-                                                    initialValue: `${t(serverFilter.operation)}` || undefined,
-                                                    rules: [{
-                                                        required:
-                                                            serverFilter.datasetColumn ||
-                                                            serverFilter.value,
-                                                        message: ' '
-                                                    }]
-                                                })(
-                                                <Select
-                                                    placeholder={t('operation')}
-                                                    style={{ width: '179px', marginLeft: '5px' }}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => {
-                                                        const event = e ? e : JSON.stringify({index: serverFilter.index, columnName: 'operation', value: undefined})
-                                                        this.handleChange(event)
-                                                    }}
-                                                >
-                                                    {
-                                                        this.props.allOperations!
-                                                            .map((o: any) =>
-                                                                <Select.Option
-                                                                    key={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
-                                                                    value={JSON.stringify({index: serverFilter.index, columnName: 'operation', value: o.get('name')})}
-                                                                >
-                                                                    {t(o.get('name'))}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={5}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator(`${idValue}`,
-                                                {
-                                                    initialValue: serverFilter.value,
-                                                    rules: [{
-                                                        required:
-                                                            serverFilter.datasetColumn ||
-                                                            serverFilter.operation,
-                                                        message: ' '
-                                                    }]
-                                                })(
-                                                <Input
-                                                    placeholder={t('value')}
-                                                    disabled={serverFilter.operation === 'IsEmpty' || serverFilter.operation === 'IsNotEmpty'}
-                                                    style={{ width: '110px', marginRight: '10px' }}
-                                                    allowClear={true}
-                                                    onChange={(e: any) => this.handleChange(
-                                                        JSON.stringify({index: serverFilter.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
-                                                    )}
-                                                    title={serverFilter.value}
-                                                    id={serverFilter.index.toString()}
-                                                />
-                                            )}
-                                        </Form.Item>
-                                    </Col>
-                                    <Col  span={2}>
-                                        <Form.Item style={{ display: 'inline-block' }}>
-                                            <Switch
-                                                defaultChecked={serverFilter.enable !== undefined ? serverFilter.enable : true}
-                                                onChange={(e: any) => {
-                                                    const event = JSON.stringify({index: serverFilter.index, columnName: 'enable', value: e});
-                                                    this.handleChange(event)
-                                                }}>
-                                            </Switch>
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={2}>
-                                        <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
-                                            <Button
-                                                title="delete row"
-                                                key={'deleteRowButton'}
-                                                value={'deleteRowButton'}
-                                                onClick={(e: any) => {this.deleteRow({index: serverFilter.index})}}
-                                            >
-                                                <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                                            </Button>
-                                        </Form.Item>
-                                    </Col>
-                                </Row>
-                                </Form.Item>
-                            )})
-                        }
+                <Form.Item>
+                    {
+                        <this.SortableList items={this.state.parametersArray!
+                            .map((serverFilter: any) => (
+                                {
+                                    ...serverFilter,
+                                    idDatasetColumn : `${JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`,
+                                    idValue : `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`
+                                }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                    }
+                </Form.Item>
             </Form>
         )
     }

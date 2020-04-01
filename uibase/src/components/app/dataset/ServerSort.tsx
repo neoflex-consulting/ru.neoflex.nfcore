@@ -9,134 +9,37 @@ import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import arrayMove from "array-move";
+import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
-    serverSorts?: Array<EObject>;
+    parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
-    allSorts?: Array<EObject>;
-    onChangeServerSort?: (newServerParam: any[], paramName: paramType) => void;
+    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newServerParam: any[], paramName: paramType) => void;
     isVisible?: boolean;
+    allSorts?: Array<EObject>;
+    componentType?: paramType;
 }
+
 
 interface State {
-    serverSorts: IServerQueryParam[] | undefined;
+    parametersArray: IServerQueryParam[] | undefined;
 }
 
-class ServerSort extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
-
-    /*const { getFieldDecorator } = this.props.form;
-    const { t } = this.props;*/
-
-    t: any;
-    getFieldDecorator: any;
+class ServerSort extends DrawerParameterComponent<Props, State> {
 
     constructor(props: any) {
         super(props);
         this.state = {
-            serverSorts: this.props.serverSorts,
+            parametersArray: this.props.parametersArray,
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
-            && JSON.stringify(this.props.serverSorts) !== JSON.stringify(this.state.serverSorts)) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (err) {
-                    this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
-                }
-            });
-        }
-        if (JSON.stringify(prevProps.serverSorts) !== JSON.stringify(this.props.serverSorts)) {
-            this.setState({serverSorts: this.props.serverSorts})
-        }
-        if (JSON.stringify(prevState.serverSorts) !== JSON.stringify(this.state.serverSorts)
-            && this.props.isVisible
-            && this.state.serverSorts?.length !== 0) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
-                    this.props.saveChanges!(this.state.serverSorts!, paramType.sort);
-                }
-            });
-        }
-        if (this.state.serverSorts?.length === 0) {
-            this.createNewRow()
-        }
-    }
-
-    handleChange(e: any) {
-        const target = JSON.parse(e);
-        let serverSorts = this.state.serverSorts!.map( (f: any) => {
-            if (f.index.toString() === target['index'].toString()) {
-                const targetColumn = this.props.columnDefs!.find( (c: any) =>
-                    c.get('field') === (f.datasetColumn || target['value'])
-                );
-                return {index: f.index,
-                    datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
-                    operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
-                    enable: target['columnName'] === 'enable' ? target['value'] : f.enable,
-                    type: f.type || (targetColumn ? targetColumn.get('type') : undefined)}
-            } else {
-                return f
-            }
-        });
-        this.setState({serverSorts})
-    };
-
-    deleteRow = (e: any) => {
-        this.props.form.resetFields();
-        let newServerParam: IServerQueryParam[] = [];
-        this.state.serverSorts?.forEach((element:IServerQueryParam, index:number) => {
-            if (element.index != e.index) {
-                newServerParam.push({
-                    index: newServerParam.length + 1,
-                    datasetColumn: element.datasetColumn,
-                    operation: element.operation,
-                    enable: (element.enable !== null ? element.enable : false),
-                    type: element.type
-                })}
-        });
-        this.setState({serverSorts: newServerParam})
-    };
-
-    handleSubmit = (e: any) => {
-        e.preventDefault();
-        this.refresh();
-    };
-
-    createNewRow = () => {
-        let serverSorts: any = this.state.serverSorts;
-        serverSorts.push(
-            {index: serverSorts.length + 1,
-                datasetColumn: undefined,
-                operation: undefined,
-                enable: true,
-                type: undefined});
-        this.setState({serverSorts})
-    };
-
-    reset = () => {
-        this.props.onChangeServerSort!(undefined, paramType.sort);
-        this.setState({serverSorts:[]});
-    };
-
-    refresh = () => {
-        this.props.form.validateFields((err: any, values: any) => {
-            if (!err) {
-                this.props.onChangeServerSort!(this.state.serverSorts!, paramType.sort)
-            }
-            else {
-                this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
-            }
-        });
-    };
-
     SortableItem = SortableElement(({value}: any) => {
-        return <li className="SortableItem">
+        return <div className="SortableItem">
             <Row gutter={[8, 0]}>
                 <Col span={1}>
                     {value.index}
@@ -153,8 +56,8 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                 },{
                                     validator: (rule: any, value: any, callback: any) => {
                                         let isDuplicate: boolean = false;
-                                        if (this.state.serverSorts !== undefined) {
-                                            const valueArr = this.state.serverSorts
+                                        if (this.state.parametersArray !== undefined) {
+                                            const valueArr = this.state.parametersArray
                                                 .filter((currentObject) => {
                                                     let currentField: string;
                                                     try {
@@ -265,23 +168,7 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                     </Form.Item>
                 </Col>
             </Row>
-        </li>
-    });
-
-    onSortEnd = ({oldIndex, newIndex}:any) => {
-        let newState: IServerQueryParam[] = arrayMove(this.state.serverSorts!, oldIndex, newIndex)
-        newState.forEach( (serverSort, index) => serverSort.index = index+1 );
-        this.setState({serverSorts: newState});
-    };
-
-    SortableList = SortableContainer(({items}:any) => {
-        return (
-            <ul className="SortableList">
-                {items.map((value:any) => (
-                    <this.SortableItem key={`item-${value}`} index={value.index-1} value={value} />
-                ))}
-            </ul>
-        );
+        </div>
     });
 
     render() {
@@ -323,13 +210,13 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                 </Form.Item>
                 <Form.Item>
                     {
-                        <this.SortableList items={this.state.serverSorts!
+                        <this.SortableList items={this.state.parametersArray!
                             .map((serverSort: any) => (
                                 {
                                     ...serverSort,
                                     idDatasetColumn : `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
-                                }))} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                                }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
             </Form>

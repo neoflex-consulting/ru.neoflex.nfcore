@@ -5,13 +5,13 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
+import {IServerQueryParam} from '../../../MainContext';
+import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
+import ServerGroupBy from "./ServerGroupBy";
 import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
-import {IServerQueryParam} from '../../../MainContext';
 import Highlight from "./Highlight";
-import ServerGroupBy from "./ServerGroupBy";
-import '../../../styles/AggregateHighlight.css'
 
 const { Option, OptGroup } = Select;
 
@@ -552,12 +552,13 @@ class DatasetView extends React.Component<any, State> {
                             ?
                             <ServerFilter
                                 {...this.props}
-                                serverFilters={this.state.serverFilters}
+                                parametersArray={this.state.serverFilters}
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
-                                onChangeServerFilter={this.onChangeParams}
+                                onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
+                                componentType={paramType.filter}
                             />
                             :
                             <ServerFilter/>
@@ -567,13 +568,14 @@ class DatasetView extends React.Component<any, State> {
                             ?
                             <Highlight
                                 {...this.props}
-                                highlights={this.state.highlights}
+                                parametersArray={this.state.highlights}
                                 columnDefs={this.state.columnDefs}
                                 allOperations={this.state.allOperations}
                                 allHighlightType={this.state.allHighlightType}
-                                onChangeHighlights={this.onChangeParams}
+                                onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
+                                componentType={paramType.highlights}
                             />
                             :
                             <Highlight/>
@@ -593,12 +595,13 @@ class DatasetView extends React.Component<any, State> {
                             ?
                             <ServerAggregate
                                 {...this.props}
-                                serverAggregates={this.state.serverAggregates}
+                                parametersArray={this.state.serverAggregates}
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
-                                onChangeServerAggregation={this.onChangeParams}
+                                onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
+                                componentType={paramType.aggregate}
                             />
                             :
                             <ServerAggregate/>
@@ -608,12 +611,13 @@ class DatasetView extends React.Component<any, State> {
                             ?
                             <ServerGroupBy
                                 {...this.props}
-                                serverGroupBy={this.state.serverGroupBy}
+                                parametersArray={this.state.serverGroupBy}
                                 columnDefs={this.state.columnDefs}
                                 allAggregates={this.state.allAggregates}
-                                onChangeServerGroupBy={this.onChangeParams}
+                                onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
+                                componentType={paramType.group}
                             />
                             :
                             <ServerGroupBy/>
@@ -633,17 +637,19 @@ class DatasetView extends React.Component<any, State> {
                             ?
                             <ServerSort
                                 {...this.props}
-                                serverSorts={this.state.serverSorts}
+                                parametersArray={this.state.serverSorts}
                                 columnDefs={this.state.columnDefs}
                                 allSorts={this.state.allSorts}
-                                onChangeServerSort={this.onChangeParams}
+                                onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.sortsMenuVisible}
+                                componentType={paramType.sort}
                             />
                             :
                             <ServerSort/>
                     }
                 </Drawer>
+
             </div>
         )
     }
