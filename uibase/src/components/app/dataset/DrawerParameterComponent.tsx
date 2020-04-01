@@ -2,7 +2,7 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {Button, Row, Col, Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
@@ -112,7 +112,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.props.form.resetFields();
         let newServerParam: IServerQueryParam[] = [];
         this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
-            if (element.index != e.index) {
+            if (element.index !== e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
                     datasetColumn: element.datasetColumn,
@@ -140,7 +140,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
                 datasetColumn: undefined,
                 operation: undefined,
                 value: undefined,
-                enable: undefined,
+                enable: true,
                 type: undefined,
                 highlightType: undefined,
                 backgroundColor: undefined,
