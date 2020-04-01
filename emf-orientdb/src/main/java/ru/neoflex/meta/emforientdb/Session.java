@@ -452,6 +452,7 @@ public class Session implements Closeable {
                                 }
                                 OVertex crVertex = orid != null ? db.load(orid) : createProxyOElement(crObject.eClass(), crURI);
                                 ((OVertex) oElement).addEdge(crVertex, getEdgeName((EReference) sf));
+                                crVertex.save();
                             } else {
                                 embedded.add(orid);
                             }
