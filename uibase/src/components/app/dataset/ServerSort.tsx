@@ -165,14 +165,14 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                         </Button>
                     </Col>
                 </Form.Item>
+                <Form.Item>
                 {
                     this.state.serverSorts !== undefined && this.state.serverSorts!
                         .map((serverSort: any) => {
                             const idDatasetColumn = `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`;
-                            const idEnable = `${JSON.stringify({index: serverSort.index, columnName: 'enable', value: serverSort.enable})}`;
                             return (
-                                <Form.Item key={serverSort.index} style={{ marginTop: '-30px' }}>
+
                                     <Row gutter={[8, 0]}>
                                     <Col span={1}>
                                         {serverSort.index}
@@ -301,9 +301,9 @@ class ServerSort extends React.Component<Props & FormComponentProps & WithTransl
                                         </Form.Item>
                                     </Col>
                                     </Row>
-                                </Form.Item>
                             )})
                 }
+                </Form.Item>
             </Form>
         )
     }

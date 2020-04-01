@@ -170,7 +170,6 @@ class ServerAggregate extends React.Component<Props & FormComponentProps & WithT
                 .map((serverAggregate: any) => {
                     const idDatasetColumn = `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`;
                     const idOperation = `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`;
-                    const idEnable = `${JSON.stringify({index: serverAggregate.index, columnName: 'enable', value: serverAggregate.enable})}`;
                     return (
                         <Form.Item key={serverAggregate.index} style={{ marginTop: '-30px' }}>
                             <Row gutter={[8, 0]}>

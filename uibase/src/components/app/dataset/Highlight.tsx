@@ -224,7 +224,6 @@ class Highlight extends React.Component<Props & FormComponentProps & WithTransla
                             const idDatasetColumn = `${JSON.stringify({index: highlight.index, columnName: 'datasetColumn', value: highlight.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: highlight.index, columnName: 'operation', value: highlight.operation})}`;
                             const idValue = `${JSON.stringify({index: highlight.index, columnName: 'value', value: highlight.value})}`;
-                            const idEnable = `${JSON.stringify({index: highlight.index, columnName: 'enable', value: highlight.enable})}`;
                             const idHighlightType = `${JSON.stringify({index: highlight.index, columnName: 'highlightType', value: highlight.highlightType})}`;
                             return (
                                 <Form.Item key={highlight.index} style={{marginTop: '-30px'}}>

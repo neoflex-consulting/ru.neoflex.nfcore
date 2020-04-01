@@ -176,7 +176,6 @@ class ServerFilter extends React.Component<Props & FormComponentProps & WithTran
                             const idDatasetColumn = `${JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`;
                             const idValue = `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`;
-                            const idEnable = `${JSON.stringify({index: serverFilter.index, columnName: 'enable', value: serverFilter.enable})}`;
                             return (
                                 <Form.Item key={serverFilter.index} style={{ marginTop: '-30px' }}>
                                     <Row gutter={[8, 0]}>

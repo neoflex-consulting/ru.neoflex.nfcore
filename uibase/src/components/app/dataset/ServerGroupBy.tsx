@@ -174,7 +174,6 @@ class ServerGroupBy extends React.Component<Props & FormComponentProps & WithTra
                         .map((serverGroupBy: IServerQueryParam) => {
                             const idDatasetColumn = `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`;
                             const idOperation = `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`;
-                            const idEnable = `${JSON.stringify({index: serverGroupBy.index, columnName: 'enable', value: serverGroupBy.enable})}`;
                             return (
                                 <Form.Item key={serverGroupBy.index} style={{ marginTop: '-30px' }}>
                                     <Row gutter={[8, 0]}>
