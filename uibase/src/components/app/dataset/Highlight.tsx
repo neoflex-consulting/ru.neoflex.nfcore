@@ -32,7 +32,7 @@ interface State {
     color: any;
 }
 
-class value extends DrawerParameterComponent<Props, State> {
+class Highlight extends DrawerParameterComponent<Props, State> {
 
     constructor(props: any) {
         super(props);
@@ -403,4 +403,4 @@ class value extends DrawerParameterComponent<Props, State> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(value))
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(Highlight))

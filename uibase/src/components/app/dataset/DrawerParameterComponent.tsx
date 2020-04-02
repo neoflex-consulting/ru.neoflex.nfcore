@@ -242,5 +242,3 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         )
     }
 }
-
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(DrawerParameterComponent))
