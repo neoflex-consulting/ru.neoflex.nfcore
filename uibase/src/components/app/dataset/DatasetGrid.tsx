@@ -251,7 +251,7 @@ class DatasetGrid extends React.Component<any, any> {
                         this.changeSettings();
                     }
                 }
-                if (JSON.parse(datasetView.get('value'))['serverAggregates']) {
+                if (datasetView && JSON.parse(datasetView.get('value'))['serverAggregates']) {
                     this.highlightAggregate(JSON.parse(datasetView.get('value'))['serverAggregates']);
                 }
             }
