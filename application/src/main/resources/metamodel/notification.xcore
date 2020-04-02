@@ -9,7 +9,6 @@ package ru.neoflex.nfcore.notification
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.application.AppModule
-import ru.neoflex.nfcore.base.types.JSON
 
 class ReportingDateOn {
     String name
@@ -28,7 +27,6 @@ class Notification {
 	String deadlineDay
 	String deadlineTime
 	Periodicity calculationInterval
-    op JSON getNotificationInstances(String dateFrom, String dateTo)
 }
 
 @Ecore(constraints="IsValid")

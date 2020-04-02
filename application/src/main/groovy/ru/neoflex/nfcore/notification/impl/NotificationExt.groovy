@@ -14,35 +14,6 @@ import ru.neoflex.nfcore.notification.Periodicity
 
 class NotificationExt extends NotificationImpl {
 
-    @Override
-    String getNotificationInstances(String dateFrom, String dateTo) {
-        return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
-            @Override
-            Object call(TransactionSPI tx) throws Exception {
-                def resource = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: this.name])
-                        .execute().resourceSet
-                if (!resource.resources.empty) {
-                    def notificationRef = Context.current.store.getRef(resource.resources.get(0))
-                    def notification = resource.resources.get(0).contents.get(0) as Notification
-
-                    if (notification.periodicity == Periodicity.MONTH) {
-                        if (notification.reportingDateOn.size() != 0) {
-
-                        }
-                    }
-
-
-
-
-
-                    Context.current.store.updateEObject(notificationRef, notification)
-                    Context.current.store.commit("Entity was updated " + notificationRef)
-                    return JsonOutput.toJson("Columns in entity " + notification.name + " were deleted")
-                }
-            }
-        })
-    }
-
     static def findOrCreateEObject(EClass eClass, String name, boolean replace = false) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet

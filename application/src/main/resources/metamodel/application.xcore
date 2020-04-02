@@ -58,16 +58,19 @@ abstract class Icon extends ViewElement {
 
 class Calendar extends ViewElement {
     refers Notification[] notifications
-    refers DaysOnTheCalendar workingDaysCalendar
+    refers YearBook yearBook
+    op JSON getNotificationInstances(String dateFrom, String dateTo)
 }
 
-class DaysOnTheCalendar {
+class YearBook {
     QName name
     contains Day[] days
+    op JSON createAllDays(String year, boolean excludeSaturdayAndSunday)
+    op JSON deleteAllDays()
 }
 
 class Day {
-    String name
+    Date name
 }
 
 class ClassFeature extends FormItem {

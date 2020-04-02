@@ -9,7 +9,7 @@ import java.util.Calendar;
 
 import java.text.SimpleDateFormat
 
-class DaysOnTheCalendarInit {
+class YearBookInit {
     def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet
@@ -18,19 +18,17 @@ class DaysOnTheCalendarInit {
         }
         if (resources.resources.empty) {
             def eObject = EcoreUtil.create(eClass)
-            eObject.eSet(eClass.getEStructuralFeature("name"), name)
-            if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
             resources.resources.add(Context.current.store.createEObject(eObject))
         }
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def createDaysOnTheCalendar(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.DAYS_ON_THE_CALENDAR, [name: name])
+    static def createYearBook(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.YEAR_BOOK, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
-            def calendar = ApplicationFactory.eINSTANCE.createDaysOnTheCalendar()
-            calendar.name = name
+            def yearBook = ApplicationFactory.eINSTANCE.createYearBook()
+            yearBook.name = name
 
             def myFormat = new SimpleDateFormat("yyyy-MM-dd");
             def date1 = "2020-01-01";
@@ -40,12 +38,13 @@ class DaysOnTheCalendarInit {
             while( d1.before(d2) ){
                 if (d1.toDayOfWeek().ordinal() != 5 && d1.toDayOfWeek().ordinal() != 6) {
                     def day = ApplicationFactory.eINSTANCE.createDay()
-                    day.name = myFormat.format(d1)
-                    calendar.days.add(day)
+//                    day.name = myFormat.format(d1)
+                    day.name = d1
+                    yearBook.days.add(day)
                 }
                 d1 = addDays(d1, 1);
             }
-            rs.resources.add(Context.current.store.createEObject(calendar))
+            rs.resources.add(Context.current.store.createEObject(yearBook))
         }
         return rs.resources.get(0).contents.get(0)
     }
@@ -55,9 +54,4 @@ class DaysOnTheCalendarInit {
         cal.add(Calendar.DATE, 1);
         return cal.getTime();
     }
-
-    private static boolean isSaturdayOrSunday(Calendar gc) {
-        return (gc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || gc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY);
-    }
-
 }

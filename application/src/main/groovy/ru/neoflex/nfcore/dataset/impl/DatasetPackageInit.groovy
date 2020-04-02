@@ -4,7 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
-import ru.neoflex.nfcore.application.impl.DaysOnTheCalendarInit
+import ru.neoflex.nfcore.application.impl.YearBookInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
 import ru.neoflex.nfcore.notification.impl.NotificationInit
@@ -61,7 +61,7 @@ class DatasetPackageInit {
         NotificationStatusInit.createNotificationStatus('Отчёт сдан в проверяющий орган','#f9c4ff')
 
         /*ApplicationPackage*/
-        DaysOnTheCalendarInit.createDaysOnTheCalendar("Календарь рабочих дней 2020(рус)")
+        YearBookInit.createYearBook("Календарь рабочих дней 2020(рус)")
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
 
