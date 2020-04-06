@@ -71,4 +71,11 @@ class YearBookExt extends YearBookImpl {
             return JsonOutput.toJson("Days in entity " + yearBook.name + " were deleted")
         }
     }
+
+    private static java.util.Date addDays(java.util.Date d1, int i) {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(d1);
+        cal.add(Calendar.DATE, 1);
+        return cal.getTime();
+    }
 }

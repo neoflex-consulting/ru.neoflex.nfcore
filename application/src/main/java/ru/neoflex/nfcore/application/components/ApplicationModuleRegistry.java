@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import ru.neoflex.nfcore.application.ApplicationPackage;
+import ru.neoflex.nfcore.application.impl.ApplicationFactoryExt;
 import ru.neoflex.nfcore.application.impl.ApplicationValidatorExt;
 import ru.neoflex.nfcore.base.components.ModuleRegistryImpl;
 import ru.neoflex.nfcore.dataset.DatasetPackage;
@@ -19,7 +20,7 @@ import ru.neoflex.nfcore.notification.impl.NotificationValidatorExt;
 @Component
 public class ApplicationModuleRegistry extends ModuleRegistryImpl {
     ApplicationModuleRegistry() {
-        registerEPackage(ApplicationPackage.eINSTANCE, new ApplicationValidatorExt());
+        registerEPackage(ApplicationPackage.eNS_URI, ()->ApplicationPackage.eINSTANCE, new ApplicationFactoryExt(), new ApplicationValidatorExt());
         registerEPackage(DatasetPackage.eNS_URI, ()->DatasetPackage.eINSTANCE, new DatasetFactoryExt(), new DatasetValidatorExt());
         registerEPackage(LocalesPackage.eINSTANCE);
         registerEPackage(NotificationPackage.eNS_URI, ()->NotificationPackage.eINSTANCE, new NotificationFactoryExt(), new NotificationValidatorExt());
