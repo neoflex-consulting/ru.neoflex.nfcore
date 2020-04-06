@@ -12,6 +12,8 @@ import ServerGroupBy from "./ServerGroupBy";
 import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
+import Calculator from "./Calculator";
+import {faCalculator} from "@fortawesome/free-solid-svg-icons/faCalculator";
 
 const { Option, OptGroup } = Select;
 
@@ -21,7 +23,8 @@ export enum paramType {
     aggregate="serverAggregates",
     sort="serverSorts",
     group="serverGroupBy",
-    highlights="highlights"
+    highlights="highlights",
+    calculations="calculations"
 }
 
 interface Props {
@@ -47,6 +50,8 @@ interface State {
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
     allHighlightType: any[];
+    calculations: any[];
+    calculationsMenuVisible: boolean;
 }
 
 const defaultComponentValues = {
@@ -80,7 +85,9 @@ class DatasetView extends React.Component<any, State> {
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
-            allHighlightType: []
+            allHighlightType: [],
+            calculations: [],
+            calculationsMenuVisible: false
         }
     }
 
@@ -403,6 +410,13 @@ class DatasetView extends React.Component<any, State> {
         this.setState({ aggregatesMenuVisible: false });
     };
 
+    handleCalculationsMenu = () => {
+        /*TODO*/
+        this.state.calculationsMenuVisible ? this.setState({ calculationsMenuVisible: false }) : this.setState({ calculationsMenuVisible: true });
+        /*this.setState({ filtersMenuVisible: false });
+        this.setState({ aggregatesMenuVisible: false });*/
+    };
+
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
@@ -538,6 +552,14 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <FontAwesomeIcon icon={faArrowsAltV} size='xs'/>
                 </Button>
+                <div style={{display: 'inline-block', height: '30px',
+                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
+                        onClick={this.handleCalculationsMenu}
+                >
+                    <FontAwesomeIcon icon={faCalculator} size='xs'/>
+                </Button>
                 <Drawer
                     placement='right'
                     title={t('filters')}
@@ -647,6 +669,32 @@ class DatasetView extends React.Component<any, State> {
                             />
                             :
                             <ServerSort/>
+                    }
+                </Drawer>
+                <Drawer
+                    placement='right'
+                    title={t('calculable expressions')}
+                    width={'700px'}
+                    visible={this.state.calculationsMenuVisible}
+                    onClose={this.handleCalculationsMenu}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        true /*TODO*/
+                            ?
+                            <Calculator
+                                {...this.props}
+                                parametersArray={[{index:1}]} /*TODO*/
+                                columnDefs={this.state.columnDefs}
+                                allCalculatorOperations={[]} /*TODO*/
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.calculationsMenuVisible}
+                                componentType={paramType.calculations}
+                            />
+                            :
+                            <Calculator/>
                     }
                 </Drawer>
 

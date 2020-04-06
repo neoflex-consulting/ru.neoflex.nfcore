@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {WithTranslation} from 'react-i18next';
 import {Button, Row, Col, Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
@@ -25,21 +25,27 @@ interface State {
     textColorVisible?: boolean;
     colorIndex?: any;
     color?: any;
+    currentIndex?: number;
 }
 
 export class DrawerParameterComponent<T extends Props, V extends State> extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
     t: any;
     getFieldDecorator: any;
+    setFieldsValue: any;
+    getFieldValue: any;
     paramNotification: string;
 
     constructor(props: any) {
         super(props);
         this.state = {
             parametersArray: this.props.parametersArray,
+            currentIndex: 0
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
         this.getFieldDecorator = this.props.form?.getFieldDecorator;
+        this.setFieldsValue = this.props.form?.setFieldsValue;
+        this.getFieldValue = this.props.form?.getFieldValue;
         switch (this.props.componentType) {
             case paramType.sort:
                 this.paramNotification = "Sort notification";
