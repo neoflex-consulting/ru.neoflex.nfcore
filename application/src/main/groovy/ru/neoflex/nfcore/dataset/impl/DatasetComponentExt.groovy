@@ -92,9 +92,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
+    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         if (column) {
-            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy)
+            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy,calculatedExpression)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -112,7 +112,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
+    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -140,6 +140,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def serverGroupByAggregation = []
         def serverGroupBy = []
         def serverSorts = []
+        def serverCalculatedExpression = []
 
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
@@ -168,6 +169,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Filter
         if (conditions) {
             for (int i = 0; i <= conditions.size() - 1; ++i) {
                 if (column.name.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
@@ -224,6 +226,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Group by
         if (groupBy) {
             for (int i = 0; i <= groupBy.size() - 1; ++i) {
                 if (column.name.contains(groupBy[i].datasetColumn) && groupBy[i].enable == true) {
@@ -267,12 +270,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Aggregation overall
         if (aggregations) {
-            for (int i = 0; i <= column.size() - 1; ++i) {
+            def allColumns = column.name + calculatedExpression.datasetColumn
+            for (int i = 0; i <= allColumns.size() - 1; ++i) {
                 def isExcluded = true;
                 //Итого и столбец под одним столбцом
                 for (int j = 0; j <= aggregations.size() - 1; ++j) {
-                    if (column[i].name == aggregations[j].datasetColumn && aggregations[j].enable == true) {
+                    if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable == true) {
                         def map = [:]
                         map["column"] = aggregations[j].datasetColumn
                         def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
@@ -305,8 +310,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
                 if (isExcluded == true) {
                     def map = [:]
-                    map["column"] = column[i].name
-                    map["select"] = "NULL as ${column[i].name}"
+                    map["column"] = allColumns[i]
+                    map["select"] = "NULL as ${allColumns[i]}"
                     if (!serverAggregations.contains(map) && map) {
                         serverAggregations.add(map)
                     }
@@ -314,6 +319,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Order by
         if (sorts) {
             for (int i = 0; i <= sorts.size() - 1; ++i) {
                 if (column.name.contains(sorts[i].datasetColumn) && sorts[i].enable == true) {
@@ -333,8 +339,24 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Calculated expressions
+        if (calculatedExpression) {
+            for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
+                def map = [:]
+                map["column"] = calculatedExpression[i].datasetColumn
+                map["select"] = "${calculatedExpression[i].operation} as ${calculatedExpression[i].datasetColumn}"
+                if (!serverCalculatedExpression.contains(map)) {
+                    serverCalculatedExpression.add(map)
+                }
+            }
+        }
+
         String currentQuery
         currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
+        if (calculatedExpression) {
+            currentQuery = "SELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
+                    " FROM (${currentQuery}) t"
+        }
         if (serverFilters) {
             currentQuery = currentQuery +
                     " WHERE ${serverFilters.select.join(' AND ')}"

@@ -200,7 +200,7 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[]) => {
+    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
@@ -208,7 +208,8 @@ class EcoreApp extends React.Component<any, State> {
         return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy')])
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
     };
 
     changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {

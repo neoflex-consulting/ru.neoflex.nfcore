@@ -22,6 +22,8 @@ interface Props {
     isVisible?: boolean;
     allCalculatorOperations?: Array<EObject>;
     componentType?: paramType;
+    onChangeColumnDefs?: (columnDefs: any, rowData: any, datasetComponentName: string) => void;
+    defaultColumnDefs?: Array<any>;
 }
 
 interface State {
@@ -86,12 +88,14 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         super(props);
         this.state = {
             parametersArray: this.props.parametersArray,
+            //array index
             currentIndex: 0
         };
     }
 
     componentDidUpdate(prevProps: any, prevState: any, snapshot?: any): void {
-        if (JSON.stringify(prevState.currentIndex) !== JSON.stringify(this.state.currentIndex)) {
+        if (JSON.stringify(prevState.currentIndex) !== JSON.stringify(this.state.currentIndex)
+            || JSON.stringify(prevState.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
             this.setFieldsValue({
                 [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
                 [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!
@@ -128,9 +132,75 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         }
     };
 
+    deleteRow = () => {
+        //Удаляем смещаем на 1 вниз
+        if (this.state.parametersArray?.length !== 1) {
+            let parametersArray = this.state.parametersArray?.filter((element => {
+                return element.index - 1 !== this.state.currentIndex
+            })).map((element, index) => {
+                return {...element,
+                        index: index + 1}
+            });
+            let currentIndex = parametersArray!.length - 1;
+            this.deleteColumnDef(this.state.parametersArray![this.state.currentIndex!].datasetColumn!);
+            this.setState({parametersArray, currentIndex});
+        //Последний обнуляем
+        } else {
+            this.deleteColumnDef(this.state.parametersArray![this.state.currentIndex!].datasetColumn!);
+            let parametersArray = this.state.parametersArray?.map((element) => {
+                   return {index: 1,
+                       datasetColumn: undefined,
+                       operation: undefined,
+                       enable: true,
+                       type: undefined}
+                }
+            );
+            this.setState({parametersArray});
+        }
+    };
+
+    addAllColumnDef = (parametersArray: IServerQueryParam[]) => {
+        let columnDefs = this.props.defaultColumnDefs.map((e:any)=> e);
+        parametersArray.forEach(element => {
+            if (element.enable && element.datasetColumn) {
+                let rowData = new Map();
+                rowData.set('field', element.datasetColumn);
+                rowData.set('headerName', element.datasetColumn);
+                //TODO определение типа по выражению?
+                rowData.set('headerTooltip', "type : String");
+                rowData.set('hide', false);
+                rowData.set('pinned', false);
+                rowData.set('filter', true);
+                rowData.set('sort', true);
+                rowData.set('editable', false);
+                rowData.set('checkboxSelection', false);
+                rowData.set('sortable', true);
+                rowData.set('suppressMenu', false);
+                rowData.set('resizable', false);
+                rowData.set('type', "String");
+                if (!columnDefs.some((col: any) => {
+                    return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
+                })) {
+                    columnDefs.push(rowData);
+                }
+            }
+        });
+        this.props.onChangeColumnDefs(columnDefs);
+    };
+    
+    deleteColumnDef = (columnName: string) => {
+        if (columnName) {
+            let columnDefs = this.props.columnDefs.filter((element: any) => {
+                return element.get('field').toLocaleLowerCase() !== columnName.toLocaleLowerCase()
+            });
+            if (JSON.stringify(columnDefs) !== JSON.stringify(this.props.columnDefs)) {
+                this.props.onChangeColumnDefs(columnDefs)
+            }
+        }
+    };
+
     handleSubmit = (e: any) => {
         e.preventDefault();
-        /*this.refresh();*/
         this.props.form.validateFields((err: any, values: any) => {
             if (err) {
                 this.props.context.notification('Achtung!','Please, correct the mistakes', 'error')
@@ -148,7 +218,9 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                         return element
                     }
                 });
+                this.addAllColumnDef(parametersArray);
                 this.setState({parametersArray});
+                this.props.onChangeParameters!(parametersArray!, this.props.componentType)
             }
         });
     };
@@ -214,8 +286,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             style={{width: '40px', marginRight: '10px'}}
                             key={'deleteButton'}
                             value={'deleteButton'}
-                            /*TODO*/
-                            /*onClick={this.reset}*/
+                            onClick={this.deleteRow}
                         >
                             <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                         </Button>
