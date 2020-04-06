@@ -38,7 +38,6 @@ class YearBookInit {
             while( d1.before(d2) ){
                 if (d1.toDayOfWeek().ordinal() != 5 && d1.toDayOfWeek().ordinal() != 6) {
                     def day = ApplicationFactory.eINSTANCE.createDay()
-//                    day.name = myFormat.format(d1)
                     day.name = d1
                     yearBook.days.add(day)
                 }
@@ -48,6 +47,7 @@ class YearBookInit {
         }
         return rs.resources.get(0).contents.get(0)
     }
+
     private static Date addDays(Date d1, int i) {
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTime(d1);
