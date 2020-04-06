@@ -1,14 +1,13 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch, Input, List} from 'antd';
+import {Button, Row, Col, Form, Select, Input, List} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {ChangeEvent, EventHandler} from "react";
 import {MouseEvent} from "react";
 
 const inputOperationKey: string = "_inputOperationKey";
@@ -87,7 +86,6 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         super(props);
         this.state = {
             parametersArray: this.props.parametersArray,
-            expression: "",
             currentIndex: 0
         };
     }
@@ -111,12 +109,6 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         this.setFieldsValue({
             [inputOperationKey]:""
         })
-    };
-
-    handleTextInput = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.currentTarget.value) {
-            this.setState({expression: e.currentTarget.value})
-        }
     };
 
     createNewRow = () => {
@@ -241,7 +233,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                         message: ' '
                                     }]
                                 })(
-                                    <Input onChange={this.handleTextInput}/>
+                                    <Input/>
                                   )
                             }
                             <CreateColumnButtons onClick={this.handleCalculate} columnDefs={this.props.columnDefs}/>
