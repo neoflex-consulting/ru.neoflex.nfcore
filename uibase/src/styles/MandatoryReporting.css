@@ -166,7 +166,17 @@
     line-height: 1;
     top: .75em;
     right: .75em;
-    font-weight: 700;
+    font-weight: 600;
+}
+
+.calendar .body .cell .title {
+    position: absolute;
+    font-size: 82.5%;
+    line-height: 1;
+    top: .75em;
+    right: .75em;
+    font-weight: 600;
+    margin-top: 17px;
 }
 
 .calendar .body .disabled {
