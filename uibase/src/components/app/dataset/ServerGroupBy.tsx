@@ -215,7 +215,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                     ...serverGroupBy,
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`,
-                                }))} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                                }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
             </Form>

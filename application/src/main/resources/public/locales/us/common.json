@@ -81,5 +81,9 @@
 
         "Cell": "cell",
         "Column": "column",
-        "Row": "row"
+        "Row": "row",
+
+        "Enter new column name": "Enter new column name",
+        "Select calculated column": "Select calculated column",
+        "Expression": "Expression"
 }

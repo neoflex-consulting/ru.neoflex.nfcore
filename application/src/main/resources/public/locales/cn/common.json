@@ -81,5 +81,9 @@
 
         "Cell": "細胞",
         "Column": "柱",
-        "Row": "行"
+        "Row": "行",
+
+        "Enter new column name": "輸入新的列名",
+        "Select calculated column": "選擇計算列",
+        "Expression": "表達"
 }
