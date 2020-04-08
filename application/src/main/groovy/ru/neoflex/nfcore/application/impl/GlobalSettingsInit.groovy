@@ -1,4 +1,4 @@
-package ru.neoflex.nfcore.dataset.impl
+package ru.neoflex.nfcore.application.impl
 
 import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.ApplicationFactory

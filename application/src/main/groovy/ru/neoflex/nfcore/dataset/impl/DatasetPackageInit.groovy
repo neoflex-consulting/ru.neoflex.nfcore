@@ -4,11 +4,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
+import ru.neoflex.nfcore.application.impl.GlobalSettingsInit
 import ru.neoflex.nfcore.application.impl.YearBookInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
 import ru.neoflex.nfcore.notification.impl.NotificationInit
-import ru.neoflex.nfcore.notification.impl.NotificationInstanceInit
 import ru.neoflex.nfcore.notification.impl.NotificationStatusInit
 
 class DatasetPackageInit {

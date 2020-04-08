@@ -14,6 +14,7 @@ interface State {
     selectedDate: Date;
     NotificationStatus: Ecore.EObject[];
     NotificationInstances: Ecore.EObject[];
+    globalSettings?: EObject;
     calendarLanguage: string;
 }
 
@@ -22,13 +23,18 @@ interface Props {
 
 class Calendar extends React.Component<any, State> {
 
-    state = {
-        currentMonth: new Date(),
-        selectedDate: new Date(),
-        NotificationStatus: [],
-        NotificationInstances: [],
-        calendarLanguage: ""
-    };
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            currentMonth: new Date(),
+            selectedDate: new Date(),
+            NotificationStatus: [],
+            NotificationInstances: [],
+            calendarLanguage: ""
+        };
+    }
+
+
 
     getAllNotificationInstances() {
         API.instance().fetchAllClasses(false).then(classes => {
@@ -58,6 +64,18 @@ class Calendar extends React.Component<any, State> {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((statuses) => {
                         this.setState({NotificationStatus: statuses})
+                    })
+            }
+        })
+    };
+
+    getGlobalSettings() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//GlobalSettings");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((result) => {
+                        this.setState({globalSettings: result[0].eContents()[0]})
                     })
             }
         })
@@ -140,6 +158,7 @@ class Calendar extends React.Component<any, State> {
             for (let i = 0; i < 7; i++) {
                 let content = this.getContents(day);
                 formattedDate = dateFns.format(day, dateFormat);
+                let title = this.getTitle(day);
                 const cloneDay = day;
                 days.push(
                     <div
@@ -154,7 +173,7 @@ class Calendar extends React.Component<any, State> {
                         }
                     >
                         <span className="number">{formattedDate}</span>
-                        <span className="title">1-й рабочий день</span>
+                        <span className="title">{title}</span>
                         <span className="bg">{formattedDate}</span>
                         <div>
                             {content.length !== 0
@@ -191,13 +210,26 @@ class Calendar extends React.Component<any, State> {
         )
     }
 
+    private getTitle(day: any) {
+        let temp: any = [];
+            this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
+                dateFns.isSameYear(day, dateFns.parseISO(r.get('date')))
+                && dateFns.isSameMonth(day, dateFns.parseISO(r.get('date')))
+                && dateFns.isSameDay(day, dateFns.parseISO(r.get('date')))
+            ).map((r: any) => temp.push(r.get('title')));
+            if (temp.length === 0) {
+                temp.push(this.props.viewObject.get('defaultTitle'))
+            }
+        return temp;
+    }
+
     private getContents(day: any) {
         let temp: any = [];
         this.state.NotificationInstances.filter((r: any) =>
             dateFns.isSameYear(day, dateFns.parseISO(r.eContents()[0].get('date')))
             && dateFns.isSameMonth(day, dateFns.parseISO(r.eContents()[0].get('date')))
             && dateFns.isSameDay(day, dateFns.parseISO(r.eContents()[0].get('date')))
-        ).map((r) => temp.push(r))
+        ).map((r) => temp.push(r));
         return temp;
     }
     
@@ -220,6 +252,7 @@ class Calendar extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
+        this.getGlobalSettings();
         this.getAllStatuses();
         this.getAllNotificationInstances();
     }
