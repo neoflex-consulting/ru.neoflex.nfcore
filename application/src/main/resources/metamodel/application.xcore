@@ -32,6 +32,7 @@ class UserComponent extends Component {
 }
 
 class GlobalSettings {
+    QName name
     refers YearBook weekendCalendar
     refers YearBook holidayCalendar
     refers YearBook workingDaysCalendar
