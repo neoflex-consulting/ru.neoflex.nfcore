@@ -21,7 +21,6 @@ interface State {
     querySortPattern?: EObject;
     queryGroupByPattern?: EObject;
     queryCalculatedExpressionPattern?: EObject;
-    /*datasetColumnPattern?: EObject;*/
     highlightPattern?: EObject;
     user?: EObject;
 }
@@ -81,18 +80,8 @@ class SaveDatasetComponent extends React.Component<any, State> {
         JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
             if (f['operation'] !== undefined) {
                 let params;
-                let customColumn;
-                const datasetColumn = currentDatasetComponent.get('dataset').get('datasetColumn').array()
-                    .filter((c: any) => c.get('name') === f['datasetColumn']);
-                /*if (!datasetColumn[0]) {
-                    customColumn = this.state.datasetColumnPattern?.create({
-                        name:f['datasetColumn'],
-                        //rdbmsDataType:"Text",
-                        convertDataType:"String"
-                    })
-                }*/
                 params = pattern.create({
-                    datasetColumn: datasetColumn[0]/*||customColumn*/,
+                    datasetColumn: f['datasetColumn'],
                     operation: f['operation'],
                     value: f['value'],
                     enable: f['enable'],
@@ -140,7 +129,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
                 this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
-                /*this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');*/
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
@@ -240,7 +229,6 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.queryGroupByPattern) this.getPattern('QueryGroupBy', 'queryGroupByPattern');
         if (!this.state.queryCalculatedExpressionPattern) this.getPattern('QueryCalculatedExpression', 'queryCalculatedExpressionPattern');
         if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
-        /*if (!this.state.datasetColumnPattern) this.getPattern('DatasetColumn', 'datasetColumnPattern');*/
         if (!this.state.user) this.getUser();
     }
 

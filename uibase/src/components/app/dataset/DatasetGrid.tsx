@@ -280,9 +280,9 @@ class DatasetGrid extends React.Component<any, any> {
                     ) {
                         this.changeSettings();
                     }
-                }
-                if (datasetView && JSON.parse(datasetView.get('value'))['serverAggregates']) {
-                    this.highlightAggregate(JSON.parse(datasetView.get('value'))['serverAggregates']);
+                    if (datasetComponent && JSON.parse(datasetComponent.get('value'))['serverAggregates']) {
+                        this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['serverAggregates']);
+                    }
                 }
             }
             else if (datasetView === undefined) {

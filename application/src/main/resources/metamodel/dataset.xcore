@@ -112,32 +112,32 @@ class FormatMask {
 }
 
 class QueryFilter {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Operations operation
     String value
     boolean enable
 }
 
 class QueryAggregate {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Aggregate operation
     boolean enable
 }
 
 class QuerySort {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Sort operation
     boolean enable
 }
 
 class QueryGroupBy {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Aggregate operation
     boolean enable
 }
 
 class QueryCalculatedExpression {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     String operation
     boolean enable
 }
@@ -154,7 +154,7 @@ class QueryFilterDTO extends QueryConditionDTO {
 
 class Highlight {
     HighlightType highlightType
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Operations operation
     String value
     boolean enable

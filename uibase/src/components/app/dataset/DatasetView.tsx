@@ -225,11 +225,11 @@ class DatasetView extends React.Component<any, State> {
                     ).length === 0) {
                         serverParam.push({
                             index: serverParam.length + 1,
-                            datasetColumn: f.get('datasetColumn').get('name'),
+                            datasetColumn: f.get('datasetColumn'),
                             operation: f.get('operation') || defaultComponentValues[componentName],
                             value: f.get('value'),
                             enable: (f.get('enable') !== null ? f.get('enable') : false),
-                            type: f.get('datasetColumn').get('convertDataType'),
+                            type: f.get('datasetColumn'),
                             highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
                             backgroundColor: f.get('backgroundColor'),
                             color: f.get('color')
@@ -770,7 +770,7 @@ class DatasetView extends React.Component<any, State> {
                 </Drawer>
                 <Drawer
                     placement='right'
-                    title={t('calculable expressions')}
+                    title={t('calculatable expressions')}
                     width={'700px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={this.handleCalculationsMenu}
