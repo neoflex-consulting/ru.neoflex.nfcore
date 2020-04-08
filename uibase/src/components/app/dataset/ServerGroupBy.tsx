@@ -48,7 +48,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                     <Form.Item style={{ display: 'inline-block' }}>
                         {this.getFieldDecorator(`${value.idDatasetColumn}`,
                             {
-                                initialValue: value.datasetColumn,
+                                initialValue: (value.datasetColumn)?this.translate(value.datasetColumn):undefined,
                                 rules: [{
                                     required:value.operation,
                                     message: ' '
@@ -101,7 +101,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                                 key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                                 value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                             >
-                                                {c.get('field')}
+                                                {c.get('headerName')}
                                             </Select.Option>)
                                 }
                             </Select>
@@ -215,7 +215,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                     ...serverGroupBy,
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`,
-                                }))} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                                }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
             </Form>

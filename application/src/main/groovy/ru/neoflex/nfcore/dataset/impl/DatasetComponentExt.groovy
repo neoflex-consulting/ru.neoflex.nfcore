@@ -92,9 +92,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
+    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         if (column) {
-            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy)
+            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy,calculatedExpression)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -112,7 +112,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy) {
+    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         try {
             Class.forName(dataset.connection.driver.driverClassName)
         } catch (ClassNotFoundException e) {
@@ -140,6 +140,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def serverGroupByAggregation = []
         def serverGroupBy = []
         def serverSorts = []
+        def serverCalculatedExpression = []
 
         if (column != []) {
             for (int i = 0; i <= column.size() - 1; ++i) {
@@ -168,11 +169,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        def allColumns = column.name + calculatedExpression.datasetColumn
+
+        //Filter
         if (conditions) {
             for (int i = 0; i <= conditions.size() - 1; ++i) {
-                if (column.name.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
+                if (allColumns.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
                     def currentColumn = column.find{ column -> column.name.toLowerCase() == conditions[i].datasetColumn.toLowerCase() }
-                    def type = currentColumn.datasetColumn.convertDataType
+                    def type;
+                    //TODO добавить определение типа для вычисляемых полей
+                    if (currentColumn) {
+                        type = currentColumn.datasetColumn.convertDataType
+                    }
 
                     if (type == DataType.DATE || type == DataType.TIMESTAMP) {
                         def map = [:]
@@ -224,42 +232,43 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Group by
         if (groupBy) {
             for (int i = 0; i <= groupBy.size() - 1; ++i) {
-                if (column.name.contains(groupBy[i].datasetColumn) && groupBy[i].enable == true) {
+                if (allColumns.contains(groupBy[i].datasetColumn) && groupBy[i].enable == true) {
                     def map = [:]
                     map["column"] = groupBy[i].datasetColumn
                     def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                     if (operator == 'AVG' ) {
-                        map["select"] = "AVG(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "AVG(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (operator == 'COUNT' ) {
-                        map["select"] = "COUNT(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "COUNT(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (operator == 'COUNT_DISTINCT' ) {
-                        map["select"] = "COUNT(DISTINCT t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "COUNT(DISTINCT t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (operator == 'MAX' ) {
-                        map["select"] = "MAX(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "MAX(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (operator == 'MEDIAN' ) {
                         //TODO
                     }
                     if (operator == 'MIN' ) {
-                        map["select"] = "MIN(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "MIN(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (operator == 'SUM' ) {
-                        map["select"] = "SUM(t.${groupBy[i].datasetColumn}) as ${groupBy[i].datasetColumn}"
+                        map["select"] = "SUM(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                     }
                     if (!serverGroupByAggregation.contains(map)) {
                         serverGroupByAggregation.add(map)
                     }
                 }
             }
-            for (int i = 0; i <= column.size() - 1; ++i) {
+            for (int i = 0; i <= allColumns.size() - 1; ++i) {
                 def map = [:]
-                if (!serverGroupByAggregation.column.contains(column[i].name)) {
-                    map["select"] = "t.${column[i].name}"
+                if (!serverGroupByAggregation.column.contains(allColumns[i])) {
+                    map["select"] = "t.\"${allColumns[i]}\""
                     if (!serverGroupBy.contains(map)) {
                         serverGroupBy.add(map)
                     }
@@ -267,35 +276,36 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Aggregation overall
         if (aggregations) {
-            for (int i = 0; i <= column.size() - 1; ++i) {
+            for (int i = 0; i <= allColumns.size() - 1; ++i) {
                 def isExcluded = true;
                 //Итого и столбец под одним столбцом
                 for (int j = 0; j <= aggregations.size() - 1; ++j) {
-                    if (column[i].name == aggregations[j].datasetColumn && aggregations[j].enable == true) {
+                    if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable == true) {
                         def map = [:]
                         map["column"] = aggregations[j].datasetColumn
                         def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                         if (operator == 'AVG' ) {
-                            map["select"] = "AVG(t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (operator == 'COUNT' ) {
-                            map["select"] = "COUNT(t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (operator == 'COUNT_DISTINCT' ) {
-                            map["select"] = "COUNT(DISTINCT t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (operator == 'MAX' ) {
-                            map["select"] = "MAX(t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (operator == 'MEDIAN' ) {
                             //TODO
                         }
                         if (operator == 'MIN' ) {
-                            map["select"] = "MIN(t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (operator == 'SUM' ) {
-                            map["select"] = "SUM(t.${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                            map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
                         }
                         if (!serverAggregations.contains(map)) {
                             serverAggregations.add(map)
@@ -305,8 +315,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
                 if (isExcluded == true) {
                     def map = [:]
-                    map["column"] = column[i].name
-                    map["select"] = "NULL as ${column[i].name}"
+                    map["column"] = allColumns[i]
+                    map["select"] = "NULL as \"${allColumns[i]}\""
                     if (!serverAggregations.contains(map) && map) {
                         serverAggregations.add(map)
                     }
@@ -314,17 +324,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Order by
         if (sorts) {
             for (int i = 0; i <= sorts.size() - 1; ++i) {
-                if (column.name.contains(sorts[i].datasetColumn) && sorts[i].enable == true) {
+                if (allColumns.contains(sorts[i].datasetColumn) && sorts[i].enable == true) {
                     def map = [:]
                     map["column"] = sorts[i].datasetColumn
                     def operator = getConvertSort(sorts[i].operation.toString().toLowerCase())
                     if (operator == 'ASC' ) {
-                        map["select"] = "t.${sorts[i].datasetColumn} ASC"
+                        map["select"] = "t.\"${sorts[i].datasetColumn}\" ASC"
                     }
                     if (operator == 'DESC' ) {
-                        map["select"] = "t.${sorts[i].datasetColumn} DESC"
+                        map["select"] = "t.\"${sorts[i].datasetColumn}\" DESC"
                     }
                     if (!serverSorts.contains(map)) {
                         serverSorts.add(map)
@@ -333,30 +344,46 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
         }
 
+        //Calculated expressions
+        if (calculatedExpression) {
+            for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
+                def map = [:]
+                map["column"] = calculatedExpression[i].datasetColumn
+                map["select"] = "${calculatedExpression[i].operation} as \"${calculatedExpression[i].datasetColumn}\""
+                if (!serverCalculatedExpression.contains(map)) {
+                    serverCalculatedExpression.add(map)
+                }
+            }
+        }
+
         String currentQuery
-        currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
+        currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${dataset.query}) t"
+        if (calculatedExpression) {
+            currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
+                    "\n  FROM (${currentQuery}) t"
+        }
         if (serverFilters) {
-            currentQuery = currentQuery +
-                    " WHERE ${serverFilters.select.join(' AND ')}"
+            currentQuery = "\nSELECT * \n  FROM (${currentQuery}) t" +
+                    "\n WHERE ${serverFilters.select.join(' AND ')}"
         }
         if (serverGroupByAggregation) {
             if (serverGroupBy) {
-                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverGroupByAggregation.select.join(' , ')}" +
-                        " FROM (${currentQuery}) t" +
-                        " GROUP BY ${serverGroupBy.select.join(' , ')}"
+                currentQuery = "\nSELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverGroupByAggregation.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t" +
+                        "\n GROUP BY ${serverGroupBy.select.join(' , ')}"
             } else {
-                currentQuery = "SELECT ${serverGroupByAggregation.select.join(' , ')}" +
-                        " FROM (${currentQuery}) t"
+                currentQuery = "\nSELECT ${serverGroupByAggregation.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t"
             }
         }
         if (serverSorts && !serverAggregations) {
-            currentQuery = "SELECT *" +
-                    " FROM (${currentQuery}) t" +
-                    " ORDER BY ${serverSorts.select.join(' , ')}"
+            currentQuery = "\nSELECT *" +
+                    "\n  FROM (${currentQuery}) t" +
+                    "\n ORDER BY ${serverSorts.select.join(' , ')}"
         }
         if (serverAggregations) {
-            currentQuery = " SELECT ${serverAggregations.select.join(' , ')}" +
-                    " FROM (${currentQuery}) t"
+            currentQuery = " \nSELECT ${serverAggregations.select.join(' , ')}" +
+                    "\n  FROM (${currentQuery}) t"
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)

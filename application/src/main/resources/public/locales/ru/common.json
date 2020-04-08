@@ -81,7 +81,11 @@
 
         "Cell": "ячейка",
         "Column": "колонка",
-        "Row": "строка"
+        "Row": "строка",
+
+        "Enter new column name": "Введите название столбца",
+        "Select calculated column": "Выберите вычисляемый столбец",
+        "Expression": "Выражение"
 }
 
 

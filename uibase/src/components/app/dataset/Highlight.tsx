@@ -97,7 +97,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                     <Form.Item style={{display: 'inline-block'}}>
                         {this.getFieldDecorator(`${value.idDatasetColumn}`,
                             {
-                                initialValue: value.datasetColumn,
+                                initialValue: (value.datasetColumn)?this.translate(value.datasetColumn):undefined,
                                 rules: [{
                                     required:
                                         value.operation ||
@@ -138,7 +138,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                                                     value: c.get('field')
                                                 })}
                                             >
-                                                {c.get('field')}
+                                                {c.get('headerName')}
                                             </Select.Option>)
                                 }
                             </Select>
