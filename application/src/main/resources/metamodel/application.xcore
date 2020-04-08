@@ -31,6 +31,13 @@ class UserComponent extends Component {
     String componentClassName
 }
 
+class GlobalSettings {
+    QName name
+    refers YearBook weekendCalendar
+    refers YearBook holidayCalendar
+    refers YearBook workingDaysCalendar
+}
+
 class AppModule {
     QName name
     contains ViewElement view
@@ -58,16 +65,22 @@ abstract class Icon extends ViewElement {
 
 class Calendar extends ViewElement {
     refers Notification[] notifications
-    refers DaysOnTheCalendar workingDaysCalendar
+    refers YearBook yearBook
+    String defaultTitle
+    op JSON getNotificationInstances(String dateFrom, String dateTo)
 }
 
-class DaysOnTheCalendar {
+class YearBook {
     QName name
     contains Day[] days
+    op JSON recreateWeekend(String year)
+    op JSON copyHolidays(String yearFrom, String yearTo)
+    op JSON recreateWorkingDays(String year)
 }
 
 class Day {
-    String name
+    Date date
+    String title
 }
 
 class ClassFeature extends FormItem {

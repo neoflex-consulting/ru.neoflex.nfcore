@@ -17,11 +17,11 @@ class CalendarWrapper extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <Form>
-                <div className="headerCalendar col-text">
-                    <div id="logo">
-                        {this.props.viewObject.get('name')}
-                    </div>
-                </div>
+                {/*<div className="headerCalendar col-text">*/}
+                {/*    <div id="logo">*/}
+                {/*        {this.props.viewObject.get('name')}*/}
+                {/*    </div>*/}
+                {/*</div>*/}
                 <StatusLegend />
                 <Calendar {...this.props}/>
             </Form>

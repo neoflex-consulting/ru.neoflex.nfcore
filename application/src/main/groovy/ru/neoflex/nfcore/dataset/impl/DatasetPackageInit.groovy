@@ -4,7 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
-import ru.neoflex.nfcore.application.impl.DaysOnTheCalendarInit
+import ru.neoflex.nfcore.application.impl.YearBookInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
 import ru.neoflex.nfcore.notification.impl.NotificationInit
@@ -19,7 +19,6 @@ class DatasetPackageInit {
         JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest")
         JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest")
         JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
-
 
         try {
             JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
@@ -61,7 +60,11 @@ class DatasetPackageInit {
         NotificationStatusInit.createNotificationStatus('Отчёт сдан в проверяющий орган','#f9c4ff')
 
         /*ApplicationPackage*/
-        DaysOnTheCalendarInit.createDaysOnTheCalendar("Календарь рабочих дней 2020(рус)")
+        YearBookInit.createWeekendYearBook("Календарь выходных дней")
+        YearBookInit.createHolidaysYearBook("Календарь праздничных дней")
+        YearBookInit.createWorkDaysYearBook("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
+        GlobalSettingsInit.createGlobalSettings("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
+
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
 
@@ -69,12 +72,7 @@ class DatasetPackageInit {
         NotificationInit.createNotification("A 1993")
         NotificationInit.createEmptyNotification("Ф 2020")
         NotificationInit.createEmptyNotification("Проверить почту")
-//        NotificationInstanceInit.createNotificationInstance("NotificationInstance1")
-//        NotificationInstanceInit.deleteNotificationInstance("NotificationInstance1")
-//        NotificationInit.deleteNotification("A 1993")
-//        NotificationInit.deleteNotification("Ф 2020")
-//        NotificationInit.deleteNotification("Проверить почту")
-//        AppModuleInit.deletedAppModule("ReportSingle")
+
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
         ApplicationInit.createApplication("Администрирование")

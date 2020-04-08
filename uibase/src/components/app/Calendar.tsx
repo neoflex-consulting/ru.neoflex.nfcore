@@ -154,6 +154,7 @@ class Calendar extends React.Component<any, State> {
                         }
                     >
                         <span className="number">{formattedDate}</span>
+                        <span className="title">1-й рабочий день</span>
                         <span className="bg">{formattedDate}</span>
                         <div>
                             {content.length !== 0

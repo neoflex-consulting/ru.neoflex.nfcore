@@ -34,6 +34,8 @@ public class Server extends SessionFactory implements Closeable {
         super(dbName, packages);
         this.home = home;
         System.setProperty("ORIENTDB_HOME", home);
+        System.setProperty("ridBag.embeddedToSbtreeBonsaiThreshold", String.valueOf(Integer.MAX_VALUE));
+
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.server = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
