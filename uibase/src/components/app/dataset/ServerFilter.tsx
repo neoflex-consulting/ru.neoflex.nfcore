@@ -48,7 +48,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                     <Form.Item style={{ display: 'inline-block' }}>
                         {this.getFieldDecorator(`${value.idDatasetColumn}`,
                             {
-                                initialValue: value.datasetColumn,
+                                initialValue: (value.datasetColumn)?this.translate(value.datasetColumn):undefined,
                                 rules: [{
                                     required:
                                         value.operation ||
@@ -73,7 +73,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                                                 key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                                 value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                             >
-                                                {c.get('field')}
+                                                {c.get('headerName')}
                                             </Select.Option>)
                                 }
                             </Select>

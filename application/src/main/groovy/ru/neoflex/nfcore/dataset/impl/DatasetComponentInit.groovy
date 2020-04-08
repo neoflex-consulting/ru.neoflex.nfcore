@@ -68,6 +68,9 @@ class DatasetComponentInit {
                         rdbmsColumn.datasetColumn = columns[i]
                         def typography = ApplicationFactory.eINSTANCE.createTypography()
                         typography.name = columns[i].name
+                                .replace("incomedate","дата")
+                                .replace("branch","филиал")
+                                .replace("income","доход")
                         rdbmsColumn.headerName = typography
                         rdbmsColumn.sortable = true
                         rdbmsColumn.resizable = true

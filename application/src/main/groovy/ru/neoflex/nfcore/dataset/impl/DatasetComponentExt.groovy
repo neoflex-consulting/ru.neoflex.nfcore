@@ -357,33 +357,33 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
 
         String currentQuery
-        currentQuery = "SELECT ${queryColumns.join(', ')} FROM (${dataset.query}) t"
+        currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${dataset.query}) t"
         if (calculatedExpression) {
-            currentQuery = "SELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
-                    " FROM (${currentQuery}) t"
+            currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
+                    "\n  FROM (${currentQuery}) t"
         }
         if (serverFilters) {
-            currentQuery = "SELECT * FROM (${currentQuery}) t" +
-                    " WHERE ${serverFilters.select.join(' AND ')}"
+            currentQuery = "\nSELECT * \n  FROM (${currentQuery}) t" +
+                    "\n WHERE ${serverFilters.select.join(' AND ')}"
         }
         if (serverGroupByAggregation) {
             if (serverGroupBy) {
-                currentQuery = "SELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverGroupByAggregation.select.join(' , ')}" +
-                        " FROM (${currentQuery}) t" +
-                        " GROUP BY ${serverGroupBy.select.join(' , ')}"
+                currentQuery = "\nSELECT ${serverGroupBy.select.join(' , ')} , " + " ${serverGroupByAggregation.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t" +
+                        "\n GROUP BY ${serverGroupBy.select.join(' , ')}"
             } else {
-                currentQuery = "SELECT ${serverGroupByAggregation.select.join(' , ')}" +
-                        " FROM (${currentQuery}) t"
+                currentQuery = "\nSELECT ${serverGroupByAggregation.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t"
             }
         }
         if (serverSorts && !serverAggregations) {
-            currentQuery = "SELECT *" +
-                    " FROM (${currentQuery}) t" +
-                    " ORDER BY ${serverSorts.select.join(' , ')}"
+            currentQuery = "\nSELECT *" +
+                    "\n  FROM (${currentQuery}) t" +
+                    "\n ORDER BY ${serverSorts.select.join(' , ')}"
         }
         if (serverAggregations) {
-            currentQuery = " SELECT ${serverAggregations.select.join(' , ')}" +
-                    " FROM (${currentQuery}) t"
+            currentQuery = " \nSELECT ${serverAggregations.select.join(' , ')}" +
+                    "\n  FROM (${currentQuery}) t"
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)

@@ -114,6 +114,31 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.setState({parametersArray})
     };
 
+    translate = (field: string) => {
+        let sortMap : {fieldName:string, fieldHeader:string}[] = this.props.columnDefs.map((colDef:any) => {
+            return {
+                fieldName : colDef.get("field"),
+                fieldHeader : colDef.get("headerName")
+            }
+        }).sort((a: { fieldHeader: string; }, b: { fieldHeader: string; }) => {
+            if (a.fieldHeader > b.fieldHeader) {
+                return 1
+            } else if (a.fieldHeader === b.fieldHeader){
+                return 0
+            }
+            return -1
+        });
+
+        sortMap.some(colDef => {
+            if (field.includes(colDef.fieldName)) {
+                field = field.replace(colDef.fieldName, colDef.fieldHeader);
+                return true
+            }
+            return false
+        });
+        return field
+    };
+
     deleteRow = (e: any) => {
         this.props.form.resetFields();
         let newServerParam: IServerQueryParam[] = [];

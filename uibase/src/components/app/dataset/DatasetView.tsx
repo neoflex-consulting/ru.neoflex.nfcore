@@ -14,7 +14,6 @@ import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 import Calculator from "./Calculator";
 import {faCalculator} from "@fortawesome/free-solid-svg-icons/faCalculator";
-import {cloneDeep} from "lodash"
 
 const { Option, OptGroup } = Select;
 
@@ -63,6 +62,7 @@ const defaultComponentValues = {
     serverAggregation: "Average",
     serverGroupBy: "Average",
     serverSort: "FromAtoZ",
+    serverCalculatedExpression: ""
 };
 
 class DatasetView extends React.Component<any, State> {
@@ -215,7 +215,7 @@ class DatasetView extends React.Component<any, State> {
             if (isValidComponentName(componentName)) {
                 resource.eContents()[0].get(componentName).array().forEach( (f: Ecore.Resource) => {
                     if (serverParam.filter( (filter: any) =>
-                        filter['datasetColumn'] === f.get('datasetColumn').get('name') &&
+                        filter['datasetColumn'] === f.get('datasetColumn') &&
                         filter['operation'] === f.get('operation') &&
                         filter['value'] === f.get('value') &&
                         filter['enable'] === (f.get('enable') !== null ? f.get('enable') : false) &&
@@ -350,7 +350,6 @@ class DatasetView extends React.Component<any, State> {
                 let rowData = new Map();
                 rowData.set('field', element.datasetColumn);
                 rowData.set('headerName', element.datasetColumn);
-                //TODO определение типа по выражению?
                 rowData.set('headerTooltip', "type : String");
                 rowData.set('hide', false);
                 rowData.set('pinned', false);
@@ -369,19 +368,47 @@ class DatasetView extends React.Component<any, State> {
                 }
             }
         });
-        /*this.props.onChangeColumnDefs(columnDefs);*/
         return columnDefs
     };
 
-    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[]) {
+    translateExpression = (calculatedExpression: IServerQueryParam[]) => {
+        let sortMap = this.state.columnDefs.map(colDef => {
+            return {
+                fieldName : colDef.get("field"),
+                fieldHeader : colDef.get("headerName")
+            }
+        }).sort((a, b) => {
+            if (a.fieldHeader > b.fieldHeader) {
+                return 1
+            } else if (a.fieldHeader === b.fieldHeader){
+                return 0
+            }
+            return -1
+        });
+        return calculatedExpression.map(expr => {
+            let translatedOperation = expr.operation;
+            sortMap.forEach(colDef => {
+                if (translatedOperation?.includes(colDef.fieldHeader)) {
+                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHeader, 'g'), colDef.fieldName);
+                }
+            });
+            return {
+                ...expr,
+                operation: translatedOperation
+            }
+        })
+    };
+
+    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
+        const calculatedExpression = this.translateExpression(calculatedExpressions);
         this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)
                                             ,[]
                                             , sortParams.filter((f: any) => f.enable)
                                             , groupByParams.filter((f: any) => f.enable)
                                             , calculatedExpression.filter((f: any) => f.enable)).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
-                let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression)
+                let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)

@@ -8,7 +8,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {MouseEvent, Ref} from "react";
+import {MouseEvent} from "react";
 
 const inputOperationKey: string = "_inputOperationKey";
 const inputFieldKey: string = "_inputFieldKey";
@@ -33,35 +33,40 @@ interface State {
 }
 
 interface CalculatorEventHandlerProps {
-    onItemsClick: React.MouseEventHandler<HTMLElement>;
+    onButtonClick: React.MouseEventHandler<HTMLElement>;
     onClearClick: React.MouseEventHandler<HTMLElement>;
 }
 
-function CreateCalculator({onItemsClick, onClearClick}:CalculatorEventHandlerProps) {
+function CreateCalculator({onButtonClick, onClearClick}:CalculatorEventHandlerProps) {
     return <Col>
                 <Row>
-                    <Button onClick={onItemsClick}>1</Button>
-                    <Button onClick={onItemsClick}>2</Button>
-                    <Button onClick={onItemsClick}>3</Button>
-                    <Button onClick={onItemsClick}>+</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>1</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>2</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>3</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>+</Button>
                 </Row>
                 <Row>
-                    <Button onClick={onItemsClick}>4</Button>
-                    <Button onClick={onItemsClick}>5</Button>
-                    <Button onClick={onItemsClick}>6</Button>
-                    <Button onClick={onItemsClick}>-</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>4</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>5</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>6</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>-</Button>
                 </Row>
                 <Row>
-                    <Button onClick={onItemsClick}>7</Button>
-                    <Button onClick={onItemsClick}>8</Button>
-                    <Button onClick={onItemsClick}>9</Button>
-                    <Button onClick={onItemsClick}>/</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>7</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>8</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>9</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>/</Button>
                 </Row>
                 <Row>
-                    <Button onClick={onClearClick}>c</Button>
-                    <Button onClick={onItemsClick}>0</Button>
-                    <Button onClick={onItemsClick}>.</Button>
-                    <Button onClick={onItemsClick}>*</Button>
+                    <Button style={{width: '40px'}} onClick={onClearClick}>c</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>0</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>.</Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>*</Button>
+                </Row>
+                <Row>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>(</Button>
+                    <Button style={{width: '80px'}} onClick={onButtonClick}> </Button>
+                    <Button style={{width: '40px'}} onClick={onButtonClick}>)</Button>
                 </Row>
             </Col>
 }
@@ -121,16 +126,12 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         }
     }
 
-    handleUserInput = (e: any) => {
-        this.setFieldsValue({[inputOperationKey]: ""})
-    }
-
     handleCalculate = (e: MouseEvent<HTMLElement>) => {
         let newString = "";
         let cursorStartPosition = this.expressionRef.current!.input.selectionStart!;
         const cursorEndPosition = this.expressionRef.current!.input.selectionEnd!;
         const oldString = (this.getFieldValue(inputOperationKey))?this.getFieldValue(inputOperationKey):"";
-        if (cursorStartPosition != cursorEndPosition) {
+        if (cursorStartPosition !== cursorEndPosition) {
             newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.textContent + oldString.substring(cursorEndPosition);
             this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.textContent).length;
             this.setFieldsValue({
@@ -170,7 +171,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
             let currentIndex = parametersArray.length - 1;
             this.setState({parametersArray, currentIndex});
         } else {
-            this.props.context.notification('Achtung!','Empty field name', 'error')
+            this.props.context.notification('Calculator','Empty field name', 'error')
         }
     };
 
@@ -205,7 +206,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         e.preventDefault();
         this.props.form.validateFields((err: any, values: any) => {
             if (err) {
-                this.props.context.notification('Achtung!','Please, correct the mistakes', 'error')
+                this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
             } else {
                 let parametersArray: any = this.state.parametersArray!.map((element)=>{
                     if (element.index-1 === this.state.currentIndex) {
@@ -331,14 +332,17 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                     }]
                                 })(
                                     <Input ref={this.expressionRef}
-                                           readOnly
                                            placeholder={this.t("Expression")}/>
                                   )
                             }
-                            <CreateColumnButtons onClick={this.handleCalculate} columnDefs={this.props.columnDefs}/>
+                            <CreateColumnButtons
+                                onClick={this.handleCalculate}
+                                columnDefs={this.props.defaultColumnDefs}/>
                         </Col>
                         <Col span={12}>
-                            <CreateCalculator onItemsClick={this.handleCalculate} onClearClick={this.handleClear}/>
+                            <CreateCalculator
+                                onButtonClick={this.handleCalculate}
+                                onClearClick={this.handleClear}/>
                         </Col>
                     </Row>
                 </Form.Item>
