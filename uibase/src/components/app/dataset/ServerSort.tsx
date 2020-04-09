@@ -7,7 +7,7 @@ import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
-import {SortableElement} from 'react-sortable-hoc';
+import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 
@@ -21,34 +21,30 @@ interface Props {
     componentType?: paramType;
 }
 
-
 interface State {
     parametersArray: IServerQueryParam[] | undefined;
 }
 
-class ServerSort extends DrawerParameterComponent<Props, State> {
+const SortableList = SortableContainer(({items}:any) => {
+    return (
+        <ul className="SortableList">
+            {items.map((value:any) => (
+                <SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
+            ))}
+        </ul>
+    );
+});
 
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            parametersArray: this.props.parametersArray,
-        };
-        this.handleChange = this.handleChange.bind(this);
-        this.t = this.props.t;
-        this.getFieldDecorator = this.props.form.getFieldDecorator;
-    }
-
-    SortableItem = SortableElement(({value}: any) => {
-        return <div className="SortableItem">
-            <Row gutter={[8, 0]}>
+const SortableItem = SortableElement(({value}:any) => <div className="SortableItem">
+    <Row gutter={[8, 0]}>
                 <Col span={1}>
                     {value.index}
                 </Col>
                 <Col span={10}>
                     <Form.Item style={{ display: 'inline-block' }}>
-                        {this.getFieldDecorator(`${value.idDatasetColumn}`,
+                        {value.getFieldDecorator(`${value.idDatasetColumn}`,
                             {
-                                initialValue: (value.datasetColumn)?this.translate(value.datasetColumn):undefined,
+                                initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
                                 rules: [{
                                     required:
                                     value.operation,
@@ -56,9 +52,9 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                 },{
                                     validator: (rule: any, value: any, callback: any) => {
                                         let isDuplicate: boolean = false;
-                                        if (this.state.parametersArray !== undefined) {
-                                            const valueArr = this.state.parametersArray
-                                                .filter((currentObject) => {
+                                        if (value.parametersArray !== undefined) {
+                                            const valueArr = value.parametersArray
+                                                .filter((currentObject: any) => {
                                                     let currentField: string;
                                                     try {
                                                         //Либо объект при валидации отдельного поля
@@ -69,10 +65,10 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                                     }
                                                     return (currentField)? currentObject.datasetColumn === currentField: false
                                                 })
-                                                .map(function (currentObject) {
+                                                .map(function (currentObject: any) {
                                                     return currentObject.datasetColumn
                                                 });
-                                            isDuplicate = valueArr.some(function (item, idx) {
+                                            isDuplicate = valueArr.some(function (item: any , idx:number) {
                                                 return valueArr.indexOf(item) !== idx
                                             });
                                         }
@@ -86,17 +82,17 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                 }]
                             })(
                             <Select
-                                placeholder={this.t('columnname')}
+                                placeholder={value.t('columnname')}
                                 style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
                                 showSearch={true}
                                 allowClear={true}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
-                                    this.handleChange(event)
+                                    value.handleChange(event)
                                 }}
                             >
                                 {
-                                    this.props.columnDefs!
+                                    value.columnDefs
                                         .map((c: any) =>
                                             <Select.Option
                                                 key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
@@ -111,9 +107,9 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                 </Col>
                 <Col span={9}>
                     <Form.Item style={{ display: 'inline-block' }}>
-                        {this.getFieldDecorator(`${value.idOperation}`,
+                        {value.getFieldDecorator(`${value.idOperation}`,
                             {
-                                initialValue: this.t(value.operation) || undefined,
+                                initialValue: value.t(value.operation) || undefined,
                                 rules: [{
                                     required:
                                     value.datasetColumn,
@@ -121,22 +117,22 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                 }]
                             })(
                             <Select
-                                placeholder={this.t('operation')}
+                                placeholder={value.t('operation')}
                                 style={{ width: '219px', marginRight: '10px' }}
                                 allowClear={true}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
-                                    this.handleChange(event)
+                                    value.handleChange(event)
                                 }}
                             >
                                 {
-                                    this.props.allSorts!
+                                    value.allSorts!
                                         .map((o: any) =>
                                             <Select.Option
                                                 key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
                                                 value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
                                             >
-                                                {this.t(o.get('name'))}
+                                                {value.t(o.get('name'))}
                                             </Select.Option>)
                                 }
                             </Select>
@@ -150,7 +146,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                             defaultChecked={value.enable !== undefined ? value.enable : true}
                             onChange={(e: any) => {
                                 const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                                this.handleChange(event)
+                                value.handleChange(event)
                             }}>
                         </Switch>
                     </Form.Item>
@@ -161,15 +157,26 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                             title="delete row"
                             key={'deleteRowButton'}
                             value={'deleteRowButton'}
-                            onClick={(e: any) => {this.deleteRow({index: value.index})}}
+                            onClick={(e: any) => {value.deleteRow({index: value.index})}}
                         >
                             <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                         </Button>
                     </Form.Item>
                 </Col>
             </Row>
-        </div>
-    });
+</div>);
+
+class ServerSort extends DrawerParameterComponent<Props, State> {
+
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            parametersArray: this.props.parametersArray,
+        };
+        this.handleChange = this.handleChange.bind(this);
+        this.t = this.props.t;
+        this.getFieldDecorator = this.props.form.getFieldDecorator;
+    }
 
     render() {
         return (
@@ -210,13 +217,24 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                 </Form.Item>
                 <Form.Item>
                     {
-                        <this.SortableList items={this.state.parametersArray!
+                        <SortableList items={this.state.parametersArray!
                             .map((serverSort: any) => (
                                 {
                                     ...serverSort,
                                     idDatasetColumn : `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
-                                }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
+                                    t : this.t,
+                                    getFieldDecorator: this.getFieldDecorator,
+                                    columnDefs: this.props.columnDefs,
+                                    allSorts: this.props.allSorts,
+                                    handleChange: this.handleChange,
+                                    deleteRow: this.deleteRow,
+                                    translate: this.translate,
+                                    parametersArray: this.state.parametersArray
+                                }))}
+                            distance={3}
+                            onSortEnd={this.onSortEnd}
+                            helperClass="SortableHelper"/>
                     }
                 </Form.Item>
             </Form>
