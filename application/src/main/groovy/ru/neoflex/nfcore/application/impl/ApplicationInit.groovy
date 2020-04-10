@@ -101,7 +101,6 @@ class ApplicationInit {
 
                 calendar.setYearBook(workDaysYearBook)
 
-                calendar.defaultTitle = 'Выходной'
                 column.children.add(typography)
                 row1.children.add(row2)
                 row1.children.add(row3)

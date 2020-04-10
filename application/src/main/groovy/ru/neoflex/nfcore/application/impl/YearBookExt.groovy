@@ -161,9 +161,7 @@ class YearBookExt extends YearBookImpl {
                                             titleNumber = 1
                                             day.setTitle(titleNumber + ' рабочий день')
                                         }
-                                        else {
-                                            titleNumber += 1
-                                        }
+                                        titleNumber += 1
                                         workDaysYearBook.days.add(day)
                                     }
                                 }
@@ -172,9 +170,7 @@ class YearBookExt extends YearBookImpl {
                                         titleNumber = 1
                                         day.setTitle(titleNumber + ' рабочий день')
                                     }
-                                    else {
-                                        titleNumber += 1
-                                    }
+                                    titleNumber += 1
                                     workDaysYearBook.days.add(day)
                                 }
                             }
@@ -186,9 +182,7 @@ class YearBookExt extends YearBookImpl {
                                         titleNumber = 1
                                         day.setTitle(titleNumber + ' рабочий день')
                                     }
-                                    else {
-                                        titleNumber += 1
-                                    }
+                                    titleNumber += 1
                                     workDaysYearBook.days.add(day)
                                 }
                             }
@@ -198,9 +192,7 @@ class YearBookExt extends YearBookImpl {
                                     titleNumber = 1
                                     day.setTitle(titleNumber + ' рабочий день')
                                 }
-                                else {
-                                    titleNumber += 1
-                                }
+                                titleNumber += 1
                             }
                         }
                         d1 = addDays(d1, 1);

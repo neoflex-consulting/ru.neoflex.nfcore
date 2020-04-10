@@ -37,6 +37,15 @@ class NotificationInstance {
 	contains NotificationStatus[] status
 }
 
+class NotificationInstanceDTO {
+    String name
+    String notificationName
+    String notificationShortName
+    String AppModuleName
+    String date
+	String statusColor
+}
+
 @Ecore(constraints="IsValid")
 class NotificationStatus {
 	QName name
