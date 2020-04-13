@@ -28,8 +28,8 @@ class NotificationExt extends NotificationImpl {
                 .execute().resourceSet
         if (rs.resources.empty) {
             def notification = NotificationFactory.eINSTANCE.createNotification()
-            notification.name = name
-            notification.shortName = name + '_Short'
+            notification.name = 'Форма ' + name
+            notification.shortName = name
             def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle",false) as AppModule
             notification.setAppModule(appModule1)
             notification.periodicity = Periodicity.MONTH
@@ -50,8 +50,8 @@ class NotificationExt extends NotificationImpl {
                 .execute().resourceSet
         if (rs.resources.empty) {
             def notification = NotificationFactory.eINSTANCE.createNotification()
-            notification.name = name
-            notification.shortName = name + '_Short'
+            notification.name = 'Форма ' + name
+            notification.shortName = name
 
             notification.periodicity = Periodicity.MONTH
             notification.deadlineDay = "1"
