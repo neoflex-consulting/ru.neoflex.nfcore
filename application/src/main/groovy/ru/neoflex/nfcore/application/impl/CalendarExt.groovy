@@ -82,6 +82,7 @@ class CalendarExt extends CalendarImpl {
 
                                             notificationInstanceDTO.name = notificationInstance.name
                                             notificationInstanceDTO.calendarDate = newDate
+                                            notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
                                         }
                                         else {
                                             def yearBookMonth = calendar.yearBook.days.findAll{ day ->
@@ -94,6 +95,7 @@ class CalendarExt extends CalendarImpl {
 
                                             notificationInstanceDTO.name = notificationInstance.name
                                             notificationInstanceDTO.calendarDate = newDate
+                                            notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
                                         }
 
                                         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION_INSTANCE, [name: notificationInstance.name])
