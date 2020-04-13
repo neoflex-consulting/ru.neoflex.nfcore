@@ -17,7 +17,13 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -32,7 +38,21 @@ public class BaseApplication {
 
     public static void main(String[] args) {
         TransactionClassLoader.withClassLoader(()->{
-            new SpringApplication(BaseApplication.class).run(args);
+            try {
+                File extLibDir = new File(System.getProperty("extLib.dir", System.getProperty("user.dir") + "/extLib"));
+                extLibDir.mkdirs();
+                List<URL> urlList = new ArrayList<>();
+                for (File lib: extLibDir.listFiles()) {
+                    if (lib.getName().toLowerCase().endsWith(".jar")) {
+                        urlList.add(lib.toURI().toURL());
+                    }
+                }
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(new URLClassLoader(urlList.toArray(new URL[0]), cl));
+                new SpringApplication(BaseApplication.class).run(args);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         });
     }
 
