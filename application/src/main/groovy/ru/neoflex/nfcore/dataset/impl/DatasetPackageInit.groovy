@@ -8,6 +8,7 @@ import ru.neoflex.nfcore.application.impl.GlobalSettingsInit
 import ru.neoflex.nfcore.application.impl.YearBookInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
+import ru.neoflex.nfcore.notification.Periodicity
 import ru.neoflex.nfcore.notification.impl.NotificationInit
 import ru.neoflex.nfcore.notification.impl.NotificationStatusInit
 
@@ -69,9 +70,13 @@ class DatasetPackageInit {
         TypographyStyleInit.createTypographyStyle("Title")
 
         AppModuleInit.createAppModule("ReportSingle")
-        NotificationInit.createNotification("A 1993")
-        NotificationInit.createEmptyNotification("Ф 2020")
-        NotificationInit.createEmptyNotification("Проверить почту")
+        NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18:00", "15", "ReportSingle")
+        NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18:00", "8")
+        NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18:00", "8")
+        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18:00", "7", "ReportSingle")
+        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18:00", "7", "ReportSingle")
+        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18:00", "7", "ReportSingle")
+        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18:00", "7", "ReportSingle")
 
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")

@@ -121,7 +121,7 @@ class Calendar extends React.Component<any, State> {
         let params: Object[] = [{
             datasetColumn: 'reportDate',
             operation: 'EqualTo',
-            value: notification.contents[0]['date'],
+            value: notification.contents[0]['notificationDateOn'],
             enable: true,
             type: 'Date'
         }];
@@ -176,7 +176,7 @@ class Calendar extends React.Component<any, State> {
                                         key={`${r.contents[0]._id}`}
                                         size="small"
                                         style={{width: "150px", display: "flex", color: "black"/*, backgroundColor: r.contents[0]['statusColor'] ? rr.contents[0] : "white"*/}}
-                                        title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['date']), "PPpp ",{locale: ru})}\n
+                                        title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                     >
                                         {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
@@ -218,9 +218,9 @@ class Calendar extends React.Component<any, State> {
     private getContents(day: any) {
         let temp: any = [];
         this.state.notificationInstancesDTO.filter((r: any) =>
-            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['date']))
-            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['date']))
-            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['date']))
+            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['calendarDate']))
         ).map((r) => temp.push(r));
         return temp;
     }

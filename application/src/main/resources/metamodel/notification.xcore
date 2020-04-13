@@ -33,7 +33,7 @@ class Notification {
 class NotificationInstance {
     QName name
     refers Notification notification
-	Date date
+	Date calendarDate
 	contains NotificationStatus[] status
 }
 
@@ -42,8 +42,9 @@ class NotificationInstanceDTO {
     String notificationName
     String notificationShortName
     String AppModuleName
-    String date
+    String calendarDate
 	String statusColor
+	String notificationDateOn
 }
 
 @Ecore(constraints="IsValid")

@@ -92,9 +92,18 @@ class ApplicationInit {
                 def notification2 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Ф 2020", "",false)
                 def notification3 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Проверить почту", "",false)
 
+                def notification4 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.MONTH", "",false)
+                def notification5 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.DAY", "",false)
+                def notification6 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.QUARTER", "",false)
+                def notification7 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.YEAR", "",false)
+
                 calendar.notifications.add(notification1)
                 calendar.notifications.add(notification2)
                 calendar.notifications.add(notification3)
+//                calendar.notifications.add(notification4)
+//                calendar.notifications.add(notification5)
+//                calendar.notifications.add(notification6)
+//                calendar.notifications.add(notification7)
 
                 def globalSettings = findGlobalSettings(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
                 def workDaysYearBook = globalSettings.getWorkingDaysCalendar()
