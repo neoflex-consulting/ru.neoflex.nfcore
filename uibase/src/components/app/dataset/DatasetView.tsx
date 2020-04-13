@@ -308,13 +308,14 @@ class DatasetView extends React.Component<any, State> {
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
             highlights = getParamsFromComponent(resource, 'highlight');
             serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
-        } else if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+        }
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             serverFilters = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
-            serverAggregates = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
+            /*serverAggregates = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverSorts = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverGroupBy = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             highlights = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
-            serverCalculatedExpression = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs)
+            serverCalculatedExpression = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);*/
         }
         this.setState({serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
         this.runQuery(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
