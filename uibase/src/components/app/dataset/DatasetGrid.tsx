@@ -32,6 +32,36 @@ interface Props {
     activeReportDateField: boolean
 }
 
+//TODO
+//Перейти с map на object в columnDef
+function compareMaps(map1: any, map2: any) {
+    var testVal;
+    if (map1.size !== map2.size) {
+        return false;
+    }
+    for (var [key, val] of map1) {
+        testVal = map2.get(key);
+        if (testVal !== val || (testVal === undefined && !map2.has(key))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function compareColumnDefs(oldDefs: any[], newDefs: any[]) {
+    let isEqual = true;
+    if (oldDefs.length !== newDefs.length) {
+        isEqual = false
+    } else {
+        oldDefs.forEach(((value, index) => {
+            if (!compareMaps(oldDefs[index],newDefs[index])) {
+                isEqual =  false
+            }
+        }))
+    }
+    return isEqual
+}
+
 class DatasetGrid extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;
@@ -250,9 +280,9 @@ class DatasetGrid extends React.Component<any, any> {
                     ) {
                         this.changeSettings();
                     }
-                }
-                if (datasetView && JSON.parse(datasetView.get('value'))['serverAggregates']) {
-                    this.highlightAggregate(JSON.parse(datasetView.get('value'))['serverAggregates']);
+                    if (datasetComponent && JSON.parse(datasetComponent.get('value'))['serverAggregates']) {
+                        this.highlightAggregate(JSON.parse(datasetComponent.get('value'))['serverAggregates']);
+                    }
                 }
             }
             else if (datasetView === undefined) {
@@ -291,7 +321,8 @@ class DatasetGrid extends React.Component<any, any> {
                     const rowData = this.props.context.datasetComponents[componentName]['rowData'];
                     this.setState({rowData})
                 }
-                if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
+                //if (JSON.stringify(prevState.columnDefs) !== JSON.stringify(this.props.context.datasetComponents[componentName]['columnDefs'])) {
+                if (!compareColumnDefs(prevState.columnDefs, this.props.context.datasetComponents[componentName]['columnDefs'])) {
                     const columnDefs = this.props.context.datasetComponents[componentName]['columnDefs'];
                     this.setState({columnDefs})
                 }

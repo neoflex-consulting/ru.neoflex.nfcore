@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { withTranslation } from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {Button, Checkbox, Input} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
@@ -20,6 +20,7 @@ interface State {
     queryAggregatePattern?: EObject;
     querySortPattern?: EObject;
     queryGroupByPattern?: EObject;
+    queryCalculatedExpressionPattern?: EObject;
     highlightPattern?: EObject;
     user?: EObject;
 }
@@ -78,10 +79,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
         currentDatasetComponent.get(componentName).clear();
         JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
             if (f['operation'] !== undefined) {
-                const datasetColumn = currentDatasetComponent.get('dataset').get('datasetColumn').array()
-                    .filter((c: any) => c.get('name') === f['datasetColumn']);
-                const params = pattern.create({
-                    datasetColumn: datasetColumn[0],
+                let params;
+                params = pattern.create({
+                    datasetColumn: f['datasetColumn'],
                     operation: f['operation'],
                     value: f['value'],
                     enable: f['enable'],
@@ -129,6 +129,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
                 this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
@@ -173,6 +174,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
             this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
             this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
             this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+            this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
             this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
         }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
@@ -225,6 +227,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.queryAggregatePattern) this.getPattern('QueryAggregate', 'queryAggregatePattern');
         if (!this.state.querySortPattern) this.getPattern('QuerySort', 'querySortPattern');
         if (!this.state.queryGroupByPattern) this.getPattern('QueryGroupBy', 'queryGroupByPattern');
+        if (!this.state.queryCalculatedExpressionPattern) this.getPattern('QueryCalculatedExpression', 'queryCalculatedExpressionPattern');
         if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
         if (!this.state.user) this.getUser();
     }

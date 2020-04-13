@@ -153,7 +153,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     createTree() {
         const getTitle = (object: { [key: string]: any }) => {
-            const possibleTitles: Array<string> = ["name", "qname", "createdBy", "code", "rdbmsFieldName", "fieldName"];
+            const possibleTitles: Array<string> = ["name", "qname", "createdBy", "code", "rdbmsFieldName", "fieldName", "title"];
             let result = null
             for (let title of possibleTitles) {
                 if (object[title]) {

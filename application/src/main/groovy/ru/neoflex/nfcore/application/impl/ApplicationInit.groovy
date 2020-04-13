@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
+import ru.neoflex.nfcore.application.GlobalSettings
 import ru.neoflex.nfcore.application.IconName
 import ru.neoflex.nfcore.application.TextAlign
 import ru.neoflex.nfcore.application.AxisXPositionType
@@ -29,6 +30,12 @@ class ApplicationInit {
             if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
             resources.resources.add(Context.current.store.createEObject(eObject))
         }
+        return resources.resources.get(0).contents.get(0)
+    }
+
+    static def findGlobalSettings(EClass eClass) {
+        def resources = DocFinder.create(Context.current.store, eClass)
+                .execute().resourceSet
         return resources.resources.get(0).contents.get(0)
     }
 
@@ -88,6 +95,11 @@ class ApplicationInit {
                 calendar.notifications.add(notification1)
                 calendar.notifications.add(notification2)
                 calendar.notifications.add(notification3)
+
+                def globalSettings = findGlobalSettings(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
+                def workDaysYearBook = globalSettings.getWorkingDaysCalendar()
+
+                calendar.setYearBook(workDaysYearBook)
 
                 column.children.add(typography)
                 row1.children.add(row2)

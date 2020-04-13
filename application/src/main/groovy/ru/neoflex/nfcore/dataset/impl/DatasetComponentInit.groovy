@@ -68,6 +68,9 @@ class DatasetComponentInit {
                         rdbmsColumn.datasetColumn = columns[i]
                         def typography = ApplicationFactory.eINSTANCE.createTypography()
                         typography.name = columns[i].name
+                                .replace("incomedate","дата")
+                                .replace("branch","филиал")
+                                .replace("income","доход")
                         rdbmsColumn.headerName = typography
                         rdbmsColumn.sortable = true
                         rdbmsColumn.resizable = true
@@ -99,24 +102,27 @@ class DatasetComponentInit {
             def dataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, JdbcDataset) as JdbcDataset
 
             def serverFilter1 = DatasetFactory.eINSTANCE.createQueryFilter()
-            def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
-            serverFilter1.setDatasetColumn(datasetColumn1)
+            /*def datasetColumn1 = dataset.datasetColumn.find { c -> c.name == "e_id"}
+            serverFilter1.setDatasetColumn(datasetColumn1)*/
+            serverFilter1.datasetColumn = "e_id"
             serverFilter1.operation = Operations.LESS_THAN
             serverFilter1.value = 100000
             serverFilter1.enable = true
             datasetComponent.serverFilter.add(serverFilter1)
 
             def serverFilter2 = DatasetFactory.eINSTANCE.createQueryFilter()
-            def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
-            serverFilter2.setDatasetColumn(datasetColumn2)
+            /*def datasetColumn2 = dataset.datasetColumn.find { c -> c.name == "e_id"}
+            serverFilter2.setDatasetColumn(datasetColumn2)*/
+            serverFilter2.datasetColumn = "e_id"
             serverFilter2.operation = Operations.LESS_THAN
             serverFilter2.value = 4000
             serverFilter2.enable = false
             datasetComponent.serverFilter.add(serverFilter2)
 
             def serverFilter3 = DatasetFactory.eINSTANCE.createQueryFilter()
-            def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
-            serverFilter3.setDatasetColumn(datasetColumn3)
+            /*def datasetColumn3 = dataset.datasetColumn.find { c -> c.name == "name"}
+            serverFilter3.setDatasetColumn(datasetColumn3)*/
+            serverFilter3.datasetColumn = "e_id"
             serverFilter3.operation = Operations.INCLUDE_IN
             serverFilter3.value = "test"
             serverFilter3.enable = true

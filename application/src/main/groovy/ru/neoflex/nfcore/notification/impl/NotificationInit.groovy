@@ -29,11 +29,11 @@ class NotificationInit {
             def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle",false) as AppModule
             notification.setAppModule(appModule1)
             notification.periodicity = Periodicity.MONTH
-            notification.deadlineDay = "1"
+            notification.deadlineDay = "17"
             notification.deadlineTime = "18:00"
 
             def dateOn1 = NotificationFactory.eINSTANCE.createReportingDateOn()
-            dateOn1.name = "9"
+            dateOn1.name = "15"
             notification.reportingDateOn.add(dateOn1)
 
             rs.resources.add(Context.current.store.createEObject(notification))
@@ -50,11 +50,11 @@ class NotificationInit {
             notification.shortName = name + '_Short'
 
             notification.periodicity = Periodicity.MONTH
-            notification.deadlineDay = "1"
+            notification.deadlineDay = "10"
             notification.deadlineTime = "18:00"
 
             def dateOn1 = NotificationFactory.eINSTANCE.createReportingDateOn()
-            dateOn1.name = "11"
+            dateOn1.name = "8"
             notification.reportingDateOn.add(dateOn1)
 
             rs.resources.add(Context.current.store.createEObject(notification))

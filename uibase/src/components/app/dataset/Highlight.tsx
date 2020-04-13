@@ -7,7 +7,7 @@ import {faPalette, faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-soli
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
-import {SortableElement} from 'react-sortable-hoc';
+import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 import {SliderPicker} from "react-color";
@@ -23,7 +23,6 @@ interface Props {
     allHighlightType?: Array<EObject>;
 }
 
-
 interface State {
     parametersArray: IServerQueryParam[] | undefined;
     backgroundColorVisible: boolean;
@@ -31,6 +30,277 @@ interface State {
     colorIndex: any;
     color: any;
 }
+
+const SortableList = SortableContainer(({items}:any) => {
+    return (
+        <ul className="SortableList">
+            {items.map((value:any) => (
+                <SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
+            ))}
+        </ul>
+    );
+});
+
+const SortableItem = SortableElement(({value}: any) => {
+    return <div className="SortableItemHighlight">
+        <Row gutter={[8, 0]}>
+            <Col span={1}>
+                <span>{value.index}</span>
+            </Col>
+            <Col span={7}>
+                <Form.Item style={{display: 'inline-block'}}>
+                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
+                        {
+                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
+                            rules: [{
+                                required:
+                                    value.operation ||
+                                    value.value,
+                                message: ' '
+                            }]
+                        })(
+                        <Select
+                            placeholder={value.t('columnname')}
+                            style={{
+                                width: '179px',
+                                marginRight: '10px',
+                                marginLeft: '10px'
+                            }}
+                            showSearch={true}
+                            allowClear={true}
+                            onChange={(e: any) => {
+                                const event = e ? e : JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'datasetColumn',
+                                    value: undefined
+                                })
+                                value.handleChange(event)
+                            }}
+                        >
+                            {
+                                value.columnDefs!
+                                    .map((c: any) =>
+                                        <Select.Option
+                                            key={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'datasetColumn',
+                                                value: c.get('field')
+                                            })}
+                                            value={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'datasetColumn',
+                                                value: c.get('field')
+                                            })}
+                                        >
+                                            {c.get('headerName')}
+                                        </Select.Option>)
+                            }
+                        </Select>
+                    )}
+                </Form.Item>
+            </Col>
+            <Col span={7}>
+                <Form.Item style={{display: 'inline-block'}}>
+                    {value.getFieldDecorator(`${value.idOperation}`,
+                        {
+                            initialValue: value.t(value.operation) || undefined,
+                            rules: [{
+                                required:
+                                    value.datasetColumn ||
+                                    value.value,
+                                message: ' '
+                            }]
+                        })(
+                        <Select
+                            disabled={value.highlightType === 'Column'}
+                            placeholder={value.t('operation')}
+                            style={{width: '179px', marginLeft: '5px'}}
+                            allowClear={true}
+                            onChange={(e: any) => {
+                                const event = e ? e : JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'operation',
+                                    value: undefined
+                                })
+                                value.handleChange(event)
+                            }}
+                        >
+                            {
+                                value.allOperations!
+                                    .map((o: any) =>
+                                        <Select.Option
+                                            key={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'operation',
+                                                value: o.get('name')
+                                            })}
+                                            value={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'operation',
+                                                value: o.get('name')
+                                            })}
+                                        >
+                                            {value.t(o.get('name'))}
+                                        </Select.Option>)
+                            }
+                        </Select>
+                    )}
+                </Form.Item>
+            </Col>
+            <Col span={5}>
+                <Form.Item style={{display: 'inline-block'}}>
+                    {value.getFieldDecorator(`${value.idValue}`,
+                        {
+                            initialValue: value.value,
+                            rules: [{
+                                required:
+                                    value.datasetColumn ||
+                                    value.operation,
+                                message: ' '
+                            }]
+                        })(
+                        <Input
+                            placeholder={value.t('value')}
+                            disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty' || value.highlightType === 'Column'}
+                            style={{width: '110px', marginRight: '10px'}}
+                            allowClear={true}
+                            onChange={(e: any) => value.handleChange(
+                                JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'value',
+                                    value: e.target.value === "" ? undefined : e.target.value
+                                })
+                            )}
+                            title={value.value}
+                            id={value.index.toString()}
+                        />
+                    )}
+                </Form.Item>
+            </Col>
+            <Col span={2}>
+                <Form.Item style={{ display: 'inline-block' }}>
+                    <Switch
+                        defaultChecked={value.enable !== undefined ? value.enable : true}
+                        onChange={(e: any) => {
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                            value.handleChange(event)
+                        }}>
+                    </Switch>
+                </Form.Item>
+            </Col>
+            <Col span={2}>
+                <Form.Item style={{ display: 'inline-block', marginLeft: '6px' }}>
+                    <Button
+                        title="delete row"
+                        key={'deleteRowButton'}
+                        value={'deleteRowButton'}
+                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
+                    >
+                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
+                    </Button>
+                </Form.Item>
+            </Col>
+        </Row>
+        <Row gutter={[8, 0]}>
+            <Col span={4} style={{marginLeft: '17px', marginTop: '-17px'}}>
+                {value.getFieldDecorator(`${value.idHighlightType}`,
+                    {
+                        initialValue: value.t(value.highlightType)
+                    })(
+                    <Select
+                        allowClear={true}
+                        style={{width: '100px', marginLeft: '21px'}}
+                        onChange={(e: any) => {
+                            const event = e ? e : JSON.stringify({
+                                index: value.index,
+                                columnName: 'highlightType',
+                                value: undefined
+                            })
+                            value.handleChange(event)
+                        }}
+                    >
+                        {
+                            value.allHighlightType!
+                                .map((o: any) =>
+                                    <Select.Option
+                                        key={JSON.stringify({
+                                            index: value.index,
+                                            columnName: 'highlightType',
+                                            value: o.get('name')
+                                        })}
+                                        value={JSON.stringify({
+                                            index: value.index,
+                                            columnName: 'highlightType',
+                                            value: o.get('name')
+                                        })}
+                                    >
+                                        {value.t(o.get('name'))}
+                                    </Select.Option>)
+                        }
+                    </Select>
+                )}
+            </Col>
+            <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
+                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Фон</div>
+                <FontAwesomeIcon
+                    color={value.backgroundColor}
+                    onClick={() => value.handleColorMenu('background', value.index)}
+                    style={{fontSize: '18px', marginLeft: '13px'}}
+                    icon={faPalette}
+                />
+                <Modal
+                    width={'500px'}
+                    title={'Выбор цвета фона'}
+                    visible={value.backgroundColorVisible && value.colorIndex === value.index}
+                    onCancel={() => value.handleColorMenu('background', value.index)}
+                    closable={false}
+                    mask={false}
+                    onOk={() => {
+                        return value.handleChange(JSON.stringify({
+                            index: value.index,
+                            columnName: 'backgroundColor',
+                            value: value.stateColor !== undefined ? value.stateColor['hex'] : value.backgroundColor
+                        }))
+                    }}
+                >
+                    <SliderPicker
+                        onChange={(e: any) => value.changeColor(e)}
+                        color={value.stateColor !== undefined ? value.stateColor['hex'] :
+                            value.backgroundColor !== undefined ? value.backgroundColor : 'white'}
+                    />
+                </Modal>
+            </Col>
+            <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
+                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Текст</div>
+                <FontAwesomeIcon
+                    color={value.color}
+                    onClick={() => value.handleColorMenu('text', value.index)}
+                    style={{fontSize: '18px', marginLeft: '13px'}}
+                    icon={faPalette}
+                />
+                <Modal
+                    width={'500px'}
+                    title={'Выбор цвета текста'}
+                    visible={value.textColorVisible && value.colorIndex === value.index}
+                    onCancel={() => value.handleColorMenu('text', value.index)}
+                    closable={false}
+                    mask={false}
+                    onOk={() => value.handleChange(JSON.stringify({
+                        index: value.index,
+                        columnName: 'color',
+                        value: value.stateColor !== undefined ? value.stateColor['hex'] : value.color
+                    }))}
+                >
+                    <SliderPicker
+                        onChange={(e: any) => value.changeColor(e)}
+                        color={ value.stateColor !== undefined ? value.stateColor['hex'] :
+                            value.color !== undefined ? value.color : 'white' }
+                    />
+                </Modal>
+            </Col>
+        </Row>
+    </div>
+});
 
 class Highlight extends DrawerParameterComponent<Props, State> {
 
@@ -87,267 +357,6 @@ class Highlight extends DrawerParameterComponent<Props, State> {
         this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined})
     }
 
-    SortableItem = SortableElement(({value}: any) => {
-        return <div className="SortableItemHighlight">
-            <Row gutter={[8, 0]}>
-                <Col span={1}>
-                    <span>{value.index}</span>
-                </Col>
-                <Col span={7}>
-                    <Form.Item style={{display: 'inline-block'}}>
-                        {this.getFieldDecorator(`${value.idDatasetColumn}`,
-                            {
-                                initialValue: value.datasetColumn,
-                                rules: [{
-                                    required:
-                                        value.operation ||
-                                        value.value,
-                                    message: ' '
-                                }]
-                            })(
-                            <Select
-                                placeholder={this.t('columnname')}
-                                style={{
-                                    width: '179px',
-                                    marginRight: '10px',
-                                    marginLeft: '10px'
-                                }}
-                                showSearch={true}
-                                allowClear={true}
-                                onChange={(e: any) => {
-                                    const event = e ? e : JSON.stringify({
-                                        index: value.index,
-                                        columnName: 'datasetColumn',
-                                        value: undefined
-                                    })
-                                    this.handleChange(event)
-                                }}
-                            >
-                                {
-                                    this.props.columnDefs!
-                                        .map((c: any) =>
-                                            <Select.Option
-                                                key={JSON.stringify({
-                                                    index: value.index,
-                                                    columnName: 'datasetColumn',
-                                                    value: c.get('field')
-                                                })}
-                                                value={JSON.stringify({
-                                                    index: value.index,
-                                                    columnName: 'datasetColumn',
-                                                    value: c.get('field')
-                                                })}
-                                            >
-                                                {c.get('field')}
-                                            </Select.Option>)
-                                }
-                            </Select>
-                        )}
-                    </Form.Item>
-                </Col>
-                <Col span={7}>
-                    <Form.Item style={{display: 'inline-block'}}>
-                        {this.getFieldDecorator(`${value.idOperation}`,
-                            {
-                                initialValue: this.t(value.operation) || undefined,
-                                rules: [{
-                                    required:
-                                        value.datasetColumn ||
-                                        value.value,
-                                    message: ' '
-                                }]
-                            })(
-                            <Select
-                                disabled={value.highlightType === 'Column'}
-                                placeholder={this.t('operation')}
-                                style={{width: '179px', marginLeft: '5px'}}
-                                allowClear={true}
-                                onChange={(e: any) => {
-                                    const event = e ? e : JSON.stringify({
-                                        index: value.index,
-                                        columnName: 'operation',
-                                        value: undefined
-                                    })
-                                    this.handleChange(event)
-                                }}
-                            >
-                                {
-                                    this.props.allOperations!
-                                        .map((o: any) =>
-                                            <Select.Option
-                                                key={JSON.stringify({
-                                                    index: value.index,
-                                                    columnName: 'operation',
-                                                    value: o.get('name')
-                                                })}
-                                                value={JSON.stringify({
-                                                    index: value.index,
-                                                    columnName: 'operation',
-                                                    value: o.get('name')
-                                                })}
-                                            >
-                                                {this.t(o.get('name'))}
-                                            </Select.Option>)
-                                }
-                            </Select>
-                        )}
-                    </Form.Item>
-                </Col>
-                <Col span={5}>
-                    <Form.Item style={{display: 'inline-block'}}>
-                        {this.getFieldDecorator(`${value.idValue}`,
-                            {
-                                initialValue: value.value,
-                                rules: [{
-                                    required:
-                                        value.datasetColumn ||
-                                        value.operation,
-                                    message: ' '
-                                }]
-                            })(
-                            <Input
-                                placeholder={this.t('value')}
-                                disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty' || value.highlightType === 'Column'}
-                                style={{width: '110px', marginRight: '10px'}}
-                                allowClear={true}
-                                onChange={(e: any) => this.handleChange(
-                                    JSON.stringify({
-                                        index: value.index,
-                                        columnName: 'value',
-                                        value: e.target.value === "" ? undefined : e.target.value
-                                    })
-                                )}
-                                title={value.value}
-                                id={value.index.toString()}
-                            />
-                        )}
-                    </Form.Item>
-                </Col>
-                <Col span={2}>
-                    <Form.Item style={{ display: 'inline-block' }}>
-                        <Switch
-                            defaultChecked={value.enable !== undefined ? value.enable : true}
-                            onChange={(e: any) => {
-                                const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                                this.handleChange(event)
-                            }}>
-                        </Switch>
-                    </Form.Item>
-                </Col>
-                <Col span={2}>
-                    <Form.Item style={{ display: 'inline-block', marginLeft: '6px' }}>
-                        <Button
-                            title="delete row"
-                            key={'deleteRowButton'}
-                            value={'deleteRowButton'}
-                            onClick={(e: any) => {this.deleteRow({index: value.index})}}
-                        >
-                            <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                        </Button>
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row gutter={[8, 0]}>
-                <Col span={4} style={{marginLeft: '17px', marginTop: '-17px'}}>
-                    {this.getFieldDecorator(`${value.idHighlightType}`,
-                        {
-                            initialValue: this.t(value.highlightType)
-                        })(
-                        <Select
-                            allowClear={true}
-                            style={{width: '100px', marginLeft: '21px'}}
-                            onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({
-                                    index: value.index,
-                                    columnName: 'highlightType',
-                                    value: undefined
-                                })
-                                this.handleChange(event)
-                            }}
-                        >
-                            {
-                                this.props.allHighlightType!
-                                    .map((o: any) =>
-                                        <Select.Option
-                                            key={JSON.stringify({
-                                                index: value.index,
-                                                columnName: 'highlightType',
-                                                value: o.get('name')
-                                            })}
-                                            value={JSON.stringify({
-                                                index: value.index,
-                                                columnName: 'highlightType',
-                                                value: o.get('name')
-                                            })}
-                                        >
-                                            {this.t(o.get('name'))}
-                                        </Select.Option>)
-                            }
-                        </Select>
-                    )}
-                </Col>
-                <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
-                    <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Фон</div>
-                    <FontAwesomeIcon
-                        color={value.backgroundColor}
-                        onClick={() => this.handleColorMenu('background', value.index)}
-                        style={{fontSize: '18px', marginLeft: '13px'}}
-                        icon={faPalette}
-                    />
-                    <Modal
-                        width={'500px'}
-                        title={'Выбор цвета фона'}
-                        visible={this.state.backgroundColorVisible && this.state.colorIndex === value.index}
-                        onCancel={() => this.handleColorMenu('background', value.index)}
-                        closable={false}
-                        mask={false}
-                        onOk={() => {
-                            return this.handleChange(JSON.stringify({
-                                index: value.index,
-                                columnName: 'backgroundColor',
-                                value: this.state.color !== undefined ? this.state.color['hex'] : value.backgroundColor
-                            }))
-                        }}
-                    >
-                        <SliderPicker
-                            onChange={(e: any) => this.changeColor(e)}
-                            color={this.state.color !== undefined ? this.state.color['hex'] :
-                                value.backgroundColor !== undefined ? value.backgroundColor : 'white'}
-                        />
-                    </Modal>
-                </Col>
-                <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
-                    <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Текст</div>
-                    <FontAwesomeIcon
-                        color={value.color}
-                        onClick={() => this.handleColorMenu('text', value.index)}
-                        style={{fontSize: '18px', marginLeft: '13px'}}
-                        icon={faPalette}
-                    />
-                    <Modal
-                        width={'500px'}
-                        title={'Выбор цвета текста'}
-                        visible={this.state.textColorVisible && this.state.colorIndex === value.index}
-                        onCancel={() => this.handleColorMenu('text', value.index)}
-                        closable={false}
-                        mask={false}
-                        onOk={() => this.handleChange(JSON.stringify({
-                            index: value.index,
-                            columnName: 'color',
-                            value: this.state.color !== undefined ? this.state.color['hex'] : value.color
-                        }))}
-                    >
-                        <SliderPicker
-                            onChange={(e: any) => this.changeColor(e)}
-                            color={ this.state.color !== undefined ? this.state.color['hex'] :
-                                value.color !== undefined ? value.color : 'white' }
-                        />
-                    </Modal>
-                </Col>
-            </Row>
-        </div>
-    });
-
     render() {
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
@@ -387,14 +396,29 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                 </Form.Item>
                 <Form.Item>
                     {
-                        <this.SortableList items={this.state.parametersArray!
+                        <SortableList items={this.state.parametersArray!
                             .map((highlights: any) => (
                                 {
                                     ...highlights,
                                     idDatasetColumn : `${JSON.stringify({index: highlights.index, columnName: 'datasetColumn', value: highlights.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: highlights.index, columnName: 'operation', value: highlights.operation})}`,
                                     idValue : `${JSON.stringify({index: highlights.index, columnName: 'value', value: highlights.value})}`,
-                                    idHighlightType : `${JSON.stringify({index: highlights.index, columnName: 'highlightType', value: highlights.highlightType})}`
+                                    idHighlightType : `${JSON.stringify({index: highlights.index, columnName: 'highlightType', value: highlights.highlightType})}`,
+                                    t : this.t,
+                                    getFieldDecorator: this.getFieldDecorator,
+                                    columnDefs: this.props.columnDefs,
+                                    allOperations: this.props.allOperations,
+                                    handleChange: this.handleChange,
+                                    deleteRow: this.deleteRow,
+                                    translate: this.translate,
+                                    parametersArray: this.state.parametersArray,
+                                    allHighlightType: this.props.allHighlightType,
+                                    handleColorMenu: this.handleColorMenu.bind(this),
+                                    backgroundColorVisible: this.state.backgroundColorVisible,
+                                    colorIndex: this.state.colorIndex,
+                                    stateColor: this.state.color,
+                                    changeColor: this.changeColor.bind(this),
+                                    textColorVisible: this.state.textColorVisible
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

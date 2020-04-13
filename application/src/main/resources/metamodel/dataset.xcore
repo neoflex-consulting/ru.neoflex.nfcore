@@ -63,13 +63,14 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy)
+     op JSON runQuery(QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy, QueryConditionDTO[] calculatedExpression)
      boolean useServerFilter
      //Состав серверного фильтра
      contains QueryFilter[] serverFilter
      contains QueryAggregate[] serverAggregation
      contains QuerySort[] serverSort
      contains QueryGroupBy[] serverGroupBy
+     contains QueryCalculatedExpression[] serverCalculatedExpression
      contains Highlight[] highlight
 }
 
@@ -111,27 +112,33 @@ class FormatMask {
 }
 
 class QueryFilter {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Operations operation
     String value
     boolean enable
 }
 
 class QueryAggregate {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Aggregate operation
     boolean enable
 }
 
 class QuerySort {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Sort operation
     boolean enable
 }
 
 class QueryGroupBy {
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Aggregate operation
+    boolean enable
+}
+
+class QueryCalculatedExpression {
+    String datasetColumn
+    String operation
     boolean enable
 }
 
@@ -147,7 +154,7 @@ class QueryFilterDTO extends QueryConditionDTO {
 
 class Highlight {
     HighlightType highlightType
-    refers DatasetColumn datasetColumn
+    String datasetColumn
     Operations operation
     String value
     boolean enable
