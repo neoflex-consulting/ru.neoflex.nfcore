@@ -37,23 +37,23 @@ public class BaseApplication {
     String repoName;
 
     public static void main(String[] args) {
-        TransactionClassLoader.withClassLoader(()->{
-            try {
-                File extLibDir = new File(System.getProperty("extLib.dir", System.getProperty("user.dir") + "/extLib"));
-                extLibDir.mkdirs();
-                List<URL> urlList = new ArrayList<>();
-                for (File lib: extLibDir.listFiles()) {
-                    if (lib.getName().toLowerCase().endsWith(".jar")) {
-                        urlList.add(lib.toURI().toURL());
-                    }
+        try {
+            File extLibDir = new File(System.getProperty("extLib.dir", System.getProperty("user.dir") + "/extLib"));
+            extLibDir.mkdirs();
+            List<URL> urlList = new ArrayList<>();
+            for (File lib: extLibDir.listFiles()) {
+                if (lib.getName().toLowerCase().endsWith(".jar")) {
+                    urlList.add(lib.toURI().toURL());
                 }
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(new URLClassLoader(urlList.toArray(new URL[0]), cl));
-                new SpringApplication(BaseApplication.class).run(args);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             }
-        });
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(new URLClassLoader(urlList.toArray(new URL[0]), cl));
+            TransactionClassLoader.withClassLoader(()->{
+                new SpringApplication(BaseApplication.class).run(args);
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Bean
