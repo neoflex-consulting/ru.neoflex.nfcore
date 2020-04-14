@@ -19,21 +19,21 @@ class NotificationInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def createNotification(String name) {
+    static def createNotification(String name, String AppModuleName, String deadlineDay, String dateOn) {
         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
             def notification = NotificationFactory.eINSTANCE.createNotification()
             notification.name = name
             notification.shortName = name + '_Short'
-            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "ReportSingle",false) as AppModule
+            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, AppModuleName,false) as AppModule
             notification.setAppModule(appModule1)
             notification.periodicity = Periodicity.MONTH
-            notification.deadlineDay = "17"
+            notification.deadlineDay = deadlineDay
             notification.deadlineTime = "18:00"
 
             def dateOn1 = NotificationFactory.eINSTANCE.createReportingDateOn()
-            dateOn1.name = "15"
+            dateOn1.name = dateOn
             notification.reportingDateOn.add(dateOn1)
 
             rs.resources.add(Context.current.store.createEObject(notification))

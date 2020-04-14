@@ -16,8 +16,8 @@ class DatasetPackageInit {
 
     {
         /*DatasetPackage*/
-        JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest")
-        JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest")
+        JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest", "org.postgresql.Driver")
+        JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest", "JdbcDriverPostgresqlTest", "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev", "postgres", "ne0f1ex")
         JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
 
         try {
@@ -51,6 +51,24 @@ class DatasetPackageInit {
             logger.error("DatasetPackage", e)
         }
 
+
+        /*DEMO*/
+        JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
+        JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@nrdemo.neoflex.ru:1521:orcl.neoflex.ru", "system", "Ne0f1ex")
+
+        try {
+            JdbcDatasetInit.createJdbcDatasetInit("jdbcNRDemo","dm_f110_aggregated_f","dma","JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemo")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemo", "jdbcNRDemo")
+            DatasetComponentInit.createAllColumn("DatasetNRDemo")
+        }
+        catch (Throwable e) {
+            logger.error("DatasetPackage", e)
+        }
+
+        /*AppModuleInit.createAppModuleF110Section1("F110_Section1")*/
+        AppModuleInit.createAppModuleF110Section2("F110_Section2")
+
         /*NotificationPackage*/
         NotificationStatusInit.createNotificationStatus('Отчет не рассчитан','#add1ff')
         NotificationStatusInit.createNotificationStatus('Отчёт за дату проверен','#ff9b9b')
@@ -69,7 +87,9 @@ class DatasetPackageInit {
         TypographyStyleInit.createTypographyStyle("Title")
 
         AppModuleInit.createAppModule("ReportSingle")
-        NotificationInit.createNotification("A 1993")
+        NotificationInit.createNotification("A 1993", "ReportSingle", "17","15")
+        //NRdemo
+        NotificationInit.createNotification("Ф110", "F110_Section2", "1", "1")
         NotificationInit.createEmptyNotification("Ф 2020")
         NotificationInit.createEmptyNotification("Проверить почту")
 

@@ -127,4 +127,115 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
+    static def createAppModuleF110Section1(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "SectionForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = "Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)"
+
+            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            typography.setTypographyStyle(typographyStyle)
+
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "SectionDatasetView"
+            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "jdbcNRDemo", "",false)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetNRDemo", "",false)
+            datasetView.setDatasetComponent(datasetComponent)
+            row2.children.add(datasetView)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row2"
+
+            def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
+            datasetGrid.name = "SectionGrid"
+            datasetGrid.setDatasetView(datasetView)
+            row3.children.add(datasetGrid)
+
+
+            form.children.add(row1)
+            form.children.add(row2)
+            form.children.add(row3)
+            application.setView(form)
+
+            def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
+            referenceTree.name = "F110_Ref_Tree"
+
+            def appModuleNome1 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            appModuleNome1.name = "F110_Section1"
+            def appModuleNome2 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            appModuleNome2.name = "F110_Section2"
+
+            referenceTree.children.add(appModuleNome1)
+            referenceTree.children.add(appModuleNome2)
+
+            application.setReferenceTree(referenceTree)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+    static def createAppModuleF110Section2(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.name = name
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)"
+
+            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "SectionForm"
+            form.children.add(row1)
+
+            application.setView(form)
+
+            def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
+            referenceTree.name = "F110_Ref_Tree"
+
+            def appModuleNome1 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            appModuleNome1.name = "F110_Section1"
+            def appModuleNome2 = ApplicationFactory.eINSTANCE.createCatalogNode()
+            appModuleNome2.name = "F110_Section2"
+
+            application.setReferenceTree(referenceTree)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
 }
