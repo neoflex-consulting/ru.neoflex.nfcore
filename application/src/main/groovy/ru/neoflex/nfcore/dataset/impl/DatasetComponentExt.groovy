@@ -8,10 +8,11 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.base.util.DriverShim
 import ru.neoflex.nfcore.dataset.*
 
-import java.sql.*
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.Statement
 
 class DatasetComponentExt extends DatasetComponentImpl {
 
@@ -101,9 +102,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
-        DriverShim.registerDriver(dataset.connection.driver.driverClassName)
-        Connection jdbcConnection = DriverManager.getConnection(dataset.connection.url,dataset.connection.userName, dataset.connection.password)
-        logger.info("connectionToDB", "Successfully connected to database " + dataset.connection.url)
+        Connection jdbcConnection = (dataset.connection as JdbcConnectionExt).connect()
 
         /*Execute query*/
         def queryColumns = []

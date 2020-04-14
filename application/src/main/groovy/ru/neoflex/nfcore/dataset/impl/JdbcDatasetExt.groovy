@@ -10,7 +10,6 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.Statement
 
@@ -20,7 +19,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
     @Override
     String runQueryDataset() {
         if (datasetColumn) {
-            Connection jdbcConnection = connectionToDB()
+            Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
             ResultSet resultSet = getResultSet(jdbcConnection, false)
             def columnCount = resultSet.metaData.columnCount
             def rowData = []
@@ -40,7 +39,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String loadAllColumns() {
-        Connection jdbcConnection = connectionToDB()
+        Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
         ResultSet resultSet = getResultSet(jdbcConnection, false)
         def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
                 .execute().resourceSet
@@ -89,7 +88,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String showAllTables() {
-        Connection jdbcConnection = connectionToDB()
+        Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
         ResultSet resultSet = getResultSet(jdbcConnection, true)
         def columnCount = resultSet.metaData.columnCount
         def rowData = []
@@ -102,14 +101,6 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
             rowData.add(map)
         }
         return JsonOutput.toJson(rowData)
-    }
-
-    Connection connectionToDB() {
-        Class.forName(connection.driver.driverClassName)
-        logger.info("Driver %s loaded", connection.driver.driverClassName)
-        Connection jdbcConnection = DriverManager.getConnection(connection.url, connection.userName, connection.password)
-        logger.info("Connected to " + connection.url)
-        return jdbcConnection
     }
 
     ResultSet getResultSet(Connection jdbcConnection, boolean showAllTables) {
