@@ -60,6 +60,10 @@ class CalendarExt extends CalendarImpl {
                                     if (notification.appModule != null) {
                                         notificationInstanceDTO.appModuleName = notification.appModule.name
                                     }
+
+                                    notificationInstance.status.add(notification.defaultStatus)
+                                    notificationInstanceDTO.statusColor = notification.defaultStatus.color
+
                                     def d1 = new Date(dateFrom)
                                     def yearDateFrom = d1.toYear().toString()
                                     def monthDateFrom = d1.toMonth().ordinal() + 1
