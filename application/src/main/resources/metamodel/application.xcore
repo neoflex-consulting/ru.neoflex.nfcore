@@ -188,6 +188,7 @@ class Typography extends ViewElement {
     boolean underlineStyle
     boolean strongStyle
     String marginTop
+    String marginBottom
     String fontSize
     String textIndent
     String height
@@ -252,6 +253,7 @@ class TypographyStyle extends Style {
     boolean underlineStyle
     boolean strongStyle
     String marginTop
+    String marginBottom
     String fontSize
     String textIndent
     String height

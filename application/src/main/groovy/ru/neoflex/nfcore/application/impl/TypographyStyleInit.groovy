@@ -24,6 +24,7 @@ class TypographyStyleInit {
             typographyStyle.name = name
             typographyStyle.textAlign = TextAlign.LEFT
             typographyStyle.marginTop = '12px'
+            typographyStyle.marginBottom = '16px'
             typographyStyle.fontSize = '34px'
             typographyStyle.textIndent = '20px'
             typographyStyle.height = '70px'

@@ -334,6 +334,7 @@ class Typography_ extends ViewContainer {
                 key={this.viewObject._id}
                 style={{
                     marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
+                    marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
                     fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
                     textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
                     height: drawObject.get('height') === null ? '0px' : `${drawObject.get('height')}`,
