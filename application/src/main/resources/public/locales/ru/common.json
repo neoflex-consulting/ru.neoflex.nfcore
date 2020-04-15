@@ -11,6 +11,7 @@
         "clear": "Очистить",
         "columnname": "Наименование колонки",
         "closeall": "Закрыть все",
+        "create": "Создать",
         "createitem": "Созать элемент",
         "data": "Данные",
         "datatype": "Тип данных",
@@ -86,7 +87,19 @@
 
         "Enter new column name": "Введите название столбца",
         "Select calculated column": "Выберите вычисляемый столбец",
-        "Expression": "Выражение"
+        "Expression": "Выражение",
+
+        "createnotification": "Создание события",
+        "calculationinterval": "Интервал расчета",
+        "deadlineday": "Рабочий день сдачи",
+        "deadlinetime": "Аремя сдачи",
+        "dateon": "Отчетная дата 'на'",
+        "fullName": "Полное название",
+        "manualsetting": "Ручная настройка",
+        "periodicity": "Периодичность сдачи",
+        "shortName": "Краткое название",
+        "throughnotificationattributes": "Через атрибуты события",
+        "weekendreporting": "Отчетность по выходным"
 }
 
 

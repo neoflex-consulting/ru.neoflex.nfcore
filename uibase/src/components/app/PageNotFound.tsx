@@ -1,5 +1,5 @@
 import * as React from "react";
-import './../../styles/MandatoryReporting.css';
+import '../../styles/Calendar.css';
 import {Form} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 

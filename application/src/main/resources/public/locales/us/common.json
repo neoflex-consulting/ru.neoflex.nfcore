@@ -11,6 +11,7 @@
         "clear": "Clear",
         "columnname": "Column name",
         "closeall": "Close All",
+        "create": "Create",
         "createitem": "Create item",
         "data": "Data",
         "datatype": "Data Type",
@@ -86,5 +87,17 @@
 
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
-        "Expression": "Expression"
+        "Expression": "Expression",
+
+        "createnotification": "Create Notification",
+        "calculationinterval": "Calculation Interval",
+        "deadlineday": "Deadline Day",
+        "deadlinetime": "Deadline Time",
+        "dateon": "Date On",
+        "fullName": "Full Name",
+        "manualsetting": "Manual Setting",
+        "periodicity": "Periodicity",
+        "shortName": "Short Name",
+        "throughnotificationattributes": "Through Notification Attributes",
+        "weekendreporting": "Weekend Reporting"
 }

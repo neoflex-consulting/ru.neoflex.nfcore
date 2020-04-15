@@ -11,6 +11,7 @@
         "clear": "清除",
         "columnname": "欄名",
         "closeall": "關閉所有",
+        "create": "創建",
         "createitem": "建立項目",
         "data": "數據",
         "datatype": "數據類型",
@@ -86,5 +87,17 @@
 
         "Enter new column name": "輸入新的列名",
         "Select calculated column": "選擇計算列",
-        "Expression": "表達"
+        "Expression": "表達",
+
+        "createnotification": "創建通知",
+        "calculationinterval": "計算間隔",
+        "deadlineday": "截止日",
+        "deadlinetime": "截止時間",
+        "dateon": "日期",
+        "fullName": "全名",
+        "manualsetting": "手動設定",
+        "periodicity": "週期性",
+        "shortName": "簡稱",
+        "throughnotificationattributes": "通過通知屬性",
+        "weekendreporting": "週末報告"
 }

@@ -11,7 +11,7 @@ import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
-import CalendarWrapper from "./components/app/CalendarWrapper";
+import Calendar from "./components/app/calendar/Calendar";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -394,7 +394,7 @@ class DatasetDiagramView_ extends ViewContainer {
 
 class Calendar_ extends ViewContainer {
     render = () => {
-        return <CalendarWrapper {...this.props} key={this.viewObject._id}/>
+        return <Calendar {...this.props} key={this.viewObject._id}/>
     }
 }
 

@@ -1,16 +1,17 @@
 import React from 'react';
 import * as dateFns from "date-fns";
 import Ecore, {EObject} from "ecore";
-import {API} from "../../modules/api";
+import {API} from "../../../modules/api";
 import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
-import {MainContext} from "../../MainContext";
+import {MainContext} from "../../../MainContext";
 import {Button, Drawer} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCalendarAlt, faLifeRing, faUser} from "@fortawesome/free-regular-svg-icons";
+import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
 import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
+import CreateNotification from "./CreateNotification";
 
 interface State {
     currentMonth: Date;
@@ -20,6 +21,7 @@ interface State {
     globalSettings?: EObject;
     calendarLanguage: string;
     legendMenuVisible: boolean;
+    createMenuVisible: boolean
 }
 
 interface Props {
@@ -35,7 +37,8 @@ class Calendar extends React.Component<any, State> {
             notificationStatus: [],
             notificationInstancesDTO: [],
             calendarLanguage: "",
-            legendMenuVisible: false
+            legendMenuVisible: false,
+            createMenuVisible: false
         };
     }
 
@@ -80,6 +83,10 @@ class Calendar extends React.Component<any, State> {
         }
     };
 
+    createNotification = (notificationStatus: any[]) => {
+        // this.setState({notificationStatus})
+    };
+
     updateAllStatuses = (notificationStatus: any[]) => {
         this.setState({notificationStatus})
     };
@@ -103,14 +110,40 @@ class Calendar extends React.Component<any, State> {
                 : enUS;
     }
 
+    handleCreateMenu = () => {
+        this.state.createMenuVisible ? this.setState({ createMenuVisible: false})
+            : this.setState({ createMenuVisible: true});
+    };
+
     handleLegendMenu = () => {
         this.state.legendMenuVisible ? this.setState({ legendMenuVisible: false})
             : this.setState({ legendMenuVisible: true});
     };
 
+    renderCreateNotification() {
+        const {i18n, t} = this.props;
+        return (
+            <Drawer
+                placement='right'
+                title={t('createnotification')}
+                width={'450px'}
+                visible={this.state.createMenuVisible}
+                onClose={this.handleCreateMenu}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    <CreateNotification
+                        {...this.props}
+                        onCreateNotificationStatus={this.createNotification}
+                    />
+                }
+            </Drawer>
+        );
+    }
+
     renderLegend() {
         const {i18n, t} = this.props;
-        const dateFormat = "LLLL yyyy";
         return (
             <Drawer
                 placement='right'
@@ -163,13 +196,15 @@ class Calendar extends React.Component<any, State> {
                     <div className="icon">chevron_right</div>
                 </div>
 
-                <Button type="primary" style={{width: '20px', height: '30px', marginTop: '2px'}}>
+                <Button type="primary" style={{width: '20px', height: '30px', marginTop: '2px'}}
+                        onClick={this.handleCreateMenu}>
                     <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
                 </Button>
 
                 <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
-                <Button style={{width: '20px', color: '#6e6e6e'}} type="link" onClick={this.handleLegendMenu}>
+                <Button style={{width: '20px', color: '#6e6e6e'}} type="link"
+                        onClick={this.handleLegendMenu}>
                     <FontAwesomeIcon icon={faLifeRing} size="lg" style={{marginLeft: '-9px'}}/>
                 </Button>
 
@@ -358,6 +393,7 @@ class Calendar extends React.Component<any, State> {
             <MainContext.Consumer>
                 { context => (
                     <div className="calendar">
+                        {this.renderCreateNotification()}
                         {this.renderLegend()}
                         {this.renderHeader()}
                         {this.renderDays()}

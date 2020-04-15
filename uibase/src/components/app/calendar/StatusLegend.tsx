@@ -1,5 +1,5 @@
 import React from "react";
-import './../../styles/MandatoryReporting.css';
+import '../../../styles/Calendar.css';
 import {Button, Checkbox, Col, Row} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -72,7 +72,7 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
                             </Row>
                         )
                 }
-                <Button title={'Apply'} style={{ width: '100px', right: '6px', }} type="primary"
+                <Button title={t('apply')} style={{ width: '100px', right: '6px', }} type="primary"
                         onClick={()=> this.apply(this.state.notificationStatus)}>
                     {t('apply')}
                 </Button>
