@@ -30,12 +30,29 @@ class JdbcDatasetInit {
         return rs.resources.get(0).contents.get(0) as JdbcDataset
     }
 
+    static def createJdbcDatasetQueryInit(String name, String tableName, String schemaName, String Query, String connectionName) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+            def jdbcDataset = DatasetFactory.eINSTANCE.createJdbcDataset()
+            jdbcDataset.name = name
+            jdbcDataset.query = Query
+            jdbcDataset.tableName = tableName
+            jdbcDataset.schemaName = schemaName
+            def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
+            jdbcDataset.setConnection(connection)
+            rs.resources.add(Context.current.store.createEObject(jdbcDataset))
+        }
+        return rs.resources.get(0).contents.get(0) as JdbcDataset
+    }
+
     static def loadAllColumnsJdbcDatasetInit(String name) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
                 .execute().resourceSet
         if (!rs.resources.empty) {
             def jdbcDataset = rs.resources.get(0).contents.get(0) as JdbcDataset
             if(jdbcDataset.connection && jdbcDataset.datasetColumn.size() == 0) {
+                print(jdbcDataset.connection.toString())
                 jdbcDataset.loadAllColumns()
             }
         }

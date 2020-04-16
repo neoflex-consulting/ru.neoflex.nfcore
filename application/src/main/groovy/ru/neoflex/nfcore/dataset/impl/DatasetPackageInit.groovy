@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.dataset.impl
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import ru.neoflex.nfcore.application.AppModule
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
 import ru.neoflex.nfcore.application.impl.GlobalSettingsInit
@@ -52,22 +53,113 @@ class DatasetPackageInit {
         }
 
 
-        /*DEMO*/
+        /*NRDEMO*/
         JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
-        JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@nrdemo.neoflex.ru:1521:orcl.neoflex.ru", "system", "Ne0f1ex")
+        JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nrdemo.neoflex.ru)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl.neoflex.ru))) ", "system", "Ne0f1ex")
 
         try {
-            JdbcDatasetInit.createJdbcDatasetInit("jdbcNRDemo","dm_f110_aggregated_f","dma","JdbcConnectionNRDemo")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemo")
-            DatasetComponentInit.createDatasetComponent("DatasetNRDemo", "jdbcNRDemo")
-            DatasetComponentInit.createAllColumn("DatasetNRDemo")
+            /*MAIN*/
+            //TODO отсутствует возможность параметризовать запрос
+            String query = "select on_date, row_number, f110_code, amount_rub, amount_cur, report_precision from (\n" +
+                    "select to_date('20190331','YYYYMMDD') as on_date,\n" +
+                    "       row_number,\n" +
+                    "       f110_code,\n" +
+                    "       amount_rub," +
+                    "       amount_cur," +
+                    "       section_number,\n" +
+                    "       1 as report_precision\n" +
+                    "  from table(data_representation.rep_f110.GetF110Apex(\n" +
+                    "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
+                    "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
+                    "         i_ReportPrecision => 1,\n" +
+                    "         i_SpodDate        => null\n" +
+                    "       ))\n" +
+                    " union all\n" +
+                    "select to_date('20190331','YYYYMMDD') as on_date,\n" +
+                    "       row_number,\n" +
+                    "       f110_code,\n" +
+                    "       amount_rub," +
+                    "       amount_cur," +
+                    "       section_number,\n" +
+                    "       1000 as report_precision\n" +
+                    "  from table(data_representation.rep_f110.GetF110Apex(\n" +
+                    "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
+                    "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
+                    "         i_ReportPrecision => 1000,\n" +
+                    "         i_SpodDate        => null\n" +
+                    "       ))\n" +
+                    ") "
+            String querySection1 = query + " where section_number = 1"
+            String querySection2 = query + " where section_number = 2"
+            String querySection3 = query + " where section_number = 3"
+            String querySection4 = query + " where section_number = 4"
+
+            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection1","dm_f110_aggregated_f","dma",querySection1,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection1")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection1", "jdbcNRDemoSection1")
+            DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection1")
+            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection1", "")
+
+            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection2","dm_f110_aggregated_f","dma",querySection2,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection2")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection2", "jdbcNRDemoSection2")
+            DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection2")
+            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection2", "")
+
+            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection3","dm_f110_aggregated_f","dma",querySection3,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection3")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection3", "jdbcNRDemoSection3")
+            DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection3")
+            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection3", "")
+
+            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection4","dm_f110_aggregated_f","dma",querySection4,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection4")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection4", "jdbcNRDemoSection4")
+            DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection4")
+            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection4", "")
+
+            /*DETAIL*/
+            //TODO получать список столбцов по запросу а не по таблице
+            String detailQuery = "select section_number,\n" +
+                    "       row_number,\n" +
+                    "       f110_code,\n" +
+                    "       account_number,\n" +
+                    "       f102_symbol,\n" +
+                    "       amount_rub,\n" +
+                    //"       amount_cur,\n" +
+                    "       account_name,\n" +
+                    "       account_amount_rub,\n" +
+                    "       option_premium_amount,\n" +
+                    "       customer_name,\n" +
+                    "       party_type,\n" +
+                    //"       customer_role_name,\n" +
+                    "       is_co,\n" +
+                    "       is_resident,\n" +
+                    //"       legal_career_type_name,\n" +
+                    //"       agreement_type_name,\n" +
+                    "       agreement_number,\n" +
+                    //"       account_link_type_name,\n" +
+                    "       active_reserve_type\n" +
+                    "  from table(data_representation.rep_f110_detail.GetF110DetailApex(\n" +
+                    "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => to_date('20190401','YYYYMMDD'),\n" +
+                    "         i_BranchCode      => '000001',\n" +
+                    "         i_SectionNumber   => null,\n" +
+                    "         i_F110Code        => null\n" +
+                    "       ))"
+
+            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoDetail","dm_f110_detail_f","dma",detailQuery,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoDetail")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoDetail", "jdbcNRDemoDetail")
+            //TODO настраивать ширину столбцов в момент создания
+            DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
+            DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
         }
-
-        /*AppModuleInit.createAppModuleF110Section1("F110_Section1")*/
-        AppModuleInit.createAppModuleF110Section2("F110_Section2")
 
         /*NotificationPackage*/
         NotificationStatusInit.createNotificationStatus('Отчет не рассчитан','#add1ff')
@@ -88,8 +180,17 @@ class DatasetPackageInit {
 
         AppModuleInit.createAppModule("ReportSingle")
         NotificationInit.createNotification("A 1993", "ReportSingle", "17","15")
-        //NRdemo
-        NotificationInit.createNotification("Ф110", "F110_Section2", "1", "1")
+        /*NRdemo*/
+        //TODO отсутствуют листы занчений (желатьльно динамические) и элементы быбора даты
+        def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1")
+        def nrDemoSection2 = AppModuleInit.createAppModuleNRDemoMain("F110_Section2", "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)", "jdbcNRDemoSection2", "DatasetNRDemoSection2")
+        def nrDemoSection3 = AppModuleInit.createAppModuleNRDemoMain("F110_Section3", "Раздел III. Расшифровки для расчета показателей, используемых для оценки финансовой устойчивости кредитных организаций", "jdbcNRDemoSection3", "DatasetNRDemoSection3")
+        def nrDemoSection4 = AppModuleInit.createAppModuleNRDemoMain("F110_Section4", "Раздел IV. Расшифровки, используемые при расчете денежно-кредитных показателей", "jdbcNRDemoSection4", "DatasetNRDemoSection4")
+
+        def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail")
+
+        NotificationInit.createNotification("Ф110", "F110_Section1", "17", "15")
+
         NotificationInit.createEmptyNotification("Ф 2020")
         NotificationInit.createEmptyNotification("Проверить почту")
 
@@ -99,5 +200,12 @@ class DatasetPackageInit {
         ApplicationInit.createApplicationLine("Линейная диаграмма")
         ApplicationInit.createApplicationPie("Круговая диаграмма")
         ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+
+        //TODO после первой пересборик ошибки, добавить проверку
+        def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
+        AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)
+        //TODO при создании ссылки на втором appModule приложение виснет
+        /*def referenceTree2 = AppModuleInit.makeRefTreeNRDemo()
+        AppModuleInit.assignRefTreeNRDemo(nrDemoSection2 as AppModule, "F110_Section2", referenceTree2)*/
     }
 }
