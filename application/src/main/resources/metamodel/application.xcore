@@ -114,9 +114,14 @@ class Form extends ViewContainer {
 class FormItem extends ViewContainer {
 }
 
+interface SubmittableItems {
+    String value
+}
+
 class DatasetView extends ViewElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
+    refers ViewElement SelectToSubmit
 }
 
 abstract class DataView extends ViewElement {

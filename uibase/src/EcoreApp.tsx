@@ -21,7 +21,7 @@ import {faClock, faEye, faUser} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
-import {IMainContext, MainContext, IServerQueryParam} from "./MainContext";
+import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./pony.png";
@@ -39,6 +39,7 @@ interface State {
     context: IMainContext;
     pathFull: any[];
     appModuleName: string;
+    queryParameterPattern?: EObject;
     queryConditionDTOPattern?: EObject;
     queryFilterDTOPattern?: EObject;
     userProfilePattern?: EObject;
@@ -176,6 +177,27 @@ class EcoreApp extends React.Component<any, State> {
 
     };
 
+    prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
+                :
+                param
+                    .filter( (p: any) => p['parameterName'] && p['parameterValue'])
+                    .map( (p: any) => {
+                        return (
+                            pattern.create({
+                                parameterName: p['parameterName'],
+                                parameterValue: p['parameterValue']
+                            } as IServerNamedParam)
+                        )
+                    });
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
     prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
         let resourceParameter = resourceSet.create({ uri: uri });
         let serverOperations: EObject[] =
@@ -200,12 +222,15 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[]) => {
+    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[]) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
         let resourceSet = Ecore.ResourceSet.create();
-        return API.instance().call(ref, methodName, [this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
+        const test = this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter');
+        return API.instance().call(ref, methodName, [
+            test,
+            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
@@ -667,6 +692,7 @@ class EcoreApp extends React.Component<any, State> {
     componentDidMount(): void {
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
+        if (!this.state.queryParameterPattern) this.getEobjectByClass("dataset","QueryParameter", "queryParameterPattern");
         //if (!this.state.userProfilePattern) this.getEobjectByClass("auth","UserProfile", "userProfilePattern");
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
 

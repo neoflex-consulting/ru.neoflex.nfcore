@@ -60,37 +60,20 @@ class DatasetPackageInit {
         try {
             /*MAIN*/
             //TODO отсутствует возможность параметризовать запрос
-            String query = "select on_date, row_number, f110_code, amount_rub, amount_cur, report_precision from (\n" +
+            String query =
                     "select to_date('20190331','YYYYMMDD') as on_date,\n" +
                     "       row_number,\n" +
                     "       f110_code,\n" +
                     "       amount_rub," +
                     "       amount_cur," +
-                    "       section_number,\n" +
-                    "       1 as report_precision\n" +
+                    "       section_number\n" +
                     "  from table(data_representation.rep_f110.GetF110Apex(\n" +
                     "         i_AppUser         => 0,\n" +
                     "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
                     "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
-                    "         i_ReportPrecision => 1,\n" +
+                    "         i_ReportPrecision => :REPORT_PRECISION,\n" +
                     "         i_SpodDate        => null\n" +
-                    "       ))\n" +
-                    " union all\n" +
-                    "select to_date('20190331','YYYYMMDD') as on_date,\n" +
-                    "       row_number,\n" +
-                    "       f110_code,\n" +
-                    "       amount_rub," +
-                    "       amount_cur," +
-                    "       section_number,\n" +
-                    "       1000 as report_precision\n" +
-                    "  from table(data_representation.rep_f110.GetF110Apex(\n" +
-                    "         i_AppUser         => 0,\n" +
-                    "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
-                    "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
-                    "         i_ReportPrecision => 1000,\n" +
-                    "         i_SpodDate        => null\n" +
-                    "       ))\n" +
-                    ") "
+                    "       ))\n"
             String querySection1 = query + " where section_number = 1"
             String querySection2 = query + " where section_number = 2"
             String querySection3 = query + " where section_number = 3"
@@ -100,25 +83,21 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection1")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection1", "jdbcNRDemoSection1")
             DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection1")
-            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection1", "")
 
             JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection2","dm_f110_aggregated_f","dma",querySection2,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection2")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection2", "jdbcNRDemoSection2")
             DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection2")
-            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection2", "")
 
             JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection3","dm_f110_aggregated_f","dma",querySection3,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection3")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection3", "jdbcNRDemoSection3")
             DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection3")
-            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection3", "")
 
             JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoSection4","dm_f110_aggregated_f","dma",querySection4,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoSection4")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoSection4", "jdbcNRDemoSection4")
             DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection4")
-            DatasetComponentInit.createServerFiltersNRDemo("DatasetNRDemoSection4", "")
 
             /*DETAIL*/
             //TODO получать список столбцов по запросу а не по таблице

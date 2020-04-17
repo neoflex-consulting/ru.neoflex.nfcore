@@ -15,13 +15,18 @@ export interface IServerQueryParam {
     color?: string
 }
 
+export interface IServerNamedParam {
+    parameterName: String,
+    parameterValue: String
+}
+
 export interface IMainContext {
     updateContext?: (context: any, cb?: () => void) => void;
     applicationReferenceTree?: Ecore.EObject
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, treeValue?: undefined, params?: Object[] | undefined) => void;
-    runQuery?: (resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[]) => Promise<string>;
+    runQuery?: (resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[], ) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;
