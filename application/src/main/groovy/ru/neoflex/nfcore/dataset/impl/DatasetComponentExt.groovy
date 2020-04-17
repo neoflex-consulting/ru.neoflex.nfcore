@@ -13,7 +13,10 @@ import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 
 import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.Statement
+import java.sql.Date
+
+import java.time.LocalDate
+
 
 
 class DatasetComponentExt extends DatasetComponentImpl {
@@ -370,6 +373,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
         for (int i = 0; i <= parameters.size() - 1; ++i) {
             p.setString(parameters[i].parameterName, parameters[i].parameterValue)
         }
+
+        /*Пример работы с датой
+        p.setDate("i_OnDate", Date.valueOf( LocalDate.parse("2019-03-31","yyyy-MM-dd") ))*/
+
         ResultSet rs = p.executeQuery();
 
         return rs

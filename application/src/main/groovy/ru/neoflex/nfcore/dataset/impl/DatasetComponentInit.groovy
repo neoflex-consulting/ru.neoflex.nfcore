@@ -158,7 +158,7 @@ class DatasetComponentInit {
                         rdbmsColumn.sortable = true
                         rdbmsColumn.resizable = true
                         if (rdbmsColumn.name in ["ON_DATE"]) {
-                            rdbmsColumn.hide = true
+                            rdbmsColumn.hide = false
                         }
                         rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                         rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP

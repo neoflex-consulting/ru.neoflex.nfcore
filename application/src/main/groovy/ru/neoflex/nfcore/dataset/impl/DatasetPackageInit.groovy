@@ -64,12 +64,13 @@ class DatasetPackageInit {
                     "select to_date('20190331','YYYYMMDD') as on_date,\n" +
                     "       row_number,\n" +
                     "       f110_code,\n" +
-                    "       amount_rub," +
-                    "       amount_cur," +
+                    "       amount_rub,\n" +
+                    "       amount_cur,\n" +
                     "       section_number\n" +
                     "  from table(data_representation.rep_f110.GetF110Apex(\n" +
                     "         i_AppUser         => 0,\n" +
                     "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
+                    /*"         i_OnDate          => :i_OnDate,\n" +*/
                     "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
                     "         i_ReportPrecision => :REPORT_PRECISION,\n" +
                     "         i_SpodDate        => null\n" +

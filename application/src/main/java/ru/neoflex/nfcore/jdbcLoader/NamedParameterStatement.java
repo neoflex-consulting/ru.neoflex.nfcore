@@ -244,6 +244,13 @@ public class NamedParameterStatement {
         }
     }
 
+    public void setDate(String name, java.sql.Date value) throws SQLException {
+        int[] indexes = getIndexes(name);
+        for (int i = 0; i < indexes.length; i++) {
+            statement.setDate(indexes[i], value);
+        }
+    }
+
     /**
      * Returns the underlying statement.
      *
