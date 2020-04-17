@@ -158,15 +158,27 @@ class AppModuleInit {
             def row2 = ApplicationFactory.eINSTANCE.createRow()
             row2.name = "row2"
 
+            def datePicker = ApplicationFactory.eINSTANCE.createDatePicker()
+            datePicker.name = 'REPORT_DATE'
+            datePicker.allowClear = false
+            datePicker.disabled = false
+            datePicker.format = "YYYY-MM-DD"
+            datePicker.width = 200
+
+            row2.children.add(datePicker)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row3"
+
             def datasetSelect = ApplicationFactory.eINSTANCE.createSelect()
             datasetSelect.name = 'REPORT_PRECISION' //Название совпадает с тем что мы передаем в качестве параметра в запрос
             datasetSelect.value = 1000 //Пока только по default значению
             datasetSelect.classToShow = ApplicationPackage.Literals.COLOR //TODO убрать заглушку
 
-            row2.children.add(datasetSelect)
+            row3.children.add(datasetSelect)
 
-            def row3 = ApplicationFactory.eINSTANCE.createRow()
-            row3.name = "row3"
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = "row4"
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
@@ -175,21 +187,22 @@ class AppModuleInit {
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
             datasetView.setSelectToSubmit(datasetSelect)
-            row3.children.add(datasetView)
+            row4.children.add(datasetView)
 
-            def row4 = ApplicationFactory.eINSTANCE.createRow()
-            row4.name = "row4"
+            def row5 = ApplicationFactory.eINSTANCE.createRow()
+            row5.name = "row5"
 
             def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGrid.name = "SectionGrid"
             datasetGrid.setDatasetView(datasetView)
-            row4.children.add(datasetGrid)
+            row5.children.add(datasetGrid)
 
 
             form.children.add(row1)
             form.children.add(row2)
             form.children.add(row3)
             form.children.add(row4)
+            form.children.add(row5)
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

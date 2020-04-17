@@ -1,7 +1,7 @@
 import {ViewFactory, View} from './View'
 import Ecore from 'ecore';
 import * as React from 'react';
-import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
+import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography, DatePicker} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
@@ -12,6 +12,7 @@ import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import CalendarWrapper from "./components/app/CalendarWrapper";
+import moment from 'moment';
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -226,6 +227,39 @@ class Select_ extends ViewContainer {
     }
 }
 
+class DatePicker_ extends ViewContainer {
+    state = {
+        pickedDate: moment()
+    };
+
+    onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', currentValue);
+        this.props.viewObject.set('dataType', 'date');
+        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
+        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
+            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+    };
+    render = () => {
+        return (
+            //TODO перейти на antd v4?
+            //В 4й весрии можно через props выбирать тип пикера и больше возможных типов (квартал, год)
+            <div style={{marginBottom: marginBottom}}>
+                <DatePicker
+                    key={this.viewObject._id}
+                    defaultValue={this.state.pickedDate}
+                    disabled={this.props.viewObject.get('disabled')}
+                    allowClear={this.props.viewObject.get('allowClear')}
+                    format={this.props.viewObject.get('format')}
+                    style={{width: this.props.viewObject.get('width')}}
+                    onChange={(date, dateString) => this.onChange(dateString)}/>
+            </div>
+        )
+    }
+}
+
 class Input_ extends ViewContainer {
     onChange = (currentValue: string) => {
         this.props.viewObject.set('value', currentValue);
@@ -412,6 +446,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//DatasetDiagramView', DatasetDiagramView_);
         this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
+        this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);

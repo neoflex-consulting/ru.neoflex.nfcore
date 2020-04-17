@@ -221,6 +221,13 @@ class Select extends ViewElement {
     String value // заглушка
 }
 
+class DatePicker extends ViewElement {
+    boolean disabled
+    boolean allowClear
+    String width = "200"
+    String format = "YYYY-MM-DD"
+}
+
 //add TextArea
 class Input extends ViewElement {
     InputType inputType = "InputString"
