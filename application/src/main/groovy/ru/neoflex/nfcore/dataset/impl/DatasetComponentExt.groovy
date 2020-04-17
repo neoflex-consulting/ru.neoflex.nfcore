@@ -363,19 +363,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)
-
-        /*Statement st = jdbcConnection.createStatement()
-        ResultSet rs = st.executeQuery(currentQuery)*/
-
         logger.info("connectionToDB", "named parameters = " + parameters)
         //Add Named Parameters
         NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, currentQuery);
         for (int i = 0; i <= parameters.size() - 1; ++i) {
-            p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            if (parameters[i].parameterDataType == "Date") {
+                //TODO вытащить с фронта format
+                p.setDate(parameters[i].parameterName, Date.valueOf( LocalDate.parse(parameters[i].parameterValue,"yyyy-MM-dd") ))
+            } else {
+                p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            }
+            //TODO numeric?
         }
-
-        /*Пример работы с датой
-        p.setDate("i_OnDate", Date.valueOf( LocalDate.parse("2019-03-31","yyyy-MM-dd") ))*/
 
         ResultSet rs = p.executeQuery();
 

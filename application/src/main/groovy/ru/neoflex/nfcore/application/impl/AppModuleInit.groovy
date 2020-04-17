@@ -187,6 +187,7 @@ class AppModuleInit {
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
             datasetView.setSelectToSubmit(datasetSelect)
+            datasetView.setDatePickerToSubmit(datePicker)
             row4.children.add(datasetView)
 
             def row5 = ApplicationFactory.eINSTANCE.createRow()

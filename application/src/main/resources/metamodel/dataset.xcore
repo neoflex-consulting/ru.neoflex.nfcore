@@ -115,6 +115,7 @@ class FormatMask {
 class QueryParameter {
     String parameterName
     String parameterValue
+    String parameterDataType = "String"
 }
 
 class QueryFilter {

@@ -388,12 +388,21 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getQueryNamedParams = () => {
+        let namedParams: IServerNamedParam[] = [];
         if (this.props.viewObject.get('SelectToSubmit')) {
-            const parameterName = this.props.viewObject.get('SelectToSubmit').get('name');
-            const parameterValue = this.props.viewObject.get('SelectToSubmit').get('value');
-            return [{parameterName: parameterName, parameterValue: parameterValue} as IServerNamedParam];
+            namedParams.push({
+                parameterName: this.props.viewObject.get('SelectToSubmit').get('name'),
+                parameterValue: this.props.viewObject.get('SelectToSubmit').get('value')
+            })
         }
-        return []
+        if (this.props.viewObject.get('DatePickerToSubmit')) {
+            namedParams.push({
+                parameterName: this.props.viewObject.get('DatePickerToSubmit').get('name'),
+                parameterValue: this.props.viewObject.get('DatePickerToSubmit').get('value'),
+                parameterDataType: "Date"
+            })
+        }
+        return namedParams
     }
 
     private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {

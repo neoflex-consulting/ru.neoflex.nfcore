@@ -232,9 +232,14 @@ class DatePicker_ extends ViewContainer {
         pickedDate: moment()
     };
 
+    componentDidMount(): void {
+        //Инициализация value
+        //TODO !!! не передаётся format !!!
+        this.onChange(this.state.pickedDate.format(this.props.viewObject.get('format')))
+    }
+
     onChange = (currentValue: string) => {
         this.props.viewObject.set('value', currentValue);
-        this.props.viewObject.set('dataType', 'date');
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
@@ -254,7 +259,9 @@ class DatePicker_ extends ViewContainer {
                     allowClear={this.props.viewObject.get('allowClear')}
                     format={this.props.viewObject.get('format')}
                     style={{width: this.props.viewObject.get('width')}}
-                    onChange={(date, dateString) => this.onChange(dateString)}/>
+                    onChange={(date, dateString) => {
+                        this.onChange(dateString)
+                    }}/>
             </div>
         )
     }

@@ -17,7 +17,8 @@ export interface IServerQueryParam {
 
 export interface IServerNamedParam {
     parameterName: String,
-    parameterValue: String
+    parameterValue: String,
+    parameterDataType?: String
 }
 
 export interface IMainContext {

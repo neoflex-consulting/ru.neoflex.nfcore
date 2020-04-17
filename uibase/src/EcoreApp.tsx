@@ -190,7 +190,8 @@ class EcoreApp extends React.Component<any, State> {
                         return (
                             pattern.create({
                                 parameterName: p['parameterName'],
-                                parameterValue: p['parameterValue']
+                                parameterValue: p['parameterValue'],
+                                parameterDataType: p['parameterDataType']||"String"
                             } as IServerNamedParam)
                         )
                     });

@@ -61,7 +61,7 @@ class DatasetPackageInit {
             /*MAIN*/
             //TODO отсутствует возможность параметризовать запрос
             String query =
-                    "select to_date('20190331','YYYYMMDD') as on_date,\n" +
+                    "select :REPORT_DATE as on_date,\n" +
                     "       row_number,\n" +
                     "       f110_code,\n" +
                     "       amount_rub,\n" +

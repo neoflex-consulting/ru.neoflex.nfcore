@@ -121,7 +121,9 @@ interface SubmittableItems {
 class DatasetView extends ViewElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    refers ViewElement SelectToSubmit
+    //TODO должена быть одна переменная под все возможные submitItems
+    refers Select SelectToSubmit
+    refers DatePicker DatePickerToSubmit
 }
 
 abstract class DataView extends ViewElement {
@@ -226,6 +228,7 @@ class DatePicker extends ViewElement {
     boolean allowClear
     String width = "200"
     String format = "YYYY-MM-DD"
+    String value
 }
 
 //add TextArea
