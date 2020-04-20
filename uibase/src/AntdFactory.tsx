@@ -229,13 +229,16 @@ class Select_ extends ViewContainer {
 
 class DatePicker_ extends ViewContainer {
     state = {
-        pickedDate: moment()
+        pickedDate: moment(),
+        disabled: this.props.viewObject.get('disabled') || false,
+        allowClear: this.props.viewObject.get('allowClear') || false,
+        format: this.props.viewObject.get('format') || "YYYY-MM-DD",
+        width: this.props.viewObject.get('width') || "200px"
     };
 
     componentDidMount(): void {
         //Инициализация value
-        //TODO !!! не передаётся format !!!
-        this.onChange(this.state.pickedDate.format(this.props.viewObject.get('format')))
+        this.onChange(this.state.pickedDate.format(this.state.format))
     }
 
     onChange = (currentValue: string) => {
@@ -244,7 +247,7 @@ class DatePicker_ extends ViewContainer {
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
     render = () => {
@@ -255,10 +258,10 @@ class DatePicker_ extends ViewContainer {
                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
-                    disabled={this.props.viewObject.get('disabled')}
-                    allowClear={this.props.viewObject.get('allowClear')}
-                    format={this.props.viewObject.get('format')}
-                    style={{width: this.props.viewObject.get('width')}}
+                    disabled={this.state.disabled}
+                    allowClear={this.state.allowClear}
+                    format={this.state.format}
+                    style={{width: this.state.width}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
