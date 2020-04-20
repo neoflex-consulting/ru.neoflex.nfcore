@@ -122,9 +122,7 @@ class DatasetView extends ViewElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
     //TODO interface submittableItems?
-    //TODO должена быть одна переменная под все возможные submitItems
-    refers Select SelectToSubmit
-    refers DatePicker DatePickerToSubmit
+    refers ViewElement[] itemsToSubmit
 }
 
 abstract class DataView extends ViewElement {

@@ -191,8 +191,8 @@ class AppModuleInit {
             datasetView.setDataset(jdbcDataset)
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
-            datasetView.setSelectToSubmit(datasetSelect)
-            datasetView.setDatePickerToSubmit(datePicker)
+            datasetView.itemsToSubmit.add(datasetSelect)
+            datasetView.itemsToSubmit.add(datePicker)
 
             button.itemsToTriggerSubmit.add(datasetView)
             row31.children.add(button)
@@ -214,38 +214,6 @@ class AppModuleInit {
             form.children.add(row31)
             form.children.add(row4)
             form.children.add(row5)
-            application.setView(form)
-
-            rs.resources.add(Context.current.store.createEObject(application))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
-
-    static def createAppModuleF110Section2(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
-                .execute().resourceSet
-        if (rs.resources.empty) {
-
-            def application = ApplicationFactory.eINSTANCE.createAppModule()
-            application.name = name
-
-            def typography = ApplicationFactory.eINSTANCE.createTypography()
-            typography.name = "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)"
-
-            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
-            typography.setTypographyStyle(typographyStyle)
-
-            def row1 = ApplicationFactory.eINSTANCE.createRow()
-            row1.name = "row1"
-            row1.textAlign = TextAlign.LEFT
-            row1.borderBottom = true
-
-            row1.children.add(typography)
-
-            def form = ApplicationFactory.eINSTANCE.createForm()
-            form.name = "SectionForm"
-            form.children.add(row1)
-
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

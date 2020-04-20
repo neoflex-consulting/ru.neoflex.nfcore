@@ -389,18 +389,14 @@ class DatasetView extends React.Component<any, State> {
 
     getQueryNamedParams = () => {
         let namedParams: IServerNamedParam[] = [];
-        if (this.props.viewObject.get('SelectToSubmit')) {
-            namedParams.push({
-                parameterName: this.props.viewObject.get('SelectToSubmit').get('name'),
-                parameterValue: this.props.viewObject.get('SelectToSubmit').get('value')
-            })
-        }
-        if (this.props.viewObject.get('DatePickerToSubmit')) {
-            namedParams.push({
-                parameterName: this.props.viewObject.get('DatePickerToSubmit').get('name'),
-                parameterValue: this.props.viewObject.get('DatePickerToSubmit').get('value'),
-                parameterDataType: this.props.viewObject.get('DatePickerToSubmit').eClass._id === "//DatePicker" ? "Date" : "String"
-            })
+        if (this.props.viewObject.get('itemsToSubmit')) {
+            this.props.viewObject.get('itemsToSubmit').each((item: EObject) => {
+                namedParams.push({
+                    parameterName: item.get('name'),
+                    parameterValue: item.get('value'),
+                    parameterDataType: item.eClass._id === "//DatePicker" ? "Date" : "String"
+                })
+            });
         }
         return namedParams
     };
