@@ -47,9 +47,9 @@ class NotificationInstanceDTO {
 	String notificationDateOn
 }
 
-@Ecore(constraints="IsValid")
+@Ecore(constraints="IsValid", documentation="some documentation")
 class NotificationStatus {
-	String name
+	QName name
 	String[1] color
 	String description
 }

@@ -68,6 +68,7 @@ class Calendar extends ViewElement {
     refers YearBook yearBook
     String defaultTitle
     op JSON getNotificationInstances(String dateFrom, String dateTo)
+    op JSON createNotification(JSON newNotification)
 }
 
 class YearBook {

@@ -21,7 +21,8 @@ interface State {
     globalSettings?: EObject;
     calendarLanguage: string;
     legendMenuVisible: boolean;
-    createMenuVisible: boolean
+    createMenuVisible: boolean;
+    periodicity: EObject[];
 }
 
 interface Props {
@@ -38,7 +39,8 @@ class Calendar extends React.Component<any, State> {
             notificationInstancesDTO: [],
             calendarLanguage: "",
             legendMenuVisible: false,
-            createMenuVisible: false
+            createMenuVisible: false,
+            periodicity: []
         };
     }
 
@@ -83,8 +85,22 @@ class Calendar extends React.Component<any, State> {
         }
     };
 
-    createNotification = (notificationStatus: any[]) => {
-        // this.setState({notificationStatus})
+    getAllPeriodicity() {
+        API.instance().findEnum('notification', 'Periodicity')
+            .then((result: Ecore.EObject[]) => {
+                let periodicity = result.map( (t: any) => {
+                    return t.get('name')
+                });
+                this.setState({periodicity})
+            })
+    };
+
+    createNotification = (newNotification: any) => {
+        const ref: string = this.props.viewObject._id;
+        const methodName: string = 'createNotification';
+        return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
+            this.getAllNotificationInstances()
+        })
     };
 
     updateAllStatuses = (notificationStatus: any[]) => {
@@ -125,7 +141,7 @@ class Calendar extends React.Component<any, State> {
         return (
             <Drawer
                 placement='right'
-                title={t('createnotification')}
+                title={t('createNotification')}
                 width={'450px'}
                 visible={this.state.createMenuVisible}
                 onClose={this.handleCreateMenu}
@@ -136,6 +152,7 @@ class Calendar extends React.Component<any, State> {
                     <CreateNotification
                         {...this.props}
                         onCreateNotificationStatus={this.createNotification}
+                        periodicity={this.state.periodicity}
                     />
                 }
             </Drawer>
@@ -386,6 +403,7 @@ class Calendar extends React.Component<any, State> {
         this.getGlobalSettings();
         this.getAllStatuses();
         this.getAllNotificationInstances();
+        this.getAllPeriodicity()
     }
 
     render() {

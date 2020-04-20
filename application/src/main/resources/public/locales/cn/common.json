@@ -89,15 +89,21 @@
         "Select calculated column": "選擇計算列",
         "Expression": "表達",
 
-        "createnotification": "創建通知",
-        "calculationinterval": "計算間隔",
-        "deadlineday": "截止日",
-        "deadlinetime": "截止時間",
-        "dateon": "日期",
+        "createNotification": "創建通知",
+        "calculationInterval": "計算間隔",
+        "deadlineDay": "截止日",
+        "deadlineTime": "截止時間",
+        "dateOn": "日期",
         "fullName": "全名",
-        "manualsetting": "手動設定",
+        "manualSetting": "手動設定",
         "periodicity": "週期性",
         "shortName": "簡稱",
-        "throughnotificationattributes": "通過通知屬性",
-        "weekendreporting": "週末報告"
+        "systemSetting": "通過屬性",
+        "weekendReporting": "週末報告",
+        "defaultStatus": "默認狀態",
+
+        "Day": "日",
+        "Month": "月",
+        "Quarter": "刻",
+        "Year": "年度"
 }

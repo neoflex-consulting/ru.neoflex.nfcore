@@ -89,15 +89,21 @@
         "Select calculated column": "Select calculated column",
         "Expression": "Expression",
 
-        "createnotification": "Create Notification",
-        "calculationinterval": "Calculation Interval",
-        "deadlineday": "Deadline Day",
-        "deadlinetime": "Deadline Time",
-        "dateon": "Date On",
+        "createNotification": "Create Notification",
+        "calculationInterval": "Calculation Interval",
+        "deadlineDay": "Deadline Day",
+        "deadlineTime": "Deadline Time",
+        "dateOn": "Date On",
         "fullName": "Full Name",
-        "manualsetting": "Manual Setting",
+        "manualSetting": "Manual Setting",
         "periodicity": "Periodicity",
         "shortName": "Short Name",
-        "throughnotificationattributes": "Through Notification Attributes",
-        "weekendreporting": "Weekend Reporting"
+        "systemSetting": "Through Attributes",
+        "weekendReporting": "Weekend Reporting",
+        "defaultStatus": "Default Status",
+
+        "Day": "Day",
+        "Month": "Month",
+        "Quarter": "Quarter",
+        "Year": "Year"
 }

@@ -71,18 +71,18 @@ class DatasetPackageInit {
         TypographyStyleInit.createTypographyStyle("Title")
 
         AppModuleInit.createAppModule("ReportSingle")
-        NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18:00", "15", "ReportSingle", "Отчет не рассчитан")
+        NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18", "15", "ReportSingle", "Отчет не рассчитан")
 
-        NotificationInit.createNotification("A 1994", Periodicity.MONTH, "16",  "18:00", "15", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("A 1995", Periodicity.MONTH, "15",  "18:00", "14", "ReportSingle", "Расчет отчета за дату произведён")
-        NotificationInit.createNotification("A 1996", Periodicity.MONTH, "14",  "18:00", "13", "ReportSingle", "Расчет отчета за дату произведён")
+        NotificationInit.createNotification("A 1994", Periodicity.MONTH, "16",  "18", "15", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("A 1995", Periodicity.MONTH, "15",  "18", "14", "ReportSingle", "Расчет отчета за дату произведён")
+        NotificationInit.createNotification("A 1996", Periodicity.MONTH, "14",  "18", "13", "ReportSingle", "Расчет отчета за дату произведён")
 
-        NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18:00", "8", "Отчёт не сдаётся из NR")
-        NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18:00", "8", "Личная заметка")
-        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18:00", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18:00", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18:00", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18:00", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18", "8", "Отчёт не сдаётся из NR")
+        NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18", "8", "Личная заметка")
+        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
 
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")

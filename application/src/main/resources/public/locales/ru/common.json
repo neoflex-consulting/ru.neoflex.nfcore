@@ -89,17 +89,23 @@
         "Select calculated column": "Выберите вычисляемый столбец",
         "Expression": "Выражение",
 
-        "createnotification": "Создание события",
-        "calculationinterval": "Интервал расчета",
-        "deadlineday": "Рабочий день сдачи",
-        "deadlinetime": "Аремя сдачи",
-        "dateon": "Отчетная дата 'на'",
+        "createNotification": "Создание события",
+        "calculationInterval": "Интервал расчета",
+        "deadlineDay": "Рабочий день сдачи",
+        "deadlineTime": "Время сдачи",
+        "dateOn": "Отчетная дата 'на'",
         "fullName": "Полное название",
-        "manualsetting": "Ручная настройка",
+        "manualSetting": "Ручная настройка",
         "periodicity": "Периодичность сдачи",
         "shortName": "Краткое название",
-        "throughnotificationattributes": "Через атрибуты события",
-        "weekendreporting": "Отчетность по выходным"
+        "systemSetting": "Через атрибуты",
+        "weekendReporting": "Отчетность по выходным",
+        "defaultStatus": "Статус по-умолчанию",
+
+        "Day": "День",
+        "Month": "Месяц",
+        "Quarter": "Квартал",
+        "Year": "Год"
 }
 
 
