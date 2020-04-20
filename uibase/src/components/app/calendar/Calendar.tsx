@@ -214,7 +214,7 @@ class Calendar extends React.Component<any, State> {
     }
 
     renderHeader() {
-        const {i18n} = this.props;
+        const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
         return (
@@ -223,7 +223,7 @@ class Calendar extends React.Component<any, State> {
                 <Button style={{marginLeft: '10px'}}
                         onClick={(e: any) => {this.handleChange(e, 'today')}}
                 >
-                    (t{'today'}
+                    {t('today')}
                 </Button>
 
                 <Select
