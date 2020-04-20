@@ -391,11 +391,20 @@ class DatasetView extends React.Component<any, State> {
         let namedParams: IServerNamedParam[] = [];
         if (this.props.viewObject.get('itemsToSubmit')) {
             this.props.viewObject.get('itemsToSubmit').each((item: EObject) => {
-                namedParams.push({
-                    parameterName: item.get('name'),
-                    parameterValue: item.get('value'),
-                    parameterDataType: item.eClass._id === "//DatePicker" ? "Date" : "String"
-                })
+                if (item.eClass._id === "//Select") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: (item.get('value') instanceof Array)
+                                      ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
+                                      : item.get('value')
+                    })
+                } else if (item.eClass._id === "//DatePicker") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: item.get('value'),
+                        parameterDataType: "Date"
+                    })
+                }
             });
         }
         return namedParams

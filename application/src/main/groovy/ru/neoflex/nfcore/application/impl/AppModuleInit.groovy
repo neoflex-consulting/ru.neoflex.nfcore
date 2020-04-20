@@ -170,7 +170,7 @@ class AppModuleInit {
             def datasetSelect = ApplicationFactory.eINSTANCE.createSelect()
             datasetSelect.name = 'REPORT_PRECISION' //Название совпадает с тем что мы передаем в качестве параметра в запрос
             datasetSelect.value = 1000 //Пока только по default значению
-            datasetSelect.classToShow = ApplicationPackage.Literals.COLOR //TODO убрать заглушку
+            datasetSelect.staticValues = "Округленная\\:1000\\;Точная\\:1"
 
             row3.children.add(datasetSelect)
 

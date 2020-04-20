@@ -215,13 +215,13 @@ class GradientStyle extends Style {
 }
 
 class Select extends ViewElement {
-    refers EClass ClassToShow
     boolean disabled
     boolean showSearch
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
     String value // заглушка
+    String staticValues
 }
 
 class DatePicker extends ViewElement {

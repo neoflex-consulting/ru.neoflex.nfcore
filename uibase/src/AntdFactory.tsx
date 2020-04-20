@@ -199,20 +199,25 @@ class Select_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
-    getSelectData() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === this.props.viewObject.get('ClassToShow')._id);
-            if (temp !== undefined) {
-                API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}, 999)
-                    .then((resources) => {
-                        this.setState({selectData: resources})
-                    })
-            }
-        })
-    };
+    componentDidMount(): void {
+        if (this.props.viewObject.get('staticValues')) {
+            this.getStaticValues()
+        }
+    }
+    getStaticValues() {
+        this.setState({
+            selectData:this.props.viewObject.get('staticValues')
+                .split("\\;")
+                .map((e:string)=>{
+                const keyValue = e.split("\\:");
+                return {
+                    key: keyValue[0],
+                    value: keyValue[1]
+                }
+            })})
+    }
     render = () => {
         if (this.state.selectData.length === 0) {
-            this.getSelectData();
             return (<div key={this.viewObject._id}></div>)
         }
         else {
@@ -232,10 +237,10 @@ class Select_ extends ViewContainer {
                         }}
                     >
                         {
-                            this.state.selectData.map((data: Ecore.Resource) =>
-                                <Select.Option key={data.get('uri')}
-                                               value={data.eContents()[0].get('name')}>
-                                    {data.eContents()[0].get('name')}
+                            this.state.selectData.map((data: {key:string,value:string}) =>
+                                <Select.Option key={data.key}
+                                               value={data.value}>
+                                    {data.key}
                                 </Select.Option>
                             )
                         }
