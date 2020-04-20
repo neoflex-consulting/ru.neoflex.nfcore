@@ -9,6 +9,7 @@ import ru.neoflex.nfcore.application.impl.GlobalSettingsInit
 import ru.neoflex.nfcore.application.impl.YearBookInit
 import ru.neoflex.nfcore.application.impl.GradientStyleInit
 import ru.neoflex.nfcore.application.impl.TypographyStyleInit
+import ru.neoflex.nfcore.notification.Periodicity
 import ru.neoflex.nfcore.notification.impl.NotificationInit
 import ru.neoflex.nfcore.notification.impl.NotificationStatusInit
 
@@ -141,12 +142,13 @@ class DatasetPackageInit {
         }
 
         /*NotificationPackage*/
-        NotificationStatusInit.createNotificationStatus('Отчет не рассчитан','#add1ff')
-        NotificationStatusInit.createNotificationStatus('Отчёт за дату проверен','#ff9b9b')
-        NotificationStatusInit.createNotificationStatus('Отчёт не сдаётся из NR','#d9d9d9')
-        NotificationStatusInit.createNotificationStatus('Расчет отчета за дату произведён','#fbf751')
-        NotificationStatusInit.createNotificationStatus('Отчёт по нормативам за дату проверен','#0084e7')
-        NotificationStatusInit.createNotificationStatus('Отчёт сдан в проверяющий орган','#f9c4ff')
+        NotificationStatusInit.createNotificationStatus('Отчет не рассчитан','#cd5680')
+        NotificationStatusInit.createNotificationStatus('Отчёт за дату проверен','#cd8056')
+        NotificationStatusInit.createNotificationStatus('Отчёт не сдаётся из NR','#aaaaaa')
+        NotificationStatusInit.createNotificationStatus('Расчет отчета за дату произведён','#56cd80')
+        NotificationStatusInit.createNotificationStatus('Отчёт по нормативам за дату проверен','#5680cd')
+        NotificationStatusInit.createNotificationStatus('Отчёт сдан в проверяющий орган','#8056CD')
+        NotificationStatusInit.createNotificationStatus('Личная заметка','#ff57da')
 
         /*ApplicationPackage*/
         YearBookInit.createWeekendYearBook("Календарь выходных дней")
@@ -158,7 +160,19 @@ class DatasetPackageInit {
         TypographyStyleInit.createTypographyStyle("Title")
 
         AppModuleInit.createAppModule("ReportSingle")
-        NotificationInit.createNotification("A 1993", "ReportSingle", "17","15")
+        NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18", "15", "ReportSingle", "Отчет не рассчитан")
+
+        NotificationInit.createNotification("A 1994", Periodicity.MONTH, "16",  "18", "15", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("A 1995", Periodicity.MONTH, "15",  "18", "14", "ReportSingle", "Расчет отчета за дату произведён")
+        NotificationInit.createNotification("A 1996", Periodicity.MONTH, "14",  "18", "13", "ReportSingle", "Расчет отчета за дату произведён")
+
+        NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18", "8", "Отчёт не сдаётся из NR")
+        NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18", "8", "Личная заметка")
+        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+
         /*NRdemo*/
         //TODO отсутствуют листы занчений (желатьльно динамические)
         def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1")
@@ -168,10 +182,7 @@ class DatasetPackageInit {
 
         def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail")
 
-        NotificationInit.createNotification("Ф110", "F110_Section1", "17", "15")
-
-        NotificationInit.createEmptyNotification("Ф 2020")
-        NotificationInit.createEmptyNotification("Проверить почту")
+        NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")

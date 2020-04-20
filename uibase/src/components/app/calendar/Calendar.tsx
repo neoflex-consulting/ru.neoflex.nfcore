@@ -1,20 +1,28 @@
 import React from 'react';
 import * as dateFns from "date-fns";
 import Ecore, {EObject} from "ecore";
-import {API} from "../../modules/api";
+import {API} from "../../../modules/api";
 import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
-import {MainContext} from "../../MainContext";
-import {Button} from "antd";
+import {MainContext} from "../../../MainContext";
+import {Button, Drawer} from "antd";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
+import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
+import StatusLegend from "./StatusLegend";
+import CreateNotification from "./CreateNotification";
 
 interface State {
     currentMonth: Date;
     selectedDate: Date;
-    notificationStatus: Ecore.EObject[];
+    notificationStatus: Object[];
     notificationInstancesDTO: Object[];
     globalSettings?: EObject;
     calendarLanguage: string;
+    legendMenuVisible: boolean;
+    createMenuVisible: boolean;
+    periodicity: EObject[];
 }
 
 interface Props {
@@ -29,7 +37,10 @@ class Calendar extends React.Component<any, State> {
             selectedDate: new Date(),
             notificationStatus: [],
             notificationInstancesDTO: [],
-            calendarLanguage: ""
+            calendarLanguage: "",
+            legendMenuVisible: false,
+            createMenuVisible: false,
+            periodicity: []
         };
     }
 
@@ -48,15 +59,52 @@ class Calendar extends React.Component<any, State> {
     };
 
     getAllStatuses() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((notificationStatus) => {
-                        this.setState({notificationStatus})
-                    })
-            }
+        const userProfileValue = this.props.context.userProfile.get('params').array()
+            .filter( (p: any) => p.get('key') === this.props.viewObject._id);
+        if (userProfileValue.length !== 0) {
+            let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus
+            this.setState({notificationStatus})
+        }
+        else {
+            API.instance().fetchAllClasses(false).then(classes => {
+                const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
+                if (temp !== undefined) {
+                    API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                        .then((result) => {
+                            let notificationStatus = result.map ((r: any) => {
+                                return {
+                                    name: r.eContents()[0].get('name'),
+                                    color: r.eContents()[0].get('color'),
+                                    enable: true
+                                }
+                            });
+                            this.setState({notificationStatus})
+                        })
+                }
+            })
+        }
+    };
+
+    getAllPeriodicity() {
+        API.instance().findEnum('notification', 'Periodicity')
+            .then((result: Ecore.EObject[]) => {
+                let periodicity = result.map( (t: any) => {
+                    return t.get('name')
+                });
+                this.setState({periodicity})
+            })
+    };
+
+    createNotification = (newNotification: any) => {
+        const ref: string = this.props.viewObject._id;
+        const methodName: string = 'createNotification';
+        return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
+            this.getAllNotificationInstances()
         })
+    };
+
+    updateAllStatuses = (notificationStatus: any[]) => {
+        this.setState({notificationStatus})
     };
 
     getGlobalSettings() {
@@ -78,24 +126,121 @@ class Calendar extends React.Component<any, State> {
                 : enUS;
     }
 
+    handleCreateMenu = () => {
+        this.state.createMenuVisible ? this.setState({ createMenuVisible: false})
+            : this.setState({ createMenuVisible: true});
+    };
+
+    handleLegendMenu = () => {
+        this.state.legendMenuVisible ? this.setState({ legendMenuVisible: false})
+            : this.setState({ legendMenuVisible: true});
+    };
+
+    renderCreateNotification() {
+        const {i18n, t} = this.props;
+        return (
+            <Drawer
+                placement='right'
+                title={t('createNotification')}
+                width={'450px'}
+                visible={this.state.createMenuVisible}
+                onClose={this.handleCreateMenu}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    <CreateNotification
+                        {...this.props}
+                        onCreateNotificationStatus={this.createNotification}
+                        periodicity={this.state.periodicity}
+                    />
+                }
+            </Drawer>
+        );
+    }
+
+    renderLegend() {
+        const {i18n, t} = this.props;
+        return (
+            <Drawer
+                placement='right'
+                title={t('legend')}
+                width={'450px'}
+                visible={this.state.legendMenuVisible}
+                onClose={this.handleLegendMenu}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    <StatusLegend
+                        {...this.props}
+                        notificationStatus={this.state.notificationStatus}
+                        onChangeNotificationStatus={this.updateAllStatuses}
+                    />
+                }
+            </Drawer>
+        );
+    }
+
     renderHeader() {
         const {i18n} = this.props;
         const dateFormat = "LLLL yyyy";
         return (
             <div className="header row flex-middle">
+
+                <Button style={{marginLeft: '10px'}}>
+                    Сегодня
+                </Button>
+                <Button style={{marginLeft: '10px'}}>
+                    2020
+                </Button>
+                <Button style={{marginLeft: '10px'}}>
+                    Апрель
+                </Button>
+
+
                 <div className="col col-start">
                     <div className="icon" onClick={this.prevMonth}>
                         chevron_left
                     </div>
                 </div>
                 <div className="col col-center">
-        <span className="col-text" style={{fontSize: "120%"}}>
-            {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
-        </span>
+                    <span className="col-text" style={{fontSize: "120%"}}>
+                        {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
+                    </span>
                 </div>
                 <div className="col col-end" onClick={this.nextMonth}>
                     <div className="icon">chevron_right</div>
                 </div>
+
+                <Button type="primary" style={{width: '20px', height: '30px', marginTop: '2px'}}
+                        onClick={this.handleCreateMenu}>
+                    <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
+                </Button>
+
+                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+
+                <Button style={{width: '20px', color: '#6e6e6e'}} type="link"
+                        onClick={this.handleLegendMenu}>
+                    <FontAwesomeIcon icon={faLifeRing} size="lg" style={{marginLeft: '-9px'}}/>
+                </Button>
+
+                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
+
+                <Button style={{marginRight: '10px', width: '20px'}} type="link" ghost>
+                    <FontAwesomeIcon color={'#6e6e6e'} icon={faCalendarAlt} size="lg" style={{marginLeft: '-6px'}}/>
+                </Button>
+                <Button style={{width: '20px'}} type="link" ghost>
+                    <FontAwesomeIcon color={'#6e6e6e'} icon={faAlignJustify} size="lg" style={{marginLeft: '-6px'}}/>
+                </Button>
+
+                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
+
+                <Button style={{marginRight: '10px', width: '20px'}} type="link" ghost>
+                    <FontAwesomeIcon color={'#6e6e6e'} icon={faPrint} size="lg" style={{marginLeft: '-6px'}}/>
+                </Button>
+
+
             </div>
         );
     }
@@ -121,7 +266,7 @@ class Calendar extends React.Component<any, State> {
         let params: Object[] = [{
             datasetColumn: 'reportDate',
             operation: 'EqualTo',
-            value: notification.contents[0]['date'],
+            value: notification.contents[0]['notificationDateOn'],
             enable: true,
             type: 'Date'
         }];
@@ -175,8 +320,8 @@ class Calendar extends React.Component<any, State> {
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        style={{width: "150px", display: "flex", color: "black"/*, backgroundColor: r.contents[0]['statusColor'] ? rr.contents[0] : "white"*/}}
-                                        title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['date']), "PPpp ",{locale: ru})}\n
+                                        style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                        title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
                                     >
                                         {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
@@ -217,12 +362,23 @@ class Calendar extends React.Component<any, State> {
 
     private getContents(day: any) {
         let temp: any = [];
+        let result: any = [];
         this.state.notificationInstancesDTO.filter((r: any) =>
-            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['date']))
-            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['date']))
-            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['date']))
-        ).map((r) => temp.push(r));
-        return temp;
+            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+        ).map((r: any) => temp.push(r));
+        if (temp.length !== 0 && this.state.notificationStatus) {
+            let colors = this.state.notificationStatus
+                .filter((s: any) => s['enable'] === true)
+                .map((s: any) => {return s['color']});
+            temp.forEach((r: any) => {
+                if (colors.includes(r.contents[0]['statusColor'])) {
+                    result.push(r)
+                }
+            })
+        }
+        return result;
     }
     
     onDateClick = (day: any) => {
@@ -247,6 +403,7 @@ class Calendar extends React.Component<any, State> {
         this.getGlobalSettings();
         this.getAllStatuses();
         this.getAllNotificationInstances();
+        this.getAllPeriodicity()
     }
 
     render() {
@@ -254,6 +411,8 @@ class Calendar extends React.Component<any, State> {
             <MainContext.Consumer>
                 { context => (
                     <div className="calendar">
+                        {this.renderCreateNotification()}
+                        {this.renderLegend()}
                         {this.renderHeader()}
                         {this.renderDays()}
                         {this.renderCells(context)}

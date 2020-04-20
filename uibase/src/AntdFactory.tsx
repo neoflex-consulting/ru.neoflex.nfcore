@@ -11,7 +11,7 @@ import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
-import CalendarWrapper from "./components/app/CalendarWrapper";
+import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {ISubmitHandlers} from "./MainContext";
 
@@ -397,6 +397,7 @@ class Typography_ extends ViewContainer {
                 key={this.viewObject._id}
                 style={{
                     marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
+                    marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
                     fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
                     textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
                     height: drawObject.get('height') === null ? '0px' : `${drawObject.get('height')}`,
@@ -456,7 +457,7 @@ class DatasetDiagramView_ extends ViewContainer {
 
 class Calendar_ extends ViewContainer {
     render = () => {
-        return <CalendarWrapper {...this.props} key={this.viewObject._id}/>
+        return <Calendar {...this.props} key={this.viewObject._id}/>
     }
 }
 

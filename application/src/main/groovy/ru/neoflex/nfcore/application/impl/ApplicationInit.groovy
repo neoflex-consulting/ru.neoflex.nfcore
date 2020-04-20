@@ -93,10 +93,28 @@ class ApplicationInit {
                 def notification3 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Проверить почту", "",false)
                 def notification4 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Ф110", "",false)
 
+                def notification5 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.DAY", "",false)
+                def notification6 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.QUARTER", "",false)
+                def notification7 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.YEAR", "",false)
+
+                def notification8 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1994", "",false)
+                def notification9 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1995", "",false)
+                def notification10 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1996", "",false)
+                def notification11 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Period.MONTH", "",false)
+
+
                 calendar.notifications.add(notification1)
                 calendar.notifications.add(notification2)
                 calendar.notifications.add(notification3)
                 calendar.notifications.add(notification4)
+                calendar.notifications.add(notification4)
+                calendar.notifications.add(notification5)
+                calendar.notifications.add(notification6)
+                calendar.notifications.add(notification7)
+                calendar.notifications.add(notification8)
+                calendar.notifications.add(notification9)
+                calendar.notifications.add(notification10)
+                calendar.notifications.add(notification11)
 
                 def globalSettings = findGlobalSettings(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
                 def workDaysYearBook = globalSettings.getWorkingDaysCalendar()

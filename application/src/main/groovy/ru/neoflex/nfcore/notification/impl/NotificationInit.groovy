@@ -7,6 +7,7 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.notification.NotificationFactory
 import ru.neoflex.nfcore.notification.NotificationPackage
+import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.notification.Periodicity
 
 class NotificationInit {
@@ -19,18 +20,21 @@ class NotificationInit {
         return resources.resources.get(0).contents.get(0)
     }
 
-    static def createNotification(String name, String AppModuleName, String deadlineDay, String dateOn) {
+    static def createNotification(String name, Periodicity periodicity, String deadlineDay, String deadlineTime, String dateOn, String appModuleName, String statusName) {
         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
             def notification = NotificationFactory.eINSTANCE.createNotification()
             notification.name = name
-            notification.shortName = name + '_Short'
-            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, AppModuleName,false) as AppModule
+            notification.shortName = name
+            def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, appModuleName,false) as AppModule
             notification.setAppModule(appModule1)
-            notification.periodicity = Periodicity.MONTH
+            notification.periodicity = periodicity
             notification.deadlineDay = deadlineDay
-            notification.deadlineTime = "18:00"
+            notification.deadlineTime = deadlineTime
+
+            def status = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION_STATUS, statusName,false) as NotificationStatus
+            notification.setDefaultStatus(status)
 
             def dateOn1 = NotificationFactory.eINSTANCE.createReportingDateOn()
             dateOn1.name = dateOn
@@ -41,21 +45,24 @@ class NotificationInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def createEmptyNotification(String name) {
+    static def createEmptyNotification(String name, Periodicity periodicity, String deadlineDay, String deadlineTime, String dateOn, String statusName) {
         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
             def notification = NotificationFactory.eINSTANCE.createNotification()
             notification.name = name
-            notification.shortName = name + '_Short'
+            notification.shortName = name
 
-            notification.periodicity = Periodicity.MONTH
-            notification.deadlineDay = "10"
-            notification.deadlineTime = "18:00"
+            notification.periodicity = periodicity
+            notification.deadlineDay = deadlineDay
+            notification.deadlineTime = deadlineTime
 
             def dateOn1 = NotificationFactory.eINSTANCE.createReportingDateOn()
-            dateOn1.name = "8"
+            dateOn1.name = dateOn
             notification.reportingDateOn.add(dateOn1)
+
+            def status = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION_STATUS, statusName,false) as NotificationStatus
+            notification.setDefaultStatus(status)
 
             rs.resources.add(Context.current.store.createEObject(notification))
         }

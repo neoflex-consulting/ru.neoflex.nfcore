@@ -4,12 +4,14 @@
         "addreference": "Add reference",
         "addresources": "Add resources",
         "aggregations": "Aggregations",
-        "appname": "BDS Kit",
+        "apply": "Apply",
+        "appname": "NR Studio",
         "backStartPage": "Back To Start Page",
         "cancel": "Cancel",
         "clear": "Clear",
         "columnname": "Column name",
         "closeall": "Close All",
+        "create": "Create",
         "createitem": "Create item",
         "data": "Data",
         "datatype": "Data Type",
@@ -85,5 +87,23 @@
 
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
-        "Expression": "Expression"
+        "Expression": "Expression",
+
+        "createNotification": "Create Notification",
+        "calculationInterval": "Calculation Interval",
+        "deadlineDay": "Deadline Day",
+        "deadlineTime": "Deadline Time",
+        "dateOn": "Date On",
+        "fullName": "Full Name",
+        "manualSetting": "Manual Setting",
+        "periodicity": "Periodicity",
+        "shortName": "Short Name",
+        "systemSetting": "Through Attributes",
+        "weekendReporting": "Weekend Reporting",
+        "defaultStatus": "Default Status",
+
+        "Day": "Day",
+        "Month": "Month",
+        "Quarter": "Quarter",
+        "Year": "Year"
 }

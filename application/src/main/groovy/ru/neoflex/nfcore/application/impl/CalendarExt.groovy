@@ -1,6 +1,8 @@
 package ru.neoflex.nfcore.application.impl
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.eclipse.emf.ecore.EClass
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,6 +18,7 @@ import ru.neoflex.nfcore.notification.NotificationPackage
 import ru.neoflex.nfcore.notification.Periodicity
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 
 class CalendarExt extends CalendarImpl {
     private static final Logger logger = LoggerFactory.getLogger(CalendarExt.class);
@@ -24,6 +27,56 @@ class CalendarExt extends CalendarImpl {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet
         return resources.resources.get(0).contents.get(0)
+    }
+
+    @Override
+    String createNotification(String newNotification) {
+        return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
+            @Override
+            Object call(TransactionSPI tx) throws Exception {
+                def resource = DocFinder.create(Context.current.store, ApplicationPackage.Literals.CALENDAR, [name: this.name])
+                        .execute().resourceSet
+                if (!resource.resources.empty) {
+                    def calendar = resource.resources.get(0).contents.get(0) as Calendar
+                    def calendarRef = Context.current.store.getRef(resource.resources[0])
+
+                    def jsonSlurper = new JsonSlurper()
+                    def notificationDTO = jsonSlurper.parseText(newNotification)
+                    def notification = NotificationFactory.eINSTANCE.createNotification()
+
+                    notification.name = notificationDTO.fullName
+                    notification.shortName = notificationDTO.shortName
+                    notification.weekendReporting = notificationDTO.weekendReporting
+                    notification.periodicity =
+                            notificationDTO.periodicity == 'Day' ? Periodicity.DAY :
+                                    notificationDTO.periodicity == 'Month' ? Periodicity.MONTH :
+                                            notificationDTO.periodicity == 'Quarter' ? Periodicity.QUARTER :
+                                                    Periodicity.YEAR
+
+                    def dateOn = NotificationFactory.eINSTANCE.createReportingDateOn()
+                    dateOn.name = notificationDTO.dateOn.toString()
+                    notification.reportingDateOn.add(dateOn)
+                    notification.deadlineDay = notificationDTO.deadlineDay.toString()
+                    notification.deadlineTime = notificationDTO.deadlineTime.toString()
+                    notification.calculationInterval = notificationDTO.calculationInterval == 'Day' ? Periodicity.DAY :
+                            notificationDTO.periodicity == 'Month' ? Periodicity.MONTH :
+                                    notificationDTO.periodicity == 'Quarter' ? Periodicity.QUARTER :
+                                            Periodicity.YEAR
+                    def status = findEObject(NotificationPackage.Literals.NOTIFICATION_STATUS, 'Личная заметка')
+                    notification.setDefaultStatus(status)
+
+                    def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: notification.name])
+                            .execute().resourceSet
+                    if (rs.resources.empty) {
+                        Context.current.store.createEObject(notification)
+                        def savedNotification = findEObject(NotificationPackage.Literals.NOTIFICATION, notification.name)
+                        calendar.notifications.add(savedNotification)
+                        Context.current.store.updateEObject(calendarRef, calendar)
+                    }
+                    return JsonOutput.toJson("Notification created")
+                }
+            }
+        })
     }
 
     @Override
@@ -37,16 +90,12 @@ class CalendarExt extends CalendarImpl {
                     def resourceSet = Context.current.store.createResourceSet()
 
                     def calendar = resource.resources.get(0).contents.get(0) as Calendar
-                    if (calendar.notifications.size()!= 0) {
+                    if (calendar.notifications.size() !=  0) {
 
                         for (int i = 0; i < calendar.notifications.size(); i++) {
-
-                            def newResource = Context.current.store.createEmptyResource(resourceSet)
-
                             def notification = findEObject(NotificationPackage.Literals.NOTIFICATION, calendar.notifications[i].name)
-
-                            if (notification.periodicity == Periodicity.MONTH) {
-                                if (notification.reportingDateOn.size() == 1) {
+                                    def notificationDateOn = notification.reportingDateOn[0].name.toInteger()
+                                    def notificationDateOnFull = notificationDateOn < 10 ? '0' + notificationDateOn : notificationDateOn
 
                                     def notificationInstance = NotificationFactory.eINSTANCE.createNotificationInstance()
                                     notificationInstance.setNotification(notification)
@@ -57,37 +106,198 @@ class CalendarExt extends CalendarImpl {
                                     if (notification.appModule != null) {
                                         notificationInstanceDTO.appModuleName = notification.appModule.name
                                     }
+
+                                    notificationInstance.status.add(notification.defaultStatus)
+                                    notificationInstanceDTO.statusColor = notification.defaultStatus.color
+
+                                    def dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
                                     def d1 = new Date(dateFrom)
                                     def yearDateFrom = d1.toYear().toString()
                                     def monthDateFrom = d1.toMonth().ordinal() + 1
                                     def monthDateFromFull = monthDateFrom < 10 ? '0' + monthDateFrom : monthDateFrom
-                                    def dayDateFrom = d1.toMonthDay().day < 10 ? '0' + d1.toMonth().ordinal() : d1.toMonth().ordinal()
 
-                                    def d2 = new Date(dateTo)
-                                    def yearDateTo = d2.toYear().toString()
-                                    def monthDateTo = d2.toMonth().ordinal()  + 1
-                                    def monthDateToFull = monthDateTo < 10 ? '0' + monthDateTo : monthDateTo
-                                    def dayDateTo = d2.toMonthDay().day < 10 ? '0' + d2.toMonth().ordinal() : d2.toMonth().ordinal()
+                                    def deadlineTimeFull = notification.deadlineTime.toInteger() < 10 ? '0' + notification.deadlineTime : notification.deadlineTime
 
-                                    if (monthDateFromFull == monthDateToFull) {
-                                        def dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                                    if (notification.periodicity == Periodicity.MONTH || notification.periodicity == Periodicity.DAY) {
+                                        if (notification.weekendReporting) {
+                                            def deadlineDayFull = notification.deadlineDay.toInteger() < 10 ? '0' + notification.deadlineDay : notification.deadlineDay
+                                            def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlineTimeFull + ":00:00"
+                                            notificationInstance.calendarDate = dateFormat.parse(newDate) as java.util.Date
+                                            notificationInstance.name = notification.name + "." + newDate
 
-                                        def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + notification.deadlineDay + "T" + notification.deadlineTime + ":00"
-                                        notificationInstance.date = dateFormat.parse(newDate) as java.util.Date
-                                        notificationInstance.name = notification.name + "." + newDate
+                                            notificationInstanceDTO.name = notificationInstance.name
+                                            notificationInstanceDTO.calendarDate = newDate
+                                            notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
+                                        } else {
+                                            def yearBookMonth = calendar.yearBook.days.findAll { day ->
+                                                day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == monthDateFrom
+                                            }
+                                            def newDeadlineDay = yearBookMonth[notification.deadlineDay.toInteger() - 1].date.toMonthDay().day
+                                            def deadlineDayFull = newDeadlineDay < 10 ? '0' + newDeadlineDay : newDeadlineDay
 
-                                        notificationInstanceDTO.name = notificationInstance.name
-                                        notificationInstanceDTO.date = newDate
+                                            def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlineTimeFull + ":00:00"
+                                            notificationInstance.calendarDate = dateFormat.parse(newDate) as java.util.Date
+                                            notificationInstance.name = notification.name + "." + newDate
+
+                                            notificationInstanceDTO.name = notificationInstance.name
+                                            notificationInstanceDTO.calendarDate = newDate
+                                            notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
+                                        }
 
                                         def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION_INSTANCE, [name: notificationInstance.name])
                                                 .execute().resourceSet
                                         if (rs.resources.empty) {
                                             Context.current.store.createEObject(notificationInstance)
                                         }
+                                        def newResource = Context.current.store.createEmptyResource(resourceSet)
                                         newResource.getContents().add(notificationInstanceDTO)
                                     }
-                                }
-                            }
+
+                                    else if (notification.periodicity == Periodicity.QUARTER) {
+                                        def deadlineDay
+                                            for (int j = 1; j < 12; j += 3) {
+                                                if ( [ j, j+1, j+2 ].contains(monthDateFrom)) {
+                                                    if (notification.weekendReporting) {
+                                                        def month1 = LocalDate.of(yearDateFrom.toInteger(), j, 1) as LocalDate
+                                                        def month2 = LocalDate.of(yearDateFrom.toInteger(), j + 1, 1) as LocalDate
+                                                        def month3 = LocalDate.of(yearDateFrom.toInteger(), j + 2, 1) as LocalDate
+
+                                                        if (notification.deadlineDay.toInteger() <= month1.lengthOfMonth() && monthDateFrom == j) {
+                                                            deadlineDay = notification.deadlineDay.toInteger()
+                                                        }
+                                                        else if (notification.deadlineDay.toInteger() <= month1.lengthOfMonth() + month2.lengthOfMonth() && monthDateFrom == j + 1) {
+                                                            deadlineDay = notification.deadlineDay.toInteger() - month1.lengthOfMonth()
+                                                        }
+                                                        else if (notification.deadlineDay.toInteger() <= month1.lengthOfMonth() + month2.lengthOfMonth() + month3.lengthOfMonth() && monthDateFrom == j + 2) {
+                                                            deadlineDay = notification.deadlineDay.toInteger() - month1.lengthOfMonth() - month2.lengthOfMonth()
+                                                        }
+                                                    }
+                                                    else {
+                                                        def month1 = calendar.yearBook.days.findAll { day ->
+                                                            day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == j
+                                                        }
+                                                        def month2 = calendar.yearBook.days.findAll { day ->
+                                                            day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == j + 1
+                                                        }
+                                                        def month3 = calendar.yearBook.days.findAll { day ->
+                                                            day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == j + 2
+                                                        }
+
+                                                        if (notification.deadlineDay.toInteger() <= month1.size() && monthDateFrom == j) {
+                                                            deadlineDay = month1[notification.deadlineDay.toInteger() - 1].date.toMonthDay().day
+                                                        }
+                                                        else if (notification.deadlineDay.toInteger() <= month1.size() + month2.size() && monthDateFrom == j + 1) {
+                                                            deadlineDay = month2[notification.deadlineDay.toInteger() - month1.size() - 1].date.toMonthDay().day
+                                                        }
+                                                        else if (notification.deadlineDay.toInteger() <= month3.size() + month2.size() + month3.size() && monthDateFrom == j + 2) {
+                                                            deadlineDay = month2[notification.deadlineDay.toInteger() - month1.size() - month2.size() - 1].date.toMonthDay().day
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        def deadlineDayFull = deadlineDay.toInteger() < 10 ? '0' + deadlineDay : deadlineDay
+
+                                        def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlineTimeFull + ":00:00"
+                                        notificationInstance.calendarDate = dateFormat.parse(newDate) as java.util.Date
+                                        notificationInstance.name = notification.name + "." + newDate
+
+                                        notificationInstanceDTO.name = notificationInstance.name
+                                        notificationInstanceDTO.calendarDate = newDate
+                                        notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
+
+                                        def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION_INSTANCE, [name: notificationInstance.name])
+                                                .execute().resourceSet
+                                        if (rs.resources.empty) {
+                                            Context.current.store.createEObject(notificationInstance)
+                                        }
+                                        def newResource = Context.current.store.createEmptyResource(resourceSet)
+                                        newResource.getContents().add(notificationInstanceDTO)
+                                    }
+
+                                    else if (notification.periodicity == Periodicity.YEAR) {
+                                        def deadlineDay
+
+                                                if (notification.weekendReporting) {
+                                                    def year = []
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 12, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 11, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 10, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 9, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 8, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 7, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 6, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 5, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 4, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 3, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 2, 1) as LocalDate)
+                                                    year.push(LocalDate.of(yearDateFrom.toInteger(), 1, 1) as LocalDate)
+
+                                                    for (int j = 0; j < monthDateFrom - 1; j++) {
+                                                        if (deadlineDay == null) {
+                                                            deadlineDay = notification.deadlineDay.toInteger() - year[0].lengthOfMonth()
+                                                        }
+                                                        else {
+                                                            deadlineDay -= year[j].lengthOfMonth()
+                                                        }
+                                                        if (j == monthDateFrom - 2 && (deadlineDay < 0 || deadlineDay > year[j].lengthOfMonth())) {
+                                                            deadlineDay = null
+                                                        }
+                                                    }
+
+                                                }
+                                                else {
+                                                    def year = []
+                                                    for (int j = 12; j >= 1; j--) {
+                                                        year.push(
+                                                                calendar.yearBook.days.findAll { day ->
+                                                                    day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == j }
+                                                                        .size()
+                                                        )
+                                                    }
+
+                                                    for (int j = 0; j < monthDateFrom - 1; j++) {
+                                                        if (deadlineDay == null) {
+                                                            deadlineDay = notification.deadlineDay.toInteger() - year[0].toInteger()
+                                                        }
+                                                        else {
+                                                            deadlineDay -= year[j].toInteger()
+                                                        }
+
+                                                        if (j == monthDateFrom - 2 && (deadlineDay < 0 || deadlineDay > year[j].toInteger())) {
+                                                            deadlineDay = null
+                                                        }
+                                                        else if (j == monthDateFrom - 2 && deadlineDay >= 0 && deadlineDay <= year[j].toInteger()) {
+
+                                                            def yearBookMonth = calendar.yearBook.days.findAll { day ->
+                                                                day.date.toYear().toString() == yearDateFrom && day.date.toMonth().ordinal() + 1 == monthDateFrom
+                                                            }
+                                                            deadlineDay = yearBookMonth[deadlineDay.toInteger() - 1].date.toMonthDay().day
+                                                        }
+                                                    }
+                                                }
+
+                                        if (deadlineDay != null) {
+                                            def deadlineDayFull = deadlineDay.toInteger() < 10 ? '0' + deadlineDay : deadlineDay
+
+                                            def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlineTimeFull + ":00:00"
+                                            notificationInstance.calendarDate = dateFormat.parse(newDate) as java.util.Date
+                                            notificationInstance.name = notification.name + "." + newDate
+
+                                            notificationInstanceDTO.name = notificationInstance.name
+                                            notificationInstanceDTO.calendarDate = newDate
+                                            notificationInstanceDTO.notificationDateOn = yearDateFrom + "-" + monthDateFromFull + "-" + notificationDateOnFull
+
+
+                                            def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION_INSTANCE, [name: notificationInstance.name])
+                                                    .execute().resourceSet
+                                            if (rs.resources.empty) {
+                                                Context.current.store.createEObject(notificationInstance)
+                                            }
+                                            def newResource = Context.current.store.createEmptyResource(resourceSet)
+                                            newResource.getContents().add(notificationInstanceDTO)
+                                        }
+                                    }
                         }
                         def resourceSetNode = EmfJson.resourceSetToTree(Context.current.store, resourceSet.resources) as ObjectNode
                         return resourceSetNode

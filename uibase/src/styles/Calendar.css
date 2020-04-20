@@ -106,10 +106,8 @@
 .calendar .header {
     text-transform: capitalize;
     font-weight: 700;
-    font-size: 115%;
-    padding: 1.5em 0;
     border-bottom: 1px solid var(--border-color);
-    height: 70px;
+    height: 49px;
 }
 
 .calendar .header .icon {
@@ -134,7 +132,7 @@
 /*!*Даты в месяце*!*/
 .calendar .body .cell {
     position: relative;
-    min-height: 10vh;
+    min-height: 12vh;
     border-right: 1px solid var(--border-color);
     overflow: hidden;
     cursor: pointer;

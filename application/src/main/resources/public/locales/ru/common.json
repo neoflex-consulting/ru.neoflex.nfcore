@@ -4,12 +4,14 @@
         "addreference": "Добавить ссылку",
         "addresources": "Добавить ресурсы",
         "aggregations": "Итоговые группы",
-        "appname": "BDS Kit",
+        "apply": "Применить",
+        "appname": "NR Studio",
         "backStartPage": "Вернуться на главную",
         "cancel": "Отмена",
         "clear": "Очистить",
         "columnname": "Наименование колонки",
         "closeall": "Закрыть все",
+        "create": "Создать",
         "createitem": "Созать элемент",
         "data": "Данные",
         "datatype": "Тип данных",
@@ -85,7 +87,25 @@
 
         "Enter new column name": "Введите название столбца",
         "Select calculated column": "Выберите вычисляемый столбец",
-        "Expression": "Выражение"
+        "Expression": "Выражение",
+
+        "createNotification": "Создание события",
+        "calculationInterval": "Интервал расчета",
+        "deadlineDay": "Рабочий день сдачи",
+        "deadlineTime": "Время сдачи",
+        "dateOn": "Отчетная дата 'на'",
+        "fullName": "Полное название",
+        "manualSetting": "Ручная настройка",
+        "periodicity": "Периодичность сдачи",
+        "shortName": "Краткое название",
+        "systemSetting": "Через атрибуты",
+        "weekendReporting": "Отчетность по выходным",
+        "defaultStatus": "Статус по-умолчанию",
+
+        "Day": "День",
+        "Month": "Месяц",
+        "Quarter": "Квартал",
+        "Year": "Год"
 }
 
 

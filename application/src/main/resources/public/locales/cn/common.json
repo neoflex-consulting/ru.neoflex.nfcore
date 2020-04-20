@@ -4,12 +4,14 @@
         "addreference": "添加參考",
         "addresources": "添加資源",
         "aggregations": "集合體",
-        "appname": "BDS Kit",
+        "apply": "應用",
+        "appname": "NR Studio",
         "backStartPage": "返回首頁",
         "cancel": "取消",
         "clear": "清除",
         "columnname": "欄名",
         "closeall": "關閉所有",
+        "create": "創建",
         "createitem": "建立項目",
         "data": "數據",
         "datatype": "數據類型",
@@ -85,5 +87,23 @@
 
         "Enter new column name": "輸入新的列名",
         "Select calculated column": "選擇計算列",
-        "Expression": "表達"
+        "Expression": "表達",
+
+        "createNotification": "創建通知",
+        "calculationInterval": "計算間隔",
+        "deadlineDay": "截止日",
+        "deadlineTime": "截止時間",
+        "dateOn": "日期",
+        "fullName": "全名",
+        "manualSetting": "手動設定",
+        "periodicity": "週期性",
+        "shortName": "簡稱",
+        "systemSetting": "通過屬性",
+        "weekendReporting": "週末報告",
+        "defaultStatus": "默認狀態",
+
+        "Day": "日",
+        "Month": "月",
+        "Quarter": "刻",
+        "Year": "年度"
 }
