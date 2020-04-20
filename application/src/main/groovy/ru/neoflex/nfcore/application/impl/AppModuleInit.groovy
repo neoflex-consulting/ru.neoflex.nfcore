@@ -3,17 +3,14 @@ package ru.neoflex.nfcore.application.impl
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.AppModule
-import ru.neoflex.nfcore.application.Application
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.CatalogNode
-import ru.neoflex.nfcore.application.RowPerPage
 import ru.neoflex.nfcore.application.TextAlign
-import ru.neoflex.nfcore.application.Theme
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.DatasetPackage
+
 //ClassComponent.AClass = rs.getEObject(URI.createURI(uri), true)
 
 class AppModuleInit {
@@ -182,8 +179,8 @@ class AppModuleInit {
 
             def button = ApplicationFactory.eINSTANCE.createButton()
             button.name = "InputButton"
+            button.buttonSubmit = true
 
-            row31.children.add(button)
 
             def row4 = ApplicationFactory.eINSTANCE.createRow()
             row4.name = "row4"
@@ -196,6 +193,10 @@ class AppModuleInit {
             datasetView.setDatasetComponent(datasetComponent)
             datasetView.setSelectToSubmit(datasetSelect)
             datasetView.setDatePickerToSubmit(datePicker)
+
+            button.itemsToTriggerSubmit.add(datasetView)
+            row31.children.add(button)
+
             row4.children.add(datasetView)
 
             def row5 = ApplicationFactory.eINSTANCE.createRow()

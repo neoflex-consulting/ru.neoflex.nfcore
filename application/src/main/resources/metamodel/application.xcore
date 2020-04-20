@@ -121,6 +121,7 @@ interface SubmittableItems {
 class DatasetView extends ViewElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
+    //TODO interface submittableItems?
     //TODO должена быть одна переменная под все возможные submitItems
     refers Select SelectToSubmit
     refers DatePicker DatePickerToSubmit
@@ -247,7 +248,8 @@ class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
     boolean buttonSubmit
-    refers DatasetView[] datasetViewToSubmit
+    //TODO interface submittableTrigger?
+    refers ViewElement[] itemsToTriggerSubmit
     boolean backStartPage
     String span = "0"
 }
