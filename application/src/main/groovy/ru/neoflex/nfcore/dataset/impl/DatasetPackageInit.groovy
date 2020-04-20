@@ -203,7 +203,7 @@ class DatasetPackageInit {
 
         def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail")
 
-        NotificationInit.createNotification("Ф110", "Periodicity.MONTH", "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
+        NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
