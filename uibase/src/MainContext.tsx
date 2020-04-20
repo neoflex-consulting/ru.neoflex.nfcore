@@ -1,7 +1,13 @@
 import * as React from "react";
 import Ecore from "ecore"
+import {TFunction} from "i18next";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
+
+export interface ISubmitHandlers {
+    name: string,
+    handler: Function
+}
 
 export interface IServerQueryParam {
     index: number,

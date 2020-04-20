@@ -59,7 +59,6 @@ class DatasetPackageInit {
 
         try {
             /*MAIN*/
-            //TODO отсутствует возможность параметризовать запрос
             String query =
                     "select :REPORT_DATE as on_date,\n" +
                     "       row_number,\n" +
@@ -161,7 +160,7 @@ class DatasetPackageInit {
         AppModuleInit.createAppModule("ReportSingle")
         NotificationInit.createNotification("A 1993", "ReportSingle", "17","15")
         /*NRdemo*/
-        //TODO отсутствуют листы занчений (желатьльно динамические) и элементы быбора даты
+        //TODO отсутствуют листы занчений (желатьльно динамические)
         def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1")
         def nrDemoSection2 = AppModuleInit.createAppModuleNRDemoMain("F110_Section2", "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)", "jdbcNRDemoSection2", "DatasetNRDemoSection2")
         def nrDemoSection3 = AppModuleInit.createAppModuleNRDemoMain("F110_Section3", "Раздел III. Расшифровки для расчета показателей, используемых для оценки финансовой устойчивости кредитных организаций", "jdbcNRDemoSection3", "DatasetNRDemoSection3")

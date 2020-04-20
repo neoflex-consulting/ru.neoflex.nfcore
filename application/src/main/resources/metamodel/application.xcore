@@ -246,6 +246,8 @@ class Button extends ViewElement {
     refers ButtonStyle buttonStyle
     boolean buttonCancel
     boolean buttonSave
+    boolean buttonSubmit
+    refers DatasetView[] datasetViewToSubmit
     boolean backStartPage
     String span = "0"
 }

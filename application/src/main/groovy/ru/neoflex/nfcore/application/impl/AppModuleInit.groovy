@@ -177,6 +177,14 @@ class AppModuleInit {
 
             row3.children.add(datasetSelect)
 
+            def row31 = ApplicationFactory.eINSTANCE.createRow()
+            row31.name = "row31"
+
+            def button = ApplicationFactory.eINSTANCE.createButton()
+            button.name = "InputButton"
+
+            row31.children.add(button)
+
             def row4 = ApplicationFactory.eINSTANCE.createRow()
             row4.name = "row4"
 
@@ -202,6 +210,7 @@ class AppModuleInit {
             form.children.add(row1)
             form.children.add(row2)
             form.children.add(row3)
+            form.children.add(row31)
             form.children.add(row4)
             form.children.add(row5)
             application.setView(form)

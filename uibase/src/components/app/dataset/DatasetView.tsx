@@ -5,7 +5,7 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
+import {IServerNamedParam, IServerQueryParam, ISubmitHandlers} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -439,16 +439,37 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
+    onSubmit(): void {
+        if (this.state.currentDatasetComponent.eResource) {
+            this.runQuery(this.state.currentDatasetComponent.eResource(),
+                          this.state.serverFilters,
+                          this.state.serverAggregates,
+                          this.state.serverSorts,
+                          this.state.serverGroupBy,
+                          this.state.serverCalculatedExpression
+            );
+        }
+    }
+
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
         if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
         if (this.state.allSorts.length === 0) {this.getAllEnumValues("Sort", "allSorts")}
         if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
+        if (this.props.context.submitHandlers !== undefined) {
+            this.props.context.submitHandlers.push({
+                name: this.props.viewObject.get('name'),
+                handler: this.onSubmit.bind(this)
+            } as ISubmitHandlers)
+        }
     }
 
     componentWillUnmount() {
         this.props.context.updateContext({datasetComponents: undefined})
+        if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
+            this.props.context.submitHandlers.pop()
+        }
     }
 
     onChangeColumnDefs(columnDefs: any) {

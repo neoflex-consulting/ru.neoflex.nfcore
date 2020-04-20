@@ -1,5 +1,5 @@
 import {ViewFactory, View} from './View'
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
 import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography, DatePicker} from 'antd';
 import UserComponent from './components/app/UserComponent';
@@ -13,6 +13,7 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import CalendarWrapper from "./components/app/CalendarWrapper";
 import moment from 'moment';
+import {ISubmitHandlers} from "./MainContext";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -145,6 +146,19 @@ class Button_ extends ViewContainer {
         let params: Object[] = appModule.params;
         this.props.context.changeURL!(appModule.appModule, undefined, params);
     };
+    submitItems = () => {
+        if (this.props.viewObject.get('datasetViewToSubmit')) {
+            let checkItems: String[] = [];
+            this.props.viewObject.get('datasetViewToSubmit').each((item: EObject) => {
+                checkItems.push(item.get('name'))
+            });
+            this.props.context.submitHandlers.forEach((obj:ISubmitHandlers)=>{
+                if (checkItems.includes(obj.name)) {
+                    obj.handler()
+                }
+            })
+        }
+    };
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
@@ -156,6 +170,11 @@ class Button_ extends ViewContainer {
             {this.props.viewObject.get('buttonSave') === true &&
             <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
                 {t('save')}
+            </Button>
+            }
+            {this.props.viewObject.get('buttonSubmit') === true &&
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
+                {t('submit')}
             </Button>
             }
             {this.props.viewObject.get('backStartPage') === true &&
