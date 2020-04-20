@@ -8,21 +8,10 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.QueryFilterDTO
-import ru.neoflex.nfcore.dataset.QueryConditionDTO
-import ru.neoflex.nfcore.dataset.DataType
-import ru.neoflex.nfcore.dataset.DatasetFactory
-import ru.neoflex.nfcore.dataset.DatasetPackage
-import ru.neoflex.nfcore.dataset.DatasetComponent
-import ru.neoflex.nfcore.dataset.Filter
-import ru.neoflex.nfcore.dataset.Operations
-import ru.neoflex.nfcore.dataset.Aggregate
-import ru.neoflex.nfcore.dataset.Sort
+import ru.neoflex.nfcore.dataset.*
 
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.ResultSet
-import java.sql.SQLException
 import java.sql.Statement
 
 class DatasetComponentExt extends DatasetComponentImpl {
@@ -113,25 +102,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
-        try {
-            Class.forName(dataset.connection.driver.driverClassName)
-        } catch (ClassNotFoundException e) {
-            logger.info("connectionToDB", "Driver " + dataset.connection.driver.driverClassName + " is not found")
-            e.printStackTrace()
-            return
-        }
-        logger.info("connectionToDB", "Driver successfully connected")
-        Connection jdbcConnection
-        try {
-            jdbcConnection = DriverManager.getConnection(dataset.connection.url, dataset.connection.userName, dataset.connection.password)
-        } catch (SQLException e) {
-            logger.info("connectionToDB", "Connection to database " + dataset.connection.url + " failed")
-            e.printStackTrace()
-            return
-        }
-        if (jdbcConnection != null) {
-            logger.info("connectionToDB", "You successfully connected to database " + dataset.connection.url)
-        }
+        Connection jdbcConnection = (dataset.connection as JdbcConnectionExt).connect()
 
         /*Execute query*/
         def queryColumns = []

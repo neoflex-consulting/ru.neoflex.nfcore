@@ -127,19 +127,7 @@
             <version>3.10.0-v20140318-2214</version>
         </dependency>
 
-        <!-- PostgreSQL -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.4.1211</version>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.oracle</groupId>-->
-<!--            <artifactId>ojdbc6</artifactId>-->
-<!--            <version>11.2.0.2.0</version>-->
-<!--        </dependency>-->
-        <dependency>
+       <dependency>
             <groupId>com.github.fonimus</groupId>
             <artifactId>ssh-shell-spring-boot-starter</artifactId>
             <version>1.2.1</version>

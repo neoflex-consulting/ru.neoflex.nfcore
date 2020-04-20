@@ -175,6 +175,18 @@ class DatasetView extends React.Component<any, State> {
 
     //Поиск сохранённых фильтров по id компоненты
     findParams(resource: Ecore.Resource, columnDefs: Object[]){
+        function addEmpty(params: IServerQueryParam[]) {
+            params.push(
+                {index: params.length + 1,
+                    datasetColumn: undefined,
+                    operation: undefined,
+                    value: undefined,
+                    enable: true,
+                    type: undefined,
+                    highlightType: undefined,
+                    backgroundColor: undefined,
+                    color: undefined});
+        }
         function getParamsFromUserProfile (userProfileParams: any): IServerQueryParam[]{
             let serverParam: IServerQueryParam[] = [];
             if (userProfileParams !== undefined) {
@@ -195,16 +207,6 @@ class DatasetView extends React.Component<any, State> {
                     }
                 )
             }
-            serverParam.push(
-                {index: serverParam.length + 1,
-                    datasetColumn: undefined,
-                    operation: undefined,
-                    value: undefined,
-                    enable: true,
-                    type: undefined,
-                    highlightType: undefined,
-                    backgroundColor: undefined,
-                    color: undefined});
             return serverParam
         }
         function getParamsFromComponent (resource: Ecore.EObject, componentName: string): IServerQueryParam[] {
@@ -237,17 +239,6 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
             }
-            serverParam.push(
-                {index: serverParam.length + 1,
-                    datasetColumn: undefined,
-                    operation: undefined,
-                    value: undefined,
-                    enable: true,
-                    type: undefined,
-                    highlightType: undefined,
-                    backgroundColor: undefined,
-                    color: undefined
-                  });
             return serverParam
         }
         function getParamsFromURL (params: any[], columnDefs: any[]): IServerQueryParam[] {
@@ -273,16 +264,6 @@ class DatasetView extends React.Component<any, State> {
                     }
                 })
             }
-            serverParam.push(
-                {index: serverParam.length + 1,
-                    datasetColumn: undefined,
-                    operation: undefined,
-                    value: undefined,
-                    enable: true,
-                    type: undefined,
-                    highlightType: undefined,
-                    backgroundColor: undefined,
-                    color: undefined});
             return serverParam
         }
         let serverFilters: IServerQueryParam[] = [];
@@ -310,13 +291,19 @@ class DatasetView extends React.Component<any, State> {
             serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            serverFilters = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
+            serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
             /*serverAggregates = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverSorts = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverGroupBy = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             highlights = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);
             serverCalculatedExpression = getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs);*/
         }
+        addEmpty(serverFilters);
+        addEmpty(serverAggregates);
+        addEmpty(serverSorts);
+        addEmpty(serverGroupBy);
+        addEmpty(highlights);
+        addEmpty(serverCalculatedExpression);
         this.setState({serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
         this.runQuery(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
     }
