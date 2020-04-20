@@ -399,11 +399,11 @@ class DatasetView extends React.Component<any, State> {
             namedParams.push({
                 parameterName: this.props.viewObject.get('DatePickerToSubmit').get('name'),
                 parameterValue: this.props.viewObject.get('DatePickerToSubmit').get('value'),
-                parameterDataType: "Date"
+                parameterDataType: this.props.viewObject.get('DatePickerToSubmit').eClass._id === "//DatePicker" ? "Date" : "String"
             })
         }
         return namedParams
-    }
+    };
 
     private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
