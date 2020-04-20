@@ -5,7 +5,7 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerQueryParam} from '../../../MainContext';
+import {IServerNamedParam, IServerQueryParam, ISubmitHandlers} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -387,23 +387,41 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    private runQuery(resource: Ecore.Resource, componentParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
+    getQueryNamedParams = () => {
+        let namedParams: IServerNamedParam[] = [];
+        if (this.props.viewObject.get('itemsToSubmit')) {
+            this.props.viewObject.get('itemsToSubmit').each((item: EObject) => {
+                namedParams.push({
+                    parameterName: item.get('name'),
+                    parameterValue: item.get('value'),
+                    parameterDataType: item.eClass._id === "//DatePicker" ? "Date" : "String"
+                })
+            });
+        }
+        return namedParams
+    };
+
+    private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)
+        const queryParams = this.getQueryNamedParams();
+
+        this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
                                             ,[]
                                             , sortParams.filter((f: any) => f.enable)
                                             , groupByParams.filter((f: any) => f.enable)
-                                            , calculatedExpression.filter((f: any) => f.enable)).then((json: string) => {
+                                            , calculatedExpression.filter((f: any) => f.enable)
+                                            , queryParams).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
-                    this.props.context.runQuery(resource, componentParams.filter((f: any) => f.enable)
+                    this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
                                                         , aggregationParams.filter((f: any) => f.enable)
                                                         , sortParams.filter((f: any) => f.enable)
                                                         , groupByParams.filter((f: any) => f.enable)
-                                                        , calculatedExpression.filter((f: any) => f.enable)).then((aggJson: string) => {
+                                                        , calculatedExpression.filter((f: any) => f.enable)
+                                                        , queryParams).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
                         this.setState({rowData: result, columnDefs: newColumnDef});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
@@ -417,16 +435,37 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
+    onSubmit(): void {
+        if (this.state.currentDatasetComponent.eResource) {
+            this.runQuery(this.state.currentDatasetComponent.eResource(),
+                          this.state.serverFilters,
+                          this.state.serverAggregates,
+                          this.state.serverSorts,
+                          this.state.serverGroupBy,
+                          this.state.serverCalculatedExpression
+            );
+        }
+    }
+
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
         if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
         if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
         if (this.state.allSorts.length === 0) {this.getAllEnumValues("Sort", "allSorts")}
         if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
+        if (this.props.context.submitHandlers !== undefined) {
+            this.props.context.submitHandlers.push({
+                name: this.props.viewObject.get('name'),
+                handler: this.onSubmit.bind(this)
+            } as ISubmitHandlers)
+        }
     }
 
     componentWillUnmount() {
         this.props.context.updateContext({datasetComponents: undefined})
+        if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
+            this.props.context.submitHandlers.pop()
+        }
     }
 
     onChangeColumnDefs(columnDefs: any) {

@@ -1,7 +1,7 @@
 import {ViewFactory, View} from './View'
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
+import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography, DatePicker} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
@@ -12,6 +12,8 @@ import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
+import moment from 'moment';
+import {ISubmitHandlers} from "./MainContext";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -144,6 +146,19 @@ class Button_ extends ViewContainer {
         let params: Object[] = appModule.params;
         this.props.context.changeURL!(appModule.appModule, undefined, params);
     };
+    submitItems = () => {
+        if (this.props.viewObject.get('itemsToTriggerSubmit')) {
+            let checkItems: String[] = [];
+            this.props.viewObject.get('itemsToTriggerSubmit').each((item: EObject) => {
+                checkItems.push(item.get('name'))
+            });
+            this.props.context.submitHandlers.forEach((obj:ISubmitHandlers)=>{
+                if (checkItems.includes(obj.name)) {
+                    obj.handler()
+                }
+            })
+        }
+    };
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
@@ -155,6 +170,11 @@ class Button_ extends ViewContainer {
             {this.props.viewObject.get('buttonSave') === true &&
             <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
                 {t('save')}
+            </Button>
+            }
+            {this.props.viewObject.get('buttonSubmit') === true &&
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
+                {t('submit')}
             </Button>
             }
             {this.props.viewObject.get('backStartPage') === true &&
@@ -223,6 +243,49 @@ class Select_ extends ViewContainer {
                 </div>
             )
         }
+    }
+}
+
+class DatePicker_ extends ViewContainer {
+    state = {
+        pickedDate: moment(),
+        disabled: this.props.viewObject.get('disabled') || false,
+        allowClear: this.props.viewObject.get('allowClear') || false,
+        format: this.props.viewObject.get('format') || "YYYY-MM-DD",
+        width: this.props.viewObject.get('width') || "200px"
+    };
+
+    componentDidMount(): void {
+        //Инициализация value
+        this.onChange(this.state.pickedDate.format(this.state.format))
+    }
+
+    onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', currentValue);
+        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
+        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
+            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+    };
+    render = () => {
+        return (
+            //TODO перейти на antd v4?
+            //В 4й весрии можно через props выбирать тип пикера и больше возможных типов (квартал, год)
+            <div style={{marginBottom: marginBottom}}>
+                <DatePicker
+                    key={this.viewObject._id}
+                    defaultValue={this.state.pickedDate}
+                    disabled={this.state.disabled}
+                    allowClear={this.state.allowClear}
+                    format={this.state.format}
+                    style={{width: this.state.width}}
+                    onChange={(date, dateString) => {
+                        this.onChange(dateString)
+                    }}/>
+            </div>
+        )
     }
 }
 
@@ -413,6 +476,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//DatasetDiagramView', DatasetDiagramView_);
         this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
+        this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);

@@ -9,10 +9,15 @@ import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
+import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 
 import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.Statement
+import java.sql.Date
+
+import java.time.LocalDate
+
+
 
 class DatasetComponentExt extends DatasetComponentImpl {
 
@@ -81,9 +86,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
+    String runQuery(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         if (column) {
-            ResultSet rs = connectionToDB(conditions, aggregations, sorts, groupBy,calculatedExpression)
+            ResultSet rs = connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression)
             def columnCount = rs.metaData.columnCount
             def rowData = []
             while (rs.next()) {
@@ -101,7 +106,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    ResultSet connectionToDB(EList<QueryFilterDTO> conditions, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
+    ResultSet connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         Connection jdbcConnection = (dataset.connection as JdbcConnectionExt).connect()
 
         /*Execute query*/
@@ -143,10 +148,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def allColumns = column.name + calculatedExpression.datasetColumn
 
         //Filter
-        if (conditions) {
-            for (int i = 0; i <= conditions.size() - 1; ++i) {
-                if (allColumns.contains(conditions[i].datasetColumn) && conditions[i].enable == true) {
-                    def currentColumn = column.find{ column -> column.name.toLowerCase() == conditions[i].datasetColumn.toLowerCase() }
+        if (filters) {
+            for (int i = 0; i <= filters.size() - 1; ++i) {
+                if (allColumns.contains(filters[i].datasetColumn) && filters[i].enable == true) {
+                    def currentColumn = column.find{ column -> column.name.toLowerCase() == filters[i].datasetColumn.toLowerCase() }
                     def type;
                     //TODO добавить определение типа для вычисляемых полей
                     if (currentColumn) {
@@ -156,44 +161,44 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     if (type == DataType.DATE || type == DataType.TIMESTAMP) {
                         def map = [:]
                         map["column"] = currentColumn.datasetColumn.name
-                        map["select"] = "(EXTRACT(DAY FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(DAY FROM CAST('${conditions[i].value}' AS DATE)) AND " +
-                                "EXTRACT(MONTH FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(MONTH FROM CAST('${conditions[i].value}' AS DATE)) AND " +
-                                "EXTRACT(YEAR FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(YEAR FROM CAST('${conditions[i].value}' AS DATE)))"
+                        map["select"] = "(EXTRACT(DAY FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(DAY FROM CAST('${filters[i].value}' AS DATE)) AND " +
+                                "EXTRACT(MONTH FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(MONTH FROM CAST('${filters[i].value}' AS DATE)) AND " +
+                                "EXTRACT(YEAR FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(YEAR FROM CAST('${filters[i].value}' AS DATE)))"
                         serverFilters.add(map)
                     }
                     else {
                         def map = [:]
-                        map["column"] = conditions[i].datasetColumn
-                        def operator = getConvertOperator(conditions[i].operation.toString().toLowerCase())
+                        map["column"] = filters[i].datasetColumn
+                        def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                         if (operator == 'LIKE') {
-                            map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') OR " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') OR " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') OR " +
-                                "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
+                            map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}') OR " +
+                                "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}') OR " +
+                                "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}%') OR " +
+                                "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}%'))"
                         }
                         else if (operator == 'NOT LIKE') {
-                            map["select"] = "(LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}') AND " +
-                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}') AND " +
-                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('${conditions[i].value}%') AND " +
-                                    "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${conditions[i].value}%'))"
+                            map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}') AND " +
+                                    "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}') AND " +
+                                    "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}%') AND " +
+                                    "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}%'))"
                         }
                         else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
-                            map["select"] = "t.${conditions[i].datasetColumn} ${operator}"
+                            map["select"] = "t.${filters[i].datasetColumn} ${operator}"
                         }
                         else if (operator == 'LIKE_START' ) {
-                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) LIKE LOWER('${conditions[i].value}%')"
+                            map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) LIKE LOWER('${filters[i].value}%')"
                         }
                         else if (operator == 'LIKE_NOT_START' ) {
-                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('${conditions[i].value}%')"
+                            map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('${filters[i].value}%')"
                         }
                         else if (operator == 'LIKE_END' ) {
-                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) LIKE LOWER('%${conditions[i].value}')"
+                            map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) LIKE LOWER('%${filters[i].value}')"
                         }
                         else if (operator == 'LIKE_NOT_END' ) {
-                            map["select"] = "LOWER(CAST(t.${conditions[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('%${conditions[i].value}')"
+                            map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('%${filters[i].value}')"
                         }
                         else {
-                            map["select"] = "t.${conditions[i].datasetColumn} ${operator} '${conditions[i].value}'"
+                            map["select"] = "t.${filters[i].datasetColumn} ${operator} '${filters[i].value}'"
                         }
                         if (!serverFilters.contains(map)) {
                             serverFilters.add(map)
@@ -358,9 +363,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)
+        logger.info("connectionToDB", "named parameters = " + parameters)
+        //Add Named Parameters
+        NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, currentQuery);
+        for (int i = 0; i <= parameters.size() - 1; ++i) {
+            if (parameters[i].parameterDataType == "Date") {
+                //TODO вытащить с фронта format
+                p.setDate(parameters[i].parameterName, Date.valueOf( LocalDate.parse(parameters[i].parameterValue,"yyyy-MM-dd") ))
+            } else {
+                p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            }
+            //TODO numeric?
+        }
 
-        Statement st = jdbcConnection.createStatement()
-        ResultSet rs = st.executeQuery(currentQuery)
+        ResultSet rs = p.executeQuery();
+
         return rs
     }
 

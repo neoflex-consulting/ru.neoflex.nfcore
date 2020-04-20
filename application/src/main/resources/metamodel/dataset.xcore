@@ -63,7 +63,8 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy, QueryConditionDTO[] calculatedExpression)
+     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy, QueryConditionDTO[] calculatedExpression)
+     contains QueryParameter[] serverParameters
      boolean useServerFilter
      //Состав серверного фильтра
      contains QueryFilter[] serverFilter
@@ -109,6 +110,12 @@ class CustomColumn extends DatasetColumnView {
 class FormatMask {
     QName name
     String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
+}
+
+class QueryParameter {
+    String parameterName
+    String parameterValue
+    String parameterDataType = "String"
 }
 
 class QueryFilter {

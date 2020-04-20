@@ -6,13 +6,11 @@ import ru.neoflex.nfcore.application.AppModule
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.CatalogNode
-import ru.neoflex.nfcore.application.RowPerPage
 import ru.neoflex.nfcore.application.TextAlign
-import ru.neoflex.nfcore.application.Theme
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.DatasetPackage
+
 //ClassComponent.AClass = rs.getEObject(URI.createURI(uri), true)
 
 class AppModuleInit {
@@ -157,58 +155,65 @@ class AppModuleInit {
             def row2 = ApplicationFactory.eINSTANCE.createRow()
             row2.name = "row2"
 
+            def datePicker = ApplicationFactory.eINSTANCE.createDatePicker()
+            datePicker.name = 'REPORT_DATE'
+            datePicker.allowClear = false
+            datePicker.disabled = false
+            datePicker.format = "YYYY-MM-DD"
+            datePicker.width = 200
+
+            row2.children.add(datePicker)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row3"
+
+            def datasetSelect = ApplicationFactory.eINSTANCE.createSelect()
+            datasetSelect.name = 'REPORT_PRECISION' //Название совпадает с тем что мы передаем в качестве параметра в запрос
+            datasetSelect.value = 1000 //Пока только по default значению
+            datasetSelect.classToShow = ApplicationPackage.Literals.COLOR //TODO убрать заглушку
+
+            row3.children.add(datasetSelect)
+
+            def row31 = ApplicationFactory.eINSTANCE.createRow()
+            row31.name = "row31"
+
+            def button = ApplicationFactory.eINSTANCE.createButton()
+            button.name = "InputButton"
+            button.buttonSubmit = true
+
+
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = "row4"
+
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
             def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/, "",false)
             datasetView.setDataset(jdbcDataset)
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
-            row2.children.add(datasetView)
+            datasetView.itemsToSubmit.add(datasetSelect)
+            datasetView.itemsToSubmit.add(datePicker)
 
-            def row3 = ApplicationFactory.eINSTANCE.createRow()
-            row3.name = "row2"
+            button.itemsToTriggerSubmit.add(datasetView)
+            row31.children.add(button)
+
+            row4.children.add(datasetView)
+
+            def row5 = ApplicationFactory.eINSTANCE.createRow()
+            row5.name = "row5"
 
             def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGrid.name = "SectionGrid"
             datasetGrid.setDatasetView(datasetView)
-            row3.children.add(datasetGrid)
+            row5.children.add(datasetGrid)
 
 
             form.children.add(row1)
             form.children.add(row2)
             form.children.add(row3)
-            application.setView(form)
-
-            rs.resources.add(Context.current.store.createEObject(application))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
-
-    static def createAppModuleF110Section2(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
-                .execute().resourceSet
-        if (rs.resources.empty) {
-
-            def application = ApplicationFactory.eINSTANCE.createAppModule()
-            application.name = name
-
-            def typography = ApplicationFactory.eINSTANCE.createTypography()
-            typography.name = "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)"
-
-            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
-            typography.setTypographyStyle(typographyStyle)
-
-            def row1 = ApplicationFactory.eINSTANCE.createRow()
-            row1.name = "row1"
-            row1.textAlign = TextAlign.LEFT
-            row1.borderBottom = true
-
-            row1.children.add(typography)
-
-            def form = ApplicationFactory.eINSTANCE.createForm()
-            form.name = "SectionForm"
-            form.children.add(row1)
-
+            form.children.add(row31)
+            form.children.add(row4)
+            form.children.add(row5)
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

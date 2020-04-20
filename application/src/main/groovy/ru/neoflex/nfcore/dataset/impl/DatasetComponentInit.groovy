@@ -154,12 +154,11 @@ class DatasetComponentInit {
                                 .replace("F110_CODE","Код обозначения расшифровки")
                                 .replace("AMOUNT_RUB","Сумма в рублях")
                                 .replace("AMOUNT_CUR","Сумма в иностранной валюте")
-                                .replace("REPORT_PRECISION","Точность")
                         rdbmsColumn.headerName = typography
                         rdbmsColumn.sortable = true
                         rdbmsColumn.resizable = true
-                        if (rdbmsColumn.name in ["ON_DATE","REPORT_PRECISION"]) {
-                            rdbmsColumn.hide = true
+                        if (rdbmsColumn.name in ["ON_DATE"]) {
+                            rdbmsColumn.hide = false
                         }
                         rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                         rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
@@ -171,7 +170,7 @@ class DatasetComponentInit {
                                 throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                             }
                         }
-                        if (rdbmsColumn.name in ["ON_DATE","ROW_NUMBER","F110_CODE","AMOUNT_RUB","REPORT_PRECISION"]) {
+                        if (rdbmsColumn.name in ["ON_DATE","ROW_NUMBER","F110_CODE","AMOUNT_RUB"]) {
                             datasetComponent.column.add(rdbmsColumn)
                         }
                         if (rdbmsColumn.name in ["AMOUNT_CUR"] && name == "DatasetNRDemoSection4") {
