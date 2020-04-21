@@ -105,5 +105,7 @@
         "Day": "日",
         "Month": "月",
         "Quarter": "刻",
-        "Year": "年度"
+        "Year": "年度",
+
+        "submit": "提交"
 }

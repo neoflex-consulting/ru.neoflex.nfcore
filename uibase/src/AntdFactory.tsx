@@ -267,6 +267,7 @@ class DatePicker_ extends ViewContainer {
 
     onChange = (currentValue: string) => {
         this.props.viewObject.set('value', currentValue);
+        this.props.viewObject.set('format', this.state.format);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')

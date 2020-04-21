@@ -402,7 +402,8 @@ class DatasetView extends React.Component<any, State> {
                     namedParams.push({
                         parameterName: item.get('name'),
                         parameterValue: item.get('value'),
-                        parameterDataType: "Date"
+                        parameterDataType: "Date",
+                        parameterDateFormat: item.get('format')
                     })
                 }
             });
