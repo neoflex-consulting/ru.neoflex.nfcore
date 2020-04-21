@@ -239,9 +239,11 @@ class ApplicationInit {
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "DatasetDiagram"
             datasetDiagram.setDatasetView(datasetView)
-            datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"branch"
-            datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(0)//"incomedate"
-            datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            if (datasetView.dataset.getDatasetColumn().size() > 0) {
+                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"branch"
+                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(0)//"incomedate"
+                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            }
             datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
             datasetDiagram.axisXPosition = AxisXPositionType.BOTTOM
             datasetDiagram.axisXLegend = "Dates"
@@ -304,10 +306,11 @@ class ApplicationInit {
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "PieChart"
             datasetDiagram.setDatasetView(datasetView)
-
-            datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"department"
-            datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"department"
-            datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            if (datasetView.dataset.getDatasetColumn().size() != 0) {
+                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"department"
+                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"department"
+                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            }
             datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
             datasetDiagram.axisXPosition = AxisXPositionType.TOP
             datasetDiagram.axisYPosition = AxisYPositionType.LEFT
@@ -368,10 +371,11 @@ class ApplicationInit {
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "BarChart"
             datasetDiagram.setDatasetView(datasetView)
-
-            datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(0)//"year"
-            datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"branch"
-            datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            if (datasetView.dataset.getDatasetColumn().size() != 0) {
+                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(0)//"year"
+                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"branch"
+                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
+            }
             datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
             datasetDiagram.axisXPosition = AxisXPositionType.BOTTOM
             datasetDiagram.axisXLegend = "year"

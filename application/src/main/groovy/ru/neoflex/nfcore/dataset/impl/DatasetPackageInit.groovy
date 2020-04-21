@@ -48,33 +48,27 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
             DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
             DatasetComponentInit.createAllColumn("DatasetGridBar")
-        }
-        catch (Throwable e) {
-            logger.error("DatasetPackage", e)
-        }
 
+            /*NRDEMO*/
+            JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
+            JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nrdemo.neoflex.ru)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl.neoflex.ru))) ", "system", "Ne0f1ex")
 
-        /*NRDEMO*/
-        JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
-        JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nrdemo.neoflex.ru)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl.neoflex.ru))) ", "system", "Ne0f1ex")
-
-        try {
             /*MAIN*/
             String query =
                     "select :REPORT_DATE as on_date,\n" +
-                    "       row_number,\n" +
-                    "       f110_code,\n" +
-                    "       amount_rub,\n" +
-                    "       amount_cur,\n" +
-                    "       section_number\n" +
-                    "  from table(data_representation.rep_f110.GetF110Apex(\n" +
-                    "         i_AppUser         => 0,\n" +
-                    "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
-                    /*"         i_OnDate          => :i_OnDate,\n" +*/
-                    "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
-                    "         i_ReportPrecision => :REPORT_PRECISION,\n" +
-                    "         i_SpodDate        => null\n" +
-                    "       ))\n"
+                            "       row_number,\n" +
+                            "       f110_code,\n" +
+                            "       amount_rub,\n" +
+                            "       amount_cur,\n" +
+                            "       section_number\n" +
+                            "  from table(data_representation.rep_f110.GetF110Apex(\n" +
+                            "         i_AppUser         => 0,\n" +
+                            "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
+                            /*"         i_OnDate          => :i_OnDate,\n" +*/
+                            "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
+                            "         i_ReportPrecision => :REPORT_PRECISION,\n" +
+                            "         i_SpodDate        => null\n" +
+                            "       ))\n"
             String querySection1 = query + " where section_number = 1"
             String querySection2 = query + " where section_number = 2"
             String querySection3 = query + " where section_number = 3"
@@ -136,6 +130,7 @@ class DatasetPackageInit {
             //TODO настраивать ширину столбцов в момент создания
             DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
             DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
+
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -184,12 +179,18 @@ class DatasetPackageInit {
 
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
+        try {
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
         ApplicationInit.createApplication("Администрирование")
         ApplicationInit.createApplicationLine("Линейная диаграмма")
         ApplicationInit.createApplicationPie("Круговая диаграмма")
         ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+        }
+        catch (Throwable e) {
+            logger.error("Application was not created", e)
+        }
+
 
         //TODO после первой пересборик ошибки, добавить проверку
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
