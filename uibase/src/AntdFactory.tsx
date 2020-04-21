@@ -13,7 +13,7 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {ISubmitHandlers} from "./MainContext";
+import {ISubmitHandler} from "./MainContext";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -147,12 +147,12 @@ class Button_ extends ViewContainer {
         this.props.context.changeURL!(appModule.appModule, undefined, params);
     };
     submitItems = () => {
-        if (this.props.viewObject.get('itemsToTriggerSubmit')) {
+        if (this.props.viewObject.get('itemsToReceiveSubmit')) {
             let checkItems: String[] = [];
-            this.props.viewObject.get('itemsToTriggerSubmit').each((item: EObject) => {
+            this.props.viewObject.get('itemsToReceiveSubmit').each((item: EObject) => {
                 checkItems.push(item.get('name'))
             });
-            this.props.context.submitHandlers.forEach((obj:ISubmitHandlers)=>{
+            this.props.context.submitHandlers.forEach((obj:ISubmitHandler)=>{
                 if (checkItems.includes(obj.name)) {
                     obj.handler()
                 }

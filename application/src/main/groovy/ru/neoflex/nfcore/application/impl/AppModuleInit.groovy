@@ -194,7 +194,7 @@ class AppModuleInit {
             datasetView.itemsToSubmit.add(datasetSelect)
             datasetView.itemsToSubmit.add(datePicker)
 
-            button.itemsToTriggerSubmit.add(datasetView)
+            button.itemsToReceiveSubmit.add(datasetView)
             row31.children.add(button)
 
             row4.children.add(datasetView)

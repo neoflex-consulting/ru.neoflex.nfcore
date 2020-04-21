@@ -5,7 +5,7 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerNamedParam, IServerQueryParam, ISubmitHandlers} from '../../../MainContext';
+import {IServerNamedParam, IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -466,7 +466,7 @@ class DatasetView extends React.Component<any, State> {
             this.props.context.submitHandlers.push({
                 name: this.props.viewObject.get('name'),
                 handler: this.onSubmit.bind(this)
-            } as ISubmitHandlers)
+            } as ISubmitHandler)
         }
     }
 

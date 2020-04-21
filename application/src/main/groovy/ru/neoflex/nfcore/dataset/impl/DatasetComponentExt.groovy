@@ -363,7 +363,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)
-        logger.info("connectionToDB", "named parameters = " + parameters)
         //Add Named Parameters
         NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, currentQuery);
         for (int i = 0; i <= parameters.size() - 1; ++i) {
