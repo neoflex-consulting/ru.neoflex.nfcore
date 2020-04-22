@@ -232,6 +232,10 @@ class DatePicker extends SubmittableItems {
     String format = "YYYY-MM-DD"
 }
 
+class HtmlContent extends ViewElement {
+    String htmlContent
+}
+
 //add TextArea
 class Input extends ViewElement {
     InputType inputType = "InputString"

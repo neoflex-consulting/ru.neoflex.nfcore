@@ -174,16 +174,24 @@ class AppModuleInit {
 
             row3.children.add(datasetSelect)
 
-            def row31 = ApplicationFactory.eINSTANCE.createRow()
-            row31.name = "row31"
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = "row4"
 
             def button = ApplicationFactory.eINSTANCE.createButton()
             button.name = "InputButton"
             button.buttonSubmit = true
 
+            def row5 = ApplicationFactory.eINSTANCE.createRow()
+            row5.name = "row5"
 
-            def row4 = ApplicationFactory.eINSTANCE.createRow()
-            row4.name = "row4"
+            def htmlContent = ApplicationFactory.eINSTANCE.createHtmlContent()
+            htmlContent.name = "futureDynamicContent"
+            htmlContent.htmlContent = "<span style=\"font-size:1.6rem;white-space:nowrap;\"><img src=\"/images/Success-icon.png\" width=\"30\" height=\"22\"> Ошибки ПККД отсутствуют.</span>"
+
+            row5.children.add(htmlContent)
+
+            def row6 = ApplicationFactory.eINSTANCE.createRow()
+            row6.name = "row6"
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
@@ -195,25 +203,26 @@ class AppModuleInit {
             datasetView.itemsToSubmit.add(datePicker)
 
             button.itemsToReceiveSubmit.add(datasetView)
-            row31.children.add(button)
+            row4.children.add(button)
 
-            row4.children.add(datasetView)
+            row6.children.add(datasetView)
 
-            def row5 = ApplicationFactory.eINSTANCE.createRow()
-            row5.name = "row5"
+            def row7 = ApplicationFactory.eINSTANCE.createRow()
+            row7.name = "row7"
 
             def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
             datasetGrid.name = "SectionGrid"
             datasetGrid.setDatasetView(datasetView)
-            row5.children.add(datasetGrid)
+            row7.children.add(datasetGrid)
 
 
             form.children.add(row1)
             form.children.add(row2)
             form.children.add(row3)
-            form.children.add(row31)
             form.children.add(row4)
             form.children.add(row5)
+            form.children.add(row6)
+            form.children.add(row7)
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

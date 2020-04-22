@@ -14,6 +14,7 @@ import {excelElementExportType, excelExportObject} from "./utils/excelExportUtil
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {ISubmitHandler} from "./MainContext";
+import DOMPurify from 'dompurify'
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -295,6 +296,21 @@ class DatePicker_ extends ViewContainer {
     }
 }
 
+class HtmlContent_ extends ViewContainer {
+    state = {
+        htmlContent: this.props.viewObject.get('htmlContent')
+    };
+
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}
+                 className="content"
+                 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            </div>
+        )
+    }
+}
+
 class Input_ extends ViewContainer {
     onChange = (currentValue: string) => {
         this.props.viewObject.set('value', currentValue);
@@ -483,6 +499,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
         this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
+        this.components.set('ru.neoflex.nfcore.application#//HtmlContent', HtmlContent_);
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
