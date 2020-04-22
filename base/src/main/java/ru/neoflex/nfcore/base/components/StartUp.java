@@ -47,6 +47,7 @@ public class StartUp {
                 }
                 catch (Throwable e) {
                     logger.error(initClassName, e);
+//                    printLongerTrace(e);
                 }
             }
             List<EClassifier> classifiers = new ArrayList<>(registry.getEClassifiers());
@@ -63,9 +64,15 @@ public class StartUp {
                 }
                 catch (Throwable e) {
                     logger.error(initClassName, e);
+//                    printLongerTrace(e);
                 }
             }
             return null;
         });
     }
+
+//    static void printLongerTrace(Throwable t){
+//        for(StackTraceElement e: t.getStackTrace())
+//            System.out.println(e);
+//    }
 }

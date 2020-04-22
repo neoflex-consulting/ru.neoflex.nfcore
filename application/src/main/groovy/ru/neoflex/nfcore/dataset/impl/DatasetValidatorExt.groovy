@@ -39,9 +39,9 @@ class DatasetValidatorExt extends DatasetValidator {
 
     @Override
     boolean validateJdbcDataset_IsValid(JdbcDataset jdbcDataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (jdbcDataset.query == null || jdbcDataset.query.length() == 0) {
-            return validate(jdbcDataset, diagnostics, context, "query - must be set")
-        }
+//        if (jdbcDataset.query == null || jdbcDataset.query.length() == 0) {
+//            return validate(jdbcDataset, diagnostics, context, "query - must be set")
+//        }
     }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {

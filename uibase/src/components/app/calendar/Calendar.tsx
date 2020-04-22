@@ -6,12 +6,13 @@ import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer} from "antd";
+import {Button, Drawer, Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
 import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
+import {add, getMonth} from "date-fns";
 
 interface State {
     currentMonth: Date;
@@ -23,6 +24,8 @@ interface State {
     legendMenuVisible: boolean;
     createMenuVisible: boolean;
     periodicity: EObject[];
+    years: Number[];
+    months: Number[];
 }
 
 interface Props {
@@ -40,15 +43,17 @@ class Calendar extends React.Component<any, State> {
             calendarLanguage: "",
             legendMenuVisible: false,
             createMenuVisible: false,
-            periodicity: []
+            periodicity: [],
+            years: [],
+            months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         };
     }
 
-    getAllNotificationInstances() {
-        const monthStart = dateFns.startOfMonth(this.state.currentMonth);
+    getAllNotificationInstances(currentMonth: Date) {
+        const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
-        const dateFrom = monthStart.toString()
-        const dateTo = monthEnd.toString()
+        const dateFrom = monthStart.toString();
+        const dateTo = monthEnd.toString();
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'getNotificationInstances';
         let resourceSet = Ecore.ResourceSet.create();
@@ -99,13 +104,39 @@ class Calendar extends React.Component<any, State> {
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'createNotification';
         return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
-            this.getAllNotificationInstances()
+            this.getAllNotificationInstances(this.state.currentMonth)
         })
     };
 
     updateAllStatuses = (notificationStatus: any[]) => {
         this.setState({notificationStatus})
     };
+
+    getYears() {
+        const currentYear = new Date().getFullYear();
+        let years = [];
+        for (let i = -10; i <= 10; i++) {
+            years.push(currentYear + i)
+        }
+        this.setState({years});
+    };
+
+    handleChange(e: any, type: string) {
+        let newDate = null;
+        if (type === 'year') {
+            newDate = add(this.state.currentMonth, {years: e - this.state.currentMonth.getFullYear()});
+            this.setState({currentMonth: newDate});
+        }
+        else if (type == 'today') {
+            newDate = new Date();
+            this.setState({currentMonth: newDate});
+        }
+        else {
+            newDate = add(this.state.currentMonth, {months: e - this.state.currentMonth.getMonth() - 1});
+            this.setState({currentMonth: newDate});
+        }
+        this.getAllNotificationInstances(newDate)
+    }
 
     getGlobalSettings() {
         API.instance().fetchAllClasses(false).then(classes => {
@@ -183,20 +214,54 @@ class Calendar extends React.Component<any, State> {
     }
 
     renderHeader() {
-        const {i18n} = this.props;
+        const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
+        const dateFormat_ = "LLLL";
         return (
             <div className="header row flex-middle">
 
-                <Button style={{marginLeft: '10px'}}>
-                    Сегодня
+                <Button style={{marginLeft: '10px'}}
+                        onClick={(e: any) => {this.handleChange(e, 'today')}}
+                >
+                    {t('today')}
                 </Button>
-                <Button style={{marginLeft: '10px'}}>
-                    2020
-                </Button>
-                <Button style={{marginLeft: '10px'}}>
-                    Апрель
-                </Button>
+
+                <Select
+                    value={this.state.currentMonth.getFullYear()}
+                    style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
+                    onChange={(e: any) => {this.handleChange(e, 'year')}}
+                >
+                    {
+                        this.state.years!.map((y: any) =>
+                            <Select.Option
+                                key={y}
+                                value={y}
+                            >
+                                {y}
+                            </Select.Option>
+                        )
+                    }
+                </Select>
+
+                <Select
+                    value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
+                    style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
+                    onChange={(e: any) => {this.handleChange(e, 'month')}}
+                >
+                    {
+                        this.state.months!.map((m: any) =>
+                            <Select.Option
+                                key={m}
+                                value={m}
+                            >
+                                {
+                                    dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
+                                    dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
+                                }
+                            </Select.Option>
+                        )
+                    }
+                </Select>
 
 
                 <div className="col col-start">
@@ -402,8 +467,9 @@ class Calendar extends React.Component<any, State> {
     componentDidMount(): void {
         this.getGlobalSettings();
         this.getAllStatuses();
-        this.getAllNotificationInstances();
-        this.getAllPeriodicity()
+        this.getAllNotificationInstances(this.state.currentMonth);
+        this.getAllPeriodicity();
+        this.getYears()
     }
 
     render() {

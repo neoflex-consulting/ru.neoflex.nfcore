@@ -48,17 +48,11 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
             DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
             DatasetComponentInit.createAllColumn("DatasetGridBar")
-        }
-        catch (Throwable e) {
-            logger.error("DatasetPackage", e)
-        }
 
+            /*NRDEMO*/
+            JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
+            JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nrdemo.neoflex.ru)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl.neoflex.ru))) ", "system", "Ne0f1ex")
 
-        /*NRDEMO*/
-        JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
-        JdbcConnectionInit.createConnection("JdbcConnectionNRDemo", "JdbcDriverNRDemo", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nrdemo.neoflex.ru)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl.neoflex.ru))) ", "system", "Ne0f1ex")
-
-        try {
             /*MAIN*/
             String query =
                     "select row_number,\n" +
@@ -134,6 +128,7 @@ class DatasetPackageInit {
             //TODO настраивать ширину столбцов в момент создания
             DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
             DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
+
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -182,12 +177,18 @@ class DatasetPackageInit {
 
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
+        try {
         ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
         ApplicationInit.createApplication("Администрирование")
         ApplicationInit.createApplicationLine("Линейная диаграмма")
         ApplicationInit.createApplicationPie("Круговая диаграмма")
         ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+        }
+        catch (Throwable e) {
+            logger.error("Application was not created", e)
+        }
+
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)

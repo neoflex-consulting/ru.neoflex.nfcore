@@ -19,5 +19,5 @@ class JdbcDriverInit {
         return rs.resources.get(0).contents.get(0) as JdbcDriver
     }
 
-    JdbcDriverInit() {}
+//    JdbcDriverInit() {}
 }
