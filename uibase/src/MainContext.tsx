@@ -4,7 +4,7 @@ import {TFunction} from "i18next";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 
-export interface ISubmitHandlers {
+export interface ISubmitHandler {
     name: string,
     handler: Function
 }
@@ -24,7 +24,8 @@ export interface IServerQueryParam {
 export interface IServerNamedParam {
     parameterName: String,
     parameterValue: String,
-    parameterDataType?: String
+    parameterDataType?: String,
+    parameterDateFormat?: String
 }
 
 export interface IMainContext {

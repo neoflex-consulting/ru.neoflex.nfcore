@@ -116,6 +116,7 @@ class QueryParameter {
     String parameterName
     String parameterValue
     String parameterDataType = "String"
+    String parameterDateFormat = "yyyy-MM-dd"
 }
 
 class QueryFilter {

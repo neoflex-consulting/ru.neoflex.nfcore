@@ -13,7 +13,8 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {ISubmitHandlers} from "./MainContext";
+import {ISubmitHandler} from "./MainContext";
+import DOMPurify from 'dompurify'
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -147,12 +148,12 @@ class Button_ extends ViewContainer {
         this.props.context.changeURL!(appModule.appModule, undefined, params);
     };
     submitItems = () => {
-        if (this.props.viewObject.get('itemsToTriggerSubmit')) {
+        if (this.props.viewObject.get('itemsToReceiveSubmit')) {
             let checkItems: String[] = [];
-            this.props.viewObject.get('itemsToTriggerSubmit').each((item: EObject) => {
+            this.props.viewObject.get('itemsToReceiveSubmit').each((item: EObject) => {
                 checkItems.push(item.get('name'))
             });
-            this.props.context.submitHandlers.forEach((obj:ISubmitHandlers)=>{
+            this.props.context.submitHandlers.forEach((obj:ISubmitHandler)=>{
                 if (checkItems.includes(obj.name)) {
                     obj.handler()
                 }
@@ -199,20 +200,25 @@ class Select_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
-    getSelectData() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === this.props.viewObject.get('ClassToShow')._id);
-            if (temp !== undefined) {
-                API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}, 999)
-                    .then((resources) => {
-                        this.setState({selectData: resources})
-                    })
-            }
-        })
-    };
+    componentDidMount(): void {
+        if (this.props.viewObject.get('staticValues')) {
+            this.getStaticValues()
+        }
+    }
+    getStaticValues() {
+        this.setState({
+            selectData:this.props.viewObject.get('staticValues')
+                .split("\\;")
+                .map((e:string)=>{
+                const keyValue = e.split("\\:");
+                return {
+                    key: keyValue[0],
+                    value: keyValue[1]
+                }
+            })})
+    }
     render = () => {
         if (this.state.selectData.length === 0) {
-            this.getSelectData();
             return (<div key={this.viewObject._id}></div>)
         }
         else {
@@ -232,10 +238,10 @@ class Select_ extends ViewContainer {
                         }}
                     >
                         {
-                            this.state.selectData.map((data: Ecore.Resource) =>
-                                <Select.Option key={data.get('uri')}
-                                               value={data.eContents()[0].get('name')}>
-                                    {data.eContents()[0].get('name')}
+                            this.state.selectData.map((data: {key:string,value:string}) =>
+                                <Select.Option key={data.key}
+                                               value={data.value}>
+                                    {data.key}
                                 </Select.Option>
                             )
                         }
@@ -262,6 +268,7 @@ class DatePicker_ extends ViewContainer {
 
     onChange = (currentValue: string) => {
         this.props.viewObject.set('value', currentValue);
+        this.props.viewObject.set('format', this.state.format);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
@@ -284,6 +291,21 @@ class DatePicker_ extends ViewContainer {
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
+            </div>
+        )
+    }
+}
+
+class HtmlContent_ extends ViewContainer {
+    state = {
+        htmlContent: this.props.viewObject.get('htmlContent')
+    };
+
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}
+                 className="content"
+                 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
         )
     }
@@ -477,6 +499,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
         this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
+        this.components.set('ru.neoflex.nfcore.application#//HtmlContent', HtmlContent_);
         this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);

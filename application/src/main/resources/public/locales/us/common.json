@@ -105,5 +105,7 @@
         "Day": "Day",
         "Month": "Month",
         "Quarter": "Quarter",
-        "Year": "Year"
+        "Year": "Year",
+
+        "submit": "Submit"
 }
