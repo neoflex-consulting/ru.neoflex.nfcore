@@ -24,12 +24,13 @@ class PlainType extends BaseType {
 }
 
 class Field {
+    container Structure structure opposite fields
     String name
     contains BaseType fieldType
 }
 
 class Structure extends BaseType {
-    contains Field[] fields
+    contains Field[] fields opposite structure
     op boolean isStructure() {true}
 }
 
@@ -76,19 +77,21 @@ class ReferenceType extends BaseType {
 }
 
 abstract class Feature {
+    container Entity entity opposite features
     String name
     boolean isTimeDependent
+    boolean isMany
     op boolean isAttribute() {false}
     op boolean isReference() {false}
 }
 
 class Attribute extends Feature {
-    contains BaseType baseType
+    contains ReferenceType attributeType
     op boolean isAttribute() {true}
 }
 
 class Reference extends Feature {
-    refers Entity entity
+    refers Entity referenceEntity
     op boolean isReference() {true}
 }
 
@@ -97,14 +100,20 @@ abstract class Index {
     refers Feature[] features
 }
 
+@Ecore(constraints="IsValid")
 class PrimaryKey extends Index {
+    container Entity entity opposite primaryKey
 }
 
+@Ecore(constraints="IsValid")
 class ForeignKey extends Index {
-    refers Entity entity
+    container Entity entity opposite foreignKeys
+    refers Entity foreignEntity
 }
 
+@Ecore(constraints="IsValid")
 abstract class InvertedEntry extends Index {
+    container Entity entity opposite invertedEntries
 }
 
 class PlainIndex extends InvertedEntry {
@@ -119,8 +128,8 @@ class SpatialIndex extends InvertedEntry {
 
 class Entity {
     QName name
-    contains Feature[] features
-    contains PrimaryKey primaryKey
-    contains InvertedEntry[] indexes
-    contains ForeignKey[] foreignKeys
+    contains Feature[] features opposite entity
+    contains PrimaryKey primaryKey opposite entity
+    contains InvertedEntry[] invertedEntries opposite entity
+    contains ForeignKey[] foreignKeys opposite entity
 }
