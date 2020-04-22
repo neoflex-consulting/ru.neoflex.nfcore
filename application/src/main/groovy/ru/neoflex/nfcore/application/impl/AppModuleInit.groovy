@@ -155,6 +155,22 @@ class AppModuleInit {
             def row2 = ApplicationFactory.eINSTANCE.createRow()
             row2.name = "row2"
 
+            def col21 = ApplicationFactory.eINSTANCE.createColumn()
+            col21.name = "col21"
+            col21.span = 2
+
+            def col22 = ApplicationFactory.eINSTANCE.createColumn()
+            col22.name = "col22"
+            col22.span = 2
+
+            def typography22 = ApplicationFactory.eINSTANCE.createTypography()
+            typography22.name = "Отчётная дата (на)"
+            col22.children.add(typography22)
+
+            def col23 = ApplicationFactory.eINSTANCE.createColumn()
+            col23.name = "col23"
+            col23.span = 2
+
             def datePicker = ApplicationFactory.eINSTANCE.createDatePicker()
             datePicker.name = 'REPORT_DATE'
             datePicker.allowClear = false
@@ -162,24 +178,61 @@ class AppModuleInit {
             datePicker.format = "YYYY-MM-DD"
             datePicker.width = 200
 
-            row2.children.add(datePicker)
+            col23.children.add(datePicker)
+
+            row2.children.add(col21)
+            row2.children.add(col22)
+            row2.children.add(col23)
 
             def row3 = ApplicationFactory.eINSTANCE.createRow()
             row3.name = "row3"
+
+            def col31 = ApplicationFactory.eINSTANCE.createColumn()
+            col31.name = "col31"
+            col31.span = 2
+
+            def col32 = ApplicationFactory.eINSTANCE.createColumn()
+            col32.name = "col32"
+            col32.span = 2
+
+            def typography32 = ApplicationFactory.eINSTANCE.createTypography()
+            typography32.name = "Точность"
+            col32.children.add(typography32)
+
+            def col33 = ApplicationFactory.eINSTANCE.createColumn()
+            col33.name = "col33"
+            col33.span = 2
 
             def datasetSelect = ApplicationFactory.eINSTANCE.createSelect()
             datasetSelect.name = 'REPORT_PRECISION' //Название совпадает с тем что мы передаем в качестве параметра в запрос
             datasetSelect.value = 1000 //Пока только по default значению
             datasetSelect.staticValues = "Округленная\\:1000\\;Точная\\:1"
 
-            row3.children.add(datasetSelect)
+            col33.children.add(datasetSelect)
+
+            row3.children.add(col31)
+            row3.children.add(col32)
+            row3.children.add(col33)
 
             def row4 = ApplicationFactory.eINSTANCE.createRow()
             row4.name = "row4"
 
+            def col41 = ApplicationFactory.eINSTANCE.createColumn()
+            col41.name = "col41"
+            col41.span = 2
+
+            def col42 = ApplicationFactory.eINSTANCE.createColumn()
+            col42.name = "col42"
+            col42.span = 2
+
             def button = ApplicationFactory.eINSTANCE.createButton()
             button.name = "InputButton"
             button.buttonSubmit = true
+
+            col42.children.add(button)
+
+            row4.children.add(col41)
+            row4.children.add(col42)
 
             def row5 = ApplicationFactory.eINSTANCE.createRow()
             row5.name = "row5"
@@ -203,7 +256,6 @@ class AppModuleInit {
             datasetView.itemsToSubmit.add(datePicker)
 
             button.itemsToReceiveSubmit.add(datasetView)
-            row4.children.add(button)
 
             row6.children.add(datasetView)
 
