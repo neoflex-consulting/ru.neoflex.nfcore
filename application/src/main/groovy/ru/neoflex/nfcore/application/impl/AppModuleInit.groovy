@@ -252,10 +252,10 @@ class AppModuleInit {
             datasetView.setDataset(jdbcDataset)
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
-            datasetView.itemsToSubmit.add(datasetSelect)
-            datasetView.itemsToSubmit.add(datePicker)
+            datasetView.valueItems.add(datasetSelect)
+            datasetView.valueItems.add(datePicker)
 
-            button.itemsToReceiveSubmit.add(datasetView)
+            button.submitItems.add(datasetView)
 
             row6.children.add(datasetView)
 

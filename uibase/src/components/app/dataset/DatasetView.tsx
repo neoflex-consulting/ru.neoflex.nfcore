@@ -694,6 +694,10 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <FontAwesomeIcon icon={faCalculator} size='xs'/>
                 </Button>
+
+
+
+
                 <Drawer
                     placement='right'
                     title={t('filters')}

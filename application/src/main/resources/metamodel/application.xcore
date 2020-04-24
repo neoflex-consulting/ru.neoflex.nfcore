@@ -252,7 +252,7 @@ class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
     boolean buttonSubmit
-    refers CommandElement[] itemsToReceiveSubmit
+    refers CommandElement[] submitItems
     boolean backStartPage
     String span = "0"
 }
