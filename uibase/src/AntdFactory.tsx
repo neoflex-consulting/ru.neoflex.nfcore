@@ -148,9 +148,9 @@ class Button_ extends ViewContainer {
         this.props.context.changeURL!(appModule.appModule, undefined, params);
     };
     submitItems = () => {
-        if (this.props.viewObject.get('itemsToReceiveSubmit')) {
+        if (this.props.viewObject.get('submitItems')) {
             let checkItems: String[] = [];
-            this.props.viewObject.get('itemsToReceiveSubmit').each((item: EObject) => {
+            this.props.viewObject.get('submitItems').each((item: EObject) => {
                 checkItems.push(item.get('name'))
             });
             this.props.context.submitHandlers.forEach((obj:ISubmitHandler)=>{

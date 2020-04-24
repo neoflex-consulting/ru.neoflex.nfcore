@@ -389,8 +389,8 @@ class DatasetView extends React.Component<any, State> {
 
     getQueryNamedParams = () => {
         let namedParams: IServerNamedParam[] = [];
-        if (this.props.viewObject.get('itemsToSubmit')) {
-            this.props.viewObject.get('itemsToSubmit').each((item: EObject) => {
+        if (this.props.viewObject.get('valueItems')) {
+            this.props.viewObject.get('valueItems').each((item: EObject) => {
                 if (item.eClass._id === "//Select") {
                     namedParams.push({
                         parameterName: item.get('name'),
@@ -694,7 +694,6 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <FontAwesomeIcon icon={faCalculator} size='xs'/>
                 </Button>
-
 
 
 
