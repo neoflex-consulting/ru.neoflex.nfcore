@@ -115,17 +115,17 @@ class Form extends ViewContainer {
 class FormItem extends ViewContainer {
 }
 
-interface SubmittableItems extends ViewElement{
+abstract class SubmittableItem {
     String value
 }
 
-interface SubmitReceiver extends ViewElement{
+abstract class SubmitReceiver {
 }
 
-class DatasetView extends SubmitReceiver {
+class DatasetView extends ViewElement, SubmitReceiver {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    refers SubmittableItems[] itemsToSubmit
+    refers SubmittableItem[] itemsToSubmit
 }
 
 abstract class DataView extends ViewElement {
@@ -216,7 +216,7 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends SubmittableItems {
+class Select extends ViewElement, SubmittableItem {
     boolean disabled
     boolean showSearch
     String placeholder
@@ -225,7 +225,7 @@ class Select extends SubmittableItems {
     String staticValues
 }
 
-class DatePicker extends SubmittableItems {
+class DatePicker extends ViewElement, SubmittableItem {
     boolean disabled
     boolean allowClear
     String width = "200"
