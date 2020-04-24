@@ -98,36 +98,49 @@ class Reference extends Feature {
 abstract class Index {
     String name
     refers Feature[] features
+    op boolean isPrimaryKey() {false}
 }
 
 @Ecore(constraints="IsValid")
 class PrimaryKey extends Index {
     container Entity entity opposite primaryKey
+    op boolean isPrimaryKey() {true}
+    op boolean isForeignKey() {false}
+    op boolean isInvertedEntry() {false}
+    op boolean isPlainIndex() {false}
+    op boolean isFulltextIndex() {false}
+    op boolean isSpatialIndex() {false}
 }
 
 @Ecore(constraints="IsValid")
 class ForeignKey extends Index {
     container Entity entity opposite foreignKeys
     refers Entity foreignEntity
+    op boolean isForeignKey() {true}
 }
 
 @Ecore(constraints="IsValid")
 abstract class InvertedEntry extends Index {
     container Entity entity opposite invertedEntries
+    op boolean isInvertedEntry() {true}
 }
 
 class PlainIndex extends InvertedEntry {
     boolean isUnique
+    op boolean isPlainIndex() {true}
 }
 
 class FulltextIndex extends InvertedEntry {
+    op boolean isFulltextIndex() {true}
 }
 
 class SpatialIndex extends InvertedEntry {
+    op boolean isSpatialIndex() {true}
 }
 
 class Entity {
     QName name
+    refers Entity[] superTypes
     contains Feature[] features opposite entity
     contains PrimaryKey primaryKey opposite entity
     contains InvertedEntry[] invertedEntries opposite entity

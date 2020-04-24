@@ -3,15 +3,20 @@ package ru.neoflex.nfcore.base.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.util.GroovyScriptEngine;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.eclipse.emf.ecore.EClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.neoflex.meta.emfgit.Transaction;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class Groovy {
@@ -48,6 +53,38 @@ public class Groovy {
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
         Object result =  sh.evaluate(code);
         return result;
+    }
+
+    public Object eval(String code, Map<String, Object> args) throws Exception {
+        Binding b = new Binding();
+        if (args != null) {
+            for (String name: args.keySet()) {
+                b.setVariable(name, args.get(name));
+            }
+        }
+        GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        Object result =  sh.evaluate(code);
+        return result;
+    }
+
+    public Object evalScript(String scriptName, List<String> args) throws Exception {
+        URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
+        GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        return groovyScriptEngine.run(scriptName, new Binding(args.toArray(new String[0])));
+    }
+
+    public Object evalStatic(String fullClassName, String method, List args) throws Exception {
+        URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
+        GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        Class scriptClass = groovyScriptEngine.loadScriptByName(fullClassName.replace(".", "/") + ".groovy");
+        return InvokerHelper.invokeMethod(scriptClass, method, args.toArray());
+    }
+
+    public Object evalMethod(String fullClassName, String method, List args) throws Exception {
+        URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
+        GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        Class scriptClass = groovyScriptEngine.loadScriptByName(fullClassName.replace(".", "/") + ".groovy");
+        return InvokerHelper.invokeMethod(scriptClass.newInstance(), method, args.toArray());
     }
 
     public Object callStatic(String fullClassName, String method, JsonNode args) throws Exception {

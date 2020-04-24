@@ -27,7 +27,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
     private String home;
-    OServer server;
+    private OServer oServer;
     private OServerConfiguration configuration;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
@@ -37,16 +37,16 @@ public class Server extends SessionFactory implements Closeable {
         System.setProperty("ridBag.embeddedToSbtreeBonsaiThreshold", String.valueOf(Integer.MAX_VALUE));
 
         String dbPath = new File(home, "databases").getAbsolutePath();
-        this.server = OServerMain.create(false);
+        this.oServer = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
     }
 
     public Server open() throws InvocationTargetException, NoSuchMethodException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        server.startup(configuration);
-        server.activate();
+        getOServer().startup(configuration);
+        getOServer().activate();
         registerWwwAsStudio();
-        if (!server.existsDatabase(getDbName())) {
-            server.createDatabase(getDbName(), ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        if (!getOServer().existsDatabase(getDbName())) {
+            getOServer().createDatabase(getDbName(), ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
         }
         createSchema();
         return this;
@@ -70,7 +70,7 @@ public class Server extends SessionFactory implements Closeable {
                 return null;
             }
         };
-        final OServerNetworkListener httpListener = server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
+        final OServerNetworkListener httpListener = getOServer().getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
         if (httpListener != null) {
             final OServerCommandGetStaticContent command = (OServerCommandGetStaticContent) httpListener
                     .getCommand(OServerCommandGetStaticContent.class);
@@ -130,12 +130,12 @@ public class Server extends SessionFactory implements Closeable {
 
     @Override
     public void close() {
-        server.shutdown();
+        getOServer().shutdown();
     }
 
     @Override
     public ODatabaseDocument createDatabaseDocument() {
-        return server.openDatabase(getDbName());
+        return getOServer().openDatabase(getDbName());
     }
 
     public OServerConfiguration getConfiguration() {
@@ -156,7 +156,7 @@ public class Server extends SessionFactory implements Closeable {
 
     public void exportDatabase(OutputStream os) throws IOException {
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
-            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
+            try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
                 ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{
                     System.out.print(iText);
                 });
@@ -178,7 +178,7 @@ public class Server extends SessionFactory implements Closeable {
 
     public void importDatabase(InputStream is, boolean merge) throws IOException {
         try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
-            try (ODatabaseDocumentInternal db = server.openDatabase(getDbName())) {
+            try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
                 ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{
                     System.out.print(iText);
                 });
@@ -208,7 +208,7 @@ public class Server extends SessionFactory implements Closeable {
         String dbName = System.getProperty("orientdb.dbname", "models");
         try {
             try (Server orientdb = new Server(home, dbName, new ArrayList<>()).open()) {
-                orientdb.server.waitForShutdown();
+                orientdb.getOServer().waitForShutdown();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -217,5 +217,9 @@ public class Server extends SessionFactory implements Closeable {
 
     public String getHome() {
         return home;
+    }
+
+    public OServer getOServer() {
+        return oServer;
     }
 }

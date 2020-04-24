@@ -66,6 +66,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         })
     }
 
+    static add(a, b) {
+        a+b
+    }
     @Override
     String deleteAllColumns() {
         return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
