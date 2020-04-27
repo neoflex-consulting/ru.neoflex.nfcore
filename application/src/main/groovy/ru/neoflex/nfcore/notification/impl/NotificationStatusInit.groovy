@@ -7,7 +7,6 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.notification.NotificationFactory
 import ru.neoflex.nfcore.notification.NotificationPackage
-import ru.neoflex.nfcore.notification.Periodicity
 
 class NotificationStatusInit {
     static def findOrCreateEObject(EClass eClass, String name, boolean replace = false) {

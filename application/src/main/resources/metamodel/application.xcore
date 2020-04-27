@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.notification.Notification
+import ru.neoflex.nfcore.notification.NotificationStatus
 
 /* Components */
 abstract class Component {
@@ -67,6 +68,7 @@ class Calendar extends ViewElement {
     refers Notification[] notifications
     refers YearBook yearBook
     String defaultTitle
+    refers NotificationStatus defaultStatus
     op JSON getNotificationInstances(String dateFrom, String dateTo)
     op JSON createNotification(JSON newNotification)
 }

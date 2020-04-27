@@ -18,7 +18,7 @@ interface State {
     spinnerVisible: boolean;
 }
 
-class CreateNotification extends React.Component<Props & WithTranslation & any, State> {
+class EditNotification extends React.Component<Props & WithTranslation & any, State> {
 
     state = {
         newNotification: {
@@ -237,4 +237,4 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
     }
 }
 
-export default withTranslation()(CreateNotification)
+export default withTranslation()(EditNotification)

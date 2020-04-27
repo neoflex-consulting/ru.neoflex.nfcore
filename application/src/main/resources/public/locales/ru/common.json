@@ -48,6 +48,7 @@
         "showrows": "Показать строки",
         "sorting": "Сортировка",
         "sorts": "Параметры сортировки",
+        "submit": "Выполнить",
         "today": "Сегодня",
         "theme": "Тема",
         "true": "истина",
@@ -102,12 +103,15 @@
         "weekendReporting": "Отчетность по выходным",
         "defaultStatus": "Статус по-умолчанию",
 
-        "Day": "День",
-        "Month": "Месяц",
+        "Day": "Дневная",
+        "Month": "Месячная",
         "Quarter": "Квартал",
-        "Year": "Год",
+        "Year": "Годовая",
 
-        "submit": "Выполнить"
+        "PerDay": "За день",
+        "PerMonth": "За месяц",
+        "ForTheQuarter": "За квартал",
+        "FromTheBeginningOfTheYear": "От начала года"
 }
 
 
