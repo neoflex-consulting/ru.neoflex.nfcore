@@ -6,6 +6,9 @@ import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OProperty;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.server.OServer;
@@ -49,8 +52,86 @@ public class MasterdataProvider {
         }
         context.transact("Init Master Data Service", () -> {
             initTypes();
+            activateEntities();
             return null;
         });
+    }
+
+    private void activateEntities() throws IOException {
+        List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY)
+                .execute().getResources();
+        for (Resource r: resList) {
+            Entity entity = (Entity) r.getContents().get(0);
+            if (entity.isActive()) {
+                activateEntity(entity);
+            }
+        }
+    }
+
+    public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
+        if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
+            oClass.addSuperClass(oSuperClass);
+        }
+    }
+
+    private OType convertPlainType(PlainType plainType) throws ClassNotFoundException {
+        Class<?> iClass = Class.forName(plainType.getJavaClassName());
+        OType oType = OType.getTypeByClass(iClass);
+        return oType != null ? oType : OType.STRING;
+    }
+
+    private Entity activateEntity(Entity entity) throws IOException {
+        if (entity.isActive()) {
+            throw new IllegalArgumentException(String.format("Entity %s already active", entity.getName()));
+        }
+        for (Entity superType: entity.getSuperTypes()) {
+            if (!superType.isActive()) {
+                throw new IllegalArgumentException(String.format("Supertype Entity %s is not active", superType.getName()));
+            }
+        }
+        withDatabase(database -> {
+            OClass oClass = database.getClass(entity.getName());
+            if (oClass == null) {
+                if (entity.getSuperTypes().size() == 0) {
+                    oClass = database.createVertexClass(entity.getName());
+                }
+                else {
+                    oClass = database.createClass(entity.getName());
+                }
+                if (entity.isAbstract()) {
+                    oClass.setAbstract(true);
+                }
+            }
+            for (Entity superType: entity.getSuperTypes()) {
+                OClass superClass = database.getClass(superType.getName());
+                if (superClass == null) {
+                    throw new IllegalArgumentException(String.format("Supertype OClass %s does not exists", superType.getName()));
+                }
+                ensureSuperClass(oClass, superClass);
+            }
+            for (Feature feature: entity.getFeatures()) {
+                OProperty oProperty = oClass.getProperty(feature.getName());
+                if (oProperty == null) {
+                    if (feature.isAttribute()) {
+                        Attribute attribute = (Attribute) feature;
+                        if (attribute.getAttributeType().getBaseType().isPlain()) {
+                            PlainType plainType = (PlainType) attribute.getAttributeType().getBaseType();
+                            OType oType = convertPlainType(plainType);
+                            if (attribute.isMany()) {
+                                oClass.createProperty(attribute.getName(), OType.EMBEDDEDLIST, oType);
+                            }
+                            else {
+                                oClass.createProperty(attribute.getName(), oType);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+        entity.setActive(true);
+        store.saveResource(entity.eResource());
+        return entity;
     }
 
     public ODatabaseDocument createDatabaseDocument() {
@@ -58,7 +139,7 @@ public class MasterdataProvider {
     }
 
     public interface DatabaseFunction<R> {
-        R call(ODatabaseDocument database);
+        R call(ODatabaseDocument database) throws ClassNotFoundException;
     }
 
     public<R> R withDatabase(DatabaseFunction<R> f) {
@@ -66,6 +147,8 @@ public class MasterdataProvider {
         try {
             try (ODatabaseDocument database = createDatabaseDocument()) {
                 return f.call(database);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
         }
         finally {
