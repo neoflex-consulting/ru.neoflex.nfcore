@@ -14,7 +14,6 @@ abstract class BaseType {
     op boolean isArray() {false}
     op boolean isMap() {false}
     op boolean isShape() {false}
-    op boolean isReferenceType() {false}
     op BaseType actualType() {this}
 }
 
@@ -24,12 +23,13 @@ class PlainType extends BaseType {
 }
 
 class Field {
+    container Structure structure opposite fields
     String name
     contains BaseType fieldType
 }
 
 class Structure extends BaseType {
-    contains Field[] fields
+    contains Field[] fields opposite structure
     op boolean isStructure() {true}
 }
 
@@ -62,65 +62,81 @@ class Shape extends BaseType {
 class NamedType extends BaseType {
     QName name
     contains BaseType baseType
-}
-
-class ReferenceType extends BaseType {
-    refers NamedType namedType
-    op boolean isPlain() {namedType.isPlain()}
-    op boolean isStructure() {namedType.isStructure()}
-    op boolean isArray() {namedType.isArray()}
-    op boolean isMap() {namedType.isMap()}
-    op boolean isShape() {namedType.isShape()}
-    op boolean isReferenceType() {true}
-    op BaseType actualType() {namedType}
+    op boolean isPlain() {baseType.isPlain()}
+    op boolean isStructure() {baseType.isStructure()}
+    op boolean isArray() {baseType.isArray()}
+    op boolean isMap() {baseType.isMap()}
+    op boolean isShape() {baseType.isShape()}
+    op BaseType actualType() {baseType}
 }
 
 abstract class Feature {
+    container Entity entity opposite features
     String name
     boolean isTimeDependent
+    boolean isMany
     op boolean isAttribute() {false}
     op boolean isReference() {false}
 }
 
 class Attribute extends Feature {
-    contains BaseType baseType
+    refers NamedType attributeType
     op boolean isAttribute() {true}
 }
 
 class Reference extends Feature {
-    refers Entity entity
+    refers Entity referenceEntity
     op boolean isReference() {true}
 }
 
 abstract class Index {
     String name
     refers Feature[] features
+    op boolean isPrimaryKey() {false}
 }
 
+@Ecore(constraints="IsValid")
 class PrimaryKey extends Index {
+    container Entity entity opposite primaryKey
+    op boolean isPrimaryKey() {true}
+    op boolean isForeignKey() {false}
+    op boolean isInvertedEntry() {false}
+    op boolean isPlainIndex() {false}
+    op boolean isFulltextIndex() {false}
+    op boolean isSpatialIndex() {false}
 }
 
+@Ecore(constraints="IsValid")
 class ForeignKey extends Index {
-    refers Entity entity
+    container Entity entity opposite foreignKeys
+    refers Entity foreignEntity
+    op boolean isForeignKey() {true}
 }
 
+@Ecore(constraints="IsValid")
 abstract class InvertedEntry extends Index {
+    container Entity entity opposite invertedEntries
+    op boolean isInvertedEntry() {true}
 }
 
 class PlainIndex extends InvertedEntry {
     boolean isUnique
+    op boolean isPlainIndex() {true}
 }
 
 class FulltextIndex extends InvertedEntry {
+    op boolean isFulltextIndex() {true}
 }
 
 class SpatialIndex extends InvertedEntry {
+    op boolean isSpatialIndex() {true}
 }
 
 class Entity {
     QName name
-    contains Feature[] features
-    contains PrimaryKey primaryKey
-    contains InvertedEntry[] indexes
-    contains ForeignKey[] foreignKeys
+    refers Entity[] superTypes
+    contains Feature[] features opposite entity
+    contains PrimaryKey primaryKey opposite entity
+    contains InvertedEntry[] invertedEntries opposite entity
+    contains ForeignKey[] foreignKeys opposite entity
 }

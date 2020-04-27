@@ -48,6 +48,7 @@
         "showrows": "Show Rows",
         "sorting": "Sorting",
         "sorts": "Sorts",
+        "submit": "Submit",
         "today": "Today",
         "theme": "Theme",
         "true": "true",
@@ -102,10 +103,13 @@
         "weekendReporting": "Weekend Reporting",
         "defaultStatus": "Default Status",
 
-        "Day": "Day",
-        "Month": "Month",
-        "Quarter": "Quarter",
-        "Year": "Year",
+        "Day": "Daily",
+        "Month": "Monthly",
+        "Quarter": "Quarterly",
+        "Year": "Annual",
 
-        "submit": "Submit"
+        "PerDay": "Per Day",
+        "PerMonth": "Per Month",
+        "ForTheQuarter": "for the quarter",
+        "FromTheBeginningOfTheYear": "From the beginning of the year"
 }

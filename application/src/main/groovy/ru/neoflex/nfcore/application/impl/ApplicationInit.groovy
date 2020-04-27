@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.notification.NotificationPackage
+import ru.neoflex.nfcore.notification.NotificationStatus
 
 class ApplicationInit {
     static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false) {
@@ -120,6 +121,9 @@ class ApplicationInit {
                 def workDaysYearBook = globalSettings.getWorkingDaysCalendar()
 
                 calendar.setYearBook(workDaysYearBook)
+
+                def defaultStatus = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION_STATUS, 'Личная заметка', "",false) as NotificationStatus
+                calendar.setDefaultStatus(defaultStatus)
 
                 column.children.add(typography)
                 row1.children.add(row2)

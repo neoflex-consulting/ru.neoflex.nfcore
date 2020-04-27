@@ -6,32 +6,30 @@ import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer, Select} from "antd";
+import {Button, Drawer, Icon, Input, Select, Switch} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
 import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add, getMonth} from "date-fns";
+import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
+import {AllCommunityModules} from "@ag-grid-community/all-modules";
+import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-interface State {
-    currentMonth: Date;
-    selectedDate: Date;
-    notificationStatus: Object[];
-    notificationInstancesDTO: Object[];
-    globalSettings?: EObject;
-    calendarLanguage: string;
-    legendMenuVisible: boolean;
-    createMenuVisible: boolean;
-    periodicity: EObject[];
-    years: Number[];
-    months: Number[];
-}
+import legend from '../../../legend.svg';
+import searchIcon from '../../../searchIcon.svg';
+import printIcon from '../../../printIcon.svg';
+import trashcanIcon from '../../../trashcanIcon.svg';
+import settingsIcon from '../../../settingsIcon.svg';
+import EditNotification from "./EditNotification";
 
 interface Props {
 }
 
-class Calendar extends React.Component<any, State> {
+class Calendar extends React.Component<any, any> {
+
+    private grid: React.RefObject<any>;
 
     constructor(props: any) {
         super(props);
@@ -43,11 +41,66 @@ class Calendar extends React.Component<any, State> {
             calendarLanguage: "",
             legendMenuVisible: false,
             createMenuVisible: false,
+            editMenuVisible: false,
             periodicity: [],
             years: [],
-            months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            calendarVisible: true,
+            gridOptions: {
+                defaultColDef: {
+                    resizable: true,
+                    filter: true,
+                    sortable: true
+                }
+            },
+            columnDefs: [],
+            rowData: [],
+            spinnerVisible: false,
+            selectedValueInGrid: 'Системные заметки',
+            frameworkComponents: {
+                'actionMenu': this.actionMenu
+            }
         };
+        this.grid = React.createRef();
+        this.handleEditMenu = this.handleEditMenu.bind(this)
     }
+
+    actionMenu = () => (
+        <div style={{marginLeft: '-32px'}}>
+            <Button
+                type="link"
+                style={{width: '35px'}}
+                onClick={this.handleEditMenu}
+            >
+                <img
+                    alt="Not found"
+                    src={settingsIcon}
+                    style={{
+                        color: '#515151'
+                    }}
+                />
+            </Button>
+            <Button
+                type="link"
+                style={{width: '35px',}}
+            >
+                <img
+                    alt="Not found"
+                    src={trashcanIcon}
+                    style={{
+                        color: '#515151'
+                    }}
+                />
+            </Button>
+        </div>
+    );
+
+    onGridReady = (params: any) => {
+        if (this.grid.current !== null) {
+            this.grid.current.api = params.api;
+            this.grid.current.columnApi = params.columnApi;
+        }
+    };
 
     getAllNotificationInstances(currentMonth: Date) {
         const monthStart = dateFns.startOfMonth(currentMonth);
@@ -59,7 +112,7 @@ class Calendar extends React.Component<any, State> {
         let resourceSet = Ecore.ResourceSet.create();
         return API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
             let notificationInstancesDTO = JSON.parse(result).resources;
-            this.setState({notificationInstancesDTO});
+            this.setState({notificationInstancesDTO, spinnerVisible: false});
         })
     };
 
@@ -101,10 +154,11 @@ class Calendar extends React.Component<any, State> {
     };
 
     createNotification = (newNotification: any) => {
+        this.setState({spinnerVisible: true});
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'createNotification';
         return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
-            this.getAllNotificationInstances(this.state.currentMonth)
+            this.getAllNotificationInstances(this.state.currentMonth);
         })
     };
 
@@ -126,16 +180,24 @@ class Calendar extends React.Component<any, State> {
         if (type === 'year') {
             newDate = add(this.state.currentMonth, {years: e - this.state.currentMonth.getFullYear()});
             this.setState({currentMonth: newDate});
+            this.getAllNotificationInstances(newDate)
         }
         else if (type == 'today') {
             newDate = new Date();
             this.setState({currentMonth: newDate});
+            this.getAllNotificationInstances(newDate)
         }
-        else {
+        else if (type === 'month') {
             newDate = add(this.state.currentMonth, {months: e - this.state.currentMonth.getMonth() - 1});
             this.setState({currentMonth: newDate});
+            this.getAllNotificationInstances(newDate)
         }
-        this.getAllNotificationInstances(newDate)
+        else if (type === 'select') {
+            this.setState({selectedValueInGrid: e});
+            e === this.props.viewObject.get('defaultStatus').get('name') ?
+                this.setGridData(true) : this.setGridData(false)
+
+        }
     }
 
     getGlobalSettings() {
@@ -162,6 +224,12 @@ class Calendar extends React.Component<any, State> {
             : this.setState({ createMenuVisible: true});
     };
 
+    handleEditMenu = () => {
+        this.state.editMenuVisible ? this.setState({ editMenuVisible: false})
+            : this.setState({ editMenuVisible: true});
+
+    };
+
     handleLegendMenu = () => {
         this.state.legendMenuVisible ? this.setState({ legendMenuVisible: false})
             : this.setState({ legendMenuVisible: true});
@@ -184,6 +252,31 @@ class Calendar extends React.Component<any, State> {
                         {...this.props}
                         onCreateNotificationStatus={this.createNotification}
                         periodicity={this.state.periodicity}
+                        spinnerVisible={this.state.spinnerVisible}
+                    />
+                }
+            </Drawer>
+        );
+    }
+
+    renderEditNotification() {
+        const {i18n, t} = this.props;
+        return (
+            <Drawer
+                placement='right'
+                title={t('editNotification')}
+                width={'450px'}
+                visible={this.state.editMenuVisible}
+                onClose={this.handleEditMenu}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    <EditNotification
+                        {...this.props}
+                        onCreateNotificationStatus={this.createNotification}
+                        periodicity={this.state.periodicity}
+                        spinnerVisible={this.state.spinnerVisible}
                     />
                 }
             </Drawer>
@@ -213,6 +306,57 @@ class Calendar extends React.Component<any, State> {
         );
     }
 
+    handleCalendarVisible = () => {
+        this.state.calendarVisible ? this.setState({ calendarVisible: false})
+            : this.setState({ calendarVisible: true});
+    };
+
+    renderGrid() {
+        const { t } = this.props;
+        const {gridOptions} = this.state;
+        return (
+            <div
+                style={{
+                    marginTop: '30px',
+                    width: '98%'
+                }}
+                className={'ag-theme-material'}
+            >
+                {this.state.columnDefs.length !== 0 && <AgGridReact
+                    ref={this.grid}
+                    rowData={this.state.rowData}
+                    modules={AllCommunityModules}
+                    onGridReady={this.onGridReady}
+                    suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
+                    suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
+                    allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
+                    headerHeight={40} //высота header в px (25 по умолчанию)
+                    suppressRowClickSelection //строки не выделяются при нажатии на них
+                    pagination={true}
+                    domLayout='autoHeight'
+                    paginationPageSize={10}
+                    frameworkComponents={this.state.frameworkComponents}
+                    {...gridOptions}
+                >
+                    {this.state.columnDefs.map((col: any) =>
+                        <AgGridColumn
+                            key={col['field']}
+                            field={col['field']}
+                            headerName={col['field']}
+                        />
+                    )}
+                    <AgGridColumn
+                        key={'settings'}
+                        cellRenderer='actionMenu'
+                        width={85}
+                        suppressMenu={true}
+                    />
+                </AgGridReact>
+                }
+            </div>
+        )
+    }
+
     renderHeader() {
         const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
@@ -220,94 +364,178 @@ class Calendar extends React.Component<any, State> {
         return (
             <div className="header row flex-middle">
 
-                <Button style={{marginLeft: '10px'}}
-                        onClick={(e: any) => {this.handleChange(e, 'today')}}
-                >
-                    {t('today')}
-                </Button>
 
-                <Select
-                    value={this.state.currentMonth.getFullYear()}
-                    style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
-                    onChange={(e: any) => {this.handleChange(e, 'year')}}
-                >
-                    {
-                        this.state.years!.map((y: any) =>
-                            <Select.Option
-                                key={y}
-                                value={y}
-                            >
-                                {y}
-                            </Select.Option>
-                        )
-                    }
-                </Select>
+                {
+                    this.state.calendarVisible &&
+                    <div
+                        style={{display: "contents"}}
+                    >
+                        <Button style={{marginLeft: '10px'}}
+                                onClick={(e: any) => {this.handleChange(e, 'today')}}
+                        >
+                            {t('today')}
+                        </Button>
 
-                <Select
-                    value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
-                    style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
-                    onChange={(e: any) => {this.handleChange(e, 'month')}}
-                >
-                    {
-                        this.state.months!.map((m: any) =>
-                            <Select.Option
-                                key={m}
-                                value={m}
-                            >
-                                {
-                                    dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
-                                    dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
-                                }
-                            </Select.Option>
-                        )
-                    }
-                </Select>
+                        <Select
+                            value={this.state.currentMonth.getFullYear()}
+                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
+                            onChange={(e: any) => {this.handleChange(e, 'year')}}
+                        >
+                            {
+                                this.state.years!.map((y: any) =>
+                                    <Select.Option
+                                        key={y}
+                                        value={y}
+                                    >
+                                        {y}
+                                    </Select.Option>
+                                )
+                            }
+                        </Select>
 
+                        <Select
+                            value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
+                            style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
+                            onChange={(e: any) => {this.handleChange(e, 'month')}}
+                        >
+                            {
+                                this.state.months!.map((m: any) =>
+                                    <Select.Option
+                                        key={m}
+                                        value={m}
+                                    >
+                                        {
+                                            dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
+                                            dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
+                                        }
+                                    </Select.Option>
+                                )
+                            }
+                        </Select>
 
-                <div className="col col-start">
-                    <div className="icon" onClick={this.prevMonth}>
-                        chevron_left
-                    </div>
-                </div>
-                <div className="col col-center">
+                        <div className="col col-start">
+                            <div className="icon" onClick={this.prevMonth}>
+                                chevron_left
+                            </div>
+                        </div>
+                        <div className="col col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
                         {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
                     </span>
-                </div>
-                <div className="col col-end" onClick={this.nextMonth}>
-                    <div className="icon">chevron_right</div>
-                </div>
+                        </div>
+                        <div className="col col-end" onClick={this.nextMonth}>
+                            <div className="icon">chevron_right</div>
+                        </div>
 
-                <Button type="primary" style={{width: '20px', height: '30px', marginTop: '2px'}}
-                        onClick={this.handleCreateMenu}>
+                        <Button style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
+                                onClick={this.handleLegendMenu}>
+                            <img alt="Not found" src={legend} style={{marginLeft: '-9px', marginTop: '4px'}}/>
+                        </Button>
+                    </div>
+                }
+
+                {
+                    !this.state.calendarVisible &&
+                    <div
+                        style={{display: "contents", marginTop: '2px'}}
+                    >
+                        <div style={{flexGrow: 1, marginLeft: '21px'}}>
+                            <Input
+                                style={{width: '186px', borderRadius: '4px', fill: '#ffffff', strokeWidth: 1, height: '32px'}}
+                                placeholder="Поиск"
+                                suffix={<img alt="Not found" src={searchIcon}/>}
+                            />
+                        </div>
+
+                        <Select
+                            value={this.state.selectedValueInGrid}
+                            style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '1px'}}
+                            onChange={(e: any) => {this.handleChange(e, 'select')}}
+                        >
+                            <Select.Option
+                                key={this.props.viewObject.get('defaultStatus').get('name')}
+                                value={this.props.viewObject.get('defaultStatus').get('name')}
+                            >
+                                {this.props.viewObject.get('defaultStatus').get('name')}
+                            </Select.Option>
+
+                            <Select.Option
+                                key={'Системные заметки'}
+                                value={'Системные заметки'}
+                            >
+                                Системные заметки
+                            </Select.Option>
+                        </Select>
+
+                    </div>
+                }
+
+                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+
+                <Button
+                    type="primary"
+                    style={{
+                        width: '20px',
+                        height: '30px',
+                        marginTop: '2px',
+                        backgroundColor: '#293468'
+                    }}
+                    onClick={this.handleCreateMenu}>
                     <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
                 </Button>
 
-                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+                <div style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
-                <Button style={{width: '20px', color: '#6e6e6e'}} type="link"
-                        onClick={this.handleLegendMenu}>
-                    <FontAwesomeIcon icon={faLifeRing} size="lg" style={{marginLeft: '-9px'}}/>
+                <Button
+                    style={{
+                        marginRight: '10px',
+                        width: '32px',
+                        height: '32px'
+                    }}
+                    onClick={this.handleCalendarVisible}
+                >
+                    <FontAwesomeIcon color={'#6e6e6e'} icon={faCalendarAlt} size="lg"
+                                     style={{
+                                         marginLeft: '-8px',
+                                         color: this.state.calendarVisible ? '#293468' : '#a0a0a0'
+                                     }}/>
+                </Button>
+                <Button
+                    style={{
+                        width: '32px',
+                        height: '32px'
+                    }}
+                    onClick={this.handleCalendarVisible}
+                >
+                    <FontAwesomeIcon icon={faAlignJustify} size="lg"
+                                     style={{
+                                         marginLeft: '-8px',
+                                         color: this.state.calendarVisible ? '#a0a0a0' : '#293468'
+                                     }}/>
                 </Button>
 
-                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
+                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
-                <Button style={{marginRight: '10px', width: '20px'}} type="link" ghost>
-                    <FontAwesomeIcon color={'#6e6e6e'} icon={faCalendarAlt} size="lg" style={{marginLeft: '-6px'}}/>
+                <Button
+                    type="link"
+                    ghost
+                    style={{
+                        marginRight: '10px',
+                        width: '32px',
+                        height: '32px'
+                    }}
+                >
+                    <img
+                        alt="Not found"
+                        src={printIcon}
+                        style={{
+                             marginLeft: '-6px',
+                             color: '#515151'
+                        }}
+                    />
                 </Button>
-                <Button style={{width: '20px'}} type="link" ghost>
-                    <FontAwesomeIcon color={'#6e6e6e'} icon={faAlignJustify} size="lg" style={{marginLeft: '-6px'}}/>
-                </Button>
-
-                <div style={{borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
-
-                <Button style={{marginRight: '10px', width: '20px'}} type="link" ghost>
-                    <FontAwesomeIcon color={'#6e6e6e'} icon={faPrint} size="lg" style={{marginLeft: '-6px'}}/>
-                </Button>
-
-
             </div>
-        );
+        )
     }
 
     renderDays() {
@@ -345,6 +573,7 @@ class Calendar extends React.Component<any, State> {
     }
 
     renderCells(context: any) {
+        const {t} = this.props;
         const { currentMonth, selectedDate } = this.state;
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
@@ -387,7 +616,8 @@ class Calendar extends React.Component<any, State> {
                                         size="small"
                                         style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
-[за ${dateFns.format(dateFns.lastDayOfMonth(dateFns.addMonths(this.state.currentMonth, -1)), "P", {locale: ru})}]`}
+[отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
+[интервал: ${t(r.contents[0]['calculationInterval'])}]`}
                                     >
                                         {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
                                     </Button>
@@ -469,7 +699,61 @@ class Calendar extends React.Component<any, State> {
         this.getAllStatuses();
         this.getAllNotificationInstances(this.state.currentMonth);
         this.getAllPeriodicity();
-        this.getYears()
+        this.getYears();
+        this.setGridData(false)
+    }
+
+    setGridData(myNotificationVisible: boolean): void {
+        const {t} = this.props;
+        let rowData: any = [];
+        let columnDefs = [
+            {field: 'Полное название формы'},
+            {field: 'Краткое название формы'},
+            {field: 'Отчетная дата "на"'},
+            {field: 'Периодичность сдачи'},
+            {field: 'Рабочий день сдачи'},
+            {field: 'Время сдачи'},
+            {field: 'Отчетность по выходным'},
+            {field: 'Интервал расчета'}
+        ];
+        if (myNotificationVisible) {
+            this.props.viewObject.get('notifications').array()
+                .filter((n: EObject) => n.get('defaultStatus').get('name') === 'Личная заметка')
+                .forEach((n: EObject) => {
+                rowData.push(
+                    {
+                        ['Полное название формы']: n.get('name'),
+                        ['Краткое название формы']: n.get('shortName'),
+                        ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
+                        ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
+                        ['Рабочий день сдачи']: n.get('deadlineDay'),
+                        ['Время сдачи']: n.get('deadlineTime'),
+                        ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
+                        ['Интервал расчета']: t(n.get('calculationInterval'))
+                    }
+                )
+            });
+        }
+        else {
+            this.props.viewObject.get('notifications').array()
+                .filter((n: EObject) => n.get('defaultStatus').get('name') !== 'Личная заметка')
+                .forEach((n: EObject) => {
+                rowData.push(
+                    {
+                        ['Полное название формы']: n.get('name'),
+                        ['Краткое название формы']: n.get('shortName'),
+                        ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
+                        ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
+                        ['Рабочий день сдачи']: n.get('deadlineDay'),
+                        ['Время сдачи']: n.get('deadlineTime'),
+                        ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
+                        ['Интервал расчета']: t(n.get('calculationInterval')),
+                        ['Удалена']: n.get('archive') ? 'Да' : 'Нет'
+                    }
+                )
+            });
+        }
+        this.setState({rowData, columnDefs});
     }
 
     render() {
@@ -478,10 +762,12 @@ class Calendar extends React.Component<any, State> {
                 { context => (
                     <div className="calendar">
                         {this.renderCreateNotification()}
+                        {this.renderEditNotification()}
                         {this.renderLegend()}
                         {this.renderHeader()}
-                        {this.renderDays()}
-                        {this.renderCells(context)}
+                        {this.state.calendarVisible && this.renderDays()}
+                        {this.state.calendarVisible && this.renderCells(context)}
+                        {!this.state.calendarVisible && this.renderGrid()}
                     </div>
                 )}
             </MainContext.Consumer>
