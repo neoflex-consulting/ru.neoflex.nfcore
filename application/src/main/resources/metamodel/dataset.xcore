@@ -240,4 +240,3 @@ enum HighlightType {
     Column
     Row
 }
-

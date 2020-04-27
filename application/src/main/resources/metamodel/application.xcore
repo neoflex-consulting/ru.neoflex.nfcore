@@ -126,18 +126,13 @@ abstract class CommandElement {
 class DatasetView extends ViewElement, CommandElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
+    RowPerPage rowPerPage = "ten"
+    Theme theme = "Material"
+    boolean showUniqRow //Показывать только уникальные строки
 }
 
 abstract class DataView extends ViewElement {
     refers DatasetView datasetView
-}
-
-@Ecore(constraints="IsValid")
-class DatasetGridView extends DataView {
-    op JSON getDatasetGrids() // для чего?
-    RowPerPage rowPerPage = "ten"
-    Theme theme = "Material"
-    boolean showUniqRow//Показывать только уникальные строки
 }
 
 class DatasetPivotView extends DataView {

@@ -208,19 +208,12 @@ class ApplicationInit {
             datasetViewRow.marginLeft = "20px"
             datasetViewRow.marginBottom = "20px"
 
-            def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetGridRow.name = "DatasetGridRow"
-            datasetGridRow.textAlign = TextAlign.LEFT
-            datasetGridRow.marginTop = "20px"
-            datasetGridRow.marginLeft = "20px"
-            datasetGridRow.marginBottom = "20px"
             def lineDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             lineDiagramRow.name = "LineDiagramRow"
             lineDiagramRow.marginTop = "20px"
             lineDiagramRow.marginLeft = "20px"
             lineDiagramRow.marginBottom = "20px"
             lineFrom.children.add(datasetViewRow)
-            lineFrom.children.add(datasetGridRow)
             lineFrom.children.add(lineDiagramRow)
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
@@ -230,11 +223,6 @@ class ApplicationInit {
             def datasetGridLine =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridLine", "",false)
             datasetView.setDatasetComponent(datasetGridLine)
             datasetViewRow.children.add(datasetView)
-
-            def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGrid.name = "DatasetGrid"
-            datasetGrid.setDatasetView(datasetView)
-            datasetGridRow.children.add(datasetGrid)
 
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "DatasetDiagram"
@@ -275,19 +263,12 @@ class ApplicationInit {
             datasetViewRow.marginTop = "20px"
             datasetViewRow.marginLeft = "20px"
             datasetViewRow.marginBottom = "20px"
-            def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetGridRow.name = "GridDatasetRow"
-            datasetGridRow.textAlign = TextAlign.LEFT
-            datasetGridRow.marginTop = "20px"
-            datasetGridRow.marginLeft = "20px"
-            datasetGridRow.marginBottom = "20px"
             def pieDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             pieDiagramRow.name = "PieRow"
             pieDiagramRow.marginTop = "20px"
             pieDiagramRow.marginLeft = "20px"
             pieDiagramRow.marginBottom = "20px"
             pieFrom.children.add(datasetViewRow)
-            pieFrom.children.add(datasetGridRow)
             pieFrom.children.add(pieDiagramRow)
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
@@ -297,11 +278,6 @@ class ApplicationInit {
             def datasetGridPie =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridPie", "",false)
             datasetView.setDatasetComponent(datasetGridPie)
             datasetViewRow.children.add(datasetView)
-
-            def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGrid.name = "GridDataset"
-            datasetGrid.setDatasetView(datasetView)
-            datasetGridRow.children.add(datasetGrid)
 
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "PieChart"
@@ -340,19 +316,12 @@ class ApplicationInit {
             datasetViewRow.marginTop = "20px"
             datasetViewRow.marginLeft = "20px"
             datasetViewRow.marginBottom = "20px"
-            def datasetGridRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetGridRow.name = "GridDatasetRow"
-            datasetGridRow.textAlign = TextAlign.LEFT
-            datasetGridRow.marginTop = "20px"
-            datasetGridRow.marginLeft = "20px"
-            datasetGridRow.marginBottom = "20px"
             def barDiagramRow = ApplicationFactory.eINSTANCE.createRow()
             barDiagramRow.name = "BarRow"
             barDiagramRow.marginTop = "20px"
             barDiagramRow.marginLeft = "20px"
             barDiagramRow.marginBottom = "20px"
             barFrom.children.add(datasetViewRow)
-            barFrom.children.add(datasetGridRow)
             barFrom.children.add(barDiagramRow)
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
@@ -362,11 +331,6 @@ class ApplicationInit {
             def datasetGridBar =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridBar", "",false)
             datasetView.setDatasetComponent(datasetGridBar)
             datasetViewRow.children.add(datasetView)
-
-            def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGrid.name = "GridDataset"
-            datasetGrid.setDatasetView(datasetView)
-            datasetGridRow.children.add(datasetGrid)
 
             def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
             datasetDiagram.name = "BarChart"
