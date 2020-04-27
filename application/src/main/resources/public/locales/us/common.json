@@ -102,8 +102,13 @@
         "weekendReporting": "Weekend Reporting",
         "defaultStatus": "Default Status",
 
-        "Day": "Day",
-        "Month": "Month",
-        "Quarter": "Quarter",
-        "Year": "Year"
+        "Day": "Daily",
+        "Month": "Monthly",
+        "Quarter": "Quarterly",
+        "Year": "Annual",
+
+        "PerDay": "Per Day",
+        "PerMonth": "Per Month",
+        "ForTheQuarter": "for the quarter",
+        "FromTheBeginningOfTheYear": "From the beginning of the year"
 }

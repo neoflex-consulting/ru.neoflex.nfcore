@@ -102,10 +102,15 @@
         "weekendReporting": "Отчетность по выходным",
         "defaultStatus": "Статус по-умолчанию",
 
-        "Day": "День",
-        "Month": "Месяц",
+        "Day": "Дневная",
+        "Month": "Месячная",
         "Quarter": "Квартал",
-        "Year": "Год"
+        "Year": "Годовая",
+
+        "PerDay": "За день",
+        "PerMonth": "За месяц",
+        "ForTheQuarter": "За квартал",
+        "FromTheBeginningOfTheYear": "От начала года"
 }
 
 

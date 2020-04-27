@@ -13,39 +13,39 @@ class NotificationValidatorExt extends NotificationValidator {
 
     @Override
     boolean validateNotification_IsValid(Notification notification, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (notification.name == null || notification.name.length() == 0) {
-            return validate(notification, diagnostics, context, "name - must be set")
-        }
-        if (notification.shortName == null || notification.shortName.length() == 0) {
-            return validate(notification, diagnostics, context, "shortName - must be set")
-        }
-        if (notification.defaultStatus == null) {
-            return validate(notification, diagnostics, context, "defaultStatus - must be set")
-        }
+//        if (notification.name == null || notification.name.length() == 0) {
+//            return validate(notification, diagnostics, context, "name - must be set")
+//        }
+//        if (notification.shortName == null || notification.shortName.length() == 0) {
+//            return validate(notification, diagnostics, context, "shortName - must be set")
+//        }
+//        if (notification.defaultStatus == null) {
+//            return validate(notification, diagnostics, context, "defaultStatus - must be set")
+//        }
+//
+//        if (notification.reportingDateOn.size() == 1 && (notification.deadlineDay == null || notification.deadlineDay.length() == 0)) {
+//            return validate(notification, diagnostics, context, "deadlineDay - must be set")
+//        }
+//        if (notification.reportingDateOn.size() > 1 && notification.deadlineDay != null && notification.deadlineDay.length() != 0) {
+//            return validate(notification, diagnostics, context, "deadlineDay - must not be set")
+//        }
+//
+//        if (notification.deadlineTime == null || notification.deadlineTime.length() == 0) {
+//            return validate(notification, diagnostics, context, "deadlineTime - must be set")
+//        }
+//        if (notification.reportingDateOn.size() == 0) {
+//            return validate(notification, diagnostics, context, "reportingDateOn - must be set")
+//        }
+//        if (notification.reportingDateOn.size() == 1 && notification.reportingDateOn[0].name.toInteger() > notification.deadlineDay.toInteger()) {
+//            return validate(notification, diagnostics, context, "reportingDateOn - must be greater than or equal to deadlineDay")
+//        }
 
-        if (notification.reportingDateOn.size() == 1 && notification.deadlineDay == null || notification.deadlineDay.length() == 0) {
-            return validate(notification, diagnostics, context, "deadlineDay - must be set")
-        }
-        if (notification.reportingDateOn.size() > 1 && notification.deadlineDay != null && notification.deadlineDay.length() != 0) {
-            return validate(notification, diagnostics, context, "deadlineDay - must not be set")
-        }
-
-        if (notification.deadlineTime == null || notification.deadlineTime.length() == 0) {
-            return validate(notification, diagnostics, context, "deadlineTime - must be set")
-        }
-        if (notification.reportingDateOn.size() == 0) {
-            return validate(notification, diagnostics, context, "reportingDateOn - must be set")
-        }
-        if (notification.reportingDateOn.size() == 1 && notification.reportingDateOn[0].name.toInteger() > notification.deadlineDay.toInteger()) {
-            return validate(notification, diagnostics, context, "reportingDateOn - must be greater than or equal to deadlineDay")
-        }
-
-        if (notification.reportingDateOn.size() > 1 && notification.periodicity != Periodicity.MONTH ) {
-            return validate(notification, diagnostics, context, "periodicity - must be equal to month")
-        }
-        if (notification.reportingDateOn.size() > 1 && notification.calculationInterval != null ) {
-            return validate(notification, diagnostics, context, "periodicity - must be equal to day")
-        }
+//        if (notification.reportingDateOn.size() > 1 && notification.periodicity != Periodicity.MONTH ) {
+//            return validate(notification, diagnostics, context, "periodicity - must be equal to month")
+//        }
+//        if (notification.reportingDateOn.size() > 1 && notification.calculationInterval != null && notification.calculationInterval != Periodicity.DAY) {
+//            return validate(notification, diagnostics, context, "calculationInterval - must be equal to day")
+//        }
     }
 
     @Override

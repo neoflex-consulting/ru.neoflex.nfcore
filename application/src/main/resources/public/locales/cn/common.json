@@ -103,8 +103,13 @@
         "weekendReporting": "週末報告",
         "defaultStatus": "默認狀態",
 
-        "Day": "日",
-        "Month": "月",
-        "Quarter": "刻",
-        "Year": "年度"
+        "Day": "日常",
+        "Month": "每月一次",
+        "Quarter": "季刊",
+        "Year": "年刊",
+
+        "PerDay": "每天",
+        "PerMonth": "每月",
+        "ForTheQuarter": "對於該季度",
+        "FromTheBeginningOfTheYear": "從年初開始"
 }
