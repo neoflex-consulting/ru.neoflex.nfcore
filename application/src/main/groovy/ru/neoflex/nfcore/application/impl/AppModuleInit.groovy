@@ -74,12 +74,7 @@ class AppModuleInit {
             row2.marginBottom = "20px"
             row2.marginRight = "20px"
 
-            def datasetGridView1 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGridView1.name = 'DatasetGridTest'
-            datasetGridView1.setDatasetView(datasetView1)
-
             row1.children.add(datasetView1)
-            row2.children.add(datasetGridView1)
             componentElement4.children.add(row1)
             componentElement4.children.add(row2)
 
@@ -103,12 +98,7 @@ class AppModuleInit {
             row4.marginBottom = "20px"
             row4.marginRight = "20px"
 
-            def datasetGridView2 = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGridView2.name = 'DatasetGridTestAAA'
-            datasetGridView2.setDatasetView(datasetView2)
-
             row3.children.add(datasetView2)
-            row4.children.add(datasetGridView2)
             componentElement4.children.add(row3)
             componentElement4.children.add(row4)
 
@@ -252,21 +242,12 @@ class AppModuleInit {
             datasetView.setDataset(jdbcDataset)
             def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
             datasetView.setDatasetComponent(datasetComponent)
-            datasetView.itemsToSubmit.add(datasetSelect)
-            datasetView.itemsToSubmit.add(datePicker)
+            datasetView.valueItems.add(datasetSelect)
+            datasetView.valueItems.add(datePicker)
 
-            button.itemsToReceiveSubmit.add(datasetView)
+            button.submitItems.add(datasetView)
 
             row6.children.add(datasetView)
-
-            def row7 = ApplicationFactory.eINSTANCE.createRow()
-            row7.name = "row7"
-
-            def datasetGrid = ApplicationFactory.eINSTANCE.createDatasetGridView()
-            datasetGrid.name = "SectionGrid"
-            datasetGrid.setDatasetView(datasetView)
-            row7.children.add(datasetGrid)
-
 
             form.children.add(row1)
             form.children.add(row2)
@@ -274,7 +255,6 @@ class AppModuleInit {
             form.children.add(row4)
             form.children.add(row5)
             form.children.add(row6)
-            form.children.add(row7)
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

@@ -15,7 +15,7 @@ interface Props {
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
     allSorts?: Array<EObject>;
     componentType?: paramType;

@@ -117,29 +117,24 @@ class Form extends ViewContainer {
 class FormItem extends ViewContainer {
 }
 
-interface SubmittableItems extends ViewElement{
+abstract class ValueItem {
     String value
 }
 
-interface SubmitReceiver extends ViewElement{
+abstract class CommandElement {
+    refers ValueItem[] valueItems
 }
 
-class DatasetView extends SubmitReceiver {
+class DatasetView extends ViewElement, CommandElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    refers SubmittableItems[] itemsToSubmit
+    RowPerPage rowPerPage = "ten"
+    Theme theme = "Material"
+    boolean showUniqRow //Показывать только уникальные строки
 }
 
 abstract class DataView extends ViewElement {
     refers DatasetView datasetView
-}
-
-@Ecore(constraints="IsValid")
-class DatasetGridView extends DataView {
-    op JSON getDatasetGrids() // для чего?
-    RowPerPage rowPerPage = "ten"
-    Theme theme = "Material"
-    boolean showUniqRow//Показывать только уникальные строки
 }
 
 class DatasetPivotView extends DataView {
@@ -218,7 +213,7 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends SubmittableItems {
+class Select extends ViewElement, ValueItem {
     boolean disabled
     boolean showSearch
     String placeholder
@@ -227,7 +222,7 @@ class Select extends SubmittableItems {
     String staticValues
 }
 
-class DatePicker extends SubmittableItems {
+class DatePicker extends ViewElement, ValueItem {
     boolean disabled
     boolean allowClear
     String width = "200"
@@ -254,7 +249,7 @@ class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
     boolean buttonSubmit
-    refers SubmitReceiver[] itemsToReceiveSubmit
+    refers CommandElement[] submitItems
     boolean backStartPage
     String span = "0"
 }

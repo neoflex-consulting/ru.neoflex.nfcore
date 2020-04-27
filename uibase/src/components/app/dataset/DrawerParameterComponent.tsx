@@ -14,7 +14,7 @@ interface Props {
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
     componentType?: paramType;
 }
@@ -156,7 +156,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
                     color: element.color
                 })}
         });
-        this.setState({parametersArray: newServerParam})
+        this.props.onChangeParameters!(newServerParam, this.props.componentType);
     };
 
     handleSubmit = (e: any) => {
@@ -206,7 +206,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
     });
 
     onSortEnd = ({oldIndex, newIndex}:any) => {
-        let newState: IServerQueryParam[] = arrayMove(this.state.parametersArray!, oldIndex, newIndex)
+        let newState: IServerQueryParam[] = arrayMove(this.state.parametersArray!, oldIndex, newIndex);
         newState.forEach( (serverParam, index) => serverParam.index = index+1 );
         this.setState({parametersArray: newState});
     };
