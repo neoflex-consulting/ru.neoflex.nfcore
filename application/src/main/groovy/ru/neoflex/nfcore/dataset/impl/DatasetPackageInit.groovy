@@ -55,20 +55,18 @@ class DatasetPackageInit {
 
             /*MAIN*/
             String query =
-                    "select :REPORT_DATE as on_date,\n" +
-                            "       row_number,\n" +
-                            "       f110_code,\n" +
-                            "       amount_rub,\n" +
-                            "       amount_cur,\n" +
-                            "       section_number\n" +
-                            "  from table(data_representation.rep_f110.GetF110Apex(\n" +
-                            "         i_AppUser         => 0,\n" +
-                            "         i_OnDate          => to_date('20190331','YYYYMMDD'),\n" +
-                            /*"         i_OnDate          => :i_OnDate,\n" +*/
-                            "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
-                            "         i_ReportPrecision => :REPORT_PRECISION,\n" +
-                            "         i_SpodDate        => null\n" +
-                            "       ))\n"
+                    "select row_number,\n" +
+                    "       f110_code,\n" +
+                    "       amount_rub,\n" +
+                    "       amount_cur,\n" +
+                    "       section_number\n" +
+                    "  from table(data_representation.rep_f110.GetF110Apex(\n" +
+                    "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => :REPORT_DATE - 1,\n" +
+                    "         i_BranchCode      => nrsettings.settings_tools.getParamChrValue('HEAD_OFFICE_BRANCH_CODE'),\n" +
+                    "         i_ReportPrecision => :REPORT_PRECISION,\n" +
+                    "         i_SpodDate        => null\n" +
+                    "       ))\n"
             String querySection1 = query + " where section_number = 1"
             String querySection2 = query + " where section_number = 2"
             String querySection3 = query + " where section_number = 3"
@@ -192,7 +190,6 @@ class DatasetPackageInit {
         }
 
 
-        //TODO после первой пересборик ошибки, добавить проверку
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)
         //TODO при создании ссылки на втором appModule приложение виснет

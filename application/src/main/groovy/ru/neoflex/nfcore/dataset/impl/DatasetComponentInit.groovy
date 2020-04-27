@@ -158,7 +158,7 @@ class DatasetComponentInit {
                         rdbmsColumn.sortable = true
                         rdbmsColumn.resizable = true
                         if (rdbmsColumn.name in ["ON_DATE"]) {
-                            rdbmsColumn.hide = false
+                            rdbmsColumn.hide = true
                         }
                         rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                         rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
@@ -170,7 +170,7 @@ class DatasetComponentInit {
                                 throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                             }
                         }
-                        if (rdbmsColumn.name in ["ON_DATE","ROW_NUMBER","F110_CODE","AMOUNT_RUB"]) {
+                        if (rdbmsColumn.name in ["ROW_NUMBER","F110_CODE","AMOUNT_RUB"]) {
                             datasetComponent.column.add(rdbmsColumn)
                         }
                         if (rdbmsColumn.name in ["AMOUNT_CUR"] && name == "DatasetNRDemoSection4") {

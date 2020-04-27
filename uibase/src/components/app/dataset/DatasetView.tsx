@@ -5,7 +5,7 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerNamedParam, IServerQueryParam, ISubmitHandlers} from '../../../MainContext';
+import {IServerNamedParam, IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -391,11 +391,21 @@ class DatasetView extends React.Component<any, State> {
         let namedParams: IServerNamedParam[] = [];
         if (this.props.viewObject.get('itemsToSubmit')) {
             this.props.viewObject.get('itemsToSubmit').each((item: EObject) => {
-                namedParams.push({
-                    parameterName: item.get('name'),
-                    parameterValue: item.get('value'),
-                    parameterDataType: item.eClass._id === "//DatePicker" ? "Date" : "String"
-                })
+                if (item.eClass._id === "//Select") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: (item.get('value') instanceof Array)
+                                      ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
+                                      : item.get('value')
+                    })
+                } else if (item.eClass._id === "//DatePicker") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: item.get('value'),
+                        parameterDataType: "Date",
+                        parameterDateFormat: item.get('format')
+                    })
+                }
             });
         }
         return namedParams
@@ -457,7 +467,7 @@ class DatasetView extends React.Component<any, State> {
             this.props.context.submitHandlers.push({
                 name: this.props.viewObject.get('name'),
                 handler: this.onSubmit.bind(this)
-            } as ISubmitHandlers)
+            } as ISubmitHandler)
         }
     }
 

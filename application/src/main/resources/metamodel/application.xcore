@@ -117,15 +117,17 @@ class Form extends ViewContainer {
 class FormItem extends ViewContainer {
 }
 
-interface SubmittableItems {
+interface SubmittableItems extends ViewElement{
     String value
 }
 
-class DatasetView extends ViewElement {
+interface SubmitReceiver extends ViewElement{
+}
+
+class DatasetView extends SubmitReceiver {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    //TODO interface submittableItems?
-    refers ViewElement[] itemsToSubmit
+    refers SubmittableItems[] itemsToSubmit
 }
 
 abstract class DataView extends ViewElement {
@@ -216,22 +218,24 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends ViewElement {
-    refers EClass ClassToShow
+class Select extends SubmittableItems {
     boolean disabled
     boolean showSearch
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
-    String value // заглушка
+    String staticValues
 }
 
-class DatePicker extends ViewElement {
+class DatePicker extends SubmittableItems {
     boolean disabled
     boolean allowClear
     String width = "200"
     String format = "YYYY-MM-DD"
-    String value
+}
+
+class HtmlContent extends ViewElement {
+    String htmlContent
 }
 
 //add TextArea
@@ -250,8 +254,7 @@ class Button extends ViewElement {
     boolean buttonCancel
     boolean buttonSave
     boolean buttonSubmit
-    //TODO interface submittableTrigger?
-    refers ViewElement[] itemsToTriggerSubmit
+    refers SubmitReceiver[] itemsToReceiveSubmit
     boolean backStartPage
     String span = "0"
 }

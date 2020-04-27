@@ -14,9 +14,9 @@ import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Date
-
+import java.sql.Timestamp
 import java.time.LocalDate
-
+import java.time.LocalDateTime
 
 
 class DatasetComponentExt extends DatasetComponentImpl {
@@ -66,6 +66,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         })
     }
 
+    static add(a, b) {
+        a+b
+    }
     @Override
     String deleteAllColumns() {
         return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
@@ -363,17 +366,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
 
         logger.info("connectionToDB", "Starting query = " + currentQuery)
-        logger.info("connectionToDB", "named parameters = " + parameters)
         //Add Named Parameters
         NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, currentQuery);
         for (int i = 0; i <= parameters.size() - 1; ++i) {
             if (parameters[i].parameterDataType == "Date") {
-                //TODO вытащить с фронта format
-                p.setDate(parameters[i].parameterName, Date.valueOf( LocalDate.parse(parameters[i].parameterValue,"yyyy-MM-dd") ))
+                p.setDate(parameters[i].parameterName, Date.valueOf( LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat) ))
+            } else if (parameters[i].parameterDataType == "Timestamp") {
+                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat) ))
+            } else if (parameters[i].parameterDataType == "Int") {
+                p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
             } else {
                 p.setString(parameters[i].parameterName, parameters[i].parameterValue)
             }
-            //TODO numeric?
         }
 
         ResultSet rs = p.executeQuery();

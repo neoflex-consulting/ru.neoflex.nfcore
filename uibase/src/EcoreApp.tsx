@@ -178,6 +178,11 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
+        function parseFormatClientToServer(format: string) : string {
+            return (format) ? format.replace(new RegExp('Y', 'g'),'y')
+                                    .replace(new RegExp('D', 'g'),'d')
+                            : format
+        }
         let resourceParameter = resourceSet.create({ uri: uri });
         let serverOperations: EObject[] =
             param === undefined
@@ -191,7 +196,8 @@ class EcoreApp extends React.Component<any, State> {
                             pattern.create({
                                 parameterName: p['parameterName'],
                                 parameterValue: p['parameterValue'],
-                                parameterDataType: p['parameterDataType']||"String"
+                                parameterDataType: p['parameterDataType']||"String",
+                                parameterDateFormat: parseFormatClientToServer(p['parameterDateFormat'])||"yyyy-MM-dd"
                             } as IServerNamedParam)
                         )
                     });
