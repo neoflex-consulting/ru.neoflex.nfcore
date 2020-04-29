@@ -14,8 +14,6 @@ abstract class BaseType {
     op boolean isArray() {false}
     op boolean isMap() {false}
     op boolean isShape() {false}
-    op boolean isReferenceType() {false}
-    op BaseType actualType() {this}
 }
 
 class PlainType extends BaseType {
@@ -60,33 +58,25 @@ class Shape extends BaseType {
     op boolean isShape() {true}
 }
 
-class NamedType extends BaseType {
+abstract class Classifier {
     QName name
-    contains BaseType baseType
 }
 
-class ReferenceType extends BaseType {
-    refers NamedType namedType
-    op boolean isPlain() {namedType.isPlain()}
-    op boolean isStructure() {namedType.isStructure()}
-    op boolean isArray() {namedType.isArray()}
-    op boolean isMap() {namedType.isMap()}
-    op boolean isShape() {namedType.isShape()}
-    op boolean isReferenceType() {true}
-    op BaseType actualType() {namedType}
+class NamedType extends Classifier {
+    contains BaseType baseType
 }
 
 abstract class Feature {
     container Entity entity opposite features
     String name
-    boolean isTimeDependent
-    boolean isMany
+    boolean timeDependent
+    boolean many
     op boolean isAttribute() {false}
     op boolean isReference() {false}
 }
 
 class Attribute extends Feature {
-    contains ReferenceType attributeType
+    refers NamedType attributeType
     op boolean isAttribute() {true}
 }
 
@@ -138,11 +128,13 @@ class SpatialIndex extends InvertedEntry {
     op boolean isSpatialIndex() {true}
 }
 
-class Entity {
-    QName name
+class Entity extends Classifier {
+    boolean active
+    boolean ^abstract
     refers Entity[] superTypes
     contains Feature[] features opposite entity
     contains PrimaryKey primaryKey opposite entity
     contains InvertedEntry[] invertedEntries opposite entity
     contains ForeignKey[] foreignKeys opposite entity
+    op void activate()
 }

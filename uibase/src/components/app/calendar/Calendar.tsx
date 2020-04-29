@@ -46,6 +46,7 @@ class Calendar extends React.Component<any, any> {
             years: [],
             months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             calendarVisible: true,
+            editableNotification: {},
             gridOptions: {
                 defaultColDef: {
                     resizable: true,
@@ -59,18 +60,19 @@ class Calendar extends React.Component<any, any> {
             selectedValueInGrid: 'Системные заметки',
             frameworkComponents: {
                 'actionMenu': this.actionMenu
-            }
+            },
+            myNotificationVisible: false
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
     }
 
-    actionMenu = () => (
+    actionMenu = (params: any) => (
         <div style={{marginLeft: '-32px'}}>
             <Button
                 type="link"
                 style={{width: '35px'}}
-                onClick={this.handleEditMenu}
+                onClick={() => this.handleEditMenu(params)}
             >
                 <img
                     alt="Not found"
@@ -80,18 +82,22 @@ class Calendar extends React.Component<any, any> {
                     }}
                 />
             </Button>
-            <Button
-                type="link"
-                style={{width: '35px',}}
-            >
-                <img
-                    alt="Not found"
-                    src={trashcanIcon}
-                    style={{
-                        color: '#515151'
-                    }}
-                />
-            </Button>
+            {
+                this.state.myNotificationVisible &&
+                <Button
+                    type="link"
+                    style={{width: '35px',}}
+                    onClick={() => this.deleteNotification(params)}
+                >
+                    <img
+                        alt="Not found"
+                        src={trashcanIcon}
+                        style={{
+                            color: '#515151'
+                        }}
+                    />
+                </Button>
+            }
         </div>
     );
 
@@ -120,7 +126,7 @@ class Calendar extends React.Component<any, any> {
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === this.props.viewObject._id);
         if (userProfileValue.length !== 0) {
-            let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus
+            let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus;
             this.setState({notificationStatus})
         }
         else {
@@ -159,6 +165,29 @@ class Calendar extends React.Component<any, any> {
         const methodName: string = 'createNotification';
         return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
             this.getAllNotificationInstances(this.state.currentMonth);
+            this.setGridData(this.state.myNotificationVisible)
+        })
+    };
+
+    editNotification = (editableNotification: any) => {
+        this.setState({spinnerVisible: true});
+        const ref: string = this.props.viewObject._id;
+        const methodName: string = 'createNotification';
+        const notifications = this.props.viewObject.get('notifications').array()
+                .filter((n: EObject) =>
+                    (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === 'Личная заметка')
+                    ||
+                    (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== 'Личная заметка')
+                );
+        const newEditableNotification = notifications[editableNotification['id']];
+        const resource = newEditableNotification.eResource();
+        if (resource) {
+            resource.eContents()[0].set('name', `${editableNotification.fullName}`);
+            resource.eContents()[0].set('deadlineDay', `${editableNotification.deadlineDay}`);
+        }
+        API.instance().saveResource(resource, 99999).then( () => {
+            this.getAllNotificationInstances(this.state.currentMonth);
+            this.setGridData(this.state.myNotificationVisible)
         })
     };
 
@@ -196,7 +225,6 @@ class Calendar extends React.Component<any, any> {
             this.setState({selectedValueInGrid: e});
             e === this.props.viewObject.get('defaultStatus').get('name') ?
                 this.setGridData(true) : this.setGridData(false)
-
         }
     }
 
@@ -224,10 +252,55 @@ class Calendar extends React.Component<any, any> {
             : this.setState({ createMenuVisible: true});
     };
 
-    handleEditMenu = () => {
+    deleteNotification = (params: any) => {
+        this.setState({spinnerVisible: true});
+        const oldNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) =>
+                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === 'Личная заметка')
+                ||
+                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== 'Личная заметка')
+            );
+        const deleteNotification = oldNotifications[params.node.id];
+        const newNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) => n.get('name') !== deleteNotification.get('name'));
+        this.props.viewObject.get('notifications').clear();
+        this.props.viewObject.get('notifications').addAll(newNotifications);
+
+        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
+        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
+            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}));
+        this.setGridData(this.state.myNotificationVisible);
+
+        API.instance().saveResource(this.props.viewObject.eResource(), 99999)
+            .then( (newResource: Ecore.Resource) => {
+                const newViewObject: Ecore.EObject[] = (newResource.eContainer as Ecore.ResourceSet).elements()
+                    .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+                    .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+                    .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}));
+            this.getAllNotificationInstances(this.state.currentMonth);
+        })
+
+    };
+
+    handleEditMenu = (params: any) => {
+        if (params.data != undefined) {
+            const editableNotification: any = {
+                'id': params.node.id,
+                'fullName': params.data["Полное название формы"],
+                'shortName': params.data["Краткое название формы"],
+                'weekendReporting': params.data["Отчетность по выходным"],
+                'periodicity': params.data["Периодичность сдачи"],
+                'deadlineDay': params.data["Рабочий день сдачи"],
+                'deadlineTime': params.data["Время сдачи"]
+            };
+            this.setState({editableNotification})
+        }
         this.state.editMenuVisible ? this.setState({ editMenuVisible: false})
             : this.setState({ editMenuVisible: true});
-
     };
 
     handleLegendMenu = () => {
@@ -250,7 +323,7 @@ class Calendar extends React.Component<any, any> {
                 {
                     <CreateNotification
                         {...this.props}
-                        onCreateNotificationStatus={this.createNotification}
+                        onCreateNotification={this.createNotification}
                         periodicity={this.state.periodicity}
                         spinnerVisible={this.state.spinnerVisible}
                     />
@@ -262,24 +335,26 @@ class Calendar extends React.Component<any, any> {
     renderEditNotification() {
         const {i18n, t} = this.props;
         return (
-            <Drawer
-                placement='right'
-                title={t('editNotification')}
-                width={'450px'}
-                visible={this.state.editMenuVisible}
-                onClose={this.handleEditMenu}
-                mask={false}
-                maskClosable={false}
-            >
-                {
-                    <EditNotification
-                        {...this.props}
-                        onCreateNotificationStatus={this.createNotification}
-                        periodicity={this.state.periodicity}
-                        spinnerVisible={this.state.spinnerVisible}
-                    />
-                }
-            </Drawer>
+                <Drawer
+                    placement='right'
+                    title={t('editNotification')}
+                    width={'450px'}
+                    visible={this.state.editMenuVisible}
+                    onClose={this.handleEditMenu}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        this.state.editableNotification !== undefined && <EditNotification
+                            {...this.props}
+                            onEditNotification={this.editNotification}
+                            periodicity={this.state.periodicity}
+                            spinnerVisible={this.state.spinnerVisible}
+                            editableNotification={this.state.editableNotification}
+                            myNotificationVisible={this.state.myNotificationVisible}
+                        />
+                    }
+                </Drawer>
         );
     }
 
@@ -716,6 +791,7 @@ class Calendar extends React.Component<any, any> {
             {field: 'Отчетность по выходным'},
             {field: 'Интервал расчета'}
         ];
+        this.setState({myNotificationVisible});
         if (myNotificationVisible) {
             this.props.viewObject.get('notifications').array()
                 .filter((n: EObject) => n.get('defaultStatus').get('name') === 'Личная заметка')

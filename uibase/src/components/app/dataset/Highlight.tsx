@@ -16,7 +16,7 @@ interface Props {
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newServerParam: any[], paramName: paramType) => void;
+    saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
     allOperations?: Array<EObject>;
     componentType?: paramType;
@@ -356,6 +356,33 @@ class Highlight extends DrawerParameterComponent<Props, State> {
         });
         this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined})
     }
+
+    reset = () => {
+        this.props.onChangeParameters!(undefined, this.props.componentType);
+        this.setState({parametersArray:[]});
+        this.props.saveChanges(true, "isHighlightsUpdated");
+    };
+
+    deleteRow = (e: any) => {
+        this.props.form.resetFields();
+        let newServerParam: IServerQueryParam[] = [];
+        this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
+            if (element.index !== e.index) {
+                newServerParam.push({
+                    index: newServerParam.length + 1,
+                    datasetColumn: element.datasetColumn,
+                    operation: element.operation,
+                    value: element.value,
+                    enable: (element.enable !== null ? element.enable : false),
+                    type: element.type,
+                    highlightType: element.highlightType,
+                    backgroundColor: element.backgroundColor,
+                    color: element.color
+                })}
+        });
+        this.props.onChangeParameters!(newServerParam, this.props.componentType);
+        this.props.saveChanges(true, "isHighlightsUpdated");
+    };
 
     render() {
         return (
