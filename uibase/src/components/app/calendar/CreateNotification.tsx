@@ -7,7 +7,7 @@ import {EObject} from "ecore";
 const { TabPane } = Tabs;
 
 interface Props {
-    onCreateNotificationStatus?: (notificationStatus: any[]) => void;
+    onCreateNotification?: (notificationStatus: any[]) => void;
     periodicity: EObject[];
     spinnerVisible: boolean;
 }
@@ -39,9 +39,6 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
         }
     }
 
-    componentDidMount(): void {
-    }
-
     handleChange(e: any): void {
         const target = JSON.parse(e);
         let newNotification: any = {
@@ -69,7 +66,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
 
     apply(newNotification: any): void {
         this.setState({spinnerVisible: true});
-        this.props.onCreateNotificationStatus(newNotification)
+        this.props.onCreateNotification(newNotification)
     }
 
     render() {
