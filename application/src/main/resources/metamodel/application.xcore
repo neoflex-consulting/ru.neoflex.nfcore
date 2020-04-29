@@ -159,6 +159,10 @@ class DatasetDiagramView extends DataView {
 
 class GroovyCommand extends ViewElement, CommandElement {
     Text command
+    String gitResourcePath
+    String gitStaticClass
+    String gitStaticMethod
+    GroovyCommandType commandType = "Eval"
 }
 
 class TabsViewReport extends ViewContainer {
@@ -413,4 +417,10 @@ enum AxisXPositionType {
 enum AxisYPositionType {
     Left
     Right
+}
+
+enum GroovyCommandType {
+    Eval,
+    Static,
+    Resource
 }

@@ -314,7 +314,11 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     state = {
-        command: this.props.viewObject.get('command')
+        command: this.props.viewObject.get('command'),
+        commandType: this.props.viewObject.get('commandType')||"Eval",
+        gitResourcePath: this.props.viewObject.get('gitResourcePath'),
+        gitStaticClass: this.props.viewObject.get('gitStaticClass'),
+        gitStaticMethod: this.props.viewObject.get('gitStaticMethod')
     };
     componentDidMount(): void {
         if (this.props.context.submitHandlers !== undefined) {
@@ -326,14 +330,34 @@ class GroovyCommand_ extends ViewContainer {
     }
     onSubmit = () => {
         //TODO пока на 8080 порту
-        API.instance().fetchJson('http://localhost:8080/script/eval',{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: this.getCommand()
-        }).then(res => {
-        })
+        if (this.state.commandType === "Resource") {
+            API.instance().fetchJson('http://localhost:8080/script/resource?path='+this.state.gitResourcePath, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        } else if (this.state.commandType === "Static") {
+            API.instance().fetchJson('http://localhost:8080/script/static/'+this.state.gitStaticClass+'/'+this.state.gitStaticMethod, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        } else {
+            API.instance().fetchJson('http://localhost:8080/script/eval', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        }
     };
     getNamedParams = () => {
         let namedParams: IServerNamedParam[] = [];
