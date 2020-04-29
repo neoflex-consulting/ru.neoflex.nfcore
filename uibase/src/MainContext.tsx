@@ -22,10 +22,10 @@ export interface IServerQueryParam {
 }
 
 export interface IServerNamedParam {
-    parameterName: String,
-    parameterValue: String,
-    parameterDataType?: String,
-    parameterDateFormat?: String
+    parameterName: string,
+    parameterValue: string,
+    parameterDataType?: string,
+    parameterDateFormat?: string
 }
 
 export interface IMainContext {

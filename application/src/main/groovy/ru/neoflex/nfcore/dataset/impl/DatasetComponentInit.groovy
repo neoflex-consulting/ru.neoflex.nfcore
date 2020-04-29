@@ -286,6 +286,50 @@ class DatasetComponentInit {
         }
     }
 
+    static def createAllColumnNRDemoCalcMart(String name) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
+                .execute().resourceSet
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetComponent).column.size() == 0) {
+            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
+            if (datasetComponent.dataset) {
+                if (datasetComponent.dataset.datasetColumn.size() != 0) {
+                    def columns = datasetComponent.dataset.datasetColumn
+                    for (int i = 0; i <= columns.size() - 1; ++i) {
+                        def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
+                        rdbmsColumn.name = columns[i].name
+                        rdbmsColumn.datasetColumn = columns[i]
+                        def typography = ApplicationFactory.eINSTANCE.createTypography()
+                        typography.name = columns[i].name
+                                .replace("EVENT_PARAMETERS_LIST","Расчетный период")
+                                .replace("PARTITION_KEY","Вид расчета")
+                                .replace("BEGIN_DATE","Дата начала")
+                                .replace("END_DATE","Дата окончания")
+                                .replace("STATUS","Статус")
+                        rdbmsColumn.headerName = typography
+                        rdbmsColumn.sortable = true
+                        rdbmsColumn.resizable = true
+                        if (rdbmsColumn.name in ["RECORD_ID"]) {
+                            rdbmsColumn.hide = true
+                        }
+                        rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
+                        rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
+                                ? Filter.DATE_COLUMN_FILTER :
+                                columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
+                                        ? Filter.NUMBER_COLUMN_FILTER : Filter.TEXT_COLUMN_FILTER
+                        datasetComponent.column.each { c->
+                            if (c.name == columns[i].name.toString()) {
+                                throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
+                            }
+                        }
+                        datasetComponent.column.add(rdbmsColumn)
+                    }
+                }
+            }
+            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+        }
+    }
+
     DatasetComponentInit() {}
 
 }

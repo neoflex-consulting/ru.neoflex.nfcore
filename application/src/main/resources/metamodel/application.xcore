@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 
@@ -156,6 +157,10 @@ class DatasetDiagramView extends DataView {
     //refers DatasetColumn datasetColumn
 }
 
+class GroovyCommand extends ViewElement, CommandElement {
+    Text command
+}
+
 class TabsViewReport extends ViewContainer {
     TabPosition tabPosition = "Top"
 }
@@ -252,6 +257,7 @@ class Button extends ViewElement {
     refers CommandElement[] submitItems
     boolean backStartPage
     String span = "0"
+    String label
 }
 
 /* Style */
