@@ -8,133 +8,71 @@
 package ru.neoflex.nfcore.masterdata
 import ru.neoflex.nfcore.base.types.QName
 
-abstract class BaseType {
-    op boolean isPlain() {false}
-    op boolean isStructure() {false}
-    op boolean isArray() {false}
-    op boolean isMap() {false}
-    op boolean isShape() {false}
-}
-
-class PlainType extends BaseType {
-    String javaClassName
-    op boolean isPlain() {true}
-}
-
-class Field {
-    container Structure structure opposite fields
-    String name
-    contains BaseType fieldType
-}
-
-class Structure extends BaseType {
-    contains Field[] fields opposite structure
-    op boolean isStructure() {true}
-}
-
-class Array extends BaseType {
-    contains BaseType elementType
-    op boolean isArray() {true}
-}
-
-class Map extends BaseType {
-    contains BaseType valueType
-    op boolean isMap() {true}
-}
-
-enum ShapeType {
-    Point
-    MultiPoint
-    LineString
-    MultiLineString
-    Polygon
-    MultiPolygon
-    Rectangle
-    GeometryCollection
-}
-
-class Shape extends BaseType {
-    ShapeType shapeType
-    op boolean isShape() {true}
-}
-
 abstract class Classifier {
     QName name
 }
 
-class NamedType extends Classifier {
-    contains BaseType baseType
+class PlainType extends Classifier {
+    String javaClassName
 }
 
-abstract class Feature {
-    container Entity entity opposite features
-    String name
+class ArrayType extends Classifier {
+    refers Classifier elementType
+}
+
+class MapType extends Classifier {
+    refers Classifier valueType
+}
+
+class DocumentType extends Classifier {
+    contains Attribute[] attributes opposite documentType
+}
+
+class EntityType extends DocumentType {
+    boolean active
+    boolean ^abstract
     boolean timeDependent
-    boolean many
-    op boolean isAttribute() {false}
-    op boolean isReference() {false}
+    refers EntityType[] superTypes
+    contains PrimaryKey primaryKey opposite entityType
+    contains InvertedEntry[] invertedEntries opposite entityType
+    contains ForeignKey[] foreignKeys opposite entityType
+    op void activate()
+    op void deactivate(boolean deleteTables)
 }
 
-class Attribute extends Feature {
-    refers NamedType attributeType
-    op boolean isAttribute() {true}
-}
-
-class Reference extends Feature {
-    refers Entity referenceEntity
-    op boolean isReference() {true}
+class Attribute {
+    container DocumentType documentType opposite attributes
+    String name
+    refers Classifier attributeType
 }
 
 abstract class Index {
     String name
-    refers Feature[] features
-    op boolean isPrimaryKey() {false}
+    refers Attribute[] attributes
 }
 
 @Ecore(constraints="IsValid")
 class PrimaryKey extends Index {
-    container Entity entity opposite primaryKey
-    op boolean isPrimaryKey() {true}
-    op boolean isForeignKey() {false}
-    op boolean isInvertedEntry() {false}
-    op boolean isPlainIndex() {false}
-    op boolean isFulltextIndex() {false}
-    op boolean isSpatialIndex() {false}
+    container EntityType entityType opposite primaryKey
 }
 
 @Ecore(constraints="IsValid")
 class ForeignKey extends Index {
-    container Entity entity opposite foreignKeys
-    refers Entity foreignEntity
-    op boolean isForeignKey() {true}
+    container EntityType entityType opposite foreignKeys
+    refers EntityType foreignEntityType
 }
 
 @Ecore(constraints="IsValid")
 abstract class InvertedEntry extends Index {
-    container Entity entity opposite invertedEntries
-    op boolean isInvertedEntry() {true}
+    container EntityType entityType opposite invertedEntries
 }
 
 class PlainIndex extends InvertedEntry {
-    boolean isUnique
-    op boolean isPlainIndex() {true}
+    boolean ^unique
 }
 
 class FulltextIndex extends InvertedEntry {
-    op boolean isFulltextIndex() {true}
 }
 
 class SpatialIndex extends InvertedEntry {
-    op boolean isSpatialIndex() {true}
-}
-
-class Entity extends Classifier {
-    boolean active
-    boolean ^abstract
-    refers Entity[] superTypes
-    contains Feature[] features opposite entity
-    contains PrimaryKey primaryKey opposite entity
-    contains InvertedEntry[] invertedEntries opposite entity
-    contains ForeignKey[] foreignKeys opposite entity
-    op void activate()
 }
