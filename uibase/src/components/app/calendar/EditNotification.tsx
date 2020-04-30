@@ -1,80 +1,82 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Checkbox, Col, Input, InputNumber, Row, Select, Switch, Tabs} from "antd";
+import {Button, Col, Input, InputNumber, Row, Select, Switch, Tabs} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
 
 const { TabPane } = Tabs;
 
 interface Props {
-    onCreateNotificationStatus?: (notificationStatus: any[]) => void;
+    onEditNotification?: (notificationStatus: any[]) => void;
     periodicity: EObject[];
     spinnerVisible: boolean;
+    editableNotification: Object;
+    myNotificationVisible: boolean;
 }
 
 interface State {
-    newNotification: Object;
+    editableNotification: Object;
     periodicity: EObject[];
     spinnerVisible: boolean;
+    myNotificationVisible: boolean;
 }
 
 class EditNotification extends React.Component<Props & WithTranslation & any, State> {
 
     state = {
-        newNotification: {
-            'fullName': undefined,
-            'shortName': undefined,
-            'weekendReporting': false,
-            'periodicity': 'Month',
-            'deadlineDay': 1,
-            'deadlineTime': 9
-        },
+        editableNotification: this.props.editableNotification,
         periodicity: this.props.periodicity,
-        spinnerVisible: this.props.spinnerVisible
+        spinnerVisible: this.props.spinnerVisible,
+        myNotificationVisible: this.props.myNotificationVisible
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
         if (this.state.spinnerVisible !== this.props.spinnerVisible) {
             this.setState({spinnerVisible: false})
         }
-    }
-
-    componentDidMount(): void {
+        if (this.props.editableNotification.fullName !== prevProps.editableNotification.fullName) {
+            this.setState({
+                editableNotification: this.props.editableNotification,
+                myNotificationVisible: this.props.myNotificationVisible
+            })
+        }
     }
 
     handleChange(e: any): void {
         const target = JSON.parse(e);
-        let newNotification: any = {
-            'fullName': target['row'] === 'fullName' ? target['value'] : this.state.newNotification['fullName'],
-            'shortName': target['row'] === 'shortName' ? target['value'] : this.state.newNotification['shortName'],
-            'weekendReporting': target['row'] === 'weekendReporting' ? target['value'] : this.state.newNotification['weekendReporting'],
-            'periodicity': target['row'] === 'periodicity' ? target['value'] : this.state.newNotification['periodicity'],
-            'deadlineDay': target['row'] === 'deadlineDay' ? target['value'] : this.state.newNotification['deadlineDay'],
-            'deadlineTime': target['row'] === 'deadlineTime' ? target['value'] : this.state.newNotification['deadlineTime'],
+        let editableNotification: any = {
+            'id': this.state.editableNotification['id'],
+            'fullName': target['row'] === 'fullName' ? target['value'] : this.state.editableNotification['fullName'],
+            'shortName': target['row'] === 'shortName' ? target['value'] : this.state.editableNotification['shortName'],
+            'weekendReporting': target['row'] === 'weekendReporting' ? target['value'] : this.state.editableNotification['weekendReporting'],
+            'periodicity': target['row'] === 'periodicity' ? target['value'] : this.state.editableNotification['periodicity'],
+            'deadlineDay': target['row'] === 'deadlineDay' ? target['value'] : this.state.editableNotification['deadlineDay'],
+            'deadlineTime': target['row'] === 'deadlineTime' ? target['value'] : this.state.editableNotification['deadlineTime'],
             };
-        this.setState({newNotification})
+        this.setState({editableNotification})
     }
 
     clear(): void {
-        const newNotification: any = {
+        const editableNotification: any = {
+            'id': this.state.editableNotification['id'],
             'fullName': undefined,
-            'shortName': undefined,
-            'weekendReporting': false,
-            'periodicity': 'Month',
+            'shortName': (this.state.myNotificationVisible ? undefined : this.state.editableNotification['shortName']),
+            'weekendReporting': (this.state.myNotificationVisible ? false : this.state.editableNotification['weekendReporting']),
+            'periodicity': (this.state.myNotificationVisible ? 'Month' : this.state.editableNotification['periodicity']),
             'deadlineDay': 1,
-            'deadlineTime': 9
+            'deadlineTime': (this.state.myNotificationVisible ? 9 : this.state.editableNotification['deadlineTime'])
         };
-        this.setState({newNotification})
+        this.setState({editableNotification})
     }
 
-    apply(newNotification: any): void {
+    save(editableNotification: any): void {
         this.setState({spinnerVisible: true});
-        this.props.onCreateNotificationStatus(newNotification)
+        this.props.onEditNotification(editableNotification)
     }
 
     render() {
         const {t} = this.props;
-        const {newNotification} = this.state;
+        const {editableNotification} = this.state;
         return (
             <div>
                 <Row>
@@ -83,7 +85,7 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </Col>
                     <Col span={12}>
                         <Input
-                            value={newNotification['fullName']}
+                            value={editableNotification['fullName']}
                             disabled={false}
                             style={{ width: '200px'}}
                             allowClear={true}
@@ -100,8 +102,8 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                 </Col>
                 <Col span={12}>
                     <Input
-                        value={newNotification['shortName']}
-                        disabled={false}
+                        value={editableNotification['shortName']}
+                        disabled={!this.state.myNotificationVisible}
                         style={{ width: '200px'}}
                         allowClear={true}
                         onChange={(e: any) => {
@@ -117,8 +119,8 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </Col>
                     <Col span={12}>
                         <Switch
-                            checked={newNotification['weekendReporting']}
-                            disabled={false}
+                            checked={editableNotification['weekendReporting']}
+                            disabled={!this.state.myNotificationVisible}
                             onChange={(e: any) => {
                                 const event = JSON.stringify({row: 'weekendReporting', value: e})
                                 this.handleChange(event)
@@ -134,7 +136,8 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                         </Col>
                         <Col span={12}>
                             <Select
-                                value={t(newNotification['periodicity'])}
+                                disabled={!this.state.myNotificationVisible}
+                                value={t(editableNotification['periodicity'])}
                                 style={{ width: '200px'}}
                                 allowClear={true}
                                 onChange={(e: any) => {
@@ -164,7 +167,7 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                             <InputNumber
                                 min={1}
                                 max={220}
-                                value={newNotification['deadlineDay']}
+                                value={editableNotification['deadlineDay']}
                                 disabled={false}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
@@ -183,11 +186,12 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                             <InputNumber
                                 min={0}
                                 max={23}
-                                value={newNotification['deadlineTime']}
+                                value={editableNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
                                 style={{ width: '200px'}}
+                                disabled={!this.state.myNotificationVisible}
                                 onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e})
+                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
                                     this.handleChange(event)
                                 }}
                             >
@@ -212,12 +216,12 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                         }
 
                         <Button
-                            title={t('create')}
+                            title={t('save')}
                             style={{ width: '100px', right: '6px', }}
                             type="primary"
-                            onClick={()=> this.apply(this.state.newNotification)}
+                            onClick={()=> this.save(this.state.editableNotification)}
                         >
-                            {t('create')}
+                            {t('save')}
                         </Button>
 
                         <Button

@@ -7,7 +7,7 @@ import {EObject} from "ecore";
 const { TabPane } = Tabs;
 
 interface Props {
-    onCreateNotificationStatus?: (notificationStatus: any[]) => void;
+    onCreateNotification?: (notificationStatus: any[]) => void;
     periodicity: EObject[];
     spinnerVisible: boolean;
 }
@@ -39,9 +39,6 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
         }
     }
 
-    componentDidMount(): void {
-    }
-
     handleChange(e: any): void {
         const target = JSON.parse(e);
         let newNotification: any = {
@@ -69,7 +66,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
 
     apply(newNotification: any): void {
         this.setState({spinnerVisible: true});
-        this.props.onCreateNotificationStatus(newNotification)
+        this.props.onCreateNotification(newNotification)
     }
 
     render() {
@@ -168,7 +165,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 disabled={false}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e})
+                                    const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e});
                                     this.handleChange(event)
                                 }}
                             />
@@ -187,7 +184,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 formatter={value => `${value}:00`}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e})
+                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
                                     this.handleChange(event)
                                 }}
                             >

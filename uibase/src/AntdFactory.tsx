@@ -13,7 +13,7 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {ISubmitHandler} from "./MainContext";
+import {IServerNamedParam, ISubmitHandler} from "./MainContext";
 import DOMPurify from 'dompurify'
 
 const { TabPane } = Tabs;
@@ -163,24 +163,25 @@ class Button_ extends ViewContainer {
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
+        const label = t(this.props.viewObject.get('label'));
         return <div key={this.viewObject._id}>
             {this.props.viewObject.get('buttonCancel') === true &&
             <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
-                {t('cancel')}
+                {(label)? label: t('cancel')}
             </Button>}
             {this.props.viewObject.get('buttonSave') === true &&
             <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
-                {t('save')}
+                {(label)? label: t('save')}
             </Button>
             }
             {this.props.viewObject.get('buttonSubmit') === true &&
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
-                {t('submit')}
+                {(label)? label: t('submit')}
             </Button>
             }
             {this.props.viewObject.get('backStartPage') === true &&
             <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
-                {t('backStartPage')}
+                {(label)? label: t('backStartPage')}
             </Button>
             }
         </div>
@@ -306,6 +307,100 @@ class HtmlContent_ extends ViewContainer {
             <div style={{marginBottom: marginBottom}}
                  className="content"
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            </div>
+        )
+    }
+}
+
+class GroovyCommand_ extends ViewContainer {
+    state = {
+        command: this.props.viewObject.get('command'),
+        commandType: this.props.viewObject.get('commandType')||"Eval",
+        gitResourcePath: this.props.viewObject.get('gitResourcePath'),
+        gitStaticClass: this.props.viewObject.get('gitStaticClass'),
+        gitStaticMethod: this.props.viewObject.get('gitStaticMethod')
+    };
+    componentDidMount(): void {
+        if (this.props.context.submitHandlers !== undefined) {
+            this.props.context.submitHandlers.push({
+                name: this.props.viewObject.get('name'),
+                handler: this.onSubmit.bind(this)
+            } as ISubmitHandler)
+        }
+    }
+    onSubmit = () => {
+        if (this.state.commandType === "Resource") {
+            API.instance().fetchJson('/script/resource?path='+this.state.gitResourcePath, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        } else if (this.state.commandType === "Static") {
+            API.instance().fetchJson('/script/static/'+this.state.gitStaticClass+'/'+this.state.gitStaticMethod, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        } else {
+            API.instance().fetchJson('/script/eval', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: this.getCommand()
+            }).then(res => {
+            })
+        }
+    };
+    getNamedParams = () => {
+        let namedParams: IServerNamedParam[] = [];
+        if (this.props.viewObject.get('valueItems')) {
+            this.props.viewObject.get('valueItems').each((item: EObject) => {
+                if (item.eClass._id === "//Select") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: (item.get('value') instanceof Array)
+                            ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
+                            : item.get('value')
+                    })
+                } else if (item.eClass._id === "//DatePicker") {
+                    namedParams.push({
+                        parameterName: item.get('name'),
+                        parameterValue: item.get('value'),
+                        parameterDataType: "Date",
+                        parameterDateFormat: item.get('format')
+                    })
+                }
+            });
+        }
+        return namedParams
+    };
+    getCommand = () => {
+        const params = this.getNamedParams().sort((a, b) => {
+            if (a.parameterName > b.parameterName) {
+                return 1
+            } else if (a.parameterName === b.parameterName){
+                return 0
+            }
+            return -1
+        });
+        let replacedCommand = this.state.command;
+        params.forEach(param => {
+            if (replacedCommand?.includes(param.parameterName)) {
+                replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), param.parameterValue);
+            }
+        });
+        return replacedCommand
+    };
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}>
             </div>
         )
     }
@@ -504,8 +599,8 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
         this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
+        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_)
     }
-
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
         if (startResource === undefined) {

@@ -54,9 +54,6 @@ export class StartPage extends React.Component<any, State> {
                                 <div className="app-name">
                                     {app.eContents()[0].get('name')}
                                 </div>
-                                <div className="description">
-                                   Описание приложения
-                                </div>
                             </Button>
                         )
                     }

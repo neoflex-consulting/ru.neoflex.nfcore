@@ -585,6 +585,9 @@ class DatasetGrid extends React.Component<any, any> {
                                 sortable={col.get('sortable') || false}
                                 suppressMenu={col.get('suppressMenu') || false}
                                 cellStyle = {this.state.cellStyle}
+                                cellRenderer = {function(params: any) {
+                                    return params.value;
+                                }}
                             />
                         )}
                     </AgGridReact>
