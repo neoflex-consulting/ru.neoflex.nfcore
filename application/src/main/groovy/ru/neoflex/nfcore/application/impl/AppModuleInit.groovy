@@ -262,6 +262,221 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
+    static def createAppModuleNRDemoCalcMart(String name, String header, String jdbcDatasetName, String datasetComponentName) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "CalcMartForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header //"Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)"
+
+            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def col21 = ApplicationFactory.eINSTANCE.createColumn()
+            col21.name = "col21"
+            col21.span = 2
+
+            def col22 = ApplicationFactory.eINSTANCE.createColumn()
+            col22.name = "col22"
+            col22.span = 2
+
+            def typography22 = ApplicationFactory.eINSTANCE.createTypography()
+            typography22.name = "Отчётная дата (на)"
+            col22.children.add(typography22)
+
+            def col23 = ApplicationFactory.eINSTANCE.createColumn()
+            col23.name = "col23"
+            col23.span = 2
+
+            def datePicker = ApplicationFactory.eINSTANCE.createDatePicker()
+            datePicker.name = 'REPORT_DATE'
+            datePicker.allowClear = false
+            datePicker.disabled = false
+            datePicker.format = "YYYY-MM-DD"
+            datePicker.width = 200
+
+            col23.children.add(datePicker)
+
+            row2.children.add(col21)
+            row2.children.add(col22)
+            row2.children.add(col23)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row3"
+
+            def col31 = ApplicationFactory.eINSTANCE.createColumn()
+            col31.name = "col31"
+            col31.span = 2
+
+            def col32 = ApplicationFactory.eINSTANCE.createColumn()
+            col32.name = "col32"
+            col32.span = 2
+
+            def typography32 = ApplicationFactory.eINSTANCE.createTypography()
+            typography32.name = "Вид расчёта"
+            col32.children.add(typography32)
+
+            def col33 = ApplicationFactory.eINSTANCE.createColumn()
+            col33.name = "col33"
+            col33.span = 2
+
+            def datasetSelect = ApplicationFactory.eINSTANCE.createSelect()
+            datasetSelect.name = 'REPORT_FILL_TYPE'
+            datasetSelect.value = 'DEF_F110MAIN'
+            datasetSelect.staticValues = "Основной отчёт\\:DEF_F110MAIN\\;Полный отчёт\\:DEF_F110ALL"
+
+            col33.children.add(datasetSelect)
+
+            row3.children.add(col31)
+            row3.children.add(col32)
+            row3.children.add(col33)
+
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = "row4"
+
+            def col41 = ApplicationFactory.eINSTANCE.createColumn()
+            col41.name = "col41"
+            col41.span = 2
+
+            def button1 = ApplicationFactory.eINSTANCE.createButton()
+            button1.name = "calcButton"
+            button1.label = "submit"
+            button1.buttonSubmit = true
+
+            col41.children.add(button1)
+
+            def col42 = ApplicationFactory.eINSTANCE.createColumn()
+            col42.name = "col42"
+            col42.span = 2
+
+            def button2 = ApplicationFactory.eINSTANCE.createButton()
+            button2.name = "RefreshButton"
+            button2.label = "refresh"
+            button2.buttonSubmit = true
+
+            col42.children.add(button2)
+
+            row4.children.add(col41)
+            row4.children.add(col42)
+
+            def row5 = ApplicationFactory.eINSTANCE.createRow()
+            row5.name = "row5"
+
+            def groovyCommand = ApplicationFactory.eINSTANCE.createGroovyCommand()
+            groovyCommand.name = "groovyCommand"
+            groovyCommand.command = "import ru.neoflex.nfcore.base.services.Context\n" +
+                    "import ru.neoflex.nfcore.base.util.DocFinder\n" +
+                    "import ru.neoflex.nfcore.dataset.DatasetPackage\n" +
+                    "import ru.neoflex.nfcore.dataset.JdbcConnection\n" +
+                    "\n" +
+                    "def jc = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_CONNECTION, [name: 'JdbcConnectionNRDemo'])\n" +
+                    "        .execute().resourceSet.resources.get(0).contents.get(0) as JdbcConnection\n" +
+                    "def conn = jc.connect()\n" +
+                    "try {\n" +
+                    "    def st = conn.createStatement()\n" +
+                    "    try {\n" +
+                    "        st.execute(\"declare\\n\" +\n" +
+                    "                \"  lv_CalcTypeCount number;\\n\" +\n" +
+                    "                \"  lv_UnderwoodName nrapp.ref_calc_type.underwood_name%type;\\n\" +\n" +
+                    "                \"  lv_OnDate        date := to_date(':REPORT_DATE','YYYY-MM-DD') - 1;\\n\" +\n" +
+                    "                \"  lv_event_record_id number;\\n\" +\n" +
+                    "                \"begin\\n\" +\n" +
+                    "                \"  --\\n\" +\n" +
+                    "                \"  EXECUTE IMMEDIATE 'alter session set nls_date_format=\\\"DD-MON-RR\\\"';\\n\" +\n" +
+                    "                \"  --\\n\" +\n" +
+                    "                \"  select count(1)\\n\" +\n" +
+                    "                \"    into lv_CalcTypeCount\\n\" +\n" +
+                    "                \"    from table(nrapp.apex_nr_util.GetCalcType\\n\" +\n" +
+                    "                \"         (\\n\" +\n" +
+                    "                \"           i_AppId => '11100',\\n\" +\n" +
+                    "                \"           i_OnDate => lv_OnDate\\n\" +\n" +
+                    "                \"         ));\\n\" +\n" +
+                    "                \"  --\\n\" +\n" +
+                    "                \"  if lv_CalcTypeCount = 1\\n\" +\n" +
+                    "                \"  then\\n\" +\n" +
+                    "                \"    select underwood_name\\n\" +\n" +
+                    "                \"      into lv_UnderwoodName\\n\" +\n" +
+                    "                \"      from table(nrapp.apex_nr_util.GetCalcType\\n\" +\n" +
+                    "                \"           (\\n\" +\n" +
+                    "                \"             i_AppId => '11100',\\n\" +\n" +
+                    "                \"             i_OnDate => lv_OnDate\\n\" +\n" +
+                    "                \"           ));\\n\" +\n" +
+                    "                \"  else\\n\" +\n" +
+                    "                \"    lv_UnderwoodName := ':REPORT_FILL_TYPE';\\n\" +\n" +
+                    "                \"  end if;\\n\" +\n" +
+                    "                \"  --\\n\" +\n" +
+                    "                \"  dma.pck_support.pSetScheduleCalcNREtl\\n\" +\n" +
+                    "                \"  (\\n\" +\n" +
+                    "                \"    i_partition_key               => lv_UnderwoodName,\\n\" +\n" +
+                    "                \"    i_is_send_mail_dds_dma        => 0,\\n\" +\n" +
+                    "                \"    i_is_run_dma_dqc              => 0,\\n\" +\n" +
+                    "                \"    i_is_send_mail_dma_dqc        => 0,\\n\" +\n" +
+                    "                \"    i_oper_date                   => lv_OnDate,\\n\" +\n" +
+                    "                \"    i_oper_date_to                => lv_OnDate,\\n\" +\n" +
+                    "                \"    i_debug_mode                  => 0,\\n\" +\n" +
+                    "                \"    o_event_record_id             => lv_event_record_id\\n\" +\n" +
+                    "                \"  );  \\n\" +\n" +
+                    "                \"end;\\n\")\n" +
+                    "        return []\n" +
+                    "    }\n" +
+                    "    finally {\n" +
+                    "        st.close()\n" +
+                    "    }\n" +
+                    "}\n" +
+                    "finally {\n" +
+                    "    conn.close()\n" +
+                    "}"
+            groovyCommand.valueItems.add(datePicker)
+            groovyCommand.valueItems.add(datasetSelect)
+
+            button1.submitItems.add(groovyCommand)
+
+            row5.children.add(groovyCommand)
+
+            def row6 = ApplicationFactory.eINSTANCE.createRow()
+            row6.name = "row6"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "SectionDatasetView"
+            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/, "",false)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
+            datasetView.setDatasetComponent(datasetComponent)
+
+            button2.submitItems.add(datasetView)
+
+            row6.children.add(datasetView)
+
+            form.children.add(row1)
+            form.children.add(row2)
+            form.children.add(row3)
+            form.children.add(row4)
+            form.children.add(row5)
+            form.children.add(row6)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
     static def makeRefTreeNRDemo() {
         def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
         referenceTree.name = "F110_REF_TREE"
@@ -270,7 +485,7 @@ class AppModuleInit {
         def appModule3 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section3", "",false) as AppModule
         def appModule4 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4", "",false) as AppModule
         def appModule5 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail", "",false) as AppModule
-
+        def appModule8 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart", "",false) as AppModule
 
 
         def catalog1 = ApplicationFactory.eINSTANCE.createCatalogNode()
@@ -305,7 +520,7 @@ class AppModuleInit {
 
         def appModuleNode8 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode8.name = "Запуск расчёта"
-        //appModuleNode8.appModule = appModule8
+        appModuleNode8.appModule = appModule8
 
         def appModuleNode9 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode9.name = "Управление статусом формы"
