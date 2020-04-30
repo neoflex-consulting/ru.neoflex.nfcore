@@ -191,7 +191,7 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                                 style={{ width: '200px'}}
                                 disabled={!this.state.myNotificationVisible}
                                 onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e})
+                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
                                     this.handleChange(event)
                                 }}
                             >
