@@ -329,9 +329,8 @@ class GroovyCommand_ extends ViewContainer {
         }
     }
     onSubmit = () => {
-        //TODO пока на 8080 порту
         if (this.state.commandType === "Resource") {
-            API.instance().fetchJson('http://localhost:8080/script/resource?path='+this.state.gitResourcePath, {
+            API.instance().fetchJson('/script/resource?path='+this.state.gitResourcePath, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -340,7 +339,7 @@ class GroovyCommand_ extends ViewContainer {
             }).then(res => {
             })
         } else if (this.state.commandType === "Static") {
-            API.instance().fetchJson('http://localhost:8080/script/static/'+this.state.gitStaticClass+'/'+this.state.gitStaticMethod, {
+            API.instance().fetchJson('/script/static/'+this.state.gitStaticClass+'/'+this.state.gitStaticMethod, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -349,7 +348,7 @@ class GroovyCommand_ extends ViewContainer {
             }).then(res => {
             })
         } else {
-            API.instance().fetchJson('http://localhost:8080/script/eval', {
+            API.instance().fetchJson('/script/eval', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
