@@ -432,11 +432,11 @@ class EcoreApp extends React.Component<any, State> {
                         </Col>
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
-                                <Col span={19}>
+                                <Col span={14}>
                                     <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
-                                <Col span={5}>
+                                <Col span={10}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
                                         <Menu.SubMenu
@@ -495,7 +495,7 @@ class EcoreApp extends React.Component<any, State> {
                                                 {localStorage.getItem('notifierDuration') === '3' ?
                                                     <Menu.Item
                                                         style={{backgroundColor: backgroundColor}}
-                                                        key={'showNotifications'}>
+                                                          key={'showNotifications'}>
                                                         <FontAwesomeIcon icon={faEye} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Disable autohiding</Menu.Item>
