@@ -61,7 +61,8 @@ class Calendar extends React.Component<any, any> {
             frameworkComponents: {
                 'actionMenu': this.actionMenu
             },
-            myNotificationVisible: false
+            myNotificationVisible: false,
+            searchValue: undefined
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
@@ -432,14 +433,20 @@ class Calendar extends React.Component<any, any> {
         )
     }
 
+    changeSearchValue = (e: any) => {
+        this.setState({searchValue: e})
+    };
+
+    searchValue = () => {
+        console.log()
+    };
+
     renderHeader() {
         const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
         return (
             <div className="header row flex-middle">
-
-
                 {
                     this.state.calendarVisible &&
                     <div
@@ -518,7 +525,14 @@ class Calendar extends React.Component<any, any> {
                             <Input
                                 style={{width: '186px', borderRadius: '4px', fill: '#ffffff', strokeWidth: 1, height: '32px'}}
                                 placeholder="Поиск"
-                                suffix={<img alt="Not found" src={searchIcon}/>}
+                                suffix={
+                                    <img
+                                        alt="Not found"
+                                        src={searchIcon}
+                                        onClick={this.searchValue}
+                                    />
+                                }
+                                onChange={(e: any) => {this.changeSearchValue(e.target.value)}}
                             />
                         </div>
 

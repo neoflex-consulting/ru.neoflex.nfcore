@@ -281,7 +281,7 @@ class EcoreApp extends React.Component<any, State> {
                     }
                 });
             } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = []
+                let splitPathFull: any = [];
                 this.state.pathFull.forEach((p: any, index: any) => {
                     if (p.appModule === appModuleName) {splitPathFull.push(index)}
                 });
