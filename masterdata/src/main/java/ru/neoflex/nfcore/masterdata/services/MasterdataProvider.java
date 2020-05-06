@@ -1,17 +1,23 @@
 package ru.neoflex.nfcore.masterdata.services;
 
+import com.orientechnologies.lucene.OLuceneIndexFactory;
 import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
+import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.OVertex;
+import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.record.impl.ODocumentHelper;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.server.OServer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.slf4j.Logger;
@@ -199,6 +205,30 @@ public class MasterdataProvider {
                         createProperty(database, oClass, attribute.getName(), attribute.getAttributeType());
                     }
                 }
+                PrimaryKey pk = entity.getPrimaryKey();
+                if (pk != null) {
+                    oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, entity.getAttributes()
+                            .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                }
+                for (InvertedEntry ie: entity.getInvertedEntries()) {
+                    if (ie instanceof PlainIndex) {
+                        OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
+                        oClass.createIndex(ie.getName(), iType, entity.getAttributes()
+                                .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                    }
+                    else if (ie instanceof FulltextIndex) {
+                        ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                        oClass.createIndex(ie.getName(), "FULLTEXT", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
+                                entity.getAttributes()
+                                        .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                    }
+                    else if (ie instanceof SpatialIndex) {
+                        ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                        oClass.createIndex(ie.getName(), "SPATIAL", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
+                                entity.getAttributes()
+                                        .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                    }
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -210,6 +240,38 @@ public class MasterdataProvider {
 
     public ODatabaseDocument createDatabaseDocument() {
         return provider.getServer().getOServer().openDatabase(masterdataDbName);
+    }
+
+    public String createEntity(ODatabaseDocument db, EntityType entityType, String jsonString) {
+        OVertex entity = db.newVertex(entityType.getName());
+        entity.fromJSON(jsonString);
+        entity.save();
+        return entity.getIdentity().toString();
+    }
+
+    public String createEntity(ODatabaseDocument db, EntityType entityType, Map<String, Object> data) {
+        OVertex entity = db.newVertex(entityType.getName());
+        for (Attribute attribute: entityType.getAttributes()) {
+            if (data.containsKey(attribute.getName())) {
+                entity.setProperty(attribute.getName(), data.get(attribute.getName()));
+            }
+        }
+        entity.save();
+        return entity.getIdentity().toString();
+    }
+
+    public String loadJson(ODatabaseDocument db, String recordId) {
+        OVertex entity = db.load(new ORecordId(recordId));
+        return entity.toJSON("rid,version,class");
+    }
+
+    public Map<String, Object> loadMap(ODatabaseDocument db, String recordId) {
+        OVertex entity = db.load(new ORecordId(recordId));
+        Map<String, Object> result = new HashMap<>();
+        entity.getSchemaType().ifPresent(oClass -> result.put(ODocumentHelper.ATTRIBUTE_CLASS, oClass.getName()));
+        result.put(ODocumentHelper.ATTRIBUTE_RID, entity.getIdentity().toString());
+        result.put(ODocumentHelper.ATTRIBUTE_VERSION, Integer.toString(entity.getVersion()));
+        return result;
     }
 
     public<R> R withDatabase(Function<ODatabaseDocument, R> f) {
@@ -282,29 +344,29 @@ public class MasterdataProvider {
         ensureArrayType("List3OfDouble", "List2OfDouble");
         ensureArrayType("List4OfDouble", "List3OfDouble");
         ensureDocumentType("OPoint", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "ListOfDouble"));
+            createAttribute(documentType, "coordinates", "ListOfDouble");
         });
         ensureDocumentType("OMultiPoint", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "List2OfDouble"));
+            createAttribute(documentType, "coordinates", "List2OfDouble");
         });
         ensureDocumentType("OLineString", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "List2OfDouble"));
+            createAttribute(documentType, "coordinates", "List2OfDouble");
         });
         ensureDocumentType("OMultiLineString", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "List3OfDouble"));
+            createAttribute(documentType, "coordinates", "List3OfDouble");
         });
         ensureDocumentType("OPolygon", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "List3OfDouble"));
+            createAttribute(documentType, "coordinates", "List3OfDouble");
         });
         ensureDocumentType("OMultiPolygon", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "List4OfDouble"));
+            createAttribute(documentType, "coordinates", "List4OfDouble");
         });
         ensureDocumentType("ORectangle", documentType -> {
-            documentType.getAttributes().add(createAttribute("coordinates", "ListOfDouble"));
+            createAttribute(documentType, "coordinates", "ListOfDouble");
         });
     }
 
-    private Attribute createAttribute(String name, String attributeTypeName) {
+    public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName) {
         try {
             List<Resource> attributeTypeList = DocFinder.create(store, MasterdataPackage.Literals.CLASSIFIER, new HashMap() {{put("name", attributeTypeName);}})
                     .execute().getResources();
@@ -314,9 +376,64 @@ public class MasterdataProvider {
             Attribute attribute = MasterdataFactory.eINSTANCE.createAttribute();
             attribute.setName(name);
             attribute.setAttributeType((Classifier) attributeTypeList.get(0).getContents().get(0));
+            entityType.getAttributes().add(attribute);
             return attribute;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public PrimaryKey createPrimaryKey(EntityType entityType, String name, String ...fieldNames) {
+        PrimaryKey primaryKey = MasterdataFactory.eINSTANCE.createPrimaryKey();
+        setupIndex(entityType, name, primaryKey, fieldNames);
+        entityType.setPrimaryKey(primaryKey);
+        return primaryKey;
+    }
+
+    public ForeignKey createForeignKey(EntityType entityType, EntityType foreignEntityType, String name, String ...fieldNames) {
+        ForeignKey foreignKey = MasterdataFactory.eINSTANCE.createForeignKey();
+        setupIndex(entityType, name, foreignKey, fieldNames);
+        foreignKey.setForeignEntityType(foreignEntityType);
+        entityType.getForeignKeys().add(foreignKey);
+        return foreignKey;
+    }
+
+    public PlainIndex createPlainIndex(EntityType entityType, boolean unique, String name, String ...fieldNames) {
+        PlainIndex plainIndex = MasterdataFactory.eINSTANCE.createPlainIndex();
+        setupIndex(entityType, name, plainIndex, fieldNames);
+        plainIndex.setUnique(unique);
+        entityType.getInvertedEntries().add(plainIndex);
+        return plainIndex;
+    }
+
+    public FulltextIndex createFulltextIndex(EntityType entityType, String name, String ...fieldNames) {
+        FulltextIndex fulltextIndex = MasterdataFactory.eINSTANCE.createFulltextIndex();
+        setupIndex(entityType, name, fulltextIndex, fieldNames);
+        entityType.getInvertedEntries().add(fulltextIndex);
+        return fulltextIndex;
+    }
+
+    public SpatialIndex createSpatialIndex(EntityType entityType, String name, String ...fieldNames) {
+        SpatialIndex spatialIndex = MasterdataFactory.eINSTANCE.createSpatialIndex();
+        setupIndex(entityType, name, spatialIndex, fieldNames);
+        entityType.getInvertedEntries().add(spatialIndex);
+        return spatialIndex;
+    }
+
+    private void setupIndex(EntityType entityType, String name, Index index, String[] fieldNames) {
+        index.setName(name);
+        for (String fieldName: fieldNames) {
+            Attribute attribute = null;
+            for (Attribute a: entityType.getAttributes()) {
+                if (a.getName().equals(fieldName)) {
+                    attribute = a;
+                    break;
+                }
+            }
+            if (attribute == null) {
+                throw new IllegalArgumentException(String.format("Attribute %s not found", fieldName));
+            }
+            index.getAttributes().add(attribute);
         }
     }
 
