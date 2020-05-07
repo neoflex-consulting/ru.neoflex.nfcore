@@ -568,17 +568,37 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
-                <Button
-                    type="primary"
-                    style={{
-                        width: '20px',
-                        height: '30px',
-                        marginTop: '2px',
-                        backgroundColor: '#293468'
-                    }}
-                    onClick={this.handleCreateMenu}>
-                    <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-                </Button>
+
+                {localStorage.getItem('fullScreenOn') === 'true' ?
+                    <Button
+                        className="ButtonPlus"
+                        type="primary"
+                        style={{
+                            width: '20px',
+                            height: '30px',
+                            marginTop: '11px',
+                            backgroundColor: '#293468'
+                        }}
+                        onClick={this.handleCreateMenu}>
+                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
+                    </Button>
+
+                :
+                    <Button
+                        className="ButtonPlus"
+                        type="primary"
+                        style={{
+                            width: '20px',
+                            height: '30px',
+                            marginTop: '2px',
+                            backgroundColor: '#293468'
+                        }}
+                        onClick={this.handleCreateMenu}>
+                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
+                    </Button>
+                }
+
+
 
                 <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 

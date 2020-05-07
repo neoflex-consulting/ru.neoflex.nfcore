@@ -406,10 +406,6 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
         }
-        else{
-            this.setState({ notifierDuration: 3});
-            localStorage.setItem('notifierDuration', '3');
-        }
     };
 
     renderDev = (props: any) => {
@@ -497,7 +493,7 @@ class EcoreApp extends React.Component<any, State> {
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu
+                                           {/* <Menu.SubMenu
                                                 style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
                                                 title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Notification</span>}>
@@ -515,7 +511,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         <FontAwesomeIcon icon={faClock} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Autohide</Menu.Item>}
-                                            </Menu.SubMenu>
+                                            </Menu.SubMenu>*/}
                                         </Menu.SubMenu>
                                     </Menu>
                                     <Dropdown overlay={langMenu} placement="bottomCenter">
