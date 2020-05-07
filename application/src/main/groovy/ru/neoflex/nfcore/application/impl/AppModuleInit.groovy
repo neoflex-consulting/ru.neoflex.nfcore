@@ -229,9 +229,71 @@ class AppModuleInit {
 
             def htmlContent = ApplicationFactory.eINSTANCE.createHtmlContent()
             htmlContent.name = "futureDynamicContent"
-            htmlContent.htmlContent = "<span style=\"font-size:1.6rem;white-space:nowrap;\"><img src=\"/images/Success-icon.png\" width=\"30\" height=\"22\"> Ошибки ПККД отсутствуют.</span>"
+            htmlContent.htmlContent = "<span style=\"font-size:1.6rem;white-space:nowrap;\">:GROOVY_JSON_HOLDER</span>"
+            //htmlContent.valueItems
+
+            def valueHolder = ApplicationFactory.eINSTANCE.createValueHolder()
+            valueHolder.name = "GROOVY_JSON_HOLDER"
+            valueHolder.groovyCommandResultColumnName = "APEXDQCMESSAGE"
+
+            def groovyCommand = ApplicationFactory.eINSTANCE.createGroovyCommand()
+            groovyCommand.name = "CHECK_DQC"
+            groovyCommand.executeOnStartup = true
+            groovyCommand.valueItems.add(datePicker)
+            groovyCommand.command = "import ru.neoflex.nfcore.base.services.Context\n" +
+                    "import ru.neoflex.nfcore.base.util.DocFinder\n" +
+                    "import ru.neoflex.nfcore.dataset.DatasetPackage\n" +
+                    "import ru.neoflex.nfcore.dataset.JdbcConnection\n" +
+                    "\n" +
+                    "def jc = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_CONNECTION, [name: 'JdbcConnectionNRDemo'])\n" +
+                    "        .execute().resourceSet.resources.get(0).contents.get(0) as JdbcConnection\n" +
+                    "def conn = jc.connect()\n" +
+                    "try {\n" +
+                    "    def st = conn.createStatement()\n" +
+                    "    try {\n" +
+                    "        def rs = st.executeQuery(\"\"\"select nrapp.APEX_NR_UTIL.getApexDqcMessage\n" +
+                    "                (\n" +
+                    "                        i_ReportId    => 11100,\n" +
+                    "                        i_OnDate      => to_date(':REPORT_DATE','YYYY-MM-DD') - 1,\n" +
+                    "                        i_AppId       => 11100,\n" +
+                    "                        i_PageId      => 79,\n" +
+                    "                        i_CallerPage  => 2,\n" +
+                    "                        i_SessionId   => '',\n" +
+                    "                        i_Debug       => '',\n" +
+                    "                        i_PicturePath => '/images/'\n" +
+                    "                ) as ApexDqcMessage\n" +
+                    "                from dual\"\"\")\n" +
+                    "        try {\n" +
+                    "            def rowData = []\n" +
+                    "            while (rs.next()) {\n" +
+                    "                def map = [:]\n" +
+                    "                def columnCount = rs.metaData.columnCount\n" +
+                    "                for (int i = 1; i <= columnCount; ++i) {\n" +
+                    "                    def object = rs.getObject(i)\n" +
+                    "                    map[\"\${rs.metaData.getColumnName(i)}\"] = (object == null ? null : object.toString())\n" +
+                    "                }\n" +
+                    "                rowData.add(map)\n" +
+                    "            }\n" +
+                    "            return rowData\n" +
+                    "        }\n" +
+                    "        finally {\n" +
+                    "            rs.close()\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "    finally {\n" +
+                    "        st.close()\n" +
+                    "    }\n" +
+                    "}\n" +
+                    "finally {\n" +
+                    "    conn.close()\n" +
+                    "}";
+
+            valueHolder.contextWriter = groovyCommand
+            htmlContent.valueItems.add(valueHolder)
 
             row5.children.add(htmlContent)
+            row5.children.add(groovyCommand)
+            row5.children.add(valueHolder)
 
             def row6 = ApplicationFactory.eINSTANCE.createRow()
             row6.name = "row6"
@@ -838,3 +900,5 @@ class AppModuleInit {
         }
     }
 }
+
+

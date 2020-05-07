@@ -5,7 +5,7 @@ import Ecore, {EObject} from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerNamedParam, IServerQueryParam, ISubmitHandler} from '../../../MainContext';
+import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -15,6 +15,7 @@ import Highlight from "./Highlight";
 import Calculator from "./Calculator";
 import {faCalculator} from "@fortawesome/free-solid-svg-icons/faCalculator";
 import DatasetGrid from "./DatasetGrid";
+import {getNamedParams} from "../../../utils/namedParamsUtils";
 
 const { Option, OptGroup } = Select;
 
@@ -391,34 +392,10 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    getQueryNamedParams = () => {
-        let namedParams: IServerNamedParam[] = [];
-        if (this.props.viewObject.get('valueItems')) {
-            this.props.viewObject.get('valueItems').each((item: EObject) => {
-                if (item.eClass._id === "//Select") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: (item.get('value') instanceof Array)
-                            ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
-                            : item.get('value')
-                    })
-                } else if (item.eClass._id === "//DatePicker") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: item.get('value'),
-                        parameterDataType: "Date",
-                        parameterDateFormat: item.get('format')
-                    })
-                }
-            });
-        }
-        return namedParams
-    };
-
     private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const queryParams = this.getQueryNamedParams();
+        const queryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
         this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
             ,[]

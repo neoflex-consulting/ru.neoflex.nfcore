@@ -13,8 +13,9 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {IServerNamedParam, ISubmitHandler} from "./MainContext";
+import {ISubmitHandler} from "./MainContext";
 import DOMPurify from 'dompurify'
+import {replaceNamedParam, getNamedParams} from "./utils/namedParamsUtils";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -189,9 +190,13 @@ class Button_ extends ViewContainer {
 }
 
 class Select_ extends ViewContainer {
-    state = {
-        selectData: []
-    };
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            selectData: []
+        };
+    }
+
     onChange = (currentValue: string[]) => {
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
@@ -254,13 +259,13 @@ class Select_ extends ViewContainer {
 }
 
 class DatePicker_ extends ViewContainer {
-    state = {
-        pickedDate: moment(),
-        disabled: this.props.viewObject.get('disabled') || false,
-        allowClear: this.props.viewObject.get('allowClear') || false,
-        format: this.props.viewObject.get('format') || "YYYY-MM-DD",
-        width: this.props.viewObject.get('width') || "200px"
-    };
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            pickedDate: moment(),
+            format: this.props.viewObject.get('format') || "YYYY-MM-DD",
+        };
+    }
 
     componentDidMount(): void {
         //Инициализация value
@@ -277,6 +282,7 @@ class DatePicker_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
     render = () => {
         return (
             //TODO перейти на antd v4?
@@ -285,10 +291,10 @@ class DatePicker_ extends ViewContainer {
                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
-                    disabled={this.state.disabled}
-                    allowClear={this.state.allowClear}
+                    disabled={this.props.viewObject.get('disabled') || false}
+                    allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
-                    style={{width: this.state.width}}
+                    style={{width: this.props.viewObject.get('width') || "200px"}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -298,9 +304,24 @@ class DatePicker_ extends ViewContainer {
 }
 
 class HtmlContent_ extends ViewContainer {
-    state = {
-        htmlContent: this.props.viewObject.get('htmlContent')
-    };
+    constructor(props: any) {
+        super(props);
+        const params = getNamedParams(this.props.viewObject.get('valueItems'));
+        this.state = {
+            htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'),params),
+            params: params
+        };
+    }
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)) {
+            this.setState({
+                params: newParams,
+                htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'), newParams),
+            })
+        }
+    }
 
     render = () => {
         return (
@@ -313,39 +334,39 @@ class HtmlContent_ extends ViewContainer {
 }
 
 class GroovyCommand_ extends ViewContainer {
-    state = {
-        command: this.props.viewObject.get('command'),
-        commandType: this.props.viewObject.get('commandType')||"Eval",
-        gitResourcePath: this.props.viewObject.get('gitResourcePath'),
-        gitStaticClass: this.props.viewObject.get('gitStaticClass'),
-        gitStaticMethod: this.props.viewObject.get('gitStaticMethod')
-    };
     componentDidMount(): void {
         if (this.props.context.submitHandlers !== undefined) {
             this.props.context.submitHandlers.push({
                 name: this.props.viewObject.get('name'),
-                handler: this.onSubmit.bind(this)
+                handler: this.execute.bind(this)
             } as ISubmitHandler)
         }
+        if (this.props.viewObject.get('executeOnStartup')) {
+            this.execute()
+        }
     }
-    onSubmit = () => {
-        if (this.state.commandType === "Resource") {
-            API.instance().fetchJson('/script/resource?path='+this.state.gitResourcePath, {
+    execute = () => {
+        const commandType = this.props.viewObject.get('commandType')||"Eval";
+        const command = this.props.viewObject.get('command');
+        if (commandType === "Resource") {
+            API.instance().fetchJson('/script/resource?path='+this.props.viewObject.get('gitResourcePath'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: this.getCommand()
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
             })
-        } else if (this.state.commandType === "Static") {
-            API.instance().fetchJson('/script/static/'+this.state.gitStaticClass+'/'+this.state.gitStaticMethod, {
+        } else if (commandType === "Static") {
+            API.instance().fetchJson('/script/static/'+this.props.viewObject.get('gitStaticClass')+'/'+this.props.viewObject.get('gitStaticMethod'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: this.getCommand()
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
             })
         } else {
             API.instance().fetchJson('/script/eval', {
@@ -353,51 +374,50 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: this.getCommand()
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
             })
         }
     };
-    getNamedParams = () => {
-        let namedParams: IServerNamedParam[] = [];
-        if (this.props.viewObject.get('valueItems')) {
-            this.props.viewObject.get('valueItems').each((item: EObject) => {
-                if (item.eClass._id === "//Select") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: (item.get('value') instanceof Array)
-                            ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
-                            : item.get('value')
-                    })
-                } else if (item.eClass._id === "//DatePicker") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: item.get('value'),
-                        parameterDataType: "Date",
-                        parameterDateFormat: item.get('format')
-                    })
-                }
-            });
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}>
+            </div>
+        )
+    }
+}
+
+class ValueHolder_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', currentValue);
+        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
+        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
+            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+    };
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
+        const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
+        if (contextItem
+            && contextItem.length >= 1
+            && columnName) {
+            const value = contextItem[0][columnName];
+            if (value !== this.props.viewObject.get('value')) {
+                this.onChange(value);
+            }
         }
-        return namedParams
-    };
-    getCommand = () => {
-        const params = this.getNamedParams().sort((a, b) => {
-            if (a.parameterName > b.parameterName) {
-                return 1
-            } else if (a.parameterName === b.parameterName){
-                return 0
-            }
-            return -1
-        });
-        let replacedCommand = this.state.command;
-        params.forEach(param => {
-            if (replacedCommand?.includes(param.parameterName)) {
-                replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), param.parameterValue);
-            }
-        });
-        return replacedCommand
-    };
+    }
+
     render = () => {
         return (
             <div style={{marginBottom: marginBottom}}>
@@ -599,7 +619,8 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
         this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
-        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_)
+        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
+        this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

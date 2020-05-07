@@ -157,12 +157,22 @@ class DatasetDiagramView extends DataView {
     //refers DatasetColumn datasetColumn
 }
 
-class GroovyCommand extends ViewElement, CommandElement {
+abstract class ContextWriter {
+
+}
+
+class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
     Text command
     String gitResourcePath
     String gitStaticClass
     String gitStaticMethod
     GroovyCommandType commandType = "Eval"
+    boolean executeOnStartup
+}
+
+class ValueHolder extends ViewElement, ValueItem {
+    refers ContextWriter contextWriter
+    String groovyCommandResultColumnName
 }
 
 class TabsViewReport extends ViewContainer {
@@ -238,8 +248,9 @@ class DatePicker extends ViewElement, ValueItem {
     String format = "YYYY-MM-DD"
 }
 
-class HtmlContent extends ViewElement {
-    String htmlContent
+class HtmlContent extends ViewElement, CommandElement {
+    String htmlContent,
+
 }
 
 //add TextArea

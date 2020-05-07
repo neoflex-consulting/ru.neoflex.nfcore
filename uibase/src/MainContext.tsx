@@ -1,6 +1,5 @@
 import * as React from "react";
 import Ecore from "ecore"
-import {TFunction} from "i18next";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 
@@ -39,4 +38,8 @@ export interface IMainContext {
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;
     changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
+    docxHandlers?: any[];
+    excelHandlers?: any[];
+    submitHandlers?: ISubmitHandler[];
+    contextItemValues?: Map<String, any>;
 }
