@@ -90,7 +90,7 @@ public class MasterdataTests {
                 "  \"customerId\": 1,\n" +
                 "  \"customerName\": \"Neoflex\"\n" +
                 "}");
-        OEntity neoflex = masterdataProvider.inTransaction(db -> masterdataProvider.create(db, (EntityType) customerTypeResource.getContents().get(0), neoflexNode));
+        OEntity neoflex = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, (EntityType) customerTypeResource.getContents().get(0), neoflexNode));
         Assert.assertNotNull(neoflex);
         String neoflexId = neoflex.getRid();
         OEntity neoflex2 = masterdataProvider.inTransaction(db -> {
@@ -105,7 +105,7 @@ public class MasterdataTests {
                 "  \"customerId\": 1,\n" +
                 "  \"customer\": \"%s\"\n" +
                 "}", neoflexId));
-        OEntity ivanov = masterdataProvider.inTransaction(db -> masterdataProvider.create(db, (EntityType) employeeTypeResource.getContents().get(0), ivanovNode));
+        OEntity ivanov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, (EntityType) employeeTypeResource.getContents().get(0), ivanovNode));
         Assert.assertNotNull(ivanov);
         Assert.assertNotNull(ivanov.getRid());
         String sql = "select firstName, lastName, customer.customerName as customerName from Employee";

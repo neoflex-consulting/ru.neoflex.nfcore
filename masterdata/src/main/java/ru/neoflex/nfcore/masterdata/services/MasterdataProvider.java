@@ -247,7 +247,7 @@ public class MasterdataProvider {
         return provider.getServer().getOServer().openDatabase(masterdataDbName);
     }
 
-    public OEntity create(ODatabaseDocument db, EntityType entityType, ObjectNode node) {
+    public OEntity insert(ODatabaseDocument db, EntityType entityType, ObjectNode node) {
         try {
             OVertex entity = db.newVertex(entityType.getName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
@@ -258,7 +258,23 @@ public class MasterdataProvider {
             throw new RuntimeException(e);
         }
     }
-
+/*
+    public OEntity insert(ODatabaseDocument db, ObjectNode node) {
+        try {
+            String className = node.get("@class").asText();
+            store.inTransaction(true, tx -> {
+                DocFinder.create(store, MasterdataPackage.ENTITY_TYPE)
+            });
+            OVertex entity = db.newVertex(entityType.getName());
+            String jsonString = new ObjectMapper().writeValueAsString(node);
+            entity.fromJSON(jsonString);
+            entity.save();
+            return new OEntity(entity);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+*/
     public OEntity update(ODatabaseDocument db, OEntity oEntity) {
         try {
             OVertex entity = db.load(new ORecordId(oEntity.getRid()));
