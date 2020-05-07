@@ -49,7 +49,7 @@ public class ScriptController {
 
     @PostMapping("/resource")
     Object evalResource(@RequestParam final String path,
-                        @RequestBody final List<String> params) throws Exception {
+                        @RequestBody final Map<String, Object> params) throws Exception {
         logger.debug(params);
         Object result = context.inContextWithClassLoaderInTransaction(()-> {
             return groovy.evalScript(path, params);

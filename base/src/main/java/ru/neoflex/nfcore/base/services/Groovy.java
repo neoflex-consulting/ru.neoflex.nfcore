@@ -73,6 +73,12 @@ public class Groovy {
         return groovyScriptEngine.run(scriptName, new Binding(args.toArray(new String[0])));
     }
 
+    public Object evalScript(String scriptName, Map<String, Object> args) throws Exception {
+        URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
+        GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        return groovyScriptEngine.run(scriptName, new Binding(args));
+    }
+
     public Object evalStatic(String fullClassName, String method, List args) throws Exception {
         URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
         GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
