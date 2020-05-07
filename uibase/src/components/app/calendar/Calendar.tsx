@@ -18,12 +18,11 @@ import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import legend from '../../../Icons/legend.svg';
-import searchIcon from '../../../Icons/searchIcon.svg';
-import printIcon from '../../../Icons/printIcon.svg';
-import FullScreenIcon from '../../../Icons/FullScreenIcon.svg';
-import trashcanIcon from '../../../Icons/trashcanIcon.svg';
-import settingsIcon from '../../../Icons/settingsIcon.svg';
+import legend from '../../../icons/legend.svg';
+import searchIcon from '../../../icons/searchIcon.svg';
+import printIcon from '../../../icons/printIcon.svg';
+import trashcanIcon from '../../../icons/trashcanIcon.svg';
+import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 
 interface Props {
@@ -45,7 +44,6 @@ class Calendar extends React.Component<any, any> {
             createMenuVisible: false,
             editMenuVisible: false,
             fullScreenOn: false,
-            isFull: false,
             periodicity: [],
             years: [],
             months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -462,14 +460,14 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents"}}
                     >
                         <Button style={{marginLeft: '10px'}}
-                                className='ButtonToday'
+                                className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
                             {t('today')}
                         </Button>
 
                         <Select
-                            className='SelectYear'
+                            className='selectYear'
                             value={this.state.currentMonth.getFullYear()}
                             style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
@@ -487,7 +485,7 @@ class Calendar extends React.Component<any, any> {
                         </Select>
 
                         <Select
-                            className='SelectMonth'
+                            className='selectMonth'
                             value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
@@ -521,7 +519,7 @@ class Calendar extends React.Component<any, any> {
                             <div className="icon">chevron_right</div>
                         </div>
 
-                        <Button className="ButtonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
+                        <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
                                 onClick={this.handleLegendMenu}>
                             <img  alt="Not found" src={legend}  style={{marginLeft: '-9px', marginTop: '4px'}}/>
                         </Button>
@@ -564,12 +562,12 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 }
 
-                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
 
                 {localStorage.getItem('fullScreenOn') === 'true' ?
                     <Button
-                        className="ButtonPlus"
+                        className="buttonPlus"
                         type="primary"
                         style={{
                             width: '20px',
@@ -583,7 +581,7 @@ class Calendar extends React.Component<any, any> {
 
                 :
                     <Button
-                        className="ButtonPlus"
+                        className="buttonPlus"
                         type="primary"
                         style={{
                             width: '20px',
@@ -598,10 +596,10 @@ class Calendar extends React.Component<any, any> {
 
 
 
-                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
                 <Button
-                    className="CalendarAlt"
+                    className="calendarAlt"
                     style={{
                         marginRight: '10px',
                         width: '32px',
@@ -616,7 +614,7 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
                 <Button
-                    className="AlignJustify"
+                    className="alignJustify"
                     style={{
                         width: '32px',
                         height: '32px'
@@ -630,10 +628,10 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
 
-                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
                 <Button
-                    className="ButtonPrint"
+                    className="buttonPrint"
                     type="link"
                     ghost
                     style={{
@@ -653,10 +651,10 @@ class Calendar extends React.Component<any, any> {
                 </Button>
 
 
-        <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
+        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
 
         <Button
-            className="ButtonFullScreen"
+            className="buttonFullScreen"
             type="link"
             ghost
             style={{

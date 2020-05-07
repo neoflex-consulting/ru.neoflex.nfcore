@@ -238,34 +238,34 @@
 .fullscreen-enabled{
     background: var(--neutral-color);
 }
-.fullscreen-enabled .header .ButtonToday{
+.fullscreen-enabled .header .buttonToday{
     margin-top: 8px;
 }
-.fullscreen-enabled .header .SelectYear{
+.fullscreen-enabled .header .selectYear{
     margin-top: 8px;
 }
-.fullscreen-enabled .header .SelectMonth{
+.fullscreen-enabled .header .selectMonth{
     margin-top: 8px;
 }
-.fullscreen-enabled .header .ButtonLegend{
+.fullscreen-enabled .header .buttonLegend{
     margin-top: 7px;
 }
-.fullscreen-enabled .header .VerticalLine{
+.fullscreen-enabled .header .verticalLine{
     margin-top: 8px;
 }
-.fullscreen-enabled .header .ButtonPlus{
+.fullscreen-enabled .header .buttonPlus{
     margin-top: 9px;
 }
-.fullscreen-enabled .header .AlignJustify{
+.fullscreen-enabled .header .alignJustify{
     margin-top: 9px;
 }
-.fullscreen-enabled .header .CalendarAlt{
+.fullscreen-enabled .header .calendarAlt{
     margin-top: 9px;
 }
-.fullscreen-enabled .header .ButtonPrint{
+.fullscreen-enabled .header .buttonPrint{
     margin-top: 9px;
 }
-.fullscreen-enabled .header .ButtonFullScreen{
+.fullscreen-enabled .header .buttonFullScreen{
     margin-top: 9px;
 }
 .fullscreen-enabled .header .icon{

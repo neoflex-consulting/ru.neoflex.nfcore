@@ -45,7 +45,6 @@ interface State {
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
-    NotificationVisible: boolean;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -70,7 +69,6 @@ class EcoreApp extends React.Component<any, State> {
             pathFull: [],
             appModuleName: props.appModuleName,
             getUserProfile: true,
-            NotificationVisible: false,
         }
     }
 
