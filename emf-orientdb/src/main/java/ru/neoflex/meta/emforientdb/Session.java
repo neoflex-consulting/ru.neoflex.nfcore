@@ -537,6 +537,7 @@ public class Session implements Closeable {
         resource.getContents().add(eObject);
         resource.setURI(factory.createResourceURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
+        EcoreUtil.resolveAll(resource);
     }
 
     public EObject createEObject(ResourceSet rs, OElement oElement) {

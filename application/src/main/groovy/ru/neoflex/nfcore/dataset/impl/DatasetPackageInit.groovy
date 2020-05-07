@@ -129,6 +129,107 @@ class DatasetPackageInit {
             DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
             DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
 
+            /*CalcMart*/
+            String calcedMarts = "with\n" +
+                    "wt_calc_type as\n" +
+                    "(\n" +
+                    "  select --+ materialize\n" +
+                    "         calc_type,\n" +
+                    "         underwood_name,\n" +
+                    "         row_number() over (partition by underwood_name order by actual_end_date desc, actual_end_date desc, row_change_time desc) as rn\n" +
+                    "    from nrapp.ref_calc_type\n" +
+                    "   where apex_application_id =  '11100'\n" +
+                    "),\n" +
+                    "wt_event_job as\n" +
+                    "(\n" +
+                    "  select --+ materialize\n" +
+                    "         t.partition_key,\n" +
+                    "         to_char(t.begin_date, 'dd.mm.yyyy hh24:mi:ss') as begin_date,\n" +
+                    "         to_char(t.end_date, 'dd.mm.yyyy hh24:mi:ss') as end_date,\n" +
+                    "         t.event_result_code,\n" +
+                    "         t.event_result_message,\n" +
+                    "         t.object_name,\n" +
+                    "         t.record_id,\n" +
+                    "         t.event_parameters_list\n" +
+                    "    from nrlogs.lg_event t\n" +
+                    "    join nrsettings.st_event_type et\n" +
+                    "      on et.event_type_id = t.event_type_id\n" +
+                    "    join wt_calc_type wt\n" +
+                    "      on t.partition_key = wt.underwood_name\n" +
+                    "   where 1=1\n" +
+                    "     and et.code = 'CREATE_JOB'\n" +
+                    ")\n" +
+                    "select ej.record_id,\n" +
+                    "       ej.event_parameters_list,\n" +
+                    "       nvl(ct.calc_type,ej.partition_key) as partition_key,\n" +
+                    "       ej.begin_date,\n" +
+                    "       ej.end_date,\n" +
+                    "       case\n" +
+                    "         when ej.event_result_code = 0\n" +
+                    "              and ej.end_date is not null\n" +
+                    "           then 'Расчет успешно завершен'\n" +
+                    "         when ej.event_result_code != 0\n" +
+                    "              and ej.end_date is not null\n" +
+                    "         then 'При расчете возникла ошибка: '||ej.event_result_message\n" +
+                    "           when wj.job_name is not null\n" +
+                    "         then 'Расчет выполняется...'\n" +
+                    "       end as status\n" +
+                    "  from wt_event_job ej\n" +
+                    "  left\n" +
+                    "  join wt_calc_type ct\n" +
+                    "    on ct.underwood_name = ej.partition_key\n" +
+                    "   and ct.rn = 1\n" +
+                    "  left\n" +
+                    "  join nrcore.vw_working_job wj\n" +
+                    "    on ej.object_name = wj.job_name\n" +
+                    " order by\n" +
+                    "       ej.record_id desc"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoCalcMart",calcedMarts,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoCalcMart")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoCalcMart", "jdbcNRDemoCalcMart")
+            DatasetComponentInit.createAllColumnNRDemoCalcMart("DatasetNRDemoCalcMart")
+
+            String kliko = "SELECT file_id,\n" +
+                    "       TO_DATE(max(decode(parameter_name,'I_ONDATE',parameter_value)),'dd.mm.yyyy')+1 AS on_date,\n" +
+                    "       TO_DATE(nvl(max(decode(parameter_name,'I_SPODDATE',parameter_value)),max(decode(parameter_name,'I_ONDATE',parameter_value))),'dd.mm.yyyy')+1 as spod_date,\n" +
+                    "       nvl2(max(decode(parameter_name,'I_SPODDATE',parameter_value)), 'Да', 'Нет') as include_spod,\n" +
+                    "       MAX(DECODE(parameter_name,'I_BRANCH_RK',parameter_value)) AS branch_rk,\n" +
+                    "       nvl(MAX(br.branch_code),'Сводный') as branch_code,\n" +
+                    "       decode(MAX(DECODE(parameter_name,'I_FORM_TYPE',parameter_value)),\n" +
+                    "                 'D','Дневная',\n" +
+                    "                 'M','Месячная',\n" +
+                    "                 'Q','Квартальная',\n" +
+                    "                 'H','Полугодовая',\n" +
+                    "                 'Месячная'\n" +
+                    "       )  AS  form_type,\n" +
+                    "       replace(file_name, 'nrcore.data_export_util','http://nrdemo.neoflex.ru:8080/apex/nrcore.data_export_util') as file_name,\n" +
+                    "       file_status,\n" +
+                    "       date_begin,\n" +
+                    "       date_end,\n" +
+                    "       file_size,\n" +
+                    "       message,\n" +
+                    "       MAX(DECODE(parameter_name,'I_STATUS_CB',parameter_value)) AS  status_cb\n" +
+                    "  FROM nrapp.vw_job_event_list t\n" +
+                    "  LEFT\n" +
+                    "  JOIN dma.dm_branch_d br\n" +
+                    "    ON nvl(DECODE(parameter_name,'I_BRANCH_RK',parameter_value), 0) = br.branch_rk\n" +
+                    "   AND date_begin BETWEEN br.data_actual_date and br.data_actual_end_date\n" +
+                    "WHERE file_type like 'F110_KLIKO%'\n" +
+                    "GROUP BY\n" +
+                    "       file_id,\n" +
+                    "       file_name,\n" +
+                    "       file_status,\n" +
+                    "       file_size,\n" +
+                    "       date_begin,\n" +
+                    "       date_end,\n" +
+                    "       message\n" +
+                    "ORDER BY file_id desc"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoKliko", kliko,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoKliko")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoKliko", "jdbcNRDemoKliko")
+            DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoKliko")
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -174,6 +275,8 @@ class DatasetPackageInit {
         def nrDemoSection4 = AppModuleInit.createAppModuleNRDemoMain("F110_Section4", "Раздел IV. Расшифровки, используемые при расчете денежно-кредитных показателей", "jdbcNRDemoSection4", "DatasetNRDemoSection4")
 
         def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail")
+        def nrDemoCalcMart = AppModuleInit.createAppModuleNRDemoCalcMart("F110_CalcMart", "Запуск расчета формы", "jdbcNRDemoCalcMart", "DatasetNRDemoCalcMart")
+        def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 

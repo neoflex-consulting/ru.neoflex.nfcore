@@ -6,4 +6,5 @@ module.exports = function(app) {
     app.use(proxy('/system/**', { target: 'http://localhost:8080/', ws: true }));
     app.use(proxy('/logout', { target: 'http://localhost:8080/', ws: true }));
     app.use(proxy('/components/reports/*', { target: 'http://localhost:8080/', ws: true }));
+    app.use(proxy('/script/**', { target: 'http://localhost:8080/', ws: true }));
 };

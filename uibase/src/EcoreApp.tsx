@@ -56,7 +56,13 @@ class EcoreApp extends React.Component<any, State> {
             changeURL: this.changeURL,
             runQuery: this.runQuery,
             notification: this.notification,
-            changeUserProfile: this.changeUserProfile
+            changeUserProfile: this.changeUserProfile,
+            //В момент создания страницы
+            docxHandlers: [],
+            excelHandlers: [],
+            submitHandlers: [],
+            //По событию на странице
+            contextItemValues: new Map()
         };
         this.state = {
             principal: undefined,
@@ -281,7 +287,7 @@ class EcoreApp extends React.Component<any, State> {
                     }
                 });
             } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = []
+                let splitPathFull: any = [];
                 this.state.pathFull.forEach((p: any, index: any) => {
                     if (p.appModule === appModuleName) {splitPathFull.push(index)}
                 });
@@ -752,10 +758,10 @@ class EcoreApp extends React.Component<any, State> {
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
 
-        //TODO добавить отдельный метод по аналогии createUserProfile?
-        this.updateContext({docxHandlers: []});
+        /*this.updateContext({docxHandlers: []});
         this.updateContext({excelHandlers: []});
         this.updateContext({submitHandlers: []});
+        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {

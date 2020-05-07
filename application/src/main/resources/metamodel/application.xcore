@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 
@@ -156,6 +157,24 @@ class DatasetDiagramView extends DataView {
     //refers DatasetColumn datasetColumn
 }
 
+abstract class ContextWriter {
+
+}
+
+class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
+    Text command
+    String gitResourcePath
+    String gitStaticClass
+    String gitStaticMethod
+    GroovyCommandType commandType = "Eval"
+    boolean executeOnStartup
+}
+
+class ValueHolder extends ViewElement, ValueItem {
+    refers ContextWriter contextWriter
+    String groovyCommandResultColumnName
+}
+
 class TabsViewReport extends ViewContainer {
     TabPosition tabPosition = "Top"
 }
@@ -229,8 +248,9 @@ class DatePicker extends ViewElement, ValueItem {
     String format = "YYYY-MM-DD"
 }
 
-class HtmlContent extends ViewElement {
-    String htmlContent
+class HtmlContent extends ViewElement, CommandElement {
+    String htmlContent,
+
 }
 
 //add TextArea
@@ -252,6 +272,7 @@ class Button extends ViewElement {
     refers CommandElement[] submitItems
     boolean backStartPage
     String span = "0"
+    String label
 }
 
 /* Style */
@@ -407,4 +428,10 @@ enum AxisXPositionType {
 enum AxisYPositionType {
     Left
     Right
+}
+
+enum GroovyCommandType {
+    Eval,
+    Static,
+    Resource
 }

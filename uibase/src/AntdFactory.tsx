@@ -15,6 +15,7 @@ import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {ISubmitHandler} from "./MainContext";
 import DOMPurify from 'dompurify'
+import {replaceNamedParam, getNamedParams} from "./utils/namedParamsUtils";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -163,24 +164,25 @@ class Button_ extends ViewContainer {
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
+        const label = t(this.props.viewObject.get('label'));
         return <div key={this.viewObject._id}>
             {this.props.viewObject.get('buttonCancel') === true &&
             <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
-                {t('cancel')}
+                {(label)? label: t('cancel')}
             </Button>}
             {this.props.viewObject.get('buttonSave') === true &&
             <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
-                {t('save')}
+                {(label)? label: t('save')}
             </Button>
             }
             {this.props.viewObject.get('buttonSubmit') === true &&
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
-                {t('submit')}
+                {(label)? label: t('submit')}
             </Button>
             }
             {this.props.viewObject.get('backStartPage') === true &&
             <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
-                {t('backStartPage')}
+                {(label)? label: t('backStartPage')}
             </Button>
             }
         </div>
@@ -188,9 +190,13 @@ class Button_ extends ViewContainer {
 }
 
 class Select_ extends ViewContainer {
-    state = {
-        selectData: []
-    };
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            selectData: []
+        };
+    }
+
     onChange = (currentValue: string[]) => {
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
@@ -253,13 +259,13 @@ class Select_ extends ViewContainer {
 }
 
 class DatePicker_ extends ViewContainer {
-    state = {
-        pickedDate: moment(),
-        disabled: this.props.viewObject.get('disabled') || false,
-        allowClear: this.props.viewObject.get('allowClear') || false,
-        format: this.props.viewObject.get('format') || "YYYY-MM-DD",
-        width: this.props.viewObject.get('width') || "200px"
-    };
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            pickedDate: moment(),
+            format: this.props.viewObject.get('format') || "YYYY-MM-DD",
+        };
+    }
 
     componentDidMount(): void {
         //Инициализация value
@@ -276,6 +282,7 @@ class DatePicker_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
     render = () => {
         return (
             //TODO перейти на antd v4?
@@ -284,10 +291,10 @@ class DatePicker_ extends ViewContainer {
                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
-                    disabled={this.state.disabled}
-                    allowClear={this.state.allowClear}
+                    disabled={this.props.viewObject.get('disabled') || false}
+                    allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
-                    style={{width: this.state.width}}
+                    style={{width: this.props.viewObject.get('width') || "200px"}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -297,15 +304,123 @@ class DatePicker_ extends ViewContainer {
 }
 
 class HtmlContent_ extends ViewContainer {
-    state = {
-        htmlContent: this.props.viewObject.get('htmlContent')
-    };
+    constructor(props: any) {
+        super(props);
+        const params = getNamedParams(this.props.viewObject.get('valueItems'));
+        this.state = {
+            htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'),params),
+            params: params
+        };
+    }
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)) {
+            this.setState({
+                params: newParams,
+                htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'), newParams),
+            })
+        }
+    }
 
     render = () => {
         return (
             <div style={{marginBottom: marginBottom}}
                  className="content"
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            </div>
+        )
+    }
+}
+
+class GroovyCommand_ extends ViewContainer {
+    componentDidMount(): void {
+        if (this.props.context.submitHandlers !== undefined) {
+            this.props.context.submitHandlers.push({
+                name: this.props.viewObject.get('name'),
+                handler: this.execute.bind(this)
+            } as ISubmitHandler)
+        }
+        if (this.props.viewObject.get('executeOnStartup')) {
+            this.execute()
+        }
+    }
+    execute = () => {
+        const commandType = this.props.viewObject.get('commandType')||"Eval";
+        const command = this.props.viewObject.get('command');
+        if (commandType === "Resource") {
+            API.instance().fetchJson('/script/resource?path='+this.props.viewObject.get('gitResourcePath'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+            }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+            })
+        } else if (commandType === "Static") {
+            API.instance().fetchJson('/script/static/'+this.props.viewObject.get('gitStaticClass')+'/'+this.props.viewObject.get('gitStaticMethod'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+            }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+            })
+        } else {
+            API.instance().fetchJson('/script/eval', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+            }).then(res => {
+                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+            })
+        }
+    };
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}>
+            </div>
+        )
+    }
+}
+
+class ValueHolder_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', currentValue);
+        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
+        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
+            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+    };
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
+        const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
+        if (contextItem
+            && contextItem.length >= 1
+            && columnName) {
+            const value = contextItem[0][columnName];
+            if (value !== this.props.viewObject.get('value')) {
+                this.onChange(value);
+            }
+        }
+    }
+
+    render = () => {
+        return (
+            <div style={{marginBottom: marginBottom}}>
             </div>
         )
     }
@@ -504,8 +619,9 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
         this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
         this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
+        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
+        this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
     }
-
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
         if (startResource === undefined) {
