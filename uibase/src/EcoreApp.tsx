@@ -523,11 +523,9 @@ class EcoreApp extends React.Component<any, State> {
                                         <Button  type="link" className="bell-icon" ghost style={{ width: '5px', height: '20px',marginTop: '20px', background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)", color: "rgb(18, 18, 18)"}}
                                                  onClick={this.onClickBellIcon}>
                                             {localStorage.getItem('notifierDuration') === '3'  ?
-                                                <FontAwesomeIcon icon={faBell} size="lg"/>
-
+                                                <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>
                                             :
-                                                <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>}
-
+                                                <FontAwesomeIcon icon={faBell} size="lg"/>}
                                         </Button>
                                     </div>
                                 </Col>

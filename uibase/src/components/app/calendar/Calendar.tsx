@@ -456,8 +456,6 @@ class Calendar extends React.Component<any, any> {
         return (
 
             <div className="header row flex-middle">
-
-
                 {
                     this.state.calendarVisible &&
                     <div
