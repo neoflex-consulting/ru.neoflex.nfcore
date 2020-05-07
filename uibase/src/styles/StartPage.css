@@ -89,6 +89,7 @@
   }
   .app-name{
     opacity: 0;
+    margin-top: 10px;
   }
   .icon-start-page {
     margin-bottom: 10px;

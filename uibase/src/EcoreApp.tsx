@@ -16,8 +16,8 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faBullhorn, faTools, faEquals} from "@fortawesome/free-solid-svg-icons"
-import {faClock, faEye, faUser} from "@fortawesome/free-regular-svg-icons";
+import {faSignOutAlt, faBullhorn, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faClock, faEye, faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
@@ -56,7 +56,13 @@ class EcoreApp extends React.Component<any, State> {
             changeURL: this.changeURL,
             runQuery: this.runQuery,
             notification: this.notification,
-            changeUserProfile: this.changeUserProfile
+            changeUserProfile: this.changeUserProfile,
+            //В момент создания страницы
+            docxHandlers: [],
+            excelHandlers: [],
+            submitHandlers: [],
+            //По событию на странице
+            contextItemValues: new Map()
         };
         this.state = {
             principal: undefined,
@@ -68,7 +74,7 @@ class EcoreApp extends React.Component<any, State> {
             context,
             pathFull: [],
             appModuleName: props.appModuleName,
-            getUserProfile: true
+            getUserProfile: true,
         }
     }
 
@@ -147,31 +153,31 @@ class EcoreApp extends React.Component<any, State> {
         if (notificationType === "success") {
             return (
                 notification.success({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "error") {
             return (
                 notification.error({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "info") {
             return (
                 notification.info({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "warning") {
             return (
                 notification.warning({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "open") {
             return (
                 notification.open({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
 
@@ -329,10 +335,6 @@ class EcoreApp extends React.Component<any, State> {
         else if (e.key === "test") {
             this.props.history.push('/test');
         }
-        else if (e.key === "showNotifications"){
-            this.setState({notifierDuration : 0});
-            localStorage.setItem('notifierDuration', '0');
-        }
         else if (e.key === "autoHideNotifications"){
             this.setState({notifierDuration : 3});
             localStorage.setItem('notifierDuration', '3');
@@ -403,6 +405,13 @@ class EcoreApp extends React.Component<any, State> {
        this.setBreadcrumb(breadcrumbValue)
     };
 
+    onClickBellIcon = () => {
+        if (this.state.notifierDuration === 3){
+            this.setState({ notifierDuration: 0});
+            localStorage.setItem('notifierDuration', '0');
+        }
+    };
+
     renderDev = (props: any) => {
         const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
@@ -432,11 +441,11 @@ class EcoreApp extends React.Component<any, State> {
                         </Col>
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
-                                <Col span={19}>
+                                <Col span={14}>
                                     <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
                                                    onClickBreadcrumb={this.onClickBreadcrumb}/>
                                 </Col>
-                                <Col span={5}>
+                                <Col span={10}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
                                         <Menu.SubMenu
@@ -488,14 +497,14 @@ class EcoreApp extends React.Component<any, State> {
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.SubMenu
+                                           {/* <Menu.SubMenu
                                                 style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
                                                 title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
                                                                                         style={{marginRight: "10px"}}/>Notification</span>}>
                                                 {localStorage.getItem('notifierDuration') === '3' ?
                                                     <Menu.Item
                                                         style={{backgroundColor: backgroundColor}}
-                                                        key={'showNotifications'}>
+                                                          key={'showNotifications'}>
                                                         <FontAwesomeIcon icon={faEye} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Disable autohiding</Menu.Item>
@@ -506,7 +515,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         <FontAwesomeIcon icon={faClock} size="lg"
                                                                          style={{marginRight: "10px"}}/>
                                                         Autohide</Menu.Item>}
-                                            </Menu.SubMenu>
+                                            </Menu.SubMenu>*/}
                                         </Menu.SubMenu>
                                     </Menu>
                                     <Dropdown overlay={langMenu} placement="bottomCenter">
@@ -514,7 +523,15 @@ class EcoreApp extends React.Component<any, State> {
                                             {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
                                         </div>
                                     </Dropdown>
-                                    <Icon className="bell-icon" type="bell"/>
+                                    <div>
+                                        <Button  type="link" className="bell-icon" ghost style={{ width: '5px', height: '20px',marginTop: '20px', background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)", color: "rgb(18, 18, 18)"}}
+                                                 onClick={this.onClickBellIcon}>
+                                            {localStorage.getItem('notifierDuration') === '3'  ?
+                                                <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>
+                                            :
+                                                <FontAwesomeIcon icon={faBell} size="lg"/>}
+                                        </Button>
+                                    </div>
                                 </Col>
                             </Row>
                         </Col>
@@ -741,10 +758,10 @@ class EcoreApp extends React.Component<any, State> {
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
 
-        //TODO добавить отдельный метод по аналогии createUserProfile?
-        this.updateContext({docxHandlers: []});
+        /*this.updateContext({docxHandlers: []});
         this.updateContext({excelHandlers: []});
         this.updateContext({submitHandlers: []});
+        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {
