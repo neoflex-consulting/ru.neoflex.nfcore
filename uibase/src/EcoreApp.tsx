@@ -16,8 +16,8 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faBullhorn, faTools, faEquals} from "@fortawesome/free-solid-svg-icons"
-import {faClock, faEye, faUser} from "@fortawesome/free-regular-svg-icons";
+import {faSignOutAlt, faBullhorn, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faClock, faEye, faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
@@ -45,6 +45,7 @@ interface State {
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
+    NotificationVisible: boolean;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -68,7 +69,8 @@ class EcoreApp extends React.Component<any, State> {
             context,
             pathFull: [],
             appModuleName: props.appModuleName,
-            getUserProfile: true
+            getUserProfile: true,
+            NotificationVisible: false,
         }
     }
 
@@ -147,31 +149,31 @@ class EcoreApp extends React.Component<any, State> {
         if (notificationType === "success") {
             return (
                 notification.success({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "error") {
             return (
                 notification.error({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "info") {
             return (
                 notification.info({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "warning") {
             return (
                 notification.warning({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
         else if (notificationType === "open") {
             return (
                 notification.open({
-                    message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
 
@@ -329,10 +331,6 @@ class EcoreApp extends React.Component<any, State> {
         else if (e.key === "test") {
             this.props.history.push('/test');
         }
-        else if (e.key === "showNotifications"){
-            this.setState({notifierDuration : 0});
-            localStorage.setItem('notifierDuration', '0');
-        }
         else if (e.key === "autoHideNotifications"){
             this.setState({notifierDuration : 3});
             localStorage.setItem('notifierDuration', '3');
@@ -401,6 +399,17 @@ class EcoreApp extends React.Component<any, State> {
 
     onClickBreadcrumb = (breadcrumbValue: string): void => {
        this.setBreadcrumb(breadcrumbValue)
+    };
+
+    onClickBellIcon = () => {
+        if (this.state.notifierDuration === 3){
+            this.setState({ notifierDuration: 0});
+            localStorage.setItem('notifierDuration', '0');
+        }
+        else{
+            this.setState({ notifierDuration: 3});
+            localStorage.setItem('notifierDuration', '3');
+        }
     };
 
     renderDev = (props: any) => {
@@ -514,7 +523,17 @@ class EcoreApp extends React.Component<any, State> {
                                             {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
                                         </div>
                                     </Dropdown>
-                                    <Icon className="bell-icon" type="bell"/>
+                                    <div>
+                                        <Button  type="link" className="bell-icon" ghost style={{ width: '5px', height: '20px',marginTop: '20px', background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)", color: "rgb(18, 18, 18)"}}
+                                                 onClick={this.onClickBellIcon}>
+                                            {localStorage.getItem('notifierDuration') === '3'  ?
+                                                <FontAwesomeIcon icon={faBell} size="lg"/>
+
+                                            :
+                                                <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>}
+
+                                        </Button>
+                                    </div>
                                 </Col>
                             </Row>
                         </Col>

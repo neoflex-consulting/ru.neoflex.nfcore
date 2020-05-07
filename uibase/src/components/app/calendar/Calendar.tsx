@@ -1,4 +1,5 @@
 import React from 'react';
+import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
@@ -9,7 +10,7 @@ import {MainContext} from "../../../MainContext";
 import {Button, Drawer, Icon, Input, Select, Switch} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
-import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
+import {faAlignJustify, faPlus, faPrint, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add, getMonth} from "date-fns";
@@ -17,11 +18,12 @@ import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import legend from '../../../legend.svg';
-import searchIcon from '../../../searchIcon.svg';
-import printIcon from '../../../printIcon.svg';
-import trashcanIcon from '../../../trashcanIcon.svg';
-import settingsIcon from '../../../settingsIcon.svg';
+import legend from '../../../Icons/legend.svg';
+import searchIcon from '../../../Icons/searchIcon.svg';
+import printIcon from '../../../Icons/printIcon.svg';
+import FullScreenIcon from '../../../Icons/FullScreenIcon.svg';
+import trashcanIcon from '../../../Icons/trashcanIcon.svg';
+import settingsIcon from '../../../Icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 
 interface Props {
@@ -42,6 +44,8 @@ class Calendar extends React.Component<any, any> {
             legendMenuVisible: false,
             createMenuVisible: false,
             editMenuVisible: false,
+            fullScreenOn: false,
+            isFull: false,
             periodicity: [],
             years: [],
             months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -308,6 +312,19 @@ class Calendar extends React.Component<any, any> {
             : this.setState({ legendMenuVisible: true});
     };
 
+    onFullScreen = () => {
+        if (this.state.fullScreenOn){
+            this.setState({ fullScreenOn: false});
+            localStorage.setItem('fullScreenOn', 'false');
+        }
+        else{
+            this.setState({ fullScreenOn: true});
+            localStorage.setItem('fullScreenOn', 'true');
+        }
+    }
+
+
+
     renderCreateNotification() {
         const {i18n, t} = this.props;
         return (
@@ -437,6 +454,7 @@ class Calendar extends React.Component<any, any> {
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
         return (
+
             <div className="header row flex-middle">
 
 
@@ -446,12 +464,14 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents"}}
                     >
                         <Button style={{marginLeft: '10px'}}
+                                className='ButtonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
                             {t('today')}
                         </Button>
 
                         <Select
+                            className='SelectYear'
                             value={this.state.currentMonth.getFullYear()}
                             style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
@@ -469,6 +489,7 @@ class Calendar extends React.Component<any, any> {
                         </Select>
 
                         <Select
+                            className='SelectMonth'
                             value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
@@ -502,9 +523,9 @@ class Calendar extends React.Component<any, any> {
                             <div className="icon">chevron_right</div>
                         </div>
 
-                        <Button style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
+                        <Button className="ButtonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
                                 onClick={this.handleLegendMenu}>
-                            <img alt="Not found" src={legend} style={{marginLeft: '-9px', marginTop: '4px'}}/>
+                            <img  alt="Not found" src={legend}  style={{marginLeft: '-9px', marginTop: '4px'}}/>
                         </Button>
                     </div>
                 }
@@ -545,7 +566,7 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 }
 
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
                 <Button
                     type="primary"
@@ -559,9 +580,10 @@ class Calendar extends React.Component<any, any> {
                     <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
                 </Button>
 
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
+                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
                 <Button
+                    className="CalendarAlt"
                     style={{
                         marginRight: '10px',
                         width: '32px',
@@ -576,6 +598,7 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
                 <Button
+                    className="AlignJustify"
                     style={{
                         width: '32px',
                         height: '32px'
@@ -589,9 +612,10 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
 
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
+                <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
                 <Button
+                    className="ButtonPrint"
                     type="link"
                     ghost
                     style={{
@@ -609,7 +633,31 @@ class Calendar extends React.Component<any, any> {
                         }}
                     />
                 </Button>
+
+
+        <div className="VerticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
+
+        <Button
+            className="ButtonFullScreen"
+            type="link"
+            ghost
+            style={{
+                marginRight: '10px',
+                width: '32px',
+                height: '32px'
+            }}
+            onClick={this.onFullScreen}
+        >
+            {localStorage.getItem('fullScreenOn') === 'false'  ?
+
+            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+            :
+            <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
+        </Button>
             </div>
+
+
+
         )
     }
 
@@ -628,6 +676,8 @@ class Calendar extends React.Component<any, any> {
             );
         }
         return <div className="days row">{days}</div>;
+
+
     }
 
     openNotification(notification: any, context: any): void  {
@@ -834,6 +884,9 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
+            <Fullscreen
+                enabled={this.state.fullScreenOn}
+                onChange={onFullScreen => this.setState({onFullScreen})}>
             <MainContext.Consumer>
                 { context => (
                     <div className="calendar">
@@ -847,6 +900,7 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 )}
             </MainContext.Consumer>
+            </Fullscreen>
         );
     }
 }
