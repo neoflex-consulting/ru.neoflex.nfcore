@@ -1,5 +1,9 @@
 package ru.neoflex.nfcore.masterdata.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.orientechnologies.lucene.OLuceneIndexFactory;
 import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
@@ -13,7 +17,7 @@ import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.record.impl.ODocumentHelper;
+import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.server.OServer;
@@ -33,6 +37,7 @@ import ru.neoflex.nfcore.masterdata.*;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,36 +247,58 @@ public class MasterdataProvider {
         return provider.getServer().getOServer().openDatabase(masterdataDbName);
     }
 
-    public String createEntity(ODatabaseDocument db, EntityType entityType, String jsonString) {
-        OVertex entity = db.newVertex(entityType.getName());
-        entity.fromJSON(jsonString);
-        entity.save();
-        return entity.getIdentity().toString();
-    }
-
-    public String createEntity(ODatabaseDocument db, EntityType entityType, Map<String, Object> data) {
-        OVertex entity = db.newVertex(entityType.getName());
-        for (Attribute attribute: entityType.getAttributes()) {
-            if (data.containsKey(attribute.getName())) {
-                entity.setProperty(attribute.getName(), data.get(attribute.getName()));
-            }
+    public OEntity insert(ODatabaseDocument db, EntityType entityType, ObjectNode node) {
+        try {
+            OVertex entity = db.newVertex(entityType.getName());
+            String jsonString = new ObjectMapper().writeValueAsString(node);
+            entity.fromJSON(jsonString);
+            entity.save();
+            return new OEntity(entity);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-        entity.save();
-        return entity.getIdentity().toString();
+    }
+/*
+    public OEntity insert(ODatabaseDocument db, ObjectNode node) {
+        try {
+            String className = node.get("@class").asText();
+            store.inTransaction(true, tx -> {
+                DocFinder.create(store, MasterdataPackage.ENTITY_TYPE)
+            });
+            OVertex entity = db.newVertex(entityType.getName());
+            String jsonString = new ObjectMapper().writeValueAsString(node);
+            entity.fromJSON(jsonString);
+            entity.save();
+            return new OEntity(entity);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+*/
+    public OEntity update(ODatabaseDocument db, OEntity oEntity) {
+        try {
+            OVertex entity = db.load(new ORecordId(oEntity.getRid()));
+            ObjectNode node = oEntity.getObjectNode();
+            String jsonString = new ObjectMapper().writeValueAsString(node);
+            entity.fromJSON(jsonString);
+            entity.save();
+            return new OEntity(entity);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String loadJson(ODatabaseDocument db, String recordId) {
-        OVertex entity = db.load(new ORecordId(recordId));
-        return entity.toJSON("rid,version,class");
+    public void delete(ODatabaseDocument db, OEntity oEntity) {
+        delete(db, oEntity.getRid());
     }
 
-    public Map<String, Object> loadMap(ODatabaseDocument db, String recordId) {
+    public void delete(ODatabaseDocument db, String recordId) {
+        db.delete(new ORecordId(recordId));
+    }
+
+    public OEntity load(ODatabaseDocument db, String recordId) {
         OVertex entity = db.load(new ORecordId(recordId));
-        Map<String, Object> result = new HashMap<>();
-        entity.getSchemaType().ifPresent(oClass -> result.put(ODocumentHelper.ATTRIBUTE_CLASS, oClass.getName()));
-        result.put(ODocumentHelper.ATTRIBUTE_RID, entity.getIdentity().toString());
-        result.put(ODocumentHelper.ATTRIBUTE_VERSION, Integer.toString(entity.getVersion()));
-        return result;
+        return new OEntity(entity);
     }
 
     public<R> R withDatabase(Function<ODatabaseDocument, R> f) {
@@ -489,4 +516,22 @@ public class MasterdataProvider {
         });
     }
 
+    public List<OEntity> query(String sql, Map args) {
+        return query(sql, args, oResultSet -> {
+            List<OEntity> result = new ArrayList<>();
+            while (oResultSet.hasNext()) {
+                OResult oResult = oResultSet.next();
+                result.add(new OEntity(oResult.toElement()));
+            }
+            return result;
+        });
+    }
+
+    public ArrayNode queryNode(String sql, Map args) {
+        ArrayNode result = new ObjectMapper().createArrayNode();
+        for (OEntity oEntity: query(sql, args)) {
+            result.add(oEntity.getObjectNode());
+        }
+        return result;
+    }
 }

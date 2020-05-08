@@ -1,5 +1,8 @@
 package ru.neoflex.nfcore.masterdata;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -7,11 +10,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testng.Assert;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 @RunWith(SpringRunner.class)
@@ -81,6 +86,31 @@ public class MasterdataTests {
 
     @Test
     public void testMasterdata() throws Exception {
+        ObjectNode neoflexNode = (ObjectNode) new ObjectMapper().readTree("{\n" +
+                "  \"customerId\": 1,\n" +
+                "  \"customerName\": \"Neoflex\"\n" +
+                "}");
+        OEntity neoflex = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, (EntityType) customerTypeResource.getContents().get(0), neoflexNode));
+        Assert.assertNotNull(neoflex);
+        String neoflexId = neoflex.getRid();
+        OEntity neoflex2 = masterdataProvider.inTransaction(db -> {
+            return masterdataProvider.load(db, neoflexId);
+        });
+        Assert.assertNotNull(neoflex);
+        Assert.assertEquals(1, neoflex2.getObjectNode().get("customerId").asInt());
+        ObjectNode ivanovNode = (ObjectNode) new ObjectMapper().readTree(String.format("{\n" +
+                "  \"personId\": 1,\n" +
+                "  \"firstName\": \"Ivan\",\n" +
+                "  \"lastName\": \"Ivanov\",\n" +
+                "  \"customerId\": 1,\n" +
+                "  \"customer\": \"%s\"\n" +
+                "}", neoflexId));
+        OEntity ivanov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, (EntityType) employeeTypeResource.getContents().get(0), ivanovNode));
+        Assert.assertNotNull(ivanov);
+        Assert.assertNotNull(ivanov.getRid());
+        String sql = "select firstName, lastName, customer.customerName as customerName from Employee";
+        ArrayNode nodes = masterdataProvider.queryNode(sql, new HashMap());
+        Assert.assertEquals(1, nodes.size());
         //do { Thread.sleep(1000); } while (true);
     }
 }
