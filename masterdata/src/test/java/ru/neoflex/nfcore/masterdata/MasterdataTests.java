@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider;
 
@@ -24,13 +23,11 @@ public class MasterdataTests {
     @Autowired
     Store store;
     @Autowired
-    Context context;
-    @Autowired
     MasterdataProvider masterdataProvider;
     Resource customerTypeResource;
     Resource personTypeResource;
     Resource employeeTypeResource;
-    public static Callable<Void> fini;
+    public static Callable<Void> preDestroy;
 
     @PostConstruct
     public void init() throws Exception {
@@ -62,7 +59,7 @@ public class MasterdataTests {
             employeeTypeResource = store.createEObject(employeeType);
             employeeType.activate();
         });
-        fini = () -> {
+        preDestroy = () -> {
             masterdataProvider.withDatabase(database -> {
                 database.command(String.format("DROP CLASS %s IF EXISTS UNSAFE", "Customer"));
                 database.command(String.format("DROP CLASS %s IF EXISTS UNSAFE", "Employee"));
@@ -80,7 +77,7 @@ public class MasterdataTests {
 
     @AfterClass
     public static void afterClass() throws Exception {
-        fini.call();
+        preDestroy.call();
     }
 
     @Test
