@@ -249,8 +249,7 @@ class DatePicker extends ViewElement, ValueItem {
 }
 
 class HtmlContent extends ViewElement, CommandElement {
-    String htmlContent,
-
+    String htmlContent
 }
 
 //add TextArea
