@@ -5,18 +5,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.testng.Assert;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 @RunWith(SpringRunner.class)
@@ -99,18 +98,36 @@ public class MasterdataTests {
         Assert.assertNotNull(neoflex);
         Assert.assertEquals(1, neoflex2.getObjectNode().get("customerId").asInt());
         ObjectNode ivanovNode = (ObjectNode) new ObjectMapper().readTree(String.format("{\n" +
+                "  \"@class\": \"Employee\",\n" +
                 "  \"personId\": 1,\n" +
                 "  \"firstName\": \"Ivan\",\n" +
                 "  \"lastName\": \"Ivanov\",\n" +
                 "  \"customerId\": 1,\n" +
                 "  \"customer\": \"%s\"\n" +
                 "}", neoflexId));
-        OEntity ivanov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, (EntityType) employeeTypeResource.getContents().get(0), ivanovNode));
+        OEntity ivanov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, ivanovNode));
         Assert.assertNotNull(ivanov);
         Assert.assertNotNull(ivanov.getRid());
         String sql = "select firstName, lastName, customer.customerName as customerName from Employee";
-        ArrayNode nodes = masterdataProvider.queryNode(sql, new HashMap());
+        ArrayNode nodes = masterdataProvider.queryNode(sql);
         Assert.assertEquals(1, nodes.size());
+        ObjectNode ivanovNode2 = ivanov.getObjectNode();
+        ivanovNode2.put("lastName", "Ivanov*a*");
+        masterdataProvider.inTransaction(db -> masterdataProvider.update(db, ivanovNode2));
+        ArrayNode nodes2 = masterdataProvider.queryNode(sql);
+        Assert.assertEquals(1, nodes2.size());
+        Assert.assertEquals("Ivanov*a*", nodes2.get(0).get("lastName").asText());
+        ObjectNode petrovNode = new ObjectMapper().createObjectNode()
+                .put("@class", "Employee")
+                .put("personId", 2)
+                .put("firstName", "Pelageia")
+                .put("lastName", "Petrova")
+                .put("customerId", 1)
+                .put("customer", neoflexId);
+        OEntity petrov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, petrovNode));
+        Assert.assertEquals(2, masterdataProvider.queryNode(sql).size());
+        masterdataProvider.inTransaction(db -> masterdataProvider.delete(db, petrov));
+        Assert.assertEquals(1, masterdataProvider.queryNode(sql).size());
         //do { Thread.sleep(1000); } while (true);
     }
 }
