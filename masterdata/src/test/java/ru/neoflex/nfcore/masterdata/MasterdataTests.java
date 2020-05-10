@@ -15,6 +15,11 @@ import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider;
 
 import javax.annotation.PostConstruct;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 
 @RunWith(SpringRunner.class)
@@ -125,6 +130,17 @@ public class MasterdataTests {
         Assert.assertEquals(2, masterdataProvider.queryNode(sql).size());
         masterdataProvider.inTransaction(db -> masterdataProvider.delete(db, petrov));
         Assert.assertEquals(1, masterdataProvider.queryNode(sql).size());
+        Properties info = new Properties();
+        info.put("user", "admin");
+        info.put("password", "admin");
+        try (Connection conn = DriverManager.getConnection("jdbc:orient:remote:localhost/masterdatatest", info);) {
+            try (Statement stmt = conn.createStatement();) {
+                try (ResultSet rs = stmt.executeQuery(sql)) {
+                    Assert.assertTrue(rs.next());
+                    Assert.assertEquals("Ivanov*a*", rs.getString("lastName"));
+                }
+            }
+        }
         //do { Thread.sleep(1000); } while (true);
     }
 }
