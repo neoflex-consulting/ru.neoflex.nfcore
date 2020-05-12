@@ -57,7 +57,7 @@ class ApplicationInit {
                 componentElement1.setComponent(userComponent5)
                 application.view = componentElement1
             }
-            else if (name == "Администрирование") {
+            else if (name == "Обязательная отчетность") {
                 application.name = name
                 application.iconName = IconName.FA_COGS
                 def row1 = ApplicationFactory.eINSTANCE.createRow()
@@ -81,13 +81,13 @@ class ApplicationInit {
                 column.span = "9"
 
                 def typography = ApplicationFactory.eINSTANCE.createTypography()
-                typography.name = "Администрирование системы"
+                typography.name = "Обязательная отчетность"
 
                 def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
                 typography.setTypographyStyle(typographyStyle)
 
                 def calendar = ApplicationFactory.eINSTANCE.createCalendar()
-                calendar.name = "Мониторинг"
+                calendar.name = "Обязательная отчетность"
                 def notification1 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "A 1993", "",false)
                 def notification2 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Ф 2020", "",false)
                 def notification3 = findOrCreateEObject(NotificationPackage.Literals.NOTIFICATION, "Проверить почту", "",false)
