@@ -15,6 +15,7 @@ const diagramAnchorMap: any = {
     "TopRight": "top-right",
     "Left": "left",
     "Center": "center",
+    "Right": "right",
     "BottomLeft": "bottom-left",
     "Bottom": "bottom",
     "BottomRight": "bottom-right"
