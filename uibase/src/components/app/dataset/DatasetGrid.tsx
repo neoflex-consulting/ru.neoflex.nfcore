@@ -269,7 +269,7 @@ class DatasetGrid extends React.Component<any, any> {
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
                 const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
-                const temp: any = cellHighlights.find((h: any) => {
+                const temp: any = cellHighlights.find((h: any) => { // eslint-disable-line
 
                     const type = h['type'];
                     const columnName = h['datasetColumn'];
@@ -360,7 +360,7 @@ class DatasetGrid extends React.Component<any, any> {
                 }
                 else {
                     const columnHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Column');
-                    const temp: any = columnHighlights.find((h: any) => {
+                    const temp: any = columnHighlights.find((h: any) => { // eslint-disable-line
                         const columnName = h['datasetColumn'];
                         const backgroundColor = h['backgroundColor'];
                         const color = h['color'];
@@ -381,7 +381,7 @@ class DatasetGrid extends React.Component<any, any> {
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
                 const rowHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Row');
-                const temp: any = rowHighlights.find((h: any) => {
+                const temp: any = rowHighlights.find((h: any) => { // eslint-disable-line
 
                     const type = h['type'];
                     const columnName = h['datasetColumn'];

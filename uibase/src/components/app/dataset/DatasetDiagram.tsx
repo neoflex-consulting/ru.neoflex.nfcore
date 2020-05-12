@@ -4,7 +4,6 @@ import {Axis, ResponsiveBar} from "@nivo/bar";
 import {ResponsiveLine} from "@nivo/line";
 import {ResponsivePie} from "@nivo/pie";
 import {AxisProps} from "@nivo/axes"
-import {diagramAnchorMap} from "../../../utils/consts";
 import {Resizable } from "re-resizable";
 import domtoimage from 'dom-to-image';
 import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";

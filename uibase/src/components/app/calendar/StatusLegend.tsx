@@ -23,11 +23,9 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
 
     handleChange(e: any): void {
         const target = JSON.parse(e);
-        this.state.notificationStatus!.map( (f: any) => {
-            if (f['name'] === target['name']) {
-                f['enable'] = target['enable']
-            }
-        });
+        this.state.notificationStatus!
+            .filter( (f: any) => f['name'] === target['name'])
+            .map ( (f: any) => f['enable'] = target['enable'])
     }
 
     apply(notificationStatus: Object[]): void {

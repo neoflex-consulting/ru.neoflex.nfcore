@@ -1,10 +1,8 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Checkbox, Col, Input, InputNumber, Row, Select, Switch, Tabs} from "antd";
+import {Button, Col, Input, InputNumber, Row, Select, Switch} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
-
-const { TabPane } = Tabs;
 
 interface Props {
     onCreateNotification?: (notificationStatus: any[]) => void;
