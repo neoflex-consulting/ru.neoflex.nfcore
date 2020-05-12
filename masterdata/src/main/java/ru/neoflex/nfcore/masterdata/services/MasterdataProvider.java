@@ -15,7 +15,6 @@ import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
@@ -62,12 +61,11 @@ public class MasterdataProvider {
         }
         context.transact("Init Master Data Service", () -> {
             initTypes();
-            activateEntities();
             return null;
         });
     }
 
-    private void activateEntities() throws IOException {
+    private void activateAllEntities() throws IOException {
         List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY_TYPE)
                 .execute().getResources();
         for (Resource r: resList) {
@@ -185,12 +183,7 @@ public class MasterdataProvider {
             try {
                 OClass oClass = database.getClass(entity.getName());
                 if (oClass == null) {
-                    if (entity.getSuperTypes().size() == 0) {
-                        oClass = database.createVertexClass(entity.getName());
-                    }
-                    else {
-                        oClass = database.createClass(entity.getName());
-                    }
+                    oClass = database.createClass(entity.getName());
                     if (entity.isAbstract()) {
                         oClass.setAbstract(true);
                     }
@@ -251,12 +244,12 @@ public class MasterdataProvider {
 
     public OEntity insert(ODatabaseDocument db, String entityTypeName, ObjectNode node) {
         try {
-            OVertex entity = db.newVertex(entityTypeName);
+            ODocument entity = new ODocument(entityTypeName);
             entity.setProperty("__created", new Date());
             entity.setProperty("__createdBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
-            entity.save();
+            db.save(entity);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -279,7 +272,7 @@ public class MasterdataProvider {
 
     public OEntity update(ODatabaseDocument db, String id, ObjectNode node) {
         try {
-            OVertex entity = db.load(new ORecordId(id));
+            ODocument entity = db.load(new ORecordId(id));
             entity.setProperty("__updated", new Date());
             entity.setProperty("__updatedBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
@@ -305,7 +298,7 @@ public class MasterdataProvider {
     }
 
     public OEntity load(ODatabaseDocument db, String recordId) {
-        OVertex entity = db.load(new ORecordId(recordId));
+        ODocument entity = db.load(new ORecordId(recordId));
         return new OEntity(entity);
     }
 
