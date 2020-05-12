@@ -14,11 +14,11 @@ import Calculator from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParams} from "../../../utils/namedParamsUtils";
 //icons
-import filterIcon from "../../../images/filterIcon.svg";
-import groupIcon from "../../../images/groupIcon.svg";
-import orderIcon from "../../../images/orderIcon.svg";
-import calculatorIcon from "../../../images/calculatorIcon.svg";
-import diagramIcon from "../../../images/diagramIcon.svg";
+import filterIcon from "../../../icons/filterIcon.svg";
+import groupIcon from "../../../icons/groupIcon.svg";
+import orderIcon from "../../../icons/orderIcon.svg";
+import calculatorIcon from "../../../icons/calculatorIcon.svg";
+import diagramIcon from "../../../icons/diagramIcon.svg";
 import DrawerDiagram from "./DrawerDiagram";
 import DatasetDiagram from "./DatasetDiagram";
 

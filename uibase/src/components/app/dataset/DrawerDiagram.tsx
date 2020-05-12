@@ -5,12 +5,12 @@ import {FormComponentProps} from "antd/lib/form";
 import {EObject} from "ecore";
 import {IDiagram} from "./DatasetView";
 import {diagramAnchorMap} from "../../../utils/consts";
-import lineIcon from "../../../images/lineIcon.svg";
-import barIcon from "../../../images/barIcon.svg";
-import pieIcon from "../../../images/pieIcon.svg";
-import lineHighlightIcon from "../../../images/lineHighlightIcon.svg";
-import barHighlightIcon from "../../../images/barHighlightIcon.svg";
-import pieHighlightIcon from "../../../images/pieHighlightIcon.svg";
+import lineIcon from "../../../icons/lineIcon.svg";
+import barIcon from "../../../icons/barIcon.svg";
+import pieIcon from "../../../icons/pieIcon.svg";
+import lineHighlightIcon from "../../../icons/lineHighlightIcon.svg";
+import barHighlightIcon from "../../../icons/barHighlightIcon.svg";
+import pieHighlightIcon from "../../../icons/pieHighlightIcon.svg";
 
 const diagramAnchorMap_: any = diagramAnchorMap;
 
