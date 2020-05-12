@@ -100,6 +100,9 @@ public class MasterdataProvider {
             }
             return oType;
         }
+        if (classifier instanceof EnumType) {
+            return OType.STRING;
+        }
         if (classifier instanceof EntityType) {
             return OType.LINK;
         }
@@ -137,6 +140,9 @@ public class MasterdataProvider {
         else if (classifier instanceof PlainType) {
             OType oType2 = getOType(classifier);
             oClass.createProperty(name, oType2);
+        }
+        else if (classifier instanceof EnumType) {
+            oClass.createProperty(name, OType.STRING);
         }
         else if (classifier instanceof DocumentType) {
             OClass oClass2 = getOClass(database, classifier.getName());
