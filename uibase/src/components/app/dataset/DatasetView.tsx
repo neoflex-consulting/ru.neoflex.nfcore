@@ -2,10 +2,8 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
 import {Button, Drawer, Select} from 'antd';
-import {IServerNamedParam, IServerQueryParam, ISubmitHandler} from '../../../MainContext';
+import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -13,8 +11,16 @@ import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 import Calculator from "./Calculator";
-import {faCalculator} from "@fortawesome/free-solid-svg-icons/faCalculator";
 import DatasetGrid from "./DatasetGrid";
+import {getNamedParams} from "../../../utils/namedParamsUtils";
+//icons
+import filterIcon from "../../../images/filterIcon.svg";
+import groupIcon from "../../../images/groupIcon.svg";
+import orderIcon from "../../../images/orderIcon.svg";
+import calculatorIcon from "../../../images/calculatorIcon.svg";
+import diagramIcon from "../../../images/diagramIcon.svg";
+import DrawerDiagram from "./DrawerDiagram";
+import DatasetDiagram from "./DatasetDiagram";
 
 const { Option, OptGroup } = Select;
 
@@ -25,10 +31,25 @@ export enum paramType {
     sort="serverSorts",
     group="serverGroupBy",
     highlights="highlights",
-    calculations="serverCalculatedExpression"
+    calculations="serverCalculatedExpression",
+    diagram="diagram"
 }
 
 interface Props {
+}
+
+export interface IDiagram {
+    keyColumn: string,
+    valueColumn: string,
+    diagramLegend: string,
+    legendAnchorPosition: string,
+    axisXPosition: string,
+    axisXLegend: string,
+    axisYPosition: string,
+    axisYLegend: string,
+    diagramType: string,
+    colorSchema: string
+    isSingle: boolean
 }
 
 interface State {
@@ -46,19 +67,24 @@ interface State {
     calculations: any[];
     useServerFilter: boolean;
     datasetComponentsData: any;
-    allOperations: any[];
-    allAggregates: any[];
-    allSorts: any[];
+    allOperations: Array<EObject>;
+    allAggregates: Array<EObject>;
+    allSorts: Array<EObject>;
     updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
     calculationsMenuVisible: boolean;
+    diagramMenuVisible: boolean;
     allHighlightType: any[];
     currentTheme: string;
     paginationPageSize: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
+    allAxisXPosition: Array<EObject>;
+    allAxisYPosition: Array<EObject>;
+    allLegendPosition: Array<EObject>;
+    currentDiagram?: IDiagram;
 }
 
 const defaultComponentValues = {
@@ -95,13 +121,18 @@ class DatasetView extends React.Component<any, State> {
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
+            diagramMenuVisible: false,
             allHighlightType: [],
             calculations: [],
             calculationsMenuVisible: false,
             currentTheme: this.props.viewObject.get('theme') || 'material',
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true
+            isHighlightsUpdated: true,
+            allAxisXPosition: [],
+            allAxisYPosition: [],
+            allLegendPosition: [],
+            currentDiagram: undefined
         }
     }
 
@@ -148,8 +179,8 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    getAllEnumValues(enumName:string, paramName:string) {
-        API.instance().findEnum('dataset', enumName)
+    getAllEnumValues(ePackageName:string, enumName:string, paramName:string) {
+        API.instance().findEnum(ePackageName, enumName)
             .then((result: EObject[]) => {
                 const paramValue = result.map( (o: any) => {return o});
                 this.setState<never>({
@@ -391,34 +422,10 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    getQueryNamedParams = () => {
-        let namedParams: IServerNamedParam[] = [];
-        if (this.props.viewObject.get('valueItems')) {
-            this.props.viewObject.get('valueItems').each((item: EObject) => {
-                if (item.eClass._id === "//Select") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: (item.get('value') instanceof Array)
-                            ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
-                            : item.get('value')
-                    })
-                } else if (item.eClass._id === "//DatePicker") {
-                    namedParams.push({
-                        parameterName: item.get('name'),
-                        parameterValue: item.get('value'),
-                        parameterDataType: "Date",
-                        parameterDateFormat: item.get('format')
-                    })
-                }
-            });
-        }
-        return namedParams
-    };
-
     private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const queryParams = this.getQueryNamedParams();
+        const queryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
         this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
             ,[]
@@ -463,10 +470,14 @@ class DatasetView extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
-        if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
-        if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
-        if (this.state.allSorts.length === 0) {this.getAllEnumValues("Sort", "allSorts")}
-        if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
+        if (this.state.allOperations.length === 0) {this.getAllEnumValues("dataset","Operations", "allOperations")}
+        if (this.state.allAggregates.length === 0) {this.getAllEnumValues("dataset","Aggregate", "allAggregates")}
+        if (this.state.allSorts.length === 0) {this.getAllEnumValues("dataset","Sort", "allSorts")}
+        if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("dataset","HighlightType", "allHighlightType")}
+        if (this.state.allAxisXPosition.length === 0) {this.getAllEnumValues("dataset","AxisXPositionType", "allAxisXPosition")}
+        if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
+        if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
+
         if (this.props.context.submitHandlers !== undefined) {
             this.props.context.submitHandlers.push({
                 name: this.props.viewObject.get('name'),
@@ -476,7 +487,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentWillUnmount() {
-        this.props.context.updateContext({datasetComponents: undefined})
+        this.props.context.updateContext({datasetComponents: undefined});
         if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
             this.props.context.submitHandlers.pop()
         }
@@ -512,7 +523,8 @@ class DatasetView extends React.Component<any, State> {
                   filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? !this.state.filtersMenuVisible : false
                 , aggregatesMenuVisible: (p === paramType.aggregate || p === paramType.group) ? !this.state.aggregatesMenuVisible : false
                 , sortsMenuVisible: (p === paramType.sort) ? !this.state.sortsMenuVisible : false
-                , calculationsMenuVisible: (p === paramType.calculations) ? !this.state.calculationsMenuVisible : false});
+                , calculationsMenuVisible: (p === paramType.calculations) ? !this.state.calculationsMenuVisible : false
+                , diagramMenuVisible: (p === paramType.diagram) ? !this.state.diagramMenuVisible : false});
     };
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
@@ -637,7 +649,7 @@ class DatasetView extends React.Component<any, State> {
                 <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={()=>{this.handleDrawerVisibility(paramType.filter)}}
                 >
-                    <FontAwesomeIcon icon={faFilter} size='xs'/>
+                    <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
                 </Button>
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -645,7 +657,7 @@ class DatasetView extends React.Component<any, State> {
                 <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={()=>{this.handleDrawerVisibility(paramType.aggregate)}}
                 >
-                    <FontAwesomeIcon icon={faObjectGroup} size='xs'/>
+                    <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
                 </Button>
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -653,7 +665,7 @@ class DatasetView extends React.Component<any, State> {
                 <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={()=>{this.handleDrawerVisibility(paramType.sort)}}
                 >
-                    <FontAwesomeIcon icon={faArrowsAltV} size='xs'/>
+                    <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
                 </Button>
                 <div style={{display: 'inline-block', height: '30px',
                     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -661,22 +673,39 @@ class DatasetView extends React.Component<any, State> {
                 <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
                         onClick={()=>{this.handleDrawerVisibility(paramType.calculations)}}
                 >
-                    <FontAwesomeIcon icon={faCalculator} size='xs'/>
+                    <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
+                </Button>
+                <div style={{display: 'inline-block', height: '30px',
+                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+                        onClick={()=>{this.handleDrawerVisibility(paramType.diagram)}}
+                >
+                    <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
                 </Button>
 
-                <DatasetGrid
-                    {...this.props}
-                    isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
-                    highlights = {this.state.highlights}
-                    currentDatasetComponent = {this.state.currentDatasetComponent}
-                    rowData = {this.state.rowData}
-                    columnDefs = {this.state.columnDefs}
-                    currentTheme = {this.state.currentTheme}
-                    paginationPageSize = {this.state.paginationPageSize}
-                    showUniqRow = {this.state.showUniqRow}
-                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                    saveChanges = {this.changeDatasetViewState}
-                />
+                {(this.state.currentDiagram)
+                    ?
+                    <DatasetDiagram
+                        {...this.props}
+                        rowData={this.state.rowData}
+                        diagramParams={this.state.currentDiagram}
+                    />
+                    :
+                    <DatasetGrid
+                        {...this.props}
+                        isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
+                        highlights = {this.state.highlights}
+                        currentDatasetComponent = {this.state.currentDatasetComponent}
+                        rowData = {this.state.rowData}
+                        columnDefs = {this.state.columnDefs}
+                        currentTheme = {this.state.currentTheme}
+                        paginationPageSize = {this.state.paginationPageSize}
+                        showUniqRow = {this.state.showUniqRow}
+                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                        saveChanges = {this.changeDatasetViewState}
+                    />
+                }
 
                 <Drawer
                     placement='right'
@@ -817,6 +846,28 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </Drawer>
 
+                <Drawer
+                    placement='right'
+                    title={t('diagram')}
+                    width={'700px'}
+                    visible={this.state.diagramMenuVisible}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.diagram)}}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        <DrawerDiagram
+                            {...this.props}
+                            columnDefs={this.state.columnDefs}
+                            allAxisXPosition={this.state.allAxisXPosition}
+                            allAxisYPosition={this.state.allAxisYPosition}
+                            allLegendPosition={this.state.allLegendPosition}
+                            allSorts={this.state.allSorts}
+                            allAggregates={this.state.allAggregates}
+                            saveChanges={this.changeDatasetViewState}
+                        />
+                    }
+                </Drawer>
             </div>
         )
     }

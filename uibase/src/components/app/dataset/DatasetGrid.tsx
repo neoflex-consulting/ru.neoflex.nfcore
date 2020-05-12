@@ -550,7 +550,7 @@ class DatasetGrid extends React.Component<any, any> {
                     </Button>
                 </Dropdown>
                 <div style={{ marginTop: '30px'}}>
-                    {this.state.columnDefs.length !== 0 && <AgGridReact
+                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
                         ref={this.grid}
                         rowData={this.state.rowData}
                         modules={AllCommunityModules}
@@ -585,6 +585,9 @@ class DatasetGrid extends React.Component<any, any> {
                                 sortable={col.get('sortable') || false}
                                 suppressMenu={col.get('suppressMenu') || false}
                                 cellStyle = {this.state.cellStyle}
+                                cellRenderer = {function(params: any) {
+                                    return params.value;
+                                }}
                             />
                         )}
                     </AgGridReact>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
@@ -9,7 +10,7 @@ import {MainContext} from "../../../MainContext";
 import {Button, Drawer, Icon, Input, Select, Switch} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
-import {faAlignJustify, faPlus, faPrint} from "@fortawesome/free-solid-svg-icons";
+import {faAlignJustify, faPlus, faPrint, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add, getMonth} from "date-fns";
@@ -17,11 +18,11 @@ import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import legend from '../../../legend.svg';
-import searchIcon from '../../../searchIcon.svg';
-import printIcon from '../../../printIcon.svg';
-import trashcanIcon from '../../../trashcanIcon.svg';
-import settingsIcon from '../../../settingsIcon.svg';
+import legend from '../../../icons/legend.svg';
+import searchIcon from '../../../icons/searchIcon.svg';
+import printIcon from '../../../icons/printIcon.svg';
+import trashcanIcon from '../../../icons/trashcanIcon.svg';
+import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 
 const myNote = 'Личная заметка';
@@ -44,6 +45,7 @@ class Calendar extends React.Component<any, any> {
             legendMenuVisible: false,
             createMenuVisible: false,
             editMenuVisible: false,
+            fullScreenOn: false,
             periodicity: [],
             years: [],
             months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -367,12 +369,21 @@ class Calendar extends React.Component<any, any> {
             : this.setState({ legendMenuVisible: true});
     };
 
+    onFullScreen = () => {
+        if (this.state.fullScreenOn){
+            this.setState({ fullScreenOn: false});
+            localStorage.setItem('fullScreenOn', 'false');
+        }
+        else{
+            this.setState({ fullScreenOn: true});
+            localStorage.setItem('fullScreenOn', 'true');
+        }
+    };
+
     handleCalendarVisible = () => {
         if (this.state.calendarVisible) {
             this.setState({ calendarVisible: false, notificationInstancesDTO: [] });
-            // this.setGridData(this.state.myNotificationVisible)
         } else if (this.state.currentMonth != null) {
-            // this.setState({ calendarVisible: true, rowData: [] });
             this.setState({ calendarVisible: true});
             if (this.state.deletedItem) {
                 this.setState({deletedItem: false})
@@ -443,7 +454,7 @@ class Calendar extends React.Component<any, any> {
         }
         return result;
     }
-    
+
     onDateClick = (day: any) => {
         this.setState({
             selectedDate: day
@@ -676,12 +687,14 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents"}}
                     >
                         <Button style={{marginLeft: '10px'}}
+                                className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
                             {t('today')}
                         </Button>
 
                         <Select
+                            className='selectYear'
                             value={this.state.currentMonth.getFullYear()}
                             style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
@@ -699,6 +712,7 @@ class Calendar extends React.Component<any, any> {
                         </Select>
 
                         <Select
+                            className='selectMonth'
                             value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
@@ -732,9 +746,9 @@ class Calendar extends React.Component<any, any> {
                             <div className="icon">chevron_right</div>
                         </div>
 
-                        <Button style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
+                        <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
                                 onClick={this.handleLegendMenu}>
-                            <img alt="Not found" src={legend} style={{marginLeft: '-9px', marginTop: '4px'}}/>
+                            <img  alt="Not found" src={legend}  style={{marginLeft: '-9px', marginTop: '4px'}}/>
                         </Button>
                     </div>
                 }
@@ -782,23 +796,44 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 }
 
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+
+
+                {localStorage.getItem('fullScreenOn') === 'true' ?
+                    <Button
+                        className="buttonPlus"
+                        type="primary"
+                        style={{
+                            width: '20px',
+                            height: '30px',
+                            marginTop: '11px',
+                            backgroundColor: '#293468'
+                        }}
+                        onClick={this.handleCreateMenu}>
+                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
+                    </Button>
+
+                :
+                    <Button
+                        className="buttonPlus"
+                        type="primary"
+                        style={{
+                            width: '20px',
+                            height: '30px',
+                            marginTop: '2px',
+                            backgroundColor: '#293468'
+                        }}
+                        onClick={this.handleCreateMenu}>
+                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
+                    </Button>
+                }
+
+
+
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
                 <Button
-                    type="primary"
-                    style={{
-                        width: '20px',
-                        height: '30px',
-                        marginTop: '2px',
-                        backgroundColor: '#293468'
-                    }}
-                    onClick={this.handleCreateMenu}>
-                    <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-                </Button>
-
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
-
-                <Button
+                    className="calendarAlt"
                     style={{
                         marginRight: '10px',
                         width: '32px',
@@ -813,6 +848,7 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
                 <Button
+                    className="alignJustify"
                     style={{
                         width: '32px',
                         height: '32px'
@@ -826,9 +862,10 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
 
-                <div style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
                 <Button
+                    className="buttonPrint"
                     type="link"
                     ghost
                     style={{
@@ -846,7 +883,31 @@ class Calendar extends React.Component<any, any> {
                         }}
                     />
                 </Button>
+
+
+        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
+
+        <Button
+            className="buttonFullScreen"
+            type="link"
+            ghost
+            style={{
+                marginRight: '10px',
+                width: '32px',
+                height: '32px'
+            }}
+            onClick={this.onFullScreen}
+        >
+            {localStorage.getItem('fullScreenOn') === 'false'  ?
+
+            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+            :
+            <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
+        </Button>
             </div>
+
+
+
         )
     }
 
@@ -865,6 +926,8 @@ class Calendar extends React.Component<any, any> {
             );
         }
         return <div className="days row">{days}</div>;
+
+
     }
 
     renderCells(context: any) {
@@ -939,6 +1002,9 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
+            <Fullscreen
+                enabled={this.state.fullScreenOn}
+                onChange={onFullScreen => this.setState({onFullScreen})}>
             <MainContext.Consumer>
                 { context => (
                     <div className="calendar">
@@ -952,6 +1018,7 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 )}
             </MainContext.Consumer>
+            </Fullscreen>
         );
     }
 }

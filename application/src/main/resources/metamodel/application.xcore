@@ -10,7 +10,6 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import ru.neoflex.nfcore.dataset.DatasetComponent
-import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
@@ -134,31 +133,22 @@ class DatasetView extends ViewElement, CommandElement {
     boolean showUniqRow //Показывать только уникальные строки
 }
 
-abstract class DataView extends ViewElement {
-    refers DatasetView datasetView
+abstract class ContextWriter {
+
 }
 
-class DatasetPivotView extends DataView {
-    op JSON getDatasetPivots() // для чего?
-}
-
-class DatasetDiagramView extends DataView {
-    op JSON getDatasetDiagrams() // для чего?
-    refers DatasetColumn indexBy
-    refers DatasetColumn keyColumn
-    refers DatasetColumn valueColumn
-    LegendAnchorPositionType legendAnchorPosition
-    AxisXPositionType axisXPosition
-    String axisXLegend
-    AxisYPositionType axisYPosition
-    String axisYLegend
-    String colorSchema
-    DiagramType diagramType
-    //refers DatasetColumn datasetColumn
-}
-
-class GroovyCommand extends ViewElement, CommandElement {
+class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
     Text command
+    String gitResourcePath
+    String gitStaticClass
+    String gitStaticMethod
+    GroovyCommandType commandType = "Eval"
+    boolean executeOnStartup
+}
+
+class ValueHolder extends ViewElement, ValueItem {
+    refers ContextWriter contextWriter
+    String groovyCommandResultColumnName
 }
 
 class TabsViewReport extends ViewContainer {
@@ -234,8 +224,9 @@ class DatePicker extends ViewElement, ValueItem {
     String format = "YYYY-MM-DD"
 }
 
-class HtmlContent extends ViewElement {
+class HtmlContent extends ViewElement, CommandElement {
     String htmlContent
+
 }
 
 //add TextArea
@@ -387,30 +378,8 @@ enum IconName {
     faEye
 }
 
-enum DiagramType {
-    Line
-    Bar
-    Pie
-}
-
-enum LegendAnchorPositionType {
-    TopLeft
-    Top
-    TopRight
-    Left
-    Center
-    Right
-    BottomLeft
-    Bottom
-    BottomRight
-}
-
-enum AxisXPositionType {
-    Top
-    Bottom
-}
-
-enum AxisYPositionType {
-    Left
-    Right
+enum GroovyCommandType {
+    Eval,
+    Static,
+    Resource
 }

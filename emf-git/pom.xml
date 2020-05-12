@@ -10,20 +10,20 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.fork>true</maven.compiler.fork>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson-version>2.10.0</jackson-version>
         <emf-version>2.18.0</emf-version>
         <emf-xmi-version>2.16.0</emf-xmi-version>
         <emf-common-version>2.16.0</emf-common-version>
-        <emf-codegen-version>2.16.0</emf-codegen-version>
-        <emf-codegen-ecore-version>2.18.0</emf-codegen-ecore-version>
-        <xtext-version>2.18.0</xtext-version>
+        <xtext-version>2.22.0.M1</xtext-version>
         <ecore-xtext-version>1.4.0</ecore-xtext-version>
         <ecore-xcore-version>1.7.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
+        <emf-codegen-version>2.16.0</emf-codegen-version>
+        <emf-codegen-ecore-version>2.18.0</emf-codegen-ecore-version>
     </properties>
 
     <dependencies>

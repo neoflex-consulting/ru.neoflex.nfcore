@@ -20,7 +20,6 @@ class DatasetPackageInit {
         /*DatasetPackage*/
         JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest", "org.postgresql.Driver")
         JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest", "JdbcDriverPostgresqlTest", "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev", "postgres", "ne0f1ex")
-        JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
 
         try {
             JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
@@ -33,21 +32,6 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTestAAA")
             DatasetComponentInit.createDatasetComponent("DatasetGridTestAAA", "JdbcDatasetTestAAA")
             DatasetComponentInit.createAllColumn("DatasetGridTestAAA")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetLine","\"lineDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetLine")
-            DatasetComponentInit.createDatasetComponent("DatasetGridLine", "JdbcDatasetLine")
-            DatasetComponentInit.createAllColumn("DatasetGridLine")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetPie","\"pieDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetPie")
-            DatasetComponentInit.createDatasetComponent("DatasetGridPie", "JdbcDatasetPie")
-            DatasetComponentInit.createAllColumn("DatasetGridPie")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetBar","\"barDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
-            DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
-            DatasetComponentInit.createAllColumn("DatasetGridBar")
 
             /*NRDEMO*/
             JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
@@ -130,7 +114,6 @@ class DatasetPackageInit {
             DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
 
             /*CalcMart*/
-            //TODO получать список столбцов по запросу а не по таблице
             String calcedMarts = "with\n" +
                     "wt_calc_type as\n" +
                     "(\n" +
@@ -189,9 +172,48 @@ class DatasetPackageInit {
             JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoCalcMart",calcedMarts,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoCalcMart")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoCalcMart", "jdbcNRDemoCalcMart")
-            //TODO настраивать ширину столбцов в момент создания
             DatasetComponentInit.createAllColumnNRDemoCalcMart("DatasetNRDemoCalcMart")
 
+            String kliko = "SELECT file_id,\n" +
+                    "       TO_DATE(max(decode(parameter_name,'I_ONDATE',parameter_value)),'dd.mm.yyyy')+1 AS on_date,\n" +
+                    "       TO_DATE(nvl(max(decode(parameter_name,'I_SPODDATE',parameter_value)),max(decode(parameter_name,'I_ONDATE',parameter_value))),'dd.mm.yyyy')+1 as spod_date,\n" +
+                    "       nvl2(max(decode(parameter_name,'I_SPODDATE',parameter_value)), 'Да', 'Нет') as include_spod,\n" +
+                    "       MAX(DECODE(parameter_name,'I_BRANCH_RK',parameter_value)) AS branch_rk,\n" +
+                    "       nvl(MAX(br.branch_code),'Сводный') as branch_code,\n" +
+                    "       decode(MAX(DECODE(parameter_name,'I_FORM_TYPE',parameter_value)),\n" +
+                    "                 'D','Дневная',\n" +
+                    "                 'M','Месячная',\n" +
+                    "                 'Q','Квартальная',\n" +
+                    "                 'H','Полугодовая',\n" +
+                    "                 'Месячная'\n" +
+                    "       )  AS  form_type,\n" +
+                    "       replace(file_name, 'nrcore.data_export_util','http://nrdemo.neoflex.ru:8080/apex/nrcore.data_export_util') as file_name,\n" +
+                    "       file_status,\n" +
+                    "       date_begin,\n" +
+                    "       date_end,\n" +
+                    "       file_size,\n" +
+                    "       message,\n" +
+                    "       MAX(DECODE(parameter_name,'I_STATUS_CB',parameter_value)) AS  status_cb\n" +
+                    "  FROM nrapp.vw_job_event_list t\n" +
+                    "  LEFT\n" +
+                    "  JOIN dma.dm_branch_d br\n" +
+                    "    ON nvl(DECODE(parameter_name,'I_BRANCH_RK',parameter_value), 0) = br.branch_rk\n" +
+                    "   AND date_begin BETWEEN br.data_actual_date and br.data_actual_end_date\n" +
+                    "WHERE file_type like 'F110_KLIKO%'\n" +
+                    "GROUP BY\n" +
+                    "       file_id,\n" +
+                    "       file_name,\n" +
+                    "       file_status,\n" +
+                    "       file_size,\n" +
+                    "       date_begin,\n" +
+                    "       date_end,\n" +
+                    "       message\n" +
+                    "ORDER BY file_id desc"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoKliko", kliko,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoKliko")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoKliko", "jdbcNRDemoKliko")
+            DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoKliko")
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -238,21 +260,17 @@ class DatasetPackageInit {
 
         def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail")
         def nrDemoCalcMart = AppModuleInit.createAppModuleNRDemoCalcMart("F110_CalcMart", "Запуск расчета формы", "jdbcNRDemoCalcMart", "DatasetNRDemoCalcMart")
+        def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
-        ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
-        ApplicationInit.createApplication("Администрирование")
-        ApplicationInit.createApplicationLine("Линейная диаграмма")
-        ApplicationInit.createApplicationPie("Круговая диаграмма")
-        ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+        ApplicationInit.createApplication("Обязательная отчетность")
         }
         catch (Throwable e) {
             logger.error("Application was not created", e)
         }
-
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)

@@ -234,3 +234,43 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+.fullscreen-enabled{
+    background: var(--neutral-color);
+}
+.fullscreen-enabled .header .buttonToday{
+    margin-top: 8px;
+}
+.fullscreen-enabled .header .selectYear{
+    margin-top: 8px;
+}
+.fullscreen-enabled .header .selectMonth{
+    margin-top: 8px;
+}
+.fullscreen-enabled .header .buttonLegend{
+    margin-top: 7px;
+}
+.fullscreen-enabled .header .verticalLine{
+    margin-top: 8px;
+}
+.fullscreen-enabled .header .buttonPlus{
+    margin-top: 9px;
+}
+.fullscreen-enabled .header .alignJustify{
+    margin-top: 9px;
+}
+.fullscreen-enabled .header .calendarAlt{
+    margin-top: 9px;
+}
+.fullscreen-enabled .header .buttonPrint{
+    margin-top: 9px;
+}
+.fullscreen-enabled .header .buttonFullScreen{
+    margin-top: 9px;
+}
+.fullscreen-enabled .header .icon{
+    margin-top: 17px;
+}
+.fullscreen-enabled .header .col-center{
+    margin-top: 11px;
+}

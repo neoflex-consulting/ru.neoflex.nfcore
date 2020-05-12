@@ -7,13 +7,12 @@ import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.GlobalSettings
 import ru.neoflex.nfcore.application.IconName
 import ru.neoflex.nfcore.application.TextAlign
-import ru.neoflex.nfcore.application.AxisXPositionType
-import ru.neoflex.nfcore.application.AxisYPositionType
-import ru.neoflex.nfcore.application.DiagramType
-import ru.neoflex.nfcore.application.LegendAnchorPositionType
+import ru.neoflex.nfcore.dataset.AxisXPositionType
+import ru.neoflex.nfcore.dataset.AxisYPositionType
+import ru.neoflex.nfcore.dataset.DiagramType
+import ru.neoflex.nfcore.dataset.LegendAnchorPositionType
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.notification.NotificationPackage
 import ru.neoflex.nfcore.notification.NotificationStatus
@@ -180,184 +179,10 @@ class ApplicationInit {
 
                application.setReferenceTree(catalogNode1)
            }
-            else {
-                def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Mandatory Reporting", "MandatoryReporting",false)
-
-                application.name = name
-
-                def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
-                componentElement1.name = 'Mandatory Reporting'
-                componentElement1.setComponent(userComponent1)
-                application.view = componentElement1
-            }
 
             rs.resources.add(Context.current.store.createEObject(application))
         }
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def createApplicationLine(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
-                .execute().resourceSet
-        if (rs.resources.empty) {
-
-            def application = ApplicationFactory.eINSTANCE.createApplication()
-            application.name = name
-            def lineFrom = ApplicationFactory.eINSTANCE.createForm()
-            lineFrom.name = "LineForm"
-            def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetViewRow.name = "DatasetViewRow"
-            datasetViewRow.textAlign = TextAlign.LEFT
-            datasetViewRow.marginTop = "20px"
-            datasetViewRow.marginLeft = "20px"
-            datasetViewRow.marginBottom = "20px"
-
-            def lineDiagramRow = ApplicationFactory.eINSTANCE.createRow()
-            lineDiagramRow.name = "LineDiagramRow"
-            lineDiagramRow.marginTop = "20px"
-            lineDiagramRow.marginLeft = "20px"
-            lineDiagramRow.marginBottom = "20px"
-            lineFrom.children.add(datasetViewRow)
-            lineFrom.children.add(lineDiagramRow)
-
-            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
-            datasetView.name = "DatasetView"
-            def jdbcDatasetLine = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetLine", "",false)
-            datasetView.setDataset(jdbcDatasetLine)
-            def datasetGridLine =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridLine", "",false)
-            datasetView.setDatasetComponent(datasetGridLine)
-            datasetViewRow.children.add(datasetView)
-
-            def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
-            datasetDiagram.name = "DatasetDiagram"
-            datasetDiagram.setDatasetView(datasetView)
-            if (datasetView.dataset.getDatasetColumn().size() > 0) {
-                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"branch"
-                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(0)//"incomedate"
-                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
-            }
-            datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
-            datasetDiagram.axisXPosition = AxisXPositionType.BOTTOM
-            datasetDiagram.axisXLegend = "Dates"
-            datasetDiagram.axisYPosition = AxisYPositionType.LEFT
-            datasetDiagram.axisYLegend = "Income"
-            datasetDiagram.colorSchema = "nivo"
-            datasetDiagram.diagramType = DiagramType.LINE
-            lineDiagramRow.children.add(datasetDiagram)
-
-            application.setView(lineFrom)
-
-            rs.resources.add(Context.current.store.createEObject(application))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
-
-    static def createApplicationPie(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
-                .execute().resourceSet
-        if (rs.resources.empty) {
-            def application = ApplicationFactory.eINSTANCE.createApplication()
-            application.name = name
-
-            def pieFrom = ApplicationFactory.eINSTANCE.createForm()
-            pieFrom.name = "PieForm"
-            def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetViewRow.name = "ViewDatasetRow"
-            datasetViewRow.textAlign = TextAlign.LEFT
-            datasetViewRow.marginTop = "20px"
-            datasetViewRow.marginLeft = "20px"
-            datasetViewRow.marginBottom = "20px"
-            def pieDiagramRow = ApplicationFactory.eINSTANCE.createRow()
-            pieDiagramRow.name = "PieRow"
-            pieDiagramRow.marginTop = "20px"
-            pieDiagramRow.marginLeft = "20px"
-            pieDiagramRow.marginBottom = "20px"
-            pieFrom.children.add(datasetViewRow)
-            pieFrom.children.add(pieDiagramRow)
-
-            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
-            datasetView.name = "ViewDataset"
-            def jdbcDatasetPie = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetPie", "",false)
-            datasetView.setDataset(jdbcDatasetPie)
-            def datasetGridPie =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridPie", "",false)
-            datasetView.setDatasetComponent(datasetGridPie)
-            datasetViewRow.children.add(datasetView)
-
-            def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
-            datasetDiagram.name = "PieChart"
-            datasetDiagram.setDatasetView(datasetView)
-            if (datasetView.dataset.getDatasetColumn().size() != 0) {
-                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(1)//"department"
-                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"department"
-                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
-            }
-            datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
-            datasetDiagram.axisXPosition = AxisXPositionType.TOP
-            datasetDiagram.axisYPosition = AxisYPositionType.LEFT
-            datasetDiagram.colorSchema = "nivo"
-            datasetDiagram.diagramType = DiagramType.PIE
-            pieDiagramRow.children.add(datasetDiagram)
-
-            application.setView(pieFrom)
-
-            rs.resources.add(Context.current.store.createEObject(application))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
-
-    static def createApplicationBar(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APPLICATION, [name: name])
-                .execute().resourceSet
-        if (rs.resources.empty) {
-            def application = ApplicationFactory.eINSTANCE.createApplication()
-            application.name = name
-
-            def barFrom = ApplicationFactory.eINSTANCE.createForm()
-            barFrom.name = "BarForm"
-            def datasetViewRow = ApplicationFactory.eINSTANCE.createRow()
-            datasetViewRow.name = "ViewDatasetRow"
-            datasetViewRow.textAlign = TextAlign.LEFT
-            datasetViewRow.marginTop = "20px"
-            datasetViewRow.marginLeft = "20px"
-            datasetViewRow.marginBottom = "20px"
-            def barDiagramRow = ApplicationFactory.eINSTANCE.createRow()
-            barDiagramRow.name = "BarRow"
-            barDiagramRow.marginTop = "20px"
-            barDiagramRow.marginLeft = "20px"
-            barDiagramRow.marginBottom = "20px"
-            barFrom.children.add(datasetViewRow)
-            barFrom.children.add(barDiagramRow)
-
-            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
-            datasetView.name = "ViewDataset"
-            def jdbcDatasetBar = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetBar", "",false)
-            datasetView.setDataset(jdbcDatasetBar)
-            def datasetGridBar =  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridBar", "",false)
-            datasetView.setDatasetComponent(datasetGridBar)
-            datasetViewRow.children.add(datasetView)
-
-            def datasetDiagram = ApplicationFactory.eINSTANCE.createDatasetDiagramView()
-            datasetDiagram.name = "BarChart"
-            datasetDiagram.setDatasetView(datasetView)
-            if (datasetView.dataset.getDatasetColumn().size() != 0) {
-                datasetDiagram.indexBy = datasetView.dataset.getDatasetColumn().get(0)//"year"
-                datasetDiagram.keyColumn = datasetView.dataset.getDatasetColumn().get(1)//"branch"
-                datasetDiagram.valueColumn = datasetView.dataset.getDatasetColumn().get(2)//"income"
-            }
-            datasetDiagram.legendAnchorPosition = LegendAnchorPositionType.BOTTOM_RIGHT
-            datasetDiagram.axisXPosition = AxisXPositionType.BOTTOM
-            datasetDiagram.axisXLegend = "year"
-            datasetDiagram.axisYPosition = AxisYPositionType.LEFT
-            datasetDiagram.axisYLegend = "income"
-            datasetDiagram.colorSchema = "nivo"
-            datasetDiagram.diagramType = DiagramType.BAR
-
-            barDiagramRow.children.add(datasetDiagram)
-
-            application.setView(barFrom)
-
-            rs.resources.add(Context.current.store.createEObject(application))
-        }
-        return rs.resources.get(0).contents.get(0)
-    }
 }

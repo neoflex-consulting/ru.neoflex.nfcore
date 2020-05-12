@@ -10,7 +10,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
@@ -412,7 +411,12 @@ public abstract class AbstractSimpleFinderProvider implements FinderSPI {
                 continue;
             }
             if (fieldName.equals("eClass")) {
-                if (!EcoreUtil.getURI(((EObject) object).eClass()).toString().equals(queryNode.asText())) {
+                if (!(object instanceof EObject)) {
+                    return false;
+                }
+                EObject eObject = (EObject) object;
+                EClass eClass = (EClass) eObject.eResource().getResourceSet().getEObject(URI.createURI(queryNode.asText()), false);
+                if (eClass == null || !eClass.isSuperTypeOf(eObject.eClass())) {
                     return false;
                 }
                 continue;
