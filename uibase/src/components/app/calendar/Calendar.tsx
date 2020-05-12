@@ -836,11 +836,13 @@ class Calendar extends React.Component<any, any> {
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
                 <Button
+                    disabled={this.state.calendarVisible}
                     className="calendarAlt"
                     style={{
                         marginRight: '10px',
                         width: '32px',
-                        height: '32px'
+                        height: '32px',
+                        backgroundColor: '#ffffff'
                     }}
                     onClick={this.handleCalendarVisible}
                 >
@@ -851,10 +853,12 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
                 <Button
+                    disabled={!this.state.calendarVisible}
                     className="alignJustify"
                     style={{
                         width: '32px',
-                        height: '32px'
+                        height: '32px',
+                        backgroundColor: '#ffffff'
                     }}
                     onClick={this.handleCalendarVisible}
                 >
