@@ -6,6 +6,7 @@ import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
 import DatasetDiagram from './components/app/dataset/DatasetDiagram';
+import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
 import {API} from './modules/api';
 import { WithTranslation } from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
@@ -598,6 +599,12 @@ class Calendar_ extends ViewContainer {
     }
 }
 
+class MasterdataView_ extends ViewContainer {
+    render = () => {
+        return <MasterdataEditor {...this.props} key={this.viewObject._id}/>
+    }
+}
+
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof View>();
@@ -621,6 +628,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
         this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
         this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
+        this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

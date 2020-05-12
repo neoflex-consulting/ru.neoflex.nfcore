@@ -17,6 +17,7 @@ import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
+import ru.neoflex.nfcore.masterdata.EntityType
 
 /* Components */
 abstract class Component {
@@ -62,6 +63,10 @@ abstract class ViewContainer extends ViewElement {
 }
 
 abstract class Icon extends ViewElement {	
+}
+
+class MasterdataView extends ViewElement {
+    refers EntityType entityType
 }
 
 class Calendar extends ViewElement {
