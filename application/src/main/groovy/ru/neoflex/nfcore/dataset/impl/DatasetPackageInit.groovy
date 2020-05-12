@@ -20,7 +20,6 @@ class DatasetPackageInit {
         /*DatasetPackage*/
         JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest", "org.postgresql.Driver")
         JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest", "JdbcDriverPostgresqlTest", "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev", "postgres", "ne0f1ex")
-        JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
 
         try {
             JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
@@ -33,21 +32,6 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTestAAA")
             DatasetComponentInit.createDatasetComponent("DatasetGridTestAAA", "JdbcDatasetTestAAA")
             DatasetComponentInit.createAllColumn("DatasetGridTestAAA")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetLine","\"lineDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetLine")
-            DatasetComponentInit.createDatasetComponent("DatasetGridLine", "JdbcDatasetLine")
-            DatasetComponentInit.createAllColumn("DatasetGridLine")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetPie","\"pieDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetPie")
-            DatasetComponentInit.createDatasetComponent("DatasetGridPie", "JdbcDatasetPie")
-            DatasetComponentInit.createAllColumn("DatasetGridPie")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetBar","\"barDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
-            DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
-            DatasetComponentInit.createAllColumn("DatasetGridBar")
 
             /*NRDEMO*/
             JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
@@ -281,17 +265,12 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
-        ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
-        ApplicationInit.createApplication("Администрирование")
-        ApplicationInit.createApplicationLine("Линейная диаграмма")
-        ApplicationInit.createApplicationPie("Круговая диаграмма")
-        ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+        ApplicationInit.createApplication("Обязательная отчетность")
         }
         catch (Throwable e) {
             logger.error("Application was not created", e)
         }
-
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)

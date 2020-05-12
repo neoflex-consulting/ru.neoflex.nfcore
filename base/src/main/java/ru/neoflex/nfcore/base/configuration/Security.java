@@ -32,6 +32,7 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.UserDetail;
 import ru.neoflex.nfcore.base.util.DocFinder;
@@ -115,6 +116,8 @@ public class Security extends WebSecurityConfigurerAdapter {
 
         @Autowired
         Store store;
+        @Autowired
+        Context context;
 
         @Value("${ldap.host:}")
         private String host;
@@ -140,49 +143,55 @@ public class Security extends WebSecurityConfigurerAdapter {
 
                     @Override
                     public UserDetails mapUserFromContext(DirContextOperations ctx, String username, Collection<? extends GrantedAuthority> authorities) {
-                        UserDetails userDetails = ldapUserDetailsMapper.mapUserFromContext(ctx, username, authorities);
-
-                        //Get roles from Ldap
-                        for (GrantedAuthority grantedAuthority : userDetails.getAuthorities()) {
-                            String temp = grantedAuthority.toString();
-                            rolesFromLdap.add(temp);
-                        }
-
-                        //Get roles from Databases (from roles and from groups)
-                        DocFinder docFinder = DocFinder.create(store);
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        ObjectNode selector = objectMapper.createObjectNode();
-                        selector
-                                .with("contents")
-                                .put("eClass", "ru.neoflex.nfcore.base.auth#//Role");
                         try {
-                            docFinder
-                                    .executionStats(true)
-                                    .selector(selector)
-                                    .execute();
-                            EList<Resource> resources = docFinder.getResourceSet().getResources();
+                            return context.transact(null, () -> {
+                                UserDetails userDetails = ldapUserDetailsMapper.mapUserFromContext(ctx, username, authorities);
 
-                            for (Resource resource : resources) {
-                                ru.neoflex.nfcore.base.auth.Role role = (ru.neoflex.nfcore.base.auth.Role) resource.getContents().get(0);
-                                if (!role.getName().isEmpty()) {
-                                    rolesFromDB.add(role.getName());
+                                //Get roles from Ldap
+                                for (GrantedAuthority grantedAuthority : userDetails.getAuthorities()) {
+                                    String temp = grantedAuthority.toString();
+                                    rolesFromLdap.add(temp);
                                 }
-                            }
 
-                            //Add roles from Ldap that are contained in Databases
-                            for (String roleFromLdap : rolesFromLdap) {
-                                if (rolesFromDB.contains(roleFromLdap)) {
-                                    au.add(new SimpleGrantedAuthority(roleFromLdap));
+                                //Get roles from Databases (from roles and from groups)
+                                DocFinder docFinder = DocFinder.create(store);
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                ObjectNode selector = objectMapper.createObjectNode();
+                                selector
+                                        .with("contents")
+                                        .put("eClass", "ru.neoflex.nfcore.base.auth#//Role");
+                                try {
+                                    docFinder
+                                            .executionStats(true)
+                                            .selector(selector)
+                                            .execute();
+                                    EList<Resource> resources = docFinder.getResourceSet().getResources();
+
+                                    for (Resource resource : resources) {
+                                        ru.neoflex.nfcore.base.auth.Role role = (ru.neoflex.nfcore.base.auth.Role) resource.getContents().get(0);
+                                        if (!role.getName().isEmpty()) {
+                                            rolesFromDB.add(role.getName());
+                                        }
+                                    }
+
+                                    //Add roles from Ldap that are contained in Databases
+                                    for (String roleFromLdap : rolesFromLdap) {
+                                        if (rolesFromDB.contains(roleFromLdap)) {
+                                            au.add(new SimpleGrantedAuthority(roleFromLdap));
+                                        }
+                                    }
+
+                                } catch (IOException e) {
+                                    throw new UsernameNotFoundException(e.getMessage());
                                 }
-                            }
 
-                        } catch (IOException e) {
-                            throw new UsernameNotFoundException(e.getMessage());
+                                LdapUserDetailsImpl.Essence essence = new LdapUserDetailsImpl.Essence((LdapUserDetails) userDetails);
+                                essence.setAuthorities(au);
+                                return essence.createUserDetails();
+                            });
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
-
-                        LdapUserDetailsImpl.Essence essence = new LdapUserDetailsImpl.Essence((LdapUserDetails) userDetails);
-                        essence.setAuthorities(au);
-                        return essence.createUserDetails();
                     }
 
                     @Override

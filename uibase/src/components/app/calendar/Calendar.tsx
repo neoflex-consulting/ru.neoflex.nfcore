@@ -25,6 +25,8 @@ import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 
+const myNote = 'Личная заметка';
+
 interface Props {
 }
 
@@ -64,7 +66,9 @@ class Calendar extends React.Component<any, any> {
                 'actionMenu': this.actionMenu
             },
             myNotificationVisible: false,
-            searchValue: undefined
+            searchValue: undefined,
+            deletedItem: false,
+            classAppModule: undefined
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
@@ -111,7 +115,16 @@ class Calendar extends React.Component<any, any> {
         }
     };
 
-    getAllNotificationInstances(currentMonth: Date) {
+    getClassAppModule = () => {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const eClass = classes.find((c: Ecore.EObject) => c._id === "//AppModule");
+            if (eClass !== undefined) {
+                this.setState({classAppModule: eClass})
+            }
+        });
+    };
+
+    getAllNotificationInstances(currentMonth: Date, updateViewObject: boolean) {
         const monthStart = dateFns.startOfMonth(currentMonth);
         const monthEnd = dateFns.endOfMonth(monthStart);
         const dateFrom = monthStart.toString();
@@ -119,10 +132,18 @@ class Calendar extends React.Component<any, any> {
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'getNotificationInstances';
         let resourceSet = Ecore.ResourceSet.create();
-        return API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
+
+        if (updateViewObject && this.state.classAppModule !== undefined) {
+            API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
+                .then((result) => {
+                    this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
+                })
+        }
+
+        API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
             let notificationInstancesDTO = JSON.parse(result).resources;
             this.setState({notificationInstancesDTO, spinnerVisible: false});
-        })
+        });
     };
 
     getAllStatuses() {
@@ -155,8 +176,8 @@ class Calendar extends React.Component<any, any> {
     getAllPeriodicity() {
         API.instance().findEnum('notification', 'Periodicity')
             .then((result: Ecore.EObject[]) => {
-                let periodicity = result.map( (t: any) => {
-                    return t.get('name')
+                let periodicity = result.map( (p: any) => {
+                    return p.get('name')
                 });
                 this.setState({periodicity})
             })
@@ -166,31 +187,64 @@ class Calendar extends React.Component<any, any> {
         this.setState({spinnerVisible: true});
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'createNotification';
+
         return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
-            this.getAllNotificationInstances(this.state.currentMonth);
-            this.setGridData(this.state.myNotificationVisible)
+            this.getAllNotificationInstances(this.state.currentMonth, true);
+            this.setGridData(this.state.myNotificationVisible, newNotification);
         })
     };
 
     editNotification = (editableNotification: any) => {
+        const {t} = this.props;
         this.setState({spinnerVisible: true});
-        const ref: string = this.props.viewObject._id;
-        const methodName: string = 'createNotification';
         const notifications = this.props.viewObject.get('notifications').array()
                 .filter((n: EObject) =>
-                    (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === 'Личная заметка')
+                    (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
                     ||
-                    (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== 'Личная заметка')
+                    (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
                 );
         const newEditableNotification = notifications[editableNotification['id']];
         const resource = newEditableNotification.eResource();
         if (resource) {
-            resource.eContents()[0].set('name', `${editableNotification.fullName}`);
-            resource.eContents()[0].set('deadlineDay', `${editableNotification.deadlineDay}`);
+            if (resource.eContents()[0].get('defaultStatus').get('name') !== myNote) {
+                resource.eContents()[0].set('name', `${editableNotification.fullName}`);
+                resource.eContents()[0].set('deadlineDay', `${editableNotification.deadlineDay}`);
+            } else {
+                resource.eContents()[0].set('name', `${editableNotification.fullName}`);
+                resource.eContents()[0].set('shortName', `${editableNotification.shortName}`);
+                resource.eContents()[0].set('weekendReporting', `${
+                    editableNotification.weekendReporting ? true : false
+                }`);
+                resource.eContents()[0].set('periodicity', `${
+                    editableNotification.periodicity === 'Месячная' ? 'Month' : editableNotification.periodicity
+                }`);
+                resource.eContents()[0].set('deadlineDay', `${editableNotification.deadlineDay}`);
+                resource.eContents()[0].set('deadlineTime', `${editableNotification.deadlineTime}`);
+            }
         }
-        API.instance().saveResource(resource, 99999).then( () => {
-            this.getAllNotificationInstances(this.state.currentMonth);
-            this.setGridData(this.state.myNotificationVisible)
+        API.instance().saveResource(resource, 99999).then( (newResource: Ecore.Resource) => {
+            const id_ = newEditableNotification._id;
+            const notifications = this.props.viewObject.get('notifications').array()
+                .map((n: EObject) =>
+                    {
+                        if (n._id === id_) {
+                            return newResource.eContents()[0]
+                        }
+                        else {
+                            return n
+                        }
+                    }
+                );
+            this.props.viewObject.get('notifications').clear();
+            this.props.viewObject.get('notifications').addAll(notifications);
+
+            const newViewObject: Ecore.EObject[] = (this.props.viewObject.eResource().eContainer as Ecore.ResourceSet).elements()
+                .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+                .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+                .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+            this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+            this.setGridData(this.state.myNotificationVisible);
+            this.setState({spinnerVisible: false})
         })
     };
 
@@ -212,17 +266,17 @@ class Calendar extends React.Component<any, any> {
         if (type === 'year') {
             newDate = add(this.state.currentMonth, {years: e - this.state.currentMonth.getFullYear()});
             this.setState({currentMonth: newDate});
-            this.getAllNotificationInstances(newDate)
+            this.getAllNotificationInstances(newDate, false)
         }
         else if (type == 'today') {
             newDate = new Date();
             this.setState({currentMonth: newDate});
-            this.getAllNotificationInstances(newDate)
+            this.getAllNotificationInstances(newDate, false)
         }
         else if (type === 'month') {
             newDate = add(this.state.currentMonth, {months: e - this.state.currentMonth.getMonth() - 1});
             this.setState({currentMonth: newDate});
-            this.getAllNotificationInstances(newDate)
+            this.getAllNotificationInstances(newDate, false)
         }
         else if (type === 'select') {
             this.setState({selectedValueInGrid: e});
@@ -255,27 +309,13 @@ class Calendar extends React.Component<any, any> {
             : this.setState({ createMenuVisible: true});
     };
 
-    deleteNotification = (params: any) => {
-        this.setState({spinnerVisible: true});
-        const oldNotifications = this.props.viewObject.get('notifications').array()
-            .filter((n: EObject) =>
-                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === 'Личная заметка')
-                ||
-                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== 'Личная заметка')
-            );
-        const deleteNotification = oldNotifications[params.node.id];
-        const newNotifications = this.props.viewObject.get('notifications').array()
-            .filter((n: EObject) => n.get('name') !== deleteNotification.get('name'));
-        this.props.viewObject.get('notifications').clear();
-        this.props.viewObject.get('notifications').addAll(newNotifications);
-
+    updateViewObject = () => {
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: newViewObject[0]}));
-        this.setGridData(this.state.myNotificationVisible);
 
         API.instance().saveResource(this.props.viewObject.eResource(), 99999)
             .then( (newResource: Ecore.Resource) => {
@@ -284,19 +324,37 @@ class Calendar extends React.Component<any, any> {
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
                 this.props.context.updateContext!(({viewObject: newViewObject[0]}));
-            this.getAllNotificationInstances(this.state.currentMonth);
         })
+    };
 
+    deleteNotification = (params: any) => {
+        if (!this.state.deletedItem) {this.setState({deletedItem: true})}
+        this.setState({spinnerVisible: true});
+        const oldNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) =>
+                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
+                ||
+                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
+            );
+        const deleteNotification = oldNotifications[params.node.id];
+        const newNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) => n.get('name') !== deleteNotification.get('name'));
+        this.props.viewObject.get('notifications').clear();
+        this.props.viewObject.get('notifications').addAll(newNotifications);
+
+        this.setGridData(this.state.myNotificationVisible);
     };
 
     handleEditMenu = (params: any) => {
+        const {t} = this.props;
         if (params.data != undefined) {
+            const newPeriodicity = this.state.periodicity.filter((p: any) => t(p) === params.data["Периодичность сдачи"]);
             const editableNotification: any = {
                 'id': params.node.id,
                 'fullName': params.data["Полное название формы"],
                 'shortName': params.data["Краткое название формы"],
                 'weekendReporting': params.data["Отчетность по выходным"],
-                'periodicity': params.data["Периодичность сдачи"],
+                'periodicity': newPeriodicity[0],
                 'deadlineDay': params.data["Рабочий день сдачи"],
                 'deadlineTime': params.data["Время сдачи"]
             };
@@ -320,9 +378,183 @@ class Calendar extends React.Component<any, any> {
             this.setState({ fullScreenOn: true});
             localStorage.setItem('fullScreenOn', 'true');
         }
+    };
+
+    handleCalendarVisible = () => {
+        if (this.state.calendarVisible) {
+            this.setState({ calendarVisible: false, notificationInstancesDTO: [] });
+        } else if (this.state.currentMonth != null) {
+            this.setState({ calendarVisible: true});
+            if (this.state.deletedItem) {
+                this.setState({deletedItem: false})
+                this.updateViewObject();
+                this.getAllNotificationInstances(this.state.currentMonth, false)
+            } else {
+                this.getAllNotificationInstances(this.state.currentMonth, true)
+            }
+
+        }
+    };
+
+    changeSearchValue = (e: any) => {
+        this.setState({searchValue: e})
+    };
+
+    searchValue = () => {
+        console.log()
+    };
+
+    openNotification(notification: any, context: any): void  {
+        let params: Object[] = [{
+            datasetColumn: 'reportDate',
+            operation: 'EqualTo',
+            value: notification.contents[0]['notificationDateOn'],
+            enable: true,
+            type: 'Date'
+        }];
+        if (notification.contents[0]['AppModuleName'] !== null) {
+            context.changeURL(
+                notification.contents[0]['AppModuleName'],
+                undefined,
+                params
+            )
+        }
     }
 
+    private getTitle(day: any) {
+        let temp: any = [];
+            this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
+                dateFns.isSameYear(day, dateFns.parseISO(r.get('date')))
+                && dateFns.isSameMonth(day, dateFns.parseISO(r.get('date')))
+                && dateFns.isSameDay(day, dateFns.parseISO(r.get('date')))
+            ).map((r: any) => temp.push(r.get('title')));
+            if (temp.length === 0) {
+                temp.push(this.props.viewObject.get('defaultTitle'))
+            }
+        return temp;
+    }
 
+    private getContents(day: any) {
+        let temp: any = [];
+        let result: any = [];
+        this.state.notificationInstancesDTO.filter((r: any) =>
+            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['calendarDate']))
+        ).map((r: any) => temp.push(r));
+        if (temp.length !== 0 && this.state.notificationStatus) {
+            let colors = this.state.notificationStatus
+                .filter((s: any) => s['enable'] === true)
+                .map((s: any) => {return s['color']});
+            temp.forEach((r: any) => {
+                if (colors.includes(r.contents[0]['statusColor'])) {
+                    result.push(r)
+                }
+            })
+        }
+        return result;
+    }
+
+    onDateClick = (day: any) => {
+        this.setState({
+            selectedDate: day
+        })
+    };
+
+    nextMonth = () => {
+        this.setState({
+            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
+        })
+    };
+
+    prevMonth = () => {
+        this.setState({
+            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
+        })
+    };
+
+    componentDidMount(): void {
+        this.getGlobalSettings();
+        this.getAllStatuses();
+        this.getAllNotificationInstances(this.state.currentMonth, false);
+        this.getAllPeriodicity();
+        this.getYears();
+        this.setGridData(false);
+        this.getClassAppModule()
+    }
+
+    setGridData(myNotificationVisible: boolean, newNotification?: any): void {
+        const {t} = this.props;
+        let rowData: any = [];
+        let columnDefs = [
+            {field: 'Полное название формы'},
+            {field: 'Краткое название формы'},
+            {field: 'Отчетная дата "на"'},
+            {field: 'Периодичность сдачи'},
+            {field: 'Рабочий день сдачи'},
+            {field: 'Время сдачи'},
+            {field: 'Отчетность по выходным'},
+            {field: 'Интервал расчета'}
+        ];
+        this.setState({myNotificationVisible});
+        if (myNotificationVisible) {
+            const newRowData = this.props.viewObject.get('notifications').array()
+                .filter((n: EObject) => n.get('defaultStatus') !== null && n.get('defaultStatus').get('name') === myNote);
+            if (newRowData.length !== 0) {
+                newRowData.forEach((n: EObject) => {
+                    rowData.push(
+                        {
+                            ['Полное название формы']: n.get('name'),
+                            ['Краткое название формы']: n.get('shortName'),
+                            ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
+                            ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
+                            ['Рабочий день сдачи']: n.get('deadlineDay'),
+                            ['Время сдачи']: n.get('deadlineTime'),
+                            ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
+                            ['Интервал расчета']: t(n.get('calculationInterval'))
+                        }
+                    )
+                })
+            }
+
+            if (newNotification) {
+                rowData.push(
+                    {
+                        ['Полное название формы']: newNotification['fullName'],
+                        ['Краткое название формы']: newNotification['shortName'],
+                        ['Отчетная дата "на"']: newNotification['deadlineDay'],
+                        ['Периодичность сдачи']: newNotification['periodicity'] === null ? t('Day') : t(newNotification['periodicity']),
+                        ['Рабочий день сдачи']: newNotification['deadlineDay'],
+                        ['Время сдачи']: newNotification['deadlineTime'],
+                        ['Отчетность по выходным']: newNotification['weekendReporting'] ? 'Да' : 'Нет',
+                        ['Интервал расчета']: null
+                    }
+                )
+            }
+        }
+        else {
+            const newRowData = this.props.viewObject.get('notifications').array()
+                .filter((n: EObject) => n.get('defaultStatus') !== null && n.get('defaultStatus').get('name') !== myNote);
+            if (newRowData.length !== 0) {
+                newRowData.forEach((n: EObject) => {
+                    rowData.push(
+                        {
+                            ['Полное название формы']: n.get('name'),
+                            ['Краткое название формы']: n.get('shortName'),
+                            ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
+                            ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
+                            ['Рабочий день сдачи']: n.get('deadlineDay'),
+                            ['Время сдачи']: n.get('deadlineTime'),
+                            ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
+                            ['Интервал расчета']: t(n.get('calculationInterval')),
+                            ['Удалена']: n.get('archive') ? 'Да' : 'Нет'
+                        }
+                    )
+                });
+            }
+        }
+        this.setState({rowData, columnDefs});
+    }
 
     renderCreateNotification() {
         const {i18n, t} = this.props;
@@ -351,26 +583,26 @@ class Calendar extends React.Component<any, any> {
     renderEditNotification() {
         const {i18n, t} = this.props;
         return (
-                <Drawer
-                    placement='right'
-                    title={t('editNotification')}
-                    width={'450px'}
-                    visible={this.state.editMenuVisible}
-                    onClose={this.handleEditMenu}
-                    mask={false}
-                    maskClosable={false}
-                >
-                    {
-                        this.state.editableNotification !== undefined && <EditNotification
-                            {...this.props}
-                            onEditNotification={this.editNotification}
-                            periodicity={this.state.periodicity}
-                            spinnerVisible={this.state.spinnerVisible}
-                            editableNotification={this.state.editableNotification}
-                            myNotificationVisible={this.state.myNotificationVisible}
-                        />
-                    }
-                </Drawer>
+            <Drawer
+                placement='right'
+                title={t('editNotification')}
+                width={'450px'}
+                visible={this.state.editMenuVisible}
+                onClose={this.handleEditMenu}
+                mask={false}
+                maskClosable={false}
+            >
+                {
+                    this.state.editableNotification !== undefined && <EditNotification
+                        {...this.props}
+                        onEditNotification={this.editNotification}
+                        periodicity={this.state.periodicity}
+                        spinnerVisible={this.state.spinnerVisible}
+                        editableNotification={this.state.editableNotification}
+                        myNotificationVisible={this.state.myNotificationVisible}
+                    />
+                }
+            </Drawer>
         );
     }
 
@@ -396,11 +628,6 @@ class Calendar extends React.Component<any, any> {
             </Drawer>
         );
     }
-
-    handleCalendarVisible = () => {
-        this.state.calendarVisible ? this.setState({ calendarVisible: false})
-            : this.setState({ calendarVisible: true});
-    };
 
     renderGrid() {
         const { t } = this.props;
@@ -448,20 +675,11 @@ class Calendar extends React.Component<any, any> {
         )
     }
 
-    changeSearchValue = (e: any) => {
-        this.setState({searchValue: e})
-    };
-
-    searchValue = () => {
-        console.log()
-    };
-
     renderHeader() {
         const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
         return (
-
             <div className="header row flex-middle">
                 {
                     this.state.calendarVisible &&
@@ -660,8 +878,8 @@ class Calendar extends React.Component<any, any> {
                         alt="Not found"
                         src={printIcon}
                         style={{
-                             marginLeft: '-6px',
-                             color: '#515151'
+                            marginLeft: '-6px',
+                            color: '#515151'
                         }}
                     />
                 </Button>
@@ -710,23 +928,6 @@ class Calendar extends React.Component<any, any> {
         return <div className="days row">{days}</div>;
 
 
-    }
-
-    openNotification(notification: any, context: any): void  {
-        let params: Object[] = [{
-            datasetColumn: 'reportDate',
-            operation: 'EqualTo',
-            value: notification.contents[0]['notificationDateOn'],
-            enable: true,
-            type: 'Date'
-        }];
-        if (notification.contents[0]['AppModuleName'] !== null) {
-            context.changeURL(
-                notification.contents[0]['AppModuleName'],
-                undefined,
-                params
-            )
-        }
     }
 
     renderCells(context: any) {
@@ -799,121 +1000,6 @@ class Calendar extends React.Component<any, any> {
         )
     }
 
-    private getTitle(day: any) {
-        let temp: any = [];
-            this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
-                dateFns.isSameYear(day, dateFns.parseISO(r.get('date')))
-                && dateFns.isSameMonth(day, dateFns.parseISO(r.get('date')))
-                && dateFns.isSameDay(day, dateFns.parseISO(r.get('date')))
-            ).map((r: any) => temp.push(r.get('title')));
-            if (temp.length === 0) {
-                temp.push(this.props.viewObject.get('defaultTitle'))
-            }
-        return temp;
-    }
-
-    private getContents(day: any) {
-        let temp: any = [];
-        let result: any = [];
-        this.state.notificationInstancesDTO.filter((r: any) =>
-            dateFns.isSameYear(day, dateFns.parseISO(r.contents[0]['calendarDate']))
-            && dateFns.isSameMonth(day, dateFns.parseISO(r.contents[0]['calendarDate']))
-            && dateFns.isSameDay(day, dateFns.parseISO(r.contents[0]['calendarDate']))
-        ).map((r: any) => temp.push(r));
-        if (temp.length !== 0 && this.state.notificationStatus) {
-            let colors = this.state.notificationStatus
-                .filter((s: any) => s['enable'] === true)
-                .map((s: any) => {return s['color']});
-            temp.forEach((r: any) => {
-                if (colors.includes(r.contents[0]['statusColor'])) {
-                    result.push(r)
-                }
-            })
-        }
-        return result;
-    }
-    
-    onDateClick = (day: any) => {
-        this.setState({
-            selectedDate: day
-        })
-    };
-
-    nextMonth = () => {
-        this.setState({
-            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        })
-    };
-
-    prevMonth = () => {
-        this.setState({
-            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        })
-    };
-
-    componentDidMount(): void {
-        this.getGlobalSettings();
-        this.getAllStatuses();
-        this.getAllNotificationInstances(this.state.currentMonth);
-        this.getAllPeriodicity();
-        this.getYears();
-        this.setGridData(false)
-    }
-
-    setGridData(myNotificationVisible: boolean): void {
-        const {t} = this.props;
-        let rowData: any = [];
-        let columnDefs = [
-            {field: 'Полное название формы'},
-            {field: 'Краткое название формы'},
-            {field: 'Отчетная дата "на"'},
-            {field: 'Периодичность сдачи'},
-            {field: 'Рабочий день сдачи'},
-            {field: 'Время сдачи'},
-            {field: 'Отчетность по выходным'},
-            {field: 'Интервал расчета'}
-        ];
-        this.setState({myNotificationVisible});
-        if (myNotificationVisible) {
-            this.props.viewObject.get('notifications').array()
-                .filter((n: EObject) => n.get('defaultStatus').get('name') === 'Личная заметка')
-                .forEach((n: EObject) => {
-                rowData.push(
-                    {
-                        ['Полное название формы']: n.get('name'),
-                        ['Краткое название формы']: n.get('shortName'),
-                        ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
-                        ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
-                        ['Рабочий день сдачи']: n.get('deadlineDay'),
-                        ['Время сдачи']: n.get('deadlineTime'),
-                        ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
-                        ['Интервал расчета']: t(n.get('calculationInterval'))
-                    }
-                )
-            });
-        }
-        else {
-            this.props.viewObject.get('notifications').array()
-                .filter((n: EObject) => n.get('defaultStatus').get('name') !== 'Личная заметка')
-                .forEach((n: EObject) => {
-                rowData.push(
-                    {
-                        ['Полное название формы']: n.get('name'),
-                        ['Краткое название формы']: n.get('shortName'),
-                        ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
-                        ['Периодичность сдачи']: n.get('periodicity') === null ? t('Day') : t(n.get('periodicity')),
-                        ['Рабочий день сдачи']: n.get('deadlineDay'),
-                        ['Время сдачи']: n.get('deadlineTime'),
-                        ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
-                        ['Интервал расчета']: t(n.get('calculationInterval')),
-                        ['Удалена']: n.get('archive') ? 'Да' : 'Нет'
-                    }
-                )
-            });
-        }
-        this.setState({rowData, columnDefs});
-    }
-
     render() {
         return (
             <Fullscreen
@@ -922,9 +1008,9 @@ class Calendar extends React.Component<any, any> {
             <MainContext.Consumer>
                 { context => (
                     <div className="calendar">
-                        {this.renderCreateNotification()}
-                        {this.renderEditNotification()}
-                        {this.renderLegend()}
+                        {this.state.createMenuVisible && this.renderCreateNotification()}
+                        {this.state.editMenuVisible && this.renderEditNotification()}
+                        {this.state.legendMenuVisible && this.renderLegend()}
                         {this.renderHeader()}
                         {this.state.calendarVisible && this.renderDays()}
                         {this.state.calendarVisible && this.renderCells(context)}

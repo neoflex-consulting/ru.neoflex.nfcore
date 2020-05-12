@@ -433,7 +433,7 @@ class Input_ extends ViewContainer {
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
     render = () => {

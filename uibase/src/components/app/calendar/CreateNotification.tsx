@@ -34,7 +34,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (this.state.spinnerVisible !== this.props.spinnerVisible) {
+        if (this.state.spinnerVisible !== this.props.spinnerVisible && this.state.spinnerVisible) {
             this.setState({spinnerVisible: false})
         }
     }
@@ -182,6 +182,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 max={23}
                                 value={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
+                                parser={value => value !== undefined ? value.replace(':00', '') : 1}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
