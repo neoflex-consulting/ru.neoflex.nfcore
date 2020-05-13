@@ -14,6 +14,7 @@ import ru.neoflex.nfcore.masterdata.MasterdataPackage
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider
 import ru.neoflex.nfcore.utils.Utils
 
+import java.text.SimpleDateFormat
 import java.util.function.Consumer
 import java.util.function.Function
 
@@ -847,6 +848,8 @@ class AppModuleInit {
             md.createAttribute(entityType, 'CHAR_TYPE', "CharType", "Характеристика счёта (А/П)")
             md.createAttribute(entityType, 'actual_date', "DATE", "Дата начала действия")
             md.createAttribute(entityType, 'actual_end_date', "DATE", "Дата окончания действия")
+            Context.current.store.createEObject(entityType)
+            entityType.activate()
         }
     }
 
@@ -855,14 +858,14 @@ class AppModuleInit {
         if (md == null) return
         def entityTypeName = 'F110_BalAccountClassifier'
         def nodes = [
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new Date().toString()],
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new Date().toString()]
+                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],
+                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())]
         ]
 
         md.inTransaction(new Function<ODatabaseDocument, Void>() {
             @Override
             Void apply(ODatabaseDocument db) {
-                db.execute('sql', 'delete * from ' + entityTypeName)
+                db.execute('sql', 'delete from ' + entityTypeName)
                 for (node in nodes) {
                     def object = new ObjectMapper().createObjectNode()
                     node.each {entry->object.put(entry.key, entry.value)}
@@ -879,8 +882,6 @@ class AppModuleInit {
             def view = EcoreUtil.create(ApplicationPackage.Literals.MASTERDATA_VIEW) as MasterdataView
             view.name = 'MasterdataView_1'
             view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
-            view.entityType.activate()
-            fillBalAccountClassifier()
             appModule.view = view
         }
     }
@@ -894,6 +895,7 @@ class AppModuleInit {
         def appModule4 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4") as AppModule
         def appModule5 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail") as AppModule
         def appModule6 = Utils.findEObjectWithConsumer(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", initBalAccountClassifierAppModule) as AppModule
+        fillBalAccountClassifier()
         def appModule8 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart") as AppModule
         def appModule14 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO") as AppModule
 
