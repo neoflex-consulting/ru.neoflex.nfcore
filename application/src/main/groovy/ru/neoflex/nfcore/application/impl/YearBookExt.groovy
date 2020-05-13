@@ -10,16 +10,11 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.utils.Utils
 
 import java.text.SimpleDateFormat
 
 class YearBookExt extends YearBookImpl {
-
-    static def findEObject(EClass eClass) {
-        def resources = DocFinder.create(Context.current.store, eClass)
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
 
     @Override
     String recreateWeekend(String year) {
@@ -129,7 +124,7 @@ class YearBookExt extends YearBookImpl {
                     def workDaysYearBook = resource.resources.get(0).contents.get(0) as YearBook
                     def dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-                    def globalSettings = findEObject(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
+                    def globalSettings = Utils.findEObject(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
                     def weekendYearBook = globalSettings.getWeekendCalendar().days
                     def holidaysYearBook = globalSettings.getHolidayCalendar().days
 

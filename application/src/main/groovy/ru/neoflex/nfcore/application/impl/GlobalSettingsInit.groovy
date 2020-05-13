@@ -1,33 +1,31 @@
 package ru.neoflex.nfcore.application.impl
 
 import org.eclipse.emf.ecore.EClass
+import ru.neoflex.nfcore.application.AppModule
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.YearBook
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.utils.Utils
 
 class GlobalSettingsInit {
 
-    static def findEObject(EClass eClass, String name) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
-
-    static def createGlobalSettings(String workDaysYearBookName, String weekendYearBookName, String holidaysYearBookName) {
+    static def createGlobalSettings(String workDaysYearBookName, String weekendYearBookName, String holidaysYearBookName, String dashboardName) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.GLOBAL_SETTINGS)
                 .execute().resourceSet
         if (rs.resources.empty) {
             def globalSettings = ApplicationFactory.eINSTANCE.createGlobalSettings()
 
-            def weekendYearBook = findEObject(ApplicationPackage.Literals.YEAR_BOOK, weekendYearBookName) as YearBook
-            def holidaysYearBook = findEObject(ApplicationPackage.Literals.YEAR_BOOK, holidaysYearBookName) as YearBook
-            def workDaysYearBook = findEObject(ApplicationPackage.Literals.YEAR_BOOK, workDaysYearBookName) as YearBook
+            def weekendYearBook = Utils.findEObject(ApplicationPackage.Literals.YEAR_BOOK, weekendYearBookName) as YearBook
+            def holidaysYearBook = Utils.findEObject(ApplicationPackage.Literals.YEAR_BOOK, holidaysYearBookName) as YearBook
+            def workDaysYearBook = Utils.findEObject(ApplicationPackage.Literals.YEAR_BOOK, workDaysYearBookName) as YearBook
+            def dashboard = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, dashboardName) as AppModule
 
             globalSettings.setWeekendCalendar(weekendYearBook)
             globalSettings.setHolidayCalendar(holidaysYearBook)
             globalSettings.setWorkingDaysCalendar(workDaysYearBook)
+            globalSettings.setDashboard(dashboard)
 
             rs.resources.add(Context.current.store.createEObject(globalSettings))
         }

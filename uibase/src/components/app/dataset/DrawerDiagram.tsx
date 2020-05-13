@@ -5,6 +5,7 @@ import {FormComponentProps} from "antd/lib/form";
 import {EObject} from "ecore";
 import {IDiagram} from "./DatasetView";
 import {diagramAnchorMap} from "../../../utils/consts";
+import * as _ from 'lodash';
 import lineIcon from "../../../icons/lineIcon.svg";
 import barIcon from "../../../icons/barIcon.svg";
 import pieIcon from "../../../icons/pieIcon.svg";
@@ -15,17 +16,22 @@ import pieHighlightIcon from "../../../icons/pieHighlightIcon.svg";
 const diagramAnchorMap_: any = diagramAnchorMap;
 
 interface Props {
+    id?: number,
+    action?: string;
     columnDefs?: Array<EObject>;
     allAxisXPosition?: Array<EObject>;
     allAxisYPosition?: Array<EObject>;
     allLegendPosition?: Array<EObject>;
     allSorts?: Array<EObject>;
     allAggregates?: Array<EObject>;
-    saveChanges?: (newParam: any, paramName: string) => void;
+    saveChanges?: (action: string, newDiagram?: IDiagram) => void;
+    currentDiagram?: IDiagram;
+
 }
 
 interface State {
-    diagramType?: string
+    diagramType?: string,
+    action?: string
 }
 
 class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
@@ -36,18 +42,16 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
         };
     }
 
-    handleReset = () => {
-        this.props.saveChanges(undefined, "currentDiagram");
-    };
-
     handleSubmit = () => {
         this.props.form.validateFields((err: any) => {
             if (!err) {
                 const diagramParam: IDiagram = {
+                    id: this.props.id,
                     keyColumn: this.props.form.getFieldValue("axisXColumnName"),
                     valueColumn: this.props.form.getFieldValue("axisYColumnName"),
-                    diagramLegend: this.props.form.getFieldValue("diagramName"),
-                    legendAnchorPosition: diagramAnchorMap_[this.props.form.getFieldValue("legendPosition")],
+                    diagramName: this.props.form.getFieldValue("diagramName"),
+                    diagramLegend: this.props.form.getFieldValue("diagramLegend"),
+                    legendAnchorPosition: this.props.form.getFieldValue("legendPosition"),
                     axisXPosition: this.props.form.getFieldValue("axisXPosition"),
                     axisXLegend: this.props.form.getFieldValue("axisXLabel"),
                     axisYPosition: this.props.form.getFieldValue("axisYPosition"),
@@ -56,7 +60,10 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     colorSchema: "accent",
                     isSingle: true
                 };
-                this.props.saveChanges(diagramParam, "currentDiagram");
+                this.props.saveChanges(this.props.action, diagramParam);
+                if (this.props.action === "add") {
+                    this.resetFields()
+                }
             }
             else {
                 //TODO Error in console
@@ -65,7 +72,21 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
         });
     };
 
-    getColumnSelectOptions = (id:string, placeHolder:string) => {
+    resetFields = () => {
+        this.props.form.setFieldsValue({
+            axisXColumnName: undefined,
+            axisYColumnName: undefined,
+            diagramName: undefined,
+            axisXPosition: undefined,
+            axisXLabel:  undefined,
+            axisYPosition: undefined,
+            axisYLabel: undefined,
+            diagramLegend: undefined,
+            legendPosition: undefined,
+        });
+    };
+
+    getColumnSelectOptions(id:string, placeHolder:string) {
         return <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
@@ -88,7 +109,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
         </Form.Item>
     };
 
-    getEnumSelectOptions = (id:string, placeHolder:string, selectEnum: Array<EObject>) => {
+    getEnumSelectOptions(id:string, placeHolder:string, selectEnum: Array<EObject>) {
         return <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
@@ -104,14 +125,14 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('name')})}
                             value={c.get('name')}
                         >
-                            {c.get('name')}
+                            {this.props.t(diagramAnchorMap_[c.get('name')])}
                         </Select.Option>)}
                 </Select>
             )}
         </Form.Item>
     };
 
-    getInput = (id:string, placeHolder:string) => {
+    getInput(id:string, placeHolder:string, disabled:boolean = false) {
         return <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
@@ -121,40 +142,75 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Input placeholder={this.props.t(placeHolder)}/>
+                <Input disabled={disabled} placeholder={this.props.t(placeHolder)}/>
             )}
         </Form.Item>
     };
 
+    loadFields() {
+        this.props.form.setFieldsValue({
+            axisXColumnName: this.props.currentDiagram.keyColumn,
+            axisYColumnName:this.props.currentDiagram.valueColumn,
+            diagramName: this.props.currentDiagram.diagramName,
+            axisXPosition: this.props.currentDiagram.axisXPosition,
+            axisXLabel:  this.props.currentDiagram.axisXLegend,
+            axisYPosition: this.props.currentDiagram.axisYPosition,
+            axisYLabel: this.props.currentDiagram.axisYLegend,
+            diagramLegend: this.props.currentDiagram.diagramLegend,
+            legendPosition: this.props.currentDiagram.legendAnchorPosition,
+        });
+    };
+
+
+
     componentDidMount() {
+        if (this.props.action === "edit") {
+            this.setState({
+                diagramType: this.props.currentDiagram.diagramType
+            },() => {
+                this.loadFields()
+            });
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (!_.isEqual(this.props.currentDiagram, prevProps.currentDiagram)
+            && this.props.currentDiagram) {
+            this.setState({
+                diagramType: this.props.currentDiagram.diagramType
+            },() => {
+                this.loadFields()
+            });
+        }
     }
 
     render() {
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Row>
-                    <Col span={6}><Button htmlType="submit">{this.props.t('create')}</Button></Col>
-                    <Col span={6}><Button>{this.props.t('delete')}</Button></Col>
-                    <Col span={6}><Button onClick={this.handleReset}>{this.props.t('reset')}</Button></Col>
+                    {this.props.action === "edit"
+                        ?<Col span={6}><Button htmlType="submit">{this.props.t('edit')}</Button></Col>
+                        :<Col span={6}><Button htmlType="submit">{this.props.t('add')}</Button></Col>}
+                    <Col span={6}><Button onClick={this.resetFields}>{this.props.t('reset')}</Button></Col>
                 </Row>
-                {this.props.t('Choose diagram type')}
+                {this.props.t('choose diagram type')}
                 <Row>
                     <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Bar"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Bar")?barHighlightIcon:barIcon} alt="barIcon" /></Button></Col>
                     <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Pie"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Pie")?pieHighlightIcon:pieIcon} alt="pieIcon" /></Button></Col>
                     <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Line"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Line")?lineHighlightIcon:lineIcon} alt="lineIcon" /></Button></Col>
                 </Row>
                 <Row>
-                    {(this.state.diagramType==="Line")?this.getInput("diagramName","diagram legend"):""}
+                    {this.getInput("diagramName",this.props.t("diagram name"))}
+                </Row>
+                <Row>
+                    {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
                 </Row>
                 <Row>
                     <Col span={12}>
-                        {this.getColumnSelectOptions("axisXColumnName", "axis X column name")}
+                        {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
                     </Col>
                     <Col span={12}>
-                        {this.getColumnSelectOptions("axisYColumnName", "axis Y column name")}
+                        {this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
                     </Col>
                 </Row>
                 {/*Временно отключено, пока через фильтры в datasetView*/}
@@ -168,23 +224,23 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                 </Row>*/}
                 <Row>
                     <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel","axis X label"):""}
+                        {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel",this.props.t("axis X label")):""}
                     </Col>
                     <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisXPosition","axis X position", this.props.allAxisXPosition):""}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel","axis Y label"):""}
-                    </Col>
-                    <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisYPosition","axis Y position", this.props.allAxisYPosition):""}
+                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisXPosition",this.props.t("axis X position"), this.props.allAxisXPosition):""}
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>
-                        {this.getEnumSelectOptions("legendPosition","legend position", this.props.allLegendPosition)}
+                        {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel",this.props.t("axis Y label")):""}
+                    </Col>
+                    <Col span={12}>
+                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisYPosition",this.props.t("axis Y position"), this.props.allAxisYPosition):""}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={12}>
+                        {this.getEnumSelectOptions("legendPosition",this.props.t("legend position"), this.props.allLegendPosition)}
                     </Col>
                 </Row>
             </Form>

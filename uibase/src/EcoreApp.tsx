@@ -45,6 +45,7 @@ interface State {
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
+    globalSettings?: EObject;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -61,7 +62,7 @@ class EcoreApp extends React.Component<any, State> {
             docxHandlers: [],
             excelHandlers: [],
             submitHandlers: [],
-            //По событию на странице
+            //По событию на страницеchangeUserProfile
             contextItemValues: new Map()
         };
         this.state = {
@@ -181,6 +182,18 @@ class EcoreApp extends React.Component<any, State> {
                 }))
         }
 
+    };
+
+    getGlobalSettings() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//GlobalSettings");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((result) => {
+                        this.setState({globalSettings: result[0].eContents()[0]})
+                    })
+            }
+        })
     };
 
     prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
@@ -434,7 +447,10 @@ class EcoreApp extends React.Component<any, State> {
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
-                                '') ? "app-logo-settings" : "app-logo"}>
+                                '') ? "app-logo-settings" : "app-logo"}
+
+                                 onClick={this.renderDashboard}
+                            >
                                 <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px', marginLeft: '20px' }}/>
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
                             </div>
@@ -497,25 +513,6 @@ class EcoreApp extends React.Component<any, State> {
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                           {/* <Menu.SubMenu
-                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
-                                                title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
-                                                                                        style={{marginRight: "10px"}}/>Notification</span>}>
-                                                {localStorage.getItem('notifierDuration') === '3' ?
-                                                    <Menu.Item
-                                                        style={{backgroundColor: backgroundColor}}
-                                                          key={'showNotifications'}>
-                                                        <FontAwesomeIcon icon={faEye} size="lg"
-                                                                         style={{marginRight: "10px"}}/>
-                                                        Disable autohiding</Menu.Item>
-                                                    :
-                                                    <Menu.Item
-                                                        style={{backgroundColor: backgroundColor}}
-                                                        key={'autoHideNotifications'}>
-                                                        <FontAwesomeIcon icon={faClock} size="lg"
-                                                                         style={{marginRight: "10px"}}/>
-                                                        Autohide</Menu.Item>}
-                                            </Menu.SubMenu>*/}
                                         </Menu.SubMenu>
                                     </Menu>
                                     <Dropdown overlay={langMenu} placement="bottomCenter">
@@ -545,6 +542,10 @@ class EcoreApp extends React.Component<any, State> {
                 </Switch>
             </Layout>
         )
+    };
+
+    renderDashboard = () => {
+        this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))
     };
 
     private setSelectedKeys() {
@@ -716,10 +717,9 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
         if (!this.state.queryParameterPattern) this.getEobjectByClass("dataset","QueryParameter", "queryParameterPattern");
-        //if (!this.state.userProfilePattern) this.getEobjectByClass("auth","UserProfile", "userProfilePattern");
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
 
-
+        this.getGlobalSettings();
         if (!this.state.languages.length) this.getLanguages();
         if (!this.state.applicationNames.length) {
             this.getAllApplication()

@@ -17,18 +17,13 @@ import ru.neoflex.nfcore.notification.NotificationFactory
 import ru.neoflex.nfcore.notification.NotificationPackage
 import ru.neoflex.nfcore.notification.Periodicity
 import ru.neoflex.nfcore.notification.CalculationInterval
+import ru.neoflex.nfcore.utils.Utils
 
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
 class CalendarExt extends CalendarImpl {
     private static final Logger logger = LoggerFactory.getLogger(CalendarExt.class);
-
-    static def findEObject(EClass eClass, String name) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
 
     @Override
     String createNotification(String newNotification) {
@@ -72,7 +67,7 @@ class CalendarExt extends CalendarImpl {
                                 .execute().resourceSet
                         if (rs.resources.empty) {
                             Context.current.store.createEObject(notification)
-                            def savedNotification = findEObject(NotificationPackage.Literals.NOTIFICATION, notification.name)
+                            def savedNotification = Utils.findEObject(NotificationPackage.Literals.NOTIFICATION, notification.name)
                             calendar.notifications.add(savedNotification)
                             Context.current.store.updateEObject(calendarRef, calendar)
                         }
@@ -101,7 +96,7 @@ class CalendarExt extends CalendarImpl {
 
                         for (int i = 0; i < calendar.notifications.size(); i++) {
 
-                            def notification = findEObject(NotificationPackage.Literals.NOTIFICATION, calendar.notifications[i].name)
+                            def notification = Utils.findEObject(NotificationPackage.Literals.NOTIFICATION, calendar.notifications[i].name)
 
                             for (int g = 0; g < notification.reportingDateOn.size(); g++) {
 

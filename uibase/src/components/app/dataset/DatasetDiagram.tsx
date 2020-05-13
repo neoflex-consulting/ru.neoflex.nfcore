@@ -9,6 +9,10 @@ import domtoimage from 'dom-to-image';
 import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
 import {excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import * as _ from 'lodash';
+import {diagramAnchorMap} from "../../../utils/consts";
+
+const diagramAnchorMap_: any = diagramAnchorMap;
+
 
 interface Props {
     rowData: any[],
@@ -205,7 +209,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                     legends={[
                         {
                             dataFrom: "keys",
-                            anchor: this.state.diagramParams.legendAnchorPosition,
+                            anchor: diagramAnchorMap_[this.state.diagramParams.legendAnchorPosition],
                             direction: 'column',
                             justify: false,
                             translateX: 120,
@@ -300,7 +304,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                     useMesh={true}
                     legends={[
                         {
-                            anchor: this.state.diagramParams.legendAnchorPosition,
+                            anchor: diagramAnchorMap_[this.state.diagramParams.legendAnchorPosition],
                             direction: 'column',
                             justify: false,
                             translateX: 100,
@@ -376,7 +380,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                     fill={[]}
                     legends={[
                         {
-                            anchor: this.state.diagramParams.legendAnchorPosition,
+                            anchor: diagramAnchorMap_[this.state.diagramParams.legendAnchorPosition],
                             direction: 'row',
                             translateY: 56,
                             itemWidth: 100,

@@ -5,7 +5,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
-import {IServerQueryParam} from '../../../MainContext';
 
 interface Props {
     closeModal?: () => void;
@@ -20,6 +19,7 @@ interface State {
     querySortPattern?: EObject;
     queryGroupByPattern?: EObject;
     queryCalculatedExpressionPattern?: EObject;
+    diagramPatter?: EObject;
     highlightPattern?: EObject;
     user?: EObject;
 }
@@ -75,9 +75,30 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     highlightType: f['highlightType'],
                     backgroundColor: f['backgroundColor'],
                     color: f['color']
-                } as IServerQueryParam);
+                });
                 currentDatasetComponent.get(componentName).add(params)
             }
+        })
+    };
+
+    addComponentDiagram(currentDatasetComponent: Ecore.EObject, pattern: Ecore.EObject, userProfileValue: Ecore.EObject[], paramName: string, componentName: string): void {
+        currentDatasetComponent.get(componentName).clear();
+        JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
+            let params;
+            params = pattern.create({
+                diagramName: f['diagramName'],
+                diagramType: f['diagramType'],
+                axisXLegend: f['axisXLegend'],
+                axisYLegend: f['axisYLegend'],
+                axisXPosition: f['axisXPosition'],
+                axisYPosition: f['axisYPosition'],
+                legendAnchorPosition: f['legendAnchorPosition'],
+                indexBy: f['indexBy'],
+                keyColumn: f['keyColumn'],
+                valueColumn: f['valueColumn'],
+                diagramLegend: f['diagramLegend'],
+            });
+            currentDatasetComponent.get(componentName).add(params)
         })
     };
 
@@ -105,6 +126,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
+                this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource();
@@ -156,6 +178,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.queryGroupByPattern) this.getPattern('QueryGroupBy', 'queryGroupByPattern');
         if (!this.state.queryCalculatedExpressionPattern) this.getPattern('QueryCalculatedExpression', 'queryCalculatedExpressionPattern');
         if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
+        if (!this.state.diagramPatter) this.getPattern('Diagram', 'diagramPatter');
         if (!this.state.user) this.getUser();
     }
 

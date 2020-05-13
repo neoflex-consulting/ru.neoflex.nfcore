@@ -1,7 +1,5 @@
 package ru.neoflex.nfcore.application.impl
 
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.*
 import ru.neoflex.nfcore.base.components.SpringContext
@@ -12,49 +10,53 @@ import ru.neoflex.nfcore.masterdata.EntityType
 import ru.neoflex.nfcore.masterdata.EnumType
 import ru.neoflex.nfcore.masterdata.MasterdataPackage
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider
+import ru.neoflex.nfcore.utils.Utils
 
 import java.util.function.Consumer
 
 //ClassComponent.AClass = rs.getEObject(URI.createURI(uri), true)
 
 class AppModuleInit {
-    static def createEObject(EClass eClass, Map<String, Object> attrs) {
-        def eObject = EcoreUtil.create(eClass)
-        attrs.each {entry->eObject.eSet(eClass.getEStructuralFeature(entry.key), entry.value)}
-        return eObject
-    }
 
-    static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false, Consumer<EObject> consumer=null) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                    .execute().resourceSet
-        while (replace && !resources.resources.empty) {
-            Context.current.store.deleteResource(resources.resources.remove(0).getURI())
-        }
-        if (resources.resources.empty) {
-            def eObject = createEObject(eClass, ["name": name])
-            if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
-            if (consumer != null) {
-                consumer.accept(eObject)
-            }
-            resources.resources.add(Context.current.store.createEObject(eObject))
-        }
-        return resources.resources.get(0).contents.get(0)
-    }
-
-    static def deletedAppModule(String name) {
-        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
-                .execute().resourceSet
-        while (!rs.resources.empty) {
-            Context.current.store.deleteResource(rs.resources.remove(0).getURI())
-        }
-    }
-
-    static def createAppModule(String name) {
+    static def createAppModuleDashboard(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
 
-            def userComponent1 = findOrCreateEObject(ApplicationPackage.Literals.USER_COMPONENT, "Pivot", "DatasetPivot",true)
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.name = name
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = "Dashboard"
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+            row2.textAlign = TextAlign.LEFT
+            row2.borderBottom = true
+
+            row2.children.add(typography)
+            row1.children.add(row2)
+
+            application.view = row1
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+
+    static def createAppModuleReportSingle(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
@@ -74,9 +76,9 @@ class AppModuleInit {
 
             def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView1.name = "DatasetViewTest_1"
-            def jdbcDataset1 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest", "",false)
+            def jdbcDataset1 = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTest")
             datasetView1.setDataset(jdbcDataset1)
-            def datasetComponent1 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTest", "",false)
+            def datasetComponent1 = Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTest")
             datasetView1.setDatasetComponent(datasetComponent1)
 
             def row2 = ApplicationFactory.eINSTANCE.createRow()
@@ -98,9 +100,9 @@ class AppModuleInit {
 
             def datasetView2 = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView2.name = "DatasetViewTest_2"
-            def jdbcDataset2 = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA", "",false)
+            def jdbcDataset2 = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, "JdbcDatasetTestAAA")
             datasetView2.setDataset(jdbcDataset2)
-            def datasetComponent2 = findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTestAAA", "",false)
+            def datasetComponent2 = Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetGridTestAAA")
             datasetView2.setDatasetComponent(datasetComponent2)
 
             def row4 = ApplicationFactory.eINSTANCE.createRow()
@@ -116,7 +118,6 @@ class AppModuleInit {
 
             def componentElement1 = ApplicationFactory.eINSTANCE.createComponentElement()
             componentElement1.name = 'Pivot'
-            componentElement1.setComponent(userComponent1)
             tabs.children.add(componentElement1)
             tabs.children.add(componentElement4)
             application.view = tabs
@@ -144,7 +145,7 @@ class AppModuleInit {
             def typography = ApplicationFactory.eINSTANCE.createTypography()
             typography.name = header //"Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)"
 
-            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
             typography.setTypographyStyle(typographyStyle)
 
             def row1 = ApplicationFactory.eINSTANCE.createRow()
@@ -312,9 +313,9 @@ class AppModuleInit {
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
-            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/, "",false)
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
             datasetView.setDataset(jdbcDataset)
-            def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
             datasetView.valueItems.add(datasetSelect)
             datasetView.valueItems.add(datePicker)
@@ -350,7 +351,7 @@ class AppModuleInit {
             def typography = ApplicationFactory.eINSTANCE.createTypography()
             typography.name = header //"Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)"
 
-            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
             typography.setTypographyStyle(typographyStyle)
 
             def row1 = ApplicationFactory.eINSTANCE.createRow()
@@ -529,9 +530,9 @@ class AppModuleInit {
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
-            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/, "",false)
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
             datasetView.setDataset(jdbcDataset)
-            def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
             button2.submitItems.add(datasetView)
@@ -566,7 +567,7 @@ class AppModuleInit {
             def typography = ApplicationFactory.eINSTANCE.createTypography()
             typography.name = header
 
-            def typographyStyle = findOrCreateEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title", "",false)
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
             typography.setTypographyStyle(typographyStyle)
 
             def row1 = ApplicationFactory.eINSTANCE.createRow()
@@ -781,9 +782,9 @@ class AppModuleInit {
 
             def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
             datasetView.name = "SectionDatasetView"
-            def jdbcDataset = findOrCreateEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/, "",false)
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
             datasetView.setDataset(jdbcDataset)
-            def datasetComponent=  findOrCreateEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/, "",false)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
             button2.submitItems.add(datasetView)
@@ -806,25 +807,25 @@ class AppModuleInit {
     static initBalAccountClassifier = new Consumer<EntityType>() {
         @Override
         void accept(EntityType entityType) {
-            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "YN", "", false, new Consumer<EnumType>() {
+            Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENUM_TYPE, "YN", new Consumer<EnumType>() {
                 @Override
                 void accept(EnumType eObject) {
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Да"]))
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Нет"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Да"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Нет"]))
                 }
             })
-            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "PartyType", "", false, new Consumer<EnumType>() {
+            Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENUM_TYPE, "PartyType", new Consumer<EnumType>() {
                 @Override
                 void accept(EnumType eObject) {
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ЮЛ"]))
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ФЛ"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ЮЛ"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ФЛ"]))
                 }
             })
-            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "CharType", "", false, new Consumer<EnumType>() {
+            Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENUM_TYPE, "CharType", new Consumer<EnumType>() {
                 @Override
                 void accept(EnumType eObject) {
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "А"]))
-                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "П"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "А"]))
+                    eObject.values.add(Utils.createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "П"]))
                 }
             })
             MasterdataProvider md = SpringContext.getBean(MasterdataProvider.class)
@@ -850,7 +851,7 @@ class AppModuleInit {
         void accept(AppModule appModule) {
             def view = EcoreUtil.create(ApplicationPackage.Literals.MASTERDATA_VIEW) as MasterdataView
             view.name = 'MasterdataView_1'
-            view.entityType = findOrCreateEObject(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", "", false, initBalAccountClassifier)
+            view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
             appModule.view = view
         }
     }
@@ -858,14 +859,14 @@ class AppModuleInit {
     static def makeRefTreeNRDemo() {
         def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
         referenceTree.name = "F110_REF_TREE"
-        def appModule1 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section1", "",false) as AppModule
-        def appModule2 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section2", "",false) as AppModule
-        def appModule3 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section3", "",false) as AppModule
-        def appModule4 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4", "",false) as AppModule
-        def appModule5 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail", "",false) as AppModule
-        def appModule6 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", "",false, initBalAccountClassifierAppModule) as AppModule
-        def appModule8 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart", "",false) as AppModule
-        def appModule14 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO", "",false) as AppModule
+        def appModule1 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section1") as AppModule
+        def appModule2 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section2") as AppModule
+        def appModule3 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section3") as AppModule
+        def appModule4 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4") as AppModule
+        def appModule5 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail") as AppModule
+        def appModule6 = Utils.findEObjectWithConsumer(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", initBalAccountClassifierAppModule) as AppModule
+        def appModule8 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart") as AppModule
+        def appModule14 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO") as AppModule
 
 
         def catalog1 = ApplicationFactory.eINSTANCE.createCatalogNode()
