@@ -7,13 +7,13 @@ import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer, Icon, Input, Select, Switch} from "antd";
+import {Button, Drawer, Input, Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
-import {faAlignJustify, faPlus, faPrint, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCalendarAlt} from "@fortawesome/free-regular-svg-icons";
+import {faAlignJustify, faPlus, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import {add, getMonth} from "date-fns";
+import {add} from "date-fns";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
@@ -131,7 +131,6 @@ class Calendar extends React.Component<any, any> {
         const dateTo = monthEnd.toString();
         const ref: string = this.props.viewObject._id;
         const methodName: string = 'getNotificationInstances';
-        let resourceSet = Ecore.ResourceSet.create();
 
         if (updateViewObject && this.state.classAppModule !== undefined) {
             API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
@@ -195,7 +194,6 @@ class Calendar extends React.Component<any, any> {
     };
 
     editNotification = (editableNotification: any) => {
-        const {t} = this.props;
         this.setState({spinnerVisible: true});
         const notifications = this.props.viewObject.get('notifications').array()
                 .filter((n: EObject) =>
@@ -268,7 +266,7 @@ class Calendar extends React.Component<any, any> {
             this.setState({currentMonth: newDate});
             this.getAllNotificationInstances(newDate, false)
         }
-        else if (type == 'today') {
+        else if (type === 'today') {
             newDate = new Date();
             this.setState({currentMonth: newDate});
             this.getAllNotificationInstances(newDate, false)
@@ -347,7 +345,7 @@ class Calendar extends React.Component<any, any> {
 
     handleEditMenu = (params: any) => {
         const {t} = this.props;
-        if (params.data != undefined) {
+        if (params.data !== undefined) {
             const newPeriodicity = this.state.periodicity.filter((p: any) => t(p) === params.data["Периодичность сдачи"]);
             const editableNotification: any = {
                 'id': params.node.id,
@@ -504,6 +502,7 @@ class Calendar extends React.Component<any, any> {
                 newRowData.forEach((n: EObject) => {
                     rowData.push(
                         {
+                            /* eslint-disable no-useless-computed-key */
                             ['Полное название формы']: n.get('name'),
                             ['Краткое название формы']: n.get('shortName'),
                             ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
@@ -512,6 +511,7 @@ class Calendar extends React.Component<any, any> {
                             ['Время сдачи']: n.get('deadlineTime'),
                             ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
                             ['Интервал расчета']: t(n.get('calculationInterval'))
+                            /* eslint-enable no-useless-computed-key */
                         }
                     )
                 })
@@ -520,6 +520,7 @@ class Calendar extends React.Component<any, any> {
             if (newNotification) {
                 rowData.push(
                     {
+                        /* eslint-disable no-useless-computed-key */
                         ['Полное название формы']: newNotification['fullName'],
                         ['Краткое название формы']: newNotification['shortName'],
                         ['Отчетная дата "на"']: newNotification['deadlineDay'],
@@ -528,6 +529,7 @@ class Calendar extends React.Component<any, any> {
                         ['Время сдачи']: newNotification['deadlineTime'],
                         ['Отчетность по выходным']: newNotification['weekendReporting'] ? 'Да' : 'Нет',
                         ['Интервал расчета']: null
+                        /* eslint-enable no-useless-computed-key */
                     }
                 )
             }
@@ -539,6 +541,7 @@ class Calendar extends React.Component<any, any> {
                 newRowData.forEach((n: EObject) => {
                     rowData.push(
                         {
+                            /* eslint-disable no-useless-computed-key */
                             ['Полное название формы']: n.get('name'),
                             ['Краткое название формы']: n.get('shortName'),
                             ['Отчетная дата "на"']: n.get('reportingDateOn').array().map((d: any) => d.get('name')),
@@ -548,6 +551,7 @@ class Calendar extends React.Component<any, any> {
                             ['Отчетность по выходным']: n.get('weekendReporting') ? 'Да' : 'Нет',
                             ['Интервал расчета']: t(n.get('calculationInterval')),
                             ['Удалена']: n.get('archive') ? 'Да' : 'Нет'
+                            /* eslint-enable no-useless-computed-key */
                         }
                     )
                 });
@@ -557,7 +561,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     renderCreateNotification() {
-        const {i18n, t} = this.props;
+        const {t} = this.props;
         return (
             <Drawer
                 placement='right'
@@ -581,7 +585,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     renderEditNotification() {
-        const {i18n, t} = this.props;
+        const {t} = this.props;
         return (
             <Drawer
                 placement='right'
@@ -607,7 +611,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     renderLegend() {
-        const {i18n, t} = this.props;
+        const {t} = this.props;
         return (
             <Drawer
                 placement='right'
@@ -630,7 +634,6 @@ class Calendar extends React.Component<any, any> {
     }
 
     renderGrid() {
-        const { t } = this.props;
         const {gridOptions} = this.state;
         return (
             <div
@@ -833,11 +836,13 @@ class Calendar extends React.Component<any, any> {
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
 
                 <Button
+                    disabled={this.state.calendarVisible}
                     className="calendarAlt"
                     style={{
                         marginRight: '10px',
                         width: '32px',
-                        height: '32px'
+                        height: '32px',
+                        backgroundColor: '#ffffff'
                     }}
                     onClick={this.handleCalendarVisible}
                 >
@@ -848,10 +853,12 @@ class Calendar extends React.Component<any, any> {
                                      }}/>
                 </Button>
                 <Button
+                    disabled={!this.state.calendarVisible}
                     className="alignJustify"
                     style={{
                         width: '32px',
-                        height: '32px'
+                        height: '32px',
+                        backgroundColor: '#ffffff'
                     }}
                     onClick={this.handleCalendarVisible}
                 >
