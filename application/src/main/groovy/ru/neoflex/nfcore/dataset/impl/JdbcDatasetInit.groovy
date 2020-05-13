@@ -9,16 +9,11 @@ import ru.neoflex.nfcore.dataset.DatasetFactory
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.QueryType
+import ru.neoflex.nfcore.utils.Utils
 
 class JdbcDatasetInit {
 
     private static final Logger logger = LoggerFactory.getLogger(DatasetPackageInit.class);
-
-    static def findOrCreateEObject(EClass eClass, String name) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
 
     static def createJdbcDatasetInit(String name, String tableName, String schemaName, String connectionName) {
         def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
@@ -29,7 +24,7 @@ class JdbcDatasetInit {
             jdbcDataset.query = "SELECT * FROM " + schemaName + "." + tableName
             jdbcDataset.tableName = tableName
             jdbcDataset.schemaName = schemaName
-            def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
+            def connection = Utils.findEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
             jdbcDataset.setConnection(connection)
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))
         }
@@ -45,7 +40,7 @@ class JdbcDatasetInit {
             jdbcDataset.query = Query
             jdbcDataset.tableName = tableName
             jdbcDataset.schemaName = schemaName
-            def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
+            def connection = Utils.findEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
             jdbcDataset.setConnection(connection)
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))
         }
@@ -60,7 +55,7 @@ class JdbcDatasetInit {
             jdbcDataset.name = name
             jdbcDataset.query = Query
             jdbcDataset.queryType = QueryType.USE_QUERY
-            def connection = findOrCreateEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
+            def connection = Utils.findEObject(DatasetPackage.Literals.JDBC_CONNECTION, connectionName)
             jdbcDataset.setConnection(connection)
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))
         }

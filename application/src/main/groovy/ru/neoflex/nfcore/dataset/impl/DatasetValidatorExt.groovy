@@ -8,8 +8,6 @@ import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
 
-
-
 class DatasetValidatorExt extends DatasetValidator {
     @Override
     boolean validateJdbcDriver_IsValid(JdbcDriver jdbcDriver, DiagnosticChain diagnostics, Map<Object, Object> context) {
