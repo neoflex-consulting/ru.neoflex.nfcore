@@ -2,9 +2,7 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter, faArrowsAltV, faObjectGroup} from '@fortawesome/free-solid-svg-icons';
-import {Button, Drawer, Select} from 'antd';
+import {Button, Drawer, Modal, Select} from 'antd';
 import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -13,49 +11,92 @@ import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 import Calculator from "./Calculator";
-import {faCalculator} from "@fortawesome/free-solid-svg-icons/faCalculator";
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParams} from "../../../utils/namedParamsUtils";
+import DrawerDiagram from "./DrawerDiagram";
+import DatasetDiagram from "./DatasetDiagram";
+import SaveDatasetComponent from "./SaveDatasetComponent";
+import {handleExportExcel} from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
+//icons
+import filterIcon from "../../../icons/filterIcon.svg";
+import groupIcon from "../../../icons/groupIcon.svg";
+import orderIcon from "../../../icons/orderIcon.svg";
+import calculatorIcon from "../../../icons/calculatorIcon.svg";
+import diagramIcon from "../../../icons/diagramIcon.svg";
+import plusIcon from "../../../icons/plusIcon.svg";
+import penIcon from "../../../icons/penIcon.svg";
+import flagIcon from "../../../icons/flagIcon.svg";
+import trashcanIcon from "../../../icons/trashcanIcon.svg";
+import downloadIcon from "../../../icons/downloadIcon.svg";
+import printIcon from "../../../icons/printIcon.svg";
+import fullScreenIcon from "../../../icons/FullScreenIcon.svg";
+import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
+import resetIcon from "../../../icons/resetIcon.svg";
+import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 
 const { Option, OptGroup } = Select;
 
 export enum paramType {
-    //Название совпадает со state параметрами
     filter="serverFilters",
     aggregate="serverAggregates",
     sort="serverSorts",
     group="serverGroupBy",
     highlights="highlights",
-    calculations="serverCalculatedExpression"
+    calculations="serverCalculatedExpression",
+    diagrams="diagrams",
+    diagramsAdd="diagramsAdd"
 }
 
 interface Props {
 }
 
+export interface IDiagram {
+    id: number,
+    keyColumn: string,
+    valueColumn: string,
+    diagramName: string,
+    diagramLegend: string,
+    legendAnchorPosition: string,
+    axisXPosition: string,
+    axisXLegend: string,
+    axisYPosition: string,
+    axisYLegend: string,
+    diagramType: string,
+    colorSchema: string
+    isSingle: boolean
+}
+
 interface State {
     allDatasetComponents: any[];
     currentDatasetComponent: Ecore.Resource;
+    currentDiagram?: IDiagram;
     columnDefs: any[];
     defaultColumnDefs: any[];
     rowData: any[];
-    serverFilters: IServerQueryParam[];
     highlights: IServerQueryParam[];
+    calculations: any[];
+    diagrams: IDiagram[];
+    serverFilters: IServerQueryParam[];
     serverAggregates: IServerQueryParam[];
     serverSorts: IServerQueryParam[];
     serverGroupBy: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
-    calculations: any[];
     useServerFilter: boolean;
-    datasetComponentsData: any;
-    allOperations: any[];
-    allAggregates: any[];
-    allSorts: any[];
-    updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
     calculationsMenuVisible: boolean;
+    diagramAddMenuVisible: boolean;
+    diagramEditMenuVisible: boolean;
+    saveMenuVisible: boolean;
+    allOperations: Array<EObject>;
+    allAggregates: Array<EObject>;
+    allSorts: Array<EObject>;
     allHighlightType: any[];
+    allAxisXPosition: Array<EObject>;
+    allAxisYPosition: Array<EObject>;
+    allLegendPosition: Array<EObject>;
     currentTheme: string;
     paginationPageSize: string;
     showUniqRow: boolean;
@@ -78,31 +119,37 @@ class DatasetView extends React.Component<any, State> {
         this.state = {
             allDatasetComponents: [],
             currentDatasetComponent: {} as Ecore.Resource,
+            currentDiagram: undefined,
             columnDefs: [],
             defaultColumnDefs: [],
             rowData: [],
-            serverFilters: [],
             highlights: [],
+            calculations: [],
+            diagrams: [],
+            serverFilters: [],
             serverAggregates: [],
             serverSorts: [],
             serverGroupBy: [],
             serverCalculatedExpression: [],
             useServerFilter: false,
-            datasetComponentsData: undefined,
-            allOperations: [],
-            allAggregates: [],
-            allSorts: [],
-            updateData: false,
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
-            allHighlightType: [],
-            calculations: [],
+            diagramAddMenuVisible: false,
+            diagramEditMenuVisible: false,
             calculationsMenuVisible: false,
+            saveMenuVisible: false,
+            allOperations: [],
+            allAggregates: [],
+            allSorts: [],
+            allHighlightType: [],
+            allAxisXPosition: [],
+            allAxisYPosition: [],
+            allLegendPosition: [],
             currentTheme: this.props.viewObject.get('theme') || 'material',
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true
+            isHighlightsUpdated: true,
         }
     }
 
@@ -149,8 +196,8 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    getAllEnumValues(enumName:string, paramName:string) {
-        API.instance().findEnum('dataset', enumName)
+    getAllEnumValues(ePackageName:string, enumName:string, paramName:string) {
+        API.instance().findEnum(ePackageName, enumName)
             .then((result: EObject[]) => {
                 const paramValue = result.map( (o: any) => {return o});
                 this.setState<never>({
@@ -219,6 +266,32 @@ class DatasetView extends React.Component<any, State> {
             }
             return serverParam
         }
+        function getDiagramsFromUserProfile (userProfileParams: any): IDiagram[]{
+            let diagrams: IDiagram[] = [];
+            if (userProfileParams !== undefined) {
+                userProfileParams.forEach((f: IDiagram) => {
+                        if (f.diagramName !== undefined) {
+                            diagrams.push({
+                                id: diagrams.length,
+                                diagramName: f.diagramName,
+                                diagramType: f.diagramType,
+                                axisXLegend: f.axisXLegend,
+                                axisYLegend: f.axisYLegend,
+                                axisXPosition: f.axisXPosition,
+                                axisYPosition: f.axisYPosition,
+                                colorSchema: f.colorSchema,
+                                diagramLegend: f.diagramLegend,
+                                isSingle: f.isSingle,
+                                keyColumn: f.keyColumn,
+                                legendAnchorPosition: f.legendAnchorPosition,
+                                valueColumn: f.valueColumn
+                            })
+                        }
+                    }
+                )
+            }
+            return diagrams
+        }
         function getParamsFromComponent (resource: Ecore.EObject, componentName: string): IServerQueryParam[] {
             function isValidComponentName(value: string): value is keyof typeof defaultComponentValues {
                 return value in defaultComponentValues;
@@ -251,6 +324,29 @@ class DatasetView extends React.Component<any, State> {
             }
             return serverParam
         }
+        function getDiagramsFromComponent (resource: Ecore.EObject, componentName: string): IDiagram[] {
+            let diagrams: IDiagram[] = [];
+            if (componentName) {
+                resource.eContents()[0].get(componentName).array().forEach( (f: Ecore.Resource) => {
+                    diagrams.push({
+                        id: diagrams.length,
+                        diagramName: f.get('diagramName'),
+                        diagramType: (f.get('diagramType') !== null ? f.get('diagramType') : "Line"),
+                        axisXLegend: f.get('axisXLegend'),
+                        axisYLegend: f.get('axisYLegend'),
+                        axisXPosition: (f.get('axisXPosition') !== null ? f.get('axisXPosition') : "Top"),
+                        axisYPosition: (f.get('axisYPosition') !== null ? f.get('axisYPosition') : "Left"),
+                        legendAnchorPosition: (f.get('legendAnchorPosition') !== null ? f.get('legendAnchorPosition') : "TopLeft"),
+                        colorSchema: "accent",
+                        diagramLegend: f.get('diagramLegend'),
+                        isSingle: true,
+                        keyColumn: f.get('keyColumn'),
+                        valueColumn: f.get('valueColumn'),
+                    })
+                });
+            }
+            return diagrams
+        }
         function getParamsFromURL (params: any[], columnDefs: any[]): IServerQueryParam[] {
             let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
@@ -282,6 +378,7 @@ class DatasetView extends React.Component<any, State> {
         let serverGroupBy: IServerQueryParam[] = [];
         let highlights: IServerQueryParam[] = [];
         let serverCalculatedExpression: IServerQueryParam[] = [];
+        let diagrams: IDiagram[] = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
         if (userProfileValue.length !== 0) {
@@ -291,6 +388,7 @@ class DatasetView extends React.Component<any, State> {
             serverGroupBy = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupBy);
             highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
             serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
+            diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
         }
         else if (resource !== undefined) {
             serverFilters = getParamsFromComponent(resource, 'serverFilter');
@@ -298,7 +396,7 @@ class DatasetView extends React.Component<any, State> {
             serverSorts = getParamsFromComponent(resource, 'serverSort');
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
             highlights = getParamsFromComponent(resource, 'highlight');
-            serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
+            diagrams = getDiagramsFromComponent(resource, 'diagram');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
@@ -309,7 +407,7 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(serverGroupBy);
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
-        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
         this.runQuery(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
     }
 
@@ -364,7 +462,7 @@ class DatasetView extends React.Component<any, State> {
         return columnDefs
     };
 
-    translateExpression = (calculatedExpression: IServerQueryParam[]) => {
+    translateExpression(calculatedExpression: IServerQueryParam[]) {
         let sortMap = this.state.columnDefs.map(colDef => {
             return {
                 fieldName : colDef.get("field"),
@@ -440,10 +538,14 @@ class DatasetView extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (this.state.allDatasetComponents.length === 0) {this.getAllDatasetComponents(true)}
-        if (this.state.allOperations.length === 0) {this.getAllEnumValues("Operations", "allOperations")}
-        if (this.state.allAggregates.length === 0) {this.getAllEnumValues("Aggregate", "allAggregates")}
-        if (this.state.allSorts.length === 0) {this.getAllEnumValues("Sort", "allSorts")}
-        if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("HighlightType", "allHighlightType")}
+        if (this.state.allOperations.length === 0) {this.getAllEnumValues("dataset","Operations", "allOperations")}
+        if (this.state.allAggregates.length === 0) {this.getAllEnumValues("dataset","Aggregate", "allAggregates")}
+        if (this.state.allSorts.length === 0) {this.getAllEnumValues("dataset","Sort", "allSorts")}
+        if (this.state.allHighlightType.length === 0) {this.getAllEnumValues("dataset","HighlightType", "allHighlightType")}
+        if (this.state.allAxisXPosition.length === 0) {this.getAllEnumValues("dataset","AxisXPositionType", "allAxisXPosition")}
+        if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
+        if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
+
         if (this.props.context.submitHandlers !== undefined) {
             this.props.context.submitHandlers.push({
                 name: this.props.viewObject.get('name'),
@@ -453,7 +555,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentWillUnmount() {
-        this.props.context.updateContext({datasetComponents: undefined})
+        this.props.context.updateContext({datasetComponents: undefined});
         if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
             this.props.context.submitHandlers.pop()
         }
@@ -484,13 +586,37 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleDrawerVisibility = (p: paramType) => {
+    handleChange(e: any): void {
+        let params: any = {name: e};
+        this.props.context.changeUserProfile(this.props.viewObject._id, params);
+        let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
+            .filter((c: any) => c.eContents()[0].get('name') === e);
+        this.setState({currentDatasetComponent: currentDatasetComponent[0]});
+        this.findColumnDefs(currentDatasetComponent[0]);
+    }
+
+    handleDrawerVisibility = (p: paramType, v:boolean) => {
         this.setState({
-                  filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? !this.state.filtersMenuVisible : false
-                , aggregatesMenuVisible: (p === paramType.aggregate || p === paramType.group) ? !this.state.aggregatesMenuVisible : false
-                , sortsMenuVisible: (p === paramType.sort) ? !this.state.sortsMenuVisible : false
-                , calculationsMenuVisible: (p === paramType.calculations) ? !this.state.calculationsMenuVisible : false});
+            filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? v : false
+            , aggregatesMenuVisible: (p === paramType.aggregate || p === paramType.group) ? v : false
+            , sortsMenuVisible: (p === paramType.sort) ? v : false
+            , calculationsMenuVisible: (p === paramType.calculations) ? v : false
+            , diagramAddMenuVisible: (p === paramType.diagramsAdd) ? v : false
+            , diagramEditMenuVisible: (p === paramType.diagrams) ? v : false});
     };
+
+    datasetViewChangeUserProfile(datasetComponentId: string, paramName: paramType, param: any): any {
+        const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
+        return this.props.context.changeUserProfile(datasetComponentId, {
+            serverFilters: (paramName === paramType.filter)? param: filterParam(this.state.serverFilters),
+            serverAggregates: (paramName === paramType.aggregate)? param: filterParam(this.state.serverAggregates),
+            serverSorts:  (paramName === paramType.sort)? param: filterParam(this.state.serverSorts),
+            serverGroupBy:  (paramName === paramType.group)? param: filterParam(this.state.serverGroupBy),
+            highlights: (paramName === paramType.highlights)? param: filterParam(this.state.highlights),
+            serverCalculatedExpression: (paramName === paramType.calculations)? param: filterParam(this.state.serverCalculatedExpression),
+            diagrams: (paramName === paramType.diagrams)? param: this.state.diagrams,
+        });
+    }
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
@@ -499,7 +625,6 @@ class DatasetView extends React.Component<any, State> {
         const serverAggregates = filterParam(this.state.serverAggregates);
         const serverSorts = filterParam(this.state.serverSorts);
         const serverGroupBy = filterParam(this.state.serverGroupBy);
-        const highlights = filterParam(this.state.highlights);
         const serverCalculatedExpression = filterParam(this.state.serverCalculatedExpression);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
@@ -517,24 +642,10 @@ class DatasetView extends React.Component<any, State> {
                     (paramName === paramType.calculations)? serverParam: serverCalculatedExpression,
                 );
             }
-            this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? serverParam: serverFilter,
-                serverAggregates: (paramName === paramType.aggregate)? serverParam: serverAggregates,
-                serverSorts:  (paramName === paramType.sort)? serverParam: serverSorts,
-                serverGroupBy:  (paramName === paramType.group)? serverParam: serverGroupBy,
-                highlights: (paramName === paramType.highlights)? serverParam: highlights,
-                serverCalculatedExpression: (paramName === paramType.calculations)? serverParam: serverCalculatedExpression
-            });
+            this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
         }
         else {
-            this.props.context.changeUserProfile(datasetComponentId, {
-                serverFilters: (paramName === paramType.filter)? []: serverFilter,
-                serverAggregates: (paramName === paramType.aggregate)? []: serverAggregates,
-                serverSorts:  (paramName === paramType.sort)? []: serverSorts,
-                serverGroupBy:  (paramName === paramType.group)? []: serverGroupBy,
-                highlights: (paramName === paramType.highlights)? []: highlights,
-                serverCalculatedExpression: (paramName === paramType.calculations)? []: serverCalculatedExpression
-            }).then(()=>
+            this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
                 this.findParams(this.state.currentDatasetComponent, this.state.columnDefs)
             )
         }
@@ -544,123 +655,327 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-    handleChange(e: any): void {
-        let params: any = {name: e};
-        this.props.context.changeUserProfile(this.props.viewObject._id, params);
-        let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
-            .filter((c: any) => c.eContents()[0].get('name') === e);
-        this.setState({currentDatasetComponent: currentDatasetComponent[0]});
-        this.findColumnDefs(currentDatasetComponent[0]);
-    }
+    handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+        let newDiagrams:IDiagram[] = [];
+        if (action === "add" && newDiagram) {
+            newDiagrams = this.state.diagrams.concat(newDiagram);
+            this.setState({
+                currentDiagram: newDiagram,
+                diagrams: newDiagrams
+            });
+        } else if (action === "edit" && newDiagram) {
+            newDiagrams = this.state.diagrams.map(value => {
+                return (value.id === newDiagram.id)? newDiagram : value
+            });
+            this.setState({
+                currentDiagram: newDiagram,
+                diagrams: newDiagrams
+            });
+        } else {
+            if (this.state.diagrams.length > 1) {
+                newDiagrams = this.state.diagrams.filter(value => {
+                    return value.diagramName !== this.state.currentDiagram?.diagramName
+                });
+                this.setState({
+                    currentDiagram: newDiagrams[0],
+                    diagrams: newDiagrams
+                })
+            } else {
+                newDiagrams = [];
+                this.handleDrawerVisibility(paramType.diagrams,false);
+                this.handleDrawerVisibility(paramType.diagramsAdd,false);
+                this.setState({
+                    currentDiagram: undefined,
+                    diagrams: []
+                })
+            }
+        }
+        this.datasetViewChangeUserProfile(this.state.currentDatasetComponent.eContents()[0]._id
+            , paramType.diagrams
+            , newDiagrams);
+    };
+
+    getGridPanel = () => {
+        const { t } = this.props;
+        return <div>
+            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
+            </Button>
+            <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
+            </Button>
+            <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
+            </Button>
+            <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        (this.state.diagrams.length > 0)
+                            ? this.setState({currentDiagram: this.state.diagrams[0]})
+                            : this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}
+                    }
+            >
+                <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon" />
+            </Button>
+            <Button title={t('save')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button title={t('reset')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={resetIcon} alt="resetIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            {this.state.allDatasetComponents.length !== 0
+            && this.state.currentDatasetComponent !== undefined
+            &&
+            <div style={{display: 'inline-block'}}>
+                <Select
+                    style={{ width: '250px'}}
+                    showSearch={true}
+                    allowClear={true}
+                    value={this.state.currentDatasetComponent.eContents()[0].get('name')}
+                    onChange={(e: any) => {
+                        this.handleChange(e)
+                    }}
+                >
+                    <OptGroup
+                        label='Default'>
+                        {
+                            this.state.allDatasetComponents
+                                .filter((c: any) => c.eContents()[0].get('access') === 'Default')
+                                .map( (c: any) =>
+                                    <Option
+                                        key={c.eContents()[0].get('name')}
+                                        value={c.eContents()[0].get('name')}>
+                                        {c.eContents()[0].get('name')}
+                                    </Option>)
+                        }
+                    </OptGroup>
+                    <OptGroup label='Private'>
+                        {
+                            this.state.allDatasetComponents
+                                .filter((c: any) => c.eContents()[0].get('access') === 'Private')
+                                .map( (c: any) =>
+                                    <Option
+                                        key={c.eContents()[0].get('name')}
+                                        value={c.eContents()[0].get('name')}>
+                                        {c.eContents()[0].get('name')}
+                                    </Option>)
+                        }
+                    </OptGroup>
+                    <OptGroup label='Public'>
+                        {
+                            this.state.allDatasetComponents
+                                .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
+                                .map( (c: any) =>
+                                    <Option
+                                        key={c.eContents()[0].get('name')}
+                                        value={c.eContents()[0].get('name')}>
+                                        {c.eContents()[0].get('name')}
+                                    </Option>)
+                        }
+                    </OptGroup>
+                </Select>
+            </div>
+            }
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                                saveAs(new Blob([blob]), 'example.xlsx');
+                                console.log("Document created successfully");
+                            }
+                        );
+                    }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+            </Button>
+            <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
+            </Button>
+            <Button title={t('about')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
+            </Button>
+            <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
+            </Button>
+        </div>
+    };
+
+    getDiagramPanel = () => {
+        const { t } = this.props;
+        return <div>
+            <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        this.handleDrawerVisibility(paramType.diagrams,false);
+                        this.handleDrawerVisibility(paramType.diagramsAdd,false);
+                        this.setState({currentDiagram:undefined})
+                    }}
+            >
+                Вернуться к таблице
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('add')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible);
+                    }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="addIcon" />
+            </Button>
+            <Button title={t('edit')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible);
+                    }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('flag')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDiagramChange("delete")}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <div style={{display: 'inline-block'}}>
+                <Select
+                    style={{ width: '250px'}}
+                    showSearch={true}
+                    allowClear={true}
+                    value={this.state.currentDiagram?.diagramName}
+                    onChange={(e: string) => {
+                        this.setState({
+                            currentDiagram: this.state.diagrams.find(function(el) {
+                                return el.diagramName === e
+                            })
+                        });
+                    }}
+                >
+                    {
+                        this.state.diagrams.map((c: IDiagram) =>
+                            <Option
+                                key={c.diagramName}
+                                value={c.diagramName}>
+                                {c.diagramName}
+                            </Option>)
+                    }
+                </Select>
+            </div>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                                saveAs(new Blob([blob]), 'example.xlsx');
+                                console.log("Document created successfully");
+                            }
+                        );
+                    }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+            </Button>
+            <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
+            </Button>
+            <Button title={t('about')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
+            </Button>
+            <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
+            </Button>
+
+        </div>
+    };
+
+    handleSaveMenu = () => {
+        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+    };
 
     render() {
         const { t } = this.props;
         return (
             <div>
-                {this.state.allDatasetComponents.length !== 0 && this.state.currentDatasetComponent !== undefined &&
-                <div style={{display: 'inline-block'}}>
-                    <Select
-                        style={{ width: '250px'}}
-                        showSearch={true}
-                        allowClear={true}
-                        value={this.state.currentDatasetComponent.eContents()[0].get('name')}
-                        onChange={(e: any) => {
-                            this.handleChange(e)
-                        }}
-                    >
-                        <OptGroup
-                            label='Default'>
-                            {
-                                this.state.allDatasetComponents
-                                    .filter((c: any) => c.eContents()[0].get('access') === 'Default')
-                                    .map( (c: any) =>
-                                        <Option
-                                            key={c.eContents()[0].get('name')}
-                                            value={c.eContents()[0].get('name')}>
-                                            {c.eContents()[0].get('name')}
-                                        </Option>)
-                            }
-                        </OptGroup>
-                        <OptGroup label='Private'>
-                            {
-                                this.state.allDatasetComponents
-                                    .filter((c: any) => c.eContents()[0].get('access') === 'Private')
-                                    .map( (c: any) =>
-                                        <Option
-                                            key={c.eContents()[0].get('name')}
-                                            value={c.eContents()[0].get('name')}>
-                                            {c.eContents()[0].get('name')}
-                                        </Option>)
-                            }
-                        </OptGroup>
-                        <OptGroup label='Public'>
-                            {
-                                this.state.allDatasetComponents
-                                    .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
-                                    .map( (c: any) =>
-                                        <Option
-                                            key={c.eContents()[0].get('name')}
-                                            value={c.eContents()[0].get('name')}>
-                                            {c.eContents()[0].get('name')}
-                                        </Option>)
-                            }
-                        </OptGroup>
-                    </Select>
-                </div>
+                {(this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
+                {(this.state.currentDiagram)
+                    ?
+                    <DatasetDiagram
+                        {...this.props}
+                        rowData={this.state.rowData}
+                        diagramParams={this.state.currentDiagram}
+                    />
+                    :
+                    <DatasetGrid
+                        {...this.props}
+                        isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
+                        highlights = {this.state.highlights}
+                        currentDatasetComponent = {this.state.currentDatasetComponent}
+                        rowData = {this.state.rowData}
+                        columnDefs = {this.state.columnDefs}
+                        currentTheme = {this.state.currentTheme}
+                        paginationPageSize = {this.state.paginationPageSize}
+                        showUniqRow = {this.state.showUniqRow}
+                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                        saveChanges = {this.changeDatasetViewState}
+                    />
                 }
-                <div style={{display: 'inline-block', height: '30px',
-                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
-                        onClick={()=>{this.handleDrawerVisibility(paramType.filter)}}
-                >
-                    <FontAwesomeIcon icon={faFilter} size='xs'/>
-                </Button>
-                <div style={{display: 'inline-block', height: '30px',
-                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
-                        onClick={()=>{this.handleDrawerVisibility(paramType.aggregate)}}
-                >
-                    <FontAwesomeIcon icon={faObjectGroup} size='xs'/>
-                </Button>
-                <div style={{display: 'inline-block', height: '30px',
-                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
-                        onClick={()=>{this.handleDrawerVisibility(paramType.sort)}}
-                >
-                    <FontAwesomeIcon icon={faArrowsAltV} size='xs'/>
-                </Button>
-                <div style={{display: 'inline-block', height: '30px',
-                    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
-                        onClick={()=>{this.handleDrawerVisibility(paramType.calculations)}}
-                >
-                    <FontAwesomeIcon icon={faCalculator} size='xs'/>
-                </Button>
-
-                <DatasetGrid
-                    {...this.props}
-                    isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
-                    highlights = {this.state.highlights}
-                    currentDatasetComponent = {this.state.currentDatasetComponent}
-                    rowData = {this.state.rowData}
-                    columnDefs = {this.state.columnDefs}
-                    currentTheme = {this.state.currentTheme}
-                    paginationPageSize = {this.state.paginationPageSize}
-                    showUniqRow = {this.state.showUniqRow}
-                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                    saveChanges = {this.changeDatasetViewState}
-                />
 
                 <Drawer
                     placement='right'
                     title={t('filters')}
                     width={'720px'}
                     visible={this.state.filtersMenuVisible}
-                    onClose={()=>{this.handleDrawerVisibility(paramType.filter)}}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
                     mask={false}
                     maskClosable={false}
                 >
@@ -703,7 +1018,7 @@ class DatasetView extends React.Component<any, State> {
                     title={t('aggregations')}
                     width={'700px'}
                     visible={this.state.aggregatesMenuVisible}
-                    onClose={()=>{this.handleDrawerVisibility(paramType.aggregate)}}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
                     maskClosable={false}
                 >
@@ -745,7 +1060,7 @@ class DatasetView extends React.Component<any, State> {
                     title={t('sorts')}
                     width={'700px'}
                     visible={this.state.sortsMenuVisible}
-                    onClose={()=>{this.handleDrawerVisibility(paramType.sort)}}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
                     mask={false}
                     maskClosable={false}
                 >
@@ -771,7 +1086,7 @@ class DatasetView extends React.Component<any, State> {
                     title={t('calculatable expressions')}
                     width={'700px'}
                     visible={this.state.calculationsMenuVisible}
-                    onClose={()=>{this.handleDrawerVisibility(paramType.calculations)}}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
                     mask={false}
                     maskClosable={false}
                 >
@@ -794,6 +1109,71 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </Drawer>
 
+                <Drawer
+                    placement='right'
+                    title={t('diagram')}
+                    width={'700px'}
+                    visible={this.state.diagramAddMenuVisible}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        <DrawerDiagram
+                            {...this.props}
+                            columnDefs={this.state.columnDefs}
+                            allAxisXPosition={this.state.allAxisXPosition}
+                            allAxisYPosition={this.state.allAxisYPosition}
+                            allLegendPosition={this.state.allLegendPosition}
+                            allSorts={this.state.allSorts}
+                            allAggregates={this.state.allAggregates}
+                            saveChanges={this.handleDiagramChange}
+                            action={"add"}
+                            currentDiagram={undefined}
+                            id={this.state.diagrams.length}
+                        />
+                    }
+                </Drawer>
+
+                <Drawer
+                    placement='right'
+                    title={t('diagram')}
+                    width={'700px'}
+                    visible={this.state.diagramEditMenuVisible}
+                    onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
+                    mask={false}
+                    maskClosable={false}
+                >
+                    {
+                        <DrawerDiagram
+                            {...this.props}
+                            columnDefs={this.state.columnDefs}
+                            allAxisXPosition={this.state.allAxisXPosition}
+                            allAxisYPosition={this.state.allAxisYPosition}
+                            allLegendPosition={this.state.allLegendPosition}
+                            allSorts={this.state.allSorts}
+                            allAggregates={this.state.allAggregates}
+                            saveChanges={this.handleDiagramChange}
+                            action={"edit"}
+                            currentDiagram={this.state.currentDiagram}
+                            id={(this.state.currentDiagram)? this.state.currentDiagram.id: 0}
+                        />
+                    }
+                </Drawer>
+                <Modal
+                    key="save_menu"
+                    width={'500px'}
+                    title={t('saveReport')}
+                    visible={this.state.saveMenuVisible}
+                    footer={null}
+                    onCancel={this.handleSaveMenu}
+                >
+                    <SaveDatasetComponent
+                        {...this.props}
+                        currentDatasetComponent={this.state.currentDatasetComponent}
+                        closeModal={this.handleSaveMenu}
+                    />
+                </Modal>
             </div>
         )
     }

@@ -20,7 +20,6 @@ class DatasetPackageInit {
         /*DatasetPackage*/
         JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest", "org.postgresql.Driver")
         JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest", "JdbcDriverPostgresqlTest", "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev", "postgres", "ne0f1ex")
-        JdbcConnectionInit.createConnectionLine("JdbcConnectionPostgresqlNeoflexCore")
 
         try {
             JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
@@ -33,21 +32,6 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetTestAAA")
             DatasetComponentInit.createDatasetComponent("DatasetGridTestAAA", "JdbcDatasetTestAAA")
             DatasetComponentInit.createAllColumn("DatasetGridTestAAA")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetLine","\"lineDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetLine")
-            DatasetComponentInit.createDatasetComponent("DatasetGridLine", "JdbcDatasetLine")
-            DatasetComponentInit.createAllColumn("DatasetGridLine")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetPie","\"pieDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetPie")
-            DatasetComponentInit.createDatasetComponent("DatasetGridPie", "JdbcDatasetPie")
-            DatasetComponentInit.createAllColumn("DatasetGridPie")
-
-            JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetBar","\"barDataset\"","datasets","JdbcConnectionPostgresqlNeoflexCore")
-            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("JdbcDatasetBar")
-            DatasetComponentInit.createDatasetComponent("DatasetGridBar", "JdbcDatasetBar")
-            DatasetComponentInit.createAllColumn("DatasetGridBar")
 
             /*NRDEMO*/
             JdbcDriverInit.createDriver("JdbcDriverNRDemo", "oracle.jdbc.driver.OracleDriver")
@@ -245,15 +229,16 @@ class DatasetPackageInit {
         NotificationStatusInit.createNotificationStatus('Личная заметка','#ff57da')
 
         /*ApplicationPackage*/
-        YearBookInit.createWeekendYearBook("Календарь выходных дней")
-        YearBookInit.createHolidaysYearBook("Календарь праздничных дней")
-        YearBookInit.createWorkDaysYearBook("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
-        GlobalSettingsInit.createGlobalSettings("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
-
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
 
-        AppModuleInit.createAppModule("ReportSingle")
+        YearBookInit.createWeekendYearBook("Календарь выходных дней")
+        YearBookInit.createHolidaysYearBook("Календарь праздничных дней")
+        YearBookInit.createWorkDaysYearBook("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
+        AppModuleInit.createAppModuleDashboard("Dashboard")
+        GlobalSettingsInit.createGlobalSettings("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней", "Dashboard")
+
+        AppModuleInit.createAppModuleReportSingle("ReportSingle")
         NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18", "15", "ReportSingle", "Отчет не рассчитан")
 
         NotificationInit.createNotification("A 1994", Periodicity.MONTH, "16",  "18", "15", "ReportSingle", "Отчёт сдан в проверяющий орган")
@@ -262,10 +247,10 @@ class DatasetPackageInit {
 
         NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18", "8", "Отчёт не сдаётся из NR")
         NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18", "8", "Личная заметка")
-        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Ф 230", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("К 210", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("M 250", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Я 666", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
 
         /*NRdemo*/
         //TODO отсутствуют листы занчений (желатьльно динамические)
@@ -281,17 +266,13 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
-        ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
-        ApplicationInit.createApplication("Администрирование")
-        ApplicationInit.createApplicationLine("Линейная диаграмма")
-        ApplicationInit.createApplicationPie("Круговая диаграмма")
-        ApplicationInit.createApplicationBar("Ступенчатая диаграмма")
+        ApplicationInit.createApplication("Обязательная отчетность")
+            ApplicationInit.createApplication("Администрирование")
         }
         catch (Throwable e) {
             logger.error("Application was not created", e)
         }
-
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)

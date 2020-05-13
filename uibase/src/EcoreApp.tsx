@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
+import {Button, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -16,8 +16,8 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faBullhorn, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
-import {faClock, faEye, faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
+import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
@@ -25,6 +25,7 @@ import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from ".
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./pony.png";
+import HeaderMenu from "./components/HeaderMenu";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
@@ -45,6 +46,7 @@ interface State {
     userProfilePattern?: EObject;
     parameterPattern?: EObject;
     getUserProfile: boolean;
+    globalSettings?: EObject;
 }
 
 class EcoreApp extends React.Component<any, State> {
@@ -61,7 +63,7 @@ class EcoreApp extends React.Component<any, State> {
             docxHandlers: [],
             excelHandlers: [],
             submitHandlers: [],
-            //По событию на странице
+            //По событию на страницеchangeUserProfile
             contextItemValues: new Map()
         };
         this.state = {
@@ -181,6 +183,18 @@ class EcoreApp extends React.Component<any, State> {
                 }))
         }
 
+    };
+
+    getGlobalSettings() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//GlobalSettings");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((result) => {
+                        this.setState({globalSettings: result[0].eContents()[0]})
+                    })
+            }
+        })
     };
 
     prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
@@ -438,18 +452,38 @@ class EcoreApp extends React.Component<any, State> {
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
-                                '') ? "app-logo-settings" : "app-logo"}>
+                                '') ? "app-logo-settings" : "app-logo"}
+
+                                 onClick={this.renderDashboard}
+                            >
                                 <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px', marginLeft: '20px' }}/>
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
                             </div>
                         </Col>
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
-                                <Col span={14}>
-                                    <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
-                                                   onClickBreadcrumb={this.onClickBreadcrumb}/>
+                                <Col
+                                    span={19}
+                                    style={{textAlign: 'center'}}
+                                >
+                                    <MainContext.Consumer>
+                                        {context => {
+                                            return <HeaderMenu
+                                                {...props}
+                                                applications={this.state.applications}
+                                                context={context}
+
+                                                selectedKeys={selectedKeys}
+                                                breadcrumb={this.state.breadcrumb}
+                                                onClickBreadcrumb={this.onClickBreadcrumb}
+                                            />
+                                        }}
+                                    </MainContext.Consumer>
+
+                                    {/*<BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}*/}
+                                    {/*               onClickBreadcrumb={this.onClickBreadcrumb}/>*/}
                                 </Col>
-                                <Col span={10}>
+                                <Col span={5}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
                                         <Menu.SubMenu
@@ -501,25 +535,6 @@ class EcoreApp extends React.Component<any, State> {
                                                     Test component
                                                 </Link>
                                             </Menu.Item>
-                                           {/* <Menu.SubMenu
-                                                style={{backgroundColor: backgroundColor, marginTop: '-8px'}}
-                                                title={<span><FontAwesomeIcon icon={faBullhorn} size="lg"
-                                                                                        style={{marginRight: "10px"}}/>Notification</span>}>
-                                                {localStorage.getItem('notifierDuration') === '3' ?
-                                                    <Menu.Item
-                                                        style={{backgroundColor: backgroundColor}}
-                                                          key={'showNotifications'}>
-                                                        <FontAwesomeIcon icon={faEye} size="lg"
-                                                                         style={{marginRight: "10px"}}/>
-                                                        Disable autohiding</Menu.Item>
-                                                    :
-                                                    <Menu.Item
-                                                        style={{backgroundColor: backgroundColor}}
-                                                        key={'autoHideNotifications'}>
-                                                        <FontAwesomeIcon icon={faClock} size="lg"
-                                                                         style={{marginRight: "10px"}}/>
-                                                        Autohide</Menu.Item>}
-                                            </Menu.SubMenu>*/}
                                         </Menu.SubMenu>
                                     </Menu>
                                     <Dropdown overlay={langMenu} placement="bottomCenter">
@@ -549,6 +564,10 @@ class EcoreApp extends React.Component<any, State> {
                 </Switch>
             </Layout>
         )
+    };
+
+    renderDashboard = () => {
+        this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))
     };
 
     private setSelectedKeys() {
@@ -662,7 +681,7 @@ class EcoreApp extends React.Component<any, State> {
             this.setBreadcrumb()
         }
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
-            this.setState({getUserProfile: false})
+            this.setState({getUserProfile: false});
             this.getUserProfile(this.state.principal)
         }
     }
@@ -720,14 +739,11 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
         if (!this.state.queryParameterPattern) this.getEobjectByClass("dataset","QueryParameter", "queryParameterPattern");
-        //if (!this.state.userProfilePattern) this.getEobjectByClass("auth","UserProfile", "userProfilePattern");
         if (!this.state.userProfilePattern) this.getUserProfilePattern();
 
-
+        this.getGlobalSettings();
         if (!this.state.languages.length) this.getLanguages();
-        if (!this.state.applicationNames.length) {
-            this.getAllApplication()
-        }
+        if (!this.state.applicationNames.length) {this.getAllApplication()}
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
 
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}

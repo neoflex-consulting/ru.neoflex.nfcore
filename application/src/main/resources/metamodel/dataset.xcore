@@ -52,6 +52,24 @@ class JdbcDataset extends Dataset {
     op JSON showAllTables()
 }
 
+class Pivot {
+
+}
+
+class Diagram {
+    String diagramName
+    DiagramType diagramType
+    String axisXLegend
+    String axisYLegend
+    AxisXPositionType axisXPosition
+    AxisYPositionType axisYPosition
+    LegendAnchorPositionType legendAnchorPosition
+    String diagramLegend
+    String indexBy
+    String keyColumn
+    String valueColumn
+}
+
 /*View*/
 class DatasetComponent {
      QName name //default сделать по умолчанию (не редактируемый)
@@ -73,6 +91,8 @@ class DatasetComponent {
      contains QueryGroupBy[] serverGroupBy
      contains QueryCalculatedExpression[] serverCalculatedExpression
      contains Highlight[] highlight
+     contains Pivot[] pivot
+     contains Diagram[] diagram
 }
 
 class DatasetColumn {
@@ -197,7 +217,6 @@ enum Aggregate {
     Count
     CountDistinct
     Maximum
-    Median
     Minimum
     Sum
 }
@@ -239,4 +258,32 @@ enum HighlightType {
     Cell
     Column
     Row
+}
+
+enum DiagramType {
+    Line
+    Bar
+    Pie
+}
+
+enum LegendAnchorPositionType {
+    TopLeft
+    Top
+    TopRight
+    Left
+    Center
+    Right
+    BottomLeft
+    Bottom
+    BottomRight
+}
+
+enum AxisXPositionType {
+    Top
+    Bottom
+}
+
+enum AxisYPositionType {
+    Left
+    Right
 }

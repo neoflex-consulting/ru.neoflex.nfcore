@@ -15,7 +15,6 @@ import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.providers.OrientDBStoreProvider;
@@ -37,10 +37,7 @@ import ru.neoflex.nfcore.masterdata.*;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -64,12 +61,11 @@ public class MasterdataProvider {
         }
         context.transact("Init Master Data Service", () -> {
             initTypes();
-            activateEntities();
             return null;
         });
     }
 
-    private void activateEntities() throws IOException {
+    private void activateAllEntities() throws IOException {
         List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY_TYPE)
                 .execute().getResources();
         for (Resource r: resList) {
@@ -103,6 +99,9 @@ public class MasterdataProvider {
                 throw new IllegalArgumentException(String.format("Can't get OType of %s", plainType.getName()));
             }
             return oType;
+        }
+        if (classifier instanceof EnumType) {
+            return OType.STRING;
         }
         if (classifier instanceof EntityType) {
             return OType.LINK;
@@ -141,6 +140,9 @@ public class MasterdataProvider {
         else if (classifier instanceof PlainType) {
             OType oType2 = getOType(classifier);
             oClass.createProperty(name, oType2);
+        }
+        else if (classifier instanceof EnumType) {
+            oClass.createProperty(name, OType.STRING);
         }
         else if (classifier instanceof DocumentType) {
             OClass oClass2 = getOClass(database, classifier.getName());
@@ -187,12 +189,7 @@ public class MasterdataProvider {
             try {
                 OClass oClass = database.getClass(entity.getName());
                 if (oClass == null) {
-                    if (entity.getSuperTypes().size() == 0) {
-                        oClass = database.createVertexClass(entity.getName());
-                    }
-                    else {
-                        oClass = database.createClass(entity.getName());
-                    }
+                    oClass = database.createClass(entity.getName());
                     if (entity.isAbstract()) {
                         oClass.setAbstract(true);
                     }
@@ -248,37 +245,42 @@ public class MasterdataProvider {
     }
 
     public OEntity insert(ODatabaseDocument db, EntityType entityType, ObjectNode node) {
+        return insert(db, entityType.getName(), node);
+    }
+
+    public OEntity insert(ODatabaseDocument db, String entityTypeName, ObjectNode node) {
         try {
-            OVertex entity = db.newVertex(entityType.getName());
+            ODocument entity = new ODocument(entityTypeName);
+            entity.setProperty("__created", new Date());
+            entity.setProperty("__createdBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
-            entity.save();
+            db.save(entity);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
-/*
+
     public OEntity insert(ODatabaseDocument db, ObjectNode node) {
-        try {
-            String className = node.get("@class").asText();
-            store.inTransaction(true, tx -> {
-                DocFinder.create(store, MasterdataPackage.ENTITY_TYPE)
-            });
-            OVertex entity = db.newVertex(entityType.getName());
-            String jsonString = new ObjectMapper().writeValueAsString(node);
-            entity.fromJSON(jsonString);
-            entity.save();
-            return new OEntity(entity);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return insert(db, node.get("@class").asText(), node);
     }
-*/
+
     public OEntity update(ODatabaseDocument db, OEntity oEntity) {
+        ObjectNode node = oEntity.getObjectNode();
+        String id = oEntity.getRid();
+        return update(db, id, node);
+    }
+
+    public OEntity update(ODatabaseDocument db, ObjectNode node) {
+        return update(db, node.get("@rid").asText(), node);
+    }
+
+    public OEntity update(ODatabaseDocument db, String id, ObjectNode node) {
         try {
-            OVertex entity = db.load(new ORecordId(oEntity.getRid()));
-            ObjectNode node = oEntity.getObjectNode();
+            ODocument entity = db.load(new ORecordId(id));
+            entity.setProperty("__updated", new Date());
+            entity.setProperty("__updatedBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
             entity.save();
@@ -288,16 +290,21 @@ public class MasterdataProvider {
         }
     }
 
-    public void delete(ODatabaseDocument db, OEntity oEntity) {
-        delete(db, oEntity.getRid());
+    public ODatabaseDocument delete(ODatabaseDocument db, OEntity oEntity) {
+        return delete(db, oEntity.getRid());
     }
 
-    public void delete(ODatabaseDocument db, String recordId) {
+    public ODatabaseDocument delete(ODatabaseDocument db, ObjectNode node) {
+        return delete(db, node.get("@rid").asText());
+    }
+
+    public ODatabaseDocument delete(ODatabaseDocument db, String recordId) {
         db.delete(new ORecordId(recordId));
+        return db;
     }
 
     public OEntity load(ODatabaseDocument db, String recordId) {
-        OVertex entity = db.load(new ORecordId(recordId));
+        ODocument entity = db.load(new ORecordId(recordId));
         return new OEntity(entity);
     }
 
@@ -394,6 +401,10 @@ public class MasterdataProvider {
     }
 
     public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName) {
+        return createAttribute(entityType, name, attributeTypeName, null);
+    }
+
+    public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName, String caption) {
         try {
             List<Resource> attributeTypeList = DocFinder.create(store, MasterdataPackage.Literals.CLASSIFIER, new HashMap() {{put("name", attributeTypeName);}})
                     .execute().getResources();
@@ -403,6 +414,7 @@ public class MasterdataProvider {
             Attribute attribute = MasterdataFactory.eINSTANCE.createAttribute();
             attribute.setName(name);
             attribute.setAttributeType((Classifier) attributeTypeList.get(0).getContents().get(0));
+            attribute.setCaption(caption);
             entityType.getAttributes().add(attribute);
             return attribute;
         } catch (IOException e) {
@@ -516,6 +528,10 @@ public class MasterdataProvider {
         });
     }
 
+    public List<OEntity> query(String sql) {
+        return query(sql, new HashMap());
+    }
+
     public List<OEntity> query(String sql, Map args) {
         return query(sql, args, oResultSet -> {
             List<OEntity> result = new ArrayList<>();
@@ -525,6 +541,10 @@ public class MasterdataProvider {
             }
             return result;
         });
+    }
+
+    public ArrayNode queryNode(String sql) {
+        return queryNode(sql, new HashMap());
     }
 
     public ArrayNode queryNode(String sql, Map args) {

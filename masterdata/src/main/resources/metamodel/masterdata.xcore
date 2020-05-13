@@ -24,11 +24,20 @@ class MapType extends Classifier {
     refers Classifier valueType
 }
 
+class EnumType extends Classifier {
+    contains EnumValue[] values
+}
+
+class EnumValue {
+    String name
+}
+
 class DocumentType extends Classifier {
     contains Attribute[] attributes opposite documentType
 }
 
 class EntityType extends DocumentType {
+    String caption
     boolean active
     boolean ^abstract
     boolean timeDependent
@@ -43,6 +52,7 @@ class EntityType extends DocumentType {
 class Attribute {
     container DocumentType documentType opposite attributes
     String name
+    String caption
     refers Classifier attributeType
 }
 

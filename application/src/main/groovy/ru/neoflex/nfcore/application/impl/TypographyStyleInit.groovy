@@ -7,14 +7,9 @@ import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.TextAlign
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.utils.Utils
 
 class TypographyStyleInit {
-
-    static def findEObject(EClass eClass, String name, boolean replace = false) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        return resources.resources.get(0).contents.get(0)
-    }
 
     static def createTypographyStyle(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.TYPOGRAPHY_STYLE, [name: name])
@@ -30,7 +25,7 @@ class TypographyStyleInit {
             typographyStyle.height = '70px'
             typographyStyle.fontWeight = 'inherit'
 
-            def gradientStyle = findEObject(ApplicationPackage.Literals.GRADIENT_STYLE, "Neoflex")
+            def gradientStyle = Utils.findEObject(ApplicationPackage.Literals.GRADIENT_STYLE, "Neoflex")
             typographyStyle.setGradientStyle(gradientStyle)
 
             rs.resources.add(Context.current.store.createEObject(typographyStyle))

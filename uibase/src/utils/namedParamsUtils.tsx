@@ -1,5 +1,5 @@
 import {IServerNamedParam} from "../MainContext";
-import Ecore, {EObject} from "ecore";
+import {EObject} from "ecore";
 
 function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) {
     const params = namedParams.sort((a, b) => {
