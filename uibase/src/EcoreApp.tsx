@@ -61,7 +61,7 @@ class EcoreApp extends React.Component<any, State> {
             docxHandlers: [],
             excelHandlers: [],
             submitHandlers: [],
-            //По событию на странице
+            //По событию на страницеchangeUserProfile
             contextItemValues: new Map()
         };
         this.state = {
