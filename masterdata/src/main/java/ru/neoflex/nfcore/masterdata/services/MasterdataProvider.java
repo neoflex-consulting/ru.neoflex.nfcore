@@ -100,6 +100,9 @@ public class MasterdataProvider {
             }
             return oType;
         }
+        if (classifier instanceof EnumType) {
+            return OType.STRING;
+        }
         if (classifier instanceof EntityType) {
             return OType.LINK;
         }
@@ -137,6 +140,9 @@ public class MasterdataProvider {
         else if (classifier instanceof PlainType) {
             OType oType2 = getOType(classifier);
             oClass.createProperty(name, oType2);
+        }
+        else if (classifier instanceof EnumType) {
+            oClass.createProperty(name, OType.STRING);
         }
         else if (classifier instanceof DocumentType) {
             OClass oClass2 = getOClass(database, classifier.getName());
@@ -395,6 +401,10 @@ public class MasterdataProvider {
     }
 
     public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName) {
+        return createAttribute(entityType, name, attributeTypeName, null);
+    }
+
+    public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName, String caption) {
         try {
             List<Resource> attributeTypeList = DocFinder.create(store, MasterdataPackage.Literals.CLASSIFIER, new HashMap() {{put("name", attributeTypeName);}})
                     .execute().getResources();
@@ -404,6 +414,7 @@ public class MasterdataProvider {
             Attribute attribute = MasterdataFactory.eINSTANCE.createAttribute();
             attribute.setName(name);
             attribute.setAttributeType((Classifier) attributeTypeList.get(0).getContents().get(0));
+            attribute.setCaption(caption);
             entityType.getAttributes().add(attribute);
             return attribute;
         } catch (IOException e) {

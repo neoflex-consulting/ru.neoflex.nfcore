@@ -1,10 +1,8 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Checkbox, Col, Input, InputNumber, Row, Select, Switch, Tabs} from "antd";
+import {Button, Col, Input, InputNumber, Row, Select, Switch} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
-
-const { TabPane } = Tabs;
 
 interface Props {
     onCreateNotification?: (notificationStatus: any[]) => void;
@@ -34,7 +32,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (this.state.spinnerVisible !== this.props.spinnerVisible) {
+        if (this.state.spinnerVisible !== this.props.spinnerVisible && this.state.spinnerVisible) {
             this.setState({spinnerVisible: false})
         }
     }
@@ -182,6 +180,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 max={23}
                                 value={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
+                                parser={value => value !== undefined ? value.replace(':00', '') : 1}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});

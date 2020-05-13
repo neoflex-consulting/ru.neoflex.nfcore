@@ -246,10 +246,10 @@ class DatasetPackageInit {
 
         NotificationInit.createEmptyNotification("Ф 2020", Periodicity.MONTH, "10",  "18", "8", "Отчёт не сдаётся из NR")
         NotificationInit.createEmptyNotification("Проверить почту", Periodicity.MONTH, "10",  "18", "8", "Личная заметка")
-        NotificationInit.createNotification("Period.MONTH", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.DAY", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.QUARTER", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
-        NotificationInit.createNotification("Period.YEAR", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Ф 230", Periodicity.MONTH, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("К 210", Periodicity.DAY, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("M 250", Periodicity.QUARTER, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
+        NotificationInit.createNotification("Я 666", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
 
         /*NRdemo*/
         //TODO отсутствуют листы занчений (желатьльно динамические)
@@ -265,14 +265,13 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
-        ApplicationInit.createApplication("Обязательная отчетность")
         ApplicationInit.createApplication("Налоговая отчетность")
-        ApplicationInit.createApplication("Администрирование")
+        ApplicationInit.createApplication("Обязательная отчетность")
+            ApplicationInit.createApplication("Администрирование")
         }
         catch (Throwable e) {
             logger.error("Application was not created", e)
         }
-
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)

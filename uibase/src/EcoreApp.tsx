@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Icon, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
+import {Button, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -16,8 +16,8 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map"
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faBullhorn, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
-import {faClock, faEye, faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
+import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
 import {StartPage} from "./components/StartPage";
