@@ -18,7 +18,42 @@ import java.util.function.Consumer
 
 class AppModuleInit {
 
-    static def createAppModule(String name) {
+    static def createAppModuleDashboard(String name) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.name = name
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = "Dashboard"
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+            row2.textAlign = TextAlign.LEFT
+            row2.borderBottom = true
+
+            row2.children.add(typography)
+            row1.children.add(row2)
+
+            application.view = row1
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+
+    static def createAppModuleReportSingle(String name) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {

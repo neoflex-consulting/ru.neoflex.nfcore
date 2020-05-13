@@ -9,7 +9,7 @@
   width: 260px;
   padding-left: 14px;
   border-bottom: 1px solid #e8e8e8;
-  user-select: none;
+  /*user-select: none;*/
   margin-top: -15px;
 }
 
@@ -22,7 +22,8 @@
   display: inline-block;
   width: 260px;
   padding-left: 14px;
-  user-select: none;
+  cursor: pointer;
+  /*user-select: none;*/
 }
 
 .app-header {
