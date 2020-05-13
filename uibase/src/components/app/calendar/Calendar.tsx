@@ -283,18 +283,6 @@ class Calendar extends React.Component<any, any> {
         }
     }
 
-    getGlobalSettings() {
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//GlobalSettings");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((result) => {
-                        this.setState({globalSettings: result[0].eContents()[0]})
-                    })
-            }
-        })
-    };
-
     private getLocale(i18n: any) {
         return i18n.language === "cn" ? zhCN
             :
@@ -472,7 +460,6 @@ class Calendar extends React.Component<any, any> {
     };
 
     componentDidMount(): void {
-        this.getGlobalSettings();
         this.getAllStatuses();
         this.getAllNotificationInstances(this.state.currentMonth, false);
         this.getAllPeriodicity();

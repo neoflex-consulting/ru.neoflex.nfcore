@@ -38,6 +38,7 @@ class GlobalSettings {
     refers YearBook weekendCalendar
     refers YearBook holidayCalendar
     refers YearBook workingDaysCalendar
+    refers AppModule dashboard
 }
 
 class AppModule {

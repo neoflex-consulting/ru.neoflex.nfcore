@@ -229,15 +229,16 @@ class DatasetPackageInit {
         NotificationStatusInit.createNotificationStatus('Личная заметка','#ff57da')
 
         /*ApplicationPackage*/
-        YearBookInit.createWeekendYearBook("Календарь выходных дней")
-        YearBookInit.createHolidaysYearBook("Календарь праздничных дней")
-        YearBookInit.createWorkDaysYearBook("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
-        GlobalSettingsInit.createGlobalSettings("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
-
         GradientStyleInit.createGradientStyle("Neoflex")
         TypographyStyleInit.createTypographyStyle("Title")
 
-        AppModuleInit.createAppModule("ReportSingle")
+        YearBookInit.createWeekendYearBook("Календарь выходных дней")
+        YearBookInit.createHolidaysYearBook("Календарь праздничных дней")
+        YearBookInit.createWorkDaysYearBook("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней")
+        AppModuleInit.createAppModuleDashboard("Dashboard")
+        GlobalSettingsInit.createGlobalSettings("Календарь рабочих дней", "Календарь выходных дней", "Календарь праздничных дней", "Dashboard")
+
+        AppModuleInit.createAppModuleReportSingle("ReportSingle")
         NotificationInit.createNotification("A 1993", Periodicity.MONTH, "17",  "18", "15", "ReportSingle", "Отчет не рассчитан")
 
         NotificationInit.createNotification("A 1994", Periodicity.MONTH, "16",  "18", "15", "ReportSingle", "Отчёт сдан в проверяющий орган")
