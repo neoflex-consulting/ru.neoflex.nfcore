@@ -401,6 +401,10 @@ public class MasterdataProvider {
     }
 
     public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName) {
+        return createAttribute(entityType, name, attributeTypeName, null);
+    }
+
+    public Attribute createAttribute(DocumentType entityType, String name, String attributeTypeName, String caption) {
         try {
             List<Resource> attributeTypeList = DocFinder.create(store, MasterdataPackage.Literals.CLASSIFIER, new HashMap() {{put("name", attributeTypeName);}})
                     .execute().getResources();
@@ -410,6 +414,7 @@ public class MasterdataProvider {
             Attribute attribute = MasterdataFactory.eINSTANCE.createAttribute();
             attribute.setName(name);
             attribute.setAttributeType((Classifier) attributeTypeList.get(0).getContents().get(0));
+            attribute.setCaption(caption);
             entityType.getAttributes().add(attribute);
             return attribute;
         } catch (IOException e) {

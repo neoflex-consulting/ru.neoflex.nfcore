@@ -1,29 +1,41 @@
 package ru.neoflex.nfcore.application.impl
 
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.util.EcoreUtil
-import ru.neoflex.nfcore.application.AppModule
-import ru.neoflex.nfcore.application.ApplicationFactory
-import ru.neoflex.nfcore.application.ApplicationPackage
-import ru.neoflex.nfcore.application.CatalogNode
-import ru.neoflex.nfcore.application.TextAlign
+import ru.neoflex.nfcore.application.*
+import ru.neoflex.nfcore.base.components.SpringContext
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetPackage
+import ru.neoflex.nfcore.masterdata.EntityType
+import ru.neoflex.nfcore.masterdata.EnumType
+import ru.neoflex.nfcore.masterdata.MasterdataPackage
+import ru.neoflex.nfcore.masterdata.services.MasterdataProvider
+
+import java.util.function.Consumer
 
 //ClassComponent.AClass = rs.getEObject(URI.createURI(uri), true)
 
 class AppModuleInit {
-    static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false) {
+    static def createEObject(EClass eClass, Map<String, Object> attrs) {
+        def eObject = EcoreUtil.create(eClass)
+        attrs.each {entry->eObject.eSet(eClass.getEStructuralFeature(entry.key), entry.value)}
+        return eObject
+    }
+
+    static def findOrCreateEObject(EClass eClass, String name, String componentClassName, boolean replace = false, Consumer<EObject> consumer=null) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                     .execute().resourceSet
         while (replace && !resources.resources.empty) {
             Context.current.store.deleteResource(resources.resources.remove(0).getURI())
         }
         if (resources.resources.empty) {
-            def eObject = EcoreUtil.create(eClass)
-            eObject.eSet(eClass.getEStructuralFeature("name"), name)
+            def eObject = createEObject(eClass, ["name": name])
             if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
+            if (consumer != null) {
+                consumer.accept(eObject)
+            }
             resources.resources.add(Context.current.store.createEObject(eObject))
         }
         return resources.resources.get(0).contents.get(0)
@@ -791,6 +803,58 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
+    static initBalAccountClassifier = new Consumer<EntityType>() {
+        @Override
+        void accept(EntityType entityType) {
+            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "YN", "", false, new Consumer<EnumType>() {
+                @Override
+                void accept(EnumType eObject) {
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Да"]))
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "Нет"]))
+                }
+            })
+            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "PartyType", "", false, new Consumer<EnumType>() {
+                @Override
+                void accept(EnumType eObject) {
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ЮЛ"]))
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "ФЛ"]))
+                }
+            })
+            findOrCreateEObject(MasterdataPackage.Literals.ENUM_TYPE, "CharType", "", false, new Consumer<EnumType>() {
+                @Override
+                void accept(EnumType eObject) {
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "А"]))
+                    eObject.values.add(createEObject(MasterdataPackage.Literals.ENUM_VALUE, [name: "П"]))
+                }
+            })
+            MasterdataProvider md = SpringContext.getBean(MasterdataProvider.class)
+            md.createAttribute(entityType, 'section_number', "INTEGER", "Раздел отчёта")
+            md.createAttribute(entityType, 'f110_code', "STRING", "Код обозначения расшифровки")
+            md.createAttribute(entityType, 'is_manually_classified', "YN", "Признак того, что в расчёт кода включаются счета только через ручной классификатор")
+            md.createAttribute(entityType, 'ledger_account_mask', "STRING", "Маска балансового счёта 1/2 порядка")
+            md.createAttribute(entityType, 'f102_symbol_mask', "STRING", "Маска символа по форме 0409102")
+            md.createAttribute(entityType, 'party_type', "PartyType", "Тип клиента, владельца счёта")
+            md.createAttribute(entityType, 'customer_type_110i_id', "STRING", "Код клиента по 180-И")
+            md.createAttribute(entityType, 'sign', "INTEGER", "Знак, с которым сумма по б/с входят в код")
+            md.createAttribute(entityType, 'VALUATION_TYPE', "STRING", "Тип оценки актива/обязательства")
+            md.createAttribute(entityType, 'AGREEMENT_TYPE_LIST', "STRING", "Тип оценки актива/обязательства")
+            md.createAttribute(entityType, 'IS_SELF_EMPLOYED', "YN", "Признак: является ли клиент по счёту ИП")
+            md.createAttribute(entityType, 'CHAR_TYPE', "CharType", "Характеристика счёта (А/П)")
+            md.createAttribute(entityType, 'actual_date', "DATE", "Дата начала действия")
+            md.createAttribute(entityType, 'actual_end_date', "DATE", "Дата окончания действия")
+        }
+    }
+
+    static initBalAccountClassifierAppModule = new Consumer<AppModule>() {
+        @Override
+        void accept(AppModule appModule) {
+            def view = EcoreUtil.create(ApplicationPackage.Literals.MASTERDATA_VIEW) as MasterdataView
+            view.name = 'MasterdataView_1'
+            view.entityType = findOrCreateEObject(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", "", false, initBalAccountClassifier)
+            appModule.view = view
+        }
+    }
+
     static def makeRefTreeNRDemo() {
         def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
         referenceTree.name = "F110_REF_TREE"
@@ -799,10 +863,9 @@ class AppModuleInit {
         def appModule3 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section3", "",false) as AppModule
         def appModule4 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4", "",false) as AppModule
         def appModule5 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail", "",false) as AppModule
+        def appModule6 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", "",false, initBalAccountClassifierAppModule) as AppModule
         def appModule8 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart", "",false) as AppModule
         def appModule14 = findOrCreateEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO", "",false) as AppModule
-
-
 
 
         def catalog1 = ApplicationFactory.eINSTANCE.createCatalogNode()
@@ -830,7 +893,7 @@ class AppModuleInit {
 
         def appModuleNode6 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode6.name = "Классификатор балансовых счетов"
-        //appModuleNode6.appModule = appModule6
+        appModuleNode6.appModule = appModule6
         def appModuleNode7 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode7.name = "Счета для включения или исключения"
         //appModuleNode7.appModule = appModule7

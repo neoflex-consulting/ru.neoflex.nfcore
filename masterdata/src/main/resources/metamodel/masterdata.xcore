@@ -25,7 +25,11 @@ class MapType extends Classifier {
 }
 
 class EnumType extends Classifier {
-    String[] values
+    contains EnumValue[] values
+}
+
+class EnumValue {
+    String name
 }
 
 class DocumentType extends Classifier {
