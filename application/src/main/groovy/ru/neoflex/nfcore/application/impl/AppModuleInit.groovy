@@ -1,5 +1,7 @@
 package ru.neoflex.nfcore.application.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument
 import org.eclipse.emf.ecore.util.EcoreUtil
 import ru.neoflex.nfcore.application.*
 import ru.neoflex.nfcore.base.components.SpringContext
@@ -13,6 +15,7 @@ import ru.neoflex.nfcore.masterdata.services.MasterdataProvider
 import ru.neoflex.nfcore.utils.Utils
 
 import java.util.function.Consumer
+import java.util.function.Function
 
 //ClassComponent.AClass = rs.getEObject(URI.createURI(uri), true)
 
@@ -829,6 +832,7 @@ class AppModuleInit {
                 }
             })
             MasterdataProvider md = SpringContext.getBean(MasterdataProvider.class)
+            if (md == null) return
             md.createAttribute(entityType, 'section_number', "INTEGER", "Раздел отчёта")
             md.createAttribute(entityType, 'f110_code', "STRING", "Код обозначения расшифровки")
             md.createAttribute(entityType, 'is_manually_classified', "YN", "Признак того, что в расчёт кода включаются счета только через ручной классификатор")
@@ -846,12 +850,37 @@ class AppModuleInit {
         }
     }
 
+    static def fillBalAccountClassifier() {
+        MasterdataProvider md = SpringContext.getBean(MasterdataProvider.class);
+        if (md == null) return
+        def entityTypeName = 'F110_BalAccountClassifier'
+        def nodes = [
+                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new Date().toString()],
+                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new Date().toString()]
+        ]
+
+        md.inTransaction(new Function<ODatabaseDocument, Void>() {
+            @Override
+            Void apply(ODatabaseDocument db) {
+                db.execute('script', 'delete * from ' + entityTypeName)
+                for (node in nodes) {
+                    def object = new ObjectMapper().createObjectNode()
+                    node.each {entry->object.put(entry.key, entry.value)}
+                    md.insert(db, object)
+                }
+                return null
+            }
+        }) as void
+    }
+
     static initBalAccountClassifierAppModule = new Consumer<AppModule>() {
         @Override
         void accept(AppModule appModule) {
             def view = EcoreUtil.create(ApplicationPackage.Literals.MASTERDATA_VIEW) as MasterdataView
             view.name = 'MasterdataView_1'
             view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
+            view.entityType.activate()
+            fillBalAccountClassifier()
             appModule.view = view
         }
     }

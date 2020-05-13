@@ -6,12 +6,12 @@ import ru.neoflex.nfcore.masterdata.services.MasterdataProvider
 class EntityTypeExt extends EntityTypeImpl {
     public void activate() {
         MasterdataProvider provider = SpringContext.getBean(MasterdataProvider.class);
-        provider.activateEntityType(this)
+        if (provider != null) provider.activateEntityType(this)
     }
 
     public void deactivate(boolean deleteTables) {
         MasterdataProvider provider = SpringContext.getBean(MasterdataProvider.class);
-        provider.deactivateEntityType(this, deleteTables)
+        if (provider != null) provider.deactivateEntityType(this, deleteTables)
     }
 
 
