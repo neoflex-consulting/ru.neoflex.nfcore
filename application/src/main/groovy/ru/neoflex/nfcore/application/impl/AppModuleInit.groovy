@@ -862,7 +862,7 @@ class AppModuleInit {
         md.inTransaction(new Function<ODatabaseDocument, Void>() {
             @Override
             Void apply(ODatabaseDocument db) {
-                db.execute('script', 'delete * from ' + entityTypeName)
+                db.execute('sql', 'delete * from ' + entityTypeName)
                 for (node in nodes) {
                     def object = new ObjectMapper().createObjectNode()
                     node.each {entry->object.put(entry.key, entry.value)}
