@@ -191,6 +191,8 @@ class Button_ extends ViewContainer {
 }
 
 class Select_ extends ViewContainer {
+    private selected = "";
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -198,7 +200,27 @@ class Select_ extends ViewContainer {
         };
     }
 
-    onChange = (currentValue: string[]) => {
+    private getDocxData(): docxExportObject {
+        return {
+            docxComponentType : docxElementExportType.text,
+            textData: this.selected
+        };
+    }
+
+    private getExcelData(): excelExportObject {
+        return {
+            excelComponentType : excelElementExportType.text,
+            textData: this.selected
+        };
+    }
+
+    onChange = (currentValue: string) => {
+        //TODO для множественного выбора
+        this.selected = this.state.selectData.find((el:{key:string,value:string})=>{
+            if (el.value === currentValue) {
+                return el
+            }
+        }).key;
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -207,23 +229,46 @@ class Select_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
     componentDidMount(): void {
         if (this.props.viewObject.get('staticValues')) {
             this.getStaticValues()
         }
+        if (this.props.context.docxHandlers !== undefined) {
+            this.props.context.docxHandlers.push(this.getDocxData.bind(this));
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this));
+        }
     }
+
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
+        }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
+    }
+
     getStaticValues() {
-        this.setState({
-            selectData:this.props.viewObject.get('staticValues')
-                .split("\\;")
-                .map((e:string)=>{
+        const staticValues = this.props.viewObject.get('staticValues')
+            .split("\\;")
+            .map((e:string)=>{
                 const keyValue = e.split("\\:");
                 return {
                     key: keyValue[0],
                     value: keyValue[1]
                 }
-            })})
+            });
+        if (staticValues.length > 0) {
+            this.selected = staticValues[0].key;
+        }
+        this.setState({
+            selectData:staticValues
+        })
     }
+
     render = () => {
         if (this.state.selectData.length === 0) {
             return (<div key={this.viewObject._id}></div>)
@@ -240,8 +285,12 @@ class Select_ extends ViewContainer {
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
                         style={{width: width}}
                         value={this.props.viewObject.get('value') || undefined}
-                        onChange={(currentValue: string[]) => {
-                            this.onChange(currentValue)
+                        onChange={(currentValue: string|string[]) => {
+                            if (typeof currentValue === 'string') {
+                                this.onChange(currentValue)
+                            } else if (Array.isArray(currentValue)) {
+                                this.onChange(currentValue.join(","))
+                            }
                         }}
                     >
                         {
@@ -268,9 +317,38 @@ class DatePicker_ extends ViewContainer {
         };
     }
 
+    private getDocxData(): docxExportObject {
+        return {
+            docxComponentType : docxElementExportType.text,
+            textData: this.state.pickedDate.format(this.state.format)
+        };
+    }
+
+    private getExcelData(): excelExportObject {
+        return {
+            excelComponentType : excelElementExportType.text,
+            textData: this.state.pickedDate.format(this.state.format)
+        };
+    }
+
     componentDidMount(): void {
         //Инициализация value
-        this.onChange(this.state.pickedDate.format(this.state.format))
+        this.onChange(this.state.pickedDate.format(this.state.format));
+        if (this.props.context.docxHandlers !== undefined) {
+            this.props.context.docxHandlers.push(this.getDocxData.bind(this));
+        }
+        if (this.props.context.excelHandlers !== undefined) {
+            this.props.context.excelHandlers.push(this.getExcelData.bind(this));
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
+            this.props.context.docxHandlers.pop()
+        }
+        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
+            this.props.context.excelHandlers.pop()
+        }
     }
 
     onChange = (currentValue: string) => {
@@ -286,8 +364,6 @@ class DatePicker_ extends ViewContainer {
 
     render = () => {
         return (
-            //TODO перейти на antd v4?
-            //В 4й весрии можно через props выбирать тип пикера и больше возможных типов (квартал, год)
             <div style={{marginBottom: marginBottom}}>
                 <DatePicker
                     key={this.viewObject._id}

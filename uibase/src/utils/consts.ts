@@ -10,7 +10,7 @@ const rowPerPageMapper = {
 };
 
 const diagramAnchorMap: any = {
-    "TopLeft":"top-Left",
+    "TopLeft":"top-left",
     "Top": "top",
     "TopRight": "top-right",
     "Left": "left",
@@ -18,7 +18,7 @@ const diagramAnchorMap: any = {
     "Right": "right",
     "BottomLeft": "bottom-left",
     "Bottom": "bottom",
-    "BottomRight": "bottom-right"
+    "BottomRight": "bottom-right",
 };
 
 const colorScheme = [
