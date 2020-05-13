@@ -410,6 +410,10 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
         }
+        else{
+            this.setState({ notifierDuration: 3});
+            localStorage.setItem('notifierDuration', '3');
+        }
     };
 
     renderDev = (props: any) => {

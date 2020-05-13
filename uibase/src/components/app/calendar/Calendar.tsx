@@ -7,7 +7,7 @@ import {ru, enUS} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer, Icon, Input, Select, Switch} from "antd";
+import {Button, Drawer, Icon, Input, Select, Switch, version} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCalendarAlt, faLifeRing} from "@fortawesome/free-regular-svg-icons";
 import {faAlignJustify, faPlus, faPrint, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
@@ -27,6 +27,7 @@ import EditNotification from "./EditNotification";
 
 interface Props {
 }
+
 
 class Calendar extends React.Component<any, any> {
 
@@ -327,7 +328,9 @@ class Calendar extends React.Component<any, any> {
     renderCreateNotification() {
         const {i18n, t} = this.props;
         return (
+            <div id="PlusIconInFullScreen">
             <Drawer
+                getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('createNotification')}
                 width={'450px'}
@@ -345,6 +348,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 }
             </Drawer>
+            </div>
         );
     }
 
@@ -377,7 +381,10 @@ class Calendar extends React.Component<any, any> {
     renderLegend() {
         const {i18n, t} = this.props;
         return (
+            <div id="legendIconInFullScreen">
             <Drawer
+                className="legendDrawer"
+                getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('legend')}
                 width={'450px'}
@@ -394,6 +401,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 }
             </Drawer>
+            </div>
         );
     }
 
@@ -462,7 +470,7 @@ class Calendar extends React.Component<any, any> {
         const dateFormat_ = "LLLL";
         return (
 
-            <div className="header row flex-middle">
+            <div id="selectInFullScreen" className="header row flex-middle">
                 {
                     this.state.calendarVisible &&
                     <div
@@ -475,12 +483,11 @@ class Calendar extends React.Component<any, any> {
                             {t('today')}
                         </Button>
 
-                        <Select
-                            className='selectYear'
+                        <Select className='selectYear'
+                                getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             value={this.state.currentMonth.getFullYear()}
-                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
-                            onChange={(e: any) => {this.handleChange(e, 'year')}}
-                        >
+                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
+                            onChange={(e: any) => {this.handleChange(e, 'year')}}>
                             {
                                 this.state.years!.map((y: any) =>
                                     <Select.Option
@@ -495,6 +502,7 @@ class Calendar extends React.Component<any, any> {
 
                         <Select
                             className='selectMonth'
+                            getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
@@ -502,6 +510,7 @@ class Calendar extends React.Component<any, any> {
                             {
                                 this.state.months!.map((m: any) =>
                                     <Select.Option
+                                        className='selectMonth2'
                                         key={m}
                                         value={m}
                                     >
@@ -519,13 +528,15 @@ class Calendar extends React.Component<any, any> {
                                 chevron_left
                             </div>
                         </div>
-                        <div className="col col-center">
+                        <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
                         {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
                     </span>
                         </div>
-                        <div className="col col-end" onClick={this.nextMonth}>
-                            <div className="icon">chevron_right</div>
+                        <div className="col col-end" >
+                            <div className="icon" onClick={this.nextMonth}>
+                                chevron_right
+                            </div>
                         </div>
 
                         <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
@@ -540,40 +551,101 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents", marginTop: '2px'}}
                     >
-                        <div style={{flexGrow: 1, marginLeft: '21px'}}>
-                            <Input
-                                style={{width: '186px', borderRadius: '4px', fill: '#ffffff', strokeWidth: 1, height: '32px'}}
-                                placeholder="Поиск"
-                                suffix={
-                                    <img
-                                        alt="Not found"
-                                        src={searchIcon}
-                                        onClick={this.searchValue}
-                                    />
-                                }
-                                onChange={(e: any) => {this.changeSearchValue(e.target.value)}}
-                            />
-                        </div>
+                        {localStorage.getItem('fullScreenOn') === 'true' ?
+                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: '8px'}}>
+                                <Input
+                                    style={{
+                                        width: '186px',
+                                        borderRadius: '4px',
+                                        fill: '#ffffff',
+                                        strokeWidth: 1,
+                                        height: '32px'
+                                    }}
+                                    placeholder="Поиск"
+                                    suffix={
+                                        <img
+                                            alt="Not found"
+                                            src={searchIcon}
+                                            onClick={this.searchValue}
+                                        />
+                                    }
+                                    onChange={(e: any) => {
+                                        this.changeSearchValue(e.target.value)
+                                    }}
+                                />
+                            </div>
+                            :
+                            <div style={{flexGrow: 1, marginLeft: '21px'}}>
+                                <Input
+                                    style={{
+                                        width: '186px',
+                                        borderRadius: '4px',
+                                        fill: '#ffffff',
+                                        strokeWidth: 1,
+                                        height: '32px'
+                                    }}
+                                    placeholder="Поиск"
+                                    suffix={
+                                        <img
+                                            alt="Not found"
+                                            src={searchIcon}
+                                            onClick={this.searchValue}
+                                        />
+                                    }
+                                    onChange={(e: any) => {
+                                        this.changeSearchValue(e.target.value)
+                                    }}
+                                />
+                            </div>
+                        }
 
-                        <Select
-                            value={this.state.selectedValueInGrid}
-                            style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '1px'}}
-                            onChange={(e: any) => {this.handleChange(e, 'select')}}
-                        >
-                            <Select.Option
-                                key={this.props.viewObject.get('defaultStatus').get('name')}
-                                value={this.props.viewObject.get('defaultStatus').get('name')}
+                        {localStorage.getItem('fullScreenOn') === 'true' ?
+                            <Select
+                                getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
+                                value={this.state.selectedValueInGrid}
+                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '8px'}}
+                                onChange={(e: any) => {
+                                    this.handleChange(e, 'select')
+                                }}
                             >
-                                {this.props.viewObject.get('defaultStatus').get('name')}
-                            </Select.Option>
+                                <Select.Option
+                                    key={this.props.viewObject.get('defaultStatus').get('name')}
+                                    value={this.props.viewObject.get('defaultStatus').get('name')}
+                                >
+                                    {this.props.viewObject.get('defaultStatus').get('name')}
+                                </Select.Option>
 
-                            <Select.Option
-                                key={'Системные заметки'}
-                                value={'Системные заметки'}
+                                <Select.Option
+                                    key={'Системные заметки'}
+                                    value={'Системные заметки'}
+                                >
+                                    Системные заметки
+                                </Select.Option>
+                            </Select>
+                            :
+                            <Select
+                                getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
+                                value={this.state.selectedValueInGrid}
+                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '1px'}}
+                                onChange={(e: any) => {
+                                    this.handleChange(e, 'select')
+                                }}
                             >
-                                Системные заметки
-                            </Select.Option>
-                        </Select>
+                                <Select.Option
+                                    key={this.props.viewObject.get('defaultStatus').get('name')}
+                                    value={this.props.viewObject.get('defaultStatus').get('name')}
+                                >
+                                    {this.props.viewObject.get('defaultStatus').get('name')}
+                                </Select.Option>
+
+                                <Select.Option
+                                    key={'Системные заметки'}
+                                    value={'Системные заметки'}
+                                >
+                                    Системные заметки
+                                </Select.Option>
+                            </Select>
+                        }
 
                     </div>
                 }
@@ -669,6 +741,7 @@ class Calendar extends React.Component<any, any> {
 
         <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
 
+
         <Button
             className="buttonFullScreen"
             type="link"
@@ -680,11 +753,10 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            {localStorage.getItem('fullScreenOn') === 'false'  ?
-
-            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+            {localStorage.getItem('fullScreenOn') === 'true'  ?
+                <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
             :
-            <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
+            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
         </Button>
             </div>
 
@@ -916,11 +988,11 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <Fullscreen
-                enabled={this.state.fullScreenOn}
-                onChange={onFullScreen => this.setState({onFullScreen})}>
             <MainContext.Consumer>
                 { context => (
+                    <Fullscreen
+                        enabled={this.state.fullScreenOn}
+                        onChange={fullScreenOn => this.setState({ fullScreenOn })}>
                     <div className="calendar">
                         {this.renderCreateNotification()}
                         {this.renderEditNotification()}
@@ -930,9 +1002,10 @@ class Calendar extends React.Component<any, any> {
                         {this.state.calendarVisible && this.renderCells(context)}
                         {!this.state.calendarVisible && this.renderGrid()}
                     </div>
+                    </Fullscreen>
                 )}
             </MainContext.Consumer>
-            </Fullscreen>
+
         );
     }
 }
