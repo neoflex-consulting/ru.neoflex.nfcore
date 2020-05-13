@@ -16,11 +16,11 @@ public class SpringContext implements ApplicationContextAware {
      * @return
      */
     public static <T extends Object> T getBean(Class<T> beanClass) {
-        return context.getBean(beanClass);
+        return context == null ? null : context.getBean(beanClass);
     }
 
     public static <T extends Object> T getBean(String name, Class<T> beanClass) {
-        return context.getBean(name, beanClass);
+        return context == null ? null : context.getBean(name, beanClass);
     }
 
     @Override
