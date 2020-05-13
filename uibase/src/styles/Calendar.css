@@ -58,6 +58,9 @@
     color: rgba(0, 0, 0, 0.65);
     font-weight: initial;
 }
+.col-col-center{
+margin-right: 30px;
+}
 
 .row {
     margin: 0;
@@ -113,6 +116,8 @@
 .calendar .header .icon {
     cursor: pointer;
     transition: .15s ease-out;
+    margin-left: -15px;
+    margin-right: 17px;
 }
 
 .calendar .header .icon:hover {
@@ -235,6 +240,7 @@
     -webkit-text-fill-color: transparent;
 }
 
+
 .fullscreen-enabled{
     background: var(--neutral-color);
 }
@@ -244,17 +250,19 @@
 .fullscreen-enabled .header .selectYear{
     margin-top: 8px;
 }
+
 .fullscreen-enabled .header .selectMonth{
     margin-top: 8px;
 }
+
 .fullscreen-enabled .header .buttonLegend{
-    margin-top: 7px;
+    margin-top: 8px;
 }
 .fullscreen-enabled .header .verticalLine{
     margin-top: 8px;
 }
 .fullscreen-enabled .header .buttonPlus{
-    margin-top: 9px;
+    margin-top: 11px;
 }
 .fullscreen-enabled .header .alignJustify{
     margin-top: 9px;
@@ -271,6 +279,10 @@
 .fullscreen-enabled .header .icon{
     margin-top: 17px;
 }
-.fullscreen-enabled .header .col-center{
+.fullscreen-enabled .header .col-col-center{
     margin-top: 11px;
 }
+
+
+
+

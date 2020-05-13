@@ -25,6 +25,7 @@ import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from ".
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./pony.png";
+import HeaderMenu from "./components/HeaderMenu";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
@@ -423,6 +424,10 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
         }
+        else{
+            this.setState({ notifierDuration: 3});
+            localStorage.setItem('notifierDuration', '3');
+        }
     };
 
     renderDev = (props: any) => {
@@ -457,11 +462,28 @@ class EcoreApp extends React.Component<any, State> {
                         </Col>
                         <Col style={{marginLeft: "291px"}}>
                             <Row>
-                                <Col span={14}>
-                                    <BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}
-                                                   onClickBreadcrumb={this.onClickBreadcrumb}/>
+                                <Col
+                                    span={19}
+                                    style={{textAlign: 'center'}}
+                                >
+                                    <MainContext.Consumer>
+                                        {context => {
+                                            return <HeaderMenu
+                                                {...props}
+                                                applications={this.state.applications}
+                                                context={context}
+
+                                                selectedKeys={selectedKeys}
+                                                breadcrumb={this.state.breadcrumb}
+                                                onClickBreadcrumb={this.onClickBreadcrumb}
+                                            />
+                                        }}
+                                    </MainContext.Consumer>
+
+                                    {/*<BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}*/}
+                                    {/*               onClickBreadcrumb={this.onClickBreadcrumb}/>*/}
                                 </Col>
-                                <Col span={10}>
+                                <Col span={5}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
                                           mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
                                         <Menu.SubMenu
@@ -659,7 +681,7 @@ class EcoreApp extends React.Component<any, State> {
             this.setBreadcrumb()
         }
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
-            this.setState({getUserProfile: false})
+            this.setState({getUserProfile: false});
             this.getUserProfile(this.state.principal)
         }
     }
@@ -721,9 +743,7 @@ class EcoreApp extends React.Component<any, State> {
 
         this.getGlobalSettings();
         if (!this.state.languages.length) this.getLanguages();
-        if (!this.state.applicationNames.length) {
-            this.getAllApplication()
-        }
+        if (!this.state.applicationNames.length) {this.getAllApplication()}
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
 
         if (!this.state.breadcrumb.length) {this.setBreadcrumb()}

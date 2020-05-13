@@ -8,6 +8,7 @@ import {API} from "../../../modules/api";
 
 interface Props {
     closeModal?: () => void;
+    currentDatasetComponent?: any;
 }
 
 interface State {

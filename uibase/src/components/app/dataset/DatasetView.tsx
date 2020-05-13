@@ -2,7 +2,7 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Select} from 'antd';
+import {Button, Drawer, Modal, Select} from 'antd';
 import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -13,6 +13,11 @@ import Highlight from "./Highlight";
 import Calculator from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParams} from "../../../utils/namedParamsUtils";
+import DrawerDiagram from "./DrawerDiagram";
+import DatasetDiagram from "./DatasetDiagram";
+import SaveDatasetComponent from "./SaveDatasetComponent";
+import {handleExportExcel} from "../../../utils/excelExportUtils";
+import {saveAs} from "file-saver";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
 import groupIcon from "../../../icons/groupIcon.svg";
@@ -27,8 +32,8 @@ import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
 import fullScreenIcon from "../../../icons/FullScreenIcon.svg";
 import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
-import DrawerDiagram from "./DrawerDiagram";
-import DatasetDiagram from "./DatasetDiagram";
+import resetIcon from "../../../icons/resetIcon.svg";
+import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 
 const { Option, OptGroup } = Select;
 
@@ -65,38 +70,37 @@ export interface IDiagram {
 interface State {
     allDatasetComponents: any[];
     currentDatasetComponent: Ecore.Resource;
+    currentDiagram?: IDiagram;
     columnDefs: any[];
     defaultColumnDefs: any[];
     rowData: any[];
-    serverFilters: IServerQueryParam[];
     highlights: IServerQueryParam[];
+    calculations: any[];
+    diagrams: IDiagram[];
+    serverFilters: IServerQueryParam[];
     serverAggregates: IServerQueryParam[];
     serverSorts: IServerQueryParam[];
     serverGroupBy: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
-    calculations: any[];
     useServerFilter: boolean;
-    datasetComponentsData: any;
-    allOperations: Array<EObject>;
-    allAggregates: Array<EObject>;
-    allSorts: Array<EObject>;
-    updateData: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     sortsMenuVisible: boolean;
     calculationsMenuVisible: boolean;
     diagramAddMenuVisible: boolean;
     diagramEditMenuVisible: boolean;
+    saveMenuVisible: boolean;
+    allOperations: Array<EObject>;
+    allAggregates: Array<EObject>;
+    allSorts: Array<EObject>;
     allHighlightType: any[];
+    allAxisXPosition: Array<EObject>;
+    allAxisYPosition: Array<EObject>;
+    allLegendPosition: Array<EObject>;
     currentTheme: string;
     paginationPageSize: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
-    allAxisXPosition: Array<EObject>;
-    allAxisYPosition: Array<EObject>;
-    allLegendPosition: Array<EObject>;
-    currentDiagram?: IDiagram;
-    diagrams: IDiagram[],
 }
 
 const defaultComponentValues = {
@@ -115,38 +119,37 @@ class DatasetView extends React.Component<any, State> {
         this.state = {
             allDatasetComponents: [],
             currentDatasetComponent: {} as Ecore.Resource,
+            currentDiagram: undefined,
             columnDefs: [],
             defaultColumnDefs: [],
             rowData: [],
-            serverFilters: [],
             highlights: [],
+            calculations: [],
+            diagrams: [],
+            serverFilters: [],
             serverAggregates: [],
             serverSorts: [],
             serverGroupBy: [],
             serverCalculatedExpression: [],
             useServerFilter: false,
-            datasetComponentsData: undefined,
-            allOperations: [],
-            allAggregates: [],
-            allSorts: [],
-            updateData: false,
             filtersMenuVisible: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
             diagramAddMenuVisible: false,
             diagramEditMenuVisible: false,
-            allHighlightType: [],
-            calculations: [],
             calculationsMenuVisible: false,
+            saveMenuVisible: false,
+            allOperations: [],
+            allAggregates: [],
+            allSorts: [],
+            allHighlightType: [],
+            allAxisXPosition: [],
+            allAxisYPosition: [],
+            allLegendPosition: [],
             currentTheme: this.props.viewObject.get('theme') || 'material',
             paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
-            allAxisXPosition: [],
-            allAxisYPosition: [],
-            allLegendPosition: [],
-            currentDiagram: undefined,
-            diagrams: [],
         }
     }
 
@@ -695,6 +698,59 @@ class DatasetView extends React.Component<any, State> {
     getGridPanel = () => {
         const { t } = this.props;
         return <div>
+            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
+            </Button>
+            <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
+            </Button>
+            <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
+            </Button>
+            <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        (this.state.diagrams.length > 0)
+                            ? this.setState({currentDiagram: this.state.diagrams[0]})
+                            : this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}
+                    }
+            >
+                <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon" />
+            </Button>
+            <Button title={t('save')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button title={t('reset')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={resetIcon} alt="resetIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
             {this.state.allDatasetComponents.length !== 0
             && this.state.currentDatasetComponent !== undefined
             &&
@@ -751,46 +807,31 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
-                        (this.state.diagrams.length > 0)
-                            ? this.setState({currentDiagram: this.state.diagrams[0]})
-                            : this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}
-                    }
+                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                                saveAs(new Blob([blob]), 'example.xlsx');
+                                console.log("Document created successfully");
+                            }
+                        );
+                    }}
             >
-                <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
+                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+            </Button>
+            <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
+            </Button>
+            <Button title={t('about')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
+            </Button>
+            <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
             </Button>
         </div>
     };
@@ -828,7 +869,7 @@ class DatasetView extends React.Component<any, State> {
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
             <Button title={t('flag')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
+                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
             >
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
@@ -868,7 +909,13 @@ class DatasetView extends React.Component<any, State> {
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
             <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
+                    onClick={()=>{
+                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                                saveAs(new Blob([blob]), 'example.xlsx');
+                                console.log("Document created successfully");
+                            }
+                        );
+                    }}
             >
                 <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
             </Button>
@@ -889,6 +936,10 @@ class DatasetView extends React.Component<any, State> {
             </Button>
 
         </div>
+    };
+
+    handleSaveMenu = () => {
+        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
     };
 
     render() {
@@ -1109,6 +1160,20 @@ class DatasetView extends React.Component<any, State> {
                         />
                     }
                 </Drawer>
+                <Modal
+                    key="save_menu"
+                    width={'500px'}
+                    title={t('saveReport')}
+                    visible={this.state.saveMenuVisible}
+                    footer={null}
+                    onCancel={this.handleSaveMenu}
+                >
+                    <SaveDatasetComponent
+                        {...this.props}
+                        currentDatasetComponent={this.state.currentDatasetComponent}
+                        closeModal={this.handleSaveMenu}
+                    />
+                </Modal>
             </div>
         )
     }
