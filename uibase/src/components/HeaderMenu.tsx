@@ -1,7 +1,5 @@
 import * as React from "react";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisH, faHome} from "@fortawesome/free-solid-svg-icons";
 import {Breadcrumb, Button, Col, Row} from "antd";
 import './../styles/BreadcrumbApp.css';
 
