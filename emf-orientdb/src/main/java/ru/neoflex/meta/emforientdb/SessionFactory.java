@@ -40,7 +40,8 @@ public abstract class SessionFactory {
     public abstract ODatabaseDocument createDatabaseDocument();
 
     public Session createSession() {
-        return new Session(this, createDatabaseDocument());
+        ODatabaseDocumentInternal currendDB = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        return new Session(this, createDatabaseDocument(), currendDB);
     }
 
     public List<EPackage> getPackages() {
@@ -188,16 +189,8 @@ public abstract class SessionFactory {
     }
 
     public<R> R withSession(SessionFunction<R> f) throws Exception {
-        ODatabaseDocumentInternal dbOld = ODatabaseRecordThreadLocal.instance().getIfDefined();
-        try {
-            try (Session session = createSession()) {
-                return f.call(session);
-            }
-        }
-        finally {
-            if (dbOld != null) {
-                dbOld.activateOnCurrentThread();
-            }
+        try (Session session = createSession()) {
+            return f.call(session);
         }
     }
 

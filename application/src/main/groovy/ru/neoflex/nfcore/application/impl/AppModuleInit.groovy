@@ -848,8 +848,6 @@ class AppModuleInit {
             md.createAttribute(entityType, 'CHAR_TYPE', "CharType", "Характеристика счёта (А/П)")
             md.createAttribute(entityType, 'actual_date', "DATE", "Дата начала действия")
             md.createAttribute(entityType, 'actual_end_date', "DATE", "Дата окончания действия")
-            Context.current.store.createEObject(entityType)
-            entityType.activate()
         }
     }
 
@@ -882,6 +880,7 @@ class AppModuleInit {
             def view = EcoreUtil.create(ApplicationPackage.Literals.MASTERDATA_VIEW) as MasterdataView
             view.name = 'MasterdataView_1'
             view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
+            view.entityType.activate()
             appModule.view = view
         }
     }

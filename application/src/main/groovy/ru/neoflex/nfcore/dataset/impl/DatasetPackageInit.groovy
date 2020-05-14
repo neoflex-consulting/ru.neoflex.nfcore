@@ -266,8 +266,8 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
-        ApplicationInit.createApplication("Налоговая отчетность")
-        ApplicationInit.createApplication("Обязательная отчетность")
+            ApplicationInit.createApplication("Обязательная отчетность")
+            ApplicationInit.createApplication("Налоговая отчетность")
             ApplicationInit.createApplication("Администрирование")
         }
         catch (Throwable e) {

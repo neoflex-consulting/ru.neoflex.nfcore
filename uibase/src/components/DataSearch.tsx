@@ -6,7 +6,7 @@ import { FormComponentProps } from 'antd/lib/form/Form';
 import Checkbox from "antd/lib/checkbox";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
-import ponyCat from '../ponyCat.png';
+import ponyCat from '../icons/ponyCat.png';
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
