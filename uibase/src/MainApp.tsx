@@ -31,7 +31,6 @@ export class MainApp extends React.Component<any, State> {
     }
 
     loadObject = () => {
-        this.setState({hideReferences: true})
         let name: string;
         let objectPackage: string;
         let objectClass: string;
@@ -50,10 +49,22 @@ export class MainApp extends React.Component<any, State> {
                         let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
-                                this.props.context.updateContext!(
-                                    ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
-                                )
-                            });
+                                if (objectApp.get('referenceTree') === null) {
+                                    this.props.context.updateContext!(
+                                        ({viewObject: objectApp.get('view')})
+                                    );
+                                    if (this.props.pathFull.length === 1) {
+                                        this.setState({hideReferences: true})
+                                    }
+                                } else {
+                                    this.props.context.updateContext!(
+                                        ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
+                                    );
+                                    if (this.props.pathFull.length !== 1) {
+                                        this.setState({hideReferences: false})
+                                    }
+                                }
+                            })
                         }
                         else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
@@ -85,6 +96,7 @@ export class MainApp extends React.Component<any, State> {
             if (this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[0].appModule
                 && this.props.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
                 this.props.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
+                this.setState({hideReferences: true})
             }
         }
         if (prevProps.location.pathname !== this.props.location.pathname) {

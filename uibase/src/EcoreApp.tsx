@@ -357,6 +357,10 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init);
+        // if (this.props.history.location.pathname === "/") {
+        //     // this.changeURL('home')
+        //     // this.changeURL(this.state.applicationNames[0])
+        // }
     };
 
     getAllApplication() {
@@ -381,7 +385,7 @@ class EcoreApp extends React.Component<any, State> {
             application = this.state.context.userProfile.get('params').array()
                 .filter((u: any) => u.get('key') === 'startApp')
         }
-        if (application !== undefined) {
+        if (application.length !== 0 && application[0].get('value') !== undefined) {
             this.changeURL(JSON.parse(application[0].get('value')))
         }
         else if (this.props.history.location.pathname === "/") {
@@ -404,32 +408,6 @@ class EcoreApp extends React.Component<any, State> {
             }
         })
     }
-
-    setBreadcrumb(breadcrumbValue? : string) {
-        if (breadcrumbValue) {
-            if (breadcrumbValue === "home") {
-                this.changeURL("home");
-                this.setState({breadcrumb: []});
-            } else {
-                let indexBreadcrumb = this.state.breadcrumb.indexOf(breadcrumbValue);
-                let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-                this.setState({breadcrumb});
-                this.changeURL(breadcrumbValue.slice(0, -2))
-            }
-        }
-        else if (this.props.location.pathname.split('/app/')[1] !== undefined) {
-            const allAppModules = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])));
-            let breadcrumb = [];
-            for (let i = 0; i <= allAppModules.length - 1; i++) {
-                breadcrumb.push(`${allAppModules[i].appModule}_${i}`)
-            }
-            this.setState({breadcrumb})
-        }
-    }
-
-    onClickBreadcrumb = (breadcrumbValue: string): void => {
-       this.setBreadcrumb(breadcrumbValue)
-    };
 
     onClickBellIcon = () => {
         if (this.state.notifierDuration === 3){
@@ -478,22 +456,19 @@ class EcoreApp extends React.Component<any, State> {
                                     span={19}
                                     style={{textAlign: 'center'}}
                                 >
-                                    <MainContext.Consumer>
-                                        {context => {
-                                            return <HeaderMenu
-                                                {...props}
-                                                applications={this.state.applications}
-                                                context={context}
+                                    {
+                                        this.props.location.pathname.includes('/app/') &&
 
-                                                selectedKeys={selectedKeys}
-                                                breadcrumb={this.state.breadcrumb}
-                                                onClickBreadcrumb={this.onClickBreadcrumb}
-                                            />
-                                        }}
-                                    </MainContext.Consumer>
-
-                                    {/*<BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}*/}
-                                    {/*               onClickBreadcrumb={this.onClickBreadcrumb}/>*/}
+                                        <MainContext.Consumer>
+                                            {(context: any) => {
+                                                return <HeaderMenu
+                                                    {...props}
+                                                    applications={this.state.applications}
+                                                    context={context}
+                                                />
+                                            }}
+                                        </MainContext.Consumer>
+                                    }
                                 </Col>
                                 <Col span={5}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
@@ -689,9 +664,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (prevProps.location.pathname !== this.props.location.pathname) {
-            this.setBreadcrumb()
-        }
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
             this.setState({getUserProfile: false});
             this.getUserProfile(this.state.principal)
@@ -758,7 +730,6 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.applicationNames.length) {this.getAllApplication()}
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
 
-        if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;
         let errorHandler : IErrorHandler = {
             handleError(error: Error): void {
@@ -789,6 +760,11 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
+
+        /*this.updateContext({docxHandlers: []});
+        this.updateContext({excelHandlers: []});
+        this.updateContext({submitHandlers: []});
+        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {

@@ -3,12 +3,6 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import {Breadcrumb, Button, Col, Row} from "antd";
 import './../styles/BreadcrumbApp.css';
 
-interface Props {
-    selectedKeys: string[];
-    breadcrumb: string[];
-    onClickBreadcrumb: (breadcrumb: any) => void;
-}
-
 interface State {
 }
 
@@ -25,7 +19,7 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     render() {
-        const { t } = this.props as Props & WithTranslation;
+        const { t } = this.props as any & WithTranslation;
         const span = 24 / this.props.applications.length;
 
         let selectedApp: any = undefined;
@@ -33,11 +27,14 @@ class HeaderMenu extends React.Component<any, any> {
             if (this.props.context.userProfile !== undefined) {
                 const application = this.props.context.userProfile.get('params').array()
                     .filter((u: any) => u.get('key') === 'startApp');
-                if (application !== undefined) {
+                if (application.length !== 0 && application[0].get('value') !== undefined) {
                     selectedApp = JSON.parse(application[0].get('value'))
                 }
+                else {
+                    selectedApp = this.props.applications[0].eContents()[0].get('name')
+                }
             } else {
-                selectedApp = this.props.applications[0].get('name')
+                selectedApp = this.props.applications[0].eContents()[0].get('name')
             }
         }
 
