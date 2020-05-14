@@ -21,16 +21,25 @@ class HeaderMenu extends React.Component<any, any> {
 
     selectApplication(applicationName: string): void  {
         this.props.context.changeURL!(applicationName)
+        this.props.context.changeUserProfile('startApp', applicationName)
     }
 
     render() {
         const { t } = this.props as Props & WithTranslation;
         const span = 24 / this.props.applications.length;
 
-        // if (this.props.applications.length !== 0) {
-        //     this.props.applications.map((a: any) =>
-        //         selectedKeys.push(`app.${a}`));
-        // }
+        let selectedApp: any = undefined;
+        if (this.props.applications.length !== 0 && this.props.context !== undefined) {
+            if (this.props.context.userProfile !== undefined) {
+                const application = this.props.context.userProfile.get('params').array()
+                    .filter((u: any) => u.get('key') === 'startApp');
+                if (application !== undefined) {
+                    selectedApp = JSON.parse(application[0].get('value'))
+                }
+            } else {
+                selectedApp = this.props.applications[0].get('name')
+            }
+        }
 
         return (
             <Row style={{marginTop: '-5px'}}>
@@ -48,8 +57,8 @@ class HeaderMenu extends React.Component<any, any> {
                                         style={{
                                             fontWeight: 500,
                                             background: "rgb(255,255,255)",
-                                            fontSize: "medium",
-                                            color: "rgb(18, 18, 18)",
+                                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
+                                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(18, 18, 18)" : "rgb(18, 18, 18, 0.35)",
                                             cursor: "pointer"
                                         }}
                                         onClick={ ()=> this.selectApplication(app.eContents()[0].get('name'))}

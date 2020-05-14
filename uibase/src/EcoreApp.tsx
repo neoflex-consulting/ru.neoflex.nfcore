@@ -13,10 +13,10 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import _map from "lodash/map"
+import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import BreadcrumbApp from "./components/BreadcrumbApp";
@@ -24,7 +24,7 @@ import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
-import pony from "./pony.png";
+import pony from "./icons/pony.png";
 import HeaderMenu from "./components/HeaderMenu";
 const backgroundColor = "#fdfdfd";
 
@@ -357,9 +357,6 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init);
-        if (this.props.history.location.pathname === "/") {
-            this.changeURL('home')
-        }
     };
 
     getAllApplication() {
@@ -371,11 +368,26 @@ class EcoreApp extends React.Component<any, State> {
                         let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
-                        this.setState({applicationNames, applications})
+                        this.setState({applicationNames, applications});
+                        this.startPageSelection(this.state.applicationNames[0])
                     })
             }
         })
     };
+
+    startPageSelection(applicationName: string) {
+        let application: any = undefined;
+        if (this.state.context.userProfile !== undefined) {
+            application = this.state.context.userProfile.get('params').array()
+                .filter((u: any) => u.get('key') === 'startApp')
+        }
+        if (application !== undefined) {
+            this.changeURL(JSON.parse(application[0].get('value')))
+        }
+        else if (this.props.history.location.pathname === "/") {
+            this.changeURL(applicationName)
+        }
+    }
 
     getLanguages() {
         const prepared: Array<string> = [];
@@ -777,11 +789,6 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
-
-        /*this.updateContext({docxHandlers: []});
-        this.updateContext({excelHandlers: []});
-        this.updateContext({submitHandlers: []});
-        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {

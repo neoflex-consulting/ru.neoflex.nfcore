@@ -1,10 +1,10 @@
 import * as React from "react";
 import {Dropdown, Menu} from 'antd'
 import { API } from "../modules/api";
-import logo from '../logo.png';
+import logo from '../icons/logo.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
-import pony from '../pony.png';
+import pony from '../icons/pony.png';
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
