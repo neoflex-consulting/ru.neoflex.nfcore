@@ -894,8 +894,8 @@ class AppModuleInit {
         def appModule3 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section3") as AppModule
         def appModule4 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Section4") as AppModule
         def appModule5 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_Detail") as AppModule
-        def appModule6 = Utils.findEObjectWithConsumer(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", initBalAccountClassifierAppModule) as AppModule
-        fillBalAccountClassifier()
+        //def appModule6 = Utils.findEObjectWithConsumer(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", initBalAccountClassifierAppModule) as AppModule
+        //fillBalAccountClassifier()
         def appModule8 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart") as AppModule
         def appModule14 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO") as AppModule
 
@@ -925,7 +925,7 @@ class AppModuleInit {
 
         def appModuleNode6 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode6.name = "Классификатор балансовых счетов"
-        appModuleNode6.appModule = appModule6
+        //appModuleNode6.appModule = appModule6
         def appModuleNode7 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode7.name = "Счета для включения или исключения"
         //appModuleNode7.appModule = appModule7
