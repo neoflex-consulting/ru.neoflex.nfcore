@@ -195,9 +195,7 @@ public abstract class SessionFactory {
             }
         }
         finally {
-            if (dbOld != null) {
-                dbOld.activateOnCurrentThread();
-            }
+            ODatabaseRecordThreadLocal.instance().set(dbOld);
         }
     }
 

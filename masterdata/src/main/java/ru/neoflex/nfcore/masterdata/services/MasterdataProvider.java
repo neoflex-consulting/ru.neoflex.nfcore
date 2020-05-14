@@ -316,9 +316,7 @@ public class MasterdataProvider {
             }
         }
         finally {
-            if (dbOld != null) {
-                dbOld.activateOnCurrentThread();
-            }
+            ODatabaseRecordThreadLocal.instance().set(dbOld);
         }
     }
 
