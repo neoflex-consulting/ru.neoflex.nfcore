@@ -2,6 +2,7 @@ package ru.neoflex.meta.emforientdb;
 
 import com.orientechnologies.lucene.OLuceneIndexFactory;
 import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
@@ -41,15 +42,20 @@ public class Session implements Closeable {
     final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
+    private final ODatabaseDocumentInternal currentDB;
 
-    Session(SessionFactory factory, ODatabaseDocument db) {
+    Session(SessionFactory factory, ODatabaseDocument db, ODatabaseDocumentInternal currentDB) {
         this.factory = factory;
         this.db = db;
+        this.currentDB = currentDB;
     }
 
     @Override
     public void close() {
         db.close();
+        if (currentDB != null) {
+            ODatabaseRecordThreadLocal.instance().set(currentDB);
+        }
     }
 
     public ODatabaseDocument getDatabaseDocument() {
