@@ -187,7 +187,7 @@ class MasterdataEditor extends React.Component<any, any> {
                             field={'@rid'}
                             cellRendererFramework={this.actionMenu}
                             width={120}
-                            suppressMenu={true}
+                            //suppressMenu={true}
                         />
                         {this.getAllAttributes(viewObject.get('entityType')).map(att =>
                             <AgGridColumn
