@@ -376,6 +376,7 @@ public class MasterdataProvider {
 
     private void initTypes() throws IOException {
         ensurePlainType("STRING", java.lang.String.class.getName());
+        ensurePlainType("TEXT", java.lang.String.class.getName());
         ensurePlainType("INTEGER", java.lang.Integer.class.getName());
         ensurePlainType("LONG", java.lang.Long.class.getName());
         ensurePlainType("FLOAT", java.lang.Float.class.getName());
