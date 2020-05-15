@@ -135,13 +135,14 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def createAppModuleNRDemoMain(String name, String header, String jdbcDatasetName, String datasetComponentName) {
+    static def createAppModuleNRDemoMain(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = useParentReferenceTree
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "SectionForm"

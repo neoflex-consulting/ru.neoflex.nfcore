@@ -37,7 +37,7 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableItem">
+    return <div id="selectsSortableItem" className="SortableItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 {value.index}
@@ -84,6 +84,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                             placeholder={value.t('columnname')}
                             style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
                             showSearch={true}
@@ -119,6 +120,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                             placeholder={value.t('operation')}
                             style={{ width: '219px', marginRight: '10px' }}
                             allowClear={true}

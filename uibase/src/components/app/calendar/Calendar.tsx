@@ -861,34 +861,19 @@ class Calendar extends React.Component<any, any> {
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
 
-                {localStorage.getItem('fullScreenOn') === 'true' ?
                     <Button
                         className="buttonPlus"
                         type="primary"
                         style={{
                             width: '20px',
                             height: '30px',
-                            marginTop: '11px',
+                            marginTop: this.state.fullScreenOn ? '11px' : '2px',
                             backgroundColor: '#293468'
                         }}
                         onClick={this.handleCreateMenu}>
                         <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
                     </Button>
 
-                :
-                    <Button
-                        className="buttonPlus"
-                        type="primary"
-                        style={{
-                            width: '20px',
-                            height: '30px',
-                            marginTop: '2px',
-                            backgroundColor: '#293468'
-                        }}
-                        onClick={this.handleCreateMenu}>
-                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-                    </Button>
-                }
 
 
 
@@ -965,7 +950,7 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            {localStorage.getItem('fullScreenOn') === 'true'  ?
+            {this.state.fullScreenOn  ?
                 <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
             :
             <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
