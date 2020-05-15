@@ -42,7 +42,7 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableItemHighlight">
+    return <div id="selectsSortableItem"  className="SortableItemHighlight">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 <span>{value.index}</span>
@@ -60,6 +60,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                             placeholder={value.t('columnname')}
                             style={{
                                 width: '179px',
@@ -112,6 +113,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                             disabled={value.highlightType === 'Column'}
                             placeholder={value.t('operation')}
                             style={{width: '179px', marginLeft: '5px'}}
@@ -208,6 +210,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         initialValue: value.t(value.highlightType)
                     })(
                     <Select
+                        getPopupContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                         allowClear={true}
                         style={{width: '100px', marginLeft: '21px'}}
                         onChange={(e: any) => {
@@ -249,6 +252,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     icon={faPalette}
                 />
                 <Modal
+                    getContainer={() => document.getElementById ('selectsSortableItem') as HTMLElement}
                     width={'500px'}
                     title={'Выбор цвета фона'}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
