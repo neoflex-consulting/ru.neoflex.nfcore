@@ -20,6 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
+import Fullscreen from "react-full-screen";
 import groupIcon from "../../../icons/groupIcon.svg";
 import orderIcon from "../../../icons/orderIcon.svg";
 import calculatorIcon from "../../../icons/calculatorIcon.svg";
@@ -73,6 +74,7 @@ interface State {
     currentDiagram?: IDiagram;
     columnDefs: any[];
     defaultColumnDefs: any[];
+    fullScreenOn: boolean;
     rowData: any[];
     highlights: IServerQueryParam[];
     calculations: any[];
@@ -133,6 +135,7 @@ class DatasetView extends React.Component<any, State> {
             serverCalculatedExpression: [],
             useServerFilter: false,
             filtersMenuVisible: false,
+            fullScreenOn: false,
             aggregatesMenuVisible: false,
             sortsMenuVisible: false,
             diagramAddMenuVisible: false,
@@ -754,8 +757,9 @@ class DatasetView extends React.Component<any, State> {
             {this.state.allDatasetComponents.length !== 0
             && this.state.currentDatasetComponent !== undefined
             &&
-            <div style={{display: 'inline-block'}}>
+            <div id="selectsInFullScreen" style={{display: 'inline-block'}}>
                 <Select
+                    getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                     style={{ width: '250px'}}
                     showSearch={true}
                     allowClear={true}
@@ -829,7 +833,7 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
             </Button>
             <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
+                    onClick={this.onFullScreen}
             >
                 <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
             </Button>
@@ -942,9 +946,23 @@ class DatasetView extends React.Component<any, State> {
         this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
     };
 
+    onFullScreen = () => {
+        if (this.state.fullScreenOn){
+            this.setState({ fullScreenOn: false});
+            localStorage.setItem('fullScreenOn', 'false');
+        }
+        else{
+            this.setState({ fullScreenOn: true});
+            localStorage.setItem('fullScreenOn', 'true');
+        }
+    };
+
     render() {
         const { t } = this.props;
         return (
+            <Fullscreen
+        enabled={this.state.fullScreenOn}
+        onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
                 {(this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
                 {(this.state.currentDiagram)
@@ -969,8 +987,9 @@ class DatasetView extends React.Component<any, State> {
                         saveChanges = {this.changeDatasetViewState}
                     />
                 }
-
+                <div id="filterButton">
                 <Drawer
+                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
                     width={'720px'}
@@ -1013,7 +1032,10 @@ class DatasetView extends React.Component<any, State> {
                             <Highlight/>
                     }
                 </Drawer>
+                </div>
+                <div id="aggregationButton">
                 <Drawer
+                    getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     placement='right'
                     title={t('aggregations')}
                     width={'700px'}
@@ -1055,7 +1077,10 @@ class DatasetView extends React.Component<any, State> {
                             <ServerGroupBy/>
                     }
                 </Drawer>
+                    </div>
+                <div id="sortButton">
                 <Drawer
+                    getContainer={() => document.getElementById ('sortButton') as HTMLElement}
                     placement='right'
                     title={t('sorts')}
                     width={'700px'}
@@ -1081,7 +1106,10 @@ class DatasetView extends React.Component<any, State> {
                             <ServerSort/>
                     }
                 </Drawer>
+                </div>
+                <div id="calculatableexpressionsButton">
                 <Drawer
+                    getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
                     title={t('calculatable expressions')}
                     width={'700px'}
@@ -1108,8 +1136,10 @@ class DatasetView extends React.Component<any, State> {
                             <Calculator/>
                     }
                 </Drawer>
-
+                </div>
+                <div id="diagramButton">
                 <Drawer
+                    getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
                     width={'700px'}
@@ -1134,11 +1164,11 @@ class DatasetView extends React.Component<any, State> {
                         />
                     }
                 </Drawer>
-
+                </div>
                 <Drawer
                     placement='right'
                     title={t('diagram')}
-                    width={'700px'}
+                    width={'70px'}
                     visible={this.state.diagramEditMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
                     mask={false}
@@ -1160,7 +1190,9 @@ class DatasetView extends React.Component<any, State> {
                         />
                     }
                 </Drawer>
+                <div id="save_menuButton">
                 <Modal
+                    getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
                     key="save_menu"
                     width={'500px'}
                     title={t('saveReport')}
@@ -1174,7 +1206,9 @@ class DatasetView extends React.Component<any, State> {
                         closeModal={this.handleSaveMenu}
                     />
                 </Modal>
+                </div>
             </div>
+            </Fullscreen>
         )
     }
 }
