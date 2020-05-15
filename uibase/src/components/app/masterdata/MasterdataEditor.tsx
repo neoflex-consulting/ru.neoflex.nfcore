@@ -10,12 +10,14 @@ import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
+import _ from 'lodash';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faBackward, faSave, faTrash} from "@fortawesome/free-solid-svg-icons";
 
 import './masterdata.css'
 import {Button} from "antd";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
-import settingsIcon from "../../../icons/settingsIcon.svg";
 
 const backgroundColor = "#fdfdfd";
 
@@ -30,6 +32,7 @@ class MasterdataEditor extends React.Component<any, any> {
             }
         },
         rowData: [],
+        currentRow: null,
         paginationPageSize: 20,
         currentTheme: 'material',
         themes: [],
@@ -44,7 +47,7 @@ class MasterdataEditor extends React.Component<any, any> {
 
     }
 
-    loadData() {
+    loadData = () => {
         const viewObject = this.props.viewObject as EObject
         const sql = "select * from " + viewObject.get('entityType').get('name')
         API.instance().fetchJson("/masterdata/select?sql=" + sql).then(json => {
@@ -54,26 +57,30 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     refresh = () => {
-        this.setState({rowData: []}, ()=>this.loadData())
+        this.setState({rowData: []}, () => this.loadData())
     }
 
-    actionMenu = (params: any) => (<div style={{marginLeft: '-32px'}}>
-        <Button
-            type="link"
-            style={{width: '35px'}}
-            onClick={() => {}}
-        >
-            <img
-                alt="Not found"
-                src={settingsIcon}
-                style={{
-                    color: '#515151'
-                }}
-            />
-        </Button>
-    </div>)
+    edit = (rid: string) => {
+        const currentRow = this.state.rowData.find(value => value['@rid'] === rid)
+        if (currentRow) {
+            this.setState({currentRow: _.cloneDeep(currentRow)})
+        }
+    }
 
-    getAllThemes() {
+    create = () => {
+        const viewObject = this.props.viewObject as EObject
+        this.setState({currentRow: {'@class': viewObject.get('entityType').get('name')}})
+    }
+
+    cancel = () => {
+        this.setState({currentRow: null})
+    }
+
+    actionMenu = (params: any) => (
+        <a onClick={event => this.edit(params.value)}>{params.value}</a>
+    )
+
+    getAllThemes = () => {
         API.instance().findEnum('application', 'Theme')
             .then((result: Ecore.EObject[]) => {
                 let themes = result.map((t: any) => {
@@ -90,18 +97,48 @@ class MasterdataEditor extends React.Component<any, any> {
         }
     }
 
-    getAllAttributes(entityType: EObject): EObject[] {
+    getAllAttributes = (entityType: EObject): EObject[] => {
         return [
             ...(entityType.get('superTypes') as EObject[]).map(t => this.getAllAttributes(t)).flat(),
             ...entityType.get('attributes').array()
         ]
     }
 
-    getAttributeFilter(attribute: EObject): string {
+    getAttributeFilter = (attribute: EObject): string => {
         return 'agTextColumnFilter'
     }
 
-    render() {
+    renderForm() {
+        const {t} = this.props
+        const {currentRow} = this.state || {}
+        return (
+            <React.Fragment>
+                <div>
+                    <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                        <FontAwesomeIcon icon={faBackward} size='lg' color="#7b7979"/>
+                    </Button>
+                    <div style={{
+                        display: 'inline-block',
+                        height: '30px',
+                        borderLeft: '1px solid rgb(217, 217, 217)',
+                        marginLeft: '10px',
+                        marginRight: '10px',
+                        marginBottom: '-10px',
+                        borderRight: '1px solid rgb(217, 217, 217)',
+                        width: '6px'
+                    }}/>
+                    <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                        <FontAwesomeIcon icon={faSave} size='lg' color="#7b7979"/>
+                    </Button>
+                    {currentRow!['@rid'] && <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                        <FontAwesomeIcon icon={faTrash} size='lg' color="red"/>
+                    </Button>}
+                </div>
+            </React.Fragment>
+        )
+    }
+
+    renderGrid() {
         const {t} = this.props
         const {gridOptions} = this.state;
         const viewObject = this.props.viewObject as EObject
@@ -109,15 +146,21 @@ class MasterdataEditor extends React.Component<any, any> {
             <React.Fragment>
                 <div>
                     <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.refresh}>
-                        <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon" />
+                        <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon"/>
                     </Button>
-                    <div style={{display: 'inline-block', height: '30px',
-                        borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                        borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-                    <Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={()=>{}}>
-                        <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon" />
+                    <div style={{
+                        display: 'inline-block',
+                        height: '30px',
+                        borderLeft: '1px solid rgb(217, 217, 217)',
+                        marginLeft: '10px',
+                        marginRight: '10px',
+                        marginBottom: '-10px',
+                        borderRight: '1px solid rgb(217, 217, 217)',
+                        width: '6px'
+                    }}/>
+                    <Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.create}>
+                        <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon"/>
                     </Button>
-
                 </div>
                 <div style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                      className={'ag-theme-' + this.state.currentTheme}>
@@ -141,9 +184,9 @@ class MasterdataEditor extends React.Component<any, any> {
                         {...gridOptions}
                     >
                         <AgGridColumn
-                            key={'settings'}
+                            field={'@rid'}
                             cellRendererFramework={this.actionMenu}
-                            width={85}
+                            width={120}
                             suppressMenu={true}
                         />
                         {this.getAllAttributes(viewObject.get('entityType')).map(att =>
@@ -171,6 +214,10 @@ class MasterdataEditor extends React.Component<any, any> {
                 </div>
             </React.Fragment>
         )
+    }
+
+    render() {
+        return this.state.currentRow ? this.renderForm() : this.renderGrid()
     }
 }
 
