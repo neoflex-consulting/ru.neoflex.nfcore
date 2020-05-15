@@ -11,6 +11,12 @@ import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
 
+import './masterdata.css'
+import {Button} from "antd";
+import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
+import plusIcon from "../../../icons/plusIcon.svg";
+import settingsIcon from "../../../icons/settingsIcon.svg";
+
 const backgroundColor = "#fdfdfd";
 
 class MasterdataEditor extends React.Component<any, any> {
@@ -47,6 +53,26 @@ class MasterdataEditor extends React.Component<any, any> {
         })
     }
 
+    refresh = () => {
+        this.setState({rowData: []}, ()=>this.loadData())
+    }
+
+    actionMenu = (params: any) => (<div style={{marginLeft: '-32px'}}>
+        <Button
+            type="link"
+            style={{width: '35px'}}
+            onClick={() => {}}
+        >
+            <img
+                alt="Not found"
+                src={settingsIcon}
+                style={{
+                    color: '#515151'
+                }}
+            />
+        </Button>
+    </div>)
+
     getAllThemes() {
         API.instance().findEnum('application', 'Theme')
             .then((result: Ecore.EObject[]) => {
@@ -76,49 +102,74 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     render() {
+        const {t} = this.props
         const {gridOptions} = this.state;
         const viewObject = this.props.viewObject as EObject
         return (
-            <div style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
-                 className={'ag-theme-' + this.state.currentTheme}>
-                <AgGridReact
-                    ref={this.grid}
-                    rowData={this.state.rowData}
-                    modules={AllCommunityModules}
-                    rowSelection='multiple' //выделение строки
-                    onGridReady={this.onGridReady} //инициализация грида
-                    //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
-                    //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
-                    suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
-                    suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
-                    allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
-                    headerHeight={40} //высота header в px (25 по умолчанию)
-                    suppressRowClickSelection //строки не выделяются при нажатии на них
-                    pagination={true}
-                    domLayout='autoHeight'
-                    paginationPageSize={this.state.paginationPageSize}
-                    {...gridOptions}
-                >
-                    {this.getAllAttributes(viewObject.get('entityType')).map(att => <AgGridColumn
-                        key={att.get('name')}
-                        field={att.get('name')}
-                        headerName={att.get('caption')}
-                        headerTooltip={att.get('caption')}
-                        hide={att.get('hide') || false}
-                        editable={false}
-                        pinned={false}
-                        filter={this.getAttributeFilter(att)}
-                        checkboxSelection={false}
-                        resizable={true}
-                        sortable={true}
-                        suppressMenu={false}
-                        cellStyle={this.state.cellStyle}
-                        cellRenderer={function (params: any) {
-                            return params.value;
-                        }}
-                    />)}
-                </AgGridReact>
-            </div>
+            <React.Fragment>
+                <div>
+                    <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.refresh}>
+                        <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon" />
+                    </Button>
+                    <div style={{display: 'inline-block', height: '30px',
+                        borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                        borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                    <Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={()=>{}}>
+                        <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon" />
+                    </Button>
+
+                </div>
+                <div style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
+                     className={'ag-theme-' + this.state.currentTheme}>
+                    <AgGridReact
+                        ref={this.grid}
+                        rowData={this.state.rowData}
+                        modules={AllCommunityModules}
+                        rowSelection='multiple' //выделение строки
+                        onGridReady={this.onGridReady} //инициализация грида
+                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
+                        //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
+                        suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
+                        suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
+                        allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
+                        headerHeight={75} //высота header в px (25 по умолчанию)
+                        suppressRowClickSelection //строки не выделяются при нажатии на них
+                        pagination={true}
+                        domLayout='autoHeight'
+                        paginationPageSize={this.state.paginationPageSize}
+                        gridAutoHeight={true}
+                        {...gridOptions}
+                    >
+                        <AgGridColumn
+                            key={'settings'}
+                            cellRendererFramework={this.actionMenu}
+                            width={85}
+                            suppressMenu={true}
+                        />
+                        {this.getAllAttributes(viewObject.get('entityType')).map(att =>
+                            <AgGridColumn
+                                key={att.get('name')}
+                                field={att.get('name')}
+                                headerName={att.get('caption')}
+                                headerTooltip={att.get('caption')}
+                                hide={att.get('hide') || false}
+                                editable={false}
+                                pinned={false}
+                                filter={this.getAttributeFilter(att)}
+                                checkboxSelection={false}
+                                resizable={true}
+                                sortable={true}
+                                suppressMenu={false}
+                                cellStyle={this.state.cellStyle}
+                                cellRenderer={function (params: any) {
+                                    return params.value;
+                                }}
+                                autoHeight={true}
+                            />
+                        )}
+                    </AgGridReact>
+                </div>
+            </React.Fragment>
         )
     }
 }

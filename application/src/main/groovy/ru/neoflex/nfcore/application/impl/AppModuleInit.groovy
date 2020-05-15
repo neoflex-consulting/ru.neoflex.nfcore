@@ -856,10 +856,9 @@ class AppModuleInit {
         if (md == null) return
         def entityTypeName = 'F110_BalAccountClassifier'
         def nodes = [
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())]
+                ['@class': entityTypeName, section_number: 1, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],
+                ['@class': entityTypeName, section_number: 1, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())]
         ]
-
         md.inTransaction(new Function<ODatabaseDocument, Void>() {
             @Override
             Void apply(ODatabaseDocument db) {
