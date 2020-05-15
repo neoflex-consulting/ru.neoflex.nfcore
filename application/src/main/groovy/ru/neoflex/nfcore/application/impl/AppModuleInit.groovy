@@ -349,6 +349,7 @@ class AppModuleInit {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = true
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "CalcMartForm"
@@ -565,6 +566,7 @@ class AppModuleInit {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = true
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "KlikoForm"
@@ -883,6 +885,7 @@ class AppModuleInit {
             view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
             view.entityType.activate()
             appModule.view = view
+            appModule.useParentReferenceTree = true
         }
     }
 

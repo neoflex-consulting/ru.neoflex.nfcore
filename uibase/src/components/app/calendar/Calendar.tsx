@@ -401,6 +401,7 @@ class Calendar extends React.Component<any, any> {
         if (notification.contents[0]['AppModuleName'] !== null) {
             context.changeURL(
                 notification.contents[0]['AppModuleName'],
+                false,
                 undefined,
                 params
             )
