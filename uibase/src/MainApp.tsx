@@ -35,6 +35,7 @@ export class MainApp extends React.Component<any, State> {
         API.instance().fetchAllClasses(false).then(classes => {
             const eClass = classes.find((c: Ecore.EObject) => c._id === "//AppModule") as Ecore.EClass;
             this.setState({eClassAppModule: eClass})
+            this.loadObject()
         })
     }
 
@@ -136,7 +137,6 @@ export class MainApp extends React.Component<any, State> {
 
     componentDidMount(): void {
         this.getEClassAppModule()
-        this.loadObject()
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
