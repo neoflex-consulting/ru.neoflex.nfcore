@@ -261,12 +261,13 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
     };
 
-    changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
         let path: any[] = [];
         let urlElement: ConfigUrlElement = {
             appModule: appModuleName,
             tree: treeValue !== undefined ? treeValue.split('/') : [],
-            params: params
+            params: params,
+            useParentReferenceTree: useParentReferenceTree || false
         };
         let appModuleNameThis = appModuleName || this.state.appModuleName;
         if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
@@ -377,10 +378,10 @@ class EcoreApp extends React.Component<any, State> {
         }
         if (this.props.history.location.pathname === "/") {
             if (application.length !== 0 && application[0].get('value') !== undefined) {
-                this.changeURL(JSON.parse(application[0].get('value')))
+                this.changeURL(JSON.parse(application[0].get('value')), false)
             }
             else {
-                this.changeURL(applicationName)
+                this.changeURL(applicationName, false)
             }
         }
     }

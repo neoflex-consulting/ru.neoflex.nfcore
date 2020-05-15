@@ -147,7 +147,7 @@ class Button_ extends ViewContainer {
     backStartPage = () => {
         const appModule = this.props.pathFull[this.props.pathFull.length - 1];
         let params: Object[] = appModule.params;
-        this.props.context.changeURL!(appModule.appModule, undefined, params);
+        this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
     submitItems = () => {
         if (this.props.viewObject.get('submitItems')) {
