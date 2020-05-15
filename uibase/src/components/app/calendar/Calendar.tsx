@@ -970,7 +970,7 @@ class Calendar extends React.Component<any, any> {
         for (let i = 0; i < 7; i++) {
             days.push(
                 <div key={i}
-                     className="col col-center col-text" style={{fontSize: "110%"}}
+                     className="col col-center col-text border-line" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
                 </div>
@@ -1012,24 +1012,30 @@ class Calendar extends React.Component<any, any> {
                             this.onDateClick(cloneDay)
                         }
                     >
+                        <div className="days-header">
                         <span className="number">{formattedDate}</span>
                         <span className="title">{title}</span>
+                        </div>
                         <span className="bg">{formattedDate}</span>
                         <div>
                             {content.length !== 0
                                 ?
                                 content.map( (r: any) =>
+                                    <div className="notification-btn"
+                                    style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                    >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                        style={{marginLeft: '15px', opacity:'0.6', width: "150px", display: "flex", color: "black", backgroundColor: "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}
                                     >
-                                        {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
+                                            {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
                                     </Button>
+                                    </div>
                                 )
                                 : ""}
                         </div>
