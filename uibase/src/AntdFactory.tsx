@@ -677,7 +677,7 @@ class Calendar_ extends ViewContainer {
 
 class MasterdataView_ extends ViewContainer {
     render = () => {
-        return <MasterdataEditor {...this.props} key={this.viewObject._id}/>
+        return <MasterdataEditor {...this.props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
     }
 }
 

@@ -48,11 +48,11 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     loadData = () => {
-        const viewObject = this.props.viewObject as EObject
-        const sql = "select * from " + viewObject.get('entityType').get('name')
+        const entityType = this.props.entityType as EObject
+        const sql = "select * from " + entityType.get('name')
         API.instance().fetchJson("/masterdata/select?sql=" + sql).then(json => {
             this.setState({rowData: json})
-            console.log(json)
+            //console.log(json)
         })
     }
 
@@ -61,15 +61,16 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     edit = (rid: string) => {
-        const currentRow = this.state.rowData.find(value => value['@rid'] === rid)
-        if (currentRow) {
-            this.setState({currentRow: _.cloneDeep(currentRow)})
+        const currentIndex = this.state.rowData.findIndex(value => value['@rid'] === rid)
+        if (currentIndex >= 0) {
+            this.setState({currentRow: _.cloneDeep(this.state.rowData[currentIndex]), currentIndex})
         }
     }
 
     create = () => {
-        const viewObject = this.props.viewObject as EObject
-        this.setState({currentRow: {'@class': viewObject.get('entityType').get('name')}})
+        const entityType = this.props.entityType as EObject
+        const currentRow = {'@class': entityType.get('name')}
+        this.setState({currentRow, currentIndex: undefined})
     }
 
     cancel = () => {
