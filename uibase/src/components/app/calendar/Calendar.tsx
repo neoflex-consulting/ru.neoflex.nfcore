@@ -358,11 +358,9 @@ class Calendar extends React.Component<any, any> {
     onFullScreen = () => {
         if (this.state.fullScreenOn){
             this.setState({ fullScreenOn: false});
-            localStorage.setItem('fullScreenOn', 'false');
         }
         else{
             this.setState({ fullScreenOn: true});
-            localStorage.setItem('fullScreenOn', 'true');
         }
     };
 
@@ -442,22 +440,16 @@ class Calendar extends React.Component<any, any> {
         return result;
     }
 
-    onDateClick = (day: any) => {
-        this.setState({
-            selectedDate: day
-        })
-    };
-
     nextMonth = () => {
-        this.setState({
-            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.addMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth});
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     prevMonth = () => {
-        this.setState({
-            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.subMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth})
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     componentDidMount(): void {
@@ -685,6 +677,9 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents"}}
                     >
+                        <div
+                            className="date">
+
                         <Button style={{marginLeft: '10px'}}
                                 className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
@@ -731,6 +726,7 @@ class Calendar extends React.Component<any, any> {
                                 )
                             }
                         </Select>
+                        </div>
 
                         <div className="col col-start">
                             <div className="icon" onClick={this.prevMonth}>
@@ -760,8 +756,7 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents", marginTop: '2px'}}
                     >
-                        {localStorage.getItem('fullScreenOn') === 'true' ?
-                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: '8px'}}>
+                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
                                 <Input
                                     style={{
                                         width: '186px',
@@ -783,36 +778,12 @@ class Calendar extends React.Component<any, any> {
                                     }}
                                 />
                             </div>
-                            :
-                            <div style={{flexGrow: 1, marginLeft: '21px'}}>
-                                <Input
-                                    style={{
-                                        width: '186px',
-                                        borderRadius: '4px',
-                                        fill: '#ffffff',
-                                        strokeWidth: 1,
-                                        height: '32px'
-                                    }}
-                                    placeholder="Поиск"
-                                    suffix={
-                                        <img
-                                            alt="Not found"
-                                            src={searchIcon}
-                                            onClick={this.searchValue}
-                                        />
-                                    }
-                                    onChange={(e: any) => {
-                                        this.changeSearchValue(e.target.value)
-                                    }}
-                                />
-                            </div>
-                        }
 
-                        {localStorage.getItem('fullScreenOn') === 'true' ?
+
                             <Select
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
-                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '8px'}}
+                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px'}}
                                 onChange={(e: any) => {
                                     this.handleChange(e, 'select')
                                 }}
@@ -831,30 +802,7 @@ class Calendar extends React.Component<any, any> {
                                     Системные заметки
                                 </Select.Option>
                             </Select>
-                            :
-                            <Select
-                                getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
-                                value={this.state.selectedValueInGrid}
-                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '1px'}}
-                                onChange={(e: any) => {
-                                    this.handleChange(e, 'select')
-                                }}
-                            >
-                                <Select.Option
-                                    key={this.props.viewObject.get('defaultStatus').get('name')}
-                                    value={this.props.viewObject.get('defaultStatus').get('name')}
-                                >
-                                    {this.props.viewObject.get('defaultStatus').get('name')}
-                                </Select.Option>
 
-                                <Select.Option
-                                    key={'Системные заметки'}
-                                    value={'Системные заметки'}
-                                >
-                                    Системные заметки
-                                </Select.Option>
-                            </Select>
-                        }
 
                     </div>
                 }
@@ -1009,27 +957,22 @@ class Calendar extends React.Component<any, any> {
                                 : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
                             }`}
                         key = {day.toString()}
-                        onClick={() =>
-                            this.onDateClick(cloneDay)
-                        }
                     >
                         <div className="days-header">
                         <span className="number">{formattedDate}</span>
                         <span className="title">{title}</span>
                         </div>
-                        <span className="bg">{formattedDate}</span>
-                        <div>
+                        <div className="notification-block">
                             {content.length !== 0
                                 ?
                                 content.map( (r: any) =>
                                     <div className="notification-btn"
-                                    style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                    style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        style={{marginLeft: '15px', opacity:'0.6', width: "150px", display: "flex", color: "black", backgroundColor: "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}

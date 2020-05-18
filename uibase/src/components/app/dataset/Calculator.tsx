@@ -236,7 +236,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
 
     render() {
     return (
-        <div id="selectscalculator">
+        <div>
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item>
                     <Col span={12}>
@@ -247,7 +247,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
-                                <Select getPopupContainer={() => document.getElementById ('selectscalculator') as HTMLElement}
+                                <Select getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
                                         onChange={(e: any) => {
                                             this.setState({currentIndex:e});

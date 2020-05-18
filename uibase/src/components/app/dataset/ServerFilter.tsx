@@ -37,7 +37,6 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableItem">
-        <div id="selectsSortableItems">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 <span>{value.index}</span>
@@ -55,7 +54,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
-                           getPopupContainer={() => document.getElementById ('selectsSortableItems') as HTMLElement}
+                           getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('columnname')}
                             style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
                             showSearch={true}
@@ -92,7 +91,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
-                            getPopupContainer={() => document.getElementById ('selectsSortableItems') as HTMLElement}
+                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('operation')}
                             style={{ width: '179px', marginLeft: '5px' }}
                             allowClear={true}
@@ -165,7 +164,6 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </Col>
         </Row>
-    </div>
     </div>
 });
 

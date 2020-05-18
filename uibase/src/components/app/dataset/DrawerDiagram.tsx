@@ -87,7 +87,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     };
 
     getColumnSelectOptions(id:string, placeHolder:string) {
-        return <div id="selectGetColumnSelectOptions">
+        return <div>
         <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
@@ -97,7 +97,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select getPopupContainer={() => document.getElementById ('selectGetColumnSelectOptions') as HTMLElement}
+                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {this.props.columnDefs!.map((c: any) =>
                         <Select.Option
@@ -113,7 +113,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     };
 
     getEnumSelectOptions(id:string, placeHolder:string, selectEnum: Array<EObject>) {
-        return  <div id="selectGetEnumSelectOptions">
+        return  <div>
         <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
@@ -123,7 +123,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select getPopupContainer={() => document.getElementById ('selectGetEnumSelectOptions') as HTMLElement}
+                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
                         <Select.Option

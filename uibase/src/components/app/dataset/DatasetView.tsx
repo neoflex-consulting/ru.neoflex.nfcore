@@ -18,9 +18,10 @@ import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
+import Fullscreen from "react-full-screen";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
-import Fullscreen from "react-full-screen";
+import {faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
 import groupIcon from "../../../icons/groupIcon.svg";
 import orderIcon from "../../../icons/orderIcon.svg";
 import calculatorIcon from "../../../icons/calculatorIcon.svg";
@@ -31,10 +32,10 @@ import flagIcon from "../../../icons/flagIcon.svg";
 import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
-import fullScreenIcon from "../../../icons/FullScreenIcon.svg";
 import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const { Option, OptGroup } = Select;
 
@@ -832,17 +833,29 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
             </Button>
-            <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={this.onFullScreen}
+            <Button
+                className="buttonFullScreen"
+                type="link"
+                ghost
+                style={{
+                    marginRight: '10px',
+                    width: '32px',
+                    height: '32px',
+                    color: 'rgb(151, 151, 151)'
+                }}
+                onClick={this.onFullScreen}
             >
-                <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
+                {this.state.fullScreenOn  ?
+                    <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+                    :
+                    <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
             </Button>
         </div>
     };
 
     getDiagramPanel = () => {
         const { t } = this.props;
-        return <div>
+        return <div id="selectInGetDiagramPanel">
             <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
@@ -887,6 +900,7 @@ class DatasetView extends React.Component<any, State> {
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
             <div style={{display: 'inline-block'}}>
                 <Select
+                    getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
                     style={{ width: '250px'}}
                     showSearch={true}
                     allowClear={true}
@@ -933,10 +947,22 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
             </Button>
-            <Button title={t('fullscreen')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
+            <Button
+                className="buttonFullScreen"
+                type="link"
+                ghost
+                style={{
+                    marginRight: '10px',
+                    width: '32px',
+                    height: '32px',
+                    color: 'rgb(151, 151, 151)'
+                }}
+                onClick={this.onFullScreen}
             >
-                <img style={{width: '24px', height: '24px'}} src={fullScreenIcon} alt="FullScreenIcon" />
+                {this.state.fullScreenOn  ?
+                    <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+                    :
+                    <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
             </Button>
 
         </div>
@@ -949,11 +975,9 @@ class DatasetView extends React.Component<any, State> {
     onFullScreen = () => {
         if (this.state.fullScreenOn){
             this.setState({ fullScreenOn: false});
-            localStorage.setItem('fullScreenOn', 'false');
         }
         else{
             this.setState({ fullScreenOn: true});
-            localStorage.setItem('fullScreenOn', 'true');
         }
     };
 
@@ -989,6 +1013,7 @@ class DatasetView extends React.Component<any, State> {
                 }
                 <div id="filterButton">
                 <Drawer
+
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
@@ -1165,10 +1190,12 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </Drawer>
                 </div>
+                <div id="diagram">
                 <Drawer
+                    getContainer={() => document.getElementById ('diagram') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
-                    width={'70px'}
+                    width={'700px'}
                     visible={this.state.diagramEditMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
                     mask={false}
@@ -1190,6 +1217,7 @@ class DatasetView extends React.Component<any, State> {
                         />
                     }
                 </Drawer>
+                </div>
                 <div id="save_menuButton">
                 <Modal
                     getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
