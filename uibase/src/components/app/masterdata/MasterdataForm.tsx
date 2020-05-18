@@ -1,10 +1,10 @@
 import React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import update from "immutability-helper";
+// import update from "immutability-helper";
 import {EObject} from "ecore";
 import {getAllAttributes, getAttrCaption} from './utils'
 import {DatePicker, Select, Input, InputNumber, Typography, Col, Divider, Row} from "antd";
-import moment, {Moment} from "moment";
+import moment from "moment";
 
 interface Props {
     entityType: EObject,
@@ -34,10 +34,10 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             return <Input.TextArea rows={3} value={data} onChange={value => updateData(value)}/>
         }
         if (typeName === 'DATE') {
-            return <DatePicker value={moment(data, 'YYYY-MM-DD HH:mm:ss')} onChange={(value) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={false}/>
+            return <DatePicker value={!data?null:moment(data, 'YYYY-MM-DD HH:mm:ss')} onChange={(value) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={false}/>
         }
         if (typeName === 'DATETIME') {
-            return <DatePicker value={moment(data, 'YYYY-MM-DD HH:mm:ss')} onChange={(value) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={true}/>
+            return <DatePicker value={!data?null:moment(data, 'YYYY-MM-DD HH:mm:ss')} onChange={(value) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={true}/>
         }
         return this.renderJSONEditor(attributeType, data, updateData)
     }
@@ -48,7 +48,9 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         }
         if (attributeType.eClass.get('name') === 'EnumType') {
             return <Select value={data} allowClear={true} onChange={(value: any) => updateData(value)}>
-                {attributeType.get('values').map((value: EObject)=><Select.Option key={value.get('name')}>{value.get('name')}</Select.Option>)}
+                {attributeType.get('values').map((value: EObject)=>
+                    <Select.Option key={value.get('name')}>{value.get('name')}</Select.Option>
+                )}
             </Select>
         }
         return this.renderJSONEditor(attributeType, data, updateData)
@@ -60,13 +62,13 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             <React.Fragment>
                 <Divider orientation="left">{entityType.get('caption') || entityType.get('name')}</Divider>
                 <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                    <Col span={10}><Typography.Text strong={true}>{'@rid'}</Typography.Text></Col>
-                    <Col span={14}>{data['@rid']}</Col>
+                    <Col span={6}><Typography.Text strong={true}>{'@rid'}</Typography.Text></Col>
+                    <Col span={18}>{data['@rid']}</Col>
                 </Row>
                 {getAllAttributes(entityType).map(attr=>
                     <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} key={attr.get('name')}>
-                        <Col span={10}><Typography.Text strong={true}>{getAttrCaption(attr)}</Typography.Text></Col>
-                        <Col span={14}>{this.renderValueEditor(attr.get('attributeType'), data[attr.get('name') as string], (data: any)=>{
+                        <Col span={6}><Typography.Text strong={true}>{getAttrCaption(attr)}</Typography.Text></Col>
+                        <Col span={18}>{this.renderValueEditor(attr.get('attributeType'), data[attr.get('name') as string], (data: any)=>{
                             updateData({[attr.get('name')]: data})
                         })}</Col>
                     </Row>

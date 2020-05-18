@@ -8,7 +8,7 @@ class FetchSpinner extends React.Component<any | WithTranslation, any> {
 
     processHandler = (processes: any[]) => {
         this.setState({inProgress: processes.length > 0})
-        console.log('FetchSpinner: inProgress=' + (processes.length > 0))
+        // console.log('FetchSpinner: inProgress=' + (processes.length > 0))
     }
 
     componentDidMount() {
@@ -20,10 +20,10 @@ class FetchSpinner extends React.Component<any | WithTranslation, any> {
     }
 
     render() {
-        return this.state.inProgress && <div className="small_loader">
-            <div className="small_inner one"/>
-            <div className="small_inner two"/>
-            <div className="small_inner three"/>
+        return this.state.inProgress && <div className="loader">
+            <div className="inner one"/>
+            <div className="inner two"/>
+            <div className="inner three"/>
         </div>;
     }
 }

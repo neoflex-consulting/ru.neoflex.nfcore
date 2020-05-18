@@ -134,7 +134,7 @@ export class API implements IErrorHandler {
 
     fireProcesses() {
         this.processHandlers.forEach(value => value(this.processes))
-        console.log("Process count: " + this.processes.length)
+        // console.log("Process count: " + this.processes.length)
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<any> {
