@@ -704,7 +704,7 @@ class Calendar extends React.Component<any, any> {
                                         {y}
                                     </Select.Option>
                                 )
-                            }
+                                }
                         </Select>
 
                         <Select
