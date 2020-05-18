@@ -242,31 +242,21 @@ class Select_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.props.viewObject.get('isDynamic')
-            && this.props.viewObject.get('datasetComponent')
-            ) {
-            API.instance().fetchAllClasses(false).then(classes => {
-                const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent');
-                if (temp !== undefined) {
-                    API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
-                        .then((result: Ecore.Resource[]) => {
-                            let datasetComponent = result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'));
-                            if (datasetComponent) {
-                                this.setState({datasetComponent});
-                                if (this.props.viewObject.get('valueItems').size() === 0) {
-                                    this.props.context.runQuery(datasetComponent).then((result: string) => {
-                                        this.setState({
-                                            selectData: JSON.parse(result).map((el: any)=>{
-                                                return {
-                                                    key: el[this.props.viewObject.get('keyColumn')],
-                                                    value: el[this.props.viewObject.get('valueColumn')]
-                                                }
-                                            })});
-                                    });
+            && this.props.viewObject.get('datasetComponent')) {
+            if (this.props.viewObject.get('datasetComponent')) {
+                this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
+                if (this.props.viewObject.get('valueItems').size() === 0) {
+                    this.props.context.runQuery(this.props.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                        this.setState({
+                            selectData: JSON.parse(result).map((el: any)=>{
+                                return {
+                                    key: el[this.props.viewObject.get('keyColumn')],
+                                    value: el[this.props.viewObject.get('valueColumn')]
                                 }
-                            }
-                        })
+                            })});
+                    });
                 }
-            });
+            }
         } else if (this.props.viewObject.get('staticValues')) {
             this.getStaticValues(this.props.viewObject.get('staticValues'))
         }
