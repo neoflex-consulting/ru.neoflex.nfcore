@@ -36,7 +36,7 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div>
+    return <div className="SortableItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 <span>{value.index}</span>
