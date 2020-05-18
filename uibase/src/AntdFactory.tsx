@@ -328,11 +328,7 @@ class Select_ extends ViewContainer {
     }
 
     render = () => {
-        if (this.state.selectData.length === 0) {
-            return (<div key={this.viewObject._id}></div>)
-        }
-        else {
-            const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
+        const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
                 <div style={{marginBottom: marginBottom}}>
                     <Select
@@ -352,18 +348,24 @@ class Select_ extends ViewContainer {
                         }}
                     >
                         {
+                            (this.state.selectData.length > 0)
+                            ?
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
                                                value={data.value}>
                                     {data.key}
                                 </Select.Option>
                             )
+                            :
+                            <Select.Option key={this.props.viewObject.get('name') + 'Select'}
+                                           value={this.props.viewObject.get('name') + 'Select'}>
+
+                            </Select.Option>
                         }
                     </Select>
                 </div>
             )
         }
-    }
 }
 
 class DatePicker_ extends ViewContainer {

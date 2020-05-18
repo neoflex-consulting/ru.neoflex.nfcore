@@ -113,11 +113,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverSorts = []
             def serverCalculatedExpression = []
 
-            logger.info("connectionToDB", "Query columns = " + column)
-
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
-                    logger.info("connectionToDB", "column[i].class = " + column[i].class.toString().toLowerCase())
                     if (column[i].class.toString().toLowerCase().contains('rdbms')) {
                         if (queryColumns.contains("${column[i].name}")) {
                             throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
