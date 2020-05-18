@@ -107,7 +107,7 @@ class Row_ extends ViewContainer {
             <Row
                 key={this.viewObject._id.toString() + '_7'}
                 style={{
-                    textAlign: this.props.viewObject.get('textAlign') || 'center',
+                    textAlign: this.props.viewObject.get('textAlign') || 'left',
                     marginRight: marginRight,
                     marginBottom: marginBottom,
                     marginTop: marginTop,
@@ -616,7 +616,7 @@ class Typography_ extends ViewContainer {
                     textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
                     height: drawObject.get('height') === null ? '0px' : `${drawObject.get('height')}`,
                     fontWeight: drawObject.get('fontWeight') || "inherit",
-                    textAlign: drawObject.get('textAlign') || "center",
+                    textAlign: drawObject.get('textAlign') || "left",
                     color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
                         drawObject.get('color') : undefined,
                     background: drawObject.get('backgroundColor') !== null && drawObject.get('gradientStyle') === null
