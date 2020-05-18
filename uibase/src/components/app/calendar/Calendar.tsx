@@ -761,7 +761,7 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents", marginTop: '2px'}}
                     >
                         {localStorage.getItem('fullScreenOn') === 'true' ?
-                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: '8px'}}>
+                            <div style={{flexGrow: 1, marginLeft: '21px'}}>
                                 <Input
                                     style={{
                                         width: '186px',
@@ -812,7 +812,7 @@ class Calendar extends React.Component<any, any> {
                             <Select
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
-                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '8px'}}
+                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal"}}
                                 onChange={(e: any) => {
                                     this.handleChange(e, 'select')
                                 }}
