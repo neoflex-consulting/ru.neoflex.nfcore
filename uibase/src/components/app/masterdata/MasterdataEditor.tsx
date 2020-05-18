@@ -11,13 +11,17 @@ import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
+import update from 'immutability-helper';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBackward, faSave, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faBackward, faSave, faTrash, faClone} from "@fortawesome/free-solid-svg-icons";
 
 import './masterdata.css'
 import {Button} from "antd";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
+import MasterdataForm from "./MasterdataForm";
+import {getAllAttributes} from './utils'
+import FetchSpinner from "../../FetchSpinner";
 
 const backgroundColor = "#fdfdfd";
 
@@ -52,7 +56,6 @@ class MasterdataEditor extends React.Component<any, any> {
         const sql = "select * from " + entityType.get('name')
         API.instance().fetchJson("/masterdata/select?sql=" + sql).then(json => {
             this.setState({rowData: json})
-            //console.log(json)
         })
     }
 
@@ -63,18 +66,70 @@ class MasterdataEditor extends React.Component<any, any> {
     edit = (rid: string) => {
         const currentIndex = this.state.rowData.findIndex(value => value['@rid'] === rid)
         if (currentIndex >= 0) {
-            this.setState({currentRow: _.cloneDeep(this.state.rowData[currentIndex]), currentIndex})
+            const currentRow = _.cloneDeep(this.state.rowData[currentIndex])
+            this.setState({currentRow})
         }
     }
 
     create = () => {
         const entityType = this.props.entityType as EObject
         const currentRow = {'@class': entityType.get('name')}
-        this.setState({currentRow, currentIndex: undefined})
+        this.setState({currentRow})
     }
 
     cancel = () => {
         this.setState({currentRow: null})
+    }
+
+    clone = () => {
+        this.setState({currentRow: {..._.cloneDeep(this.state.currentRow) as any, '@rid': undefined}})
+    }
+
+    save = () => {
+        const rid = this.state.currentRow!['@rid']
+        if (rid) {
+            API.instance().fetchJson("/masterdata/entity?id=" + encodeURIComponent(rid), {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.state.currentRow)
+            }).then(json => {
+                const currentIndex = this.state.rowData.findIndex(value => value['@rid'] === rid)
+                const rowData = [...this.state.rowData.slice(0, currentIndex), json, ...this.state.rowData.slice(currentIndex + 1)]
+                this.setState({rowData, currentRow: json})
+            })
+        } else {
+            API.instance().fetchJson("/masterdata/entity", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.state.currentRow)
+            }).then(json => {
+                const rowData = [...this.state.rowData.slice(), json]
+                this.setState({rowData, currentRow: json})
+            })
+        }
+    }
+
+    delete = () => {
+        const rid = this.state.currentRow!['@rid']
+        if (rid) {
+            API.instance().fetchJson("/masterdata/entity?id=" + encodeURIComponent(rid), {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).then(json => {
+                const currentIndex = this.state.rowData.findIndex(value => value['@rid'] === rid)
+                const rowData = [...this.state.rowData.slice(0, currentIndex), ...this.state.rowData.slice(currentIndex + 1)]
+                this.setState({rowData, currentRow: null})
+            })
+        }
     }
 
     actionMenu = (params: any) => (
@@ -98,24 +153,21 @@ class MasterdataEditor extends React.Component<any, any> {
         }
     }
 
-    getAllAttributes = (entityType: EObject): EObject[] => {
-        return [
-            ...(entityType.get('superTypes') as EObject[]).map(t => this.getAllAttributes(t)).flat(),
-            ...entityType.get('attributes').array()
-        ]
-    }
-
     getAttributeFilter = (attribute: EObject): string => {
         return 'agTextColumnFilter'
     }
 
     renderForm() {
         const {t} = this.props
-        const {currentRow} = this.state || {}
+        const {currentRow} = this.state
+        const viewObject = this.props.viewObject as EObject
+        const entityType = viewObject.get('entityType') as EObject
         return (
             <React.Fragment>
+                <FetchSpinner/>
                 <div>
-                    <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                    <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                            onClick={this.cancel}>
                         <FontAwesomeIcon icon={faBackward} size='lg' color="#7b7979"/>
                     </Button>
                     <div style={{
@@ -128,13 +180,26 @@ class MasterdataEditor extends React.Component<any, any> {
                         borderRight: '1px solid rgb(217, 217, 217)',
                         width: '6px'
                     }}/>
-                    <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                    <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                            onClick={this.save}>
                         <FontAwesomeIcon icon={faSave} size='lg' color="#7b7979"/>
                     </Button>
-                    {currentRow!['@rid'] && <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}} onClick={this.cancel}>
+                    {currentRow!['@rid'] &&
+                    <Button title={t('clone')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                            onClick={this.clone}>
+                        <FontAwesomeIcon icon={faClone} size='lg'/>
+                    </Button>}
+                    {currentRow!['@rid'] &&
+                    <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                            onClick={this.delete}>
                         <FontAwesomeIcon icon={faTrash} size='lg' color="red"/>
                     </Button>}
                 </div>
+                <MasterdataForm
+                    entityType={entityType}
+                    data={currentRow}
+                    updateData={(data: Object) => this.setState({currentRow: update(currentRow || {}, {$merge: data})})}
+                />
             </React.Fragment>
         )
     }
@@ -143,8 +208,10 @@ class MasterdataEditor extends React.Component<any, any> {
         const {t} = this.props
         const {gridOptions} = this.state;
         const viewObject = this.props.viewObject as EObject
+        const entityType = viewObject.get('entityType') as EObject
         return (
             <React.Fragment>
+                <FetchSpinner/>
                 <div>
                     <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.refresh}>
                         <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon"/>
@@ -181,7 +248,6 @@ class MasterdataEditor extends React.Component<any, any> {
                         pagination={true}
                         domLayout='autoHeight'
                         paginationPageSize={this.state.paginationPageSize}
-                        gridAutoHeight={true}
                         {...gridOptions}
                     >
                         <AgGridColumn
@@ -190,7 +256,7 @@ class MasterdataEditor extends React.Component<any, any> {
                             width={120}
                             //suppressMenu={true}
                         />
-                        {this.getAllAttributes(viewObject.get('entityType')).map(att =>
+                        {getAllAttributes(entityType).map(att =>
                             <AgGridColumn
                                 key={att.get('name')}
                                 field={att.get('name')}
