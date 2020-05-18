@@ -210,7 +210,7 @@ class EcoreApp extends React.Component<any, State> {
                 param
                 :
                 param
-                    .filter( (p: any) => p['parameterName'] && p['parameterValue'])
+                    .filter( (p: any) => p['parameterName'] )
                     .map( (p: any) => {
                         return (
                             pattern.create({
@@ -249,7 +249,8 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[]) => {
+    runQuery = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = [], filterParams: IServerQueryParam[] = [], aggregationParams: IServerQueryParam[] = [],
+                sortParams: IServerQueryParam[] = [], groupByParams: IServerQueryParam[] = [], calculatedExpression: IServerQueryParam[] = []) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';

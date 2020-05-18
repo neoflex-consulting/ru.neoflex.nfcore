@@ -33,7 +33,7 @@ export interface IMainContext {
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, treeValue?: undefined, params?: Object[] | undefined) => void;
-    runQuery?: (resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[], ) => Promise<string>;
+    runQuery?: (resource: Ecore.Resource, queryParams: IServerNamedParam[], filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], ) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;

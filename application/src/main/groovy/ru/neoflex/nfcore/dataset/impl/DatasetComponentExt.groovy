@@ -113,22 +113,26 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverSorts = []
             def serverCalculatedExpression = []
 
+            logger.info("connectionToDB", "Query columns = " + column)
+
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
+                    logger.info("connectionToDB", "column[i].class = " + column[i].class.toString().toLowerCase())
                     if (column[i].class.toString().toLowerCase().contains('rdbms')) {
-                        if (queryColumns.contains("${column[i].datasetColumn.name}")) {
+                        if (queryColumns.contains("${column[i].name}")) {
                             throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                         } else {
-                            queryColumns.add("t.\"${column[i].datasetColumn.name}\"")
+                            queryColumns.add("t.\"${column[i].name}\"")
                         }
                     } else {
                         def valueCustomColumn
-                        if (column[i].customColumnExpression == null || column[i].customColumnExpression == "" && column[i].defaultValue != null && column[i].defaultValue != "") {
+                        def customColumn = column[i] as CustomColumn
+                        if (customColumn.customColumnExpression == null || customColumn.customColumnExpression == "" && column[i].defaultValue != null && column[i].defaultValue != "") {
                             valueCustomColumn = column[i].defaultValue
-                        } else if (column[i].customColumnExpression == null || column[i].customColumnExpression == "" && column[i].defaultValue == null || column[i].defaultValue == "") {
+                        } else if (customColumn.customColumnExpression == null || customColumn.customColumnExpression == "" && column[i].defaultValue == null || column[i].defaultValue == "") {
                             valueCustomColumn = null
                         } else {
-                            valueCustomColumn = column[i].customColumnExpression
+                            valueCustomColumn = customColumn.customColumnExpression
                         }
 
                         if (queryColumns.contains(" \"${column[i].headerName.name}\"")) {
@@ -344,10 +348,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
 
             logger.info("connectionToDB", "Starting query = " + currentQuery)
+            logger.info("connectionToDB", "parameters = " + parameters)
             //Add Named Parameters
             p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
                 for (int i = 0; i <= parameters.size() - 1; ++i) {
+                    if (!parameters[i].parameterValue) {
+                        p.setString(parameters[i].parameterName, null)
+                    }
                     if (parameters[i].parameterDataType == "Date") {
                         p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
                     } else if (parameters[i].parameterDataType == "Timestamp") {
