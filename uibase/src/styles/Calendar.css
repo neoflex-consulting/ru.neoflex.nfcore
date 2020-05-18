@@ -365,11 +365,13 @@ div .body {
     color: #000000;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    border: none;
 }
 
 .notification-btn Button:hover{
     outline: none;
     border: none;
+    color: black;
 }
 
 /*Легенда*/
