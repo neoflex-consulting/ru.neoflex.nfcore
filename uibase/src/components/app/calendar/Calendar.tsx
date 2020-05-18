@@ -447,15 +447,15 @@ class Calendar extends React.Component<any, any> {
     };
 
     nextMonth = () => {
-        this.setState({
-            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.addMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth});
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     prevMonth = () => {
-        this.setState({
-            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.subMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth})
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     componentDidMount(): void {
