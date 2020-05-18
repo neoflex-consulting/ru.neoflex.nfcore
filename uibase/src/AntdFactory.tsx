@@ -243,19 +243,17 @@ class Select_ extends ViewContainer {
     componentDidMount(): void {
         if (this.props.viewObject.get('isDynamic')
             && this.props.viewObject.get('datasetComponent')) {
-            if (this.props.viewObject.get('datasetComponent')) {
-                this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
-                if (this.props.viewObject.get('valueItems').size() === 0) {
-                    this.props.context.runQuery(this.props.viewObject.get('datasetComponent').eContainer).then((result: string) => {
-                        this.setState({
-                            selectData: JSON.parse(result).map((el: any)=>{
-                                return {
-                                    key: el[this.props.viewObject.get('keyColumn')],
-                                    value: el[this.props.viewObject.get('valueColumn')]
-                                }
-                            })});
-                    });
-                }
+            this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
+            if (this.props.viewObject.get('valueItems').size() === 0) {
+                this.props.context.runQuery(this.props.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                    this.setState({
+                        selectData: JSON.parse(result).map((el: any)=>{
+                            return {
+                                key: el[this.props.viewObject.get('keyColumn')],
+                                value: el[this.props.viewObject.get('valueColumn')]
+                            }
+                        })});
+                });
             }
         } else if (this.props.viewObject.get('staticValues')) {
             this.getStaticValues(this.props.viewObject.get('staticValues'))
@@ -343,7 +341,7 @@ class Select_ extends ViewContainer {
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
                                                value={data.value}>
-                                    {data.key}
+                                    {data.value}
                                 </Select.Option>
                             )
                             :

@@ -153,6 +153,7 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
+    //TODO нужна оптимизация
     getAllDatasetComponents(findColumn: boolean) {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent');
