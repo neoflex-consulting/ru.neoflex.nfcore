@@ -1029,6 +1029,7 @@ class Calendar extends React.Component<any, any> {
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
+                                        type="link"
                                         style={{marginLeft: '15px', opacity:'0.6', width: "150px", display: "flex", color: "black", backgroundColor: "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
