@@ -14,7 +14,7 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     selectApplication(applicationName: string): void  {
-        this.props.context.changeURL!(applicationName)
+        this.props.context.changeURL!(applicationName, false);
         this.props.context.changeUserProfile('startApp', applicationName)
     }
 

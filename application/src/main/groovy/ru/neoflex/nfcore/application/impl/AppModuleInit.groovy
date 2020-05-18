@@ -135,13 +135,14 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def createAppModuleNRDemoMain(String name, String header, String jdbcDatasetName, String datasetComponentName) {
+    static def createAppModuleNRDemoMain(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = useParentReferenceTree
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "SectionForm"
@@ -348,6 +349,7 @@ class AppModuleInit {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = true
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "CalcMartForm"
@@ -564,6 +566,7 @@ class AppModuleInit {
 
             def application = ApplicationFactory.eINSTANCE.createAppModule()
             application.name = name
+            application.useParentReferenceTree = true
 
             def form = ApplicationFactory.eINSTANCE.createForm()
             form.name = "KlikoForm"
@@ -856,10 +859,9 @@ class AppModuleInit {
         if (md == null) return
         def entityTypeName = 'F110_BalAccountClassifier'
         def nodes = [
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],
-                ['@class': entityTypeName, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())]
+                ['@class': entityTypeName, section_number: 1, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],
+                ['@class': entityTypeName, section_number: 1, CHAR_TYPE: 'А', f110_code: 'А102/327', IS_SELF_EMPLOYED: 'Да', party_type: 'ФЛ', sign: 0, ledger_account_mask: '*10234', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())]
         ]
-
         md.inTransaction(new Function<ODatabaseDocument, Void>() {
             @Override
             Void apply(ODatabaseDocument db) {
@@ -882,6 +884,7 @@ class AppModuleInit {
             view.entityType = Utils.findEObjectWithConsumer(MasterdataPackage.Literals.ENTITY_TYPE, "F110_BalAccountClassifier", initBalAccountClassifier)
             view.entityType.activate()
             appModule.view = view
+            appModule.useParentReferenceTree = true
         }
     }
 

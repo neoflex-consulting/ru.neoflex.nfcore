@@ -15,6 +15,7 @@ interface State {
     hideReferences: boolean
     currentTool?: string
     objectApp?: Ecore.EObject
+    eClassAppModule?: Ecore.EObject
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -30,43 +31,58 @@ export class MainApp extends React.Component<any, State> {
         }
     }
 
+    getEClassAppModule(): void {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const eClass = classes.find((c: Ecore.EObject) => c._id === "//AppModule") as Ecore.EClass;
+            this.setState({eClassAppModule: eClass})
+            this.loadObject()
+        })
+    }
+
     loadObject = () => {
         let name: string;
         let objectPackage: string;
         let objectClass: string;
         if (this.props.appModuleName !== undefined) {
-        name = decodeURI(this.props.appModuleName);
-        objectPackage = "ru.neoflex.nfcore.application";
-        objectClass = "AppModule";
-        API.instance().fetchPackages().then(packages => {
-            const ePackage = packages.find(p => p.get("nsURI") === objectPackage);
-            if (ePackage) {
-                const eClass = ePackage.eContents().find(c => c.get("name") === objectClass) as Ecore.EClass;
-                API.instance().findByKindAndName(eClass, name, 999).then(resources => {
+            name = decodeURI(this.props.appModuleName);
+
+            if (this.state.eClassAppModule) {
+                API.instance().findByKindAndName(this.state.eClassAppModule, name, 999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
 
-                        let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
+                        let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
                                 if (objectApp.get('referenceTree') === null) {
-                                    this.props.context.updateContext!(
-                                        ({viewObject: objectApp.get('view')})
-                                    );
-                                    if (this.props.pathFull.length === 1) {
+                                    if (currentAppModule.useParentReferenceTree) {
+                                        this.props.context.updateContext!(
+                                            ({viewObject: objectApp.get('view')})
+                                        );
+                                        let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
+                                        if (app.length !== 0 && this.props.context.applicationReferenceTree === undefined) {
+                                            this.setReferenceTree(app[app.length - 1].appModule)
+                                        }
+                                    } else {
+                                        this.props.context.updateContext!(
+                                            ({viewObject: objectApp.get('view'), applicationReferenceTree: undefined})
+                                        );
                                         this.setState({hideReferences: true})
                                     }
+
                                 } else {
                                     this.props.context.updateContext!(
-                                        ({viewObject: objectApp.get('view'), applicationReferenceTree: objectApp.get('referenceTree')})
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            applicationReferenceTree: objectApp.get('referenceTree')
+                                        })
                                     );
                                     if (this.props.pathFull.length !== 1) {
                                         this.setState({hideReferences: false})
                                     }
                                 }
                             })
-                        }
-                        else {
+                        } else {
                             let treeChildren = objectApp.get('referenceTree').eContents();
                             let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
                             let currentTree: any[] = currentAppModule['tree']
@@ -79,7 +95,8 @@ export class MainApp extends React.Component<any, State> {
                             this.props.context.updateContext!(
                                 ({
                                     viewObject: treeChildren[0],
-                                    applicationReferenceTree: objectApp.get('referenceTree')})
+                                    applicationReferenceTree: objectApp.get('referenceTree')
+                                })
                             );
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
@@ -88,15 +105,29 @@ export class MainApp extends React.Component<any, State> {
                     }
                 })
             }
-        })}
+        }
     };
+
+    setReferenceTree = (appModuleName: string) => {
+        if (this.state.eClassAppModule !== undefined) {
+            API.instance().findByKindAndName(this.state.eClassAppModule, appModuleName, 999).then(resources => {
+                if (resources.length > 0) {
+                    const objectApp = resources[0].eContents()[0];
+                    this.props.context.updateContext!(
+                        ({applicationReferenceTree: objectApp.get('referenceTree')})
+                    );
+                    this.setState({hideReferences: false})
+                }
+            })
+        }
+    };
+
 
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.props.context.viewObject !== undefined && this.props.context.viewObject !== null) {
             if (this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[0].appModule
                 && this.props.context.viewObject.eResource().eContents()[0].eClass.get('name') === 'Application') {
                 this.props.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
-                this.setState({hideReferences: true})
             }
         }
         if (prevProps.location.pathname !== this.props.location.pathname) {
@@ -105,7 +136,7 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
-        this.loadObject()
+        this.getEClassAppModule()
     }
 
     renderToolButton = (name: string, label: string, icon: string) => {
@@ -216,7 +247,8 @@ export class MainApp extends React.Component<any, State> {
     private setURL(eObject: Ecore.EObject, key: any) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.appModuleName;
         let treeValue = eObject.get('AppModule') ? undefined : key;
-        this.props.context.changeURL!(appModuleName, treeValue)
+        let useParentReferenceTree = eObject.get('AppModule').get('useParentReferenceTree') || false;
+        this.props.context.changeURL!(appModuleName, useParentReferenceTree, treeValue)
     }
 
     render = () => {

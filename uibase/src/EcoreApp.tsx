@@ -19,8 +19,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
-import BreadcrumbApp from "./components/BreadcrumbApp";
-import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
@@ -263,73 +261,70 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
     };
 
-    changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
-        if (appModuleName === "home") {
-            this.props.history.push('/home')
-        } else {
-            let path: any[] = [];
-            let urlElement: ConfigUrlElement = {
-                appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: params
-            };
-            let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
-                path.push(urlElement)
-            }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = treeValue.split('/');
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = [];
-                this.state.pathFull.forEach((p: any, index: any) => {
-                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                });
-                if (splitPathFull.length === 0) {
-                    this.state.pathFull.forEach( (p:any) => {
-                        path.push(p)
-                    });
-                    urlElement.appModule = appModuleName;
-                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
+        let path: any[] = [];
+        let urlElement: ConfigUrlElement = {
+            appModule: appModuleName,
+            tree: treeValue !== undefined ? treeValue.split('/') : [],
+            params: params,
+            useParentReferenceTree: useParentReferenceTree || false
+        };
+        let appModuleNameThis = appModuleName || this.state.appModuleName;
+        if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
+            path.push(urlElement)
+        }
+        else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.tree = treeValue.split('/');
                     urlElement.params = params;
                     path.push(urlElement)
-                } else {
-                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
                 }
-            } else if (appModuleName === this.state.appModuleName) {
-                path = this.state.pathFull
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.params = params;
+                    path.push(urlElement)
+                }
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (appModuleName !== this.state.appModuleName) {
+            let splitPathFull: any = [];
+            this.state.pathFull.forEach((p: any, index: any) => {
+                if (p.appModule === appModuleName) {splitPathFull.push(index)}
+            });
+            if (splitPathFull.length === 0) {
+                this.state.pathFull.forEach( (p:any) => {
+                    path.push(p)
+                });
+                urlElement.appModule = appModuleName;
+                urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                urlElement.params = params;
+                path.push(urlElement)
+            } else {
+                path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
             }
-            this.setState({pathFull: path});
-            this.props.history.push(`/app/${
-                btoa(
-                    encodeURIComponent(
-                        JSON.stringify(
-                            path
-                        )
+        } else if (appModuleName === this.state.appModuleName) {
+            path = this.state.pathFull
+        }
+        this.setState({pathFull: path});
+        this.props.history.push(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        path
                     )
                 )
-            }`);
-        }
+            )
+        }`);
     };
 
     onRightMenu(e : any) {
@@ -357,10 +352,6 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init);
-        // if (this.props.history.location.pathname === "/") {
-        //     // this.changeURL('home')
-        //     // this.changeURL(this.state.applicationNames[0])
-        // }
     };
 
     getAllApplication() {
@@ -385,11 +376,13 @@ class EcoreApp extends React.Component<any, State> {
             application = this.state.context.userProfile.get('params').array()
                 .filter((u: any) => u.get('key') === 'startApp')
         }
-        if (application.length !== 0 && application[0].get('value') !== undefined) {
-            this.changeURL(JSON.parse(application[0].get('value')))
-        }
-        else if (this.props.history.location.pathname === "/") {
-            this.changeURL(applicationName)
+        if (this.props.history.location.pathname === "/") {
+            if (application.length !== 0 && application[0].get('value') !== undefined) {
+                this.changeURL(JSON.parse(application[0].get('value')), false)
+            }
+            else {
+                this.changeURL(applicationName, false)
+            }
         }
     }
 
@@ -544,7 +537,6 @@ class EcoreApp extends React.Component<any, State> {
                     </Row>
                 </Header>
                 <Switch>
-                    <Route path='/home' component={this.renderStartPage}/>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
@@ -564,7 +556,7 @@ class EcoreApp extends React.Component<any, State> {
                 selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
-            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule
+            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule;
             selectedKeys = selectedKeys
                 .filter(k => k.split('.').length > 1)
                 .filter( k =>
@@ -648,16 +640,6 @@ class EcoreApp extends React.Component<any, State> {
                             pathFull={this.state.pathFull}
                             appModuleName={this.state.appModuleName}
                         />
-                }}
-            </MainContext.Consumer>
-        )
-    };
-
-    renderStartPage = (props: any) => {
-        return (
-            <MainContext.Consumer>
-                {context => {
-                    return <StartPage {...props} context={context} applications={this.state.applications}/>;
                 }}
             </MainContext.Consumer>
         )

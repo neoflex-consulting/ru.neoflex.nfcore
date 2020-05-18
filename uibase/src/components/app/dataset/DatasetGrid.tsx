@@ -539,11 +539,13 @@ class DatasetGrid extends React.Component<any, any> {
             </Menu>
         );
         return (
-            <div
+            <div id="menuButton"
                 style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor }}
                 className={'ag-theme-' + this.state.currentTheme}
             >
-                <Dropdown overlay={menu} placement='bottomLeft'>
+                <Dropdown overlay={menu} placement='bottomLeft'
+                          getPopupContainer={() => document.getElementById ('menuButton') as HTMLElement}
+                >
                     <Button style={{color: 'rgb(151, 151, 151)'}}> {t('action')}
                         <FontAwesomeIcon icon={faChevronDown} size='xs'
                                          style={{marginLeft: '5px'}}/>

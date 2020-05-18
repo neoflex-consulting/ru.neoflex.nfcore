@@ -256,12 +256,6 @@ div .body {
     letter-spacing: -.07em;
 }
 
-/*Отобразить цифорку на заднем фоне*/
-.calendar .body .cell:hover .bg, .calendar .body .selected .bg  {
-    opacity: 0.05;
-    transition: .5s ease-in;
-}
-
 /*Выровнять ячейки по ширине*/
 .calendar .body .col {
     flex-grow: 0;

@@ -60,6 +60,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('columnname')}
                             style={{
                                 width: '179px',
@@ -112,6 +113,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             disabled={value.highlightType === 'Column'}
                             placeholder={value.t('operation')}
                             style={{width: '179px', marginLeft: '5px'}}
@@ -208,6 +210,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         initialValue: value.t(value.highlightType)
                     })(
                     <Select
+                        getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                         allowClear={true}
                         style={{width: '100px', marginLeft: '21px'}}
                         onChange={(e: any) => {
@@ -240,7 +243,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     </Select>
                 )}
             </Col>
-            <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
+                <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Фон</div>
                 <FontAwesomeIcon
                     color={value.backgroundColor}
@@ -249,6 +252,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     icon={faPalette}
                 />
                 <Modal
+                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'500px'}
                     title={'Выбор цвета фона'}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
@@ -261,8 +265,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             columnName: 'backgroundColor',
                             value: value.stateColor !== undefined ? value.stateColor['hex'] : value.backgroundColor
                         }))
-                    }}
-                >
+                    }}>
                     <SliderPicker
                         onChange={(e: any) => value.changeColor(e)}
                         color={value.stateColor !== undefined ? value.stateColor['hex'] :
@@ -279,6 +282,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     icon={faPalette}
                 />
                 <Modal
+                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'500px'}
                     title={'Выбор цвета текста'}
                     visible={value.textColorVisible && value.colorIndex === value.index}
