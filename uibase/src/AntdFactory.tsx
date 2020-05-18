@@ -147,7 +147,7 @@ class Button_ extends ViewContainer {
     backStartPage = () => {
         const appModule = this.props.pathFull[this.props.pathFull.length - 1];
         let params: Object[] = appModule.params;
-        this.props.context.changeURL!(appModule.appModule, undefined, params);
+        this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
     submitItems = () => {
         if (this.props.viewObject.get('submitItems')) {
@@ -677,7 +677,7 @@ class Calendar_ extends ViewContainer {
 
 class MasterdataView_ extends ViewContainer {
     render = () => {
-        return <MasterdataEditor {...this.props} key={this.viewObject._id}/>
+        return <MasterdataEditor {...this.props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
     }
 }
 
