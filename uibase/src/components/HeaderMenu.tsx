@@ -1,6 +1,6 @@
 import * as React from "react";
-import {withTranslation, WithTranslation} from "react-i18next";
-import {Breadcrumb, Button, Col, Row} from "antd";
+import {withTranslation} from "react-i18next";
+import {Button, Col, Row} from "antd";
 import './../styles/BreadcrumbApp.css';
 
 interface State {
@@ -19,7 +19,6 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     render() {
-        const { t } = this.props as any & WithTranslation;
         const span = 24 / this.props.applications.length;
 
         let selectedApp: any = undefined;

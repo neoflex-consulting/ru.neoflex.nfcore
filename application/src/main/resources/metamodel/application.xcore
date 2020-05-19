@@ -215,13 +215,17 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends ViewElement, ValueItem {
+class Select extends ViewElement, ValueItem, CommandElement {
     boolean disabled
     boolean showSearch
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
+    boolean isDynamic
     String staticValues
+    refers DatasetComponent datasetComponent
+    String keyColumn //TODO выбор из списка
+    String valueColumn //TODO
 }
 
 class DatePicker extends ViewElement, ValueItem {
