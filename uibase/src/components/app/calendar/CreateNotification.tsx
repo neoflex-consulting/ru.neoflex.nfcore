@@ -71,7 +71,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
         const {t} = this.props;
         const {newNotification} = this.state;
         return (
-            <div>
+            <div id="selectButton">
                 <Row>
                     <Col span={10} style={{marginRight: '10px',textAlign: 'right'}}>
                         <span>{t('fullName')}</span>
@@ -129,6 +129,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                         </Col>
                         <Col span={12}>
                             <Select
+                                getPopupContainer={() => document.getElementById ('selectButton') as HTMLElement}
                                 value={t(newNotification['periodicity'])}
                                 style={{ width: '200px'}}
                                 allowClear={true}

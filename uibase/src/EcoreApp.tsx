@@ -13,18 +13,16 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import _map from "lodash/map"
+import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons"
+import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
-import BreadcrumbApp from "./components/BreadcrumbApp";
-import {StartPage} from "./components/StartPage";
 import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
-import pony from "./pony.png";
+import pony from "./icons/pony.png";
 import HeaderMenu from "./components/HeaderMenu";
 const backgroundColor = "#fdfdfd";
 
@@ -264,73 +262,70 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
     };
 
-    changeURL = (appModuleName?: string, treeValue?: string, params?: Object[]) => {
-        if (appModuleName === "home") {
-            this.props.history.push('/home')
-        } else {
-            let path: any[] = [];
-            let urlElement: ConfigUrlElement = {
-                appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: params
-            };
-            let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
-                path.push(urlElement)
-            }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = treeValue.split('/');
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = [];
-                this.state.pathFull.forEach((p: any, index: any) => {
-                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                });
-                if (splitPathFull.length === 0) {
-                    this.state.pathFull.forEach( (p:any) => {
-                        path.push(p)
-                    });
-                    urlElement.appModule = appModuleName;
-                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
+        let path: any[] = [];
+        let urlElement: ConfigUrlElement = {
+            appModule: appModuleName,
+            tree: treeValue !== undefined ? treeValue.split('/') : [],
+            params: params,
+            useParentReferenceTree: useParentReferenceTree || false
+        };
+        let appModuleNameThis = appModuleName || this.state.appModuleName;
+        if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
+            path.push(urlElement)
+        }
+        else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.tree = treeValue.split('/');
                     urlElement.params = params;
                     path.push(urlElement)
-                } else {
-                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
                 }
-            } else if (appModuleName === this.state.appModuleName) {
-                path = this.state.pathFull
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.params = params;
+                    path.push(urlElement)
+                }
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (appModuleName !== this.state.appModuleName) {
+            let splitPathFull: any = [];
+            this.state.pathFull.forEach((p: any, index: any) => {
+                if (p.appModule === appModuleName) {splitPathFull.push(index)}
+            });
+            if (splitPathFull.length === 0) {
+                this.state.pathFull.forEach( (p:any) => {
+                    path.push(p)
+                });
+                urlElement.appModule = appModuleName;
+                urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                urlElement.params = params;
+                path.push(urlElement)
+            } else {
+                path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
             }
-            this.setState({pathFull: path});
-            this.props.history.push(`/app/${
-                btoa(
-                    encodeURIComponent(
-                        JSON.stringify(
-                            path
-                        )
+        } else if (appModuleName === this.state.appModuleName) {
+            path = this.state.pathFull
+        }
+        this.setState({pathFull: path});
+        this.props.history.push(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        path
                     )
                 )
-            }`);
-        }
+            )
+        }`);
     };
 
     onRightMenu(e : any) {
@@ -358,9 +353,6 @@ class EcoreApp extends React.Component<any, State> {
 
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init);
-        if (this.props.history.location.pathname === "/") {
-            this.changeURL('home')
-        }
     };
 
     getAllApplication() {
@@ -372,11 +364,28 @@ class EcoreApp extends React.Component<any, State> {
                         let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
-                        this.setState({applicationNames, applications})
+                        this.setState({applicationNames, applications});
+                        this.startPageSelection(this.state.applicationNames[0])
                     })
             }
         })
     };
+
+    startPageSelection(applicationName: string) {
+        let application: any = undefined;
+        if (this.state.context.userProfile !== undefined) {
+            application = this.state.context.userProfile.get('params').array()
+                .filter((u: any) => u.get('key') === 'startApp')
+        }
+        if (this.props.history.location.pathname === "/") {
+            if (application.length !== 0 && application[0].get('value') !== undefined) {
+                this.changeURL(JSON.parse(application[0].get('value')), false)
+            }
+            else {
+                this.changeURL(applicationName, false)
+            }
+        }
+    }
 
     getLanguages() {
         const prepared: Array<string> = [];
@@ -394,36 +403,14 @@ class EcoreApp extends React.Component<any, State> {
         })
     }
 
-    setBreadcrumb(breadcrumbValue? : string) {
-        if (breadcrumbValue) {
-            if (breadcrumbValue === "home") {
-                this.changeURL("home");
-                this.setState({breadcrumb: []});
-            } else {
-                let indexBreadcrumb = this.state.breadcrumb.indexOf(breadcrumbValue);
-                let breadcrumb = this.state.breadcrumb.slice(0, indexBreadcrumb + 1);
-                this.setState({breadcrumb});
-                this.changeURL(breadcrumbValue.slice(0, -2))
-            }
-        }
-        else if (this.props.location.pathname.split('/app/')[1] !== undefined) {
-            const allAppModules = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])));
-            let breadcrumb = [];
-            for (let i = 0; i <= allAppModules.length - 1; i++) {
-                breadcrumb.push(`${allAppModules[i].appModule}_${i}`)
-            }
-            this.setState({breadcrumb})
-        }
-    }
-
-    onClickBreadcrumb = (breadcrumbValue: string): void => {
-       this.setBreadcrumb(breadcrumbValue)
-    };
-
     onClickBellIcon = () => {
         if (this.state.notifierDuration === 3){
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
+        }
+        else{
+            this.setState({ notifierDuration: 3});
+            localStorage.setItem('notifierDuration', '3');
         }
     };
 
@@ -463,22 +450,19 @@ class EcoreApp extends React.Component<any, State> {
                                     span={19}
                                     style={{textAlign: 'center'}}
                                 >
-                                    <MainContext.Consumer>
-                                        {context => {
-                                            return <HeaderMenu
-                                                {...props}
-                                                applications={this.state.applications}
-                                                context={context}
+                                    {
+                                        this.props.location.pathname.includes('/app/') &&
 
-                                                selectedKeys={selectedKeys}
-                                                breadcrumb={this.state.breadcrumb}
-                                                onClickBreadcrumb={this.onClickBreadcrumb}
-                                            />
-                                        }}
-                                    </MainContext.Consumer>
-
-                                    {/*<BreadcrumbApp {...props}  selectedKeys={selectedKeys} breadcrumb={this.state.breadcrumb}*/}
-                                    {/*               onClickBreadcrumb={this.onClickBreadcrumb}/>*/}
+                                        <MainContext.Consumer>
+                                            {(context: any) => {
+                                                return <HeaderMenu
+                                                    {...props}
+                                                    applications={this.state.applications}
+                                                    context={context}
+                                                />
+                                            }}
+                                        </MainContext.Consumer>
+                                    }
                                 </Col>
                                 <Col span={5}>
                                     <Menu selectedKeys={selectedKeys} className="header-menu"
@@ -554,7 +538,6 @@ class EcoreApp extends React.Component<any, State> {
                     </Row>
                 </Header>
                 <Switch>
-                    <Route path='/home' component={this.renderStartPage}/>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
@@ -574,7 +557,7 @@ class EcoreApp extends React.Component<any, State> {
                 selectedKeys.push(`app.${a}`));
         }
         if (this.props.location.pathname.includes('/app/')) {
-            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule
+            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule;
             selectedKeys = selectedKeys
                 .filter(k => k.split('.').length > 1)
                 .filter( k =>
@@ -663,20 +646,7 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-    renderStartPage = (props: any) => {
-        return (
-            <MainContext.Consumer>
-                {context => {
-                    return <StartPage {...props} context={context} applications={this.state.applications}/>;
-                }}
-            </MainContext.Consumer>
-        )
-    };
-
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (prevProps.location.pathname !== this.props.location.pathname) {
-            this.setBreadcrumb()
-        }
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
             this.setState({getUserProfile: false});
             this.getUserProfile(this.state.principal)
@@ -743,7 +713,6 @@ class EcoreApp extends React.Component<any, State> {
         if (!this.state.applicationNames.length) {this.getAllApplication()}
         if (this.state.parameterPattern === undefined) {this.getParameterPattern()};
 
-        if (!this.state.breadcrumb.length) {this.setBreadcrumb()}
         const _this = this;
         let errorHandler : IErrorHandler = {
             handleError(error: Error): void {

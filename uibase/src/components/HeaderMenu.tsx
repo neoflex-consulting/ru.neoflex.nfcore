@@ -1,15 +1,7 @@
 import * as React from "react";
-import {withTranslation, WithTranslation} from "react-i18next";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisH, faHome} from "@fortawesome/free-solid-svg-icons";
-import {Breadcrumb, Button, Col, Row} from "antd";
+import {withTranslation} from "react-i18next";
+import {Button, Col, Row} from "antd";
 import './../styles/BreadcrumbApp.css';
-
-interface Props {
-    selectedKeys: string[];
-    breadcrumb: string[];
-    onClickBreadcrumb: (breadcrumb: any) => void;
-}
 
 interface State {
 }
@@ -22,17 +14,28 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     selectApplication(applicationName: string): void  {
-        this.props.context.changeURL!(applicationName)
+        this.props.context.changeURL!(applicationName, false);
+        this.props.context.changeUserProfile('startApp', applicationName)
     }
 
     render() {
-        const { t } = this.props as Props & WithTranslation;
         const span = 24 / this.props.applications.length;
 
-        // if (this.props.applications.length !== 0) {
-        //     this.props.applications.map((a: any) =>
-        //         selectedKeys.push(`app.${a}`));
-        // }
+        let selectedApp: any = undefined;
+        if (this.props.applications.length !== 0 && this.props.context !== undefined) {
+            if (this.props.context.userProfile !== undefined) {
+                const application = this.props.context.userProfile.get('params').array()
+                    .filter((u: any) => u.get('key') === 'startApp');
+                if (application.length !== 0 && application[0].get('value') !== undefined) {
+                    selectedApp = JSON.parse(application[0].get('value'))
+                }
+                else {
+                    selectedApp = this.props.applications[0].eContents()[0].get('name')
+                }
+            } else {
+                selectedApp = this.props.applications[0].eContents()[0].get('name')
+            }
+        }
 
         return (
             <Row style={{marginTop: '-5px'}}>
@@ -43,15 +46,16 @@ class HeaderMenu extends React.Component<any, any> {
                         :
                         this.props.applications.map(
                             (app: any) =>
-                                <Col span={span}>
+                                <Col span={span} key={app.eContents()[0].get('name')}>
                                     <Button
+                                        key={app.eContents()[0].get('name')}
                                         type="link"
                                         ghost
                                         style={{
                                             fontWeight: 500,
                                             background: "rgb(255,255,255)",
-                                            fontSize: "medium",
-                                            color: "rgb(18, 18, 18)",
+                                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
+                                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(18, 18, 18)" : "rgb(18, 18, 18, 0.35)",
                                             cursor: "pointer"
                                         }}
                                         onClick={ ()=> this.selectApplication(app.eContents()[0].get('name'))}

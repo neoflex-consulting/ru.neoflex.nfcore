@@ -168,6 +168,7 @@
   height: 250px;
   border-radius: 100%;
   perspective: 1000px;
+  z-index: 32000;
 }
 
 .inner {

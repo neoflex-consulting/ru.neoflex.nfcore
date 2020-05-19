@@ -46,6 +46,7 @@ class AppModule {
     contains ViewElement view
     contains ToolPanel toolPanel
     contains CatalogNode referenceTree
+    boolean useParentReferenceTree
 }
 
 class Application extends AppModule {
@@ -324,9 +325,9 @@ class ViewNode extends TreeNode {
 }
 
 enum TextAlign {
+    Left
     Center
     Justify
-    Left
     Right
 }
 

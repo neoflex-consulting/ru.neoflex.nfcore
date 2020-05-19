@@ -1,6 +1,14 @@
 import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
 
+const indexer = (() => {
+    let i = 0
+    return () => {
+        i = i + 1
+        return i
+    }
+})()
+
 export class Error {
     error: string = "Unknown error";
     message?: string;
@@ -35,12 +43,16 @@ export class API implements IErrorHandler {
     private errorHandlers: Array<IErrorHandler>;
     private ePackagesPromise: Promise<Ecore.EPackage[]>;
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
+    private processes: any[];
+    private processHandlers: ((processes: any[])=>void)[];
 
     private constructor() {
         this.errorHandlers = [this];
         this.ePackagesPromise = new Promise<Ecore.EPackage[]>((resolve, reject) => {
             this.resolvePackages = resolve
         });
+        this.processes = []
+        this.processHandlers = []
     }
 
     static instance(): API {
@@ -97,14 +109,45 @@ export class API implements IErrorHandler {
         return this.fetch(input, this.getOpts(init)).then(response => response.json());
     }
 
+    newProcess(type: string, props: any) {
+        const id = indexer()
+        this.processes.push({id, type, props})
+        this.fireProcesses()
+        return id
+    }
+
+    removeProcess(id: number) {
+        const index = this.processes.findIndex(item => item.id === id)
+        if (index >= 0) {
+            this.processes.splice(index, 1)
+        }
+        this.fireProcesses()
+    }
+
+    subscribeProcesses(handler: (processes: any[])=>void) {
+        this.processHandlers.push(handler)
+    }
+
+    unsubscribeProcesses(handler: (processes: any[])=>void) {
+        this.processHandlers = this.processHandlers.filter(value => value !== handler)
+    }
+
+    fireProcesses() {
+        this.processHandlers.forEach(value => value(this.processes))
+        // console.log("Process count: " + this.processes.length)
+    }
+
     fetch(input: RequestInfo, init?: RequestInit): Promise<any> {
         console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
+        const pid = this.newProcess("FETCH", {input, init})
         return fetch(input, init).then(response => {
             if (!response.ok) {
                 throw response;
             }
+            this.removeProcess(pid)
             return response
         }).catch((error) => {
+            this.removeProcess(pid)
             this.catchFetchError(error);
             return Promise.reject(error)
         });

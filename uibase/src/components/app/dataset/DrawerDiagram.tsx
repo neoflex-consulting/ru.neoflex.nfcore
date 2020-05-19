@@ -87,7 +87,8 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     };
 
     getColumnSelectOptions(id:string, placeHolder:string) {
-        return <Form.Item>
+        return <div>
+        <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
                     rules: [{
@@ -96,7 +97,8 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select placeholder={this.props.t(placeHolder)}>
+                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                    placeholder={this.props.t(placeHolder)}>
                     {this.props.columnDefs!.map((c: any) =>
                         <Select.Option
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
@@ -107,10 +109,12 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                 </Select>
             )}
         </Form.Item>
+        </div>
     };
 
     getEnumSelectOptions(id:string, placeHolder:string, selectEnum: Array<EObject>) {
-        return <Form.Item>
+        return  <div>
+        <Form.Item>
             {this.props.form.getFieldDecorator(id,
                 {
                     rules: [{
@@ -119,7 +123,8 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select placeholder={this.props.t(placeHolder)}>
+                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                    placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
                         <Select.Option
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('name')})}
@@ -130,6 +135,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                 </Select>
             )}
         </Form.Item>
+        </div>
     };
 
     getInput(id:string, placeHolder:string, disabled:boolean = false) {

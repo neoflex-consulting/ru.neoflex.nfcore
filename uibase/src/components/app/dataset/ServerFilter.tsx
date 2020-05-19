@@ -54,6 +54,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                           getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('columnname')}
                             style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
                             showSearch={true}
@@ -90,6 +91,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <Select
+                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('operation')}
                             style={{ width: '179px', marginLeft: '5px' }}
                             allowClear={true}

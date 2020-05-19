@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Service
 public class MasterdataProvider {
@@ -55,13 +56,19 @@ public class MasterdataProvider {
 
     @PostConstruct
     public void init() throws Exception {
-        OServer oServer = provider.getServer().getOServer();
-        if (!oServer.existsDatabase(masterdataDbName)) {
-            oServer.createDatabase(masterdataDbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
-        }
-        context.transact("Init Master Data Service", () -> {
-            initTypes();
-            return null;
+        safe(() -> {
+            OServer oServer = provider.getServer().getOServer();
+            if (!oServer.existsDatabase(masterdataDbName)) {
+                oServer.createDatabase(masterdataDbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+            }
+            try {
+                return context.transact("Init Master Data Service", () -> {
+                    initTypes();
+                    return null;
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
@@ -308,18 +315,24 @@ public class MasterdataProvider {
         return new OEntity(entity);
     }
 
-    public<R> R withDatabase(Function<ODatabaseDocument, R> f) {
+    private<R> R safe(Supplier<R> f) {
         ODatabaseDocumentInternal dbOld = ODatabaseRecordThreadLocal.instance().getIfDefined();
         try {
-            try (ODatabaseDocument database = createDatabaseDocument()) {
-                return f.apply(database);
-            }
+            return f.get();
         }
         finally {
             if (dbOld != null) {
-                dbOld.activateOnCurrentThread();
+                ODatabaseRecordThreadLocal.instance().set(dbOld);
             }
         }
+    }
+
+    public<R> R withDatabase(Function<ODatabaseDocument, R> f) {
+        return safe(() -> {
+            try (ODatabaseDocument database = createDatabaseDocument()) {
+                return f.apply(database);
+            }
+        });
     }
 
     public <R> R inTransaction(Function<ODatabaseDocument, R> f) {
@@ -363,6 +376,7 @@ public class MasterdataProvider {
 
     private void initTypes() throws IOException {
         ensurePlainType("STRING", java.lang.String.class.getName());
+        ensurePlainType("TEXT", java.lang.String.class.getName());
         ensurePlainType("INTEGER", java.lang.Integer.class.getName());
         ensurePlainType("LONG", java.lang.Long.class.getName());
         ensurePlainType("FLOAT", java.lang.Float.class.getName());

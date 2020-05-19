@@ -60,6 +60,7 @@ class Calendar extends React.Component<any, any> {
             },
             columnDefs: [],
             rowData: [],
+            filteredRowData: undefined,
             spinnerVisible: false,
             selectedValueInGrid: 'Системные заметки',
             frameworkComponents: {
@@ -358,11 +359,9 @@ class Calendar extends React.Component<any, any> {
     onFullScreen = () => {
         if (this.state.fullScreenOn){
             this.setState({ fullScreenOn: false});
-            localStorage.setItem('fullScreenOn', 'false');
         }
         else{
             this.setState({ fullScreenOn: true});
-            localStorage.setItem('fullScreenOn', 'true');
         }
     };
 
@@ -387,7 +386,27 @@ class Calendar extends React.Component<any, any> {
     };
 
     searchValue = () => {
-        console.log()
+        if (this.state.searchValue === "") {
+            this.setState({filteredRowData: undefined})
+        } else {
+            let filteredRowData: any = [];
+            this.state.rowData.forEach((r:any) => {
+                if (
+                    r['Полное название формы'].includes(this.state.searchValue) ||
+                    r['Краткое название формы'].includes(this.state.searchValue) ||
+                    r['Периодичность сдачи'].includes(this.state.searchValue) ||
+                    r['Рабочий день сдачи'].includes(this.state.searchValue) ||
+                    r['Время сдачи'].includes(this.state.searchValue) ||
+                    r['Отчетность по выходным'].includes(this.state.searchValue) ||
+                    r['Интервал расчета'].includes(this.state.searchValue)
+                    ||
+                    r['Отчетная дата "на"'].find((d:any) => d.includes(this.state.searchValue))
+                ) {
+                    filteredRowData.push(r)
+                }
+            });
+            this.setState({filteredRowData})
+        }
     };
 
     openNotification(notification: any, context: any): void  {
@@ -401,6 +420,7 @@ class Calendar extends React.Component<any, any> {
         if (notification.contents[0]['AppModuleName'] !== null) {
             context.changeURL(
                 notification.contents[0]['AppModuleName'],
+                false,
                 undefined,
                 params
             )
@@ -441,22 +461,16 @@ class Calendar extends React.Component<any, any> {
         return result;
     }
 
-    onDateClick = (day: any) => {
-        this.setState({
-            selectedDate: day
-        })
-    };
-
     nextMonth = () => {
-        this.setState({
-            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.addMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth});
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     prevMonth = () => {
-        this.setState({
-            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.subMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth})
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     componentDidMount(): void {
@@ -550,7 +564,9 @@ class Calendar extends React.Component<any, any> {
     renderCreateNotification() {
         const {t} = this.props;
         return (
+            <div id="PlusIconInFullScreen">
             <Drawer
+                getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('createNotification')}
                 width={'450px'}
@@ -568,6 +584,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 }
             </Drawer>
+            </div>
         );
     }
 
@@ -600,7 +617,10 @@ class Calendar extends React.Component<any, any> {
     renderLegend() {
         const {t} = this.props;
         return (
+            <div id="legendIconInFullScreen">
             <Drawer
+                className="legendDrawer"
+                getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('legend')}
                 width={'450px'}
@@ -617,6 +637,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 }
             </Drawer>
+            </div>
         );
     }
 
@@ -632,7 +653,7 @@ class Calendar extends React.Component<any, any> {
             >
                 {this.state.columnDefs.length !== 0 && <AgGridReact
                     ref={this.grid}
-                    rowData={this.state.rowData}
+                    rowData={this.state.filteredRowData === undefined ? this.state.rowData : this.state.filteredRowData}
                     modules={AllCommunityModules}
                     onGridReady={this.onGridReady}
                     suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
@@ -670,12 +691,16 @@ class Calendar extends React.Component<any, any> {
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
         return (
-            <div className="header row flex-middle">
+
+            <div id="selectInFullScreen" className="header row flex-middle">
                 {
                     this.state.calendarVisible &&
                     <div
                         style={{display: "contents"}}
                     >
+                        <div
+                            className="date">
+
                         <Button style={{marginLeft: '10px'}}
                                 className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
@@ -683,12 +708,11 @@ class Calendar extends React.Component<any, any> {
                             {t('today')}
                         </Button>
 
-                        <Select
-                            className='selectYear'
+                        <Select className='selectYear'
+                                getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             value={this.state.currentMonth.getFullYear()}
-                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal"}}
-                            onChange={(e: any) => {this.handleChange(e, 'year')}}
-                        >
+                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
+                            onChange={(e: any) => {this.handleChange(e, 'year')}}>
                             {
                                 this.state.years!.map((y: any) =>
                                     <Select.Option
@@ -703,6 +727,7 @@ class Calendar extends React.Component<any, any> {
 
                         <Select
                             className='selectMonth'
+                            getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
@@ -710,6 +735,7 @@ class Calendar extends React.Component<any, any> {
                             {
                                 this.state.months!.map((m: any) =>
                                     <Select.Option
+                                        className='selectMonth2'
                                         key={m}
                                         value={m}
                                     >
@@ -721,19 +747,22 @@ class Calendar extends React.Component<any, any> {
                                 )
                             }
                         </Select>
+                        </div>
 
                         <div className="col col-start">
                             <div className="icon" onClick={this.prevMonth}>
                                 chevron_left
                             </div>
                         </div>
-                        <div className="col col-center">
+                        <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
                         {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
                     </span>
                         </div>
-                        <div className="col col-end" onClick={this.nextMonth}>
-                            <div className="icon">chevron_right</div>
+                        <div className="col col-end" >
+                            <div className="icon" onClick={this.nextMonth}>
+                                chevron_right
+                            </div>
                         </div>
 
                         <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
@@ -748,40 +777,53 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents", marginTop: '2px'}}
                     >
-                        <div style={{flexGrow: 1, marginLeft: '21px'}}>
-                            <Input
-                                style={{width: '186px', borderRadius: '4px', fill: '#ffffff', strokeWidth: 1, height: '32px'}}
-                                placeholder="Поиск"
-                                suffix={
-                                    <img
-                                        alt="Not found"
-                                        src={searchIcon}
-                                        onClick={this.searchValue}
-                                    />
-                                }
-                                onChange={(e: any) => {this.changeSearchValue(e.target.value)}}
-                            />
-                        </div>
+                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
+                                <Input
+                                    style={{
+                                        width: '186px',
+                                        borderRadius: '4px',
+                                        fill: '#ffffff',
+                                        strokeWidth: 1,
+                                        height: '32px'
+                                    }}
+                                    placeholder="Поиск"
+                                    suffix={
+                                        <img
+                                            alt="Not found"
+                                            src={searchIcon}
+                                            onClick={this.searchValue}
+                                        />
+                                    }
+                                    onChange={(e: any) => {
+                                        this.changeSearchValue(e.target.value)
+                                    }}
+                                />
+                            </div>
 
-                        <Select
-                            value={this.state.selectedValueInGrid}
-                            style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: '1px'}}
-                            onChange={(e: any) => {this.handleChange(e, 'select')}}
-                        >
-                            <Select.Option
-                                key={this.props.viewObject.get('defaultStatus').get('name')}
-                                value={this.props.viewObject.get('defaultStatus').get('name')}
-                            >
-                                {this.props.viewObject.get('defaultStatus').get('name')}
-                            </Select.Option>
 
-                            <Select.Option
-                                key={'Системные заметки'}
-                                value={'Системные заметки'}
+                            <Select
+                                getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
+                                value={this.state.selectedValueInGrid}
+                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px'}}
+                                onChange={(e: any) => {
+                                    this.handleChange(e, 'select')
+                                }}
                             >
-                                Системные заметки
-                            </Select.Option>
-                        </Select>
+                                <Select.Option
+                                    key={this.props.viewObject.get('defaultStatus').get('name')}
+                                    value={this.props.viewObject.get('defaultStatus').get('name')}
+                                >
+                                    {this.props.viewObject.get('defaultStatus').get('name')}
+                                </Select.Option>
+
+                                <Select.Option
+                                    key={'Системные заметки'}
+                                    value={'Системные заметки'}
+                                >
+                                    Системные заметки
+                                </Select.Option>
+                            </Select>
+
 
                     </div>
                 }
@@ -789,34 +831,19 @@ class Calendar extends React.Component<any, any> {
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
 
 
-                {localStorage.getItem('fullScreenOn') === 'true' ?
                     <Button
                         className="buttonPlus"
                         type="primary"
                         style={{
                             width: '20px',
                             height: '30px',
-                            marginTop: '11px',
+                            marginTop: this.state.fullScreenOn ? '11px' : '2px',
                             backgroundColor: '#293468'
                         }}
                         onClick={this.handleCreateMenu}>
                         <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
                     </Button>
 
-                :
-                    <Button
-                        className="buttonPlus"
-                        type="primary"
-                        style={{
-                            width: '20px',
-                            height: '30px',
-                            marginTop: '2px',
-                            backgroundColor: '#293468'
-                        }}
-                        onClick={this.handleCreateMenu}>
-                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-                    </Button>
-                }
 
 
 
@@ -881,6 +908,7 @@ class Calendar extends React.Component<any, any> {
 
         <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
 
+
         <Button
             className="buttonFullScreen"
             type="link"
@@ -892,11 +920,10 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            {localStorage.getItem('fullScreenOn') === 'false'  ?
-
-            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+            {this.state.fullScreenOn  ?
+                <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
             :
-            <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
+            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
         </Button>
             </div>
 
@@ -913,7 +940,7 @@ class Calendar extends React.Component<any, any> {
         for (let i = 0; i < 7; i++) {
             days.push(
                 <div key={i}
-                     className="col col-center col-text" style={{fontSize: "110%"}}
+                     className="col col-center col-text border-line" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
                 </div>
@@ -951,28 +978,29 @@ class Calendar extends React.Component<any, any> {
                                 : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
                             }`}
                         key = {day.toString()}
-                        onClick={() =>
-                            this.onDateClick(cloneDay)
-                        }
                     >
+                        <div className="days-header">
                         <span className="number">{formattedDate}</span>
                         <span className="title">{title}</span>
-                        <span className="bg">{formattedDate}</span>
-                        <div>
+                        </div>
+                        <div className="notification-block">
                             {content.length !== 0
                                 ?
                                 content.map( (r: any) =>
+                                    <div className="notification-btn"
+                                    style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                    >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}
                                     >
-                                        {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
+                                            {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
                                     </Button>
+                                    </div>
                                 )
                                 : ""}
                         </div>
@@ -996,11 +1024,11 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <Fullscreen
-                enabled={this.state.fullScreenOn}
-                onChange={onFullScreen => this.setState({onFullScreen})}>
             <MainContext.Consumer>
                 { context => (
+                    <Fullscreen
+                        enabled={this.state.fullScreenOn}
+                        onChange={fullScreenOn => this.setState({ fullScreenOn })}>
                     <div className="calendar">
                         {this.state.createMenuVisible && this.renderCreateNotification()}
                         {this.state.editMenuVisible && this.renderEditNotification()}
@@ -1010,9 +1038,10 @@ class Calendar extends React.Component<any, any> {
                         {this.state.calendarVisible && this.renderCells(context)}
                         {!this.state.calendarVisible && this.renderGrid()}
                     </div>
+                    </Fullscreen>
                 )}
             </MainContext.Consumer>
-            </Fullscreen>
+
         );
     }
 }
