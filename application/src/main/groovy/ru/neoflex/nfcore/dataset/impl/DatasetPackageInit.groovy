@@ -272,12 +272,12 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Я 666", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
 
         /*NRdemo*/
-        def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1")
-        def nrDemoSection2 = AppModuleInit.createAppModuleNRDemoMain("F110_Section2", "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)", "jdbcNRDemoSection2", "DatasetNRDemoSection2")
-        def nrDemoSection3 = AppModuleInit.createAppModuleNRDemoMain("F110_Section3", "Раздел III. Расшифровки для расчета показателей, используемых для оценки финансовой устойчивости кредитных организаций", "jdbcNRDemoSection3", "DatasetNRDemoSection3")
-        def nrDemoSection4 = AppModuleInit.createAppModuleNRDemoMain("F110_Section4", "Раздел IV. Расшифровки, используемые при расчете денежно-кредитных показателей", "jdbcNRDemoSection4", "DatasetNRDemoSection4")
+        def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1", true)
+        def nrDemoSection2 = AppModuleInit.createAppModuleNRDemoMain("F110_Section2", "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)", "jdbcNRDemoSection2", "DatasetNRDemoSection2", true)
+        def nrDemoSection3 = AppModuleInit.createAppModuleNRDemoMain("F110_Section3", "Раздел III. Расшифровки для расчета показателей, используемых для оценки финансовой устойчивости кредитных организаций", "jdbcNRDemoSection3", "DatasetNRDemoSection3", true)
+        def nrDemoSection4 = AppModuleInit.createAppModuleNRDemoMain("F110_Section4", "Раздел IV. Расшифровки, используемые при расчете денежно-кредитных показателей", "jdbcNRDemoSection4", "DatasetNRDemoSection4", true)
 
-        def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail", true)
+        def nrDemoDetail = AppModuleInit.createAppModuleNRDemoDetail("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail", true)
         def nrDemoCalcMart = AppModuleInit.createAppModuleNRDemoCalcMart("F110_CalcMart", "Запуск расчета формы", "jdbcNRDemoCalcMart", "DatasetNRDemoCalcMart")
         def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 
