@@ -220,7 +220,7 @@ class DatasetPackageInit {
                     " where sysdate between actual_date and actual_end_date \n"
              String f110_codes_bind = "   and nvl(:SECTIONS,'1,2,3,4') like '%'||to_char(section_number)||'%'  \n" +
                     " order by section_number, row_number\n"
-            String f110_sections = "select distinct section_number as key, 'Раздел '||section_number as value from dma.dm_f110_code_s order by 1"
+            String f110_sections = "select distinct 'Раздел '||section_number as key, section_number as value from dma.dm_f110_code_s order by 1"
 
             JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110Codes", f110_codes,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110Codes")

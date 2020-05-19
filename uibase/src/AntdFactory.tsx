@@ -341,7 +341,7 @@ class Select_ extends ViewContainer {
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
                                                value={data.value}>
-                                    {data.value}
+                                    {data.key}
                                 </Select.Option>
                             )
                             :
