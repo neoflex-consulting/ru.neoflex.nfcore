@@ -94,19 +94,44 @@ class DatasetPackageInit {
                     "       active_reserve_type\n" +
                     "  from table(data_representation.rep_f110_detail.GetF110DetailApex(\n" +
                     "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => NULL,\n" +
+                    "         i_BranchCode      => '000001',\n" +
+                    "         i_SectionNumber   => null,\n" +
+                    "         i_F110Code        => null\n" +
+                    "       ))\n" +
+                    " where (NULL like '%'||to_char(section_number)||'%' or NULL is null) \n" +
+                    "   and (NULL like '%'||to_char(f110_code)||'%' or NULL is null) "
+
+            String bindQuery = "select section_number,\n" +
+                    "       row_number,\n" +
+                    "       f110_code,\n" +
+                    "       account_number,\n" +
+                    "       f102_symbol,\n" +
+                    "       amount_rub,\n" +
+                    "       account_name,\n" +
+                    "       account_amount_rub,\n" +
+                    "       option_premium_amount,\n" +
+                    "       customer_name,\n" +
+                    "       party_type,\n" +
+                    "       is_co,\n" +
+                    "       is_resident,\n" +
+                    "       agreement_number,\n" +
+                    "       active_reserve_type\n" +
+                    "  from table(data_representation.rep_f110_detail.GetF110DetailApex(\n" +
+                    "         i_AppUser         => 0,\n" +
                     "         i_OnDate          => :REPORT_DATE,\n" +
                     "         i_BranchCode      => '000001',\n" +
                     "         i_SectionNumber   => null,\n" +
                     "         i_F110Code        => null\n" +
-                    "       ))\n"
-            String detailQuery_bind = " where (:SECTIONS like '%'||to_char(section_number)||'%' or :SECTIONS is null) \n" +
+                    "       ))\n" +
+                    " where (:SECTIONS like '%'||to_char(section_number)||'%' or :SECTIONS is null) \n" +
                     "   and (:CODES like '%'||to_char(f110_code)||'%' or :CODES is null) "
 
-            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoDetail","dm_f110_detail_f","dma",detailQuery,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoDetail",detailQuery,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoDetail")
+            JdbcDatasetInit.updateJdbcDataset("jdbcNRDemoDetail", bindQuery)
 
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoDetail", "jdbcNRDemoDetail")
-            JdbcDatasetInit.updateJdbcDataset("jdbcNRDemoDetail", detailQuery + detailQuery_bind)
             //TODO настраивать ширину столбцов в момент создания
             DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
 
