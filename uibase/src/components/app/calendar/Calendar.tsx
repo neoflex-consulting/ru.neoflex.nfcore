@@ -60,6 +60,7 @@ class Calendar extends React.Component<any, any> {
             },
             columnDefs: [],
             rowData: [],
+            filteredRowData: undefined,
             spinnerVisible: false,
             selectedValueInGrid: 'Системные заметки',
             frameworkComponents: {
@@ -385,7 +386,27 @@ class Calendar extends React.Component<any, any> {
     };
 
     searchValue = () => {
-        console.log()
+        if (this.state.searchValue === "") {
+            this.setState({filteredRowData: undefined})
+        } else {
+            let filteredRowData: any = [];
+            this.state.rowData.forEach((r:any) => {
+                if (
+                    r['Полное название формы'].includes(this.state.searchValue) ||
+                    r['Краткое название формы'].includes(this.state.searchValue) ||
+                    r['Периодичность сдачи'].includes(this.state.searchValue) ||
+                    r['Рабочий день сдачи'].includes(this.state.searchValue) ||
+                    r['Время сдачи'].includes(this.state.searchValue) ||
+                    r['Отчетность по выходным'].includes(this.state.searchValue) ||
+                    r['Интервал расчета'].includes(this.state.searchValue)
+                    ||
+                    r['Отчетная дата "на"'].find((d:any) => d.includes(this.state.searchValue))
+                ) {
+                    filteredRowData.push(r)
+                }
+            });
+            this.setState({filteredRowData})
+        }
     };
 
     openNotification(notification: any, context: any): void  {
@@ -638,7 +659,7 @@ class Calendar extends React.Component<any, any> {
             >
                 {this.state.columnDefs.length !== 0 && <AgGridReact
                     ref={this.grid}
-                    rowData={this.state.rowData}
+                    rowData={this.state.filteredRowData === undefined ? this.state.rowData : this.state.filteredRowData}
                     modules={AllCommunityModules}
                     onGridReady={this.onGridReady}
                     suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей

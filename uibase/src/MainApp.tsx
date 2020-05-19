@@ -41,8 +41,6 @@ export class MainApp extends React.Component<any, State> {
 
     loadObject = () => {
         let name: string;
-        let objectPackage: string;
-        let objectClass: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
 
