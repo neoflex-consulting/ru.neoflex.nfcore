@@ -36,7 +36,6 @@
 }
 
 /*!* GENERAL *!*/
-
 .headerCalendar {
     font-weight: 500;
     display: block;
@@ -105,7 +104,12 @@
     line-height: initial;
     background: var(--neutral-color);
     border: 1px solid var(--border-color);
-    padding: 2em;
+    padding: 1em 1em 0 1em;
+    background-color: rgb(243, 244, 251);
+}
+
+.primary {
+    background-color: rgb(243, 244, 251);
 }
 
 .calendar .header {
@@ -128,30 +132,41 @@
     color: var(--main-color);
 }
 
+.calendar .header .date div, .calendar .header .date button {
+    font-weight: 600;
+    align-items: center;
+}
+
+.calendar .header .date button{
+    background-color: rgb(255,204,102);
+    color: white;
+}
+
 div .body {
     border: 1px solid rgba(200, 200, 200, 0.65);
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-
+    box-shadow: 0px 0px 2px rgba(132, 132, 132, 0.5);
 }
 
 /*!*День недели*!*/
 .calendar .days {
     font-weight: 400;
-    font-size: 100%;
+    font-size: 1em;
     /*margin: 0 10px 0 10px;*/
-    height: 3em;
+    height: 4em;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     background-color: rgba(42, 53, 108, 0.75);
+    box-shadow: 0px 0px 5px rgba(132, 132, 132, 0.5);
 }
 
 .days .col-text {
     color: rgb(255, 255, 255);
     height:100%;
-    line-height: 2.5em;
+    line-height: 3em;
 }
 
 .days .border-line {
@@ -175,10 +190,9 @@ div .body {
 /*!*Даты в месяце*!*/
 .calendar .body .cell {
     position: relative;
-    min-height: 12vh;
+    min-height: 30px;
     border-right: 1px solid var(--border-color);
     overflow: hidden;
-    cursor: pointer;
     background: var(--neutral-color);
     transition: 0.25s ease-out;
 }
@@ -192,6 +206,7 @@ div .body {
 .calendar .body .cell.selected{
     border: 1px #2f54eb solid;
     border-radius: 4px;
+    box-shadow: 0px 0px 2px rgba(0,0,0,0.2), inset 0px 1px 2px rgba(0,0,0,0.2), inset 0px 1px 2px rgba(0,0,0,0.2);
 }
 
 .calendar .body .row {
@@ -208,23 +223,22 @@ div .body {
 
 .calendar .body .cell .number {
     position: absolute;
-    font-size: 85%;
+    font-size: 14px;
     line-height: 1;
-    top: .75em;
+    top: .5em;
     right: .75em;
-    font-weight: 800;
-    color: rgb(117, 117, 117);
+    font-weight: 700;
+    color: #333333;
 }
 
 .calendar .body .cell .title {
-    font-size: 85%;
+    font-size: 12px;
     font-weight: 600;
     margin-left: 6px;
-    text-color: rgb(117, 117, 117);
+    color: rgb(135, 135, 135);
 }
 
 .calendar .body .disabled {
-    color: var(--text-color-light);
     pointer-events: none;
 }
 
@@ -322,11 +336,78 @@ div .body {
 }
 
 /*Ячейки*/
-.notification-btn {
-    border-radius: 4px;
-    height: 100%;
-    opacity: 1;
-    z-index: 0;
+
+.notification-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 0;
 }
 
+.notification-btn {
+    display: flex;
+    border-radius: 4px;
+    height: 100%;
+    width: 90%;
+    margin: 4px 0;
+    color: black;
+    justify-content: flex-end;
+}
 
+.notification-btn Button{
+    display: flex;
+    opacity: 0.85;
+    background-color: rgb(239, 239, 239);
+    height: 28px;
+    width: 93%;
+    overflow-x:hidden;
+    font-size: 12px;
+    color: #000000;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border: none;
+}
+
+.notification-btn Button:hover{
+    outline: none;
+    border: none;
+    color: black;
+}
+
+/*Легенда*/
+
+.calendar .ant-drawer-wrapper-body .ant-drawer-title {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #27677c;
+    border: none;
+}
+
+.ant-checkbox-wrapper .ant-checkbox-inner,
+.ant-checkbox:hover .ant-checkbox-inner,
+.ant-checkbox-input:focus + .ant-checkbox-inner {
+    border: 2px solid grey;
+}
+
+.ant-checkbox-input:checked + .ant-checkbox-inner {
+    border: none;
+}
+
+.ant-checkbox-checked::after {
+    border: 1px solid #27677c
+}
+
+.ant-drawer-body .ant-col-17 {
+    font-weight: 500;
+}
+
+.ant-btn-primary,
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+    background-color: #293468;
+    border: 1px solid #293468;
+    width: 120px;
+}

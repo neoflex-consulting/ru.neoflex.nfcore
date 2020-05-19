@@ -461,12 +461,6 @@ class Calendar extends React.Component<any, any> {
         return result;
     }
 
-    onDateClick = (day: any) => {
-        this.setState({
-            selectedDate: day
-        })
-    };
-
     nextMonth = () => {
         const newMonth = dateFns.addMonths(this.state.currentMonth, 1);
         this.setState({currentMonth: newMonth});
@@ -704,6 +698,9 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents"}}
                     >
+                        <div
+                            className="date">
+
                         <Button style={{marginLeft: '10px'}}
                                 className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
@@ -725,7 +722,7 @@ class Calendar extends React.Component<any, any> {
                                         {y}
                                     </Select.Option>
                                 )
-                                }
+                            }
                         </Select>
 
                         <Select
@@ -750,6 +747,7 @@ class Calendar extends React.Component<any, any> {
                                 )
                             }
                         </Select>
+                        </div>
 
                         <div className="col col-start">
                             <div className="icon" onClick={this.prevMonth}>
@@ -980,28 +978,22 @@ class Calendar extends React.Component<any, any> {
                                 : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
                             }`}
                         key = {day.toString()}
-                        onClick={() =>
-                            this.onDateClick(cloneDay)
-                        }
                     >
                         <div className="days-header">
                         <span className="number">{formattedDate}</span>
                         <span className="title">{title}</span>
                         </div>
-                        <span className="bg">{formattedDate}</span>
-                        <div>
+                        <div className="notification-block">
                             {content.length !== 0
                                 ?
                                 content.map( (r: any) =>
                                     <div className="notification-btn"
-                                    style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                    style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        type="link"
-                                        style={{marginLeft: '15px', opacity:'0.6', width: "150px", display: "flex", color: "black", backgroundColor: "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}

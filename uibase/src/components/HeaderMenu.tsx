@@ -46,8 +46,9 @@ class HeaderMenu extends React.Component<any, any> {
                         :
                         this.props.applications.map(
                             (app: any) =>
-                                <Col span={span}>
+                                <Col span={span} key={app.eContents()[0].get('name')}>
                                     <Button
+                                        key={app.eContents()[0].get('name')}
                                         type="link"
                                         ghost
                                         style={{
