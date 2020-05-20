@@ -1,16 +1,20 @@
 .app-logo {
-  background-color: #fdfdfd;
-  color: #262626;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 400;
   font-size: 23px;
   height: 55px;
   line-height: 55px;
   display: inline-block;
   width: 260px;
-  padding-left: 14px;
+  padding-left: 40px;
   border-bottom: 1px solid #e8e8e8;
   /*user-select: none;*/
   margin-top: -15px;
+}
+
+.app-logo span {
+  font-weight: 700;
+  margin: 0 2px;
 }
 
 .app-logo-settings {
@@ -27,9 +31,9 @@
 }
 
 .app-header {
-  height: '55px'; 
-  padding: '0px'; 
-  background-color: #fdfdfd;
+  /*height: 55px;*/
+  /*padding: 0px;*/
+  background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
 }
 
@@ -68,6 +72,10 @@
   box-shadow: 0px 0px 12px 1px #ebebeb;
   transform: translate(-50%,-50%);
   padding: 24px;
+}
+
+.login-box .app-logo {
+  color: black;
 }
 
 .input-login::placeholder{

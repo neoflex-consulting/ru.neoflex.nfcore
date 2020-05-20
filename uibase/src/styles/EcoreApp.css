@@ -10,7 +10,7 @@
 	margin-bottom: 2px;
 	background-color: #fdfdfd;
 }
-  
+
 .panel-button {
 	margin-left: 13px;
 	border: 0;
@@ -62,6 +62,9 @@
 	.item-title {
 		width: 40px;
 	}
+	.btn-appName span {
+		white-space: pre-line;
+	}
 }
 
 .resource-link {
@@ -73,7 +76,7 @@
 	height: 100%;
 	border: none;
 	padding-top: 7px;
-	background-color: #fdfdfd;
+	background-color: #2a356c;
 }
 
 .lang-label{
@@ -82,7 +85,7 @@
     float: right;
     margin-top: -2px;
 	margin-right: 5px;
-	color: rgb(18, 18, 18) /*#189dff*/;
+	color: #ffffff;
     text-shadow: 1px 1px 2px #d8d8d8;
     font-weight: 100;
 }
@@ -135,4 +138,38 @@
 	height: 250px;
 	border-radius: 100%;
 	perspective: 1000px;
+}
+
+.ant-btn {
+	border: none;
+}
+
+
+li .lang-title, .ant-menu-item, .ant-menu-item>a, .ant-menu {
+	color: #ffffff;
+}
+
+li:hover .lang-title {
+	color: #2a356c;
+}
+
+.ant-menu-item {
+	background-color: #2a356c;
+}
+
+.ant-menu-submenu-title {
+	padding: 0 15px 0 0;
+}
+
+.ant-menu-item:hover {
+	background-color: #ffffff;
+}
+
+.logout-icon {
+	background-image: url("../icons/logoutIcon.svg") !important;
+	background-repeat:  no-repeat !important;
+}
+
+.btn-appName:hover span, .bell-icon:hover {
+	color: #2657f6;
 }

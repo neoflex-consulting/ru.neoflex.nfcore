@@ -70,7 +70,7 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
                             </Row>
                         )
                 }
-                <Button title={t('apply')} style={{ width: '100px', right: '6px', }} type="primary"
+                <Button title={t('apply')} style={{ width: '120px', right: '6px', }} type="primary"
                         onClick={()=> this.apply(this.state.notificationStatus)}>
                     {t('apply')}
                 </Button>

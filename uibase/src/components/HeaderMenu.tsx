@@ -39,23 +39,24 @@ class HeaderMenu extends React.Component<any, any> {
         }
 
         return (
-            <Row style={{marginTop: '-5px'}}>
+            <Row style={{marginTop: '0px'}}>
                 {
                     this.props.applications.length === 0
                         ?
-                        <span style={{fontWeight: 500}}>Loading... </span>
+                        <span style={{fontWeight: 500, color: 'rgb(255, 255, 255)'}}>Loading... </span>
                         :
                         this.props.applications.map(
                             (app: any) =>
                                 <Col span={span}>
                                     <Button
+                                        className='btn-appName'
                                         type="link"
                                         ghost
                                         style={{
                                             fontWeight: 500,
                                             background: "rgb(255,255,255)",
                                             fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(18, 18, 18)" : "rgb(18, 18, 18, 0.35)",
+                                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
                                             cursor: "pointer"
                                         }}
                                         onClick={ ()=> this.selectApplication(app.eContents()[0].get('name'))}
