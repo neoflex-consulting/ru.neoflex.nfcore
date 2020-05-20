@@ -3,10 +3,12 @@ import {WithTranslation, withTranslation} from "react-i18next";
 import {Col, Row, Select} from "antd";
 import {EObject} from "ecore";
 import {API} from "../../../modules/api";
+import MasterdataEditor from "./MasterdataEditor";
 
 class MetadataBrowser extends React.Component<any & WithTranslation, any> {
     state = {
-        entityTypes: []
+        entityTypes: [],
+        index: -1
     }
 
     componentDidMount() {
@@ -30,6 +32,7 @@ class MetadataBrowser extends React.Component<any & WithTranslation, any> {
                 <Col span={1}/>
                 <Col span={22}>
                     <Select
+                        onChange={value => {this.setState({index: value!==undefined?value:-1})}}
                         notFoundContent={t('notfound')}
                         allowClear={true}
                         showSearch={true}
@@ -42,6 +45,10 @@ class MetadataBrowser extends React.Component<any & WithTranslation, any> {
                                 {eObject.get('name')}
                             </Select.Option>)}
                     </Select>
+                    {this.state.index >= 0 &&
+                    <div style={{marginTop: 15}}>
+                        <MasterdataEditor {...this.props} entityType={this.state.entityTypes[this.state.index]}/>
+                    </div>}
                 </Col>
                 <Col span={1}/>
             </Row>

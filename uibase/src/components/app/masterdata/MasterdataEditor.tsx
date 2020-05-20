@@ -28,6 +28,7 @@ const backgroundColor = "#fdfdfd";
 class MasterdataEditor extends React.Component<any, any> {
     private grid: React.RefObject<any>;
     state = {
+        entityTypeName: '',
         gridOptions: {
             defaultColDef: {
                 resizable: true,
@@ -47,8 +48,12 @@ class MasterdataEditor extends React.Component<any, any> {
         if (this.state.themes.length === 0) {
             this.getAllThemes()
         }
-        this.loadData()
+    }
 
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {
+        if (this.state.entityTypeName !== this.props.entityType.get('name')) {
+            this.setState({entityTypeName: this.props.entityType.get('name')}, this.loadData)
+        }
     }
 
     loadData = () => {
@@ -160,8 +165,7 @@ class MasterdataEditor extends React.Component<any, any> {
     renderForm() {
         const {t} = this.props
         const {currentRow} = this.state
-        const viewObject = this.props.viewObject as EObject
-        const entityType = viewObject.get('entityType') as EObject
+        const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
                 <FetchSpinner/>
@@ -207,8 +211,7 @@ class MasterdataEditor extends React.Component<any, any> {
     renderGrid() {
         const {t} = this.props
         const {gridOptions} = this.state;
-        const viewObject = this.props.viewObject as EObject
-        const entityType = viewObject.get('entityType') as EObject
+        const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
                 <FetchSpinner/>
