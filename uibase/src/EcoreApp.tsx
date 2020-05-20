@@ -23,6 +23,8 @@ import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from ".
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
+import EventTracker from "./EventTracker";
+import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 const backgroundColor = "#2a356c";
 
 const { Header, Content, Sider } = Layout;
@@ -59,9 +61,11 @@ class EcoreApp extends React.Component<any, State> {
             //В момент создания страницы
             docxHandlers: [],
             excelHandlers: [],
-            submitHandlers: [],
-            //По событию на страницеchangeUserProfile
-            contextItemValues: new Map()
+            //По событию на странице
+            contextItemValues: new Map(),
+
+            eventActions: [],
+            eventTracker: new EventTracker(),
         };
         this.state = {
             principal: undefined,
@@ -207,7 +211,7 @@ class EcoreApp extends React.Component<any, State> {
                 param
                 :
                 param
-                    .filter( (p: any) => p['parameterName'] && p['parameterValue'])
+                    .filter( (p: any) => p['parameterName'] )
                     .map( (p: any) => {
                         return (
                             pattern.create({
@@ -246,7 +250,8 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[]) => {
+    runQuery = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = [], filterParams: IServerQueryParam[] = [], aggregationParams: IServerQueryParam[] = [],
+                sortParams: IServerQueryParam[] = [], groupByParams: IServerQueryParam[] = [], calculatedExpression: IServerQueryParam[] = []) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
@@ -327,7 +332,7 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     onRightMenu(e : any) {
-        if (e.key === "logout" || e.value === "logout") {
+        if (e.value === "logout") {
             API.instance().logout().then(() => {
                 this.setState({principal : undefined, getUserProfile: true});
                 this.state.context.updateContext!(({userProfile: undefined}))
@@ -348,13 +353,7 @@ class EcoreApp extends React.Component<any, State> {
             localStorage.setItem('notifierDuration', '3');
         }
     }
-    onRightMenuTest = () => {
-        API.instance().logout().then(() => {
-            this.setState({principal : undefined, getUserProfile: true});
-            this.state.context.updateContext!(({userProfile: undefined}))
-        });
-        this.props.history.push('')
-    }
+
     setPrincipal = (principal: any)=>{
         this.setState({principal}, API.instance().init);
     };
@@ -436,7 +435,7 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
-                <Header className="app-header" style={{height:'55px', padding:'0px', backgroundColor:'#2a356c'}} >
+                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: backgroundColor}}>
                     <Row>
                         <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
                             <div className={window.location.pathname.includes('developer' +
@@ -578,7 +577,7 @@ class EcoreApp extends React.Component<any, State> {
 
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query', 'tools']
+        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
@@ -608,6 +607,12 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ color: '#eeeeee' }}>{t('tools')}</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'masterdata'}>
+                            <Link to={`/developer/masterdata`}>
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
+                                <span style={{ color: '#eeeeee' }}>{t('masterdata')}</span>
+                            </Link>
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
@@ -618,6 +623,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route exact={true} path='/developer/data' component={DataBrowser}/>
                             <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
                             <Route path='/developer/tools' component={Tools}/>
+                            <Route path='/developer/masterdata' component={MasterdataBrowser}/>
                         </Switch>
                     </Content>
                 </Layout>
@@ -737,11 +743,6 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
-
-        /*this.updateContext({docxHandlers: []});
-        this.updateContext({excelHandlers: []});
-        this.updateContext({submitHandlers: []});
-        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {

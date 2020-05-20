@@ -1,22 +1,23 @@
-import {ViewFactory, View} from './View'
+import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography, DatePicker} from 'antd';
+import {Button, Col, DatePicker, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
 import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
 import {API} from './modules/api';
-import { WithTranslation } from 'react-i18next';
+import {WithTranslation} from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {ISubmitHandler} from "./MainContext";
+import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {replaceNamedParam, getNamedParams} from "./utils/namedParamsUtils";
+import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {eventType, actionType} from "./utils/consts";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -149,19 +150,6 @@ class Button_ extends ViewContainer {
         let params: Object[] = appModule.params;
         this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
-    submitItems = () => {
-        if (this.props.viewObject.get('submitItems')) {
-            let checkItems: String[] = [];
-            this.props.viewObject.get('submitItems').each((item: EObject) => {
-                checkItems.push(item.get('name'))
-            });
-            this.props.context.submitHandlers.forEach((obj:ISubmitHandler)=>{
-                if (checkItems.includes(obj.name)) {
-                    obj.handler()
-                }
-            })
-        }
-    };
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
@@ -177,7 +165,9 @@ class Button_ extends ViewContainer {
             </Button>
             }
             {this.props.viewObject.get('buttonSubmit') === true &&
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
+                this.props.context.eventTracker?.notifyAll({type:eventType.click,itemName:this.props.viewObject.get('name')});
+            }}>
                 {(label)? label: t('submit')}
             </Button>
             }
@@ -196,7 +186,10 @@ class Select_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            selectData: []
+            selectData: [],
+            params: [],
+            currentValue: "",
+            datasetComponent: undefined
         };
     }
 
@@ -214,25 +207,48 @@ class Select_ extends ViewContainer {
         };
     }
 
-    onChange = (currentValue: string) => {
-        //TODO для множественного выбора
-        this.selected = this.state.selectData.find((el:{key:string,value:string})=>{
-            if (el.value === currentValue) {
-                return el
-            }
-        }).key;
+    onChange = (currentValue: string|string[]) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
+        if (typeof currentValue === 'string') {
+            this.selected = currentValue
+        } else if (Array.isArray(currentValue)) {
+            let temp = this.state.selectData.filter((el:{key:string,value:string})=>{
+                return currentValue.includes(el.value)
+            }).map((el:{key:string,value:string})=>{
+                return el.key
+            });
+            this.selected = temp.join(",");
+            currentValue = currentValue.join(",");
+        }
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}));
     };
 
     componentDidMount(): void {
-        if (this.props.viewObject.get('staticValues')) {
-            this.getStaticValues()
+        if (this.props.viewObject.get('isDynamic')
+            && this.props.viewObject.get('datasetComponent')) {
+            this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
+            if (this.props.viewObject.get('valueItems').size() === 0) {
+                this.props.context.runQuery(this.props.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                    this.setState({
+                        selectData: JSON.parse(result).map((el: any)=>{
+                            return {
+                                key: el[this.props.viewObject.get('keyColumn')],
+                                value: el[this.props.viewObject.get('valueColumn')]
+                            }
+                        })});
+                });
+            }
+        } else if (this.props.viewObject.get('staticValues')) {
+            this.getStaticValues(this.props.viewObject.get('staticValues'))
         }
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this));
@@ -251,8 +267,30 @@ class Select_ extends ViewContainer {
         }
     }
 
-    getStaticValues() {
-        const staticValues = this.props.viewObject.get('staticValues')
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
+            && this.state.datasetComponent
+            && this.props.viewObject.get('valueItems')) {
+            this.setState({params: newParams});
+            this.props.context.runQuery(this.state.datasetComponent, newParams).then((result: string) => {
+                const resArr = JSON.parse(result).map((el: any)=>{
+                    return {
+                        key: el[this.props.viewObject.get('keyColumn')],
+                        value: el[this.props.viewObject.get('valueColumn')]
+                    }
+                });
+                this.setState({
+                    params: newParams,
+                    currentValue: undefined,
+                    selectData: resArr
+                });
+            });
+        }
+    }
+
+    getStaticValues(stringValues: string) {
+        const staticValues = stringValues
             .split("\\;")
             .map((e:string)=>{
                 const keyValue = e.split("\\:");
@@ -270,11 +308,7 @@ class Select_ extends ViewContainer {
     }
 
     render = () => {
-        if (this.state.selectData.length === 0) {
-            return (<div key={this.viewObject._id}></div>)
-        }
-        else {
-            const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
+        const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
                 <div style={{marginBottom: marginBottom}}>
                     <Select
@@ -284,28 +318,34 @@ class Select_ extends ViewContainer {
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
                         style={{width: width}}
-                        value={this.props.viewObject.get('value') || undefined}
+                        defaultValue={this.props.viewObject.get('value') || undefined}
+                        value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
-                            if (typeof currentValue === 'string') {
-                                this.onChange(currentValue)
-                            } else if (Array.isArray(currentValue)) {
-                                this.onChange(currentValue.join(","))
-                            }
+                            this.onChange(currentValue);
+                            this.setState({
+                                currentValue: currentValue
+                            })
                         }}
                     >
                         {
+                            (this.state.selectData.length > 0)
+                            ?
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
                                                value={data.value}>
                                     {data.key}
                                 </Select.Option>
                             )
+                            :
+                            <Select.Option key={this.props.viewObject.get('name') + 'Select'}
+                                           value={this.props.viewObject.get('name') + 'Select'}>
+
+                            </Select.Option>
                         }
                     </Select>
                 </div>
             )
         }
-    }
 }
 
 class DatePicker_ extends ViewContainer {
@@ -352,6 +392,10 @@ class DatePicker_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         this.props.viewObject.set('format', this.state.format);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
@@ -412,16 +456,20 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
-        if (this.props.context.submitHandlers !== undefined) {
-            this.props.context.submitHandlers.push({
-                name: this.props.viewObject.get('name'),
-                handler: this.execute.bind(this)
-            } as ISubmitHandler)
-        }
+        this.props.context.eventActions.push({
+            name: this.props.viewObject.get('name'),
+            actionType: actionType.submit,
+            callback: this.execute.bind(this)
+        });
         if (this.props.viewObject.get('executeOnStartup')) {
             this.execute()
         }
     }
+
+    componentWillUnmount(): void {
+        this.props.context.eventActions.pop()
+    }
+
     execute = () => {
         const commandType = this.props.viewObject.get('commandType')||"Eval";
         const command = this.props.viewObject.get('command');
@@ -473,6 +521,10 @@ class ValueHolder_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -505,6 +557,10 @@ class ValueHolder_ extends ViewContainer {
 
 class Input_ extends ViewContainer {
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -586,6 +642,10 @@ class Typography_ extends ViewContainer {
     }
 
     onChange = (str: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('name', str);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -642,6 +702,46 @@ class Typography_ extends ViewContainer {
                 {this.props.viewObject.get('name')}
             </Paragraph>
         )
+    }
+}
+
+class EventHandler_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    handleEvent() {
+        this.props.viewObject.get('eventActions').each((el: EObject)=>{
+            const actionEvent = this.props.context.eventActions.find((action: IEventAction) => {
+                    return el.get('triggerItem')
+                        && action.name === el.get('triggerItem').get('name')
+                        && action.actionType === (el.get('action') || actionType.submit)
+                }
+            );
+            if (actionEvent) {
+                actionEvent.callback()
+            } else {
+                //TODO бросить нотификацию
+            }
+        })
+    }
+
+    componentDidMount(): void {
+        this.props.context.eventTracker?.addEventHandler({
+            name: this.props.viewObject.get('listenItem').get('name'),
+            eventType: this.props.viewObject.get('event') || "click",
+            callback: this.handleEvent.bind(this)
+        })
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.eventTracker?.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+    }
+
+    render = () => {
+        return <div/>
     }
 }
 
@@ -705,6 +805,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
         this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
         this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
+        this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

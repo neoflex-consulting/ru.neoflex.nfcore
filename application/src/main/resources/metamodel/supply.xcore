@@ -1,0 +1,18 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.supply/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.supply
+import ru.neoflex.nfcore.base.types.QName
+import ru.neoflex.nfcore.base.types.Timestamp
+import ru.neoflex.nfcore.base.auth.Audit
+
+class Supply {
+    QName name
+    Timestamp date
+    String description
+    contains Audit audit
+}

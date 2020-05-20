@@ -61,6 +61,20 @@ const colorScheme = [
     "rgb(138,69,198)"
 ];
 
+enum actionType {
+    submit="submit",
+    visible="visible",
+    hide="hide",
+    disable="disable"
+}
+
+enum eventType {
+    click="click",
+    change="change"
+}
+
 export {rowPerPageMapper};
 export {colorScheme};
 export {diagramAnchorMap};
+export {actionType};
+export {eventType};

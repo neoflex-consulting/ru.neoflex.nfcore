@@ -3,7 +3,7 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {Button, Drawer, Modal, Select} from 'antd';
-import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
+import {IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -36,6 +36,7 @@ import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {actionType} from "../../../utils/consts";
 
 const { Option, OptGroup } = Select;
 
@@ -157,6 +158,7 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
+    //TODO нужна оптимизация
     getAllDatasetComponents(findColumn: boolean) {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent');
@@ -412,7 +414,7 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
         this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.runQuery(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
+        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -494,27 +496,29 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    private runQuery(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
+    private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
         const queryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
-        this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
+        this.props.context.runQuery(resource
+            , queryParams
+            , filterParams.filter((f: any) => f.enable)
             ,[]
             , sortParams.filter((f: any) => f.enable)
             , groupByParams.filter((f: any) => f.enable)
-            , calculatedExpression.filter((f: any) => f.enable)
-            , queryParams).then((json: string) => {
+            , calculatedExpression.filter((f: any) => f.enable)).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
-                    this.props.context.runQuery(resource, filterParams.filter((f: any) => f.enable)
+                    this.props.context.runQuery(resource
+                        , queryParams
+                        , filterParams.filter((f: any) => f.enable)
                         , aggregationParams.filter((f: any) => f.enable)
                         , sortParams.filter((f: any) => f.enable)
                         , groupByParams.filter((f: any) => f.enable)
-                        , calculatedExpression.filter((f: any) => f.enable)
-                        , queryParams).then((aggJson: string) => {
+                        , calculatedExpression.filter((f: any) => f.enable)).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
                         this.setState({rowData: result, columnDefs: newColumnDef});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
@@ -530,7 +534,7 @@ class DatasetView extends React.Component<any, State> {
 
     onSubmit(): void {
         if (this.state.currentDatasetComponent.eResource) {
-            this.runQuery(this.state.currentDatasetComponent.eResource(),
+            this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
                 this.state.serverFilters,
                 this.state.serverAggregates,
                 this.state.serverSorts,
@@ -550,19 +554,15 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
-        if (this.props.context.submitHandlers !== undefined) {
-            this.props.context.submitHandlers.push({
-                name: this.props.viewObject.get('name'),
-                handler: this.onSubmit.bind(this)
-            } as ISubmitHandler)
-        }
+        this.props.context.eventActions.push({
+            name: this.props.viewObject.get('name'),
+            actionType: actionType.submit,
+            callback: this.onSubmit.bind(this)
+        });
     }
 
     componentWillUnmount() {
-        this.props.context.updateContext({datasetComponents: undefined});
-        if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
-            this.props.context.submitHandlers.pop()
-        }
+        this.props.context.eventActions.pop()
     }
 
     onChangeColumnDefs(columnDefs: any) {
@@ -638,7 +638,7 @@ class DatasetView extends React.Component<any, State> {
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.calculations].includes(paramName)) {
-                this.runQuery(this.state.currentDatasetComponent,
+                this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
                     (paramName === paramType.aggregate)? serverParam: serverAggregates,
                     (paramName === paramType.sort)? serverParam: serverSorts,
