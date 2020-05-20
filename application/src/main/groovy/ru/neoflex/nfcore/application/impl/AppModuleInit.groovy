@@ -325,9 +325,32 @@ class AppModuleInit {
             datasetView.valueItems.add(datasetSelect)
             datasetView.valueItems.add(datePicker)
 
-            button.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerMain = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerMain.name = "mainHandler"
+            eventHandlerMain.setEvent(Event.CLICK)
+            eventHandlerMain.setListenItem(button)
+
+            def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
+            submitAction.setAction(Action.SUBMIT)
+            submitAction.setTriggerItem(datasetView)
+            eventHandlerMain.eventActions.add(submitAction)
+
+            row6.children.add(eventHandlerMain)
+
+            def eventHandlerCheckDqc = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerCheckDqc.name = "dqcHandler"
+            eventHandlerCheckDqc.setEvent(Event.CHANGE)
+            eventHandlerCheckDqc.setListenItem(datePicker)
+
+            def actionCheckDqc = ApplicationFactory.eINSTANCE.createEventAction()
+            actionCheckDqc.setAction(Action.SUBMIT)
+            actionCheckDqc.setTriggerItem(groovyCommand)
+            eventHandlerCheckDqc.eventActions.add(actionCheckDqc)
+
+            row6.children.add(eventHandlerMain)
+            row6.children.add(eventHandlerCheckDqc)
 
             form.children.add(row1)
             form.children.add(row2)
@@ -502,9 +525,19 @@ class AppModuleInit {
             datasetView.valueItems.add(datasetSelectCodes)
             datasetView.valueItems.add(datePicker)
 
-            button.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerMain = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerMain.name = "detailHandler"
+            eventHandlerMain.setEvent(Event.CLICK)
+            eventHandlerMain.setListenItem(button)
+
+            def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
+            submitAction.setAction(Action.SUBMIT)
+            submitAction.setTriggerItem(datasetView)
+            eventHandlerMain.eventActions.add(submitAction)
+
+            row6.children.add(eventHandlerMain)
 
             form.children.add(row1)
             form.children.add(row2)
@@ -704,8 +737,6 @@ class AppModuleInit {
             groovyCommand.valueItems.add(datePicker)
             groovyCommand.valueItems.add(datasetSelect)
 
-            button1.submitItems.add(groovyCommand)
-
             row5.children.add(groovyCommand)
 
             def row6 = ApplicationFactory.eINSTANCE.createRow()
@@ -718,9 +749,31 @@ class AppModuleInit {
             def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
-            button2.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerButton = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton.name = "buttonHandler"
+            eventHandlerButton.setEvent(Event.CLICK)
+            eventHandlerButton.setListenItem(button1)
+
+            def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setTriggerItem(groovyCommand)
+            eventHandlerButton.eventActions.add(submitActionButton)
+
+            row6.children.add(eventHandlerButton)
+
+            def eventHandlerButton2 = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton2.name = "button2Handler"
+            eventHandlerButton2.setEvent(Event.CLICK)
+            eventHandlerButton2.setListenItem(button2)
+
+            def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setTriggerItem(datasetView)
+            eventHandlerButton2.eventActions.add(submitActionButton2)
+
+            row6.children.add(eventHandlerButton2)
 
             form.children.add(row1)
             form.children.add(row2)
@@ -957,8 +1010,6 @@ class AppModuleInit {
             groovyCommand.valueItems.add(datePicker)
             groovyCommand.valueItems.add(datasetSelect)
 
-            button1.submitItems.add(groovyCommand)
-
             row5.children.add(groovyCommand)
 
             def row6 = ApplicationFactory.eINSTANCE.createRow()
@@ -971,9 +1022,31 @@ class AppModuleInit {
             def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
-            button2.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerButton = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton.name = "button1Handler"
+            eventHandlerButton.setEvent(Event.CLICK)
+            eventHandlerButton.setListenItem(button1)
+
+            def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setTriggerItem(groovyCommand)
+            eventHandlerButton.eventActions.add(submitActionButton)
+
+            row6.children.add(eventHandlerButton)
+
+            def eventHandlerButton2 = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton2.name = "button2Handler"
+            eventHandlerButton2.setEvent(Event.CLICK)
+            eventHandlerButton2.setListenItem(button2)
+
+            def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setTriggerItem(datasetView)
+            eventHandlerButton2.eventActions.add(submitActionButton2)
+
+            row6.children.add(eventHandlerButton2)
 
             form.children.add(row1)
             form.children.add(row2)

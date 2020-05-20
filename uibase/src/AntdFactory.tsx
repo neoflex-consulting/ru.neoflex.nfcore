@@ -1,22 +1,23 @@
-import {ViewFactory, View} from './View'
+import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, Form, Input, InputNumber, Row, Select, Tabs, Typography, DatePicker} from 'antd';
+import {Button, Col, DatePicker, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
 import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
 import {API} from './modules/api';
-import { WithTranslation } from 'react-i18next';
+import {WithTranslation} from 'react-i18next';
 import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {ISubmitHandler} from "./MainContext";
+import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {replaceNamedParam, getNamedParams} from "./utils/namedParamsUtils";
+import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {eventType, actionType} from "./utils/consts";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -149,19 +150,6 @@ class Button_ extends ViewContainer {
         let params: Object[] = appModule.params;
         this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
-    submitItems = () => {
-        if (this.props.viewObject.get('submitItems')) {
-            let checkItems: String[] = [];
-            this.props.viewObject.get('submitItems').each((item: EObject) => {
-                checkItems.push(item.get('name'))
-            });
-            this.props.context.submitHandlers.forEach((obj:ISubmitHandler)=>{
-                if (checkItems.includes(obj.name)) {
-                    obj.handler()
-                }
-            })
-        }
-    };
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
@@ -177,7 +165,9 @@ class Button_ extends ViewContainer {
             </Button>
             }
             {this.props.viewObject.get('buttonSubmit') === true &&
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.submitItems()}>
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
+                this.props.context.eventTracker?.notifyAll({type:eventType.click,itemName:this.props.viewObject.get('name')});
+            }}>
                 {(label)? label: t('submit')}
             </Button>
             }
@@ -218,13 +208,15 @@ class Select_ extends ViewContainer {
     }
 
     onChange = (currentValue: string|string[]) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         if (typeof currentValue === 'string') {
             this.selected = currentValue
         } else if (Array.isArray(currentValue)) {
             let temp = this.state.selectData.filter((el:{key:string,value:string})=>{
-                if (currentValue.includes(el.value)) {
-                    return el
-                }
+                return currentValue.includes(el.value)
             }).map((el:{key:string,value:string})=>{
                 return el.key
             });
@@ -400,6 +392,10 @@ class DatePicker_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         this.props.viewObject.set('format', this.state.format);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
@@ -460,16 +456,20 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
-        if (this.props.context.submitHandlers !== undefined) {
-            this.props.context.submitHandlers.push({
-                name: this.props.viewObject.get('name'),
-                handler: this.execute.bind(this)
-            } as ISubmitHandler)
-        }
+        this.props.context.eventActions.push({
+            name: this.props.viewObject.get('name'),
+            actionType: actionType.submit,
+            callback: this.execute.bind(this)
+        });
         if (this.props.viewObject.get('executeOnStartup')) {
             this.execute()
         }
     }
+
+    componentWillUnmount(): void {
+        this.props.context.eventActions.pop()
+    }
+
     execute = () => {
         const commandType = this.props.viewObject.get('commandType')||"Eval";
         const command = this.props.viewObject.get('command');
@@ -521,6 +521,10 @@ class ValueHolder_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -553,6 +557,10 @@ class ValueHolder_ extends ViewContainer {
 
 class Input_ extends ViewContainer {
     onChange = (currentValue: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -634,6 +642,10 @@ class Typography_ extends ViewContainer {
     }
 
     onChange = (str: string) => {
+        this.props.context.eventTracker?.notifyAll({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         this.props.viewObject.set('name', str);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
@@ -690,6 +702,46 @@ class Typography_ extends ViewContainer {
                 {this.props.viewObject.get('name')}
             </Paragraph>
         )
+    }
+}
+
+class EventHandler_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    handleEvent() {
+        this.props.viewObject.get('eventActions').each((el: EObject)=>{
+            const actionEvent = this.props.context.eventActions.find((action: IEventAction) => {
+                    return el.get('triggerItem')
+                        && action.name === el.get('triggerItem').get('name')
+                        && action.actionType === (el.get('action') || actionType.submit)
+                }
+            );
+            if (actionEvent) {
+                actionEvent.callback()
+            } else {
+                //TODO бросить нотификацию
+            }
+        })
+    }
+
+    componentDidMount(): void {
+        this.props.context.eventTracker?.addEventHandler({
+            name: this.props.viewObject.get('listenItem').get('name'),
+            eventType: this.props.viewObject.get('event') || "click",
+            callback: this.handleEvent.bind(this)
+        })
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.eventTracker?.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+    }
+
+    render = () => {
+        return <div/>
     }
 }
 
@@ -753,6 +805,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
         this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
         this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
+        this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {
