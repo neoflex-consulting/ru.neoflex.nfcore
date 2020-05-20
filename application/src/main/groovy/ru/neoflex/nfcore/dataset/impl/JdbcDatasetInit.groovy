@@ -1,8 +1,10 @@
 package ru.neoflex.nfcore.dataset.impl
 
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.DatasetFactory
@@ -60,6 +62,19 @@ class JdbcDatasetInit {
             rs.resources.add(Context.current.store.createEObject(jdbcDataset))
         }
         return rs.resources.get(0).contents.get(0) as JdbcDataset
+    }
+
+    static def updateJdbcDataset(String name, String query) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: name])
+                .execute().resourceSet
+        if (!rs.resources.empty && query) {
+            def JdbcDatasetRef = Context.current.store.getRef(rs.resources.get(0))
+            def jdbcDataset = rs.resources.get(0).contents.get(0) as JdbcDataset
+
+            jdbcDataset.setQuery(query)
+
+            Context.current.store.updateEObject(JdbcDatasetRef, jdbcDataset)
+        }
     }
 
     static def loadAllColumnsJdbcDatasetInit(String name) {

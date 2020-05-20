@@ -196,7 +196,10 @@ class Select_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            selectData: []
+            selectData: [],
+            params: [],
+            currentValue: "",
+            datasetComponent: undefined
         };
     }
 
@@ -214,25 +217,46 @@ class Select_ extends ViewContainer {
         };
     }
 
-    onChange = (currentValue: string) => {
-        //TODO для множественного выбора
-        this.selected = this.state.selectData.find((el:{key:string,value:string})=>{
-            if (el.value === currentValue) {
-                return el
-            }
-        }).key;
+    onChange = (currentValue: string|string[]) => {
+        if (typeof currentValue === 'string') {
+            this.selected = currentValue
+        } else if (Array.isArray(currentValue)) {
+            let temp = this.state.selectData.filter((el:{key:string,value:string})=>{
+                if (currentValue.includes(el.value)) {
+                    return el
+                }
+            }).map((el:{key:string,value:string})=>{
+                return el.key
+            });
+            this.selected = temp.join(",");
+            currentValue = currentValue.join(",");
+        }
         this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]}));
     };
 
     componentDidMount(): void {
-        if (this.props.viewObject.get('staticValues')) {
-            this.getStaticValues()
+        if (this.props.viewObject.get('isDynamic')
+            && this.props.viewObject.get('datasetComponent')) {
+            this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
+            if (this.props.viewObject.get('valueItems').size() === 0) {
+                this.props.context.runQuery(this.props.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                    this.setState({
+                        selectData: JSON.parse(result).map((el: any)=>{
+                            return {
+                                key: el[this.props.viewObject.get('keyColumn')],
+                                value: el[this.props.viewObject.get('valueColumn')]
+                            }
+                        })});
+                });
+            }
+        } else if (this.props.viewObject.get('staticValues')) {
+            this.getStaticValues(this.props.viewObject.get('staticValues'))
         }
         if (this.props.context.docxHandlers !== undefined) {
             this.props.context.docxHandlers.push(this.getDocxData.bind(this));
@@ -251,8 +275,30 @@ class Select_ extends ViewContainer {
         }
     }
 
-    getStaticValues() {
-        const staticValues = this.props.viewObject.get('staticValues')
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
+            && this.state.datasetComponent
+            && this.props.viewObject.get('valueItems')) {
+            this.setState({params: newParams});
+            this.props.context.runQuery(this.state.datasetComponent, newParams).then((result: string) => {
+                const resArr = JSON.parse(result).map((el: any)=>{
+                    return {
+                        key: el[this.props.viewObject.get('keyColumn')],
+                        value: el[this.props.viewObject.get('valueColumn')]
+                    }
+                });
+                this.setState({
+                    params: newParams,
+                    currentValue: undefined,
+                    selectData: resArr
+                });
+            });
+        }
+    }
+
+    getStaticValues(stringValues: string) {
+        const staticValues = stringValues
             .split("\\;")
             .map((e:string)=>{
                 const keyValue = e.split("\\:");
@@ -270,11 +316,7 @@ class Select_ extends ViewContainer {
     }
 
     render = () => {
-        if (this.state.selectData.length === 0) {
-            return (<div key={this.viewObject._id}></div>)
-        }
-        else {
-            const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
+        const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
                 <div style={{marginBottom: marginBottom}}>
                     <Select
@@ -284,28 +326,34 @@ class Select_ extends ViewContainer {
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
                         style={{width: width}}
-                        value={this.props.viewObject.get('value') || undefined}
+                        defaultValue={this.props.viewObject.get('value') || undefined}
+                        value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
-                            if (typeof currentValue === 'string') {
-                                this.onChange(currentValue)
-                            } else if (Array.isArray(currentValue)) {
-                                this.onChange(currentValue.join(","))
-                            }
+                            this.onChange(currentValue);
+                            this.setState({
+                                currentValue: currentValue
+                            })
                         }}
                     >
                         {
+                            (this.state.selectData.length > 0)
+                            ?
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
                                                value={data.value}>
                                     {data.key}
                                 </Select.Option>
                             )
+                            :
+                            <Select.Option key={this.props.viewObject.get('name') + 'Select'}
+                                           value={this.props.viewObject.get('name') + 'Select'}>
+
+                            </Select.Option>
                         }
                     </Select>
                 </div>
             )
         }
-    }
 }
 
 class DatePicker_ extends ViewContainer {
