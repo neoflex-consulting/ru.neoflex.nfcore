@@ -24,6 +24,7 @@ import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./icons/pony.png";
 import HeaderMenu from "./components/HeaderMenu";
+import EventTracker from "./EventTracker";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
@@ -60,9 +61,11 @@ class EcoreApp extends React.Component<any, State> {
             //В момент создания страницы
             docxHandlers: [],
             excelHandlers: [],
-            submitHandlers: [],
-            //По событию на страницеchangeUserProfile
-            contextItemValues: new Map()
+            //По событию на странице
+            contextItemValues: new Map(),
+
+            eventActions: [],
+            eventTracker: new EventTracker(),
         };
         this.state = {
             principal: undefined,
@@ -743,11 +746,6 @@ class EcoreApp extends React.Component<any, State> {
 
         const localDuration = localStorage.getItem('notifierDuration');
         localDuration && this.setState({notifierDuration: Number(localDuration) });
-
-        /*this.updateContext({docxHandlers: []});
-        this.updateContext({excelHandlers: []});
-        this.updateContext({submitHandlers: []});
-        this.updateContext({ContextWriters: []});*/
     }
 
     render = () => {

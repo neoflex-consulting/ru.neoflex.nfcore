@@ -1,12 +1,9 @@
 import * as React from "react";
 import Ecore from "ecore"
+import {actionType, eventType} from "./utils/consts";
+import EventTracker from "./EventTracker";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
-
-export interface ISubmitHandler {
-    name: string,
-    handler: Function
-}
 
 export interface IServerQueryParam {
     index: number,
@@ -27,6 +24,18 @@ export interface IServerNamedParam {
     parameterDateFormat?: string
 }
 
+export interface IEventAction {
+    name: string,
+    actionType: actionType,
+    callback: () => void
+}
+
+export interface IEventHandler {
+    name: string,
+    eventType: eventType,
+    callback: () => void
+}
+
 export interface IMainContext {
     updateContext?: (context: any, cb?: () => void) => void;
     applicationReferenceTree?: Ecore.EObject
@@ -40,6 +49,7 @@ export interface IMainContext {
     changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
     docxHandlers?: any[];
     excelHandlers?: any[];
-    submitHandlers?: ISubmitHandler[];
     contextItemValues?: Map<String, any>;
+    eventActions?: IEventAction[];
+    eventTracker?: EventTracker;
 }
