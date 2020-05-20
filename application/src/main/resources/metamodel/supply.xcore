@@ -7,10 +7,12 @@
 )
 package ru.neoflex.nfcore.supply
 import ru.neoflex.nfcore.base.types.QName
-import ru.neoflex.nfcore.base.types.Date
+import ru.neoflex.nfcore.base.types.Timestamp
+import ru.neoflex.nfcore.base.auth.Audit
 
 class Supply {
-    QName deploy
-    Date date
+    QName name
+    Timestamp date
     String description
+    contains Audit audit
 }
