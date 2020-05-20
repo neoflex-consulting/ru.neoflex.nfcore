@@ -9,6 +9,7 @@ import ru.neoflex.nfcore.application.impl.ApplicationValidatorExt;
 import ru.neoflex.nfcore.base.components.ModuleRegistryImpl;
 import ru.neoflex.nfcore.dataset.DatasetPackage;
 import ru.neoflex.nfcore.locales.LocalesPackage;
+import ru.neoflex.nfcore.supply.SupplyPackage;
 import ru.neoflex.nfcore.notification.NotificationPackage;
 import ru.neoflex.nfcore.dataset.impl.DatasetFactoryExt;
 import ru.neoflex.nfcore.dataset.impl.DatasetValidatorExt;
@@ -24,5 +25,8 @@ public class ApplicationModuleRegistry extends ModuleRegistryImpl {
         registerEPackage(DatasetPackage.eNS_URI, ()->DatasetPackage.eINSTANCE, new DatasetFactoryExt(), new DatasetValidatorExt());
         registerEPackage(LocalesPackage.eINSTANCE);
         registerEPackage(NotificationPackage.eNS_URI, ()->NotificationPackage.eINSTANCE, new NotificationFactoryExt(), new NotificationValidatorExt());
+        registerEPackage(SupplyPackage.eINSTANCE);
+
+
     }
 }

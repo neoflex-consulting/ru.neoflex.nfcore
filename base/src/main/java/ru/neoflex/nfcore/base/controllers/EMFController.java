@@ -115,6 +115,7 @@ public class EMFController {
     private JsonNode callImpl(boolean readOnly, String ref, String method, List<Object> args) throws Exception {
         return store.inTransaction(readOnly, tx -> {
             Resource resource = store.loadResource(ref);
+            EcoreUtil.resolveAll(resource.getResourceSet());
             EObject eObject = resource.getContents().get(0);
             EClass eClass = eObject.eClass();
             for (EOperation eOperation: eClass.getEAllOperations()) {

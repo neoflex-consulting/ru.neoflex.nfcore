@@ -28,10 +28,10 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             return <InputNumber value={data} onChange={value => updateData(value)}/>
         }
         if (typeName === 'STRING') {
-            return <Input value={data} onChange={value => updateData(value)}/>
+            return <Input value={data} onChange={value => updateData(value.target.value)}/>
         }
         if (typeName === 'TEXT') {
-            return <Input.TextArea rows={3} value={data} onChange={value => updateData(value)}/>
+            return <Input.TextArea rows={3} value={data} onChange={value => updateData(value.target.value)}/>
         }
         if (typeName === 'DATE') {
             return <DatePicker value={!data?null:moment(data, 'YYYY-MM-DD HH:mm:ss')} onChange={(value) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={false}/>
