@@ -60,6 +60,7 @@ class Calendar extends React.Component<any, any> {
             },
             columnDefs: [],
             rowData: [],
+            filteredRowData: undefined,
             spinnerVisible: false,
             selectedValueInGrid: 'Системные заметки',
             frameworkComponents: {
@@ -385,7 +386,27 @@ class Calendar extends React.Component<any, any> {
     };
 
     searchValue = () => {
-        console.log()
+        if (this.state.searchValue === "") {
+            this.setState({filteredRowData: undefined})
+        } else {
+            let filteredRowData: any = [];
+            this.state.rowData.forEach((r:any) => {
+                if (
+                    r['Полное название формы'].includes(this.state.searchValue) ||
+                    r['Краткое название формы'].includes(this.state.searchValue) ||
+                    r['Периодичность сдачи'].includes(this.state.searchValue) ||
+                    r['Рабочий день сдачи'].includes(this.state.searchValue) ||
+                    r['Время сдачи'].includes(this.state.searchValue) ||
+                    r['Отчетность по выходным'].includes(this.state.searchValue) ||
+                    r['Интервал расчета'].includes(this.state.searchValue)
+                    ||
+                    r['Отчетная дата "на"'].find((d:any) => d.includes(this.state.searchValue))
+                ) {
+                    filteredRowData.push(r)
+                }
+            });
+            this.setState({filteredRowData})
+        }
     };
 
     openNotification(notification: any, context: any): void  {
@@ -440,22 +461,16 @@ class Calendar extends React.Component<any, any> {
         return result;
     }
 
-    onDateClick = (day: any) => {
-        this.setState({
-            selectedDate: day
-        })
-    };
-
     nextMonth = () => {
-        this.setState({
-            currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.addMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth});
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     prevMonth = () => {
-        this.setState({
-            currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-        })
+        const newMonth = dateFns.subMonths(this.state.currentMonth, 1);
+        this.setState({currentMonth: newMonth})
+        this.getAllNotificationInstances(newMonth, false)
     };
 
     componentDidMount(): void {
@@ -638,7 +653,7 @@ class Calendar extends React.Component<any, any> {
             >
                 {this.state.columnDefs.length !== 0 && <AgGridReact
                     ref={this.grid}
-                    rowData={this.state.rowData}
+                    rowData={this.state.filteredRowData === undefined ? this.state.rowData : this.state.filteredRowData}
                     modules={AllCommunityModules}
                     onGridReady={this.onGridReady}
                     suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
@@ -683,6 +698,9 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents"}}
                     >
+                        <div
+                            className="date">
+
                         <Button style={{marginLeft: '10px'}}
                                 className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
@@ -704,7 +722,7 @@ class Calendar extends React.Component<any, any> {
                                         {y}
                                     </Select.Option>
                                 )
-                                }
+                            }
                         </Select>
 
                         <Select
@@ -729,6 +747,7 @@ class Calendar extends React.Component<any, any> {
                                 )
                             }
                         </Select>
+                        </div>
 
                         <div className="col col-start">
                             <div className="icon" onClick={this.prevMonth}>
@@ -959,27 +978,22 @@ class Calendar extends React.Component<any, any> {
                                 : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
                             }`}
                         key = {day.toString()}
-                        onClick={() =>
-                            this.onDateClick(cloneDay)
-                        }
                     >
                         <div className="days-header">
                         <span className="number">{formattedDate}</span>
                         <span className="title">{title}</span>
                         </div>
-                        <span className="bg">{formattedDate}</span>
-                        <div>
+                        <div className="notification-block">
                             {content.length !== 0
                                 ?
                                 content.map( (r: any) =>
                                     <div className="notification-btn"
-                                    style={{marginLeft: '5px', marginTop: '5px', marginBottom: '5px', width: "150px", display: "flex", color: "black", backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
+                                    style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${r.contents[0]._id}`}
                                         size="small"
-                                        style={{marginLeft: '15px', opacity:'0.6', width: "150px", display: "flex", color: "black", backgroundColor: "white"}}
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}

@@ -72,24 +72,13 @@ public class MasterdataProvider {
         });
     }
 
-    private void activateAllEntities() throws IOException {
-        List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY_TYPE)
-                .execute().getResources();
-        for (Resource r: resList) {
-            EntityType entity = (EntityType) r.getContents().get(0);
-            if (!entity.isActive()) {
-                activateEntityType(entity);
-            }
-        }
-    }
-
     public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
         if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
             oClass.addSuperClass(oSuperClass);
         }
     }
 
-    private OType getOType(Classifier classifier) throws ClassNotFoundException {
+    private OType getOType(Classifier classifier) {
         if (classifier instanceof ArrayType) {
             ArrayType arrayType = (ArrayType) classifier;
             return arrayType.getElementType() instanceof EntityType ? OType.LINKLIST : OType.EMBEDDEDLIST;
@@ -100,7 +89,12 @@ public class MasterdataProvider {
         }
         if (classifier instanceof PlainType) {
             PlainType plainType = (PlainType) classifier;
-            Class<?> iClass = Class.forName(plainType.getJavaClassName());
+            Class<?> iClass = null;
+            try {
+                iClass = Class.forName(plainType.getJavaClassName());
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             OType oType = OType.getTypeByClass(iClass);
             if (oType == null) {
                 throw new IllegalArgumentException(String.format("Can't get OType of %s", plainType.getName()));
@@ -119,12 +113,12 @@ public class MasterdataProvider {
         throw new IllegalArgumentException(String.format("Unknown OType for %s", classifier.getName()));
     }
 
-    private void createProperty(ODatabaseDocument database, OClass oClass, String name, Classifier classifier) throws ClassNotFoundException {
+    private void createProperty(ODatabaseDocument database, OClass oClass, String name, Classifier classifier) {
         if (classifier instanceof ArrayType) {
             ArrayType arrayType = (ArrayType) classifier;
             OType oType = arrayType.getElementType() instanceof EntityType ? OType.EMBEDDEDLIST : OType.LINKLIST;
             if (arrayType.getElementType() instanceof DocumentType) {
-                OClass oClass2 = getOClass(database, arrayType.getElementType().getName());
+                OClass oClass2 = getOClass(database, (DocumentType) arrayType.getElementType());
                 oClass.createProperty(name, oType, oClass2);
             }
             else {
@@ -136,7 +130,7 @@ public class MasterdataProvider {
             MapType mapType = (MapType) classifier;
             OType oType =  mapType.getValueType() instanceof EntityType ? OType.EMBEDDEDMAP : OType.LINKMAP;
             if (mapType.getValueType() instanceof DocumentType) {
-                OClass oClass2 = getOClass(database, mapType.getValueType().getName());
+                OClass oClass2 = getOClass(database, (DocumentType) mapType.getValueType());
                 oClass.createProperty(name, oType, oClass2);
             }
             else {
@@ -152,21 +146,28 @@ public class MasterdataProvider {
             oClass.createProperty(name, OType.STRING);
         }
         else if (classifier instanceof DocumentType) {
-            OClass oClass2 = getOClass(database, classifier.getName());
+            OClass oClass2 = getOClass(database, (DocumentType) classifier);
             OType oType = classifier instanceof EntityType ? OType.LINK : OType.EMBEDDED;
             oClass.createProperty(name, oType, oClass2);
         }
     }
 
-    private OClass getOClass(ODatabaseDocument database, String name) {
-        OClass oClass = database.getClass(name);
+    public OClass getOClass(ODatabaseDocument database, DocumentType entity) {
+        if (entity instanceof EntityType) {
+            activateEntityType((EntityType) entity);
+        }
+        else {
+            activateDocumentType(entity);
+        }
+        OClass oClass = database.getClass(entity.getName());
         if (oClass == null) {
-            throw new IllegalArgumentException(String.format("OClass %s does not exists", name));
+            throw new IllegalArgumentException(String.format("OClass %s does not exists", entity.getName()));
         }
         return oClass;
     }
 
-    public void deactivateEntityType(EntityType entity, boolean deleteTables) throws IOException {
+
+    public void deactivateDocumentType(DocumentType entity, boolean deleteTables) throws IOException {
         if (!entity.isActive()) {
             throw new IllegalArgumentException(String.format("Entity %s is not active", entity.getName()));
         }
@@ -179,72 +180,102 @@ public class MasterdataProvider {
                 return null;
             });
         }
-        entity.setActive(false);
-        store.saveResource(entity.eResource());
     }
 
-    public void activateEntityType(EntityType entity) throws IOException {
-        if (entity.isActive()) {
-            throw new IllegalArgumentException(String.format("Entity %s is already active", entity.getName()));
-        }
-        for (EntityType superType: entity.getSuperTypes()) {
-            if (!superType.isActive()) {
-                throw new IllegalArgumentException(String.format("Supertype Entity %s is not active", superType.getName()));
-            }
-        }
+    public boolean isActive(ODatabaseDocument database, DocumentType documentType) {
+        return database.getClass(documentType.getName()) != null;
+    }
+
+    public boolean isActive(DocumentType documentType) {
+        return withDatabase(database -> isActive(database, documentType));
+    }
+
+    public void activateEntityType(EntityType entity) {
         withDatabase(database -> {
-            try {
-                OClass oClass = database.getClass(entity.getName());
-                if (oClass == null) {
-                    oClass = database.createClass(entity.getName());
-                    if (entity.isAbstract()) {
-                        oClass.setAbstract(true);
-                    }
-                }
-                for (EntityType superType: entity.getSuperTypes()) {
-                    OClass superClass = database.getClass(superType.getName());
-                    if (superClass == null) {
-                        throw new IllegalArgumentException(String.format("Supertype OClass %s does not exists", superType.getName()));
-                    }
-                    ensureSuperClass(oClass, superClass);
-                }
-                for (Attribute attribute: entity.getAttributes()) {
-                    OProperty oProperty = oClass.getProperty(attribute.getName());
-                    if (oProperty == null) {
-                        createProperty(database, oClass, attribute.getName(), attribute.getAttributeType());
-                    }
-                }
-                PrimaryKey pk = entity.getPrimaryKey();
-                if (pk != null) {
-                    oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, entity.getAttributes()
-                            .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
-                }
-                for (InvertedEntry ie: entity.getInvertedEntries()) {
-                    if (ie instanceof PlainIndex) {
-                        OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
-                        oClass.createIndex(ie.getName(), iType, entity.getAttributes()
-                                .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
-                    }
-                    else if (ie instanceof FulltextIndex) {
-                        ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
-                        oClass.createIndex(ie.getName(), "FULLTEXT", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                                entity.getAttributes()
-                                        .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
-                    }
-                    else if (ie instanceof SpatialIndex) {
-                        ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
-                        oClass.createIndex(ie.getName(), "SPATIAL", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                                entity.getAttributes()
-                                        .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            activateEntityType(database, entity);
             return null;
         });
-        entity.setActive(true);
-        store.saveResource(entity.eResource());
+    }
+
+    public void activateEntityType(ODatabaseDocument database, EntityType entity) {
+        for (EntityType superType: entity.getSuperTypes()) {
+            activateEntityType(database, superType);
+        }
+        OClass oClass = database.getClass(entity.getName());
+        if (oClass == null) {
+            logger.info("Creating class " + entity.getName());
+            oClass = database.createClass(entity.getName());
+            if (entity.isAbstract()) {
+                oClass.setAbstract(true);
+            }
+        }
+        for (EntityType superType: entity.getSuperTypes()) {
+            OClass superClass = database.getClass(superType.getName());
+            if (superClass == null) {
+                throw new IllegalArgumentException(String.format("Supertype OClass %s does not exists", superType.getName()));
+            }
+            ensureSuperClass(oClass, superClass);
+        }
+        for (Attribute attribute: entity.getAttributes()) {
+            OProperty oProperty = oClass.getProperty(attribute.getName());
+            if (oProperty == null) {
+                logger.info("Creating property " + entity.getName() + "." + attribute.getName());
+                createProperty(database, oClass, attribute.getName(), attribute.getAttributeType());
+            }
+        }
+        PrimaryKey pk = entity.getPrimaryKey();
+        if (pk != null) {
+            logger.info("Creating pk index " + entity.getName() + "." + pk.getName());
+            if (oClass.getClassIndex(pk.getName()) == null) {
+                oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, entity.getAttributes()
+                        .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+            }
+        }
+        for (InvertedEntry ie: entity.getInvertedEntries()) {
+            logger.info("Creating ie index " + entity.getName() + "." + ie.getName());
+            if (oClass.getClassIndex(pk.getName()) == null) {
+                if (ie instanceof PlainIndex) {
+                    OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
+                    oClass.createIndex(ie.getName(), iType, entity.getAttributes()
+                            .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                }
+                else if (ie instanceof FulltextIndex) {
+                    ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                    oClass.createIndex(ie.getName(), "FULLTEXT", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
+                            entity.getAttributes()
+                                    .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                }
+                else if (ie instanceof SpatialIndex) {
+                    ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
+                    oClass.createIndex(ie.getName(), "SPATIAL", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
+                            entity.getAttributes()
+                                    .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
+                }
+            }
+        }
+    }
+
+    public void activateDocumentType(DocumentType entity) {
+        withDatabase(database -> {
+            activateDocumentType(database, entity);
+            return null;
+        });
+    }
+
+    public void activateDocumentType(ODatabaseDocument database, DocumentType entity) {
+        OClass oClass = database.getClass(entity.getName());
+        if (oClass == null) {
+            logger.info("Creating class " + entity.getName());
+            oClass = database.createClass(entity.getName());
+            oClass.setAbstract(true);
+        }
+        for (Attribute attribute: entity.getAttributes()) {
+            OProperty oProperty = oClass.getProperty(attribute.getName());
+            if (oProperty == null) {
+                logger.info("Creating property " + entity.getName() + "." + attribute.getName());
+                createProperty(database, oClass, attribute.getName(), attribute.getAttributeType());
+            }
+        }
     }
 
     public ODatabaseDocument createDatabaseDocument() {

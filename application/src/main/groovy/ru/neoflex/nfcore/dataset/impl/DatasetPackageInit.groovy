@@ -77,41 +77,64 @@ class DatasetPackageInit {
             DatasetComponentInit.createAllColumnNRDemoMain("DatasetNRDemoSection4")
 
             /*DETAIL*/
-            //TODO получать список столбцов по запросу а не по таблице
             String detailQuery = "select section_number,\n" +
                     "       row_number,\n" +
                     "       f110_code,\n" +
                     "       account_number,\n" +
                     "       f102_symbol,\n" +
                     "       amount_rub,\n" +
-                    //"       amount_cur,\n" +
                     "       account_name,\n" +
                     "       account_amount_rub,\n" +
                     "       option_premium_amount,\n" +
                     "       customer_name,\n" +
                     "       party_type,\n" +
-                    //"       customer_role_name,\n" +
                     "       is_co,\n" +
                     "       is_resident,\n" +
-                    //"       legal_career_type_name,\n" +
-                    //"       agreement_type_name,\n" +
                     "       agreement_number,\n" +
-                    //"       account_link_type_name,\n" +
                     "       active_reserve_type\n" +
                     "  from table(data_representation.rep_f110_detail.GetF110DetailApex(\n" +
                     "         i_AppUser         => 0,\n" +
-                    "         i_OnDate          => to_date('20190401','YYYYMMDD'),\n" +
+                    "         i_OnDate          => NULL,\n" +
                     "         i_BranchCode      => '000001',\n" +
                     "         i_SectionNumber   => null,\n" +
                     "         i_F110Code        => null\n" +
-                    "       ))"
+                    "       ))\n" +
+                    " where (NULL like '%'||to_char(section_number)||'%' or NULL is null) \n" +
+                    "   and (NULL like '%'||to_char(f110_code)||'%' or NULL is null) "
 
-            JdbcDatasetInit.createJdbcDatasetQueryInit("jdbcNRDemoDetail","dm_f110_detail_f","dma",detailQuery,"JdbcConnectionNRDemo")
+            String bindQuery = "select section_number,\n" +
+                    "       row_number,\n" +
+                    "       f110_code,\n" +
+                    "       account_number,\n" +
+                    "       f102_symbol,\n" +
+                    "       amount_rub,\n" +
+                    "       account_name,\n" +
+                    "       account_amount_rub,\n" +
+                    "       option_premium_amount,\n" +
+                    "       customer_name,\n" +
+                    "       party_type,\n" +
+                    "       is_co,\n" +
+                    "       is_resident,\n" +
+                    "       agreement_number,\n" +
+                    "       active_reserve_type\n" +
+                    "  from table(data_representation.rep_f110_detail.GetF110DetailApex(\n" +
+                    "         i_AppUser         => 0,\n" +
+                    "         i_OnDate          => :REPORT_DATE,\n" +
+                    "         i_BranchCode      => '000001',\n" +
+                    "         i_SectionNumber   => null,\n" +
+                    "         i_F110Code        => null\n" +
+                    "       ))\n" +
+                    " where (:SECTIONS like '%'||to_char(section_number)||'%' or :SECTIONS is null) \n" +
+                    "   and (:CODES like '%'||to_char(f110_code)||'%' or :CODES is null) "
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoDetail",detailQuery,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoDetail")
+            JdbcDatasetInit.updateJdbcDataset("jdbcNRDemoDetail", bindQuery)
+
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoDetail", "jdbcNRDemoDetail")
             //TODO настраивать ширину столбцов в момент создания
             DatasetComponentInit.createAllColumnNRDemoDetail("DatasetNRDemoDetail")
-            DatasetComponentInit.createServerFiltersNRDemoDetail("DatasetNRDemoDetail", "")
+
 
             /*CalcMart*/
             String calcedMarts = "with\n" +
@@ -214,6 +237,27 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoKliko")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoKliko", "jdbcNRDemoKliko")
             DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoKliko")
+
+
+            String f110_codes = "select f110_code code_key, \n" +
+                    "       f110_code code_value \n" +
+                    "  from dma.dm_f110_code_s \n" +
+                    " where sysdate between actual_date and actual_end_date \n"
+             String f110_codes_bind = "   and nvl(:SECTIONS,'1,2,3,4') like '%'||to_char(section_number)||'%'  \n" +
+                    " order by section_number, row_number\n"
+            String f110_sections = "select distinct 'Раздел '||section_number as key, section_number as value from dma.dm_f110_code_s order by 1"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110Codes", f110_codes,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110Codes")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110Codes", "jdbcNRDemoF110Codes")
+            DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoF110Codes")
+            JdbcDatasetInit.updateJdbcDataset("jdbcNRDemoF110Codes", f110_codes + f110_codes_bind)
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110Sections",f110_sections,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110Sections")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110Sections", "jdbcNRDemoF110Sections")
+            DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoF110Sections")
+
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -253,13 +297,12 @@ class DatasetPackageInit {
         NotificationInit.createNotification("Я 666", Periodicity.YEAR, "9",  "18", "7", "ReportSingle", "Отчёт сдан в проверяющий орган")
 
         /*NRdemo*/
-        //TODO отсутствуют листы занчений (желатьльно динамические)
-        def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1", false)
+        def nrDemoSection1 = AppModuleInit.createAppModuleNRDemoMain("F110_Section1","Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)", "jdbcNRDemoSection1", "DatasetNRDemoSection1", true)
         def nrDemoSection2 = AppModuleInit.createAppModuleNRDemoMain("F110_Section2", "Раздел II. Расшифровки, используемые для формирования отчета о финансовых результатах (публикуемая форма)", "jdbcNRDemoSection2", "DatasetNRDemoSection2", true)
         def nrDemoSection3 = AppModuleInit.createAppModuleNRDemoMain("F110_Section3", "Раздел III. Расшифровки для расчета показателей, используемых для оценки финансовой устойчивости кредитных организаций", "jdbcNRDemoSection3", "DatasetNRDemoSection3", true)
         def nrDemoSection4 = AppModuleInit.createAppModuleNRDemoMain("F110_Section4", "Раздел IV. Расшифровки, используемые при расчете денежно-кредитных показателей", "jdbcNRDemoSection4", "DatasetNRDemoSection4", true)
 
-        def nrDemoDetail = AppModuleInit.createAppModuleNRDemoMain("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail", true)
+        def nrDemoDetail = AppModuleInit.createAppModuleNRDemoDetail("F110_Detail", "Расшифровочный отчет", "jdbcNRDemoDetail", "DatasetNRDemoDetail", true)
         def nrDemoCalcMart = AppModuleInit.createAppModuleNRDemoCalcMart("F110_CalcMart", "Запуск расчета формы", "jdbcNRDemoCalcMart", "DatasetNRDemoCalcMart")
         def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 

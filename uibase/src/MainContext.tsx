@@ -1,12 +1,9 @@
 import * as React from "react";
 import Ecore from "ecore"
+import {actionType, eventType} from "./utils/consts";
+import EventTracker from "./EventTracker";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
-
-export interface ISubmitHandler {
-    name: string,
-    handler: Function
-}
 
 export interface IServerQueryParam {
     index: number,
@@ -27,19 +24,32 @@ export interface IServerNamedParam {
     parameterDateFormat?: string
 }
 
+export interface IEventAction {
+    name: string,
+    actionType: actionType,
+    callback: () => void
+}
+
+export interface IEventHandler {
+    name: string,
+    eventType: eventType,
+    callback: () => void
+}
+
 export interface IMainContext {
     updateContext?: (context: any, cb?: () => void) => void;
     applicationReferenceTree?: Ecore.EObject
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: Object[] | undefined) => void;
-    runQuery?: (resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], queryParams: IServerNamedParam[], ) => Promise<string>;
+    runQuery?: (resource: Ecore.Resource, queryParams: IServerNamedParam[], filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortsParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpression: IServerQueryParam[], ) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;
     changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
     docxHandlers?: any[];
     excelHandlers?: any[];
-    submitHandlers?: ISubmitHandler[];
     contextItemValues?: Map<String, any>;
+    eventActions?: IEventAction[];
+    eventTracker?: EventTracker;
 }

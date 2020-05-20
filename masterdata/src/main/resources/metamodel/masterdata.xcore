@@ -34,25 +34,25 @@ class EnumValue {
 
 class DocumentType extends Classifier {
     contains Attribute[] attributes opposite documentType
+    op boolean isActive()
+    op void activate()
+    op void deactivate(boolean deleteTables)
 }
 
 class EntityType extends DocumentType {
     String caption
-    boolean active
     boolean ^abstract
-    boolean timeDependent
     refers EntityType[] superTypes
     contains PrimaryKey primaryKey opposite entityType
     contains InvertedEntry[] invertedEntries opposite entityType
     contains ForeignKey[] foreignKeys opposite entityType
-    op void activate()
-    op void deactivate(boolean deleteTables)
 }
 
 class Attribute {
     container DocumentType documentType opposite attributes
     String name
     String caption
+    boolean display
     refers Classifier attributeType
 }
 

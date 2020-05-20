@@ -325,15 +325,225 @@ class AppModuleInit {
             datasetView.valueItems.add(datasetSelect)
             datasetView.valueItems.add(datePicker)
 
-            button.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerMain = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerMain.name = "mainHandler"
+            eventHandlerMain.setEvent(Event.CLICK)
+            eventHandlerMain.setListenItem(button)
+
+            def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
+            submitAction.setAction(Action.SUBMIT)
+            submitAction.setTriggerItem(datasetView)
+            eventHandlerMain.eventActions.add(submitAction)
+
+            row6.children.add(eventHandlerMain)
+
+            def eventHandlerCheckDqc = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerCheckDqc.name = "dqcHandler"
+            eventHandlerCheckDqc.setEvent(Event.CHANGE)
+            eventHandlerCheckDqc.setListenItem(datePicker)
+
+            def actionCheckDqc = ApplicationFactory.eINSTANCE.createEventAction()
+            actionCheckDqc.setAction(Action.SUBMIT)
+            actionCheckDqc.setTriggerItem(groovyCommand)
+            eventHandlerCheckDqc.eventActions.add(actionCheckDqc)
+
+            row6.children.add(eventHandlerMain)
+            row6.children.add(eventHandlerCheckDqc)
 
             form.children.add(row1)
             form.children.add(row2)
             form.children.add(row3)
             form.children.add(row4)
             form.children.add(row5)
+            form.children.add(row6)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+    static def createAppModuleNRDemoDetail(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.useParentReferenceTree = useParentReferenceTree
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "SectionForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header //"Раздел I. Расшифровки, используемые для формирования бухгалтерского баланса (публикуемая форма)"
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def col21 = ApplicationFactory.eINSTANCE.createColumn()
+            col21.name = "col21"
+            col21.span = 2
+
+            def col22 = ApplicationFactory.eINSTANCE.createColumn()
+            col22.name = "col22"
+            col22.span = 2
+
+            def typography22 = ApplicationFactory.eINSTANCE.createTypography()
+            typography22.name = "Отчётная дата (на)"
+            col22.children.add(typography22)
+
+            def col23 = ApplicationFactory.eINSTANCE.createColumn()
+            col23.name = "col23"
+            col23.span = 2
+
+            def datePicker = ApplicationFactory.eINSTANCE.createDatePicker()
+            datePicker.name = 'REPORT_DATE'
+            datePicker.allowClear = false
+            datePicker.disabled = false
+            datePicker.format = "YYYY-MM-DD"
+            datePicker.width = 200
+
+            col23.children.add(datePicker)
+
+            row2.children.add(col21)
+            row2.children.add(col22)
+            row2.children.add(col23)
+
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row3"
+
+            def col31 = ApplicationFactory.eINSTANCE.createColumn()
+            col31.name = "col31"
+            col31.span = 2
+
+            def col32 = ApplicationFactory.eINSTANCE.createColumn()
+            col32.name = "col32"
+            col32.span = 2
+
+            def typography32 = ApplicationFactory.eINSTANCE.createTypography()
+            typography32.name = "Раздел"
+            col32.children.add(typography32)
+
+            def col33 = ApplicationFactory.eINSTANCE.createColumn()
+            col33.name = "col33"
+            col33.span = 2
+
+            def datasetSelectSections = ApplicationFactory.eINSTANCE.createSelect()
+            datasetSelectSections.name = 'SECTIONS' //Название совпадает с тем что мы передаем в качестве параметра в запрос
+            datasetSelectSections.isDynamic = true
+            datasetSelectSections.keyColumn = "KEY"
+            datasetSelectSections.valueColumn = "VALUE"
+            datasetSelectSections.setMode(SelectMode.MULTIPLE)
+            def datasetComponentSections =  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetNRDemoF110Sections")
+            datasetSelectSections.setDatasetComponent(datasetComponentSections)
+
+            col33.children.add(datasetSelectSections)
+
+            row3.children.add(col31)
+            row3.children.add(col32)
+            row3.children.add(col33)
+
+            def row31 = ApplicationFactory.eINSTANCE.createRow()
+            row31.name = "row31"
+
+            def col311 = ApplicationFactory.eINSTANCE.createColumn()
+            col311.name = "col311"
+            col311.span = 2
+
+            def col312 = ApplicationFactory.eINSTANCE.createColumn()
+            col312.name = "col312"
+            col312.span = 2
+
+            def typography312 = ApplicationFactory.eINSTANCE.createTypography()
+            typography312.name = "Код обозначения расшифровки 110ф"
+            col312.children.add(typography312)
+
+            def col313 = ApplicationFactory.eINSTANCE.createColumn()
+            col313.name = "col33"
+            col313.span = 2
+
+            def datasetSelectCodes = ApplicationFactory.eINSTANCE.createSelect()
+            datasetSelectCodes.name = 'CODES' //Название совпадает с тем что мы передаем в качестве параметра в запрос
+            datasetSelectCodes.isDynamic = true
+            datasetSelectCodes.keyColumn = "CODE_KEY"
+            datasetSelectCodes.valueColumn = "CODE_VALUE"
+            datasetSelectCodes.setMode(SelectMode.MULTIPLE)
+            datasetSelectCodes.valueItems.add(datasetSelectSections)
+            def datasetComponentCodes =  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetNRDemoF110Codes")
+            datasetSelectCodes.setDatasetComponent(datasetComponentCodes)
+
+            col313.children.add(datasetSelectCodes)
+
+            row31.children.add(col311)
+            row31.children.add(col312)
+            row31.children.add(col313)
+
+            def row4 = ApplicationFactory.eINSTANCE.createRow()
+            row4.name = "row4"
+
+            def col41 = ApplicationFactory.eINSTANCE.createColumn()
+            col41.name = "col41"
+            col41.span = 2
+
+            def col42 = ApplicationFactory.eINSTANCE.createColumn()
+            col42.name = "col42"
+            col42.span = 2
+
+            def button = ApplicationFactory.eINSTANCE.createButton()
+            button.name = "InputButton"
+            button.buttonSubmit = true
+
+            col42.children.add(button)
+
+            row4.children.add(col41)
+            row4.children.add(col42)
+
+
+            def row6 = ApplicationFactory.eINSTANCE.createRow()
+            row6.name = "row6"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "SectionDatasetView"
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
+            datasetView.setDatasetComponent(datasetComponent)
+            datasetView.valueItems.add(datasetSelectSections)
+            datasetView.valueItems.add(datasetSelectCodes)
+            datasetView.valueItems.add(datePicker)
+
+            row6.children.add(datasetView)
+
+            def eventHandlerMain = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerMain.name = "detailHandler"
+            eventHandlerMain.setEvent(Event.CLICK)
+            eventHandlerMain.setListenItem(button)
+
+            def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
+            submitAction.setAction(Action.SUBMIT)
+            submitAction.setTriggerItem(datasetView)
+            eventHandlerMain.eventActions.add(submitAction)
+
+            row6.children.add(eventHandlerMain)
+
+            form.children.add(row1)
+            form.children.add(row2)
+            form.children.add(row3)
+            form.children.add(row31)
+            form.children.add(row4)
             form.children.add(row6)
             application.setView(form)
 
@@ -527,8 +737,6 @@ class AppModuleInit {
             groovyCommand.valueItems.add(datePicker)
             groovyCommand.valueItems.add(datasetSelect)
 
-            button1.submitItems.add(groovyCommand)
-
             row5.children.add(groovyCommand)
 
             def row6 = ApplicationFactory.eINSTANCE.createRow()
@@ -541,9 +749,31 @@ class AppModuleInit {
             def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
-            button2.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerButton = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton.name = "buttonHandler"
+            eventHandlerButton.setEvent(Event.CLICK)
+            eventHandlerButton.setListenItem(button1)
+
+            def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setTriggerItem(groovyCommand)
+            eventHandlerButton.eventActions.add(submitActionButton)
+
+            row6.children.add(eventHandlerButton)
+
+            def eventHandlerButton2 = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton2.name = "button2Handler"
+            eventHandlerButton2.setEvent(Event.CLICK)
+            eventHandlerButton2.setListenItem(button2)
+
+            def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setTriggerItem(datasetView)
+            eventHandlerButton2.eventActions.add(submitActionButton2)
+
+            row6.children.add(eventHandlerButton2)
 
             form.children.add(row1)
             form.children.add(row2)
@@ -780,8 +1010,6 @@ class AppModuleInit {
             groovyCommand.valueItems.add(datePicker)
             groovyCommand.valueItems.add(datasetSelect)
 
-            button1.submitItems.add(groovyCommand)
-
             row5.children.add(groovyCommand)
 
             def row6 = ApplicationFactory.eINSTANCE.createRow()
@@ -794,9 +1022,31 @@ class AppModuleInit {
             def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
-            button2.submitItems.add(datasetView)
-
             row6.children.add(datasetView)
+
+            def eventHandlerButton = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton.name = "button1Handler"
+            eventHandlerButton.setEvent(Event.CLICK)
+            eventHandlerButton.setListenItem(button1)
+
+            def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setTriggerItem(groovyCommand)
+            eventHandlerButton.eventActions.add(submitActionButton)
+
+            row6.children.add(eventHandlerButton)
+
+            def eventHandlerButton2 = ApplicationFactory.eINSTANCE.createEventHandler()
+            eventHandlerButton2.name = "button2Handler"
+            eventHandlerButton2.setEvent(Event.CLICK)
+            eventHandlerButton2.setListenItem(button2)
+
+            def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
+            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setTriggerItem(datasetView)
+            eventHandlerButton2.eventActions.add(submitActionButton2)
+
+            row6.children.add(eventHandlerButton2)
 
             form.children.add(row1)
             form.children.add(row2)
@@ -887,7 +1137,6 @@ class AppModuleInit {
             appModule.useParentReferenceTree = true
         }
     }
-
     static def makeRefTreeNRDemo() {
         def referenceTree = ApplicationFactory.eINSTANCE.createCatalogNode()
         referenceTree.name = "F110_REF_TREE"

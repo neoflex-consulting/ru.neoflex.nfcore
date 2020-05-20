@@ -17,6 +17,7 @@ interface Props {}
 
 interface State {
     fileName?: string,
+    deployName?: string,
     modalResourceVisible: boolean,
     withReferences: boolean,
     withDependents: boolean,
@@ -78,6 +79,15 @@ class Tools extends React.Component<any, State> {
         })
     }
 
+    deployFile = (file: any) => {
+        let form = new FormData()
+        form.append("file", file)
+        this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
+        API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json=>{
+            notification.success({message: JSON.stringify(json, undefined, 4)})
+        })
+    }
+
     downloadAll = () => {
         let filename = "export.zip";
         API.instance().download("/system/exportdb", {}, filename)
@@ -120,6 +130,23 @@ class Tools extends React.Component<any, State> {
                        }}
                        onClick={e => {
                            this.setState({fileName: undefined})
+                       }}
+                />
+            </label>
+        </Tooltip>
+
+        const fileDeploy = <Tooltip title={"Import"}>
+            <label>
+                <FontAwesomeIcon icon={faCloudUploadAlt}/>
+                <Input type="file" style={{display: "none"}}
+                       onChange={e => {
+                           const file = e!.target!.files![0]
+                           if (file) {
+                               this.deployFile(file)
+                           }
+                       }}
+                       onClick={e => {
+                           this.setState({deployName: undefined})
                        }}
                 />
             </label>
@@ -217,6 +244,12 @@ class Tools extends React.Component<any, State> {
                     <Form layout={"inline"}>
                         <Form.Item>
                             <Input addonBefore={fileInput} value={this.state!.fileName} readOnly={true}/>
+                        </Form.Item>
+                    </Form>
+                    <Divider orientation="left">Deploy supply</Divider>
+                    <Form layout={"inline"}>
+                        <Form.Item>
+                            <Input addonBefore={fileDeploy} value={this.state!.deployName} readOnly={true}/>
                         </Form.Item>
                     </Form>
                 </Col>
