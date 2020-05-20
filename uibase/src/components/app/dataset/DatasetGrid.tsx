@@ -208,12 +208,8 @@ class DatasetGrid extends React.Component<any, any> {
     };
 
     componentDidMount(): void {
-        if (this.props.context.docxHandlers !== undefined) {
-            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        }
-        if (this.props.context.excelHandlers !== undefined) {
-            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
-        }
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
         if (this.state.themes.length === 0) {
             this.getAllThemes()
         }
@@ -223,12 +219,8 @@ class DatasetGrid extends React.Component<any, any> {
     }
 
     componentWillUnmount(): void {
-        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
-            this.props.context.docxHandlers.pop()
-        }
-        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
-            this.props.context.excelHandlers.pop()
-        }
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
