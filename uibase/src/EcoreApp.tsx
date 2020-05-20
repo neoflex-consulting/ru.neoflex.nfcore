@@ -24,6 +24,7 @@ import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import pony from "./icons/pony.png";
 import HeaderMenu from "./components/HeaderMenu";
+import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 const backgroundColor = "#fdfdfd";
 
 const { Header, Content, Sider } = Layout;
@@ -614,6 +615,12 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ color: '#eeeeee' }}>{t('tools')}</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'masterdata'}>
+                            <Link to={`/developer/masterdata`}>
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
+                                <span style={{ color: '#eeeeee' }}>{t('masterdata')}</span>
+                            </Link>
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
@@ -624,6 +631,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route exact={true} path='/developer/data' component={DataBrowser}/>
                             <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
                             <Route path='/developer/tools' component={Tools}/>
+                            <Route path='/developer/masterdata' component={MasterdataBrowser}/>
                         </Switch>
                     </Content>
                 </Layout>
