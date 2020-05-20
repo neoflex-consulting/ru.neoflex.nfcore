@@ -606,7 +606,7 @@ class EcoreApp extends React.Component<any, State> {
 
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query', 'tools']
+        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
