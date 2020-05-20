@@ -3,7 +3,7 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {Button, Drawer, Modal, Select} from 'antd';
-import {IServerQueryParam, ISubmitHandler} from '../../../MainContext';
+import {IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -36,6 +36,7 @@ import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {actionType} from "../../../utils/consts";
 
 const { Option, OptGroup } = Select;
 
@@ -553,19 +554,15 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
-        if (this.props.context.submitHandlers !== undefined) {
-            this.props.context.submitHandlers.push({
-                name: this.props.viewObject.get('name'),
-                handler: this.onSubmit.bind(this)
-            } as ISubmitHandler)
-        }
+        this.props.context.eventActions.push({
+            name: this.props.viewObject.get('name'),
+            actionType: actionType.submit,
+            callback: this.onSubmit.bind(this)
+        });
     }
 
     componentWillUnmount() {
-        this.props.context.updateContext({datasetComponents: undefined});
-        if (this.props.context.submitHandlers !== undefined && this.props.context.submitHandlers.length > 0) {
-            this.props.context.submitHandlers.pop()
-        }
+        this.props.context.eventActions.pop()
     }
 
     onChangeColumnDefs(columnDefs: any) {
