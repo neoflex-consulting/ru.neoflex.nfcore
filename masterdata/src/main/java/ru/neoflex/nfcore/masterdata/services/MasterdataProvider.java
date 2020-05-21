@@ -116,7 +116,7 @@ public class MasterdataProvider {
     private void createProperty(ODatabaseDocument database, OClass oClass, String name, Classifier classifier) {
         if (classifier instanceof ArrayType) {
             ArrayType arrayType = (ArrayType) classifier;
-            OType oType = arrayType.getElementType() instanceof EntityType ? OType.EMBEDDEDLIST : OType.LINKLIST;
+            OType oType = arrayType.getElementType() instanceof EntityType ? OType.LINKLIST : OType.EMBEDDEDLIST;
             if (arrayType.getElementType() instanceof DocumentType) {
                 OClass oClass2 = getOClass(database, (DocumentType) arrayType.getElementType());
                 oClass.createProperty(name, oType, oClass2);
@@ -128,7 +128,7 @@ public class MasterdataProvider {
         }
         else if (classifier instanceof MapType) {
             MapType mapType = (MapType) classifier;
-            OType oType =  mapType.getValueType() instanceof EntityType ? OType.EMBEDDEDMAP : OType.LINKMAP;
+            OType oType =  mapType.getValueType() instanceof EntityType ? OType.LINKMAP : OType.EMBEDDEDMAP;
             if (mapType.getValueType() instanceof DocumentType) {
                 OClass oClass2 = getOClass(database, (DocumentType) mapType.getValueType());
                 oClass.createProperty(name, oType, oClass2);
