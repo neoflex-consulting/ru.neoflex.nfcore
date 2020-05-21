@@ -1,15 +1,10 @@
 package ru.neoflex.nfcore.base.auth.impl
 
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
 import org.springframework.security.core.context.SecurityContextHolder
-import ru.neoflex.meta.emfgit.Events
-import ru.neoflex.meta.emfgit.Transaction
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.AuthFactory
 import ru.neoflex.nfcore.base.auth.AuthPackage
-import ru.neoflex.nfcore.base.components.Publisher
-import ru.neoflex.nfcore.base.services.Context
 
 import java.sql.Timestamp
 

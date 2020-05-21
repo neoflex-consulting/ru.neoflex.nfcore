@@ -1,15 +1,9 @@
 package ru.neoflex.nfcore.base.auth.impl
 
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
-import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
-import ru.neoflex.meta.emfgit.Events
-import ru.neoflex.meta.emfgit.Transaction
 import ru.neoflex.nfcore.base.auth.*
-import ru.neoflex.nfcore.base.components.Publisher
 import ru.neoflex.nfcore.base.services.Context
-import ru.neoflex.nfcore.base.util.DocFinder
 
 class UserInit extends UserImpl {
     static Role createSU() {
