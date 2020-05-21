@@ -775,7 +775,7 @@ class ResourceEditor extends React.Component<any, State> {
                     footer={null}
                     onCancel={this.handleResourceModalCancel}
                 >
-                    <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
+                    <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
 
                 </Modal>}
                 <EClassSelection
