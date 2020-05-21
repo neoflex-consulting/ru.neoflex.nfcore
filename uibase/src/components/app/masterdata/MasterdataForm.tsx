@@ -22,10 +22,15 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         </Typography.Paragraph>
     }
 
+    renderArrayTypeEditor(elementType: EObject, data: any, updateData: (data: any)=>void) {
+        return (
+            <span>{elementType.get('name')}</span>
+        )
+    }
     renderPlainTypeEditor(attributeType: EObject, data: any, updateData: (data: any)=>void) {
         const typeName = attributeType.get('name') as string
-        if (typeName === 'INTEGER') {
-            return <InputNumber value={data} onChange={value => updateData(value)}/>
+        if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(typeName)) {
+            return <InputNumber value={data} style={{width: '15em'}} onChange={value => updateData(value)}/>
         }
         if (typeName === 'STRING') {
             return <Input value={data} onChange={value => updateData(value.target.value)}/>
@@ -53,6 +58,9 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                 )}
             </Select>
         }
+        if (attributeType.eClass.get('name') === 'ArrayType') {
+            return this.renderArrayTypeEditor(attributeType.get('elementType'), data, updateData)
+        }
         return this.renderJSONEditor(attributeType, data, updateData)
     }
 
@@ -66,7 +74,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                     <Col span={18}>{data['@rid']}</Col>
                 </Row>
                 {getAllAttributes(entityType).map(attr=>
-                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} key={attr.get('name')}>
+                    <Row style={{marginTop: '5px'}} gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} key={attr.get('name')}>
                         <Col span={6}><Typography.Text strong={true}>{getAttrCaption(attr)}</Typography.Text></Col>
                         <Col span={18}>{this.renderValueEditor(attr.get('attributeType'), data[attr.get('name') as string], (data: any)=>{
                             updateData({[attr.get('name')]: data})
