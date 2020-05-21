@@ -351,6 +351,79 @@ class DatasetComponentInit {
         }
     }
 
+    static def createAllColumnNRDemoDqc(String name) {
+        def rs = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: name])
+                .execute().resourceSet
+        if (!rs.resources.empty && (rs.resources.get(0).contents.get(0) as DatasetComponent).column.size() == 0) {
+            def datasetComponentRef = Context.current.store.getRef(rs.resources.get(0))
+            def datasetComponent = rs.resources.get(0).contents.get(0) as DatasetComponent
+            if (datasetComponent.dataset) {
+                if (datasetComponent.dataset.datasetColumn.size() != 0) {
+                    def columns = datasetComponent.dataset.datasetColumn
+                    for (int i = 0; i <= columns.size() - 1; ++i) {
+                        def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
+                        rdbmsColumn.name = columns[i].name
+                        rdbmsColumn.datasetColumn = columns[i]
+                        def typography = ApplicationFactory.eINSTANCE.createTypography()
+                        typography.name = columns[i].name
+                                .replace("TEST_ID","id проверки")
+                                .replace("TEST_NUM","Код проверки")
+                                .replace("TEST_TYPE","Область проверки")
+                                .replace("TEST_NAME","Название проверки")
+                                .replace("TEST_OBJECT","Проверяемый объект")
+                                .replace("PRIORITY","Приоритет")
+                                .replace("JOB_STATE","JOB_STATE")
+                                .replace("RUN","Запуск")
+                                .replace("SHOW_LOG","Журнал запуска")
+                                .replace("REPORT_LIST","Отчёт(ы)")
+
+                                .replace("TEST_SET_ID","Идентификатор")
+                                .replace("TEST_SET_NAME","Название набора")
+                                .replace("TEST_COUNT","Кол-во проверок")
+                                .replace("DESCRIPTION","Описание набора")
+
+                                .replace("TEST_OBJECT","Проверяемый объект")
+                                .replace("INTERNAL_RK","Внутренний идентификатор объекта (RK)")
+                                .replace("OPER_DATE","Проверяемая дата")
+                                .replace("ERROR_MESSAGE","Сообщение об ошибке")
+                                .replace("USER_OBJECT_ID","Идентификатор объекта")
+                                .replace("BRANCH","Филиал")
+                                .replace("REASON","Причина")
+                                .replace("REPORT_LIST","Отчеты, на которые влияет проверка")
+                                .replace("PRIORITY","Приоритет")
+
+                                .replace("TEST_SET_RUN_ID","ID запуска")
+                                .replace("DATE_TIME_END","Дата завершения")
+                                .replace("DATE_TIME","Дата запуска проверки")
+                                .replace("ERROR_COUNT","Ошибки")
+                                .replace("SHOW_HISTORY_RUN_TEST","Журнал")
+
+
+                        rdbmsColumn.headerName = typography
+                        rdbmsColumn.sortable = true
+                        rdbmsColumn.resizable = true
+                        if (rdbmsColumn.name in ["TEST_ID","JOB_STATE","PROBLEM_ID","BRANCH","USER_OBJECT_ID",
+                            "TEST_SET_RUN_ID","TEST_SET_ID","SHOW_LOG","SHOW_HISTORY_RUN_TEST"]) {
+                            rdbmsColumn.hide = true
+                        }
+                        rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
+                        rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
+                                ? Filter.DATE_COLUMN_FILTER :
+                                columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
+                                        ? Filter.NUMBER_COLUMN_FILTER : Filter.TEXT_COLUMN_FILTER
+                        datasetComponent.column.each { c->
+                            if (c.name == columns[i].name.toString()) {
+                                throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
+                            }
+                        }
+                        datasetComponent.column.add(rdbmsColumn)
+                    }
+                }
+            }
+            Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+        }
+    }
+
     DatasetComponentInit() {}
 
 }

@@ -62,6 +62,23 @@ public class SysController {
         return result;
     }
 
+//    @PostMapping(value="/deploySupply", produces={"application/json"})
+//    public ObjectNode deploySupply(@RequestParam(value = "file") final MultipartFile file) throws Exception {
+//        File directory = new File(new File("").getAbsolutePath() + "\\deploy");
+//
+////        File file = new File()
+//
+//        boolean exists = directory.exists();
+//        if (!exists) {
+//            directory.mkdir();
+//        }
+//
+//        int count = new Exporter(store).unzip(file.getInputStream());
+//        ObjectMapper mapper = new ObjectMapper();
+//        ObjectNode result = mapper.createObjectNode().put("count", count);
+//        return result;
+//    }
+
     @GetMapping(value="/exportdb")
     public ResponseEntity exportDb() throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();

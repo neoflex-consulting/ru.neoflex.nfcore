@@ -63,14 +63,18 @@ const colorScheme = [
 
 enum actionType {
     submit="submit",
-    visible="visible",
+    show="show",
     hide="hide",
-    disable="disable"
+    enable="enable",
+    disable="disable",
+    clear="clear",
+    setValue="setValue"
 }
 
 enum eventType {
     click="click",
-    change="change"
+    change="change",
+    componentLoad="componentLoad"
 }
 
 export {rowPerPageMapper};

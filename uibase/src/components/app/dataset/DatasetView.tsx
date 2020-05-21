@@ -554,15 +554,16 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
-        this.props.context.eventActions.push({
+        this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
-            actionType: actionType.submit,
-            callback: this.onSubmit.bind(this)
+            actions: [
+                {actionType: actionType.submit,callback: this.onSubmit.bind(this)}
+            ]
         });
     }
 
     componentWillUnmount() {
-        this.props.context.eventActions.pop()
+        this.props.context.removeEventAction()
     }
 
     onChangeColumnDefs(columnDefs: any) {
@@ -814,7 +815,7 @@ class DatasetView extends React.Component<any, State> {
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
             <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
-                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
+                        handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
                                 saveAs(new Blob([blob]), 'example.xlsx');
                                 console.log("Document created successfully");
                             }

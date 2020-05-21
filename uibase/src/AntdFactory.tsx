@@ -125,6 +125,7 @@ class Row_ extends ViewContainer {
 }
 
 class Button_ extends ViewContainer {
+
     saveResource = () => {
         API.instance().saveResource(this.props.viewObject.eResource(), 99999)
             .then((newResource: Ecore.Resource) => {
@@ -135,6 +136,7 @@ class Button_ extends ViewContainer {
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
                 this.props.context.updateContext!(({viewObject: newViewObject[0]}))
             })};
+
     cancelChange = () => {
         const resource: Ecore.Resource = this.props.viewObject.eResource();
         resource.clear();
@@ -145,11 +147,13 @@ class Button_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
         this.props.context.updateContext!(({viewObject: oldViewObject[0]}))
     };
+
     backStartPage = () => {
         const appModule = this.props.pathFull[this.props.pathFull.length - 1];
         let params: Object[] = appModule.params;
         this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
+
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
@@ -166,7 +170,7 @@ class Button_ extends ViewContainer {
             }
             {this.props.viewObject.get('buttonSubmit') === true &&
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
-                this.props.context.eventTracker?.notifyAll({type:eventType.click,itemName:this.props.viewObject.get('name')});
+                this.props.context.notifyAllEventHandlers({type:eventType.click,itemName:this.props.viewObject.get('name')});
             }}>
                 {(label)? label: t('submit')}
             </Button>
@@ -189,7 +193,9 @@ class Select_ extends ViewContainer {
             selectData: [],
             params: [],
             currentValue: "",
-            datasetComponent: undefined
+            datasetComponent: undefined,
+            isVisible: true,
+            isDisabled: this.props.viewObject.get('disabled'),
         };
     }
 
@@ -208,7 +214,7 @@ class Select_ extends ViewContainer {
     }
 
     onChange = (currentValue: string|string[]) => {
-        this.props.context.eventTracker?.notifyAll({
+        this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
@@ -233,6 +239,10 @@ class Select_ extends ViewContainer {
     };
 
     componentDidMount(): void {
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
         if (this.props.viewObject.get('isDynamic')
             && this.props.viewObject.get('datasetComponent')) {
             this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
@@ -250,21 +260,22 @@ class Select_ extends ViewContainer {
         } else if (this.props.viewObject.get('staticValues')) {
             this.getStaticValues(this.props.viewObject.get('staticValues'))
         }
-        if (this.props.context.docxHandlers !== undefined) {
-            this.props.context.docxHandlers.push(this.getDocxData.bind(this));
-        }
-        if (this.props.context.excelHandlers !== undefined) {
-            this.props.context.excelHandlers.push(this.getExcelData.bind(this));
-        }
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+            ]
+        });
     }
 
     componentWillUnmount(): void {
-        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
-            this.props.context.docxHandlers.pop()
-        }
-        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
-            this.props.context.excelHandlers.pop()
-        }
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -313,11 +324,11 @@ class Select_ extends ViewContainer {
                 <div style={{marginBottom: marginBottom}}>
                     <Select
                         key={this.viewObject._id}
-                        disabled={this.props.viewObject.get('disabled')}
+                        disabled={this.state.isDisabled}
                         showSearch={this.props.viewObject.get('showSearch')}
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
-                        style={{width: width}}
+                        style={{width: width, display: (this.state.isVisible)? undefined: 'none'}}
                         defaultValue={this.props.viewObject.get('value') || undefined}
                         value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
@@ -354,6 +365,8 @@ class DatePicker_ extends ViewContainer {
         this.state = {
             pickedDate: moment(),
             format: this.props.viewObject.get('format') || "YYYY-MM-DD",
+            isVisible: true,
+            isDisabled: this.props.viewObject.get('disabled') || false
         };
     }
 
@@ -372,27 +385,31 @@ class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        //Инициализация value
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
         this.onChange(this.state.pickedDate.format(this.state.format));
-        if (this.props.context.docxHandlers !== undefined) {
-            this.props.context.docxHandlers.push(this.getDocxData.bind(this));
-        }
-        if (this.props.context.excelHandlers !== undefined) {
-            this.props.context.excelHandlers.push(this.getExcelData.bind(this));
-        }
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+            ]
+        });
     }
 
     componentWillUnmount(): void {
-        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
-            this.props.context.docxHandlers.pop()
-        }
-        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
-            this.props.context.excelHandlers.pop()
-        }
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
     }
 
     onChange = (currentValue: string) => {
-        this.props.context.eventTracker?.notifyAll({
+        this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
@@ -412,10 +429,10 @@ class DatePicker_ extends ViewContainer {
                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
-                    disabled={this.props.viewObject.get('disabled') || false}
+                    disabled={this.state.isDisabled}
                     allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
-                    style={{width: this.props.viewObject.get('width') || "200px"}}
+                    style={{width: this.props.viewObject.get('width') || "200px", display: (this.state.isVisible)? undefined: 'none'}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -456,10 +473,15 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
-        this.props.context.eventActions.push({
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
+        this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
-            actionType: actionType.submit,
-            callback: this.execute.bind(this)
+            actions: [
+                {actionType: actionType.submit,callback: this.execute.bind(this)}
+                ]
         });
         if (this.props.viewObject.get('executeOnStartup')) {
             this.execute()
@@ -467,7 +489,7 @@ class GroovyCommand_ extends ViewContainer {
     }
 
     componentWillUnmount(): void {
-        this.props.context.eventActions.pop()
+        this.props.context.removeEventAction()
     }
 
     execute = () => {
@@ -521,7 +543,7 @@ class ValueHolder_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
-        this.props.context.eventTracker?.notifyAll({
+        this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
@@ -533,6 +555,13 @@ class ValueHolder_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
+    componentDidMount(): void {
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
+    }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
@@ -556,8 +585,32 @@ class ValueHolder_ extends ViewContainer {
 }
 
 class Input_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isVisible: true,
+            isDisabled: false
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+            ]
+        });
+    }
+
     onChange = (currentValue: string) => {
-        this.props.context.eventTracker?.notifyAll({
+        this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
@@ -569,6 +622,7 @@ class Input_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
     render = () => {
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
         if (this.props.viewObject.get('inputType') === 'InputNumber' ) {
@@ -577,7 +631,8 @@ class Input_ extends ViewContainer {
                     key={this.viewObject._id}
                     style={{marginBottom: marginBottom}}>
                     <InputNumber
-                        style={{width: width}}
+                        style={{width: width, display: (this.state.isVisible) ? undefined : 'none'}}
+                        disabled={this.state.isDisabled}
                         min={this.props.viewObject.get('minValue') || 1}
                         max={this.props.viewObject.get('maxValue') || 99}
                         step={this.props.viewObject.get('step') || 1}
@@ -608,23 +663,32 @@ class Input_ extends ViewContainer {
 }
 
 class Typography_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isVisible: true,
+        };
+    }
 
     componentDidMount(): void {
-        if (this.props.context.docxHandlers !== undefined) {
-            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        }
-        if (this.props.context.excelHandlers !== undefined) {
-            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
-        }
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+            ]
+        });
     }
 
     componentWillUnmount(): void {
-        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
-            this.props.context.docxHandlers.pop()
-        }
-        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
-            this.props.context.excelHandlers.pop()
-        }
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
     }
 
     private getDocxData(): docxExportObject {
@@ -642,7 +706,7 @@ class Typography_ extends ViewContainer {
     }
 
     onChange = (str: string) => {
-        this.props.context.eventTracker?.notifyAll({
+        this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
@@ -654,6 +718,7 @@ class Typography_ extends ViewContainer {
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
         this.props.context.updateContext!(({viewObject: newViewObject[0]}))
     };
+
     render = () => {
         let drawObject = this.props.viewObject;
         if (this.props.viewObject.get('typographyStyle') !== null) {
@@ -687,7 +752,8 @@ class Typography_ extends ViewContainer {
                             ? `linear-gradient(${drawObject.get('gradientStyle').get('position')}, ${gradients})`
                             : undefined,
                     WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
-                    WebkitTextFillColor: gradients !== "" ? "transparent" : "unset"
+                    WebkitTextFillColor: gradients !== "" ? "transparent" : "unset",
+                    display: (this.state.isVisible) ? undefined : 'none'
                 }}
                 copyable={drawObject.get('buttonCopyable')}
                 editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
@@ -714,22 +780,22 @@ class EventHandler_ extends ViewContainer {
 
     handleEvent() {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
-            const actionEvent = this.props.context.eventActions.find((action: IEventAction) => {
-                    return el.get('triggerItem')
-                        && action.name === el.get('triggerItem').get('name')
-                        && action.actionType === (el.get('action') || actionType.submit)
-                }
-            );
-            if (actionEvent) {
-                actionEvent.callback()
-            } else {
-                //TODO бросить нотификацию
+            const eventActions = this.props.context.getEventActions().find((action: IEventAction) => {
+                return el.get('triggerItem')
+                    && action.name === el.get('triggerItem').get('name')
+            }).actions;
+            if (eventActions) {
+                eventActions.forEach((action:{actionType: actionType, callback: () => void}) => {
+                    if (action.actionType === (el.get('action') || actionType.submit)) {
+                        action.callback()
+                    }
+                })
             }
         })
     }
 
     componentDidMount(): void {
-        this.props.context.eventTracker?.addEventHandler({
+        this.props.context.addEventHandler({
             name: this.props.viewObject.get('listenItem').get('name'),
             eventType: this.props.viewObject.get('event') || "click",
             callback: this.handleEvent.bind(this)
@@ -737,7 +803,7 @@ class EventHandler_ extends ViewContainer {
     }
 
     componentWillUnmount(): void {
-        this.props.context.eventTracker?.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+        this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
     }
 
     render = () => {
