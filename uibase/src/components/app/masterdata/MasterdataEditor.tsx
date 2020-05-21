@@ -50,6 +50,7 @@ class MasterdataEditor extends React.Component<any, any> {
         // if (this.state.themes.length === 0) {
         //     this.getAllThemes()
         // }
+        this.loadData()
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {
@@ -161,6 +162,14 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     getAttributeFilter = (attribute: EObject): string => {
+        if (attribute.get('attributeType').eClass.get('name') === 'PlainType') {
+            if (['DATE', 'DATETIME'].includes(attribute.get('attributeType').get('name'))) {
+                return 'agDateColumnFilter'
+            }
+            if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(attribute.get('attributeType').get('name'))) {
+                return 'agNumberColumnFilter'
+            }
+        }
         return 'agTextColumnFilter'
     }
 
