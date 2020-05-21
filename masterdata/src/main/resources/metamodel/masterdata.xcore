@@ -33,6 +33,7 @@ class EnumValue {
 }
 
 class DocumentType extends Classifier {
+    String caption
     contains Attribute[] attributes opposite documentType
     op boolean isActive()
     op void activate()
@@ -40,7 +41,6 @@ class DocumentType extends Classifier {
 }
 
 class EntityType extends DocumentType {
-    String caption
     boolean ^abstract
     refers EntityType[] superTypes
     contains PrimaryKey primaryKey opposite entityType

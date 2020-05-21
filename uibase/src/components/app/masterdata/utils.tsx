@@ -7,7 +7,7 @@ export const getAllAttributes = (entityType: EObject): EObject[] => {
     ]
 }
 
-export const getAttrCaption = (attr: EObject): string => {
+export const getCaption = (attr: EObject): string => {
     return attr.get('caption') || attr.get('name')
 }
 
