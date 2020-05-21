@@ -5,8 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.nfcore.base.supply.Supply;
@@ -18,16 +16,13 @@ import ru.neoflex.nfcore.base.util.Exporter;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 @Service
-@EnableScheduling
 public class DeploySupply {
     private final static Log logger = LogFactory.getLog(DeploySupply.class);
     @Autowired
@@ -69,10 +64,34 @@ public class DeploySupply {
         }
         return null;
         });
-    };
 
-    @Scheduled(initialDelay = 900000, fixedRate = 900000)
+    }
+
+    @PostConstruct
     void ScheduledSupply() throws Exception {
-        this.init();
+        new Thread(() -> {
+            try {
+                WatchService watchService = FileSystems.getDefault().newWatchService();
+                Path path = Paths.get(new File("").getAbsolutePath() + "\\deploy");
+
+                path.register(
+                        watchService,
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_DELETE,
+                        StandardWatchEventKinds.ENTRY_MODIFY);
+
+                WatchKey key;
+                while ((key = watchService.take()) != null) {
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                    logger.info("Event kind:" + event.kind()
+                            + ". File affected: " + event.context() + ".");
+                    this.init();
+                }
+                    }
+                    key.reset();
+                }
+            } catch (Exception e) {}
+        }).start();
     }
 }
