@@ -10,6 +10,7 @@ import ponyCat from '../icons/ponyCat.png';
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
+import FetchSpinner from "./FetchSpinner";
 
 const FormItem = Form.Item;
 
@@ -205,6 +206,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                 <Button title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
                                     <Icon type="search" />
                                 </Button>
+                                <FetchSpinner/>
                             </FormItem>
                         </Form>
                     </Col>
