@@ -411,12 +411,16 @@ enum GroovyCommandType {
 
 enum Action {
     submit
-    visible
+    show
     hide
+    enable
     disable
+    //clear
+    //setValue
 }
 
 enum Event {
     click
     change
+    componentLoad
 }

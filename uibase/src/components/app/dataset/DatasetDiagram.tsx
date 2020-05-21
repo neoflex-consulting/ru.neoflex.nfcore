@@ -79,21 +79,13 @@ class DatasetDiagram extends React.Component<Props & any, State> {
     }
 
     componentDidMount(): void {
-        if (this.props.context.docxHandlers !== undefined) {
-            this.props.context.docxHandlers.push(this.getDocxData.bind(this))
-        }
-        if (this.props.context.excelHandlers !== undefined) {
-            this.props.context.excelHandlers.push(this.getExcelData.bind(this))
-        }
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
     }
 
     componentWillUnmount(): void {
-        if (this.props.context.docxHandlers !== undefined && this.props.context.docxHandlers.length > 0) {
-            this.props.context.docxHandlers.pop()
-        }
-        if (this.props.context.excelHandlers !== undefined && this.props.context.excelHandlers.length > 0) {
-            this.props.context.excelHandlers.pop()
-        }
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
     }
 
     private getDocxData(): docxExportObject {
