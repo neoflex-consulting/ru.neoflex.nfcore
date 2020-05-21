@@ -1,11 +1,6 @@
 package ru.neoflex.nfcore.base.auth.impl
 
-import ru.neoflex.nfcore.base.auth.AllPermission
-import ru.neoflex.nfcore.base.auth.Authorization
-import ru.neoflex.nfcore.base.auth.ClassPermission
-import ru.neoflex.nfcore.base.auth.ObjectPermission
-import ru.neoflex.nfcore.base.auth.ReferencePermission
-import ru.neoflex.nfcore.base.auth.Role
+import ru.neoflex.nfcore.base.auth.*
 
 class AuthFactoryExt extends AuthFactoryImpl{
     @Override

@@ -19,7 +19,14 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
-import {IMainContext, MainContext, IServerQueryParam, IServerNamedParam} from "./MainContext";
+import {
+    IMainContext,
+    MainContext,
+    IServerQueryParam,
+    IServerNamedParam,
+    IEventAction,
+    IEventHandler, IEvent
+} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
@@ -50,6 +57,11 @@ interface State {
 
 class EcoreApp extends React.Component<any, State> {
 
+    private docxHandlers: any[] = [];
+    private excelHandlers: any[] = [];
+    private eventActions: any[] = [];
+    private eventTracker = new EventTracker();
+
     constructor(props: any) {
         super(props);
         const context: IMainContext = {
@@ -58,14 +70,20 @@ class EcoreApp extends React.Component<any, State> {
             runQuery: this.runQuery,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
-            //В момент создания страницы
-            docxHandlers: [],
-            excelHandlers: [],
+            addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
+            addExcelHandler: (handler: any) => { this.excelHandlers.push(handler) },
+            addEventAction: (action: IEventAction) => { this.eventActions.push(action) },
+            removeDocxHandler: () => { this.docxHandlers.pop() },
+            removeExcelHandler: () => { this.excelHandlers.pop() },
+            removeEventAction: () => { this.eventActions.pop() },
+            getDocxHandlers: ()=>{return this.docxHandlers},
+            getExcelHandlers: ()=>{return this.excelHandlers},
+            getEventActions: ()=>{return this.eventActions},
             //По событию на странице
             contextItemValues: new Map(),
-
-            eventActions: [],
-            eventTracker: new EventTracker(),
+            addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
+            removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
+            notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
         };
         this.state = {
             principal: undefined,

@@ -9,7 +9,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {API} from "../../../modules/api";
-import Ecore, {EObject} from "ecore";
+import {EObject} from "ecore";
 import _ from 'lodash';
 import update from 'immutability-helper';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -141,18 +141,18 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     actionMenu = (params: any) => (
-        <a onClick={event => this.edit(params.value)}>{params.value}</a>
+        <Button type="link" onClick={event => this.edit(params.value)}>{params.value}</Button>
     )
 
-    getAllThemes = () => {
-        API.instance().findEnum('application', 'Theme')
-            .then((result: Ecore.EObject[]) => {
-                let themes = result.map((t: any) => {
-                    return t.get('name').toLowerCase()
-                });
-                this.setState({themes})
-            })
-    };
+    // getAllThemes = () => {
+    //     API.instance().findEnum('application', 'Theme')
+    //         .then((result: Ecore.EObject[]) => {
+    //             let themes = result.map((t: any) => {
+    //                 return t.get('name').toLowerCase()
+    //             });
+    //             this.setState({themes})
+    //         })
+    // };
 
     onGridReady = (params: any) => {
         if (this.grid && this.grid.current !== null) {
@@ -221,7 +221,9 @@ class MasterdataEditor extends React.Component<any, any> {
                 <MasterdataForm
                     entityType={entityType}
                     data={currentRow}
-                    updateData={(data: Object) => this.setState({currentRow: update(currentRow || {}, {$merge: data})})}
+                    updateData={(data: Object) => {
+                        this.setState({currentRow: update(currentRow || {}, {$merge: data})})
+                    }}
                 />
             </React.Fragment>
         )

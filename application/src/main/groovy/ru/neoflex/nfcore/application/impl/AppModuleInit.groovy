@@ -1061,6 +1061,194 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
+    static def createAppModuleNRDemoDqcTests(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.useParentReferenceTree = useParentReferenceTree
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "DqcTestsForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "DqcDatasetViewTests"
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
+            datasetView.setDatasetComponent(datasetComponent)
+
+            row2.children.add(datasetView)
+
+
+            form.children.add(row1)
+            form.children.add(row2)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+    static def createAppModuleNRDemoDqcView(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.useParentReferenceTree = useParentReferenceTree
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "DqcViewForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "DqcDatasetView"
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
+            datasetView.setDatasetComponent(datasetComponent)
+
+            row2.children.add(datasetView)
+
+
+            form.children.add(row1)
+            form.children.add(row2)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+    static def createAppModuleNRDemoDqcJournal(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.useParentReferenceTree = useParentReferenceTree
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "DqcJournalForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "DqcJournalView"
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
+            datasetView.setDatasetComponent(datasetComponent)
+
+            row2.children.add(datasetView)
+
+
+            form.children.add(row1)
+            form.children.add(row2)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
+    static def createAppModuleNRDemoDqcHistory(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+        def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
+                .execute().resourceSet
+        if (rs.resources.empty) {
+
+            def application = ApplicationFactory.eINSTANCE.createAppModule()
+            application.useParentReferenceTree = useParentReferenceTree
+            application.name = name
+
+            def form = ApplicationFactory.eINSTANCE.createForm()
+            form.name = "DqcJournalForm"
+
+            def typography = ApplicationFactory.eINSTANCE.createTypography()
+            typography.name = header
+
+            def typographyStyle = Utils.findEObject(ApplicationPackage.Literals.TYPOGRAPHY_STYLE, "Title")
+            typography.setTypographyStyle(typographyStyle)
+
+            def row1 = ApplicationFactory.eINSTANCE.createRow()
+            row1.name = "row1"
+            row1.textAlign = TextAlign.LEFT
+            row1.borderBottom = true
+
+            row1.children.add(typography)
+
+            def row2 = ApplicationFactory.eINSTANCE.createRow()
+            row2.name = "row2"
+
+            def datasetView = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView.name = "DqcJournalView"
+            def jdbcDataset = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, jdbcDatasetName/*"jdbcNRDemoSection1"*/)
+            datasetView.setDataset(jdbcDataset)
+            def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
+            datasetView.setDatasetComponent(datasetComponent)
+
+            row2.children.add(datasetView)
+
+
+            form.children.add(row1)
+            form.children.add(row2)
+            application.setView(form)
+
+            rs.resources.add(Context.current.store.createEObject(application))
+        }
+        return rs.resources.get(0).contents.get(0)
+    }
+
     static initBalAccountClassifier = new Consumer<EntityType>() {
         @Override
         void accept(EntityType entityType) {
@@ -1148,6 +1336,10 @@ class AppModuleInit {
         def appModule6 = Utils.findEObjectWithConsumer(ApplicationPackage.Literals.APP_MODULE, "F110_BalAccountClassifier", initBalAccountClassifierAppModule) as AppModule
         fillBalAccountClassifier()
         def appModule8 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_CalcMart") as AppModule
+        def appModule10 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_DQC_TESTS") as AppModule
+        def appModule11 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_DQC_VIEW") as AppModule
+        def appModule12 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_DQC_JOURNAL") as AppModule
+        def appModule13 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_DQC_HISTORY") as AppModule
         def appModule14 = Utils.findEObject(ApplicationPackage.Literals.APP_MODULE, "F110_KLIKO") as AppModule
 
 
@@ -1194,16 +1386,16 @@ class AppModuleInit {
 
         def appModuleNode10 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode10.name = "Проверки"
-        //appModuleNode10.appModule = appModule10
+        appModuleNode10.appModule = appModule10
         def appModuleNode11 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode11.name = "Наборы проверок"
-        //appModuleNode11.appModule = appModule11
+        appModuleNode11.appModule = appModule11
         def appModuleNode12 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode12.name = "Журнал ошибок"
-        //appModuleNode12.appModule = appModule12
+        appModuleNode12.appModule = appModule12
         def appModuleNode13 = ApplicationFactory.eINSTANCE.createAppModuleNode()
         appModuleNode13.name = "История запуска наборов"
-        //appModuleNode13.appModule = appModule13
+        appModuleNode13.appModule = appModule13
 
         def catalog4 = ApplicationFactory.eINSTANCE.createCatalogNode()
         catalog4.name = "Выгрузка"

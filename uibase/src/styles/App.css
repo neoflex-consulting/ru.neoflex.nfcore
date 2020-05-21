@@ -191,21 +191,21 @@
   left: 0%;
   top: 0%;
   animation: rotate-one 1s linear infinite;
-  border-bottom: 15px solid #cef;
+  border-bottom: 15px solid #293468;
 }
 
 .inner.two {
   right: 0%;
   top: 0%;
   animation: rotate-two 1s linear infinite;
-  border-right: 15px solid #cef;
+  border-right: 15px solid #293468;
 }
 
 .inner.three {
   right: 0%;
   bottom: 0%;
   animation: rotate-three 1s linear infinite;
-  border-top: 15px solid #cef;
+  border-top: 15px solid #293468;
 }
 
 @keyframes rotate-one {
@@ -244,6 +244,7 @@
   height: 40px;
   border-radius: 100%;
   perspective: 1000px;
+  z-index: 32000;
 }
 
 .small_inner {
@@ -258,19 +259,19 @@
   left: 0%;
   top: 0%;
   animation: rotate-one 1s linear infinite;
-  border-bottom: 8px solid #cef;
+  border-bottom: 8px solid #293468;
 }
 
 .small_inner.two {
   right: 0%;
   top: 0%;
   animation: rotate-two 1s linear infinite;
-  border-right: 8px solid #cef;
+  border-right: 8px solid #293468;
 }
 
 .small_inner.three {
   right: 0%;
   bottom: 0%;
   animation: rotate-three 1s linear infinite;
-  border-top: 8px solid #cef;
+  border-top: 8px solid #293468;
 }

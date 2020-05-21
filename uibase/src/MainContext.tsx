@@ -24,10 +24,17 @@ export interface IServerNamedParam {
     parameterDateFormat?: string
 }
 
+export interface IEvent {
+    type: eventType,
+    itemName: string
+}
+
 export interface IEventAction {
     name: string,
-    actionType: actionType,
-    callback: () => void
+    actions: {
+        actionType: actionType,
+        callback: () => void
+    }[]
 }
 
 export interface IEventHandler {
@@ -47,9 +54,17 @@ export interface IMainContext {
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;
     changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
-    docxHandlers?: any[];
-    excelHandlers?: any[];
+    addDocxHandler?: (handler:any)=>void;
+    addExcelHandler?: (handler:any)=>void;
+    addEventAction?: (action:IEventAction)=>void;
+    removeDocxHandler?: ()=>void;
+    removeExcelHandler?: ()=>void;
+    removeEventAction?: ()=>void;
+    getDocxHandlers?: ()=>any[];
+    getExcelHandlers?: ()=>any[];
+    getEventActions?: ()=>IEventAction[];
     contextItemValues?: Map<String, any>;
-    eventActions?: IEventAction[];
-    eventTracker?: EventTracker;
+    addEventHandler?: (eventHandler: IEventHandler)=>void;
+    removeEventHandler?: (name: string)=>void;
+    notifyAllEventHandlers?: (event: IEvent)=>void;
 }
