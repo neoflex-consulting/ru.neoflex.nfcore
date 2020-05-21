@@ -25,9 +25,12 @@ import FetchSpinner from "../../FetchSpinner";
 
 const backgroundColor = "#fdfdfd";
 
+const truncate = (input: string, length: number) => input.length > length ? `${input.substring(0, length - 3)}...` : input;
+
 class MasterdataEditor extends React.Component<any, any> {
     private grid: React.RefObject<any>;
     state = {
+        entityTypeName: '',
         gridOptions: {
             defaultColDef: {
                 resizable: true,
@@ -44,11 +47,16 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     componentDidMount(): void {
-        if (this.state.themes.length === 0) {
-            this.getAllThemes()
-        }
+        // if (this.state.themes.length === 0) {
+        //     this.getAllThemes()
+        // }
         this.loadData()
+    }
 
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {
+        if (this.state.entityTypeName !== this.props.entityType.get('name')) {
+            this.setState({entityTypeName: this.props.entityType.get('name'), currentRow: null}, this.loadData)
+        }
     }
 
     loadData = () => {
@@ -154,14 +162,29 @@ class MasterdataEditor extends React.Component<any, any> {
     }
 
     getAttributeFilter = (attribute: EObject): string => {
+        if (attribute.get('attributeType').eClass.get('name') === 'PlainType') {
+            if (['DATE', 'DATETIME'].includes(attribute.get('attributeType').get('name'))) {
+                return 'agDateColumnFilter'
+            }
+            if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(attribute.get('attributeType').get('name'))) {
+                return 'agNumberColumnFilter'
+            }
+        }
         return 'agTextColumnFilter'
+    }
+
+
+
+    getGridData = () => {
+        return this.state.rowData.map(value=>
+            _.mapValues(value, (v)=>
+                typeof v !== "object" ? v : truncate(JSON.stringify(v), 45)))
     }
 
     renderForm() {
         const {t} = this.props
         const {currentRow} = this.state
-        const viewObject = this.props.viewObject as EObject
-        const entityType = viewObject.get('entityType') as EObject
+        const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
                 <FetchSpinner/>
@@ -207,8 +230,7 @@ class MasterdataEditor extends React.Component<any, any> {
     renderGrid() {
         const {t} = this.props
         const {gridOptions} = this.state;
-        const viewObject = this.props.viewObject as EObject
-        const entityType = viewObject.get('entityType') as EObject
+        const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
                 <FetchSpinner/>
@@ -234,7 +256,7 @@ class MasterdataEditor extends React.Component<any, any> {
                      className={'ag-theme-' + this.state.currentTheme}>
                     <AgGridReact
                         ref={this.grid}
-                        rowData={this.state.rowData}
+                        rowData={this.getGridData()}
                         modules={AllCommunityModules}
                         rowSelection='multiple' //выделение строки
                         onGridReady={this.onGridReady} //инициализация грида
