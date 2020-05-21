@@ -435,9 +435,9 @@ class EcoreApp extends React.Component<any, State> {
         let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
-                <Header className="app-header" style={{height: '55px', padding: '0px', backgroundColor: backgroundColor}}>
-                    <Row>
-                        <Col span={4} style={{display: "block", width: "10.5%", boxSizing: "border-box"}}>
+                <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
+                    <Row style={{height: 'inherit'}}>
+                        <Col span={4} style={{display: "block", boxSizing: "border-box", height: 'inherit'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
@@ -445,12 +445,8 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
-                        <Col style={{marginLeft: "200px"}}>
-                            <Row>
-                                <Col
-                                    span={19}
-                                    style={{textAlign: 'center'}}
-                                >
+                        <Col span={14}
+                                    style={{textAlign: 'center', height: 'inherit'}}>
                                     {
                                         this.props.location.pathname.includes('/app/') &&
 
@@ -464,69 +460,69 @@ class EcoreApp extends React.Component<any, State> {
                                             }}
                                         </MainContext.Consumer>
                                     }
-                                </Col>
-                                <Col span={5}>
-                                        <Button
-                                            onClick={(e:any) => this.onRightMenu(e.target)}
-                                            value="logout"
-                                            type="link" className="bell-icon logout-icon" ghost style={{
-                                            width: '5px',
-                                            height: '20px',
-                                            marginTop: '23px',
-                                            background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                                        >
-                                        </Button>
-                                    <Menu selectedKeys={selectedKeys} className="header-menu"
-                                          mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
-                                        <Menu.SubMenu
-                                            style={{float: "right", height: '100%'}}
-                                            title={<span style={{
-                                            fontVariantCaps: 'petite-caps',
-                                            fontSize: '18px',
-                                            lineHeight: '39px'
-                                        }}>
-                                                <FontAwesomeIcon icon={faUser} size="xs" style={{marginRight: "7px"}}/>
-                                                {principal.name}</span>}
-                                        >
-                                            <Menu.Item
-                                                style={{ marginTop: '-8px'}}
-                                                key={'developer'}>
-                                                <Link to={`/developer/data`}>
-                                                    <FontAwesomeIcon icon={faTools} size="lg"
-                                                                     style={{marginRight: "10px"}}/>
-                                                    {t('developer')}
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item
-                                                style={{ marginTop: '-8px'}}
-                                                key={'test'}>
-                                                <Link to={`/test`}>
-                                                    <FontAwesomeIcon icon={faBuffer} size="lg"
-                                                                     style={{marginRight: "10px"}}/>
-                                                    Test component
-                                                </Link>
-                                            </Menu.Item>
-                                        </Menu.SubMenu>
-                                    </Menu>
-                                    <Dropdown overlay={langMenu} placement="bottomCenter">
-                                        <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
-                                            {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
-                                        </div>
-                                    </Dropdown>
-                                        <Button  type="link"
-                                            className="bell-icon" ghost style={{
-                                            width: '5px',
-                                            height: '20px',
-                                            marginTop: '20px',
-                                            background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                                                 onClick={this.onClickBellIcon}>
-                                            {localStorage.getItem('notifierDuration') === '3'  ?
-                                                <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>
-                                            :
-                                                <FontAwesomeIcon icon={faBell} size="lg"/>}
-                                        </Button>
-                                </Col>
-                            </Row>
+                        </Col>
+                        <Col span={6}
+                             style={{width:'225px',
+                                    float:'right',
+                                    height: 'inherit'}}>
+                            <Button
+                                onClick={(e:any) => this.onRightMenu(e.target)}
+                                value="logout"
+                                type="link" className="bell-icon logout-icon" ghost style={{
+                                width: '5px',
+                                height: '20px',
+                                marginTop: '23px',
+                                background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
+                            >
+                            </Button>
+                            <Menu selectedKeys={selectedKeys} className="header-menu"
+                                  mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
+                                <Menu.SubMenu
+                                    style={{ height: '100%'}}
+                                    title={<span style={{
+                                    fontVariantCaps: 'petite-caps',
+                                    fontSize: '18px',
+                                    lineHeight: '39px'
+                                }}>
+                                        <FontAwesomeIcon icon={faUser} size="xs" style={{marginRight: "7px"}}/>
+                                        <span>{principal.name}</span></span>}
+                                >
+                                    <Menu.Item
+                                        key={'developer'}>
+                                        <Link to={`/developer/data`}>
+                                            <FontAwesomeIcon icon={faTools} size="lg"
+                                                             style={{marginRight: "10px"}}/>
+                                            {t('developer')}
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.Item
+                                        style={{ marginTop: '-8px'}}
+                                        key={'test'}>
+                                        <Link to={`/test`}>
+                                            <FontAwesomeIcon icon={faBuffer} size="lg"
+                                                             style={{marginRight: "10px"}}/>
+                                            Test component
+                                        </Link>
+                                    </Menu.Item>
+                                </Menu.SubMenu>
+                            </Menu>
+                            <Dropdown overlay={langMenu} placement="bottomCenter">
+                                    <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
+                                        {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
+                                    </div>
+                            </Dropdown>
+                            <Button  type="link"
+                                    className="bell-icon" ghost style={{
+                                    width: '5px',
+                                    height: '20px',
+                                    marginTop: '20px',
+                                    background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
+                                         onClick={this.onClickBellIcon}>
+                                    {localStorage.getItem('notifierDuration') === '3'  ?
+                                        <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>
+                                    :
+                                        <FontAwesomeIcon icon={faBell} size="lg"/>}
+                            </Button>
                         </Col>
                     </Row>
                 </Header>

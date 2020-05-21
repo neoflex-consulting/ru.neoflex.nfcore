@@ -58,12 +58,27 @@
 	overflow: hidden;
 }
 
+.dropMenuApps {
+	display: none;
+}
+
+
+
 @media screen and (max-width: 1100px){
 	.item-title {
 		width: 40px;
 	}
 	.btn-appName span {
 		white-space: pre-line;
+	}
+	.dropMenuApps {
+		display: block;
+	}
+	header .apps-menu div:nth-child(3) {
+		display: none;
+	}
+	header .ant-menu-submenu-title span span {
+		display: none;
 	}
 }
 
@@ -173,3 +188,4 @@ li:hover .lang-title {
 .btn-appName:hover span, .bell-icon:hover {
 	color: #2657f6;
 }
+

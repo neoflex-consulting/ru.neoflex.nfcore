@@ -2,30 +2,30 @@
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
-  height: 55px;
-  line-height: 55px;
+  height: inherit;
+  /*line-height: 55px;*/
   display: inline-block;
-  width: 260px;
-  padding-left: 40px;
-  border-bottom: 1px solid #e8e8e8;
+  /*width: 260px;*/
+  padding: 0 0 0 40px;
+  /*border-bottom: 1px solid #e8e8e8;*/
   /*user-select: none;*/
-  margin-top: -15px;
+  /*margin-top: -15px;*/
 }
 
-.app-logo span {
+.app-logo span, .app-logo-settings span {
   font-weight: 700;
   margin: 0 2px;
 }
 
 .app-logo-settings {
-  background-color: #fdfdfd;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 400;
   font-size: 23px;
   height: 55px;
   line-height: 55px;
   display: inline-block;
   width: 260px;
-  padding-left: 14px;
+  padding-left: 40px;
   cursor: pointer;
   /*user-select: none;*/
 }
