@@ -258,6 +258,137 @@ class DatasetPackageInit {
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110Sections", "jdbcNRDemoF110Sections")
             DatasetComponentInit.createAllColumnNRDemoKliko("DatasetNRDemoF110Sections")
 
+            String dqc_tests = "select t.TEST_ID,\n" +
+                    "       t.TEST_NUM,\n" +
+                    "       t.TEST_TYPE,\n" +
+                    "       t.TEST_NAME,\n" +
+                    "       t.TEST_OBJECT,\n" +
+                    "       t.PRIORITY,\n" +
+                    "       t.JOB_STATE,\n" +
+                    "       case\n" +
+                    "         when t.job_state = 'RUNNING'\n" +
+                    "         then 'ВЫПОЛНЯЕТСЯ'\n" +
+                    "         else '<img src=\"#WORKSPACE_IMAGES#success-icon-3.png\" width=\"20\" height=\"20\" alt=\"' || \n" +
+                    "              t.job_state || '\">'\n" +
+                    "       end as RUN,\n" +
+                    "       0 as show_log,\n" +
+                    "       to_char(t.report_list) as report_list\n" +
+                    "  from table( dqc.data_quality.getTests(V('APP_USER'), '110') ) t"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcTests",dqc_tests,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcTests")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcTests", "jdbcNRDemoF110DqcTests")
+            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcTests")
+
+            String dqc_view = "select t.TEST_SET_ID\n" +
+                    "      ,t.TEST_SET_NAME\n" +
+                    "      ,t.TEST_COUNT\n" +
+                    "      ,t.DESCRIPTION\n" +
+                    "      ,case\n" +
+                    "         when t.job_state = 'RUNNING'\n" +
+                    "         then 'ВЫПОЛНЯЕТСЯ'\n" +
+                    "         else '<img src=\"#WORKSPACE_IMAGES#success-icon-3.png\" width=\"20\" height=\"20\" alt=\"' || \n" +
+                    "              t.job_state || '\">'\n" +
+                    "       end as RUN\n" +
+                    "      ,t.JOB_STATE\n" +
+                    "  from table ( DQC.DATA_QUALITY.getTestSets('110') ) t\n" +
+                    " order\n" +
+                    "    by t.TEST_SET_NAME"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcView",dqc_view,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcView")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcView", "jdbcNRDemoF110DqcView")
+            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcView")
+
+            String dqc_journal = "select date_time,\n" +
+                    "       test_id,\n" +
+                    "       test_num,\n" +
+                    "       test_name,\n" +
+                    "       test_object,\n" +
+                    "       internal_rk,\n" +
+                    "       problem_id,\n" +
+                    "       oper_date,\n" +
+                    "       error_message,\n" +
+                    "       user_object_id,\n" +
+                    "       branch,\n" +
+                    "       reason,\n" +
+                    "       report_list,\n" +
+                    "       priority\n" +
+                    "  from table ( dqc.data_quality.getResults(  \n" +
+                    "         null,\n" +
+                    "         null,\n" +
+                    "         to_date('2010-04-01','YYYY-MM-DD'),\n" +
+                    "         to_date('2020-04-01','YYYY-MM-DD'),\n" +
+                    "         '1'\n" +
+                    "       ))\n" +
+                    " order by date_time desc, priority asc"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcJournal",dqc_journal,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcJournal")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcJournal", "jdbcNRDemoF110DqcJournal")
+            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcJournal")
+
+            String dqc_history = "with\n" +
+                    "wt_test_run_groups as\n" +
+                    " (\n" +
+                    "   select tr.test_set_run_id,\n" +
+                    "          sum(tr.record_count) as error_count\n" +
+                    "     from dqc.test_run tr\n" +
+                    "    group by tr.test_set_run_id\n" +
+                    " ),\n" +
+                    " wt_test_set_run as\n" +
+                    " (\n" +
+                    "   select /*+ materialize*/\n" +
+                    "          tsr.test_set_run_id\n" +
+                    "         ,tsr.test_set_id\n" +
+                    "         ,tsr.date_time\n" +
+                    "         ,tsr.oper_date\n" +
+                    "         ,tsr.branch\n" +
+                    "         ,tsr.date_time_end\n" +
+                    "         --,max(tsr.test_set_run_id) over (partition by tsr.oper_date, tsr.test_set_id) as max_test_set_run_id\n" +
+                    "     from dqc.test_set_run tsr\n" +
+                    "    where (\n" +
+                    "            tsr.test_set_id = NV('P75_TEST_SET_ID')\n" +
+                    "            or NV('P75_TEST_SET_ID') is null\n" +
+                    "          )\n" +
+                    " )\n" +
+                    " select distinct\n" +
+                    "        tsr.test_set_run_id,\n" +
+                    "        tsr.date_time,\n" +
+                    "        tsr.oper_date,\n" +
+                    "        tsr.branch,\n" +
+                    "        tsr.date_time_end,\n" +
+                    "        tsr.test_set_id,\n" +
+                    "        tsr.test_set_run_id as show_log,\n" +
+                    "        ts.test_set_name,\n" +
+                    "        ts.description,\n" +
+                    "        null as error_count,\n" +
+                    "        0 as show_history_run_test\n" +
+                    "   from wt_test_set_run tsr\n" +
+                    "   left\n" +
+                    "   join dqc.test_set ts\n" +
+                    "     on tsr.test_set_id = ts.test_set_id\n" +
+                    "   join wt_test_run_groups trg\n" +
+                    "     on trg.test_set_run_id = tsr.test_set_run_id\n" +
+                    "   join dqc.test_x_test_set x\n" +
+                    "     on ts.test_set_id = x.test_set_id\n" +
+                    "   join dqc.report_influence ri\n" +
+                    "     on x.test_id = ri.test_id\n" +
+                    "   join nrsettings.st_report r\n" +
+                    "     on r.report_id = ri.report_id\n" +
+                    "  where 1 = 1\n" +
+                    "    --and tsr.test_set_run_id = tsr.max_test_set_run_id\n" +
+                    "    and x.is_active = 'Y'\n" +
+                    "    and (\n" +
+                    "          r.report_id = '110'\n" +
+                    "          or '110' is null\n" +
+                    "        )\n" +
+                    "  order by date_time desc"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcHistory",dqc_history,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcHistory")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcHistory", "jdbcNRDemoF110DqcHistory")
+            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcHistory")
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -306,6 +437,12 @@ class DatasetPackageInit {
         def nrDemoCalcMart = AppModuleInit.createAppModuleNRDemoCalcMart("F110_CalcMart", "Запуск расчета формы", "jdbcNRDemoCalcMart", "DatasetNRDemoCalcMart")
         def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 
+        AppModuleInit.createAppModuleNRDemoDqcTests("F110_DQC_TESTS", "Проверки", "jdbcNRDemoF110DqcTests", "DatasetNRDemoF110DqcTests",true)
+        AppModuleInit.createAppModuleNRDemoDqcView("F110_DQC_VIEW", "Наборы проверок", "jdbcNRDemoF110DqcView", "DatasetNRDemoF110DqcView",true)
+        AppModuleInit.createAppModuleNRDemoDqcJournal("F110_DQC_JOURNAL", "Журнал ошибок", "jdbcNRDemoF110DqcJournal", "DatasetNRDemoF110DqcJournal",true)
+        AppModuleInit.createAppModuleNRDemoDqcHistory("F110_DQC_HISTORY", "История запуска наборов", "jdbcNRDemoF110DqcHistory", "DatasetNRDemoF110DqcHistory",true)
+
+
         NotificationInit.createNotification("Ф110", Periodicity.MONTH, "15", "17", "15", "F110_Section1", "Отчет не рассчитан")
 
         try {
@@ -319,8 +456,5 @@ class DatasetPackageInit {
 
         def referenceTree1 = AppModuleInit.makeRefTreeNRDemo()
         AppModuleInit.assignRefTreeNRDemo(nrDemoSection1 as AppModule, "F110_Section1", referenceTree1)
-        //TODO при создании ссылки на втором appModule приложение виснет
-        /*def referenceTree2 = AppModuleInit.makeRefTreeNRDemo()
-        AppModuleInit.assignRefTreeNRDemo(nrDemoSection2 as AppModule, "F110_Section2", referenceTree2)*/
     }
 }
