@@ -5,7 +5,7 @@ import {API} from "../../../modules/api";
 import {Button, Modal, Typography} from "antd";
 import {getCaption} from "./utils";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faSearchPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import MasterdataEditor from "./MasterdataEditor";
 
 interface Props {
@@ -59,10 +59,12 @@ class MasterdataLookup extends React.Component<Props&WithTranslation, State> {
 
     render() {
         const {t, onSelect, entityType} = this.props
+        const {rid} = this.state
         return <div>
             {this.state.showDialog && <Modal title={getCaption(entityType)}
                                              onCancel={()=>this.setState({showDialog: false})}
                                              visible={true}
+                                             footer={null}
             >
                 <MasterdataEditor entityType={entityType} onSelect={(row)=>{
                     const rid = row['@rid']
@@ -73,13 +75,13 @@ class MasterdataLookup extends React.Component<Props&WithTranslation, State> {
             <Button title={t('search')} size={'small'}
                     style={{color: 'rgb(151, 151, 151)'}}
                     onClick={(event) => {this.setState({showDialog: true})}}>
-                <FontAwesomeIcon icon={faPlus} size='sm' color="#7b7979"/>
+                <FontAwesomeIcon icon={faSearchPlus} size='sm' color="#7b7979"/>
             </Button>
-            <Button title={t('clear')} size={'small'}
+            {rid && <Button title={t('clear')} size={'small'}
                     style={{color: 'rgb(151, 151, 151)'}}
                     onClick={(event) => {onSelect(undefined)}}>
                 <FontAwesomeIcon icon={faTrashAlt} size='sm' color="#7b7979"/>
-            </Button>
+            </Button>}
             <Typography.Text>{this.getCaption()}</Typography.Text>
         </div>;
     }

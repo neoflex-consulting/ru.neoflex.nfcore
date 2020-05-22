@@ -32,19 +32,19 @@ public class MasterdataController {
     @GetMapping("/entity")
     JsonNode loadEntity(@RequestParam String id) {
         logger.debug("Load " + id);
-        return provider.withDatabase(db -> provider.load(db, id)).getObjectNode();
+        return provider.withDatabase(db -> provider.load(db, id).getObjectNode());
     }
 
     @PutMapping("/entity")
     JsonNode updateEntity(@RequestParam String id, @RequestBody ObjectNode node) {
         logger.debug("Update " + id);
-        return provider.withDatabase(db -> provider.update(db, id, node)).getObjectNode();
+        return provider.withDatabase(db -> provider.update(db, id, node).getObjectNode());
     }
 
     @PostMapping("/entity")
     JsonNode insertEntity(@RequestBody ObjectNode node) {
         logger.debug("Insert entity");
-        return provider.withDatabase(db -> provider.insert(db, node)).getObjectNode();
+        return provider.withDatabase(db -> provider.insert(db, node).getObjectNode());
     }
 
     @DeleteMapping("/entity")
