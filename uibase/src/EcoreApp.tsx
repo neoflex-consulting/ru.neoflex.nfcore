@@ -32,6 +32,8 @@ import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
+import pony from './icons/pony.png';
+
 const backgroundColor = "#2a356c";
 
 const { Header, Content, Sider } = Layout;
@@ -357,7 +359,7 @@ class EcoreApp extends React.Component<any, State> {
             });
             this.props.history.push('')
         }
-        else if (e.key === "developer") {
+        else if (e.value === "developer") {
             this.props.history.push('/developer/data');
         }
         else if (e.key.split('.').includes('app')) {
@@ -443,7 +445,7 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const langMenu = () => <Menu style={{ marginTop: '24px', backgroundColor: backgroundColor }}>
+        const langMenu = () => <Menu style={{ backgroundColor: backgroundColor }}>
             {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
                     <span className='lang-title' style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
@@ -454,12 +456,13 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout style={{height: '100vh'}}>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
-                    <Row style={{height: 'inherit'}}>
-                        <Col span={4} style={{display: "block", boxSizing: "border-box", height: 'inherit'}}>
+                    <Row style={{height: '70'}}>
+                        <Col span={5} style={{display: "block", height: 'inherit', textAlign:'center'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
+                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '45px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px' }}/>
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
@@ -479,51 +482,41 @@ class EcoreApp extends React.Component<any, State> {
                                         </MainContext.Consumer>
                                     }
                         </Col>
-                        <Col span={6}
-                             style={{width:'225px',
-                                    float:'right',
-                                    height: 'inherit'}}>
+                        <Col span={5}
+                             style={{
+                                    height: 'inherit'
+                             }}>
                             <Button
                                 onClick={(e:any) => this.onRightMenu(e.target)}
                                 value="logout"
                                 type="link" className="bell-icon logout-icon" ghost style={{
                                 width: '5px',
                                 height: '20px',
-                                marginTop: '23px',
+                                marginTop: '22px',
                                 background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
                             >
                             </Button>
-                            <Menu selectedKeys={selectedKeys} className="header-menu"
-                                  mode="horizontal" onClick={(e: any) => this.onRightMenu(e)}>
-                                <Menu.SubMenu
-                                    style={{ height: '100%'}}
-                                    title={<span style={{
-                                    fontVariantCaps: 'petite-caps',
-                                    fontSize: '18px',
-                                    lineHeight: '39px'
-                                }}>
-                                        <FontAwesomeIcon icon={faUser} size="xs" style={{marginRight: "7px"}}/>
-                                        <span>{principal.name}</span></span>}
-                                >
-                                    <Menu.Item
-                                        key={'developer'}>
-                                        <Link to={`/developer/data`}>
-                                            <FontAwesomeIcon icon={faTools} size="lg"
-                                                             style={{marginRight: "10px"}}/>
-                                            {t('developer')}
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.Item
-                                        style={{ marginTop: '-8px'}}
-                                        key={'test'}>
-                                        <Link to={`/test`}>
-                                            <FontAwesomeIcon icon={faBuffer} size="lg"
-                                                             style={{marginRight: "10px"}}/>
-                                            Test component
-                                        </Link>
-                                    </Menu.Item>
-                                </Menu.SubMenu>
-                            </Menu>
+                            <Link to={`/developer/data`}>
+                            <Button
+                                value="developer"
+                                type="link" className="bell-icon developer-icon" ghost
+                                style={{
+                                marginTop: '20px',
+                                background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
+                            >
+                                <FontAwesomeIcon icon={faTools} size="1x"
+                                />
+                            </Button>
+                            </Link>
+                            <div className='header-menu'>
+                                    <span style={{
+                                        fontVariantCaps: 'petite-caps',
+                                        fontSize: '18px',
+                                        lineHeight: '39px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faUser} size="xs" />
+                                        <span>{principal.name}</span></span>
+                            </div>
                             <Dropdown overlay={langMenu} placement="bottomCenter">
                                     <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
                                         {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
@@ -533,7 +526,7 @@ class EcoreApp extends React.Component<any, State> {
                                     className="bell-icon" ghost style={{
                                     width: '5px',
                                     height: '20px',
-                                    marginTop: '20px',
+                                    marginRight: '15px',
                                     background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
                                          onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?

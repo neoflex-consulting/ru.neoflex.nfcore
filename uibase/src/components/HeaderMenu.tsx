@@ -20,6 +20,83 @@ class HeaderMenu extends React.Component<any, any> {
         this.props.context.changeUserProfile('startApp', applicationName)
     }
 
+    appsMenu(selectedApp:any) {
+    if(this.props.applications.length < 4 ){
+        return this.props.applications.slice(0,3).map(
+            (app: any) =>
+                <Col span={8} key={app.eContents()[0].get('name')}>
+                    <Button
+                        className='btn-appName'
+                        key={app.eContents()[0].get('name')}
+                        type="link"
+                        ghost
+                        style={{
+                            fontWeight: 500,
+                            background: "rgb(255,255,255)",
+                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
+                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
+                            cursor: "pointer"
+                        }}
+                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                    >
+                        {app.eContents()[0].get('name')}
+                    </Button>
+                </Col>
+        )
+    } else {
+        return <>
+            {this.props.applications.slice(0,3).map(
+            (app: any) =>
+                <Col span={7} key={app.eContents()[0].get('name')}>
+                    <Button
+                        className='btn-appName'
+                        key={app.eContents()[0].get('name')}
+                        type="link"
+                        ghost
+                        style={{
+                            fontWeight: 500,
+                            background: "rgb(255,255,255)",
+                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
+                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
+                            cursor: "pointer"
+                        }}
+                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                    >
+                        {app.eContents()[0].get('name')}
+                    </Button>
+                </Col>
+        )}
+            <Col span={3}>
+                <Dropdown overlay={(
+                    <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
+                        {this.props.applications.slice(3).map(
+                            (app: any) =>
+                                <Menu.Item
+                                    key={app.eContents()[0].get('name')}
+                                    onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                                >
+                        <span className='lang-title'
+                              style={{ fontWeight:600 }}>
+                            {app.eContents()[0].get('name')}</span>
+                                </Menu.Item>
+                        )}
+                    </Menu>
+                )} placement="bottomCenter">
+                    <Button className='btn-appName'
+                            type="link"
+                            ghost style={{
+                        fontWeight: 500,
+                        background: "rgb(255,255,255)",
+                        cursor: "pointer"
+                    }}>
+                        Еще
+                    </Button>
+                </Dropdown>
+            </Col>
+            </>
+    }
+}
+
     render() {
         const span = 24 / this.props.applications.length;
 
@@ -39,44 +116,6 @@ class HeaderMenu extends React.Component<any, any> {
             }
         }
 
-        let appsMenu = this.props.applications.slice(0,3).map(
-            (app: any) =>
-                <Col span={span} key={app.eContents()[0].get('name')}>
-                    <Button
-                        className='btn-appName'
-                        key={app.eContents()[0].get('name')}
-                        type="link"
-                        ghost
-                        style={{
-                            fontWeight: 500,
-                            background: "rgb(255,255,255)",
-                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
-                            cursor: "pointer"
-                        }}
-                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                    >
-                        {app.eContents()[0].get('name')}
-                    </Button>
-                </Col>
-        )
-
-        let dropMenuApps = (
-            <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
-                {this.props.applications.slice(2).map(
-            (app: any) =>
-                    <Menu.Item
-                        key={app.eContents()[0].get('name')}
-                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                    >
-                        <span className='lang-title'
-                              style={{ fontWeight:600 }}>
-                            {app.eContents()[0].get('name')}</span>
-                    </Menu.Item>
-        )}
-            </Menu>
-        )
-
         return (
             <Row style={{marginTop: '0px'}} className='apps-menu'>
                 {
@@ -84,45 +123,7 @@ class HeaderMenu extends React.Component<any, any> {
                         ?
                         <span style={{fontWeight: 500, color: 'rgb(255, 255, 255)'}}>Loading... </span>
                         :
-                        (appsMenu.length < 3) ?
-                            appsMenu
-                                :
-                            <>
-                                {this.props.applications.slice(0,3).map(
-                                    (app: any) =>
-                                        <Col span={span} key={app.eContents()[0].get('name')}>
-                                            <Button
-                                                className='btn-appName'
-                                                key={app.eContents()[0].get('name')}
-                                                type="link"
-                                                ghost
-                                                style={{
-                                                    fontWeight: 500,
-                                                    background: "rgb(255,255,255)",
-                                                    fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                                                    color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
-                                                    cursor: "pointer"
-                                                }}
-                                                onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                                            >
-                                                {app.eContents()[0].get('name')}
-                                            </Button>
-                                        </Col>
-                                )}
-                                <Col span={span} className='dropMenuApps'>
-                                <Dropdown overlay={dropMenuApps} placement="bottomCenter">
-                                    <Button className='btn-appName'
-                                            type="link"
-                                            ghost style={{
-                                        fontWeight: 500,
-                                        background: "rgb(255,255,255)",
-                                        cursor: "pointer"
-                                    }}>
-                                        Еще
-                                    </Button>
-                                </Dropdown>
-                                </Col>
-                            </>
+                        this.appsMenu(selectedApp)
                 }
             </Row>
         );

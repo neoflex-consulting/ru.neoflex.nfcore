@@ -2,14 +2,9 @@
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
-  height: inherit;
-  /*line-height: 55px;*/
-  display: inline-block;
-  /*width: 260px;*/
-  padding: 0 0 0 40px;
-  /*border-bottom: 1px solid #e8e8e8;*/
-  /*user-select: none;*/
-  /*margin-top: -15px;*/
+  height: 64px;
+  line-height: 60px;
+  cursor: pointer;
 }
 
 .app-logo span, .app-logo-settings span {
@@ -21,18 +16,13 @@
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
-  height: 55px;
-  line-height: 55px;
+  height: 64px;
+  line-height: 60px;
   display: inline-block;
-  width: 260px;
-  padding-left: 40px;
   cursor: pointer;
-  /*user-select: none;*/
 }
 
 .app-header {
-  /*height: 55px;*/
-  /*padding: 0px;*/
   background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
 }
