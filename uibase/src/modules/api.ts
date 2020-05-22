@@ -427,7 +427,7 @@ export class API implements IErrorHandler {
     }
 
     findByKind(eClass: Ecore.EClass, selector: any, level: number = 1): Promise<Ecore.Resource[]> {
-        const eAllSubTypes: Ecore.EClass[] = (eClass.get('eAllSubTypes') as Ecore.EClass[]);
+        // const eAllSubTypes: Ecore.EClass[] = (eClass.get('eAllSubTypes') as Ecore.EClass[]);
         const promises: Promise<Ecore.Resource[]>[] = [eClass/*, ...eAllSubTypes*/]
             .filter(c => !c.get('abstract'))
             .map(c => this.findByClass(c, selector, level));

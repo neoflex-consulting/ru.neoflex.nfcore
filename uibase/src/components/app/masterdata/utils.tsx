@@ -20,3 +20,5 @@ export const createDefaultValue = (classifierType: EObject): any => {
     }
     return null
 }
+
+export const truncate = (input: string, length: number) => input.length > length ? `${input.substring(0, length - 3)}...` : input;
