@@ -6,7 +6,8 @@ import {createDefaultValue, getAllAttributes, getCaption} from './utils'
 import {DatePicker, Select, Input, InputNumber, Typography, Col, Divider, Row, Button, Collapse} from "antd";
 import moment from "moment";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faArrowDown, faArrowUp, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
+import MasterdataLookup from "./MasterdataLookup";
 
 interface Props {
     entityType: EObject,
@@ -24,7 +25,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         </Typography.Paragraph>
     }
 
-    renderArrayTypeEditor(elementType: EObject, data: any, updateData: (data: any) => void) {
+    renderArrayTypeEditor(caption: string, elementType: EObject, data: any, updateData: (data: any) => void) {
         const {t} = this.props
         const addButton =
             <Button title={t('add')} size={'small'}
@@ -39,7 +40,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         return (
             <React.Fragment>
                 <Collapse defaultActiveKey={[]} >
-                    <Collapse.Panel header={getCaption(elementType)} key="1" extra={addButton}>
+                    <Collapse.Panel header={caption} key="1" extra={addButton}>
                         {data.map((e: any, i: number) => <Row key={i}>
                             <Col span={2}>
                                 <Button title={t('delete')} size={'small'}
@@ -49,9 +50,25 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                                         }}>
                                     <FontAwesomeIcon icon={faMinus} size='sm' color="#7b7979"/>
                                 </Button>
+                                <Button title={t('up')} size={'small'}
+                                        style={{color: 'rgb(151, 151, 151)', marginTop: '5px'}}
+                                        disabled={i<=0}
+                                        onClick={() => {
+                                            updateData([...data.slice(0, i - 1), data[i], data[i - 1], ...data.slice(i + 1)])
+                                        }}>
+                                    <FontAwesomeIcon icon={faArrowUp} size='sm' color="#7b7979"/>
+                                </Button>
+                                <Button title={t('down')} size={'small'}
+                                        disabled={i>=data.length-1}
+                                        style={{color: 'rgb(151, 151, 151)', marginTop: '5px'}}
+                                        onClick={() => {
+                                            updateData([...data.slice(0, i), data[i+1], data[i], ...data.slice(i + 2)])
+                                        }}>
+                                    <FontAwesomeIcon icon={faArrowDown} size='sm' color="#7b7979"/>
+                                </Button>
                             </Col>
                             <Col span={22}>
-                                {this.renderValueEditor(elementType, data[i], dataNew => {
+                                {this.renderValueEditor("#"+(i + 1), elementType, data[i], dataNew => {
                                     updateData([...data.slice(0, i), update(data[i], {$merge: dataNew}), ...data.slice(i + 1)])
                                 })}
                             </Col>
@@ -84,7 +101,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         return this.renderJSONEditor(attributeType, data, updateData)
     }
 
-    renderValueEditor(attributeType: EObject, data: any, updateData: (data: any) => void) {
+    renderValueEditor(caption: string, attributeType: EObject, data: any, updateData: (data: any) => void) {
         if (attributeType.eClass.get('name') === 'PlainType') {
             return this.renderPlainTypeEditor(attributeType, data, updateData)
         }
@@ -96,10 +113,13 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             </Select>
         }
         if (attributeType.eClass.get('name') === 'ArrayType') {
-            return this.renderArrayTypeEditor(attributeType.get('elementType'), data, updateData)
+            return this.renderArrayTypeEditor(caption, attributeType.get('elementType'), data, updateData)
         }
         if (attributeType.eClass.get('name') === 'DocumentType') {
             return <MasterdataForm {...this.props} entityType={attributeType} data={data} updateData={updateData}/>
+        }
+        if (attributeType.eClass.get('name') === 'EntityType') {
+            return <MasterdataLookup {...this.props} entityType={attributeType} rid={data} onSelect={updateData}/>
         }
         return this.renderJSONEditor(attributeType, data, updateData)
     }
@@ -116,9 +136,12 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                 </Row>}
                 {getAllAttributes(entityType).map(attr =>
                     <Row style={{marginTop: '5px'}} gutter={{xs: 8, sm: 16, md: 24, lg: 32}} key={attr.get('name')}>
-                        <Col span={4}><Typography.Text strong={true}>{getCaption(attr)}</Typography.Text></Col>
+                        <Col span={4}>
+                            {attr.get('attributeType').eClass.get('name') !== 'ArrayType' &&
+                            <Typography.Text strong={true}>{getCaption(attr)}</Typography.Text>}
+                        </Col>
                         <Col
-                            span={20}>{this.renderValueEditor(attr.get('attributeType'), data[attr.get('name') as string], (data: any) => {
+                            span={20}>{this.renderValueEditor(getCaption(attr), attr.get('attributeType'), data[attr.get('name') as string], (data: any) => {
                             updateData({[attr.get('name')]: data})
                         })}</Col>
                     </Row>
