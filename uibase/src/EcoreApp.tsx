@@ -399,7 +399,7 @@ class EcoreApp extends React.Component<any, State> {
                 .filter((u: any) => u.get('key') === 'startApp')
         }
         if (this.props.history.location.pathname === "/") {
-            if (application.length !== 0 && application[0].get('value') !== undefined) {
+            if (application !== undefined && application[0].get('value') !== undefined) {
                 this.changeURL(JSON.parse(application[0].get('value')), false)
             }
             else {
@@ -663,7 +663,7 @@ class EcoreApp extends React.Component<any, State> {
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
         if (this.state.context.userProfile === undefined && this.state.userProfilePattern !== undefined && this.state.principal !== undefined && this.state.getUserProfile) {
             this.setState({getUserProfile: false});
-            this.getUserProfile(this.state.principal)
+            this.getUserProfile(this.state.principal);
         }
     }
 
@@ -700,6 +700,10 @@ class EcoreApp extends React.Component<any, State> {
                         }
                         else {
                             this.createUserProfile(userName);
+                        }
+
+                        if (this.props.history.location.pathname === "/") {
+                            this.startPageSelection(this.state.applicationNames[0])
                         }
                     })
             }
