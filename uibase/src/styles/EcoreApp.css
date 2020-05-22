@@ -10,7 +10,7 @@
 	margin-bottom: 2px;
 	background-color: #fdfdfd;
 }
-  
+
 .panel-button {
 	margin-left: 13px;
 	border: 0;
@@ -58,9 +58,27 @@
 	overflow: hidden;
 }
 
+.dropMenuApps {
+	display: none;
+}
+
+
+
 @media screen and (max-width: 1100px){
 	.item-title {
 		width: 40px;
+	}
+	.btn-appName span {
+		white-space: pre-line;
+	}
+	.dropMenuApps {
+		display: block;
+	}
+	header .apps-menu div:nth-child(3) {
+		display: none;
+	}
+	header .ant-menu-submenu-title span span {
+		display: none;
 	}
 }
 
@@ -73,7 +91,7 @@
 	height: 100%;
 	border: none;
 	padding-top: 7px;
-	background-color: #fdfdfd;
+	background-color: #2a356c;
 }
 
 .lang-label{
@@ -82,7 +100,7 @@
     float: right;
     margin-top: -2px;
 	margin-right: 5px;
-	color: rgb(18, 18, 18) /*#189dff*/;
+	color: #ffffff;
     text-shadow: 1px 1px 2px #d8d8d8;
     font-weight: 100;
 }
@@ -136,3 +154,38 @@
 	border-radius: 100%;
 	perspective: 1000px;
 }
+
+.ant-btn {
+	border: none;
+}
+
+
+li .lang-title, .ant-menu-item, .ant-menu-item>a, .ant-menu {
+	color: #ffffff;
+}
+
+li:hover .lang-title {
+	color: #2a356c;
+}
+
+.ant-menu-item {
+	background-color: #2a356c;
+}
+
+.ant-menu-submenu-title {
+	padding: 0 15px 0 0;
+}
+
+.ant-menu-item:hover {
+	background-color: #ffffff;
+}
+
+.logout-icon {
+	background-image: url("../icons/logoutIcon.svg") !important;
+	background-repeat:  no-repeat !important;
+}
+
+.btn-appName:hover span, .bell-icon:hover {
+	color: #2657f6;
+}
+
