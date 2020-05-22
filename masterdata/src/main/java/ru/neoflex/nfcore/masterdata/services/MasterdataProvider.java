@@ -289,10 +289,10 @@ public class MasterdataProvider {
     public OEntity insert(ODatabaseDocument db, String entityTypeName, ObjectNode node) {
         try {
             ODocument entity = new ODocument(entityTypeName);
-            entity.setProperty("__created", new Date());
-            entity.setProperty("__createdBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
+            entity.setProperty("__created", new Date());
+            entity.setProperty("__createdBy", Authorization.getUserName());
             db.save(entity);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
@@ -317,10 +317,10 @@ public class MasterdataProvider {
     public OEntity update(ODatabaseDocument db, String id, ObjectNode node) {
         try {
             ODocument entity = db.load(new ORecordId(id));
-            entity.setProperty("__updated", new Date());
-            entity.setProperty("__updatedBy", Authorization.getUserName());
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
+            entity.setProperty("__updated", new Date());
+            entity.setProperty("__updatedBy", Authorization.getUserName());
             entity.save();
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
