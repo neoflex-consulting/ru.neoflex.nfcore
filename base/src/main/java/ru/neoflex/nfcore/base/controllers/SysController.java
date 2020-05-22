@@ -16,14 +16,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.neoflex.nfcore.base.services.DeploySupply;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.Exporter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +42,8 @@ public class SysController {
     Workspace workspace;
     @Autowired
     Store store;
+    @Autowired
+    DeploySupply deploySupply;
 
     @GetMapping(value="/user", produces = "application/json; charset=utf-8")
     public Principal getUser(Principal principal) {
@@ -62,22 +70,22 @@ public class SysController {
         return result;
     }
 
-//    @PostMapping(value="/deploySupply", produces={"application/json"})
-//    public ObjectNode deploySupply(@RequestParam(value = "file") final MultipartFile file) throws Exception {
-//        File directory = new File(new File("").getAbsolutePath() + "\\deploy");
-//
-////        File file = new File()
-//
-//        boolean exists = directory.exists();
-//        if (!exists) {
-//            directory.mkdir();
-//        }
-//
-//        int count = new Exporter(store).unzip(file.getInputStream());
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode result = mapper.createObjectNode().put("count", count);
-//        return result;
-//    }
+    @PostMapping(value="/deploySupply", produces={"application/json"})
+    public Object deploySupply(@RequestParam(value = "file") final MultipartFile file) throws Exception {
+        Path path = Paths.get(deploySupply.getDeployBase(), file.getOriginalFilename());
+        try {
+            Files.copy(file.getInputStream(), path);
+            logger.info("File " + file.getOriginalFilename() + " successfully imported");
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode result = mapper.createObjectNode().put("Supply successfully imported", file.getOriginalFilename());
+            return result;
+        }
+        catch (FileAlreadyExistsException e) {
+            throw new RuntimeException(
+                    "File " + file.getOriginalFilename() + " already exists"
+            );
+        }
+    }
 
     @GetMapping(value="/exportdb")
     public ResponseEntity exportDb() throws IOException {

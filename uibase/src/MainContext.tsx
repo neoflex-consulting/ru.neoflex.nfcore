@@ -1,7 +1,6 @@
 import * as React from "react";
 import Ecore from "ecore"
 import {actionType, eventType} from "./utils/consts";
-import EventTracker from "./EventTracker";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 

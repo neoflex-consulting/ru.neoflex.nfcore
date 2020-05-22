@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.Exporter;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -25,16 +27,20 @@ import java.util.List;
 @Service
 public class DeploySupply {
     private final static Log logger = LogFactory.getLog(DeploySupply.class);
+    private Thread supply;
+
     @Autowired
     Store store;
     @Autowired
     Context context;
+    @Value("${deploy.base:${user.dir}/deploy}")
+    private
+    String deployBase;
 
     @PostConstruct
     void init() throws Exception {
         context.transact("DeploySupply", () -> {
-
-        File directory = new File(new File("").getAbsolutePath() + "\\deploy");
+        File directory = new File(deployBase);
         if (directory.exists()) {
             for (File lib : directory.listFiles()) {
                 DocFinder docFinder = DocFinder.create(
@@ -43,14 +49,8 @@ public class DeploySupply {
                         new HashMap<String, String>() {{put("name", lib.getName());}});
                 List<Resource> resources = docFinder.execute().getResources();
                 if (resources.isEmpty()) {
-                    byte[] content = null;
-                    try {
-                        Path path = Paths.get(lib.getAbsolutePath());
-                        content = Files.readAllBytes(path);
-                    } catch (final IOException e) {}
-
-                    MultipartFile file = new MockMultipartFile(lib.getName(), lib.getName(), "text/plain", content);
-                    new Exporter(store).unzip(file.getInputStream());
+                    Path path = Paths.get(lib.getAbsolutePath());
+                    new Exporter(store).unzip(path);
                     logger.info("File named " + lib.getName() + " successfully deployed");
 
                     Supply supply = SupplyFactory.eINSTANCE.createSupply();
@@ -64,12 +64,11 @@ public class DeploySupply {
         }
         return null;
         });
-
     }
 
     @PostConstruct
-    void ScheduledSupply() throws Exception {
-        new Thread(() -> {
+    void scheduledSupply() throws Exception {
+        supply = new Thread(() -> {
             try {
                 WatchService watchService = FileSystems.getDefault().newWatchService();
                 Path path = Paths.get(new File("").getAbsolutePath() + "\\deploy");
@@ -92,6 +91,16 @@ public class DeploySupply {
                     key.reset();
                 }
             } catch (Exception e) {}
-        }).start();
+        });
+        supply.start();
+    }
+
+    @PreDestroy
+    void fini() throws Exception {
+        supply.interrupt();
+    }
+
+    public String getDeployBase() {
+        return deployBase;
     }
 }

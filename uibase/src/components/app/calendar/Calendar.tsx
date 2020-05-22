@@ -969,7 +969,6 @@ class Calendar extends React.Component<any, any> {
                 let content = this.getContents(day);
                 formattedDate = dateFns.format(day, dateFormat);
                 let title = this.getTitle(day);
-                const cloneDay = day;
                 days.push(
                     <div
                         className={`col cell ${
