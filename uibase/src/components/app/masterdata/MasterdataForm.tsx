@@ -129,6 +129,14 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(typeName)) {
             return <InputNumber value={data} style={{width: '15em'}} onChange={value => updateData(value)}/>
         }
+        if (typeName === 'BOOLEAN') {
+            return <Select value={_.isBoolean(data)?data.toString():undefined} allowClear={true}
+                           style={{width: '6em'}}
+                           onChange={(value: any) => updateData(value?value === "true":undefined)}>
+                <Select.Option key={"true"}>True</Select.Option>
+                <Select.Option key={"false"}>False</Select.Option>
+            </Select>
+        }
         if (typeName === 'STRING') {
             return <Input value={data} onChange={value => updateData(value.target.value)}/>
         }
@@ -151,7 +159,11 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             return this.renderPlainTypeEditor(attributeType, data, updateData)
         }
         if (attributeType.eClass.get('name') === 'EnumType') {
-            return <Select value={data} allowClear={true} onChange={(value: any) => updateData(value)}>
+            const length = Math.max(...attributeType.get('values').map((value: EObject) =>
+                value.get('name').length)) + 3
+            return <Select value={data} allowClear={true}
+                           style={{width: `${length}em`}}
+                           onChange={(value: any) => updateData(value)}>
                 {attributeType.get('values').map((value: EObject) =>
                     <Select.Option key={value.get('name')}>{value.get('name')}</Select.Option>
                 )}
