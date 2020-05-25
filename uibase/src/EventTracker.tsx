@@ -16,7 +16,7 @@ export default class EventTracker {
     notifyAllEventHandlers(event: IEvent) {
         this.handlers.forEach(el => {
             if (el.name === event.itemName && el.eventType === event.type)
-                el.callback()
+                el.callback(event.value)
         })
     }
 }

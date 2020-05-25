@@ -32,6 +32,10 @@ abstract class DynamicActionElement {
 
 }
 
+abstract class GridComponent {
+
+}
+
 @Ecore(constraints="IsValid")
 class UserComponent extends Component {
     String componentClassName
@@ -255,7 +259,7 @@ class Input extends ViewElement {
     String width = "200"
 }
 
-class Button extends ViewElement, DynamicActionElement {
+class Button extends ViewElement, DynamicActionElement, GridComponent {
     refers ButtonStyle buttonStyle
     boolean buttonCancel
     boolean buttonSave
@@ -338,6 +342,16 @@ class EventHandler extends ViewElement {
     contains EventAction[] eventActions
 }
 
+class Drawer extends ViewContainer, DynamicActionElement {
+    boolean isVisible
+    TabPosition position
+}
+
+class Href extends ViewElement, GridComponent, DynamicActionElement {
+    String label
+    String ref
+}
+
 enum TextAlign {
     Left
     Center
@@ -410,13 +424,13 @@ enum GroovyCommandType {
 }
 
 enum Action {
-    submit
+    refresh
     show
     hide
     enable
     disable
     //clear
-    //setValue
+    setValue
 }
 
 enum Event {
