@@ -8,7 +8,7 @@ import 'brace/theme/tomorrow';
 // import Splitter from './CustomSplitter'
 import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import {WithTranslation, withTranslation} from "react-i18next";
-import SearchGridTrans from "./SearchGrid";
+import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 const {Column} = Table;
 const ButtonGroup = Button.Group
@@ -82,8 +82,8 @@ class Tools extends React.Component<any, State> {
     deployFile = (file: any) => {
         let form = new FormData()
         form.append("file", file)
-        this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
-        API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json=>{
+        this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')});
+        API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json=>{
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
     }
@@ -199,7 +199,7 @@ class Tools extends React.Component<any, State> {
                         visible={this.state.modalResourceVisible}
                         footer={null}
                         onCancel={() => this.setState({modalResourceVisible: false})}                    >
-                        <SearchGridTrans key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={true} specialEClass={undefined} />
+                        <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
                     </Modal>}
                     <div>
                         {this.state.resourceList.map(r=>

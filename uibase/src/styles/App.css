@@ -1,35 +1,29 @@
 .app-logo {
-  background-color: #fdfdfd;
-  color: #262626;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 400;
   font-size: 23px;
-  height: 55px;
-  line-height: 55px;
-  display: inline-block;
-  width: 260px;
-  padding-left: 14px;
-  border-bottom: 1px solid #e8e8e8;
-  /*user-select: none;*/
-  margin-top: -15px;
+  height: 64px;
+  line-height: 60px;
+  cursor: pointer;
+}
+
+.app-logo span, .app-logo-settings span {
+  font-weight: 700;
+  margin: 0 2px;
 }
 
 .app-logo-settings {
-  background-color: #fdfdfd;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 400;
   font-size: 23px;
-  height: 55px;
-  line-height: 55px;
+  height: 64px;
+  line-height: 60px;
   display: inline-block;
-  width: 260px;
-  padding-left: 14px;
   cursor: pointer;
-  /*user-select: none;*/
 }
 
 .app-header {
-  height: '55px'; 
-  padding: '0px'; 
-  background-color: #fdfdfd;
+  background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
 }
 
@@ -68,6 +62,10 @@
   box-shadow: 0px 0px 12px 1px #ebebeb;
   transform: translate(-50%,-50%);
   padding: 24px;
+}
+
+.login-box .app-logo {
+  color: black;
 }
 
 .input-login::placeholder{
@@ -183,21 +181,21 @@
   left: 0%;
   top: 0%;
   animation: rotate-one 1s linear infinite;
-  border-bottom: 15px solid #cef;
+  border-bottom: 15px solid #293468;
 }
 
 .inner.two {
   right: 0%;
   top: 0%;
   animation: rotate-two 1s linear infinite;
-  border-right: 15px solid #cef;
+  border-right: 15px solid #293468;
 }
 
 .inner.three {
   right: 0%;
   bottom: 0%;
   animation: rotate-three 1s linear infinite;
-  border-top: 15px solid #cef;
+  border-top: 15px solid #293468;
 }
 
 @keyframes rotate-one {
@@ -236,6 +234,7 @@
   height: 40px;
   border-radius: 100%;
   perspective: 1000px;
+  z-index: 32000;
 }
 
 .small_inner {
@@ -250,19 +249,19 @@
   left: 0%;
   top: 0%;
   animation: rotate-one 1s linear infinite;
-  border-bottom: 8px solid #cef;
+  border-bottom: 8px solid #293468;
 }
 
 .small_inner.two {
   right: 0%;
   top: 0%;
   animation: rotate-two 1s linear infinite;
-  border-right: 8px solid #cef;
+  border-right: 8px solid #293468;
 }
 
 .small_inner.three {
   right: 0%;
   bottom: 0%;
   animation: rotate-three 1s linear infinite;
-  border-top: 8px solid #cef;
+  border-top: 8px solid #293468;
 }

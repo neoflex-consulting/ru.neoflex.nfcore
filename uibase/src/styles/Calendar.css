@@ -404,10 +404,9 @@ div .body {
     font-weight: 500;
 }
 
-.ant-btn-primary,
-.ant-btn-primary:hover,
-.ant-btn-primary:focus {
+.calendar .ant-btn-primary,
+.calendar .ant-btn-primary:hover,
+.calendar .ant-btn-primary:focus {
     background-color: #293468;
     border: 1px solid #293468;
-    width: 120px;
 }

@@ -1,11 +1,11 @@
 @GenModel(
     bundleManifest="false",
-    modelDirectory="ru.neoflex.nfcore.supply/src/java/java-gen",
+    modelDirectory="ru.neoflex.nfcore.base/src/java/java-gen",
     complianceLevel="7.0",
     rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
-package ru.neoflex.nfcore.supply
+package ru.neoflex.nfcore.base.supply
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.auth.Audit
