@@ -333,7 +333,7 @@ class AppModuleInit {
             eventHandlerMain.setListenItem(button)
 
             def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
-            submitAction.setAction(Action.SUBMIT)
+            submitAction.setAction(Action.REFRESH)
             submitAction.setTriggerItem(datasetView)
             eventHandlerMain.eventActions.add(submitAction)
 
@@ -345,7 +345,7 @@ class AppModuleInit {
             eventHandlerCheckDqc.setListenItem(datePicker)
 
             def actionCheckDqc = ApplicationFactory.eINSTANCE.createEventAction()
-            actionCheckDqc.setAction(Action.SUBMIT)
+            actionCheckDqc.setAction(Action.REFRESH)
             actionCheckDqc.setTriggerItem(groovyCommand)
             eventHandlerCheckDqc.eventActions.add(actionCheckDqc)
 
@@ -533,7 +533,7 @@ class AppModuleInit {
             eventHandlerMain.setListenItem(button)
 
             def submitAction = ApplicationFactory.eINSTANCE.createEventAction()
-            submitAction.setAction(Action.SUBMIT)
+            submitAction.setAction(Action.REFRESH)
             submitAction.setTriggerItem(datasetView)
             eventHandlerMain.eventActions.add(submitAction)
 
@@ -757,7 +757,7 @@ class AppModuleInit {
             eventHandlerButton.setListenItem(button1)
 
             def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
-            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setAction(Action.REFRESH)
             submitActionButton.setTriggerItem(groovyCommand)
             eventHandlerButton.eventActions.add(submitActionButton)
 
@@ -769,7 +769,7 @@ class AppModuleInit {
             eventHandlerButton2.setListenItem(button2)
 
             def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
-            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setAction(Action.REFRESH)
             submitActionButton2.setTriggerItem(datasetView)
             eventHandlerButton2.eventActions.add(submitActionButton2)
 
@@ -1030,7 +1030,7 @@ class AppModuleInit {
             eventHandlerButton.setListenItem(button1)
 
             def submitActionButton = ApplicationFactory.eINSTANCE.createEventAction()
-            submitActionButton.setAction(Action.SUBMIT)
+            submitActionButton.setAction(Action.REFRESH)
             submitActionButton.setTriggerItem(groovyCommand)
             eventHandlerButton.eventActions.add(submitActionButton)
 
@@ -1042,7 +1042,7 @@ class AppModuleInit {
             eventHandlerButton2.setListenItem(button2)
 
             def submitActionButton2 = ApplicationFactory.eINSTANCE.createEventAction()
-            submitActionButton2.setAction(Action.SUBMIT)
+            submitActionButton2.setAction(Action.REFRESH)
             submitActionButton2.setTriggerItem(datasetView)
             eventHandlerButton2.eventActions.add(submitActionButton2)
 
@@ -1108,7 +1108,7 @@ class AppModuleInit {
         return rs.resources.get(0).contents.get(0)
     }
 
-    static def createAppModuleNRDemoDqcView(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree) {
+    static def createAppModuleNRDemoDqcView(String name, String header, String jdbcDatasetName, String datasetComponentName, boolean useParentReferenceTree, GridComponent runButton, GridComponent hrefComp) {
         def rs = DocFinder.create(Context.current.store, ApplicationPackage.Literals.APP_MODULE, [name: name])
                 .execute().resourceSet
         if (rs.resources.empty) {
@@ -1143,11 +1143,75 @@ class AppModuleInit {
             def datasetComponent=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, datasetComponentName/*"DatasetNRDemoSection1"*/)
             datasetView.setDatasetComponent(datasetComponent)
 
+
+            def testSetId = ApplicationFactory.eINSTANCE.createValueHolder()
+            testSetId.name = "TEST_SET_ID"
+
+            def datasetView1 = ApplicationFactory.eINSTANCE.createDatasetView()
+            datasetView1.name = "DqcTestxTestSetDatasetView"
+            def jdbcDataset1 = Utils.findEObject(DatasetPackage.Literals.JDBC_DATASET, "jdbcNRDemoF110DqcTestsxTestSet")
+            datasetView1.setDataset(jdbcDataset1)
+            def datasetComponent1=  Utils.findEObject(DatasetPackage.Literals.DATASET_COMPONENT, "DatasetNRDemoF110DqcTestsxTestSet")
+            datasetView1.setDatasetComponent(datasetComponent1)
+
+            def drawer1 = ApplicationFactory.eINSTANCE.createDrawer()
+            drawer1.name = "TestXTestSets"
+            drawer1.children.add(datasetView1)
+            drawer1.isVisible = false
+            drawer1.setPosition(TabPosition.BOTTOM)
+
+            def drawer2 = ApplicationFactory.eINSTANCE.createDrawer()
+            drawer2.name = "RunTestSet"
+            drawer2.isVisible = false
+            drawer2.setPosition(TabPosition.RIGHT)
+
             row2.children.add(datasetView)
 
+            def row3 = ApplicationFactory.eINSTANCE.createRow()
+            row3.name = "row3"
+
+            def showTestSetsEvent = ApplicationFactory.eINSTANCE.createEventHandler()
+            showTestSetsEvent.name = "showTestSetsEvent"
+            showTestSetsEvent.setEvent(Event.CLICK)
+            showTestSetsEvent.setListenItem(hrefComp as DynamicActionElement)
+
+            def showTestSetsEventAction1 = ApplicationFactory.eINSTANCE.createEventAction()
+            showTestSetsEventAction1.setAction(Action.SHOW)
+            showTestSetsEventAction1.setTriggerItem(drawer1)
+            def showTestSetsEventAction2 = ApplicationFactory.eINSTANCE.createEventAction()
+            showTestSetsEventAction2.setAction(Action.HIDE)
+            showTestSetsEventAction2.setTriggerItem(drawer2)
+            def showTestSetsEventAction3 = ApplicationFactory.eINSTANCE.createEventAction()
+            showTestSetsEventAction3.setAction(Action.SET_VALUE)
+            showTestSetsEventAction3.setTriggerItem(testSetId)
+
+            showTestSetsEvent.eventActions.add(showTestSetsEventAction1)
+            showTestSetsEvent.eventActions.add(showTestSetsEventAction2)
+
+            def showRunTestSetEvent = ApplicationFactory.eINSTANCE.createEventHandler()
+            showRunTestSetEvent.name = "showRunTestSetEvent"
+            showRunTestSetEvent.setEvent(Event.CLICK)
+            showRunTestSetEvent.setListenItem(runButton as DynamicActionElement)
+
+            def showRunTestSetEventAction1 = ApplicationFactory.eINSTANCE.createEventAction()
+            showRunTestSetEventAction1.setAction(Action.SHOW)
+            showRunTestSetEventAction1.setTriggerItem(drawer2)
+            def showRunTestSetEventAction2 = ApplicationFactory.eINSTANCE.createEventAction()
+            showRunTestSetEventAction2.setAction(Action.HIDE)
+            showRunTestSetEventAction2.setTriggerItem(drawer1)
+
+            showRunTestSetEvent.eventActions.add(showRunTestSetEventAction1)
+            showRunTestSetEvent.eventActions.add(showRunTestSetEventAction2)
+
+            row3.children.add(testSetId)
+            row3.children.add(showTestSetsEvent)
+            row3.children.add(showRunTestSetEvent)
 
             form.children.add(row1)
             form.children.add(row2)
+            form.children.add(row3)
+            form.children.add(drawer1)
+            form.children.add(drawer2)
             application.setView(form)
 
             rs.resources.add(Context.current.store.createEObject(application))

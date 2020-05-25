@@ -1,7 +1,7 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, DatePicker, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
+import {Button, Col, DatePicker, Form, Input, InputNumber, Row, Select, Tabs, Typography, Drawer} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
@@ -17,7 +17,7 @@ import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
-import {eventType, actionType} from "./utils/consts";
+import {eventType, actionType, positionEnum} from "./utils/consts";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -124,7 +124,23 @@ class Row_ extends ViewContainer {
     }
 }
 
-class Button_ extends ViewContainer {
+export class Href_ extends ViewContainer {
+    render = () => {
+        return <a href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
+                  onClick={()=>{
+                      this.props.context.notifyAllEventHandlers({
+                      type:eventType.click,
+                      itemName:this.props.viewObject.get('name'),
+                      //this.props.getValue props из ag-grid
+                      value:(this.props.getValue)? this.props.getValue(): undefined
+                      })
+                  }}>
+            {this.props.viewObject.get('label')}
+        </a>
+    }
+}
+
+export class Button_ extends ViewContainer {
 
     saveResource = () => {
         API.instance().saveResource(this.props.viewObject.eResource(), 99999)
@@ -154,32 +170,45 @@ class Button_ extends ViewContainer {
         this.props.context.changeURL!(appModule.appModule, false, undefined, params);
     };
 
+    getCancelButton = (t: any, label: any, span: any) => {
+        return <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
+        {(label)? label: t('cancel')}
+    </Button>
+    };
+
+    getSaveButton = (t: any, label: any, span: any) => {
+        return <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
+            {(label)? label: t('save')}
+        </Button>
+    };
+
+    getSubmitButton = (t: any, label: any, span: any) => {
+        return <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
+            this.props.context.notifyAllEventHandlers({
+                type:eventType.click,
+                itemName:this.props.viewObject.get('name'),
+                //this.props.getValue props из ag-grid
+                value:(this.props.getValue)? this.props.getValue(): undefined});
+        }}>
+            {(label)? label: t('submit')}
+        </Button>
+    };
+
+    getBackButton = (t: any, label: any, span: any) => {
+        return <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
+            {(label)? label: t('backStartPage')}
+        </Button>
+    };
+
     render = () => {
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
         const label = t(this.props.viewObject.get('label'));
         return <div key={this.viewObject._id}>
-            {this.props.viewObject.get('buttonCancel') === true &&
-            <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
-                {(label)? label: t('cancel')}
-            </Button>}
-            {this.props.viewObject.get('buttonSave') === true &&
-            <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
-                {(label)? label: t('save')}
-            </Button>
-            }
-            {this.props.viewObject.get('buttonSubmit') === true &&
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
-                this.props.context.notifyAllEventHandlers({type:eventType.click,itemName:this.props.viewObject.get('name')});
-            }}>
-                {(label)? label: t('submit')}
-            </Button>
-            }
-            {this.props.viewObject.get('backStartPage') === true &&
-            <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
-                {(label)? label: t('backStartPage')}
-            </Button>
-            }
+            {this.props.viewObject.get('buttonCancel') === true && this.getCancelButton(t, label, span)}
+            {this.props.viewObject.get('buttonSave') === true && this.getSaveButton(t, label, span)}
+            {this.props.viewObject.get('buttonSubmit') === true &&  this.getSubmitButton(t, label, span)}
+            {this.props.viewObject.get('backStartPage') === true && this.getBackButton(t, label, span)}
         </div>
     }
 }
@@ -480,7 +509,7 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
-                {actionType: actionType.submit,callback: this.execute.bind(this)}
+                {actionType: actionType.refresh,callback: this.execute.bind(this)}
                 ]
         });
         if (this.props.viewObject.get('executeOnStartup')) {
@@ -561,17 +590,25 @@ class ValueHolder_ extends ViewContainer {
             type:eventType.componentLoad,
             itemName:this.props.viewObject.get('name')
         });
+        this.props.context.addEventAction({
+            name: this.props.viewObject.get('name'),
+            actions: [
+                {actionType: actionType.setValue,callback: this.onChange.bind(this)}
+            ]
+        });
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
-        const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
-        if (contextItem
-            && contextItem.length >= 1
-            && columnName) {
-            const value = contextItem[0][columnName];
-            if (value !== this.props.viewObject.get('value')) {
-                this.onChange(value);
+        if (this.props.viewObject.get('contextWriter')) {
+            const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
+            const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
+            if (contextItem
+                && contextItem.length >= 1
+                && columnName) {
+                const value = contextItem[0][columnName];
+                if (value !== this.props.viewObject.get('value')) {
+                    this.onChange(value);
+                }
             }
         }
     }
@@ -778,28 +815,34 @@ class EventHandler_ extends ViewContainer {
         };
     }
 
-    handleEvent() {
+    handleEvent(value:string|undefined) {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
-            const eventActions = this.props.context.getEventActions().find((action: IEventAction) => {
+            const eventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                 return el.get('triggerItem')
                     && action.name === el.get('triggerItem').get('name')
-            }).actions;
-            if (eventActions) {
-                eventActions.forEach((action:{actionType: actionType, callback: () => void}) => {
-                    if (action.actionType === (el.get('action') || actionType.submit)) {
-                        action.callback()
+            });
+            if (eventAction) {
+                eventAction.actions.forEach((action:{actionType: actionType, callback: (value:string|undefined) => void}) => {
+                    if (action.actionType === (el.get('action') || actionType.refresh)) {
+                        action.callback(value)
                     }
                 })
+            } else {
+                this.props.context.notification("Event handler warning",
+                    `Action ${el.get('action')} not supported for ${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')})`,
+                    "warning")
             }
         })
     }
 
     componentDidMount(): void {
-        this.props.context.addEventHandler({
-            name: this.props.viewObject.get('listenItem').get('name'),
-            eventType: this.props.viewObject.get('event') || "click",
-            callback: this.handleEvent.bind(this)
-        })
+        if (this.props.viewObject.get('listenItem')) {
+            this.props.context.addEventHandler({
+                name: this.props.viewObject.get('listenItem').get('name'),
+                eventType: this.props.viewObject.get('event') || "click",
+                callback: this.handleEvent.bind(this)
+            })
+        }
     }
 
     componentWillUnmount(): void {
@@ -808,6 +851,47 @@ class EventHandler_ extends ViewContainer {
 
     render = () => {
         return <div/>
+    }
+}
+
+class Drawer_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isVisible: this.viewObject.get('isVisible'),
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+            ]
+        });
+    }
+
+    render = () => {
+        return (
+            <Drawer
+                placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
+                width={'700px'}
+                height={'500px'}
+                visible={this.state.isVisible}
+                onClose={()=>{this.setState({isVisible:false})}}
+                mask={false}
+                maskClosable={false}
+                getContainer={false}
+                style={{ position: 'absolute' }}
+            >
+                {this.renderChildren()}
+            </Drawer>
+        )
     }
 }
 
@@ -872,6 +956,8 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
         this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
         this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
+        this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
+        this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

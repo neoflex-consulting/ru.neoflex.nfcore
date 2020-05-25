@@ -22,6 +22,7 @@ import {handleExportExcel, excelExportObject, excelElementExportType} from "../.
 import {saveAs} from "file-saver";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
+import {Button_, Href_} from '../../../AntdFactory';
 
 const backgroundColor = "#fdfdfd";
 const rowPerPageMapper_: any = rowPerPageMapper;
@@ -64,6 +65,10 @@ class DatasetGrid extends React.Component<any, any> {
             highlights: [],
             saveMenuVisible: false,
             gridOptions: {
+                frameworkComponents: {
+                    buttonComponent: Button_,
+                    hrefComponent: Href_,
+                },
                 defaultColDef: {
                     resizable: true,
                     filter: true,
@@ -501,6 +506,15 @@ class DatasetGrid extends React.Component<any, any> {
         this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
     };
 
+    getComponent = (className: string) => {
+        if (className === "//Href") {
+            return 'hrefComponent'
+        } else if (className === "//Button") {
+            return 'buttonComponent'
+        }
+        return 'none'
+    };
+
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
@@ -603,9 +617,15 @@ class DatasetGrid extends React.Component<any, any> {
                                 sortable={col.get('sortable') || false}
                                 suppressMenu={col.get('suppressMenu') || false}
                                 cellStyle = {this.state.cellStyle}
-                                cellRenderer = {function(params: any) {
-                                    return params.value;
-                                }}
+                                cellRendererParams = {(col.get('component')) ? {
+                                    ...this.props,
+                                    viewObject: col.get('component'),
+                                } : undefined}
+                                cellRenderer = {
+                                    (col.get('component')) ? this.getComponent(col.get('component').eClass._id) : function (params: any) {
+                                        return params.value;
+                                    }
+                                }
                             />
                         )}
                     </AgGridReact>

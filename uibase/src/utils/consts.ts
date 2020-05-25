@@ -9,7 +9,7 @@ const rowPerPageMapper = {
     "all": "All"
 };
 
-const diagramAnchorMap: any = {
+const diagramAnchorMap = {
     "TopLeft":"top-left",
     "Top": "top",
     "TopRight": "top-right",
@@ -19,6 +19,20 @@ const diagramAnchorMap: any = {
     "BottomLeft": "bottom-left",
     "Bottom": "bottom",
     "BottomRight": "bottom-right",
+};
+
+const positionMap = {
+    "Top":"top",
+    "Left": "left",
+    "Right": "right",
+    "Bottom": "bottom",
+};
+
+enum positionEnum {
+    Top = "top",
+    Left = "left",
+    Right = "right",
+    Bottom = "bottom",
 };
 
 const colorScheme = [
@@ -62,7 +76,7 @@ const colorScheme = [
 ];
 
 enum actionType {
-    submit="submit",
+    refresh="refresh",
     show="show",
     hide="hide",
     enable="enable",
@@ -78,6 +92,8 @@ enum eventType {
 }
 
 export {rowPerPageMapper};
+export {positionMap}
+export {positionEnum}
 export {colorScheme};
 export {diagramAnchorMap};
 export {actionType};

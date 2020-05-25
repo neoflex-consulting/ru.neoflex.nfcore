@@ -25,7 +25,6 @@ import {
     IServerQueryParam,
     IServerNamedParam,
     IEventAction,
-    IEventHandler, IEvent
 } from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
