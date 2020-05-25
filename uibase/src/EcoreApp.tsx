@@ -454,7 +454,7 @@ class EcoreApp extends React.Component<any, State> {
             <Layout style={{height: '100vh'}}>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
                     <Row style={{height: '70'}}>
-                        <Col span={5} style={{display: "block", height: 'inherit', textAlign:'center'}}>
+                        <Col span={5} style={{display: "block", height: 'inherit', paddingLeft: '20px'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
