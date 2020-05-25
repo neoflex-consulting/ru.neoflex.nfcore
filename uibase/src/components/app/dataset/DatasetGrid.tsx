@@ -39,7 +39,7 @@ interface Props {
     currentTheme: string,
     paginationCurrentPage: number,
     paginationTotalPage: number,
-    paginationPageSize2: number,
+    paginationPageSize: number,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
     saveChanges?: (newParam: any, paramName: string) => void;
@@ -58,7 +58,7 @@ class DatasetGrid extends React.Component<any, any> {
             rowPerPages: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
-            paginationPageSize2: 10,
+            paginationPageSize: 10,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -84,7 +84,7 @@ class DatasetGrid extends React.Component<any, any> {
 
     onPageSize2 = (e : any, r : any) =>{
         this.grid.current.api.paginationSetPageSize(r);
-        this.setState({ paginationPageSize2: r});
+        this.setState({ paginationPageSize: r});
 
     }
     onPageSizeChanged = (newPageSize: any) => {
@@ -587,7 +587,7 @@ class DatasetGrid extends React.Component<any, any> {
                         pagination={true}
                         suppressPaginationPanel={true}
                         domLayout='autoHeight'
-                        paginationPageSize={this.state.paginationPageSize2}
+                        paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
                         {...gridOptions}
                     >
@@ -616,7 +616,7 @@ class DatasetGrid extends React.Component<any, any> {
                     </AgGridReact>
                     }
                     <Pagination  size={"small"} style={{marginLeft: "800px", float: "right"}} current={this.state.paginationCurrentPage}
-                                total={this.state.paginationTotalPage*this.state.paginationPageSize2}
+                                total={this.state.paginationTotalPage*this.state.paginationPageSize}
                                 onChange={(e : any) => this.OnsomePage(e)} showSizeChanger showQuickJumper
                         pageSizeOptions={['10', '20', '30', '40', '100']}
                         onShowSizeChange={(p: any, r : any) => this.onPageSize2(p,r)}>
