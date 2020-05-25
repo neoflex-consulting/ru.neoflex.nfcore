@@ -349,27 +349,12 @@ class EcoreApp extends React.Component<any, State> {
         }`);
     };
 
-    onRightMenu(e : any) {
-        if (e.value === "logout") {
+    logOut() {
             API.instance().logout().then(() => {
                 this.setState({principal : undefined, getUserProfile: true});
                 this.state.context.updateContext!(({userProfile: undefined}))
             });
             this.props.history.push('')
-        }
-        else if (e.value === "developer") {
-            this.props.history.push('/developer/data');
-        }
-        else if (e.key.split('.').includes('app')) {
-            this.changeURL(e.key.split('.').slice(1).join('.'))
-        }
-        else if (e.key === "test") {
-            this.props.history.push('/test');
-        }
-        else if (e.key === "autoHideNotifications"){
-            this.setState({notifierDuration : 3});
-            localStorage.setItem('notifierDuration', '3');
-        }
     }
 
     setPrincipal = (principal: any)=>{
@@ -484,8 +469,7 @@ class EcoreApp extends React.Component<any, State> {
                                     height: 'inherit'
                              }}>
                             <Button
-                                onClick={(e:any) => this.onRightMenu(e.target)}
-                                value="logout"
+                                onClick={(e:any) => this.logOut()}
                                 type="link" className="bell-icon logout-icon" ghost style={{
                                 width: '5px',
                                 height: '20px',
@@ -494,16 +478,7 @@ class EcoreApp extends React.Component<any, State> {
                             >
                             </Button>
                             <Link to={`/developer/data`}>
-                            <Button
-                                value="developer"
-                                type="link" className="bell-icon developer-icon" ghost
-                                style={{
-                                marginTop: '20px',
-                                background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                            >
-                                <FontAwesomeIcon icon={faTools} size="1x"
-                                />
-                            </Button>
+                                    <FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>
                             </Link>
                             <div className='header-menu'>
                                     <span style={{
