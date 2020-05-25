@@ -8,6 +8,7 @@ import moment from "moment";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowDown, faArrowUp, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import MasterdataLookup from "./MasterdataLookup";
+import * as _ from "lodash";
 
 interface Props {
     entityType: EObject,
@@ -42,7 +43,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                 <Collapse defaultActiveKey={[]} >
                     <Collapse.Panel header={caption} key="1" extra={addButton}>
                         {data.map((e: any, i: number) => <Row key={i}>
-                            <Col span={2}>
+                            <Col span={3}>
                                 <Button title={t('delete')} size={'small'}
                                         style={{color: 'rgb(151, 151, 151)', marginTop: '5px'}}
                                         onClick={() => {
@@ -67,9 +68,53 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                                     <FontAwesomeIcon icon={faArrowDown} size='sm' color="#7b7979"/>
                                 </Button>
                             </Col>
-                            <Col span={22}>
+                            <Col span={21}>
                                 {this.renderValueEditor("#"+(i + 1), elementType, data[i], dataNew => {
                                     updateData([...data.slice(0, i), update(data[i], {$merge: dataNew}), ...data.slice(i + 1)])
+                                })}
+                            </Col>
+                        </Row>)}
+                    </Collapse.Panel>
+                </Collapse>
+            </React.Fragment>
+        )
+    }
+
+    renderMapTypeEditor(caption: string, valueType: EObject, data: any, updateData: (data: any) => void) {
+        const {t} = this.props
+        data = data || {}
+        const addButton =
+            <Button title={t('add')} size={'small'}
+                    disabled={data.hasOwnProperty("")}
+                    style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={(event) => {
+                        updateData({...data, "": createDefaultValue(valueType)})
+                        event.stopPropagation()
+                    }}>
+                <FontAwesomeIcon icon={faPlus} size='sm' color="#7b7979"/>
+            </Button>
+        return (
+            <React.Fragment>
+                <Collapse defaultActiveKey={[]} >
+                    <Collapse.Panel header={caption} key="1" extra={addButton}>
+                        {Object.keys(data).sort().map((key: string, i: number) => <Row key={key}>
+                            <Col span={8}>
+                                <Button title={t('delete')} size={'small'}
+                                        style={{color: 'rgb(151, 151, 151)', marginTop: '5px'}}
+                                        onClick={() => {
+                                            updateData(_.omit(data, key))
+                                        }}>
+                                    <FontAwesomeIcon icon={faMinus} size='sm' color="#7b7979"/>
+                                </Button>
+                                <Typography.Text editable={{
+                                    onChange: newKey => updateData({..._.omit(data, key), [newKey]: data[key]})
+                                }} >
+                                    {key}
+                                </Typography.Text>
+                            </Col>
+                            <Col span={16}>
+                                {this.renderValueEditor(key, valueType, data[key], dataNew => {
+                                    updateData({..._.omit(data, key), [key]: dataNew})
                                 })}
                             </Col>
                         </Row>)}
@@ -83,6 +128,14 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         const typeName = attributeType.get('name') as string
         if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(typeName)) {
             return <InputNumber value={data} style={{width: '15em'}} onChange={value => updateData(value)}/>
+        }
+        if (typeName === 'BOOLEAN') {
+            return <Select value={_.isBoolean(data)?data.toString():undefined} allowClear={true}
+                           style={{width: '6em'}}
+                           onChange={(value: any) => updateData(value?value === "true":undefined)}>
+                <Select.Option key={"true"}>True</Select.Option>
+                <Select.Option key={"false"}>False</Select.Option>
+            </Select>
         }
         if (typeName === 'STRING') {
             return <Input value={data} onChange={value => updateData(value.target.value)}/>
@@ -106,7 +159,11 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             return this.renderPlainTypeEditor(attributeType, data, updateData)
         }
         if (attributeType.eClass.get('name') === 'EnumType') {
-            return <Select value={data} allowClear={true} onChange={(value: any) => updateData(value)}>
+            const length = Math.max(...attributeType.get('values').map((value: EObject) =>
+                value.get('name').length)) + 3
+            return <Select value={data} allowClear={true}
+                           style={{width: `${length}em`}}
+                           onChange={(value: any) => updateData(value)}>
                 {attributeType.get('values').map((value: EObject) =>
                     <Select.Option key={value.get('name')}>{value.get('name')}</Select.Option>
                 )}
@@ -114,6 +171,9 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
         }
         if (attributeType.eClass.get('name') === 'ArrayType') {
             return this.renderArrayTypeEditor(caption, attributeType.get('elementType'), data, updateData)
+        }
+        if (attributeType.eClass.get('name') === 'MapType') {
+            return this.renderMapTypeEditor(caption, attributeType.get('valueType'), data, updateData)
         }
         if (attributeType.eClass.get('name') === 'DocumentType') {
             return <MasterdataForm {...this.props} entityType={attributeType} data={data} updateData={updateData}/>
@@ -137,7 +197,7 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                 {getAllAttributes(entityType).map(attr =>
                     <Row style={{marginTop: '5px'}} gutter={{xs: 8, sm: 16, md: 24, lg: 32}} key={attr.get('name')}>
                         <Col span={4}>
-                            {attr.get('attributeType').eClass.get('name') !== 'ArrayType' &&
+                            {!['ArrayType', 'MapType'].includes(attr.get('attributeType').eClass.get('name')) &&
                             <Typography.Text strong={true}>{getCaption(attr)}</Typography.Text>}
                         </Col>
                         <Col
