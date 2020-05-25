@@ -80,12 +80,12 @@ class Tools extends React.Component<any, State> {
     }
 
     deployFile = (file: any) => {
-        // let form = new FormData()
-        // form.append("file", file)
-        // this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
-        // API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json=>{
-        //     notification.success({message: JSON.stringify(json, undefined, 4)})
-        // })
+        let form = new FormData()
+        form.append("file", file)
+        this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')});
+        API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json=>{
+            notification.success({message: JSON.stringify(json, undefined, 4)})
+        })
     }
 
     downloadAll = () => {

@@ -19,6 +19,8 @@ import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
+
+
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
 import {faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
@@ -103,7 +105,6 @@ interface State {
     allAxisYPosition: Array<EObject>;
     allLegendPosition: Array<EObject>;
     currentTheme: string;
-    paginationPageSize: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
 }
@@ -154,7 +155,6 @@ class DatasetView extends React.Component<any, State> {
             allAxisYPosition: [],
             allLegendPosition: [],
             currentTheme: this.props.viewObject.get('theme') || 'material',
-            paginationPageSize: this.props.viewObject.get('rowPerPage') || 'ten',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
         }
@@ -573,6 +573,7 @@ class DatasetView extends React.Component<any, State> {
     componentWillUnmount() {
         this.props.context.removeEventAction()
     }
+
 
     onChangeColumnDefs(columnDefs: any) {
         this.updatedDatasetComponents(columnDefs, undefined, this.state.currentDatasetComponent.eContents()[0].get('name'));
@@ -1014,7 +1015,6 @@ class DatasetView extends React.Component<any, State> {
                         rowData = {this.state.rowData}
                         columnDefs = {this.state.columnDefs}
                         currentTheme = {this.state.currentTheme}
-                        paginationPageSize = {this.state.paginationPageSize}
                         showUniqRow = {this.state.showUniqRow}
                         isHighlightsUpdated = {this.state.isHighlightsUpdated}
                         saveChanges = {this.changeDatasetViewState}

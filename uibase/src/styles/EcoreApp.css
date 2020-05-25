@@ -10,7 +10,7 @@
 	margin-bottom: 2px;
 	background-color: #fdfdfd;
 }
-  
+
 .panel-button {
 	margin-left: 13px;
 	border: 0;
@@ -58,32 +58,49 @@
 	overflow: hidden;
 }
 
+.dropMenuApps {
+	display: none;
+}
+
+
+
 @media screen and (max-width: 1100px){
 	.item-title {
 		width: 40px;
 	}
+	.btn-appName span {
+		white-space: pre-line;
+	}
+	.dropMenuApps {
+		display: block;
+	}
+	header .header-menu span span {
+		display: none;
+	}
+}
+
+header .header-menu span span {
+	margin-left: 5px;
+}
+
+header .header-menu{
+	float: right;
+	line-height: 60px;
+	border: none;
+	background-color: #2a356c;
+	padding: 0 15px 0 0;
+	text-align: center;
 }
 
 .resource-link {
 	color: inherit;
 }
 
-.header-menu{
-	float: right; 
-	height: 100%;
-	border: none;
-	padding-top: 7px;
-	background-color: #fdfdfd;
-}
-
 .lang-label{
 	width: 35px;
-	height: 35px;
     float: right;
     margin-top: -2px;
-	margin-right: 5px;
-	color: rgb(18, 18, 18) /*#189dff*/;
-    text-shadow: 1px 1px 2px #d8d8d8;
+	color: #ffffff;
     font-weight: 100;
 }
 
@@ -111,13 +128,6 @@
     }
 }
 
-.bell-icon{
-	font-size: small;
-    float: right;
-    margin-top: 12px;
-    margin-right: 20px;
-}
-
 .ant-layout-sider-zero-width-trigger{
 	bottom: 0px !important;
 	top: unset !important;
@@ -136,3 +146,52 @@
 	border-radius: 100%;
 	perspective: 1000px;
 }
+
+.ant-btn {
+	border: none;
+}
+
+
+li .lang-title, .ant-menu-item, .ant-menu-item>a, .ant-menu, .header-menu {
+	color: #ffffff;
+}
+
+li:hover .lang-title {
+	color: #2a356c;
+}
+
+.ant-menu-item, .ant-menu-submenu-popup, .ant-menu-submenu > .ant-menu {
+	background-color: #2a356c;
+}
+
+.ant-menu-item:hover {
+	background-color: #ffffff;
+}
+
+.bell-icon{
+	font-size: small;
+	float: right;
+	margin-top: 20px;
+}
+
+.logout-icon {
+	background-image: url("../icons/logoutIcon.svg") !important;
+	background-repeat:  no-repeat !important;
+}
+.logout-icon:hover{
+	color: yellow;
+}
+
+.developer-icon {
+	padding: 0;
+	width: 15px;
+	height: 15px;
+	margin-right: 15px;
+	background-image: url("../icons/developer-icon.svg") !important;
+	background-repeat:  no-repeat !important;
+}
+
+.btn-appName:hover span, .bell-icon:hover, .lang-label:hover, .ant-menu-item-selected>a {
+	color: #2657f6;
+}
+

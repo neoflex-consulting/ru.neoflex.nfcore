@@ -1,7 +1,5 @@
 import React from 'react';
-import {withTranslation} from "react-i18next";
-import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
-import {AllCommunityModules} from '@ag-grid-community/all-modules';
+import {withTranslation, WithTranslation} from "react-i18next";
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
@@ -9,7 +7,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {API} from "../../../modules/api";
-import Ecore, {EObject} from "ecore";
+import {EObject} from "ecore";
 import _ from 'lodash';
 import update from 'immutability-helper';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -20,15 +18,16 @@ import {Button} from "antd";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
 import MasterdataForm from "./MasterdataForm";
-import {getAllAttributes} from './utils'
+import {truncate} from './utils'
 import FetchSpinner from "../../FetchSpinner";
+import MasterdataGrid from "./MasterdataGrid";
 
-const backgroundColor = "#fdfdfd";
+interface Props {
+    entityType: EObject,
+    onSelect?: ((row: any)=>void)
+}
 
-const truncate = (input: string, length: number) => input.length > length ? `${input.substring(0, length - 3)}...` : input;
-
-class MasterdataEditor extends React.Component<any, any> {
-    private grid: React.RefObject<any>;
+class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
     state = {
         entityTypeName: '',
         gridOptions: {
@@ -140,40 +139,15 @@ class MasterdataEditor extends React.Component<any, any> {
         }
     }
 
-    actionMenu = (params: any) => (
-        <a onClick={event => this.edit(params.value)}>{params.value}</a>
-    )
-
-    getAllThemes = () => {
-        API.instance().findEnum('application', 'Theme')
-            .then((result: Ecore.EObject[]) => {
-                let themes = result.map((t: any) => {
-                    return t.get('name').toLowerCase()
-                });
-                this.setState({themes})
-            })
-    };
-
-    onGridReady = (params: any) => {
-        if (this.grid && this.grid.current !== null) {
-            this.grid.current.api = params.api;
-            this.grid.current.columnApi = params.columnApi;
-        }
-    }
-
-    getAttributeFilter = (attribute: EObject): string => {
-        if (attribute.get('attributeType').eClass.get('name') === 'PlainType') {
-            if (['DATE', 'DATETIME'].includes(attribute.get('attributeType').get('name'))) {
-                return 'agDateColumnFilter'
-            }
-            if (['INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'DECIMAL'].includes(attribute.get('attributeType').get('name'))) {
-                return 'agNumberColumnFilter'
-            }
-        }
-        return 'agTextColumnFilter'
-    }
-
-
+    // getAllThemes = () => {
+    //     API.instance().findEnum('application', 'Theme')
+    //         .then((result: Ecore.EObject[]) => {
+    //             let themes = result.map((t: any) => {
+    //                 return t.get('name').toLowerCase()
+    //             });
+    //             this.setState({themes})
+    //         })
+    // };
 
     getGridData = () => {
         return this.state.rowData.map(value=>
@@ -221,15 +195,17 @@ class MasterdataEditor extends React.Component<any, any> {
                 <MasterdataForm
                     entityType={entityType}
                     data={currentRow}
-                    updateData={(data: Object) => this.setState({currentRow: update(currentRow || {}, {$merge: data})})}
+                    updateData={(data: Object) => {
+                        this.setState({currentRow: update(currentRow || {}, {$merge: data})})
+                    }}
                 />
             </React.Fragment>
         )
     }
 
     renderGrid() {
-        const {t} = this.props
-        const {gridOptions} = this.state;
+        const {t, onSelect} = this.props
+        const {rowData} = this.state;
         const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
@@ -252,55 +228,9 @@ class MasterdataEditor extends React.Component<any, any> {
                         <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon"/>
                     </Button>
                 </div>
-                <div style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
-                     className={'ag-theme-' + this.state.currentTheme}>
-                    <AgGridReact
-                        ref={this.grid}
-                        rowData={this.getGridData()}
-                        modules={AllCommunityModules}
-                        rowSelection='multiple' //выделение строки
-                        onGridReady={this.onGridReady} //инициализация грида
-                        //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
-                        //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
-                        suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
-                        suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
-                        allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
-                        headerHeight={75} //высота header в px (25 по умолчанию)
-                        suppressRowClickSelection //строки не выделяются при нажатии на них
-                        pagination={true}
-                        domLayout='autoHeight'
-                        paginationPageSize={this.state.paginationPageSize}
-                        {...gridOptions}
-                    >
-                        <AgGridColumn
-                            field={'@rid'}
-                            cellRendererFramework={this.actionMenu}
-                            width={120}
-                            //suppressMenu={true}
-                        />
-                        {getAllAttributes(entityType).map(att =>
-                            <AgGridColumn
-                                key={att.get('name')}
-                                field={att.get('name')}
-                                headerName={att.get('caption')}
-                                headerTooltip={att.get('caption')}
-                                hide={att.get('hide') || false}
-                                editable={false}
-                                pinned={false}
-                                filter={this.getAttributeFilter(att)}
-                                checkboxSelection={false}
-                                resizable={true}
-                                sortable={true}
-                                suppressMenu={false}
-                                cellStyle={this.state.cellStyle}
-                                cellRenderer={function (params: any) {
-                                    return params.value;
-                                }}
-                                autoHeight={true}
-                            />
-                        )}
-                    </AgGridReact>
-                </div>
+                <MasterdataGrid entityType={entityType} rowData={rowData} onSelect={row =>
+                    onSelect? onSelect(row) : this.edit(row['@rid'])
+                }/>
             </React.Fragment>
         )
     }
