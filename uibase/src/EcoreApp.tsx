@@ -16,16 +16,14 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
+import {faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
-import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import {
     IMainContext,
     MainContext,
     IServerQueryParam,
     IServerNamedParam,
-    IEventAction,
-    IEventHandler, IEvent
+    IEventAction
 } from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
@@ -351,27 +349,12 @@ class EcoreApp extends React.Component<any, State> {
         }`);
     };
 
-    onRightMenu(e : any) {
-        if (e.value === "logout") {
-            API.instance().logout().then(() => {
-                this.setState({principal : undefined, getUserProfile: true});
-                this.state.context.updateContext!(({userProfile: undefined}))
-            });
-            this.props.history.push('')
-        }
-        else if (e.value === "developer") {
-            this.props.history.push('/developer/data');
-        }
-        else if (e.key.split('.').includes('app')) {
-            this.changeURL(e.key.split('.').slice(1).join('.'))
-        }
-        else if (e.key === "test") {
-            this.props.history.push('/test');
-        }
-        else if (e.key === "autoHideNotifications"){
-            this.setState({notifierDuration : 3});
-            localStorage.setItem('notifierDuration', '3');
-        }
+    logOut() {
+        API.instance().logout().then(() => {
+            this.setState({principal : undefined, getUserProfile: true});
+            this.state.context.updateContext!(({userProfile: undefined}))
+        });
+        this.props.history.push('')
     }
 
     setPrincipal = (principal: any)=>{
@@ -388,7 +371,7 @@ class EcoreApp extends React.Component<any, State> {
                             a.eContents()[0].get('name')
                         );
                         this.setState({applicationNames, applications});
-                        this.startPageSelection(this.state.applicationNames[0])
+                        this.startPageSelection(applicationNames[0])
                     })
             }
         })
@@ -401,7 +384,7 @@ class EcoreApp extends React.Component<any, State> {
                 .filter((u: any) => u.get('key') === 'startApp')
         }
         if (this.props.history.location.pathname === "/") {
-            if (application !== undefined && application[0].get('value') !== undefined) {
+            if (application !== undefined && application.length !== 0 && application[0].get('value') !== undefined) {
                 this.changeURL(JSON.parse(application[0].get('value')), false)
             }
             else {
@@ -452,17 +435,16 @@ class EcoreApp extends React.Component<any, State> {
                 </Menu.Item>
             )}
         </Menu>;
-        let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
                     <Row style={{height: '70'}}>
-                        <Col span={5} style={{display: "block", height: 'inherit', textAlign:'center'}}>
+                        <Col span={5} style={{display: "block", height: 'inherit', paddingLeft: '20px'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '45px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px' }}/>
+                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px' }}/>
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
@@ -487,8 +469,7 @@ class EcoreApp extends React.Component<any, State> {
                                     height: 'inherit'
                              }}>
                             <Button
-                                onClick={(e:any) => this.onRightMenu(e.target)}
-                                value="logout"
+                                onClick={this.logOut}
                                 type="link" className="bell-icon logout-icon" ghost style={{
                                 width: '5px',
                                 height: '20px',
@@ -497,16 +478,7 @@ class EcoreApp extends React.Component<any, State> {
                             >
                             </Button>
                             <Link to={`/developer/data`}>
-                            <Button
-                                value="developer"
-                                type="link" className="bell-icon developer-icon" ghost
-                                style={{
-                                marginTop: '20px',
-                                background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                            >
-                                <FontAwesomeIcon icon={faTools} size="1x"
-                                />
-                            </Button>
+                                    <FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>
                             </Link>
                             <div className='header-menu'>
                                     <span style={{
@@ -514,7 +486,6 @@ class EcoreApp extends React.Component<any, State> {
                                         fontSize: '18px',
                                         lineHeight: '39px'
                                     }}>
-                                        <FontAwesomeIcon icon={faUser} size="xs" />
                                         <span>{principal.name}</span></span>
                             </div>
                             <Dropdown overlay={langMenu} placement="bottomCenter">
@@ -526,7 +497,8 @@ class EcoreApp extends React.Component<any, State> {
                                     className="bell-icon" ghost style={{
                                     width: '5px',
                                     height: '20px',
-                                    marginRight: '15px',
+                                    marginRight: '5px',
+                                    color: '#ffffff',
                                     background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
                                          onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
@@ -695,7 +667,7 @@ class EcoreApp extends React.Component<any, State> {
                             this.createUserProfile(userName);
                         }
 
-                        if (this.props.history.location.pathname === "/") {
+                        if (this.props.history.location.pathname === "/" && this.state.applicationNames !== undefined && this.state.applicationNames.length !== 0) {
                             this.startPageSelection(this.state.applicationNames[0])
                         }
                     })

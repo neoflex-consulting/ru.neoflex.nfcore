@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.AppModule
+import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.impl.AppModuleInit
 import ru.neoflex.nfcore.application.impl.ApplicationInit
 import ru.neoflex.nfcore.application.impl.GlobalSettingsInit
@@ -20,6 +21,14 @@ class DatasetPackageInit {
         /*DatasetPackage*/
         JdbcDriverInit.createDriver("JdbcDriverPostgresqlTest", "org.postgresql.Driver")
         JdbcConnectionInit.createConnection("JdbcConnectionPostgresqlTest", "JdbcDriverPostgresqlTest", "jdbc:postgresql://cloud.neoflex.ru:5432/teneodev", "postgres", "ne0f1ex")
+
+        def dqcRunTest = ApplicationFactory.eINSTANCE.createButton()
+        dqcRunTest.name = "showRun"
+        dqcRunTest.setButtonSubmit(true)
+        def dqcShowTests = ApplicationFactory.eINSTANCE.createHref()
+        dqcShowTests.name = "showTest"
+        dqcShowTests.label = "перейти"
+
 
         try {
             JdbcDatasetInit.createJdbcDatasetInit("JdbcDatasetTest", "sse_workspace","public", "JdbcConnectionPostgresqlTest")
@@ -298,7 +307,7 @@ class DatasetPackageInit {
             JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcView",dqc_view,"JdbcConnectionNRDemo")
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcView")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcView", "jdbcNRDemoF110DqcView")
-            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcView")
+            DatasetComponentInit.createAllColumnNRDemoDqcButtons("DatasetNRDemoF110DqcView", dqcRunTest, dqcShowTests)
 
             String dqc_journal = "select date_time,\n" +
                     "       test_id,\n" +
@@ -389,6 +398,27 @@ class DatasetPackageInit {
             JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcHistory")
             DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcHistory", "jdbcNRDemoF110DqcHistory")
             DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcHistory")
+
+            String dqc_test_set_tests = "select TEST_ID,\n" +
+                    "       TEST_NUM,\n" +
+                    "       TEST_TYPE,\n" +
+                    "       TEST_NAME,\n" +
+                    "       TEST_OBJECT,\n" +
+                    "       PRIORITY,\n" +
+                    "       0 as delete_row\n" +
+                    "  from DQC.TEST t\n"
+            String dqc_test_set_tests_bind =        " where t.test_id in ( SELECT TX.TEST_ID\n" +
+                    "                       FROM DQC.TEST_X_TEST_SET TX\n" +
+                    "                      WHERE TX.TEST_SET_ID = :TEST_SET_ID\n" +
+                    "                        and tx.is_active = 'Y' )\n" +
+                    " order by TEST_NAME"
+
+            JdbcDatasetInit.createJdbcDatasetQueryTypeInit("jdbcNRDemoF110DqcTestsxTestSet",dqc_test_set_tests,"JdbcConnectionNRDemo")
+            JdbcDatasetInit.loadAllColumnsJdbcDatasetInit("jdbcNRDemoF110DqcTestsxTestSet")
+            DatasetComponentInit.createDatasetComponent("DatasetNRDemoF110DqcTestsxTestSet", "jdbcNRDemoF110DqcTestsxTestSet")
+            DatasetComponentInit.createAllColumnNRDemoDqc("DatasetNRDemoF110DqcTestsxTestSet")
+
+            /*JdbcDatasetInit.updateJdbcDataset("jdbcNRDemoF110DqcTestsxTestSet", dqc_test_set_tests + dqc_test_set_tests_bind)*/
         }
         catch (Throwable e) {
             logger.error("DatasetPackage", e)
@@ -438,7 +468,14 @@ class DatasetPackageInit {
         def nrDemoKliko = AppModuleInit.createAppModuleNRDemoKliko("F110_KLIKO", "Выгрузка в KLIKO", "jdbcNRDemoKliko", "DatasetNRDemoKliko")
 
         AppModuleInit.createAppModuleNRDemoDqcTests("F110_DQC_TESTS", "Проверки", "jdbcNRDemoF110DqcTests", "DatasetNRDemoF110DqcTests",true)
-        AppModuleInit.createAppModuleNRDemoDqcView("F110_DQC_VIEW", "Наборы проверок", "jdbcNRDemoF110DqcView", "DatasetNRDemoF110DqcView",true)
+        AppModuleInit.createAppModuleNRDemoDqcView("F110_DQC_VIEW",
+                "Наборы проверок",
+                "jdbcNRDemoF110DqcView",
+                "DatasetNRDemoF110DqcView",
+                true,
+                dqcRunTest,
+                dqcShowTests)
+
         AppModuleInit.createAppModuleNRDemoDqcJournal("F110_DQC_JOURNAL", "Журнал ошибок", "jdbcNRDemoF110DqcJournal", "DatasetNRDemoF110DqcJournal",true)
         AppModuleInit.createAppModuleNRDemoDqcHistory("F110_DQC_HISTORY", "История запуска наборов", "jdbcNRDemoF110DqcHistory", "DatasetNRDemoF110DqcHistory",true)
 

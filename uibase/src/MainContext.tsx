@@ -25,21 +25,22 @@ export interface IServerNamedParam {
 
 export interface IEvent {
     type: eventType,
-    itemName: string
+    itemName: string,
+    value?: string
 }
 
 export interface IEventAction {
     name: string,
     actions: {
         actionType: actionType,
-        callback: () => void
+        callback: (value:string|undefined) => void
     }[]
 }
 
 export interface IEventHandler {
     name: string,
     eventType: eventType,
-    callback: () => void
+    callback: (value:string|undefined) => void
 }
 
 export interface IMainContext {

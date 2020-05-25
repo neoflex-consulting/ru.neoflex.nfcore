@@ -701,7 +701,7 @@ class Calendar extends React.Component<any, any> {
                         <div
                             className="date">
 
-                        <Button style={{marginLeft: '10px'}}
+                        <Button
                                 className='buttonToday'
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >

@@ -3,7 +3,7 @@ import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {Button, Drawer, Modal, Select} from 'antd';
-import {IServerQueryParam} from '../../../MainContext';
+import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -88,6 +88,7 @@ interface State {
     serverSorts: IServerQueryParam[];
     serverGroupBy: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
+    queryParams: IServerNamedParam[]
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
@@ -136,6 +137,7 @@ class DatasetView extends React.Component<any, State> {
             serverSorts: [],
             serverGroupBy: [],
             serverCalculatedExpression: [],
+            queryParams: [],
             useServerFilter: false,
             filtersMenuVisible: false,
             fullScreenOn: false,
@@ -229,6 +231,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
             rowData.set('type', c.get('datasetColumn').get('convertDataType'));
+            rowData.set('component', c.get('component'));
             columnDefs.push(rowData);
         });
         this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs});
@@ -369,7 +372,7 @@ class DatasetView extends React.Component<any, State> {
                                     type: f.type,
                                     highlightType: (f.highlightType !== null ? f.highlightType : 'Cell'),
                                     backgroundColor: f.backgroundColor,
-                                      color: f.color
+                                    color: f.color
                                 })
                             }
                         })
@@ -418,6 +421,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -437,6 +441,11 @@ class DatasetView extends React.Component<any, State> {
             ) {
                 this.getAllDatasetComponents(false)
             }
+        }
+        if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
+            this.setState({
+                queryParams: newQueryParams
+            },()=>this.refresh())
         }
     }
 
@@ -499,10 +508,9 @@ class DatasetView extends React.Component<any, State> {
     private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const queryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
         this.props.context.runQuery(resource
-            , queryParams
+            , this.state.queryParams
             , filterParams.filter((f: any) => f.enable)
             ,[]
             , sortParams.filter((f: any) => f.enable)
@@ -513,7 +521,7 @@ class DatasetView extends React.Component<any, State> {
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
-                        , queryParams
+                        , this.state.queryParams
                         , filterParams.filter((f: any) => f.enable)
                         , aggregationParams.filter((f: any) => f.enable)
                         , sortParams.filter((f: any) => f.enable)
@@ -532,7 +540,7 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
-    onSubmit(): void {
+    refresh(): void {
         if (this.state.currentDatasetComponent.eResource) {
             this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
                 this.state.serverFilters,
@@ -557,7 +565,7 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
-                {actionType: actionType.submit,callback: this.onSubmit.bind(this)}
+                {actionType: actionType.refresh,callback: this.refresh.bind(this)}
             ]
         });
     }

@@ -13,6 +13,9 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.application.Typography
+import ru.neoflex.nfcore.application.GridComponent
+
+
 
 /*JdbcDriver*/
 @Ecore(constraints="IsValid")
@@ -117,6 +120,7 @@ abstract class DatasetColumnView {
     boolean sortable
     boolean suppressMenu
     boolean resizable
+    contains GridComponent component
 }
 
 class RdbmsColumn extends DatasetColumnView {

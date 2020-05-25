@@ -21,85 +21,63 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     appsMenu(selectedApp:any) {
-    if(this.props.applications.length < 4 ){
-        return this.props.applications.slice(0,3).map(
-            (app: any) =>
-                <Col span={8} key={app.eContents()[0].get('name')}>
-                    <Button
-                        className='btn-appName'
-                        key={app.eContents()[0].get('name')}
-                        type="link"
-                        ghost
-                        style={{
-                            fontWeight: 500,
-                            background: "rgb(255,255,255)",
-                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
-                            cursor: "pointer"
-                        }}
-                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                    >
-                        {app.eContents()[0].get('name')}
-                    </Button>
-                </Col>
-        )
-    } else {
-        return <>
-            {this.props.applications.slice(0,3).map(
-            (app: any) =>
-                <Col span={7} key={app.eContents()[0].get('name')}>
-                    <Button
-                        className='btn-appName'
-                        key={app.eContents()[0].get('name')}
-                        type="link"
-                        ghost
-                        style={{
-                            fontWeight: 500,
-                            background: "rgb(255,255,255)",
-                            fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                            color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.35)",
-                            cursor: "pointer"
-                        }}
-                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                    >
-                        {app.eContents()[0].get('name')}
-                    </Button>
-                </Col>
-        )}
-            <Col span={3}>
-                <Dropdown overlay={(
-                    <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
-                        {this.props.applications.slice(3).map(
-                            (app: any) =>
-                                <Menu.Item
-                                    key={app.eContents()[0].get('name')}
-                                    onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                                >
-                        <span className='lang-title'
-                              style={{ fontWeight:600 }}>
-                            {app.eContents()[0].get('name')}</span>
-                                </Menu.Item>
-                        )}
-                    </Menu>
-                )} placement="bottomCenter">
-                    <Button className='btn-appName'
+        const {applications, t} = this.props
+        return (
+            <Row>
+                {applications.slice(0,3).map((app: any) =>
+                    <Col span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
+                        <Button
+                            className='btn-appName'
+                            key={app.eContents()[0].get('name')}
                             type="link"
-                            ghost style={{
-                        fontWeight: 500,
-                        background: "rgb(255,255,255)",
-                        cursor: "pointer"
-                    }}>
-                        Еще
-                    </Button>
-                </Dropdown>
-            </Col>
-            </>
-    }
+                            ghost
+                            style={{
+                                fontWeight: 500,
+                                background: "rgb(255,255,255)",
+                                fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
+                                color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.7)",
+                                cursor: "pointer"
+                            }}
+                            onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                        >
+                            {app.eContents()[0].get('name')}
+                        </Button>
+                    </Col>
+                )}
+                {applications.length >= 4 &&
+                <Col span={3}>
+                    <Dropdown overlay={(
+                        <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
+                            {applications.slice(3).map(
+                                (app: any) =>
+                                    <Menu.Item
+                                        key={app.eContents()[0].get('name')}
+                                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                                    >
+                    <span className='lang-title'
+                          style={{ fontWeight:600 }}>
+                        {app.eContents()[0].get('name')}</span>
+                                    </Menu.Item>
+                            )}
+                        </Menu>
+                    )} placement="bottomCenter">
+                        <Button className='btn-appName'
+                                type="link"
+                                ghost style={{
+                            fontWeight: 500,
+                            background: "rgb(255,255,255)",
+                            cursor: "pointer"
+                        }}>
+                            {t('more')}
+                        </Button>
+                    </Dropdown>
+                </Col>
+                }
+            </Row>
+        )
 }
 
     render() {
-        const span = 24 / this.props.applications.length;
-
         let selectedApp: any = undefined;
         if (this.props.applications.length !== 0 && this.props.context !== undefined) {
             if (this.props.context.userProfile !== undefined) {
