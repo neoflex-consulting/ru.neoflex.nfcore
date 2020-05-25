@@ -13,7 +13,7 @@ import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { InputNumber, Pagination } from 'antd';
+import { Pagination } from 'antd';
 import {API} from '../../../modules/api';
 import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
@@ -37,9 +37,9 @@ interface Props {
     rowData: any[],
     columnDefs: any[],
     currentTheme: string,
-    paginationPageSize: string,
     paginationCurrentPage: number,
     paginationTotalPage: number,
+    paginationPageSize2: number,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
     saveChanges?: (newParam: any, paramName: string) => void;
@@ -56,9 +56,9 @@ class DatasetGrid extends React.Component<any, any> {
             themes: [],
             currentTheme: this.props.currentTheme,
             rowPerPages: [],
-            paginationPageSize: this.props.paginationPageSize,
             operations: [],
             showUniqRow: this.props.showUniqRow,
+            paginationPageSize2: 10,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -82,6 +82,11 @@ class DatasetGrid extends React.Component<any, any> {
         }
     };
 
+    onPageSize2 = (e : any, r : any) =>{
+        this.grid.current.api.paginationSetPageSize(r);
+        this.setState({ paginationPageSize2: r});
+
+    }
     onPageSizeChanged = (newPageSize: any) => {
         this.grid.current.api.paginationSetPageSize(Number(rowPerPageMapper_[newPageSize]));
         if (this.state.rowPerPages.length !== 0) {
@@ -101,7 +106,6 @@ class DatasetGrid extends React.Component<any, any> {
     onPaginationChanged = () => {
         this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
         this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
-
     }
 
 
@@ -523,13 +527,6 @@ class DatasetGrid extends React.Component<any, any> {
                 <Menu.Item key='selectColumns'>
                     Select Columns
                 </Menu.Item>
-                <Menu.SubMenu title={'Rows Per Page'}>
-                    {this.state.rowPerPages.map((p: string) =>
-                        <Menu.Item key={`rowPerPage.${p}`} style={{width: '65px'}}>
-                            {rowPerPageMapper_[p]}
-                        </Menu.Item>
-                    )}
-                </Menu.SubMenu>
                 <Menu.Item key='format'>
                     Format
                 </Menu.Item>
@@ -562,7 +559,7 @@ class DatasetGrid extends React.Component<any, any> {
         );
         return (
             <div id="menuButton"
-                style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor }}
+                style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                 className={'ag-theme-' + this.state.currentTheme}
             >
                 <Dropdown overlay={menu} placement='bottomLeft'
@@ -590,7 +587,7 @@ class DatasetGrid extends React.Component<any, any> {
                         pagination={true}
                         suppressPaginationPanel={true}
                         domLayout='autoHeight'
-                        paginationPageSize={Number(rowPerPageMapper_[this.state.paginationPageSize])}
+                        paginationPageSize={this.state.paginationPageSize2}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
                         {...gridOptions}
                     >
@@ -618,32 +615,12 @@ class DatasetGrid extends React.Component<any, any> {
                         )}
                     </AgGridReact>
                     }
-
-                    <Pagination  size={"small"} style={{marginLeft: "800px", position: "absolute"}} defaultCurrent={this.state.paginationCurrentPage + 1}
-                                total={this.state.paginationTotalPage*Number(rowPerPageMapper_[this.state.paginationPageSize])}
-                                onChange={(e : any) => this.OnsomePage(e)}
-                    />
-                    <Select
-                        size={"small"}
-                        style={{ width: 100, marginLeft: "1020px", position: "relative"}}
-                        placeholder="Rows Per Page"
-                        onChange={(e: any) => this.onPageSizeChanged(e)}
-                    >
-                        {this.state.rowPerPages.map((p: string) =>
-                            <Select.Option value={p} style={{width: '65px'}}>
-                                {rowPerPageMapper_[p]}
-                            </Select.Option>
-                        )}
-                    </Select>
-                           Перейти на
-                    <InputNumber size="small" width={'10px'} min={1} max={100000} defaultValue={1} type={'number'} onChange={(e : any) => this.OnsomePage(e)}/>
-                    {/*<div className="icon" onClick={this.onPreviousPage} style={{marginLeft: "1100px"}}>
-                        chevron_left
-                    </div>
-                    <div className="icon" onClick={this.onNextPage}>
-                        chevron_right
-                    </div>*/}
-
+                    <Pagination  size={"small"} style={{marginLeft: "800px", float: "right"}} current={this.state.paginationCurrentPage}
+                                total={this.state.paginationTotalPage*this.state.paginationPageSize2}
+                                onChange={(e : any) => this.OnsomePage(e)} showSizeChanger showQuickJumper
+                        pageSizeOptions={['10', '20', '30', '40', '100']}
+                        onShowSizeChange={(p: any, r : any) => this.onPageSize2(p,r)}>
+                    </Pagination>
                 </div>
                 <Modal
                     key="save_menu"
