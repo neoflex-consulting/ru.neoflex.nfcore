@@ -369,7 +369,7 @@ class DatasetView extends React.Component<any, State> {
                                     type: f.type,
                                     highlightType: (f.highlightType !== null ? f.highlightType : 'Cell'),
                                     backgroundColor: f.backgroundColor,
-                                      color: f.color
+                                    color: f.color
                                 })
                             }
                         })
