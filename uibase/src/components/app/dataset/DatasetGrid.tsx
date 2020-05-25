@@ -7,7 +7,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
-import {Button, Dropdown, Menu, Modal, Select} from 'antd';
+import {Button, Dropdown, Menu, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';

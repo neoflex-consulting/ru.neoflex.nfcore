@@ -16,16 +16,14 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faSignOutAlt, faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
+import {faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
 import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
-import {faBuffer, faSketch} from "@fortawesome/free-brands-svg-icons";
 import {
     IMainContext,
     MainContext,
     IServerQueryParam,
     IServerNamedParam,
-    IEventAction,
-    IEventHandler, IEvent
+    IEventAction
 } from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
@@ -388,7 +386,7 @@ class EcoreApp extends React.Component<any, State> {
                             a.eContents()[0].get('name')
                         );
                         this.setState({applicationNames, applications});
-                        this.startPageSelection(this.state.applicationNames[0])
+                        this.startPageSelection(applicationNames[0])
                     })
             }
         })
@@ -401,7 +399,7 @@ class EcoreApp extends React.Component<any, State> {
                 .filter((u: any) => u.get('key') === 'startApp')
         }
         if (this.props.history.location.pathname === "/") {
-            if (application !== undefined && application[0].get('value') !== undefined) {
+            if (application !== undefined && application.length !== 0 && application[0].get('value') !== undefined) {
                 this.changeURL(JSON.parse(application[0].get('value')), false)
             }
             else {
@@ -452,7 +450,6 @@ class EcoreApp extends React.Component<any, State> {
                 </Menu.Item>
             )}
         </Menu>;
-        let selectedKeys = this.setSelectedKeys();
         return (
             <Layout style={{height: '100vh'}}>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
@@ -695,7 +692,7 @@ class EcoreApp extends React.Component<any, State> {
                             this.createUserProfile(userName);
                         }
 
-                        if (this.props.history.location.pathname === "/") {
+                        if (this.props.history.location.pathname === "/" && this.state.applicationNames !== undefined && this.state.applicationNames.length !== 0) {
                             this.startPageSelection(this.state.applicationNames[0])
                         }
                     })
