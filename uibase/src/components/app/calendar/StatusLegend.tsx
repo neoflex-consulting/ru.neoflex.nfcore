@@ -2,6 +2,7 @@ import React from "react";
 import '../../../styles/Calendar.css';
 import {Button, Checkbox, Col, Row} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
+import {NXButton} from "../../../nr-design";
 
 interface Props {
     notificationStatus: Object[];
@@ -70,10 +71,10 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
                             </Row>
                         )
                 }
-                <Button title={t('apply')} style={{ width: '120px', right: '6px', }} type="primary"
+                <NXButton primary title={t('apply')}
                         onClick={()=> this.apply(this.state.notificationStatus)}>
                     {t('apply')}
-                </Button>
+                </NXButton>
             </div>
         )
     }
