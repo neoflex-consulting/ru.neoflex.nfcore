@@ -1,13 +1,12 @@
-package ru.neoflex.nfcore.notification.impl;
+package ru.neoflex.nfcore.notification.impl
 
-import org.eclipse.emf.common.util.Diagnostic;
-import org.eclipse.emf.common.util.DiagnosticChain;
-import org.eclipse.emf.ecore.EObject;
-import ru.neoflex.nfcore.notification.Notification;
-import ru.neoflex.nfcore.notification.NotificationInstance;
+import org.eclipse.emf.common.util.Diagnostic
+import org.eclipse.emf.common.util.DiagnosticChain
+import org.eclipse.emf.ecore.EObject
+import ru.neoflex.nfcore.notification.Notification
+import ru.neoflex.nfcore.notification.NotificationInstance
 import ru.neoflex.nfcore.notification.NotificationStatus
-import ru.neoflex.nfcore.notification.Periodicity;
-import ru.neoflex.nfcore.notification.util.NotificationValidator;
+import ru.neoflex.nfcore.notification.util.NotificationValidator
 
 class NotificationValidatorExt extends NotificationValidator {
 
