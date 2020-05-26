@@ -2,7 +2,7 @@ import React from "react";
 import '../../../styles/Calendar.css';
 import {Button, Checkbox, Col, Row} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {NXButton} from "../../../nr-design";
+import {NXButton} from "../../../nx-design";
 
 interface Props {
     notificationStatus: Object[];
