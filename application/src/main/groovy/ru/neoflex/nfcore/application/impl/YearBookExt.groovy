@@ -1,7 +1,6 @@
 package ru.neoflex.nfcore.application.impl
 
 import groovy.json.JsonOutput
-import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
 import ru.neoflex.nfcore.application.GlobalSettings

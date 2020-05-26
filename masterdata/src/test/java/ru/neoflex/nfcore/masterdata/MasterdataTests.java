@@ -13,12 +13,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.masterdata.services.MasterdataProvider;
+import ru.neoflex.nfcore.masterdata.utils.OEntity;
 
 import javax.annotation.PostConstruct;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @RunWith(SpringRunner.class)
@@ -127,6 +130,11 @@ public class MasterdataTests {
                 .put("customer", neoflexId);
         OEntity petrov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, petrovNode));
         Assert.assertEquals(2, masterdataProvider.queryNode(sql).size());
+        List<String> exports = new ArrayList<>();
+        masterdataProvider.createExporter().export("select from Employee", s -> {
+            exports.add(s);
+        });
+        Assert.assertEquals(3, exports.size());
         masterdataProvider.inTransaction(db -> masterdataProvider.delete(db, petrov));
         Assert.assertEquals(1, masterdataProvider.queryNode(sql).size());
         try (Connection conn = DriverManager.getConnection("jdbc:orient:remote:localhost/masterdatatest", "admin", "admin");) {

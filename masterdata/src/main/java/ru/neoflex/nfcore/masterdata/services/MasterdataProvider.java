@@ -34,6 +34,7 @@ import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.providers.OrientDBStoreProvider;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.masterdata.*;
+import ru.neoflex.nfcore.masterdata.utils.OEntity;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -598,5 +599,9 @@ public class MasterdataProvider {
             result.add(oEntity.getObjectNode());
         }
         return result;
+    }
+
+    public MasterdataExporter createExporter() {
+        return new MasterdataExporter(this);
     }
 }

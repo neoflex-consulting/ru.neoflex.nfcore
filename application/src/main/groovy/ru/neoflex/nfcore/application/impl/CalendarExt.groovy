@@ -3,7 +3,6 @@ package ru.neoflex.nfcore.application.impl
 import com.fasterxml.jackson.databind.node.ObjectNode
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.eclipse.emf.ecore.EClass
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.application.ApplicationPackage
@@ -13,10 +12,10 @@ import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.base.util.EmfJson
+import ru.neoflex.nfcore.notification.CalculationInterval
 import ru.neoflex.nfcore.notification.NotificationFactory
 import ru.neoflex.nfcore.notification.NotificationPackage
 import ru.neoflex.nfcore.notification.Periodicity
-import ru.neoflex.nfcore.notification.CalculationInterval
 import ru.neoflex.nfcore.utils.Utils
 
 import java.text.SimpleDateFormat

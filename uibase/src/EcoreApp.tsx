@@ -210,7 +210,9 @@ class EcoreApp extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((result) => {
-                        this.setState({globalSettings: result[0].eContents()[0]})
+                        if (result[0] !== undefined) {
+                            this.setState({globalSettings: result[0].eContents()[0]})
+                        }
                     })
             }
         })
