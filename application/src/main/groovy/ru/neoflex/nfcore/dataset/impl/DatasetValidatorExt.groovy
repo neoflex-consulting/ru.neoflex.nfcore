@@ -3,9 +3,9 @@ package ru.neoflex.nfcore.dataset.impl
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.DiagnosticChain
 import org.eclipse.emf.ecore.EObject
-import ru.neoflex.nfcore.dataset.JdbcDriver
 import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
+import ru.neoflex.nfcore.dataset.JdbcDriver
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
 
 class DatasetValidatorExt extends DatasetValidator {
