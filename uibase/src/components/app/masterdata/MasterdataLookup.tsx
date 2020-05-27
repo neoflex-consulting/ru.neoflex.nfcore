@@ -5,7 +5,8 @@ import {API} from "../../../modules/api";
 import {Button, Modal, Typography} from "antd";
 import {getCaption} from "./utils";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSearchPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faSearchPlus} from "@fortawesome/free-solid-svg-icons/faSearchPlus";
+import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import MasterdataEditor from "./MasterdataEditor";
 
 interface Props {
