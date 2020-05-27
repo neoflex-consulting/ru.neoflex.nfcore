@@ -70,6 +70,7 @@
 	}
 	.btn-appName span {
 		white-space: pre-line;
+		font-size: 0.75rem;
 	}
 	.dropMenuApps {
 		display: block;
@@ -102,6 +103,7 @@ header .header-menu{
     margin-top: -2px;
 	color: #ffffff;
     font-weight: 100;
+	text-align: center;
 }
 
 .lang-label-login{
@@ -164,10 +166,6 @@ li:hover .lang-title {
 	background-color: #2a356c;
 }
 
-.ant-menu-item:hover {
-	background-color: #ffffff;
-}
-
 .bell-icon{
 	font-size: small;
 	float: right;
@@ -178,20 +176,19 @@ li:hover .lang-title {
 	background-image: url("../icons/logoutIcon.svg") !important;
 	background-repeat:  no-repeat !important;
 }
-.logout-icon:hover{
-	color: yellow;
-}
 
 .developer-icon {
 	padding: 0;
+	margin-top: 23px;
 	width: 15px;
 	height: 15px;
 	margin-right: 15px;
 	background-image: url("../icons/developer-icon.svg") !important;
 	background-repeat:  no-repeat !important;
+	color: white;
 }
 
 .btn-appName:hover span, .bell-icon:hover, .lang-label:hover, .ant-menu-item-selected>a {
-	color: #2657f6;
+	color: white;
 }
 

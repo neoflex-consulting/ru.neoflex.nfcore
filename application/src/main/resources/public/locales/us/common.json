@@ -69,6 +69,7 @@
         "username": "User Name",
         "value": "Value",
         "tools": "Tools",
+        "more": "More",
 
         "EqualTo": "equals",
         "NotEqual": "does not equal",

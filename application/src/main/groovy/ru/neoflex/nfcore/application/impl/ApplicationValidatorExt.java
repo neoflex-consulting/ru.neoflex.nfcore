@@ -3,7 +3,10 @@ package ru.neoflex.nfcore.application.impl;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EObject;
-import ru.neoflex.nfcore.application.*;
+import ru.neoflex.nfcore.application.DatasetView;
+import ru.neoflex.nfcore.application.TreeNode;
+import ru.neoflex.nfcore.application.UserComponent;
+import ru.neoflex.nfcore.application.ViewElement;
 import ru.neoflex.nfcore.application.util.ApplicationValidator;
 
 import java.util.Map;

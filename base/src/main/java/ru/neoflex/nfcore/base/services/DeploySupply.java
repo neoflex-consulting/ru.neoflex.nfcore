@@ -71,7 +71,7 @@ public class DeploySupply {
         supply = new Thread(() -> {
             try {
                 WatchService watchService = FileSystems.getDefault().newWatchService();
-                Path path = Paths.get(new File("").getAbsolutePath() + "\\deploy");
+                Path path = Paths.get(deployBase);
 
                 path.register(
                         watchService,
