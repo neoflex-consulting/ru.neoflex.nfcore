@@ -73,6 +73,15 @@ public class MasterdataProvider {
         });
     }
 
+    public void activateAllEntityTypes() throws IOException {
+        List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY_TYPE)
+                .execute().getResources();
+        for (Resource r: resList) {
+            EntityType entity = (EntityType) r.getContents().get(0);
+            activateEntityType(entity);
+        }
+    }
+
     public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
         if (!oClass.getAllSuperClasses().contains(oSuperClass)) {
             oClass.addSuperClass(oSuperClass);
@@ -228,28 +237,28 @@ public class MasterdataProvider {
         if (pk != null) {
             logger.info("Creating pk index " + entity.getName() + "." + pk.getName());
             if (oClass.getClassIndex(pk.getName()) == null) {
-                oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, entity.getAttributes()
+                oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, pk.getAttributes()
                         .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
             }
         }
         for (InvertedEntry ie: entity.getInvertedEntries()) {
             logger.info("Creating ie index " + entity.getName() + "." + ie.getName());
-            if (oClass.getClassIndex(pk.getName()) == null) {
+            if (oClass.getClassIndex(ie.getName()) == null) {
                 if (ie instanceof PlainIndex) {
                     OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
-                    oClass.createIndex(ie.getName(), iType, entity.getAttributes()
+                    oClass.createIndex(ie.getName(), iType, ie.getAttributes()
                             .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
                 else if (ie instanceof FulltextIndex) {
                     ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
                     oClass.createIndex(ie.getName(), "FULLTEXT", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                            entity.getAttributes()
+                            ie.getAttributes()
                                     .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
                 else if (ie instanceof SpatialIndex) {
                     ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
                     oClass.createIndex(ie.getName(), "SPATIAL", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                            entity.getAttributes()
+                            ie.getAttributes()
                                     .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
             }

@@ -1359,6 +1359,7 @@ class AppModuleInit {
     static def fillBalAccountClassifier() {
         MasterdataProvider md = SpringContext.getBean(MasterdataProvider.class);
         if (md == null) return
+        md.activateAllEntityTypes()
         def entityTypeName = 'F110_BalAccountClassifier'
         def nodes = [
                 ['@class': entityTypeName, section_number: 1, CHAR_TYPE: 'А', f110_code: 'А102/16', IS_SELF_EMPLOYED: 'Нет', party_type: 'ЮЛ', sign: 1, ledger_account_mask: '*102', actual_date: new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date())],

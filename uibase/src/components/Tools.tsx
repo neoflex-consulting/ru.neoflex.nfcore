@@ -27,7 +27,9 @@ interface State {
         current: string,
         default: string,
         branches: string[]
-    }
+    },
+    mdFileName?: string,
+    sql?: string
 }
 
 class Tools extends React.Component<any, State> {
@@ -79,6 +81,15 @@ class Tools extends React.Component<any, State> {
         })
     }
 
+    uploadMD = (file: any) => {
+        let form = new FormData()
+        form.append("file", file)
+        this.setState({mdFileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
+        API.instance().fetchJson("/masterdata/import", {method: 'POST', body: form}).then(json=>{
+            notification.success({message: JSON.stringify(json, undefined, 4)})
+        })
+    }
+
     deployFile = (file: any) => {
         let form = new FormData()
         form.append("file", file)
@@ -104,6 +115,16 @@ class Tools extends React.Component<any, State> {
         }, filename)
     }
 
+    downloadSQL = () => {
+        let filename = "masterdata.json";
+        API.instance().download(`/masterdata/export?sql=${this.state.sql}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }, filename)
+    }
+
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
         const {resourceList} = this.state
         resourceList.push(...resources)
@@ -126,6 +147,23 @@ class Tools extends React.Component<any, State> {
                            const file = e!.target!.files![0]
                            if (file) {
                                this.uploadFile(file)
+                           }
+                       }}
+                       onClick={e => {
+                           this.setState({fileName: undefined})
+                       }}
+                />
+            </label>
+        </Tooltip>
+
+        const mdInput = <Tooltip title={"Import MD"}>
+            <label>
+                <FontAwesomeIcon icon={faCloudUploadAlt}/>
+                <Input type="file" style={{display: "none"}}
+                       onChange={e => {
+                           const file = e!.target!.files![0]
+                           if (file) {
+                               this.uploadMD(file)
                            }
                        }}
                        onClick={e => {
@@ -250,6 +288,25 @@ class Tools extends React.Component<any, State> {
                     <Form layout={"inline"}>
                         <Form.Item>
                             <Input addonBefore={fileDeploy} value={this.state!.deployName} readOnly={true}/>
+                        </Form.Item>
+                    </Form>
+                    <Divider orientation="left">Export Master Data</Divider>
+                    <Form layout={"inline"}>
+                        <Tooltip title={"Query data to export"}>
+                            <Input.TextArea placeholder="SQL" value={this.state.sql} onChange={(e)=>this.setState({sql: e.target.value})}></Input.TextArea>
+                        </Tooltip>
+                        <Tooltip title={"Export Selected"}>
+                            <Button type="dashed" size="small" disabled={!this.state.sql} onClick={()=>{
+                                this.downloadSQL()
+                            }}>
+                                <FontAwesomeIcon icon={faCloudDownloadAlt}/>
+                            </Button>
+                        </Tooltip>
+                    </Form>
+                    <Divider orientation="left">Import Master Data</Divider>
+                    <Form layout={"inline"}>
+                        <Form.Item>
+                            <Input addonBefore={mdInput} value={this.state!.mdFileName} readOnly={true}/>
                         </Form.Item>
                     </Form>
                 </Col>

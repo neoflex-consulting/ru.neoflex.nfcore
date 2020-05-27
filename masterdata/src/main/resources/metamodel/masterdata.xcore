@@ -38,6 +38,7 @@ class DocumentType extends Classifier {
     op boolean isActive()
     op void activate()
     op void deactivate(boolean deleteTables)
+    op void activateAll()
 }
 
 class EntityType extends DocumentType {
