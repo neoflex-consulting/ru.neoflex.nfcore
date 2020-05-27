@@ -27,9 +27,6 @@ import EditNotification from "./EditNotification";
 
 const myNote = 'Личная заметка';
 
-interface Props {
-}
-
 class Calendar extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;

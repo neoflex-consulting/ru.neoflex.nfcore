@@ -46,7 +46,7 @@ interface Props {
     saveChanges?: (newParam: any, paramName: string) => void;
 }
 
-class DatasetGrid extends React.Component<any, any> {
+class DatasetGrid extends React.Component<Props & any, any> {
 
     private grid: React.RefObject<any>;
 

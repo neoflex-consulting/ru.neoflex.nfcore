@@ -25,10 +25,6 @@ const marginBottom = '20px';
 
 let startResource: Object;
 
-interface State {
-    datasetGridName: string
-}
-
 abstract class ViewContainer extends View {
     renderChildren = () => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];

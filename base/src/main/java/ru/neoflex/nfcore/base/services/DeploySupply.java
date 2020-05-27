@@ -5,9 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.nfcore.base.supply.Supply;
 import ru.neoflex.nfcore.base.supply.SupplyFactory;
 import ru.neoflex.nfcore.base.supply.SupplyPackage;
@@ -17,7 +15,6 @@ import ru.neoflex.nfcore.base.util.Exporter;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.*;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -33,7 +30,7 @@ public class DeploySupply {
     Store store;
     @Autowired
     Context context;
-    @Value("${deploy.base:${user.dir}/deploy}")
+    @Value("${deploy.application:${user.dir}/deploy}")
     private
     String deployBase;
 
