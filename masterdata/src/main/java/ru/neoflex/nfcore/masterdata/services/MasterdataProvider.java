@@ -10,8 +10,11 @@ import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORecordId;
+import com.orientechnologies.orient.core.index.OIndex;
+import com.orientechnologies.orient.core.index.OSimpleKeyIndexDefinition;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
@@ -46,6 +49,7 @@ import java.util.function.Supplier;
 @Service
 public class MasterdataProvider {
     private static final Logger logger = LoggerFactory.getLogger(MasterdataProvider.class);
+    private static final String REFERRED_BY_INDEX_NAME = "____REFERRED_BY____";
     @Autowired
     OrientDBStoreProvider provider;
     @Autowired
@@ -54,6 +58,7 @@ public class MasterdataProvider {
     Context context;
     @Value("${masterdata.dbname:masterdata}")
     String masterdataDbName;
+    OIndex<OIdentifiable> referredByHashTable;
 
     @PostConstruct
     public void init() throws Exception {
@@ -62,6 +67,7 @@ public class MasterdataProvider {
             if (!oServer.existsDatabase(masterdataDbName)) {
                 oServer.createDatabase(masterdataDbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
             }
+            initRefferedByIndex();
             try {
                 return context.transact("Init Master Data Service", () -> {
                     initTypes();
@@ -71,6 +77,27 @@ public class MasterdataProvider {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    private void initRefferedByIndex() {
+        withDatabase(database -> {
+            referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
+            if (referredByHashTable == null) {
+                referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager()
+                        .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.DICTIONARY_HASH_INDEX.toString(),
+                                new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
+            }
+            return null;
+        });
+    }
+
+    public void activateAllEntityTypes() throws IOException {
+        List<Resource> resList = DocFinder.create(store, MasterdataPackage.Literals.ENTITY_TYPE)
+                .execute().getResources();
+        for (Resource r: resList) {
+            EntityType entity = (EntityType) r.getContents().get(0);
+            activateEntityType(entity);
+        }
     }
 
     public void ensureSuperClass(OClass oClass, OClass oSuperClass) {
@@ -228,28 +255,28 @@ public class MasterdataProvider {
         if (pk != null) {
             logger.info("Creating pk index " + entity.getName() + "." + pk.getName());
             if (oClass.getClassIndex(pk.getName()) == null) {
-                oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, entity.getAttributes()
+                oClass.createIndex(pk.getName(), OClass.INDEX_TYPE.UNIQUE, pk.getAttributes()
                         .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
             }
         }
         for (InvertedEntry ie: entity.getInvertedEntries()) {
             logger.info("Creating ie index " + entity.getName() + "." + ie.getName());
-            if (oClass.getClassIndex(pk.getName()) == null) {
+            if (oClass.getClassIndex(ie.getName()) == null) {
                 if (ie instanceof PlainIndex) {
                     OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
-                    oClass.createIndex(ie.getName(), iType, entity.getAttributes()
+                    oClass.createIndex(ie.getName(), iType, ie.getAttributes()
                             .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
                 else if (ie instanceof FulltextIndex) {
                     ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
                     oClass.createIndex(ie.getName(), "FULLTEXT", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                            entity.getAttributes()
+                            ie.getAttributes()
                                     .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
                 else if (ie instanceof SpatialIndex) {
                     ODocument meta = new ODocument().field("analyzer", StandardAnalyzer.class.getName());
                     oClass.createIndex(ie.getName(), "SPATIAL", null, meta, OLuceneIndexFactory.LUCENE_ALGORITHM,
-                            entity.getAttributes()
+                            ie.getAttributes()
                                     .stream().map(attribute -> attribute.getName()).toArray(size -> new String[size]));
                 }
             }

@@ -18,4 +18,9 @@ class EntityTypeExt extends EntityTypeImpl {
         MasterdataProvider provider = SpringContext.getBean(MasterdataProvider.class);
         if (provider != null) provider.deactivateDocumentType(this, deleteTables)
     }
+
+    public void activateAll() {
+        MasterdataProvider provider = SpringContext.getBean(MasterdataProvider.class);
+        if (provider != null) provider.activateAllEntityTypes()
+    }
 }
