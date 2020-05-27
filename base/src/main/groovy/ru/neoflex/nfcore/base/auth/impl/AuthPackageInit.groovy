@@ -54,5 +54,19 @@ class AuthPackageInit {
                 UserInit.encodeUserPassword(eObject, encoder)
             }
         })
+
+        // create default admin user
+        def sus = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "su"]).execute().resources
+        def su = sus.size() > 0 ? sus[0].contents[0] : UserInit.createSU()
+        def actuators = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "ACTUATOR"]).execute().resources
+        def actuator = actuators.size() > 0 ? actuators[0].contents[0] : UserInit.createActuator()
+        def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resources
+        if (admins.size() == 0) {
+            UserInit.createAdmin("admin", "admin", su, actuator)
+            UserInit.createAdmin("anna", "anna", su, actuator)
+        }
+        else {
+            Context.current.store.saveResource(admins[0])
+        }
     }
 }

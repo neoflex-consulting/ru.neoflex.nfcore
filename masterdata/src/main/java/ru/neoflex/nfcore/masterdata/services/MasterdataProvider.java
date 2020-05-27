@@ -10,8 +10,11 @@ import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORecordId;
+import com.orientechnologies.orient.core.index.OIndex;
+import com.orientechnologies.orient.core.index.OSimpleKeyIndexDefinition;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
@@ -46,6 +49,7 @@ import java.util.function.Supplier;
 @Service
 public class MasterdataProvider {
     private static final Logger logger = LoggerFactory.getLogger(MasterdataProvider.class);
+    private static final String REFERRED_BY_INDEX_NAME = "____REFERRED_BY____";
     @Autowired
     OrientDBStoreProvider provider;
     @Autowired
@@ -54,6 +58,7 @@ public class MasterdataProvider {
     Context context;
     @Value("${masterdata.dbname:masterdata}")
     String masterdataDbName;
+    OIndex<OIdentifiable> referredByHashTable;
 
     @PostConstruct
     public void init() throws Exception {
@@ -62,6 +67,7 @@ public class MasterdataProvider {
             if (!oServer.existsDatabase(masterdataDbName)) {
                 oServer.createDatabase(masterdataDbName, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
             }
+            initRefferedByIndex();
             try {
                 return context.transact("Init Master Data Service", () -> {
                     initTypes();
@@ -70,6 +76,18 @@ public class MasterdataProvider {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        });
+    }
+
+    private void initRefferedByIndex() {
+        withDatabase(database -> {
+            referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
+            if (referredByHashTable == null) {
+                referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager()
+                        .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.DICTIONARY_HASH_INDEX.toString(),
+                                new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
+            }
+            return null;
         });
     }
 

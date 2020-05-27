@@ -207,6 +207,38 @@ public class MasterdataExporter {
         return null;
     }
 
+    private void processOrids(JsonNode value, Consumer<JsonNode> consumer) {
+        if (value.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) value;
+            for (int i = 0; i < arrayNode.size(); ++i) {
+                JsonNode element = arrayNode.get(i);
+                int index = i;
+                processOrid(element, node -> arrayNode.set(index, node));
+            }
+        }
+        else if (value.isObject()) {
+            ObjectNode objectNode = (ObjectNode) value;
+            Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                JsonNode node = entry.getValue();
+                processOrid(node, textNode -> objectNode.set(entry.getKey(), textNode));
+            }
+        }
+    }
+
+    private void processOrid(JsonNode element, Consumer<JsonNode> consumer) {
+        if (element.isTextual()) {
+            String oldOrid = element.asText("");
+            Matcher matcher = ridPattern.matcher(oldOrid);
+            if (matcher.matches()) {
+                consumer.accept(element);
+                return;
+            }
+        }
+        processOrids(element, consumer);
+    }
+
     private void replaceOridsInNode(Map<String, String> oridMap, JsonNode value) {
         if (value.isArray()) {
             ArrayNode arrayNode = (ArrayNode) value;
