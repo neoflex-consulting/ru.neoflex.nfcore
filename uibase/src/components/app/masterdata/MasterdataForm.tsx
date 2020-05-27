@@ -9,7 +9,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowDown, faArrowUp, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import MasterdataLookup from "./MasterdataLookup";
 import * as _ from "lodash";
-import {NXInput, NXDatePicker, NXTypography} from '../../../nx-design/index.js';
+import {NXInput, NXDatePicker, NXTypography} from '../../../nx-design';
 
 interface Props {
     entityType: EObject,

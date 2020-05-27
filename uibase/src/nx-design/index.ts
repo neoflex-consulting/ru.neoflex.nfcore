@@ -4,24 +4,21 @@ import {Typography, Button, Input, DatePicker} from 'antd'
 const NXTypography = {
     Text: styled(Typography.Text)`
     font-size: 14px;
-    font-weight: ${(props) => {
-        return props.strong && '500'
-        return props.light && '300'
-        return '400'
-    }
-    }
+    font-weight: ${(props) => (props.light ? '300'
+    : props.strong ? '500' 
+    : '400')}
 `
 }
 
 const NXButton = styled(Button)`
-    background: ${(props) => {
-        return props.primary && '#424D78';
-        return props.disabled && "#B3B3B3";
-        return 'white'}};
-    color: ${(props) => {
-        return props.primary && "white";
-        return props.disabled && 'white';
-        return "#424D78"}};
+    background: ${(props) => (props.primary ? '#424D78' 
+    : props.secondary ? 'white' 
+    : props.disabled ? "#B3B3B3"
+    : '#424D78')};
+    color: ${(props) => (props.primary ? 'white' 
+    : props.secondary ? '#424D78'
+    : props.disabled ? 'white'
+    : 'white')};
     font-size: 12px;
     line-height: 14px;
     border-radius: 4px;
@@ -32,26 +29,27 @@ const NXButton = styled(Button)`
     text-align: center;
     
     :hover {
-    background: ${(props) => {
-        return props.primary && "#424D78";
-        return props.disabled && '#B3B3B3'
-        return "white"}};
-    color: ${(props) => {
-        return props.primary && "white";
-        return props.disabled && 'white';
-        return "#424D78"}};
+    background: ${(props) => (props.primary ? '#424D78'
+    : props.secondary ? 'white'
+    : props.disabled ? "#B3B3B3"
+    : '#424D78')};
+    color: ${(props) => (props.primary ? 'white'
+    : props.secondary ? '#424D78'
+    : props.disabled ? 'white'
+    : 'white')};
     border: 1px solid #293468;
+    box-shadow: 0px 0px 3px black;
     }
     
     :focus {
-    background: ${(props) => {
-        return props.primary && "#424D78";
-        return props.disabled && '#B3B3B3'
-        return "white"}};
-    color: ${(props) => {
-        return props.primary && "white";
-        return props.disabled && 'white';
-        return "#424D78"}};
+    background: ${(props) => (props.primary ? '#424D78'
+    : props.secondary ? 'white'
+        : props.disabled ? "#B3B3B3"
+            : '#424D78')};
+    color: ${(props) => (props.primary ? 'white'
+    : props.secondary ? '#424D78'
+    : props.disabled ? 'white'
+    : 'white')};
     border: 1px solid #293468;
     }
 `
