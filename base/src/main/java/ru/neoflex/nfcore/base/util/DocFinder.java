@@ -108,7 +108,10 @@ public class DocFinder {
     }
 
     public List<Resource> getResources() throws IOException {
-        return new ArrayList<>(provider.getResourceSet().getResources());
+        ResourceSet rs = provider.getResourceSet();
+        List<Resource> result = new ArrayList<>(rs.getResources());
+        EcoreUtil.resolveAll(rs);
+        return result;
     }
 
     public ResourceSet getResourceSet() throws IOException {
