@@ -2,16 +2,11 @@ import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
-import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {EObject} from "ecore";
 import FetchSpinner from "../../FetchSpinner";
 import {Button} from "antd";
-import Paginator from "../dataset/Paginator";
+import Paginator from "../Paginator";
 import {getAllAttributes, truncate} from "./utils";
 import * as _ from "lodash";
 
@@ -90,7 +85,7 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
         return (
             <React.Fragment>
                 <FetchSpinner/>
-                <div style={{boxSizing: 'border-box', height: 750, width: "99,5%", backgroundColor: backgroundColor}}
+                <div style={{boxSizing: 'border-box', height: 570, width: "99,5%", backgroundColor: backgroundColor}}
                      className={'ag-theme-material'}>
                     <AgGridReact
                         ref={this.grid}

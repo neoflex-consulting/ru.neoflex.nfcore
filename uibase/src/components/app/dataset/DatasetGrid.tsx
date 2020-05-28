@@ -2,25 +2,18 @@ import React from 'react';
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
-import {Button, Dropdown, Menu, Modal} from 'antd';
+import { Modal } from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import SaveDatasetComponent from "./SaveDatasetComponent";
-import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
-import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
-import {saveAs} from "file-saver";
+import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
-import Paginator from "./Paginator";
+import Paginator from "../Paginator";
 
 const backgroundColor = "#fdfdfd";
 
@@ -91,25 +84,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.setState({isGridReady: true});
     }
 
-
-    onActionMenu(e : any) {
-        if (e.key === 'saveReport') {
-            this.handleSaveMenu()
-        }
-        if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context.docxHandlers).then(blob => {
-                saveAs(blob, "example.docx");
-                console.log("Document created successfully");
-            });
-        }
-        if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context.excelHandlers).then((blob) => {
-                    saveAs(new Blob([blob]), 'example.xlsx');
-                    console.log("Document created successfully");
-                }
-            );
-        }
-    }
 
 
     private getDocxData() : docxExportObject {
@@ -435,51 +409,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
-        const menu = (
-            <Menu
-                key='actionMenu'
-                onClick={(e: any) => this.onActionMenu(e)}
-                style={{width: '150px'}}
-            >
-                <Menu.Item key='selectColumns'>
-                    Select Columns
-                </Menu.Item>
-                <Menu.Item key='format'>
-                    Format
-                </Menu.Item>
-                <Menu.Item key='saveReport'>
-                    Save Report
-                </Menu.Item>
-                <Menu.Item key='reset'>
-                    Reset
-                </Menu.Item>
-                <Menu.Item key='help'>
-                    Help
-                </Menu.Item>
-                <Menu.Item key='download'>
-                    Download
-                </Menu.Item>
-                <Menu.Item key='exportToDocx'>
-                    exportToDocx
-                </Menu.Item>
-                <Menu.Item key='exportToExcel'>
-                    exportToExcel
-                </Menu.Item>
-            </Menu>
-        );
         return (
             <div id="menuButton"
                 style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                 className={'ag-theme-material'}
             >
-                <Dropdown overlay={menu} placement='bottomLeft'
-                          getPopupContainer={() => document.getElementById ('menuButton') as HTMLElement}
-                >
-                    <Button style={{color: 'rgb(151, 151, 151)'}}> {t('action')}
-                        <FontAwesomeIcon icon={faChevronDown} size='xs'
-                                         style={{marginLeft: '5px'}}/>
-                    </Button>
-                </Dropdown>
                 <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
                         ref={this.grid}

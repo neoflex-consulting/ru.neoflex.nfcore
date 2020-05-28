@@ -14,7 +14,7 @@ import {faAlignJustify, faPlus, faExpandArrowsAlt, faCompressArrowsAlt} from "@f
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add} from "date-fns";
-import Paginator from "../dataset/Paginator";
+import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
