@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build/lib",
     "target": "es5",
     "downlevelIteration": true,
     "lib": [
@@ -28,5 +30,6 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "exclude": ["node_modules", "build", "scripts"]
 }

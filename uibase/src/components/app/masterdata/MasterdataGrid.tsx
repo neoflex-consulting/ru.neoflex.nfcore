@@ -2,15 +2,11 @@ import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
-import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
 import {EObject} from "ecore";
 import FetchSpinner from "../../FetchSpinner";
 import {Button} from "antd";
+import Paginator from "../Paginator";
 import {getAllAttributes, truncate} from "./utils";
 import * as _ from "lodash";
 
@@ -23,19 +19,26 @@ interface Props {
 }
 
 class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
+
     private grid: React.RefObject<any>;
-    state = {
-        gridOptions: {
-            defaultColDef: {
-                resizable: true,
-                filter: true,
-                sortable: true,
-            }
-        },
-        paginationPageSize: 20,
-        currentTheme: 'material',
-        themes: [],
-        cellStyle: {}
+
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            gridOptions: {
+                defaultColDef: {
+                    resizable: true,
+                    filter: true,
+                    sortable: true,
+                }
+            },
+            paginationPageSize: 10,
+            isGridReady: false,
+            themes: [],
+            cellStyle: {}
+        }
+        this.grid = React.createRef();
     }
 
     getGridData = () => {
@@ -70,14 +73,20 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
         </Button>
     )
 
+    onPaginationChanged = () => {
+        this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
+        this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
+        this.setState({isGridReady: true});
+    }
+
     render() {
         const {entityType} = this.props
         const {gridOptions} = this.state;
         return (
             <React.Fragment>
                 <FetchSpinner/>
-                <div style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
-                     className={'ag-theme-' + this.state.currentTheme}>
+                <div style={{boxSizing: 'border-box', height: 570, width: "99,5%", backgroundColor: backgroundColor}}
+                     className={'ag-theme-material'}>
                     <AgGridReact
                         ref={this.grid}
                         rowData={this.getGridData()}
@@ -92,8 +101,9 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
                         headerHeight={75} //высота header в px (25 по умолчанию)
                         suppressRowClickSelection //строки не выделяются при нажатии на них
                         pagination={true}
-                        domLayout='autoHeight'
+                        suppressPaginationPanel={true}
                         paginationPageSize={this.state.paginationPageSize}
+                        onPaginationChanged={this.onPaginationChanged.bind(this)}
                         {...gridOptions}
                     >
                         <AgGridColumn
@@ -125,6 +135,16 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
                         )}
                     </AgGridReact>
                 </div>
+                <div style={{marginLeft: "800px", marginBottom: "20px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                    <Paginator
+                        {...this.props}
+                        currentPage = {this.state.paginationCurrentPage}
+                        totalNumberOfPage = {this.state.paginationTotalPage}
+                        paginationPageSize = {this.state.paginationPageSize}
+                        grid = {this.grid}
+                    />
+                </div>
+
             </React.Fragment>
         )
     }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Modal, Select} from 'antd';
+import {Button, Drawer, Modal, Select, Menu, Dropdown} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -17,6 +17,7 @@ import DrawerDiagram from "./DrawerDiagram";
 import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
+import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
 
@@ -39,6 +40,7 @@ import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {actionType} from "../../../utils/consts";
+
 
 const { Option, OptGroup } = Select;
 
@@ -710,8 +712,36 @@ class DatasetView extends React.Component<any, State> {
             , newDiagrams);
     };
 
+    onActionMenu(e : any) {
+        if (e.key === 'exportToDocx') {
+            handleExportDocx(this.props.context.getDocxHandlers()).then(blob => {
+                saveAs(new Blob([blob]), "example.docx");
+                console.log("Document created successfully");
+            });
+        }
+        if (e.key === 'exportToExcel') {
+            handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
+                    saveAs(new Blob([blob]), 'example.xlsx');
+                    console.log("Document created successfully");
+                }
+            );
+        }
+    }
+
     getGridPanel = () => {
         const { t } = this.props;
+        const menu = (<Menu
+            key='actionMenu'
+            onClick={(e: any) => this.onActionMenu(e)}
+            style={{width: '150px'}}
+        >
+            <Menu.Item key='exportToDocx'>
+                exportToDocx
+            </Menu.Item>
+            <Menu.Item key='exportToExcel'>
+                exportToExcel
+            </Menu.Item>
+        </Menu>)
         return <div>
             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
@@ -823,17 +853,14 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{
-                        handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
-                                saveAs(new Blob([blob]), 'example.xlsx');
-                                console.log("Document created successfully");
-                            }
-                        );
-                    }}
-            >
-                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-            </Button>
+
+            <Dropdown overlay={menu} placement="bottomLeft">
+                <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
+                    <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+                </Button>
+            </Dropdown>
+
+
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
             >

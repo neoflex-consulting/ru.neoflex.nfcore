@@ -21,6 +21,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -131,12 +132,15 @@ public class MasterdataTests {
         OEntity petrov = masterdataProvider.inTransaction(db -> masterdataProvider.insert(db, petrovNode));
         Assert.assertEquals(2, masterdataProvider.queryNode(sql).size());
         List<String> exports = new ArrayList<>();
-        masterdataProvider.createExporter().export("select from Employee", s -> {
+        masterdataProvider.createExporter().exportSQL("select from Employee", s -> {
             exports.add(s);
         });
         Assert.assertEquals(3, exports.size());
         masterdataProvider.inTransaction(db -> masterdataProvider.delete(db, petrov));
         Assert.assertEquals(1, masterdataProvider.queryNode(sql).size());
+        Iterator<String> it = exports.iterator();
+        masterdataProvider.createExporter().importJson(() -> it.hasNext() ? it.next() : null);
+        Assert.assertEquals(2, masterdataProvider.queryNode(sql).size());
         try (Connection conn = DriverManager.getConnection("jdbc:orient:remote:localhost/masterdatatest", "admin", "admin");) {
             try (Statement stmt = conn.createStatement();) {
                 try (ResultSet rs = stmt.executeQuery(sql)) {

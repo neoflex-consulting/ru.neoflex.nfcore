@@ -2,30 +2,20 @@ import React from 'react';
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-fresh.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-blue.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-bootstrap.css';
-import {Button, Dropdown, Menu, Modal} from 'antd';
+import { Modal } from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { Pagination } from 'antd';
-import {API} from '../../../modules/api';
-import {rowPerPageMapper} from '../../../utils/consts';
 import SaveDatasetComponent from "./SaveDatasetComponent";
-import {handleExportDocx, docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
-import {handleExportExcel, excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
-import {saveAs} from "file-saver";
+import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
+import {excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
+import Paginator from "../Paginator";
 
 const backgroundColor = "#fdfdfd";
-const rowPerPageMapper_: any = rowPerPageMapper;
 
 interface Props {
     onCtrlA?: Function,
@@ -37,16 +27,16 @@ interface Props {
     isAggregatesHighlighted: boolean,
     rowData: any[],
     columnDefs: any[],
-    currentTheme: string,
     paginationCurrentPage: number,
     paginationTotalPage: number,
     paginationPageSize: number,
+    isGridReady: boolean,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
     saveChanges?: (newParam: any, paramName: string) => void;
 }
 
-class DatasetGrid extends React.Component<any, any> {
+class DatasetGrid extends React.Component<Props & any, any> {
 
     private grid: React.RefObject<any>;
 
@@ -55,11 +45,10 @@ class DatasetGrid extends React.Component<any, any> {
 
         this.state = {
             themes: [],
-            currentTheme: this.props.currentTheme,
-            rowPerPages: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
             paginationPageSize: 10,
+            isGridReady: false,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -87,93 +76,15 @@ class DatasetGrid extends React.Component<any, any> {
         }
     };
 
-    onPageSize2 = (e : any, r : any) =>{
-        this.grid.current.api.paginationSetPageSize(r);
-        this.setState({ paginationPageSize: r});
 
-    }
-    onPageSizeChanged = (newPageSize: any) => {
-        this.grid.current.api.paginationSetPageSize(Number(rowPerPageMapper_[newPageSize]));
-        if (this.state.rowPerPages.length !== 0) {
-            if (newPageSize && this.state.rowPerPages.includes(newPageSize)) {
-                this.props.viewObject.set('rowPerPage', newPageSize);
-            }
-            else if (this.state.paginationPageSize === null) {
-                this.props.viewObject.set('rowPerPage', this.state.rowPerPages[0]);
-            }
-        }
-    }
-
-    OnsomePage = (e : any) =>{
-        this.grid.current.api.paginationGoToPage(e-1);
-    }
 
     onPaginationChanged = () => {
         this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
         this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
+        this.setState({isGridReady: true});
     }
 
 
-    onActionMenu(e : any) {
-        if (e.key.split('.').includes('theme')) {
-            this.setSelectedKeys(e.key.split('.')[1])
-        }
-        if (e.key.split('.').includes('rowPerPage')) {
-            this.setSelectedKeys(e.key.split('.')[1]);
-            this.onPageSizeChanged(e.key.split('.')[1]);
-        }
-        if (e.key === 'saveReport') {
-            this.handleSaveMenu()
-        }
-        if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context.docxHandlers).then(blob => {
-                saveAs(blob, "example.docx");
-                console.log("Document created successfully");
-            });
-        }
-        if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context.excelHandlers).then((blob) => {
-                    saveAs(new Blob([blob]), 'example.xlsx');
-                    console.log("Document created successfully");
-                }
-            );
-        }
-    }
-
-    private setSelectedKeys(parameter?: string) {
-        let selectedKeys: string[] = [];
-        if (this.state.themes.length !== 0) {
-            if (parameter && this.state.themes.includes(parameter)) {
-                selectedKeys.push(`theme.${parameter}`);
-                this.setState({currentTheme: parameter});
-                this.props.viewObject.set('theme', parameter);
-            }
-            else if (this.state.currentTheme === null) {
-                selectedKeys.push(`theme.${this.state.themes[0]}`);
-                this.setState({currentTheme: this.state.themes[0]});
-                this.props.viewObject.set('theme', this.state.themes[0]);
-            }
-            else {
-                selectedKeys.push(`theme.${this.state.currentTheme}`)
-            }
-        }
-        if (this.state.rowPerPages.length !== 0) {
-            if (parameter && this.state.rowPerPages.includes(parameter)) {
-                selectedKeys.push(`rowPerPage.${parameter}`);
-                this.setState({paginationPageSize: parameter});
-                this.props.viewObject.set('rowPerPage', parameter);
-            }
-            else if (this.state.paginationPageSize === null) {
-                selectedKeys.push(`rowPerPage.${this.state.rowPerPages[0]}`);
-                this.setState({paginationPageSize: this.state.rowPerPages[0]});
-                this.props.viewObject.set('rowPerPage', this.state.rowPerPages[0]);
-            }
-            else {
-                selectedKeys.push(`rowPerPage.${this.state.paginationPageSize}`)
-            }
-        }
-        return selectedKeys;
-    }
 
     private getDocxData() : docxExportObject {
         let header = [];
@@ -218,35 +129,11 @@ class DatasetGrid extends React.Component<any, any> {
         };
     }
 
-    getAllThemes() {
-        API.instance().findEnum('application', 'Theme')
-            .then((result: Ecore.EObject[]) => {
-                let themes = result.map( (t: any) => {
-                    return t.get('name').toLowerCase()
-                });
-                this.setState({themes})
-            })
-    };
 
-    getAllRowPerPage() {
-        API.instance().findEnum('application', 'RowPerPage')
-            .then((result: Ecore.EObject[]) => {
-                let rowPerPages = result.map( (t: any) => {
-                    return t.get('name')
-                });
-                this.setState({rowPerPages})
-            })
-    };
 
     componentDidMount(): void {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
-        if (this.state.themes.length === 0) {
-            this.getAllThemes()
-        }
-        if (this.state.rowPerPages.length === 0) {
-            this.getAllRowPerPage()
-        }
     }
 
     componentWillUnmount(): void {
@@ -522,61 +409,12 @@ class DatasetGrid extends React.Component<any, any> {
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
-        let selectedKeys = this.setSelectedKeys();
-        const menu = (
-            <Menu
-                key='actionMenu'
-                onClick={(e: any) => this.onActionMenu(e)}
-                selectedKeys={selectedKeys}
-                style={{width: '150px'}}
-            >
-                <Menu.Item key='selectColumns'>
-                    Select Columns
-                </Menu.Item>
-                <Menu.Item key='format'>
-                    Format
-                </Menu.Item>
-                <Menu.Item key='saveReport'>
-                    Save Report
-                </Menu.Item>
-                <Menu.Item key='reset'>
-                    Reset
-                </Menu.Item>
-                <Menu.SubMenu title={'Theme'}>
-                    {this.state.themes.map((theme: string) =>
-                        <Menu.Item key={`theme.${theme}`} style={{width: '100px'}}>
-                            {theme.charAt(0).toUpperCase() + theme.slice(1)}
-                        </Menu.Item>
-                    )}
-                </Menu.SubMenu>
-                <Menu.Item key='help'>
-                    Help
-                </Menu.Item>
-                <Menu.Item key='download'>
-                    Download
-                </Menu.Item>
-                <Menu.Item key='exportToDocx'>
-                    exportToDocx
-                </Menu.Item>
-                <Menu.Item key='exportToExcel'>
-                    exportToExcel
-                </Menu.Item>
-            </Menu>
-        );
         return (
             <div id="menuButton"
                 style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
-                className={'ag-theme-' + this.state.currentTheme}
+                className={'ag-theme-material'}
             >
-                <Dropdown overlay={menu} placement='bottomLeft'
-                          getPopupContainer={() => document.getElementById ('menuButton') as HTMLElement}
-                >
-                    <Button style={{color: 'rgb(151, 151, 151)'}}> {t('action')}
-                        <FontAwesomeIcon icon={faChevronDown} size='xs'
-                                         style={{marginLeft: '5px'}}/>
-                    </Button>
-                </Dropdown>
-                <div style={{ marginTop: '30px'}}>
+                <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
                         ref={this.grid}
                         rowData={this.state.rowData}
@@ -592,7 +430,7 @@ class DatasetGrid extends React.Component<any, any> {
                         suppressRowClickSelection //строки не выделяются при нажатии на них
                         pagination={true}
                         suppressPaginationPanel={true}
-                        domLayout='autoHeight'
+                        /*domLayout='autoHeight'*/
                         paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
                         {...gridOptions}
@@ -627,12 +465,15 @@ class DatasetGrid extends React.Component<any, any> {
                         )}
                     </AgGridReact>
                     }
-                    <Pagination  size={"small"} style={{marginLeft: "800px", float: "right"}} current={this.state.paginationCurrentPage}
-                                total={this.state.paginationTotalPage*this.state.paginationPageSize}
-                                onChange={(e : any) => this.OnsomePage(e)} showSizeChanger showQuickJumper
-                        pageSizeOptions={['10', '20', '30', '40', '100']}
-                        onShowSizeChange={(p: any, r : any) => this.onPageSize2(p,r)}>
-                    </Pagination>
+                    <div style={{marginLeft: "800px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                        <Paginator
+                            {...this.props}
+                            currentPage = {this.state.paginationCurrentPage}
+                            totalNumberOfPage = {this.state.paginationTotalPage}
+                            paginationPageSize = {this.state.paginationPageSize}
+                            grid = {this.grid}
+                        />
+                    </div>
                 </div>
                 <Modal
                     key="save_menu"
