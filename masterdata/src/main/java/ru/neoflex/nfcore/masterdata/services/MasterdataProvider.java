@@ -80,10 +80,10 @@ public class MasterdataProvider {
         });
     }
 
-    private OIndex<List<OIdentifiable>> getReferredByMap(ODatabaseDocument database) {
-        OIndex<List<OIdentifiable>> referredByHashTable = (OIndex<List<OIdentifiable>>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
+    private OIndex<Collection<OIdentifiable>> getReferredByMap(ODatabaseDocument database) {
+        OIndex<Collection<OIdentifiable>> referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
         if (referredByHashTable == null) {
-            referredByHashTable = (OIndex<List<OIdentifiable>>) database.getMetadata().getIndexManager()
+            referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager()
                     .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX.toString(),
                             new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
         }
@@ -325,7 +325,7 @@ public class MasterdataProvider {
             entity.setProperty("__created", new Date());
             entity.setProperty("__createdBy", Authorization.getUserName());
             db.save(entity);
-            OIndex<List<OIdentifiable>> referredBy = getReferredByMap(db);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
             addDocumentRefs(referredBy, entity, node);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
@@ -351,7 +351,7 @@ public class MasterdataProvider {
         try {
             ORecordId orid = new ORecordId(id);
             ODocument entity = db.load(orid);
-            OIndex<List<OIdentifiable>> referredBy = getReferredByMap(db);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
             removeDocumentRefs(referredBy, entity);
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
@@ -365,7 +365,7 @@ public class MasterdataProvider {
         }
     }
 
-    public void addDocumentRefs(OIndex<List<OIdentifiable>> referredBy, ODocument entity, ObjectNode node) {
+    public void addDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity, ObjectNode node) {
         MasterdataExporter.processOrids(node, jsonNode -> {
             ORecordId to = new ORecordId(jsonNode.asText());
             if (entity.getIdentity().compareTo(to) != 0) {
@@ -387,8 +387,8 @@ public class MasterdataProvider {
         try {
             ORecordId orid = new ORecordId(recordId);
             ODocument entity = db.load(orid);
-            OIndex<List<OIdentifiable>> referredBy = getReferredByMap(db);
-            List<OIdentifiable> deps = referredBy.get(orid);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            Collection<OIdentifiable> deps = referredBy.get(orid);
             if (deps != null && deps.size() > 0) {
                 throw new RuntimeException(String.format("record %s referenced by [%s]",
                         orid.toString(), deps.stream().map(i -> i.toString()).collect(Collectors.joining(", "))));
@@ -401,7 +401,7 @@ public class MasterdataProvider {
         return db;
     }
 
-    public void removeDocumentRefs(OIndex<List<OIdentifiable>> referredBy, ODocument entity) throws IOException {
+    public void removeDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity) throws IOException {
         JsonNode oldNode = new ObjectMapper().readTree(entity.toJSON());
         MasterdataExporter.processOrids(oldNode, jsonNode -> {
             ORecordId to = new ORecordId(jsonNode.asText());

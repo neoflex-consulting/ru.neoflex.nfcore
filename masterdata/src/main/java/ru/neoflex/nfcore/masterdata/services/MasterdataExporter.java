@@ -17,6 +17,7 @@ import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import ru.neoflex.nfcore.masterdata.utils.OEntity;
 
 import java.io.*;
 import java.util.*;
@@ -114,16 +115,7 @@ public class MasterdataExporter {
     }
 
     public Map<String, String> importJson(Supplier<String> supplier) {
-        return provider.inTransaction(db -> importJson(db, supplier));
-    }
-
-    public Map<String, String> importJson(ODatabaseDocument db, Supplier<String> supplier) {
         Map<String, String> oridMap = new HashMap<>();
-        importJson(db, oridMap, supplier);
-        return oridMap;
-    }
-
-    public void importJson(ODatabaseDocument db, Map<String, String> oridMap, Supplier<String> supplier) {
         ObjectMapper mapper = new ObjectMapper();
         while (true) {
             String json = supplier.get();
@@ -141,7 +133,7 @@ public class MasterdataExporter {
                     continue; // already imported
                 }
                 objectNode.remove("@rid");
-                objectNode = (ObjectNode) processOrids(objectNode, jsonNode -> {
+                processOrids(objectNode, jsonNode -> {
                     String newOrid = oridMap.get(jsonNode.asText());
                     if (newOrid == null) {
                         logger.warn(String.format("New orid for %s not found", oldOrid));
@@ -151,18 +143,21 @@ public class MasterdataExporter {
                         return new TextNode(newOrid);
                     }
                 });
-                String newOrid = findODocumentByIndexes(db, mapper, oldOrid, objectNode);
-                if (newOrid != null) {
-                    provider.update(db, newOrid, objectNode);
-                }
-                else {
-                    newOrid = provider.insert(db, objectNode).getRid();
-                }
-                oridMap.put(oldOrid, newOrid);
+                OEntity oEntity = provider.inTransaction(db -> {
+                    String newOrid = findODocumentByIndexes(db, mapper, oldOrid, objectNode);
+                    if (newOrid != null) {
+                        return provider.update(db, newOrid, objectNode);
+                    }
+                    else {
+                        return provider.insert(db, objectNode);
+                    }
+                });
+                oridMap.put(oldOrid, oEntity.getRid());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+        return oridMap;
     }
 
     private String findODocumentByIndexes(ODatabaseDocument db, ObjectMapper mapper, String oldOrid, ObjectNode objectNode) {
