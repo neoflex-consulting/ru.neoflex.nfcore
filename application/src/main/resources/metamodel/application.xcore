@@ -143,8 +143,6 @@ abstract class CommandElement {
 class DatasetView extends ViewElement, CommandElement, DynamicActionElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    RowPerPage rowPerPage = "ten"
-    Theme theme = "Material"
     boolean showUniqRow //Показывать только уникальные строки
 }
 
@@ -377,24 +375,6 @@ enum InputType {
     InputString
 }
 
-enum RowPerPage {
-    one
-    ten
-    twenty
-    fifty
-    oneHundred
-    fiveHundred
-    oneThousand
-    all
-}
-
-enum Theme {
-    Balham
-    Blue
-    Bootstrap
-    Fresh
-    Material
-}
 
 enum Colors {
     Yellow

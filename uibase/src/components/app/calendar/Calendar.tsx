@@ -14,6 +14,7 @@ import {faAlignJustify, faPlus, faExpandArrowsAlt, faCompressArrowsAlt} from "@f
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add} from "date-fns";
+import Paginator from "../dataset/Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
@@ -26,6 +27,13 @@ import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 
 const myNote = 'Личная заметка';
+
+interface Props {
+    paginationCurrentPage: number,
+    paginationTotalPage: number,
+    paginationPageSize: number,
+    isGridReady: boolean,
+}
 
 class Calendar extends React.Component<any, any> {
 
@@ -44,6 +52,8 @@ class Calendar extends React.Component<any, any> {
             editMenuVisible: false,
             fullScreenOn: false,
             periodicity: [],
+            paginationPageSize: 10,
+            isGridReady: false,
             years: [],
             months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             calendarVisible: true,
@@ -406,6 +416,12 @@ class Calendar extends React.Component<any, any> {
         }
     };
 
+    onPaginationChanged = () => {
+        this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
+        this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
+        this.setState({isGridReady: true});
+    }
+
     openNotification(notification: any, context: any): void  {
         let params: Object[] = [{
             datasetColumn: 'reportDate',
@@ -644,7 +660,8 @@ class Calendar extends React.Component<any, any> {
             <div
                 style={{
                     marginTop: '30px',
-                    width: '98%'
+                    width: '98%',
+                    height: 550
                 }}
                 className={'ag-theme-material'}
             >
@@ -659,8 +676,9 @@ class Calendar extends React.Component<any, any> {
                     headerHeight={40} //высота header в px (25 по умолчанию)
                     suppressRowClickSelection //строки не выделяются при нажатии на них
                     pagination={true}
-                    domLayout='autoHeight'
-                    paginationPageSize={10}
+                    suppressPaginationPanel={true}
+                    paginationPageSize={this.state.paginationPageSize}
+                    onPaginationChanged={this.onPaginationChanged.bind(this)}
                     frameworkComponents={this.state.frameworkComponents}
                     {...gridOptions}
                 >
@@ -679,6 +697,15 @@ class Calendar extends React.Component<any, any> {
                     />
                 </AgGridReact>
                 }
+                <div style={{marginLeft: "800px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                    <Paginator
+                        {...this.props}
+                        currentPage = {this.state.paginationCurrentPage}
+                        totalNumberOfPage = {this.state.paginationTotalPage}
+                        paginationPageSize = {this.state.paginationPageSize}
+                        grid = {this.grid}
+                    />
+                </div>
             </div>
         )
     }
