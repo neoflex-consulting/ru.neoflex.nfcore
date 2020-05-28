@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -140,7 +141,16 @@ public class MasterdataExporter {
                     continue; // already imported
                 }
                 objectNode.remove("@rid");
-                replaceOridsInNode(oridMap, objectNode);
+                objectNode = (ObjectNode) processOrids(objectNode, jsonNode -> {
+                    String newOrid = oridMap.get(jsonNode.asText());
+                    if (newOrid == null) {
+                        logger.warn(String.format("New orid for %s not found", oldOrid));
+                        return jsonNode;
+                    }
+                    else {
+                        return new TextNode(newOrid);
+                    }
+                });
                 String newOrid = findODocumentByIndexes(db, mapper, oldOrid, objectNode);
                 if (newOrid != null) {
                     provider.update(db, newOrid, objectNode);
@@ -207,13 +217,23 @@ public class MasterdataExporter {
         return null;
     }
 
-    private void processOrids(JsonNode value, Consumer<JsonNode> consumer) {
+    public static JsonNode processOrids(JsonNode value, Function<JsonNode, JsonNode> consumer) {
+        if (value.isTextual()) {
+            String orid = value.asText("");
+            Matcher matcher = ridPattern.matcher(orid);
+            if (matcher.matches()) {
+                return consumer.apply(value);
+            }
+        }
         if (value.isArray()) {
             ArrayNode arrayNode = (ArrayNode) value;
             for (int i = 0; i < arrayNode.size(); ++i) {
                 JsonNode element = arrayNode.get(i);
                 int index = i;
-                processOrid(element, node -> arrayNode.set(index, node));
+                JsonNode newElement = processOrids(element, consumer);
+                if (newElement != element) {
+                    arrayNode.set(index, newElement);
+                }
             }
         }
         else if (value.isObject()) {
@@ -221,59 +241,13 @@ public class MasterdataExporter {
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
-                JsonNode node = entry.getValue();
-                processOrid(node, textNode -> objectNode.set(entry.getKey(), textNode));
-            }
-        }
-    }
-
-    private void processOrid(JsonNode element, Consumer<JsonNode> consumer) {
-        if (element.isTextual()) {
-            String oldOrid = element.asText("");
-            Matcher matcher = ridPattern.matcher(oldOrid);
-            if (matcher.matches()) {
-                consumer.accept(element);
-                return;
-            }
-        }
-        processOrids(element, consumer);
-    }
-
-    private void replaceOridsInNode(Map<String, String> oridMap, JsonNode value) {
-        if (value.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) value;
-            for (int i = 0; i < arrayNode.size(); ++i) {
-                JsonNode element = arrayNode.get(i);
-                int index = i;
-                replaceOrid(oridMap, element, node -> arrayNode.set(index, node));
-            }
-        }
-        else if (value.isObject()) {
-            ObjectNode objectNode = (ObjectNode) value;
-            Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                JsonNode node = entry.getValue();
-                replaceOrid(oridMap, node, textNode -> objectNode.set(entry.getKey(), textNode));
-            }
-        }
-    }
-
-    private void replaceOrid(Map<String, String> oridMap, JsonNode element, Consumer<JsonNode> consumer) {
-        if (element.isTextual()) {
-            String oldOrid = element.asText("");
-            Matcher matcher = ridPattern.matcher(oldOrid);
-            if (matcher.matches()) {
-                String newOrid = oridMap.get(oldOrid);
-                if (newOrid == null) {
-                    logger.warn(String.format("New orid for %s not found", oldOrid));
+                JsonNode element = entry.getValue();
+                JsonNode newElement = processOrids(element, consumer);
+                if (newElement != element) {
+                    objectNode.set(entry.getKey(), newElement);
                 }
-                else {
-                    consumer.accept(new TextNode(newOrid));
-                }
-                return;
             }
         }
-        replaceOridsInNode(oridMap, element);
+        return value;
     }
 }
