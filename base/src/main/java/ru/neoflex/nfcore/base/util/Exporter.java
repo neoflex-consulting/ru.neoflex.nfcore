@@ -256,15 +256,21 @@ public class Exporter {
         return entityCount;
     }
 
-    public void unzip(Path zipFile) throws IOException {
+    public void unzip(Path zipFile, String fileType) throws IOException {
         Map<String, Object> env = new HashMap<>();
         //env.put("create", "true");
         env.put("useTempFile", Boolean.TRUE);
         java.net.URI uri = java.net.URI.create("jar:" + zipFile.toUri());
-        FileSystem fileSystem = FileSystems.newFileSystem(uri, env);
-        Iterable<Path> roots = fileSystem.getRootDirectories();
-        Path root = roots.iterator().next();
-        importPath(root);
+        try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env);) {
+            Iterable<Path> roots = fileSystem.getRootDirectories();
+            Path root = roots.iterator().next();
+            if (fileType.equals(XMI)) {
+                importPathXmi(root);
+            }
+            if (fileType.equals(REFS)) {
+                importPathRefs(root);
+            }
+        }
     }
 
     public void exportAll(Path path) throws Exception {
@@ -279,12 +285,15 @@ public class Exporter {
         });
     }
 
-    public void importPath(Path path) throws IOException {
+    public void importPathXmi(Path path) throws IOException {
         List<Path> jsonPaths = Files.walk(path).filter(Files::isRegularFile).filter(file -> file.getFileName().toString().endsWith(XMI)).collect(Collectors.toList());
         for (Path jsonPath : jsonPaths) {
             byte[] content = Files.readAllBytes(jsonPath);
             importEObject(content);
         }
+    }
+
+    public void importPathRefs(Path path) throws IOException {
         List<Path> refsPaths = Files.walk(path).filter(Files::isRegularFile).filter(file -> file.getFileName().toString().endsWith(REFS)).collect(Collectors.toList());
         for (Path refsPath : refsPaths) {
             byte[] content = Files.readAllBytes(refsPath);
