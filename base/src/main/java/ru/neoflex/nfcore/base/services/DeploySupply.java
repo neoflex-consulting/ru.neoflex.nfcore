@@ -5,9 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.nfcore.base.supply.Supply;
 import ru.neoflex.nfcore.base.supply.SupplyFactory;
 import ru.neoflex.nfcore.base.supply.SupplyPackage;
@@ -28,12 +26,14 @@ import java.util.List;
 public class DeploySupply {
     private final static Log logger = LogFactory.getLog(DeploySupply.class);
     private Thread supply;
+    public static final String XMI = ".xmi";
+    public static final String REFS = ".refs";
 
     @Autowired
     Store store;
     @Autowired
     Context context;
-    @Value("${deploy.base:${user.dir}/deploy}")
+    @Value("${deploy.application:${user.dir}/deploy}")
     private
     String deployBase;
 
@@ -43,20 +43,29 @@ public class DeploySupply {
         File directory = new File(deployBase);
         if (directory.exists()) {
             for (File lib : directory.listFiles()) {
-                DocFinder docFinder = DocFinder.create(
-                        store,
-                        SupplyPackage.Literals.SUPPLY,
-                        new HashMap<String, String>() {{put("name", lib.getName());}});
-                List<Resource> resources = docFinder.execute().getResources();
+                List<Resource> resources = getResources(lib);
                 if (resources.isEmpty()) {
                     Path path = Paths.get(lib.getAbsolutePath());
-                    new Exporter(store).unzip(path);
-                    logger.info("File named " + lib.getName() + " successfully deployed");
-
+                    new Exporter(store).unzip(path, XMI);
+                    logger.info("File " + lib.getName() + " successfully deployed (XMI)");
+                }
+            }
+            for (File lib : directory.listFiles()) {
+                List<Resource> resources = getResources(lib);
+                if (resources.isEmpty()) {
+                    Path path = Paths.get(lib.getAbsolutePath());
+                    new Exporter(store).unzip(path, REFS);
+                    logger.info("File " + lib.getName() + " successfully deployed (REFS)");
+                }
+            }
+            for (File lib : directory.listFiles()) {
+                List<Resource> resources = getResources(lib);
+                if (resources.isEmpty()) {
                     Supply supply = SupplyFactory.eINSTANCE.createSupply();
                     supply.setName(lib.getName());
                     supply.setDate(new Timestamp((new Date()).getTime()));
                     store.createEObject(supply);
+                    logger.info("Supply " + lib.getName() + " successfully created");
                 }
             }
         } else {
@@ -64,6 +73,14 @@ public class DeploySupply {
         }
         return null;
         });
+    }
+
+    private List<Resource> getResources(File lib) throws IOException {
+        DocFinder docFinder = DocFinder.create(
+                store,
+                SupplyPackage.Literals.SUPPLY,
+                new HashMap<String, String>() {{put("name", lib.getName());}});
+        return docFinder.execute().getResources();
     }
 
     @PostConstruct

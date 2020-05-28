@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.masterdata.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -45,6 +46,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class MasterdataProvider {
@@ -58,7 +60,6 @@ public class MasterdataProvider {
     Context context;
     @Value("${masterdata.dbname:masterdata}")
     String masterdataDbName;
-    OIndex<OIdentifiable> referredByHashTable;
 
     @PostConstruct
     public void init() throws Exception {
@@ -79,16 +80,18 @@ public class MasterdataProvider {
         });
     }
 
+    private OIndex<Collection<OIdentifiable>> getReferredByMap(ODatabaseDocument database) {
+        OIndex<Collection<OIdentifiable>> referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
+        if (referredByHashTable == null) {
+            referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager()
+                    .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX.toString(),
+                            new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
+        }
+        return referredByHashTable;
+    }
+
     private void initRefferedByIndex() {
-        withDatabase(database -> {
-            referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
-            if (referredByHashTable == null) {
-                referredByHashTable = (OIndex<OIdentifiable>) database.getMetadata().getIndexManager()
-                        .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.DICTIONARY_HASH_INDEX.toString(),
-                                new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
-            }
-            return null;
-        });
+        withDatabase(database -> getReferredByMap(database));
     }
 
     public void activateAllEntityTypes() throws IOException {
@@ -322,6 +325,8 @@ public class MasterdataProvider {
             entity.setProperty("__created", new Date());
             entity.setProperty("__createdBy", Authorization.getUserName());
             db.save(entity);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            addDocumentRefs(referredBy, entity, node);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -344,16 +349,30 @@ public class MasterdataProvider {
 
     public OEntity update(ODatabaseDocument db, String id, ObjectNode node) {
         try {
-            ODocument entity = db.load(new ORecordId(id));
+            ORecordId orid = new ORecordId(id);
+            ODocument entity = db.load(orid);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            removeDocumentRefs(referredBy, entity);
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
             entity.setProperty("__updated", new Date());
             entity.setProperty("__updatedBy", Authorization.getUserName());
             entity.save();
+            addDocumentRefs(referredBy, entity, node);
             return new OEntity(entity);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void addDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity, ObjectNode node) {
+        MasterdataExporter.processOrids(node, jsonNode -> {
+            ORecordId to = new ORecordId(jsonNode.asText());
+            if (entity.getIdentity().compareTo(to) != 0) {
+                referredBy.put(to, entity.getIdentity());
+            }
+            return jsonNode;
+        });
     }
 
     public ODatabaseDocument delete(ODatabaseDocument db, OEntity oEntity) {
@@ -365,8 +384,32 @@ public class MasterdataProvider {
     }
 
     public ODatabaseDocument delete(ODatabaseDocument db, String recordId) {
-        db.delete(new ORecordId(recordId));
+        try {
+            ORecordId orid = new ORecordId(recordId);
+            ODocument entity = db.load(orid);
+            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            Collection<OIdentifiable> deps = referredBy.get(orid);
+            if (deps != null && deps.size() > 0) {
+                throw new RuntimeException(String.format("record %s referenced by [%s]",
+                        orid.toString(), deps.stream().map(i -> i.toString()).collect(Collectors.joining(", "))));
+            }
+            removeDocumentRefs(referredBy, entity);
+            entity.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return db;
+    }
+
+    public void removeDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity) throws IOException {
+        JsonNode oldNode = new ObjectMapper().readTree(entity.toJSON());
+        MasterdataExporter.processOrids(oldNode, jsonNode -> {
+            ORecordId to = new ORecordId(jsonNode.asText());
+            if (entity.getIdentity().compareTo(to) != 0) {
+                referredBy.remove(to, entity.getIdentity());
+            }
+            return jsonNode;
+        });
     }
 
     public OEntity load(ODatabaseDocument db, String recordId) {

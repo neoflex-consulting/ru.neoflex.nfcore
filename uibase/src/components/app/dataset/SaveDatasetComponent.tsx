@@ -106,9 +106,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     saveDatasetComponentOptions(): void {
         let objectId = this.props.viewObject._id;
         let params: any = {};
-        if (this.props.viewObject.get('theme') !== null) {params['theme'] = this.props.viewObject.get('theme')}
         if (this.props.viewObject.get('showUniqRow') !== null) {params['showUniqRow'] = this.props.viewObject.get('showUniqRow')}
-        if (this.props.viewObject.get('rowPerPage') !== null) {params['rowPerPage'] = this.props.viewObject.get('rowPerPage')}
         this.props.context.changeUserProfile(objectId, params).then (()=> {
             let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
             currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');

@@ -1,13 +1,3 @@
-const rowPerPageMapper = {
-    "one": "1",
-    "ten": "10",
-    "twenty": "20",
-    "fifty": "50",
-    "oneHundred": "100",
-    "fiveHundred": "500",
-    "oneThousand": "1000",
-    "all": "All"
-};
 
 const diagramAnchorMap = {
     "TopLeft":"top-left",
@@ -91,7 +81,6 @@ enum eventType {
     componentLoad="componentLoad"
 }
 
-export {rowPerPageMapper};
 export {positionMap}
 export {positionEnum}
 export {colorScheme};
