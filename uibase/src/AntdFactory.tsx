@@ -57,9 +57,32 @@ class Col_ extends ViewContainer {
 }
 
 class Form_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('isHidden') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            name:this.props.viewObject.get('name'),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+            ]
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction()
+    }
+
     render = () => {
         return (
-            <Form style={{marginBottom: marginBottom}} key={this.viewObject._id.toString() + '_4'}>
+            <Form style={{marginBottom: marginBottom,
+                          display: (this.state.isHidden)? 'none' : undefined}}
+                  key={this.viewObject._id.toString() + '_4'}>
                 {this.renderChildren()}
             </Form>
         )
@@ -86,13 +109,14 @@ class TabsViewReport_ extends ViewContainer {
 class ComponentElement_ extends ViewContainer {
     render = () => {
         if (this.props.viewObject.eClass.get('name') === 'ComponentElement' && this.props.viewObject.get('component')) {
-            const componentClassName = this.props.viewObject.get('component').get('componentClassName')
+            const componentClassName = this.props.viewObject.get('component').get('componentClassName');
             return<UserComponent key={this.viewObject._id} {...this.props} componentClassName={componentClassName}/>
         } else return <div>Not found</div>
     }
 }
 
 class Row_ extends ViewContainer {
+
     render = () => {
         const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}`;
         const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}`;
@@ -110,7 +134,7 @@ class Row_ extends ViewContainer {
                     marginTop: marginTop,
                     marginLeft: marginLeft,
                     borderBottom: borderBottom,
-                    height: height
+                    height: height,
                 }}
                 gutter={[this.props.viewObject.get('horizontalGutter') || 0, this.props.viewObject.get('verticalGutter') || 0]}
             >
@@ -128,7 +152,7 @@ export class Href_ extends ViewContainer {
                       type:eventType.click,
                       itemName:this.props.viewObject.get('name'),
                       //this.props.getValue props из ag-grid
-                      value:(this.props.getValue)? this.props.getValue(): undefined
+                      value:(this.props.getValue)? (this.props.viewObject.get('returnValueType') === 'object') ? this.props.data: this.props.getValue(): undefined
                       })
                   }}>
             {this.props.viewObject.get('label')}
@@ -183,8 +207,8 @@ export class Button_ extends ViewContainer {
             this.props.context.notifyAllEventHandlers({
                 type:eventType.click,
                 itemName:this.props.viewObject.get('name'),
-                //this.props.getValue props из ag-grid
-                value:(this.props.getValue)? this.props.getValue(): undefined});
+                //this.props.getValue, this.props.getData props из ag-grid
+                value:(this.props.getValue)? (this.props.viewObject.get('returnValueType') === 'object') ? this.props.data: this.props.getValue(): undefined});
         }}>
             {(label)? label: t('submit')}
         </Button>
@@ -219,7 +243,7 @@ class Select_ extends ViewContainer {
             params: [],
             currentValue: "",
             datasetComponent: undefined,
-            isVisible: true,
+            isHidden: false,
             isDisabled: this.props.viewObject.get('disabled'),
         };
     }
@@ -239,10 +263,6 @@ class Select_ extends ViewContainer {
     }
 
     onChange = (currentValue: string|string[]) => {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
-        });
         if (typeof currentValue === 'string') {
             this.selected = currentValue
         } else if (Array.isArray(currentValue)) {
@@ -254,13 +274,20 @@ class Select_ extends ViewContainer {
             this.selected = temp.join(",");
             currentValue = currentValue.join(",");
         }
-        this.props.viewObject.set('value', currentValue);
+        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        });
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}));
+        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        })*/);
     };
 
     componentDidMount(): void {
@@ -290,8 +317,8 @@ class Select_ extends ViewContainer {
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
             ]
@@ -301,6 +328,7 @@ class Select_ extends ViewContainer {
     componentWillUnmount(): void {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
+        this.props.context.removeEventAction();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -353,7 +381,7 @@ class Select_ extends ViewContainer {
                         showSearch={this.props.viewObject.get('showSearch')}
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
-                        style={{width: width, display: (this.state.isVisible)? undefined: 'none'}}
+                        style={{width: width, display: (this.state.isHidden)? 'none' : undefined}}
                         defaultValue={this.props.viewObject.get('value') || undefined}
                         value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
@@ -390,7 +418,7 @@ class DatePicker_ extends ViewContainer {
         this.state = {
             pickedDate: moment(),
             format: this.props.viewObject.get('format') || "YYYY-MM-DD",
-            isVisible: true,
+            isHidden: false,
             isDisabled: this.props.viewObject.get('disabled') || false
         };
     }
@@ -420,8 +448,8 @@ class DatePicker_ extends ViewContainer {
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
             ]
@@ -431,21 +459,25 @@ class DatePicker_ extends ViewContainer {
     componentWillUnmount(): void {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
+        this.props.context.removeEventAction();
     }
 
     onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
+        this.props.viewObject.set('format', this.state.format);
         this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
-        this.props.viewObject.set('value', currentValue);
-        this.props.viewObject.set('format', this.state.format);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        })*/)
     };
 
     render = () => {
@@ -457,7 +489,7 @@ class DatePicker_ extends ViewContainer {
                     disabled={this.state.isDisabled}
                     allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
-                    style={{width: this.props.viewObject.get('width') || "200px", display: (this.state.isVisible)? undefined: 'none'}}
+                    style={{width: this.props.viewObject.get('width') || "200px", display: (this.state.isHidden) ? 'none' : undefined}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -505,7 +537,7 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
-                {actionType: actionType.refresh,callback: this.execute.bind(this)}
+                {actionType: actionType.refresh,callback: this.execute.bind(this)},
                 ]
         });
         if (this.props.viewObject.get('executeOnStartup')) {
@@ -529,6 +561,10 @@ class GroovyCommand_ extends ViewContainer {
                 body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
                 this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+                this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name')
+                });
             })
         } else if (commandType === "Static") {
             API.instance().fetchJson('/script/static/'+this.props.viewObject.get('gitStaticClass')+'/'+this.props.viewObject.get('gitStaticMethod'), {
@@ -539,6 +575,10 @@ class GroovyCommand_ extends ViewContainer {
                 body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
                 this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+                this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name')
+                });
             })
         } else {
             API.instance().fetchJson('/script/eval', {
@@ -549,6 +589,10 @@ class GroovyCommand_ extends ViewContainer {
                 body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
             }).then(res => {
                 this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
+                this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name')
+                });
             })
         }
     };
@@ -567,18 +611,21 @@ class ValueHolder_ extends ViewContainer {
         };
     }
 
-    onChange = (currentValue: string) => {
+    onChange = (currentValue?: string) => {
+        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue );
         this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
-        this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        })*/)
     };
 
     componentDidMount(): void {
@@ -592,6 +639,10 @@ class ValueHolder_ extends ViewContainer {
                 {actionType: actionType.setValue,callback: this.onChange.bind(this)}
             ]
         });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -621,7 +672,7 @@ class Input_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isVisible: true,
+            isHidden: false,
             isDisabled: false
         };
     }
@@ -634,26 +685,33 @@ class Input_ extends ViewContainer {
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
             ]
         });
     }
 
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
+
     onChange = (currentValue: string) => {
+        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
         this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
         });
-        this.props.viewObject.set('value', currentValue);
         const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
         const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
             .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
             .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
             .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemName:this.props.viewObject.get('name')
+        })*/)
     };
 
     render = () => {
@@ -664,7 +722,7 @@ class Input_ extends ViewContainer {
                     key={this.viewObject._id}
                     style={{marginBottom: marginBottom}}>
                     <InputNumber
-                        style={{width: width, display: (this.state.isVisible) ? undefined : 'none'}}
+                        style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={this.state.isDisabled}
                         min={this.props.viewObject.get('minValue') || 1}
                         max={this.props.viewObject.get('maxValue') || 99}
@@ -699,7 +757,8 @@ class Typography_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isVisible: true,
+            isHidden: false,
+            label: "",
         };
     }
 
@@ -713,8 +772,9 @@ class Typography_ extends ViewContainer {
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.setValue,callback: this.onChange.bind(this)},
             ]
         });
     }
@@ -722,6 +782,7 @@ class Typography_ extends ViewContainer {
     componentWillUnmount(): void {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
+        this.props.context.removeEventAction();
     }
 
     private getDocxData(): docxExportObject {
@@ -739,17 +800,10 @@ class Typography_ extends ViewContainer {
     }
 
     onChange = (str: string) => {
-        this.props.context.notifyAllEventHandlers({
+        this.setState({label: str},()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
-        });
-        this.props.viewObject.set('name', str);
-        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
-        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+        }));
     };
 
     render = () => {
@@ -772,7 +826,7 @@ class Typography_ extends ViewContainer {
                     marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
                     fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
                     textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
-                    height: drawObject.get('height') === null ? '0px' : `${drawObject.get('height')}`,
+                    height: drawObject.get('height') === null ? '70px' : `${drawObject.get('height')}`,
                     fontWeight: drawObject.get('fontWeight') || "inherit",
                     textAlign: drawObject.get('textAlign') || "left",
                     color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
@@ -786,7 +840,7 @@ class Typography_ extends ViewContainer {
                             : undefined,
                     WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
                     WebkitTextFillColor: gradients !== "" ? "transparent" : "unset",
-                    display: (this.state.isVisible) ? undefined : 'none'
+                    display: (this.state.isHidden) ? 'none' : undefined
                 }}
                 copyable={drawObject.get('buttonCopyable')}
                 editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
@@ -798,7 +852,7 @@ class Typography_ extends ViewContainer {
                 underline={drawObject.get('underlineStyle')}
                 strong={drawObject.get('strongStyle')}
             >
-                {this.props.viewObject.get('name')}
+                {(this.state.label) ? this.state.label : this.props.viewObject.get('name')}
             </Paragraph>
         )
     }
@@ -811,7 +865,7 @@ class EventHandler_ extends ViewContainer {
         };
     }
 
-    handleEvent(value:string|undefined) {
+    handleEvent(value:any) {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
             const eventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                 return el.get('triggerItem')
@@ -820,7 +874,15 @@ class EventHandler_ extends ViewContainer {
             if (eventAction) {
                 eventAction.actions.forEach((action:{actionType: actionType, callback: (value:string|undefined) => void}) => {
                     if (action.actionType === (el.get('action') || actionType.refresh)) {
-                        action.callback(value)
+                        if (el.get('valueObjectKey') && value === Object(value)) {
+                            (value[el.get('valueObjectKey')])
+                                ? action.callback(value[el.get('valueObjectKey')])
+                                : this.props.context.notification("Event handler warning",
+                                `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
+                                "warning")
+                        } else {
+                            action.callback(value)
+                        }
                     }
                 })
             } else {
@@ -854,7 +916,7 @@ class Drawer_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isVisible: this.viewObject.get('isVisible'),
+            isHidden: this.viewObject.get('isHidden') || false,
         };
     }
 
@@ -866,10 +928,14 @@ class Drawer_ extends ViewContainer {
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isVisible:true})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isVisible:false})},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
             ]
         });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction()
     }
 
     render = () => {
@@ -878,8 +944,8 @@ class Drawer_ extends ViewContainer {
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
-                visible={this.state.isVisible}
-                onClose={()=>{this.setState({isVisible:false})}}
+                visible={!this.state.isHidden}
+                onClose={()=>{this.setState({isHidden:true})}}
                 mask={false}
                 maskClosable={false}
                 getContainer={false}

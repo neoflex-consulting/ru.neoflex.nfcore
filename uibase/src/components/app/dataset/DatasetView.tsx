@@ -426,7 +426,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        /*const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));*/
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -447,11 +447,11 @@ class DatasetView extends React.Component<any, State> {
                 this.getAllDatasetComponents(false)
             }
         }
-        if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
+        /*if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
             this.setState({
                 queryParams: newQueryParams
             },()=>this.refresh())
-        }
+        }*/
     }
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
@@ -513,9 +513,10 @@ class DatasetView extends React.Component<any, State> {
     private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
         this.props.context.runQuery(resource
-            , this.state.queryParams
+            , newQueryParams
             , filterParams.filter((f: any) => f.enable)
             ,[]
             , sortParams.filter((f: any) => f.enable)
@@ -526,7 +527,7 @@ class DatasetView extends React.Component<any, State> {
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
-                        , this.state.queryParams
+                        , newQueryParams
                         , filterParams.filter((f: any) => f.enable)
                         , aggregationParams.filter((f: any) => f.enable)
                         , sortParams.filter((f: any) => f.enable)
