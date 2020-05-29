@@ -1,7 +1,7 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, DatePicker, Form, Input, InputNumber, Row, Select, Tabs, Typography, Drawer} from 'antd';
+import {Button, Col, DatePicker, Drawer, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
@@ -17,7 +17,7 @@ import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
-import {eventType, actionType, positionEnum} from "./utils/consts";
+import {actionType, eventType, positionEnum} from "./utils/consts";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -537,7 +537,7 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
-                {actionType: actionType.refresh,callback: this.execute.bind(this)},
+                {actionType: actionType.execute,callback: this.execute.bind(this)},
                 ]
         });
         if (this.props.viewObject.get('executeOnStartup')) {
@@ -869,11 +869,12 @@ class EventHandler_ extends ViewContainer {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
             const eventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                 return el.get('triggerItem')
-                    && action.name === el.get('triggerItem').get('name')
+                    && (action.name === el.get('triggerItem').get('name')
+                    || el.get('action') === actionType.showMessage)
             });
             if (eventAction) {
                 eventAction.actions.forEach((action:{actionType: actionType, callback: (value:string|undefined) => void}) => {
-                    if (action.actionType === (el.get('action') || actionType.refresh)) {
+                    if (action.actionType === (el.get('action') || actionType.execute) && action.actionType !== actionType.showMessage) {
                         if (el.get('valueObjectKey') && value === Object(value)) {
                             (value[el.get('valueObjectKey')])
                                 ? action.callback(value[el.get('valueObjectKey')])
@@ -884,7 +885,12 @@ class EventHandler_ extends ViewContainer {
                             action.callback(value)
                         }
                     }
-                })
+                });
+                if (el.get('action')  === actionType.showMessage) {
+                    this.props.context.notification(el.get('triggerItem').get('header'),
+                        el.get('triggerItem').get('message'),
+                        el.get('triggerItem').get('messageType')||"success")
+                }
             } else {
                 this.props.context.notification("Event handler warning",
                     `Action ${el.get('action')} not supported for ${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')})`,

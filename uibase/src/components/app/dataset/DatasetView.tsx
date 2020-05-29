@@ -568,7 +568,7 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
-                {actionType: actionType.refresh,callback: this.refresh.bind(this)}
+                {actionType: actionType.execute,callback: this.refresh.bind(this)}
             ]
         });
     }
