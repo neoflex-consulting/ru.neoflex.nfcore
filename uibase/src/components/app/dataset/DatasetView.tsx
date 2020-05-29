@@ -2,7 +2,7 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Modal, Select} from 'antd';
+import {Button, Drawer, Modal, Select, Menu, Dropdown} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -17,9 +17,10 @@ import DrawerDiagram from "./DrawerDiagram";
 import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
+import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-
+import {actionType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -37,8 +38,10 @@ import printIcon from "../../../icons/printIcon.svg";
 import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
+import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {actionType} from "../../../utils/consts";
+
+
 
 const { Option, OptGroup } = Select;
 
@@ -92,6 +95,7 @@ interface State {
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
+    aggregatesGroupsMenuVisible: boolean;
     sortsMenuVisible: boolean;
     calculationsMenuVisible: boolean;
     diagramAddMenuVisible: boolean;
@@ -142,6 +146,7 @@ class DatasetView extends React.Component<any, State> {
             filtersMenuVisible: false,
             fullScreenOn: false,
             aggregatesMenuVisible: false,
+            aggregatesGroupsMenuVisible: false,
             sortsMenuVisible: false,
             diagramAddMenuVisible: false,
             diagramEditMenuVisible: false,
@@ -154,7 +159,7 @@ class DatasetView extends React.Component<any, State> {
             allAxisXPosition: [],
             allAxisYPosition: [],
             allLegendPosition: [],
-            currentTheme: this.props.viewObject.get('theme') || 'material',
+            currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
         }
@@ -421,7 +426,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        /*const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));*/
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -442,11 +447,11 @@ class DatasetView extends React.Component<any, State> {
                 this.getAllDatasetComponents(false)
             }
         }
-        if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
+        /*if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
             this.setState({
                 queryParams: newQueryParams
             },()=>this.refresh())
-        }
+        }*/
     }
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
@@ -508,9 +513,10 @@ class DatasetView extends React.Component<any, State> {
     private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
 
         this.props.context.runQuery(resource
-            , this.state.queryParams
+            , newQueryParams
             , filterParams.filter((f: any) => f.enable)
             ,[]
             , sortParams.filter((f: any) => f.enable)
@@ -521,7 +527,7 @@ class DatasetView extends React.Component<any, State> {
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
-                        , this.state.queryParams
+                        , newQueryParams
                         , filterParams.filter((f: any) => f.enable)
                         , aggregationParams.filter((f: any) => f.enable)
                         , sortParams.filter((f: any) => f.enable)
@@ -612,7 +618,8 @@ class DatasetView extends React.Component<any, State> {
     handleDrawerVisibility = (p: paramType, v:boolean) => {
         this.setState({
             filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? v : false
-            , aggregatesMenuVisible: (p === paramType.aggregate || p === paramType.group) ? v : false
+            , aggregatesGroupsMenuVisible : (p === paramType.group) ? v : false
+            , aggregatesMenuVisible: (p === paramType.aggregate) ? v : false
             , sortsMenuVisible: (p === paramType.sort) ? v : false
             , calculationsMenuVisible: (p === paramType.calculations) ? v : false
             , diagramAddMenuVisible: (p === paramType.diagramsAdd) ? v : false
@@ -709,8 +716,36 @@ class DatasetView extends React.Component<any, State> {
             , newDiagrams);
     };
 
+    onActionMenu(e : any) {
+        if (e.key === 'exportToDocx') {
+            handleExportDocx(this.props.context.getDocxHandlers()).then(blob => {
+                saveAs(new Blob([blob]), "example.docx");
+                console.log("Document created successfully");
+            });
+        }
+        if (e.key === 'exportToExcel') {
+            handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
+                    saveAs(new Blob([blob]), 'example.xlsx');
+                    console.log("Document created successfully");
+                }
+            );
+        }
+    }
+
     getGridPanel = () => {
         const { t } = this.props;
+        const menu = (<Menu
+            key='actionMenu'
+            onClick={(e: any) => this.onActionMenu(e)}
+            style={{width: '150px'}}
+        >
+            <Menu.Item key='exportToDocx'>
+                exportToDocx
+            </Menu.Item>
+            <Menu.Item key='exportToExcel'>
+                exportToExcel
+            </Menu.Item>
+        </Menu>)
         return <div>
             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
@@ -744,6 +779,13 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
             </Button>
+            <Button title={t('aggregationGroups')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
+            </Button>
+
+
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
@@ -822,17 +864,14 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{
-                        handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
-                                saveAs(new Blob([blob]), 'example.xlsx');
-                                console.log("Document created successfully");
-                            }
-                        );
-                    }}
-            >
-                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-            </Button>
+
+            <Dropdown overlay={menu} placement="bottomLeft">
+                <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
+                    <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+                </Button>
+            </Dropdown>
+
+
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
             >
@@ -1094,24 +1133,37 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerAggregate/>
                     }
-                    {
-                        this.state.serverGroupBy
-                            ?
-                            <ServerGroupBy
-                                {...this.props}
-                                parametersArray={this.state.serverGroupBy}
-                                columnDefs={this.state.columnDefs}
-                                allAggregates={this.state.allAggregates}
-                                onChangeParameters={this.onChangeParams}
-                                saveChanges={this.changeDatasetViewState}
-                                isVisible={this.state.aggregatesMenuVisible}
-                                componentType={paramType.group}
-                            />
-                            :
-                            <ServerGroupBy/>
-                    }
                 </Drawer>
                     </div>
+                <div id="aggregationGroupsButton">
+                    <Drawer
+                        getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
+                        placement='right'
+                        title={t('aggregations')}
+                        width={'700px'}
+                        visible={this.state.aggregatesGroupsMenuVisible}
+                        onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
+                        mask={false}
+                        maskClosable={false}
+                    >
+                        {
+                            this.state.serverGroupBy
+                                ?
+                                <ServerGroupBy
+                                    {...this.props}
+                                    parametersArray={this.state.serverGroupBy}
+                                    columnDefs={this.state.columnDefs}
+                                    allAggregates={this.state.allAggregates}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.aggregatesGroupsMenuVisible}
+                                    componentType={paramType.group}
+                                />
+                                :
+                                <ServerGroupBy/>
+                        }
+                    </Drawer>
+                </div>
                 <div id="sortButton">
                 <Drawer
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
