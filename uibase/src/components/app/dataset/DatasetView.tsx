@@ -20,7 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-
+import {actionType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -38,8 +38,9 @@ import printIcon from "../../../icons/printIcon.svg";
 import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import resetIcon from "../../../icons/resetIcon.svg";
 import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
+import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {actionType} from "../../../utils/consts";
+
 
 
 const { Option, OptGroup } = Select;
@@ -94,6 +95,7 @@ interface State {
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
+    aggregatesGroupsMenuVisible: boolean;
     sortsMenuVisible: boolean;
     calculationsMenuVisible: boolean;
     diagramAddMenuVisible: boolean;
@@ -144,6 +146,7 @@ class DatasetView extends React.Component<any, State> {
             filtersMenuVisible: false,
             fullScreenOn: false,
             aggregatesMenuVisible: false,
+            aggregatesGroupsMenuVisible: false,
             sortsMenuVisible: false,
             diagramAddMenuVisible: false,
             diagramEditMenuVisible: false,
@@ -156,7 +159,7 @@ class DatasetView extends React.Component<any, State> {
             allAxisXPosition: [],
             allAxisYPosition: [],
             allLegendPosition: [],
-            currentTheme: this.props.viewObject.get('theme') || 'material',
+            currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
         }
@@ -615,7 +618,8 @@ class DatasetView extends React.Component<any, State> {
     handleDrawerVisibility = (p: paramType, v:boolean) => {
         this.setState({
             filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? v : false
-            , aggregatesMenuVisible: (p === paramType.aggregate || p === paramType.group) ? v : false
+            , aggregatesGroupsMenuVisible : (p === paramType.group) ? v : false
+            , aggregatesMenuVisible: (p === paramType.aggregate) ? v : false
             , sortsMenuVisible: (p === paramType.sort) ? v : false
             , calculationsMenuVisible: (p === paramType.calculations) ? v : false
             , diagramAddMenuVisible: (p === paramType.diagramsAdd) ? v : false
@@ -775,6 +779,13 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
             </Button>
+            <Button title={t('aggregationGroups')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
+            </Button>
+
+
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
@@ -1122,24 +1133,37 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerAggregate/>
                     }
-                    {
-                        this.state.serverGroupBy
-                            ?
-                            <ServerGroupBy
-                                {...this.props}
-                                parametersArray={this.state.serverGroupBy}
-                                columnDefs={this.state.columnDefs}
-                                allAggregates={this.state.allAggregates}
-                                onChangeParameters={this.onChangeParams}
-                                saveChanges={this.changeDatasetViewState}
-                                isVisible={this.state.aggregatesMenuVisible}
-                                componentType={paramType.group}
-                            />
-                            :
-                            <ServerGroupBy/>
-                    }
                 </Drawer>
                     </div>
+                <div id="aggregationGroupsButton">
+                    <Drawer
+                        getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
+                        placement='right'
+                        title={t('aggregations')}
+                        width={'700px'}
+                        visible={this.state.aggregatesGroupsMenuVisible}
+                        onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
+                        mask={false}
+                        maskClosable={false}
+                    >
+                        {
+                            this.state.serverGroupBy
+                                ?
+                                <ServerGroupBy
+                                    {...this.props}
+                                    parametersArray={this.state.serverGroupBy}
+                                    columnDefs={this.state.columnDefs}
+                                    allAggregates={this.state.allAggregates}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.aggregatesGroupsMenuVisible}
+                                    componentType={paramType.group}
+                                />
+                                :
+                                <ServerGroupBy/>
+                        }
+                    </Drawer>
+                </div>
                 <div id="sortButton">
                 <Drawer
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
