@@ -2,7 +2,7 @@ import React from "react";
 import '../../../styles/Calendar.css';
 import {Button, Checkbox, Col, Row} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {NXButton} from "../../../nx-design";
+import {NXButton, NXCheckbox, NXAlert} from "../../../nx-design";
 
 interface Props {
     notificationStatus: Object[];
@@ -48,13 +48,13 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
                         .map((c: any) =>
                             <Row style={{marginBottom: '15px'}}>
                                 <Col span={2}>
-                                    <Checkbox
+                                    <NXCheckbox
                                         defaultChecked={c['enable']}
                                         onChange={(e: any) => {
                                             const event = JSON.stringify({enable: e.target.checked, name: c['name'], color: c['color']});
                                             this.handleChange(event)
                                         }}>
-                                    </Checkbox>
+                                    </NXCheckbox>
                                 </Col>
                                 <Col span={4}>
 
