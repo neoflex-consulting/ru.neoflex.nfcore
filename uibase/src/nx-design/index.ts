@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {Typography, Button, Input, DatePicker} from 'antd'
+import {Typography, Button, Input, DatePicker, Checkbox} from 'antd'
 
 const NXTypography = {
     Text: styled(Typography.Text)`
@@ -10,47 +10,51 @@ const NXTypography = {
 `
 }
 
+const NXCheckbox = styled(Checkbox)`
+    .span {background-color: #424D78;}
+`
+
+
+
 const NXButton = styled(Button)`
     background: ${(props) => (props.primary ? '#424D78' 
-    : props.secondary ? 'white' 
-    : props.disabled ? "#B3B3B3"
+    : props.disabled ? '#B3B3B3'
+    : '#FFFFFF')};
+    color: ${(props) => (props.primary || props.disabled ? '#FFFFFF'
     : '#424D78')};
-    color: ${(props) => (props.primary ? 'white' 
-    : props.secondary ? '#424D78'
-    : props.disabled ? 'white'
-    : 'white')};
     font-size: 12px;
     line-height: 14px;
     border-radius: 4px;
-    border: 1px solid #293468;
     padding: 9px 32px;
     height: 32px;
     width: auto;
     text-align: center;
+    border: ${(props) => (props.primary ? 'none'
+    : props.disabled ? 'none'
+        : '1px solid #424D78')};
     
     :hover {
-    background: ${(props) => (props.primary ? '#424D78'
-    : props.secondary ? 'white'
+    background: ${(props) => (props.primary ? '#2A356C'
     : props.disabled ? "#B3B3B3"
-    : '#424D78')};
+    : '#FFFFFF')};
     color: ${(props) => (props.primary ? 'white'
-    : props.secondary ? '#424D78'
     : props.disabled ? 'white'
-    : 'white')};
-    border: 1px solid #293468;
-    box-shadow: 0px 0px 3px black;
+    : '#171D45')};
+    border: ${(props) => (props.primary ? 'none'
+    : props.disabled ? 'none'
+        : '1px solid #171D45')};
     }
     
     :focus {
     background: ${(props) => (props.primary ? '#424D78'
-    : props.secondary ? 'white'
         : props.disabled ? "#B3B3B3"
-            : '#424D78')};
+            : '#FFF8E0')};
     color: ${(props) => (props.primary ? 'white'
-    : props.secondary ? '#424D78'
     : props.disabled ? 'white'
-    : 'white')};
-    border: 1px solid #293468;
+    : '#090B1F')};
+    border: ${(props) => (props.primary ? 'none'
+    : props.disabled ? 'none'
+        : '1px solid #FFCC66')};
     }
 `
 
@@ -78,4 +82,4 @@ const NXDatePicker = styled(DatePicker)`
 `
 
 
-export {NXButton, NXInput, NXDatePicker, NXTypography}
+export {NXButton, NXInput, NXDatePicker, NXTypography, NXCheckbox}
