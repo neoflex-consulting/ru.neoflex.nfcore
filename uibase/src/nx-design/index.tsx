@@ -1,4 +1,3 @@
-import React, {Component} from 'react';
 import styled from 'styled-components';
 import {Typography, Button, Input, DatePicker, Checkbox, Radio, Select, Alert} from 'antd'
 
