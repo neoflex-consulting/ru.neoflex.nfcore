@@ -39,11 +39,12 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String loadAllColumns() {
-        Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
-        ResultSet resultSet = getResultSet(jdbcConnection, false)
         def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
                 .execute().resourceSet
         if (!resource.resources.empty) {
+            Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
+            ResultSet resultSet = getResultSet(jdbcConnection, false)
+
             def jdbcDatasetRef = Context.current.store.getRef(resource.resources.get(0))
             def jdbcDataset = resource.resources.get(0).contents.get(0) as JdbcDataset
             def columnCount = resultSet.metaData.columnCount

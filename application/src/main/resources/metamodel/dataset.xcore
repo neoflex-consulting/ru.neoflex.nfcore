@@ -6,6 +6,7 @@
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
 package ru.neoflex.nfcore.dataset
+import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
@@ -14,8 +15,6 @@ import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.application.Typography
 import ru.neoflex.nfcore.application.GridComponent
-
-
 
 /*JdbcDriver*/
 @Ecore(constraints="IsValid")
@@ -40,8 +39,6 @@ class JdbcConnection {
 abstract class Dataset {
     QName name
     op JSON deleteAllColumns()
-    op JSON loadAllColumns()
-    op JSON runQueryDataset()
     contains DatasetColumn[] datasetColumn
 }
 
@@ -53,10 +50,16 @@ class JdbcDataset extends Dataset {
     Text schemaName
     Text tableName
     op JSON showAllTables()
+    op JSON loadAllColumns()
+    op JSON runQueryDataset()
+}
+
+class MetaDataset extends Dataset {
+    refers EClass metaEClass
+    op JSON loadAllColumns()
 }
 
 class Pivot {
-
 }
 
 class Diagram {

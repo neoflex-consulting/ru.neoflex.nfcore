@@ -374,7 +374,12 @@ class EcoreApp extends React.Component<any, State> {
                             a.eContents()[0].get('name')
                         );
                         this.setState({applicationNames, applications});
-                        this.startPageSelection(applicationNames[0])
+                        if (applicationNames.length !== 0) {
+                            this.startPageSelection(applicationNames[0])
+                        }
+                        else {
+                            this.notification("Application", "Not found","info")
+                        }
                     })
             }
         })
