@@ -370,6 +370,7 @@ div .body {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border: none;
+    line-height: 28px;
 }
 
 .notification-btn Button:hover{

@@ -96,7 +96,11 @@
     "@storybook/preset-create-react-app": "^3.0.0",
     "@storybook/preset-typescript": "^3.0.0",
     "@storybook/react": "^5.3.19",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-import": "^1.13.0",
+    "file-loader": "^6.0.0",
     "fork-ts-checker-webpack-plugin": "^4.1.6",
+    "less-loader": "^6.1.0",
     "ts-loader": "^7.0.5"
   }
 }
