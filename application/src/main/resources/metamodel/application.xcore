@@ -143,7 +143,6 @@ abstract class CommandElement {
 class DatasetView extends ViewElement, CommandElement, DynamicActionElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
-    boolean showUniqRow //Показывать только уникальные строки
 }
 
 abstract class ContextWriter {

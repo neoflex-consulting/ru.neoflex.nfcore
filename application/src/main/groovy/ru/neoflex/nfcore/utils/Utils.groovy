@@ -41,6 +41,12 @@ class Utils {
         return resources.resources.get(0).contents.get(0)
     }
 
+    static def findAllEClass(EClass eClass) {
+        def resources = DocFinder.create(Context.current.store, eClass)
+                .execute().resourceSet
+        return resources.resources
+    }
+
     static def findUserComponent(EClass eClass, String name, String componentClassName) {
         def resources = DocFinder.create(Context.current.store, eClass, [name: name])
                 .execute().resourceSet

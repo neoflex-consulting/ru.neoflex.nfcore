@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
@@ -10,6 +11,7 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
+import ru.neoflex.nfcore.utils.Utils
 
 import java.sql.Connection
 import java.sql.Date
@@ -87,11 +89,58 @@ class DatasetComponentExt extends DatasetComponentImpl {
     @Override
     String runQuery(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
         if (column) {
-            return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression))
+            def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
+                    .execute().resourceSet
+            if (!resource.resources.empty && resource.resources[0].contents[0].dataset.metaEClass != null) {
+                EClass eClass = resource.resources[0].contents[0].dataset.metaEClass
+                return JsonOutput.toJson(getMetaDataRaw(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, eClass))
+            }
+            else {
+                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression))
+            }
         }
         else {
             throw new IllegalArgumentException("Please created columns in this object.")
         }
+    }
+
+    List<Map> getMetaDataRaw(
+            EList<QueryParameter> parameters,
+            EList<QueryFilterDTO> filters,
+            EList<QueryConditionDTO> aggregations,
+            EList<QueryConditionDTO> sorts,
+            EList<QueryConditionDTO> groupBy,
+            EList<QueryConditionDTO> calculatedExpression,
+            EClass eClass) {
+
+        def temp = Utils.findAllEClass(eClass)
+
+        def rowData = []
+
+            def queryColumns = []
+            def serverFilters = []
+            def serverAggregations = []
+            def serverGroupByAggregation = []
+            def serverGroupBy = []
+            def serverSorts = []
+            def serverCalculatedExpression = []
+
+        for (int i = 0; i < temp.size(); i++) {
+
+            def map = [:]
+            for (int j = 0; j <= column.size() - 1; ++j) {
+                def object = temp.get(0).contents.get(0)["${column[j].name}"]
+                if ( object instanceof List ) {
+                    object = temp.get(0).contents.get(0)["${column[j].name}"]
+                    map["${column[j].name}"] = (object == null ? null : object.toString())
+                }
+                else {
+                    map["${column[j].name}"] = (object == null ? null : object.toString())
+                }
+            }
+            rowData.add(map)
+        }
+        return rowData
     }
 
     List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
