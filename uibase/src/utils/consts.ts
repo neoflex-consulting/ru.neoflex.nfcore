@@ -66,13 +66,14 @@ const colorScheme = [
 ];
 
 enum actionType {
-    refresh="refresh",
+    execute="execute",
     show="show",
     hide="hide",
     enable="enable",
     disable="disable",
     clear="clear",
-    setValue="setValue"
+    setValue="setValue",
+    showMessage="showMessage"
 }
 
 enum eventType {

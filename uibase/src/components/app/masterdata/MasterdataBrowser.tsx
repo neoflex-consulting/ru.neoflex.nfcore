@@ -43,6 +43,9 @@ class MetadataBrowser extends React.Component<any & WithTranslation, any> {
                         notFoundContent={t('notfound')}
                         allowClear={true}
                         showSearch={true}
+                        filterOption={(input, option) => {
+                            return (option.props.children as string).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }}
                         style={{width: '270px'}}
                         autoFocus
                         placeholder="EntityType">

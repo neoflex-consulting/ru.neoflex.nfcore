@@ -33,7 +33,7 @@ abstract class DynamicActionElement {
 }
 
 abstract class GridComponent {
-    gridComponentValueType returnValueType
+    GridComponentValueType returnValueType
 }
 
 @Ecore(constraints="IsValid")
@@ -352,6 +352,13 @@ class Href extends ViewElement, GridComponent, DynamicActionElement {
     String ref
 }
 
+class Message extends DynamicActionElement {
+    QName name
+    MessageType messageType
+    String header
+    String message
+}
+
 enum TextAlign {
     Left
     Center
@@ -406,13 +413,14 @@ enum GroovyCommandType {
 }
 
 enum Action {
-    refresh
+    execute
     show
     hide
     enable
     disable
     //clear
     setValue
+    showMessage
 }
 
 enum Event {
@@ -421,7 +429,15 @@ enum Event {
     componentLoad
 }
 
-enum gridComponentValueType {
+enum GridComponentValueType {
     string
     object
+}
+
+enum MessageType {
+    success,
+    error,
+    info,
+    warning,
+    open
 }
