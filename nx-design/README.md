@@ -7,11 +7,9 @@ Repository created for the purpose of helping to change components using Ant Des
 To start run the following commands:
 
 ```sh
-# clone this repository
-git clone https://github.com/davidsonsns/storybook-antd.git
 
 # enter in the folder
-cd storybook-antd
+cd nx-design
 
 # install the dependencies
 yarn
