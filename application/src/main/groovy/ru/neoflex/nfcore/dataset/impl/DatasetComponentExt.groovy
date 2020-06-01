@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.utils.Utils
 import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
+import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -420,13 +421,13 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         rowData.add(map)
                     }
                 } finally {
-                    rs.close()
+                    (rs) ? rs.close() : null
                 }
             } finally {
-                p.close()
+                (p) ? p.close() : null
             }
         } finally {
-            jdbcConnection.close()
+            (jdbcConnection) ? jdbcConnection.close() : null
         }
         return rowData
     }

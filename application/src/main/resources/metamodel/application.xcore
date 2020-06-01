@@ -33,7 +33,7 @@ abstract class DynamicActionElement {
 }
 
 abstract class GridComponent {
-
+    GridComponentValueType returnValueType
 }
 
 @Ecore(constraints="IsValid")
@@ -126,7 +126,8 @@ class FAIcon extends Icon {
 	String iconCode
 }
 
-class Form extends ViewContainer {
+class Form extends ViewContainer, DynamicActionElement {
+    boolean isHidden
 }
 
 class FormItem extends ViewContainer {
@@ -331,6 +332,7 @@ class ViewNode extends TreeNode {
 class EventAction {
     Action action
     refers DynamicActionElement triggerItem
+    String valueObjectKey
 }
 
 class EventHandler extends ViewElement {
@@ -340,13 +342,20 @@ class EventHandler extends ViewElement {
 }
 
 class Drawer extends ViewContainer, DynamicActionElement {
-    boolean isVisible
+    boolean isHidden
     TabPosition position
 }
 
 class Href extends ViewElement, GridComponent, DynamicActionElement {
     String label
     String ref
+}
+
+class Message extends DynamicActionElement {
+    QName name
+    MessageType messageType
+    String header
+    String message
 }
 
 enum TextAlign {
@@ -403,17 +412,31 @@ enum GroovyCommandType {
 }
 
 enum Action {
-    refresh
+    execute
     show
     hide
     enable
     disable
     //clear
     setValue
+    showMessage
 }
 
 enum Event {
     click
     change
     componentLoad
+}
+
+enum GridComponentValueType {
+    string
+    object
+}
+
+enum MessageType {
+    success,
+    error,
+    info,
+    warning,
+    open
 }
