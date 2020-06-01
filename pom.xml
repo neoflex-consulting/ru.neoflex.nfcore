@@ -25,6 +25,7 @@
         <module>uireport</module>
         <module>emf-orientdb</module>
         <module>masterdata</module>
+        <module>nx-design</module>
     </modules>
 
 </project>
