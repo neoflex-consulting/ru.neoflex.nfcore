@@ -8,7 +8,6 @@
 package ru.neoflex.nfcore.application
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EStructuralFeature
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.base.types.QName
@@ -101,10 +100,6 @@ class Day {
     String title
 }
 
-class ClassFeature extends FormItem {
-	refers EStructuralFeature eStructuralFeature
-}
-
 @GenModel(documentation="max span value = 24 in one row")
 class Column extends ViewContainer {
     String span = "24"
@@ -116,10 +111,6 @@ class Column extends ViewContainer {
 
 class ComponentElement extends ViewElement {
 	refers Component component
-}
-
-class EClassForm extends ViewContainer {
-	refers EClass aClass
 }
 
 class FAIcon extends Icon {
