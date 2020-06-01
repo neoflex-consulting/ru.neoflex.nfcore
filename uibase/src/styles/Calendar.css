@@ -386,25 +386,6 @@ div .body {
     font-size: 20px;
 }
 
-.ant-checkbox-checked .ant-checkbox-inner {
-    background-color: #27677c;
-    border: none;
-}
-
-.ant-checkbox-wrapper .ant-checkbox-inner,
-.ant-checkbox:hover .ant-checkbox-inner,
-.ant-checkbox-input:focus + .ant-checkbox-inner {
-    border: 2px solid grey;
-}
-
-.ant-checkbox-input:checked + .ant-checkbox-inner {
-    border: none;
-}
-
-.ant-checkbox-checked::after {
-    border: 1px solid #27677c
-}
-
 .ant-drawer-body .ant-col-17 {
     font-weight: 500;
 }
