@@ -34,6 +34,7 @@
         "eClass": "EClass",
         "filters": "Фильтры",
         "false": "ложь",
+        "filesystem": "Файлы",
         "itemname": "Название элемента",
         "language": "Язык",
         "legend": "Легенда",
