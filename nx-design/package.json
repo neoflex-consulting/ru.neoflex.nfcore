@@ -7,7 +7,6 @@
     "storybook": "start-storybook -p 9002 -c .storybook",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Davidson Nascimento <davidsonsns@gmail.com> https://github.com/davidsonsns",
   "license": "ISC",
   "dependencies": {
     "antd": "^3.2.0",

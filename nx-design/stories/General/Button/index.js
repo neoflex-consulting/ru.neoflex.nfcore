@@ -8,6 +8,7 @@ import Multiple from './Multiple';
 import Loading from './Loading';
 import Group from './Group';
 import Ghost from './Ghost';
+import NXButton from './NXButton'
 
 class ButtonPage extends Component {
   render() { 
@@ -22,6 +23,10 @@ class ButtonPage extends Component {
         </p>
 
         <h2 className="title">Exemples:</h2>
+
+        <section className="example">
+          <NXButton />
+        </section>
 
         <section className="example">
           <Type />
