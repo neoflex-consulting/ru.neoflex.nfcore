@@ -11,6 +11,9 @@ To start run the following commands:
 # enter in the folder
 cd nx-design
 
+# intall yarn
+npm install -g yarn
+
 # install the dependencies
 yarn
 
