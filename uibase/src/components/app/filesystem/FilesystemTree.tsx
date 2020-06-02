@@ -109,13 +109,19 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         var newCatalog = prompt("New catalog name", "NewCatalog")
         if (newCatalog) {
             console.log(newCatalog)
-            const key = this.state.key||""
-            const newKey = [...key.split("/"), newCatalog].join("/")
+            const key = this.state.key||"/"
+            const newKey = ["", ...key.slice(1).split("/"), newCatalog].join("/")
             const children = [...this.getChildren(this.state.treeData, key),
                 {key: newKey, title: newCatalog, isLeaf: false}]
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, children)
+                treeData: this.updateTreeData(this.state.treeData, key, children),
+                selectedKeys: [newKey],
+                key: newKey,
+                isLeaf: false
             })
+            if (this.props.onSelect) {
+                this.props.onSelect(newKey, false)
+            }
         }
     }
 
@@ -123,13 +129,19 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         var newFile = prompt("New file name", "test.groovy")
         if (newFile) {
             console.log(newFile)
-            const key = this.state.key||""
-            const newKey = [...key.split("/"), newFile].join("/")
+            const key = this.state.key||"/"
+            const newKey = ["", ...key.slice(1).split("/"), newFile].join("/")
             const children = [...this.getChildren(this.state.treeData, key),
                 {key: newKey, title: newFile, isLeaf: true}]
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, children)
+                treeData: this.updateTreeData(this.state.treeData, key, children),
+                selectedKeys: [newKey],
+                key: newKey,
+                isLeaf: true
             })
+            if (this.props.onSelect) {
+                this.props.onSelect(newKey, true)
+            }
         }
     }
 
@@ -143,7 +155,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                 },
 
             }).then(json=>{
-                const parent = (this.state.key||"").split("/").slice(0, -1).join("/")
+                const parent = ["", ...(this.state.key||"/").slice(1).split("/")].slice(0, -1).join("/") || "/"
                 this.setState({
                     treeData: this.updateTreeData(this.state.treeData, parent, json),
                     loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
