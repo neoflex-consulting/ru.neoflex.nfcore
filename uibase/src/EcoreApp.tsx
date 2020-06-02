@@ -334,20 +334,14 @@ class EcoreApp extends React.Component<any, State> {
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
 
-
-                //
-                // if (
-                //     path.length === 0 ||
-                //     path[path.length - 1].tree.length !== 0
-                //
-                //
-                // /*path[path.length - 1].tree !== undefined && p.tree !== undefined
-                //     && path[path.length - 1].tree[0] !== p.tree[0]*/
-                // ) {
-                //     path.push(p)
-                // }
-                //
-
+                const nextPath = path[path.length - 1];
+                if (
+                    nextPath.useParentReferenceTree === true &&
+                    nextPath.tree.length !== 0 &&
+                    path.length !== 1
+                ) {
+                    path.pop()
+                }
                 path.push(urlElement)
             } else {
                 path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
