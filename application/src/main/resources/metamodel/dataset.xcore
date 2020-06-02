@@ -87,7 +87,7 @@ class DatasetComponent {
      boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
-     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy, QueryConditionDTO[] calculatedExpression)
+     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryConditionDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
      contains QueryParameter[] serverParameters
      boolean useServerFilter
      //Состав серверного фильтра
