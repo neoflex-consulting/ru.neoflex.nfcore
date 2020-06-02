@@ -327,12 +327,27 @@ class EcoreApp extends React.Component<any, State> {
                 if (p.appModule === appModuleName) {splitPathFull.push(index)}
             });
             if (splitPathFull.length === 0) {
-                this.state.pathFull.forEach( (p:any) => {
-                    path.push(p)
+                this.state.pathFull.forEach( (p:any, index: any) => {
+                    path.push(p);
                 });
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
+
+
+                //
+                // if (
+                //     path.length === 0 ||
+                //     path[path.length - 1].tree.length !== 0
+                //
+                //
+                // /*path[path.length - 1].tree !== undefined && p.tree !== undefined
+                //     && path[path.length - 1].tree[0] !== p.tree[0]*/
+                // ) {
+                //     path.push(p)
+                // }
+                //
+
                 path.push(urlElement)
             } else {
                 path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
@@ -490,8 +505,8 @@ class EcoreApp extends React.Component<any, State> {
                             </Link>
                             <div className='header-menu'>
                                     <span style={{
-                                        fontVariantCaps: 'petite-caps',
-                                        fontSize: '18px',
+                                        textTransform: "capitalize",
+                                        fontSize: '15px',
                                         lineHeight: '39px'
                                     }}>
                                         <span>{principal.name}</span></span>
