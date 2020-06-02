@@ -203,12 +203,13 @@ public class SysController {
     }
 
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestBody(required = false) String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
             Path filePath = tx.getFileSystem().getRootPath().resolve(path);
             Path parent = filePath.getParent();
             Files.createDirectories(parent);
-            Files.write(filePath, text.getBytes("utf-8"));
+            byte[] bytes = text == null ? new byte[0] : text.getBytes("utf-8");
+            Files.write(filePath, bytes);
             tx.commit("Saving file " + path);
             return listPath(tx, parent.toString());
         });

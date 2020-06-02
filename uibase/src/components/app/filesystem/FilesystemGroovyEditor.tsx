@@ -36,7 +36,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         if (this.state.path) {
             API.instance().fetch("/system/fs/data?path=" + this.state.path)
                 .then(response => response.text())
-                .then(text => this.setState({text: text}))
+                .then(text => this.setState({text: text||""}))
         }
     }
 
