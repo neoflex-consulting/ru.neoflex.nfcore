@@ -92,7 +92,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (column) {
             def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                     .execute().resourceSet
-            if (!resource.resources.empty && resource.resources[0].contents[0].dataset.metaEClass != null) {
+            if (!resource.resources.empty &&
+                    resource.resources[0].contents[0].dataset.class.name != "ru.neoflex.nfcore.dataset.impl.JdbcDatasetExt"
+            ) {
                 EClass eClass = resource.resources[0].contents[0].dataset.metaEClass
                 return JsonOutput.toJson(getMetaDataRaw(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, eClass))
             }
