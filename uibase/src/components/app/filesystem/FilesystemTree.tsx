@@ -9,7 +9,7 @@ import {
 } from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCloudUploadAlt, faFile, faFolderPlus, faSyncAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCloudDownloadAlt, faCloudUploadAlt, faFile, faFolderPlus, faSyncAlt} from "@fortawesome/free-solid-svg-icons";
 import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 
 const {DirectoryTree} = Tree;
@@ -166,6 +166,11 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         })
     }
 
+    downloadFile = () => {
+        let filename = (this.state.key||"").split("/").pop();
+        API.instance().download("/system/fs/data?path=" + this.state.key, {}, filename)
+    }
+
     render() {
         const {t} = this.props
         return (
@@ -205,6 +210,10 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                                    }}
                             />
                         </label>
+                    </Button>
+                    <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
+                            disabled={!this.state.isLeaf === true} onClick={this.downloadFile}>
+                        <FontAwesomeIcon icon={faCloudDownloadAlt} size='lg' color="#7b7979"/>
                     </Button>
                     <Button title={t('delete')}
                             disabled={!this.state.key || this.state.key === "/"}

@@ -25,6 +25,7 @@
         "createdir": "Create directory",
         "createfile": "Create file",
         "upload": "Upload",
+        "download": "Download",
         "data": "Data",
         "datatype": "Data Type",
         "delete": "Delete",
