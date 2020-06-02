@@ -203,25 +203,25 @@ public class SysController {
     }
 
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestParam String name, @RequestBody String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
-            Path file = tx.getFileSystem().getRootPath().resolve(path);
-            Path parent = file.getParent();
+            Path parent = tx.getFileSystem().getRootPath().resolve(path);
+            Path filePath = parent.resolve(name);
             Files.createDirectories(parent);
-            Files.write(file, text.getBytes("utf-8"));
-            tx.commit("Saving file " + path);
+            Files.write(filePath, text.getBytes("utf-8"));
+            tx.commit("Saving file " + path + "/" + name);
             return listPath(tx, parent.toString());
         });
     }
 
     @PostMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestParam(value = "file") final MultipartFile file) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestParam String name, @RequestParam(value = "file") final MultipartFile file) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
             Path parent = tx.getFileSystem().getRootPath().resolve(path);
-            Path filePath = parent.resolve(file.getName());
+            Path filePath = parent.resolve(name);
             Files.createDirectories(parent);
             Files.copy(file.getInputStream(), filePath);
-            tx.commit("Saving file " + path + "/" + file.getName());
+            tx.commit("Saving file " + path + "/" + name);
             return listPath(tx, parent.toString());
         });
     }
