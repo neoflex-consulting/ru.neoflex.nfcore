@@ -9,7 +9,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowDown, faArrowUp, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import MasterdataLookup from "./MasterdataLookup";
 import * as _ from "lodash";
-import {NXInput, NXDatePicker, NXTypography} from '../../../nx-design';
 
 interface Props {
     entityType: EObject,
@@ -107,11 +106,11 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                                         }}>
                                     <FontAwesomeIcon icon={faMinus} size='sm' color="#7b7979"/>
                                 </Button>
-                                <NXTypography.Text editable={{
-                                    onChange: (newKey :any) => updateData({..._.omit(data, key), [newKey]: data[key]})
+                                <Typography.Text editable={{
+                                    onChange: newKey => updateData({..._.omit(data, key), [newKey]: data[key]})
                                 }} >
                                     {key}
-                                </NXTypography.Text>
+                                </Typography.Text>
                             </Col>
                             <Col span={16}>
                                 {this.renderValueEditor(key, valueType, data[key], dataNew => {
@@ -139,17 +138,17 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
             </Select>
         }
         if (typeName === 'STRING') {
-            return <NXInput.Input value={data} onChange={(value :any) => updateData(value.target.value)}/>
+            return <Input value={data} onChange={(value :any) => updateData(value.target.value)}/>
         }
         if (typeName === 'TEXT') {
-            return <NXInput.TextArea rows={3} value={data} onChange={(value :any) => updateData(value.target.value)}/>
+            return <Input.TextArea rows={3} value={data} onChange={(value :any) => updateData(value.target.value)}/>
         }
         if (typeName === 'DATE') {
-            return <NXDatePicker value={!data ? null : moment(data, 'YYYY-MM-DD HH:mm:ss')}
+            return <DatePicker value={!data ? null : moment(data, 'YYYY-MM-DD HH:mm:ss')}
                                onChange={(value:any) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={false}/>
         }
         if (typeName === 'DATETIME') {
-            return <NXDatePicker value={!data ? null : moment(data, 'YYYY-MM-DD HH:mm:ss')}
+            return <DatePicker value={!data ? null : moment(data, 'YYYY-MM-DD HH:mm:ss')}
                                onChange={(value:any) => updateData(value?.format('YYYY-MM-DD HH:mm:ss'))} showTime={true}/>
         }
         return this.renderJSONEditor(attributeType, data, updateData)
@@ -192,14 +191,14 @@ class MasterdataForm extends React.Component<Props & WithTranslation, any> {
                 {entityType.eClass.get('name') === 'EntityType' &&
                 <Divider orientation="left">{entityType.get('caption') || entityType.get('name')}</Divider>}
                 {data['@rid'] && <Row gutter={{xs: 8, sm: 16, md: 24, lg: 32}}>
-                    <Col span={4}><NXTypography.Text strong>{'@rid'}</NXTypography.Text></Col>
+                    <Col span={4}><Typography.Text strong>{'@rid'}</Typography.Text></Col>
                     <Col span={20}>{data['@rid']}</Col>
                 </Row>}
                 {getAllAttributes(entityType).map(attr =>
                     <Row style={{marginTop: '5px'}} gutter={{xs: 8, sm: 16, md: 24, lg: 32}} key={attr.get('name')}>
                         <Col span={4}>
                             {!['ArrayType', 'MapType'].includes(attr.get('attributeType').eClass.get('name')) &&
-                            <NXTypography.Text strong>{getCaption(attr)}</NXTypography.Text>}
+                            <Typography.Text strong>{getCaption(attr)}</Typography.Text>}
                         </Col>
                         <Col
                             span={20}>{this.renderValueEditor(getCaption(attr), attr.get('attributeType'), data[attr.get('name') as string], (data: any) => {

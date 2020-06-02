@@ -160,9 +160,9 @@ public class SysController {
     public ResponseEntity downloadFs(@RequestParam String path) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             Path resolved = tx.getFileSystem().getRootPath().resolve(path);
-            byte[] contents = Files.readAllBytes(resolved);
+            byte[] contents = Files.isRegularFile(resolved) ? Files.readAllBytes(resolved) : new byte[0];
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/zip");
+            //headers.set("Content-Type", "application/zip");
             headers.set("Content-Disposition", String.format("attachment; filename=\"%s\"", resolved.getFileName().toString()));
             return new ResponseEntity(new InputStreamResource(new ByteArrayInputStream(contents)), headers, HttpStatus.OK);
         });
@@ -203,25 +203,26 @@ public class SysController {
     }
 
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestBody(required = false) String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
-            Path file = tx.getFileSystem().getRootPath().resolve(path);
-            Path parent = file.getParent();
+            Path filePath = tx.getFileSystem().getRootPath().resolve(path);
+            Path parent = filePath.getParent();
             Files.createDirectories(parent);
-            Files.write(file, text.getBytes("utf-8"));
+            byte[] bytes = text == null ? new byte[0] : text.getBytes("utf-8");
+            Files.write(filePath, bytes);
             tx.commit("Saving file " + path);
             return listPath(tx, parent.toString());
         });
     }
 
     @PostMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestParam(value = "file") final MultipartFile file) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestParam String name, @RequestParam(value = "file") final MultipartFile file) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
             Path parent = tx.getFileSystem().getRootPath().resolve(path);
-            Path filePath = parent.resolve(file.getName());
+            Path filePath = parent.resolve(name);
             Files.createDirectories(parent);
             Files.copy(file.getInputStream(), filePath);
-            tx.commit("Saving file " + path + "/" + file.getName());
+            tx.commit("Saving file " + path + "/" + name);
             return listPath(tx, parent.toString());
         });
     }
