@@ -11,7 +11,7 @@ import Ghost from './Ghost';
 import NXButton from './NXButton'
 
 class ButtonPage extends Component {
-  render() { 
+  render() {
     return (
       <Fragment>
         <h1 className="title">Button</h1>
@@ -22,10 +22,23 @@ class ButtonPage extends Component {
           A button means an operation (or a series of operations). Clicking a button will trigger corresponding business logic.
         </p>
 
-        <h2 className="title">Exemples:</h2>
-
+        <h2 className="title">Examples:</h2>
         <section className="example">
-          <NXButton />
+          <h3 className="ex-title">Buttons</h3>
+
+          <div>
+            <NXButton primary>
+              Primary
+            </NXButton>
+
+            <NXButton className="ml20">
+              Default
+            </NXButton>
+
+            <NXButton className="ml20" disabled>
+              Disabled
+            </NXButton>
+          </div>
         </section>
 
         <section className="example">
@@ -63,7 +76,7 @@ class ButtonPage extends Component {
     );
   }
 }
- 
+
 export default ButtonPage;
 
 

@@ -1,8 +1,8 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Checkbox, Col, Row} from "antd";
+import {Col, Row} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {NXButton, NXCheckbox, NXAlert} from "../../../nx-design";
+import {NXButton, NXCheckbox} from "../../../nx-design";
 
 interface Props {
     notificationStatus: Object[];

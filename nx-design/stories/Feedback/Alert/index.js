@@ -7,10 +7,11 @@ import Description from './Description';
 import Icon from './Icon';
 import Custom from './Custom';
 import Banner from './Banner';
+import {NXAlert} from "./Alert";
 
 class AlertPage extends Component {
   state = {}
-  render() { 
+  render() {
     return (
       <Fragment>
         <h1 className="title">Alert</h1>
@@ -30,6 +31,11 @@ class AlertPage extends Component {
 
         <h2 className="title">Examples:</h2>
 
+        <section className="example">
+          <h3 className="ex-title">Basic</h3>
+          <NXAlert.small message="Success Text" type="success" />
+        </section>
+
         <Basic />
         <Types />
         <Closeble />
@@ -42,5 +48,5 @@ class AlertPage extends Component {
     );
   }
 }
- 
+
 export default AlertPage;

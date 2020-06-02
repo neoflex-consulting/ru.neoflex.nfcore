@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import { action } from '@storybook/addon-actions';
 import { Button } from 'antd';
 
 class Loading extends Component {
@@ -9,7 +8,7 @@ class Loading extends Component {
     /* isOpen: false */
   };
 
-  render() { 
+  render() {
     return (
       <Fragment>
         <h3 className="ex-title">Loading</h3>
@@ -34,9 +33,9 @@ class Loading extends Component {
           </Button>
 
           <br /><br />
-          
+
           <Button shape="circle" loading />
-          
+
           <Button className="ml20" type="primary" shape="circle" loading />
         </div>
 
@@ -59,7 +58,7 @@ class Loading extends Component {
       </Fragment>
     );
   }
-  
+
   /* toggle = () => this.setState({ isOpen: !this.state.isOpen });
 
   getCode() {
@@ -104,5 +103,5 @@ class Loading extends Component {
     );
   } */
 }
- 
+
 export default Loading;

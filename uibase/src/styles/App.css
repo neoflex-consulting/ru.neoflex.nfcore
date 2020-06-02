@@ -308,7 +308,3 @@
   padding: 0;
 }
 
-/*Alert*/
-.ant-alert-no-icon span::before {
-  content: url('../icons/alert.svg');
-}
