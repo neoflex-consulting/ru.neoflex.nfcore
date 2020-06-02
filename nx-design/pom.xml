@@ -11,18 +11,14 @@
     <properties>
         <java.version>1.8</java.version>
         <node-version>v12.16.3</node-version>
-        <npm-version>6.14.4</npm-version>
+      <npm-version>6.14.4</npm-version>
+      <yarn-version>v1.22.4</yarn-version>
     </properties>
 
-    <dependencies>
-      <dependency>
-        <groupId>ru.neoflex.nfcore</groupId>
-        <artifactId>nx-design</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-      </dependency>
-    </dependencies>
+  <dependencies>
+  </dependencies>
 
-    <build>
+  <build>
         <plugins>
             <plugin>
 
@@ -43,7 +39,7 @@
                         </goals>
                         <configuration>
                             <nodeVersion>${node-version}</nodeVersion>
-                            <yarnVersion>${npm-version}</yarnVersion>
+                            <yarnVersion>${yarn-version}</yarnVersion>
                         </configuration>
                     </execution>
                     <execution>

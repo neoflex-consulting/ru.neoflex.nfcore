@@ -16,13 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.DeploySupply;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.Exporter;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -32,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController()
@@ -45,24 +47,24 @@ public class SysController {
     @Autowired
     DeploySupply deploySupply;
 
-    @GetMapping(value="/user", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/user", produces = "application/json; charset=utf-8")
     public Principal getUser(Principal principal) {
         return principal;
     }
 
-    @GetMapping(value="/branch", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/branch", produces = "application/json; charset=utf-8")
     public JsonNode getBranchInfo() throws IOException {
         ObjectNode branchInfo = new ObjectMapper().createObjectNode();
         branchInfo.put("current", workspace.getCurrentBranch());
         branchInfo.put("default", workspace.getDefaultBranch());
         ArrayNode branches = branchInfo.withArray("branches");
-        for (String branch: workspace.getDatabase().getBranches()) {
+        for (String branch : workspace.getDatabase().getBranches()) {
             branches.add(branch);
         }
         return branchInfo;
     }
 
-    @PostMapping(value="/importdb", produces={"application/json"})
+    @PostMapping(value = "/importdb", produces = {"application/json"})
     public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws Exception {
         int count = new Exporter(store).unzip(file.getInputStream());
         ObjectMapper mapper = new ObjectMapper();
@@ -70,7 +72,7 @@ public class SysController {
         return result;
     }
 
-    @PostMapping(value="/deploySupply", produces={"application/json"})
+    @PostMapping(value = "/deploySupply", produces = {"application/json"})
     public Object deploySupply(@RequestParam(value = "file") final MultipartFile file) throws Exception {
         Path path = Paths.get(deploySupply.getDeployBase(), file.getOriginalFilename());
         try {
@@ -79,15 +81,14 @@ public class SysController {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode().put("Supply successfully imported", file.getOriginalFilename());
             return result;
-        }
-        catch (FileAlreadyExistsException e) {
+        } catch (FileAlreadyExistsException e) {
             throw new RuntimeException(
                     "File " + file.getOriginalFilename() + " already exists"
             );
         }
     }
 
-    @GetMapping(value="/exportdb")
+    @GetMapping(value = "/exportdb")
     public ResponseEntity exportDb() throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
@@ -105,7 +106,7 @@ public class SysController {
         return new ResponseEntity(new InputStreamResource(pipedInputStream), headers, HttpStatus.OK);
     }
 
-    @PostMapping(value="/exportdb", consumes={"application/json"})
+    @PostMapping(value = "/exportdb", consumes = {"application/json"})
     public ResponseEntity exportDb(
             @RequestBody List<String> ids,
             @RequestParam boolean withReferences,
@@ -114,12 +115,11 @@ public class SysController {
     ) throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-        String branch = workspace.getCurrentBranch();
         new Thread(() -> {
             try {
-                store.inTransaction(true, tx->{
+                store.inTransaction(true, tx -> {
                     List<Resource> resources = new ArrayList<>();
-                    for (String id: ids) {
+                    for (String id : ids) {
                         resources.add(store.loadResource(store.getUriByIdAndRev(id, null)));
                     }
                     if (withDependents) {
@@ -145,9 +145,84 @@ public class SysController {
         return new ResponseEntity(new InputStreamResource(pipedInputStream), headers, HttpStatus.OK);
     }
 
-    @PutMapping(value="/branch/{name}", produces = "application/json; charset=utf-8")
+    @PutMapping(value = "/branch/{name}", produces = "application/json; charset=utf-8")
     public JsonNode setCurrentBranch(@PathVariable String name) throws IOException {
         workspace.setCurrentBranch(name);
         return getBranchInfo();
+    }
+
+    @GetMapping(value = "/fs", produces = "application/json; charset=utf-8")
+    public JsonNode listFs(@RequestParam String path) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> listPath(tx, path));
+    }
+
+    @GetMapping(value = "/fs/data", produces = "application/json; charset=utf-8")
+    public ResponseEntity downloadFs(@RequestParam String path) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
+            Path resolved = tx.getFileSystem().getRootPath().resolve(path);
+            byte[] contents = Files.readAllBytes(resolved);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/zip");
+            headers.set("Content-Disposition", String.format("attachment; filename=\"%s\"", resolved.getFileName().toString()));
+            return new ResponseEntity(new InputStreamResource(new ByteArrayInputStream(contents)), headers, HttpStatus.OK);
+        });
+    }
+
+    public ArrayNode listPath(Transaction tx, @RequestParam String path) throws IOException {
+        ArrayNode list = new ObjectMapper().createArrayNode();
+        Path dir = tx.getFileSystem().getRootPath().resolve(path);
+        if (Files.isDirectory(dir)) {
+            Files.walk(dir, 1).skip(1)
+                    .sorted(Comparator.comparing(p -> (Files.isDirectory(p) ? "0" : "1") + p.getFileName().toString()))
+                    .forEach(child -> {
+                        String key = child.toString();
+                        ObjectNode childNode = list.addObject();
+                        childNode.put("key", key);
+                        childNode.put("title", child.getFileName().toString());
+                        childNode.put("isLeaf", !Files.isDirectory(child));
+                    });
+        }
+        return list;
+    }
+
+    @DeleteMapping(value = "/fs", produces = "application/json; charset=utf-8")
+    public JsonNode deleteFs(@RequestParam String path) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            Path resolved = tx.getFileSystem().getRootPath().resolve(path);
+            if (Files.isDirectory(resolved)) {
+                workspace.getDatabase().deleteRecursive(resolved);
+                tx.commit("Deleting directory " + path);
+            }
+            else if (Files.isRegularFile(resolved)) {
+                Files.delete(resolved);
+                tx.commit("Deleting file " + path);
+            }
+            Path parent = resolved.getParent();
+            return listPath(tx, parent.toString());
+        });
+    }
+
+    @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
+    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            Path file = tx.getFileSystem().getRootPath().resolve(path);
+            Path parent = file.getParent();
+            Files.createDirectories(parent);
+            Files.write(file, text.getBytes("utf-8"));
+            tx.commit("Saving file " + path);
+            return listPath(tx, parent.toString());
+        });
+    }
+
+    @PostMapping(value = "/fs", produces = "application/json; charset=utf-8")
+    public JsonNode createFsFile(@RequestParam String path, @RequestParam(value = "file") final MultipartFile file) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            Path parent = tx.getFileSystem().getRootPath().resolve(path);
+            Path filePath = parent.resolve(file.getName());
+            Files.createDirectories(parent);
+            Files.copy(file.getInputStream(), filePath);
+            tx.commit("Saving file " + path + "/" + file.getName());
+            return listPath(tx, parent.toString());
+        });
     }
 }

@@ -28,7 +28,7 @@ class FilesystemBrowser extends React.Component<any & WithTranslation, any> {
                     }}
                 >
                     <div style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
-                        <FilesystemTree/>
+                        <FilesystemTree onSelect={key => {}}/>
                     </div>
                     <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
                     </div>
