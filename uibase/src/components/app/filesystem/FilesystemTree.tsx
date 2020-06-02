@@ -15,7 +15,7 @@ import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 const {DirectoryTree} = Tree;
 
 interface Props {
-    onSelect?: (key?: string, isLeaf?: boolean)=>void;
+    onSelect?: (path?: string, isLeaf?: boolean)=>void;
     onCheck?: (keys: string[])=>void;
 }
 

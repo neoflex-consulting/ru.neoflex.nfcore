@@ -160,9 +160,9 @@ public class SysController {
     public ResponseEntity downloadFs(@RequestParam String path) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             Path resolved = tx.getFileSystem().getRootPath().resolve(path);
-            byte[] contents = Files.readAllBytes(resolved);
+            byte[] contents = Files.isRegularFile(resolved) ? Files.readAllBytes(resolved) : new byte[0];
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/zip");
+            //headers.set("Content-Type", "application/zip");
             headers.set("Content-Disposition", String.format("attachment; filename=\"%s\"", resolved.getFileName().toString()));
             return new ResponseEntity(new InputStreamResource(new ByteArrayInputStream(contents)), headers, HttpStatus.OK);
         });
@@ -203,13 +203,13 @@ public class SysController {
     }
 
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestParam String name, @RequestBody String text) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
-            Path parent = tx.getFileSystem().getRootPath().resolve(path);
-            Path filePath = parent.resolve(name);
+            Path filePath = tx.getFileSystem().getRootPath().resolve(path);
+            Path parent = filePath.getParent();
             Files.createDirectories(parent);
             Files.write(filePath, text.getBytes("utf-8"));
-            tx.commit("Saving file " + path + "/" + name);
+            tx.commit("Saving file " + path);
             return listPath(tx, parent.toString());
         });
     }
