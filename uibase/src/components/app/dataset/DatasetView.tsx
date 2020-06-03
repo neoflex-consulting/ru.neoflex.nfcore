@@ -50,6 +50,7 @@ export enum paramType {
     aggregate="serverAggregates",
     sort="serverSorts",
     group="serverGroupBy",
+    groupby="serverGroupByColumn",
     highlights="highlights",
     calculations="serverCalculatedExpression",
     diagrams="diagrams",
@@ -90,6 +91,7 @@ interface State {
     serverAggregates: IServerQueryParam[];
     serverSorts: IServerQueryParam[];
     serverGroupBy: IServerQueryParam[];
+    serverGroupByColumn: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
     queryParams: IServerNamedParam[]
     useServerFilter: boolean;
@@ -119,8 +121,10 @@ const defaultComponentValues = {
     serverAggregation: "Average",
     serverGroupBy: "Average",
     serverSort: "FromAtoZ",
-    serverCalculatedExpression: ""
+    serverCalculatedExpression: "",
+    serverGroupByColumn: ""
 };
+
 
 class DatasetView extends React.Component<any, State> {
 
@@ -140,6 +144,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates: [],
             serverSorts: [],
             serverGroupBy: [],
+            serverGroupByColumn: [],
             serverCalculatedExpression: [],
             queryParams: [],
             useServerFilter: false,
@@ -390,6 +395,7 @@ class DatasetView extends React.Component<any, State> {
         let serverAggregates: IServerQueryParam[] = [];
         let serverSorts: IServerQueryParam[] = [];
         let serverGroupBy: IServerQueryParam[] = [];
+        let serverGroupByColumn: IServerQueryParam[] = [];
         let highlights: IServerQueryParam[] = [];
         let serverCalculatedExpression: IServerQueryParam[] = [];
         let diagrams: IDiagram[] = [];
@@ -400,6 +406,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
             serverSorts = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverSorts);
             serverGroupBy = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupBy);
+            serverGroupByColumn = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupByColumn);
             highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
             serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
             diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
@@ -409,6 +416,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates = getParamsFromComponent(resource, 'serverAggregation');
             serverSorts = getParamsFromComponent(resource, 'serverSort');
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
+            serverGroupByColumn = getParamsFromComponent(resource, 'serverGroupByColumn');
             highlights = getParamsFromComponent(resource, 'highlight');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
         }
@@ -419,10 +427,11 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(serverAggregates);
         addEmpty(serverSorts);
         addEmpty(serverGroupBy);
+        addEmpty(serverGroupByColumn);
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
-        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression);
+        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, serverGroupByColumn, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverGroupByColumn, serverCalculatedExpression);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -510,7 +519,7 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
+    private prepParamsAndRun(resource: Ecore.Resource, filterParams: IServerQueryParam[], aggregationParams: IServerQueryParam[], sortParams: IServerQueryParam[], groupByParams: IServerQueryParam[], groupByColumnParams: IServerQueryParam[], calculatedExpressions: IServerQueryParam[]) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
         const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
@@ -518,9 +527,9 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.runQuery(resource
             , newQueryParams
             , filterParams.filter((f: any) => f.enable)
-            ,[]
             , sortParams.filter((f: any) => f.enable)
             , groupByParams.filter((f: any) => f.enable)
+            , groupByColumnParams.filter((f: any) => f.enable)
             , calculatedExpression.filter((f: any) => f.enable)).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression);
@@ -532,6 +541,7 @@ class DatasetView extends React.Component<any, State> {
                         , aggregationParams.filter((f: any) => f.enable)
                         , sortParams.filter((f: any) => f.enable)
                         , groupByParams.filter((f: any) => f.enable)
+                        , groupByColumnParams.filter((f: any) => f.enable)
                         , calculatedExpression.filter((f: any) => f.enable)).then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
                         this.setState({rowData: result, columnDefs: newColumnDef});
@@ -553,6 +563,7 @@ class DatasetView extends React.Component<any, State> {
                 this.state.serverAggregates,
                 this.state.serverSorts,
                 this.state.serverGroupBy,
+                this.state.serverGroupByColumn,
                 this.state.serverCalculatedExpression
             );
         }
@@ -633,6 +644,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates: (paramName === paramType.aggregate)? param: filterParam(this.state.serverAggregates),
             serverSorts:  (paramName === paramType.sort)? param: filterParam(this.state.serverSorts),
             serverGroupBy:  (paramName === paramType.group)? param: filterParam(this.state.serverGroupBy),
+            serverGroupByColumn: (paramName === paramType.groupby)? param: filterParam(this.state.serverGroupByColumn),
             highlights: (paramName === paramType.highlights)? param: filterParam(this.state.highlights),
             serverCalculatedExpression: (paramName === paramType.calculations)? param: filterParam(this.state.serverCalculatedExpression),
             diagrams: (paramName === paramType.diagrams)? param: this.state.diagrams,
@@ -640,12 +652,14 @@ class DatasetView extends React.Component<any, State> {
     }
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
+
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
         const serverSorts = filterParam(this.state.serverSorts);
         const serverGroupBy = filterParam(this.state.serverGroupBy);
+        const serverGroupByColumn = filterParam(this.state.serverGroupByColumn);
         const serverCalculatedExpression = filterParam(this.state.serverCalculatedExpression);
         const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
@@ -654,12 +668,13 @@ class DatasetView extends React.Component<any, State> {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
-            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.calculations].includes(paramName)) {
+            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupby, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
                     (paramName === paramType.aggregate)? serverParam: serverAggregates,
                     (paramName === paramType.sort)? serverParam: serverSorts,
                     (paramName === paramType.group)? serverParam: serverGroupBy,
+                    (paramName === paramType.groupby)? serverParam: serverGroupByColumn,
                     (paramName === paramType.calculations)? serverParam: serverCalculatedExpression,
                 );
             }

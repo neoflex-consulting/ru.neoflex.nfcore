@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch} from 'antd';
+import {Button, Row, Col, Form, Select, Switch, Input} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -35,11 +35,49 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
+
+
 const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 {value.index}
+            </Col>
+            <Col span={9}>
+                <Form.Item style={{ display: 'inline-block' }}>
+                    {value.getFieldDecorator(`${value.idOperation}`,
+                        {
+                            initialValue: value.t(value.operation) || undefined,
+                            rules: [{
+                                required:
+                                value.datasetColumn,
+                                message: ' '
+                            }]
+                        })(
+                        <Select
+                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
+                            placeholder={value.t('operation')}
+                            style={{ width: '219px', marginRight: '10px' }}
+                            allowClear={true}
+                            onChange={(e: any) => {
+                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
+                                value.handleChange(event)
+                            }}
+                        >
+                            {
+                                value.allAggregates!
+                                    .map((o: any) =>
+                                        <Select.Option
+                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                        >
+                                            {value.t(o.get('name'))}
+                                        </Select.Option>)
+                            }
+                        </Select>
+
+                    )}
+                </Form.Item>
             </Col>
             <Col span={10}>
                 <Form.Item style={{ display: 'inline-block' }}>
@@ -84,7 +122,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <Select
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                            style={{ width: '239px', marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -103,42 +141,6 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </Select.Option>)
                             }
                         </Select>
-                    )}
-                </Form.Item>
-            </Col>
-            <Col span={9}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    {value.getFieldDecorator(`${value.idOperation}`,
-                        {
-                            initialValue: value.t(value.operation) || undefined,
-                            rules: [{
-                                required:
-                                value.datasetColumn,
-                                message: ' '
-                            }]
-                        })(
-                        <Select
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('operation')}
-                            style={{ width: '219px', marginRight: '10px' }}
-                            allowClear={true}
-                            onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
-                                value.handleChange(event)
-                            }}
-                        >
-                            {
-                                value.allAggregates!
-                                    .map((o: any) =>
-                                        <Select.Option
-                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                        >
-                                            {value.t(o.get('name'))}
-                                        </Select.Option>)
-                            }
-                        </Select>
-
                     )}
                 </Form.Item>
             </Col>
@@ -166,6 +168,14 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </Col>
         </Row>
+        <Row>
+            <Col span={1}>
+            </Col>
+            <Col span={23}>
+                <Input placeholder="Basic usage" />
+            </Col>
+        </Row>
+
     </div>
 });
 
@@ -185,10 +195,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
-                    <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Группировка</div>
-                    </Col>
-                    <Col span={12} style={{textAlign: "right"}}>
+                    <Col span={24} style={{textAlign: "left"}}>
                         <Button
                             title="reset"
                             style={{width: '40px', marginRight: '10px'}}
@@ -197,15 +204,6 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                             onClick={this.reset}
                         >
                             <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title="add row"
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'createNewRowButton'}
-                            value={'createNewRowButton'}
-                            onClick={this.createNewRow}
-                        >
-                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
                             title="run query"
@@ -237,6 +235,15 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
+                <Button
+                    title="add row"
+                    style={{width: '40px', marginRight: '10px'}}
+                    key={'createNewRowButton'}
+                    value={'createNewRowButton'}
+                    onClick={this.createNewRow}
+                >
+                    <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
+                </Button>
             </Form>
         )
     }
