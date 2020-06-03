@@ -212,7 +212,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         treeData: this.updateTreeData(this.state.treeData, parent, json),
                         loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
                         selectedKeys: [renamed],
-                        key: renamed
+                        key: renamed,
+                        popupMenuVisible: false
                     })
                     if (this.props.onSelect) {
                         this.props.onSelect(renamed, this.state.isLeaf)
@@ -221,7 +222,6 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
             }
 
         }
-        this.setState({popupMenuVisible: false})
     }
 
     render() {
