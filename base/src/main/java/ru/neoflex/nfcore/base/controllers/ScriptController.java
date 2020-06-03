@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
 
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,19 @@ public class ScriptController {
         Object result = context.inContextWithClassLoaderInTransaction(()-> groovy.eval(script, params));
         logger.debug(result);
         return result;
+    }
+
+    @PostMapping("/evaluate")
+    Object evaluate(@RequestParam final Map<String,Object> params, @RequestBody String script) throws Exception {
+        logger.debug(params);
+        Writer out = new StringWriter();
+        params.put("out", out);
+        Object result = context.inContextWithClassLoaderInTransaction(()-> groovy.eval(script, params));
+        logger.debug(result);
+        Map ret = new HashMap();
+        ret.put("result", result);
+        ret.put("out", out.toString());
+        return ret;
     }
 
     @PostMapping("/static/{fullClassName:.+}/{method}")

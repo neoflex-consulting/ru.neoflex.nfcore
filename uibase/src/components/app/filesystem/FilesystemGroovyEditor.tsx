@@ -44,11 +44,23 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         API.instance().fetchJson("/system/fs?path=" + this.state.path, {
             method: 'PUT',
             body: this.state.text
-        })
+        }).then(value => {})
     }
 
     run = () => {
-
+        API.instance().fetchJson("/script/evaluate", {
+            method: 'POST',
+            body: this.state.text
+        }).then(ret => {
+            let result = ""
+            if (ret.out) {
+                result = result + ret.out
+            }
+            if (ret.result && ret.result !== "null") {
+                result = result + "\n>> " + ret.result
+            }
+            this.setState({result})
+        })
     }
 
     resizeEditors = () => {
