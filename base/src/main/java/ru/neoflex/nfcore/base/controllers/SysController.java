@@ -230,7 +230,7 @@ public class SysController {
     @PutMapping(value = "/fs/rename", produces = "application/json; charset=utf-8")
     public JsonNode renameFsFile(@RequestParam String path, @RequestParam String name) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
-            Path filePath = tx.getFileSystem().getRootPath().resolve(name);
+            Path filePath = tx.getFileSystem().getRootPath().resolve(path);
             Path parent = filePath.getParent();
             Path newPath = parent.resolve(name);
             Files.move(filePath, newPath);
