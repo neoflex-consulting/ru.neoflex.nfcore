@@ -263,8 +263,8 @@ public class MasterdataProvider {
             }
         }
         for (InvertedEntry ie: entity.getInvertedEntries()) {
-            logger.info("Creating ie index " + entity.getName() + "." + ie.getName());
             if (oClass.getClassIndex(ie.getName()) == null) {
+                logger.info("Creating ie index " + entity.getName() + "." + ie.getName());
                 if (ie instanceof PlainIndex) {
                     OClass.INDEX_TYPE iType = ((PlainIndex) ie).isUnique() ? OClass.INDEX_TYPE.UNIQUE : OClass.INDEX_TYPE.NOTUNIQUE;
                     oClass.createIndex(ie.getName(), iType, ie.getAttributes()
