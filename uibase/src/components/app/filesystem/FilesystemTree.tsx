@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {Button, Input, Tree} from 'antd';
+import {Button, Dropdown, Input, Menu, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,
@@ -15,14 +15,23 @@ import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 const {DirectoryTree} = Tree;
 
 interface Props {
-    onSelect?: (path?: string, isLeaf?: boolean)=>void;
-    onCheck?: (keys: string[])=>void;
+    onSelect?: (path?: string, isLeaf?: boolean) => void;
+    onCheck?: (keys: string[]) => void;
 }
 
-class FilesystemTree extends React.Component<Props & WithTranslation, any> {
-    state = {
+interface State {
+    key: string,
+    isLeaf: boolean,
+    loadedKeys: string[],
+    selectedKeys: string[],
+    treeData: any[],
+    popupMenuVisible: boolean,
+}
+
+class FilesystemTree extends React.Component<Props & WithTranslation, State> {
+    state: State = {
         key: "/",
-        isLeaf: undefined,
+        isLeaf: false,
         loadedKeys: [],
         selectedKeys: ["/"],
         treeData: [
@@ -32,36 +41,33 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                 isLeaf: false,
                 children: [],
             },
-        ]
+        ],
+        popupMenuVisible: false,
     }
 
     updateTreeData = (list: any[], key: string, children: any[]): any[] => {
         if (!list) return list
-        return list.map(node=>{
+        return list.map(node => {
             if (node.key === key) {
                 return {...node, children}
-            }
-            else if (node.isLeaf !== true) {
+            } else if (node.isLeaf !== true) {
                 return {...node, children: this.updateTreeData(node.children, key, children)}
             }
             return node
         })
     }
 
+    findNodes = (list: any[], key: string): any[] => {
+        return list.map(value => value.key === key ? [value] :
+            (value.isLeaf === true ? [] : this.findNodes(value.children || [], key))).flat()
+    }
+
     getChildren = (list: any[], key: string): any[] => {
-        return list.map(node=>{
-            if (node.key === key) {
-                return node.children || []
-            }
-            else if (node.isLeaf !== true) {
-                return this.getChildren(node.children || [], key)
-            }
-            return []
-        }).flat()
+        return this.findNodes(list, key).map(value => value.children || []).flat()
     }
 
     reloadKey = (key: string) => {
-        return API.instance().fetchJson(`/system/fs?path=${key}`).then(json=>{
+        return API.instance().fetchJson(`/system/fs?path=${key}`).then(json => {
             this.setState({
                 treeData: this.updateTreeData(this.state.treeData, key, json),
                 loadedKeys: this.state.loadedKeys.filter((value: string) => value === key || !value.startsWith(key))
@@ -73,10 +79,12 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         return this.reloadKey(node.props.eventKey || "")
     }
 
+    isSelectedLoaded = () => this.state.loadedKeys.includes(this.state.key)
+
     onSelect = (selectedKeys: string[], e: AntTreeNodeSelectedEvent) => {
         console.log('Trigger Select', selectedKeys, e);
-        const key = e.node ? e.node.props.eventKey : undefined
-        const isLeaf = e.node ? e.node.props.isLeaf === true : undefined
+        const key = e.node ? e.node.props.eventKey || "/" : "/"
+        const isLeaf = e.node ? e.node.props.isLeaf === true : false
         this.setState({selectedKeys, key, isLeaf})
         if (this.props.onSelect) {
             this.props.onSelect(key, isLeaf)
@@ -93,10 +101,6 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         }
     };
 
-    onExpand = (expandedKeys: string[], info: AntTreeNodeExpandedEvent) => {
-        console.log('Trigger Expand', expandedKeys, info);
-    };
-
     onRefresh = () => {
         this.reloadKey(this.state.key || "")
     }
@@ -109,7 +113,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         var newCatalog = prompt("New catalog name", "NewCatalog")
         if (newCatalog) {
             console.log(newCatalog)
-            const key = this.state.key||"/"
+            const key = this.state.key || "/"
             const newKey = ["", ...key.slice(1).split("/"), newCatalog].join("/")
             const children = [...this.getChildren(this.state.treeData, key),
                 {key: newKey, title: newCatalog, isLeaf: false}]
@@ -129,7 +133,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         var newFile = prompt("New file name", "test.groovy")
         if (newFile) {
             console.log(newFile)
-            const key = this.state.key||"/"
+            const key = this.state.key || "/"
             const newKey = ["", ...key.slice(1).split("/"), newFile].join("/")
             const children = [...this.getChildren(this.state.treeData, key),
                 {key: newKey, title: newFile, isLeaf: true}]
@@ -154,8 +158,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                     'Content-Type': 'application/json'
                 },
 
-            }).then(json=>{
-                const parent = ["", ...(this.state.key||"/").slice(1).split("/")].slice(0, -1).join("/") || "/"
+            }).then(json => {
+                const parent = ["", ...(this.state.key || "/").slice(1).split("/")].slice(0, -1).join("/") || "/"
                 this.setState({
                     treeData: this.updateTreeData(this.state.treeData, parent, json),
                     loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
@@ -174,9 +178,9 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
         let form = new FormData()
         form.append("file", file)
         const name = file.name.replace(/\\/g, '/').replace(/.*\//, '')
-        const key = this.state.key||""
+        const key = this.state.key || ""
         API.instance().fetchJson(`/system/fs?path=${key}&name=${name}`,
-            {method: 'POST', body: form}).then(json=>{
+            {method: 'POST', body: form}).then(json => {
             this.setState({
                 treeData: this.updateTreeData(this.state.treeData, key, json),
                 loadedKeys: this.state.loadedKeys.filter((value: string) => value === key || !value.startsWith(key))
@@ -185,16 +189,53 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
     }
 
     downloadFile = () => {
-        let filename = (this.state.key||"").split("/").pop();
+        let filename = (this.state.key || "").split("/").pop();
         API.instance().download("/system/fs/data?path=" + this.state.key, {}, filename)
+    }
+
+    rename = () => {
+        const found = this.findNodes(this.state.treeData, this.state.key)
+        if (found.length > 0) {
+            var newName = prompt(`New name for ${found[0].title}`, `${found[0].title}`)
+            if (newName) {
+                return API.instance().fetchJson(`/system/fs/rename?path=${this.state.key}&name=${newName}`, {
+                    method: "PUT",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+
+                }).then(json => {
+                    const parent = ["", ...(this.state.key || "/").slice(1).split("/")].slice(0, -1).join("/") || "/"
+                    const renamed = parent + "/" + newName
+                    this.setState({
+                        treeData: this.updateTreeData(this.state.treeData, parent, json),
+                        loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
+                        selectedKeys: [renamed],
+                        key: renamed
+                    })
+                    if (this.props.onSelect) {
+                        this.props.onSelect(renamed, this.state.isLeaf)
+                    }
+                })
+            }
+
+        }
+        this.setState({popupMenuVisible: false})
     }
 
     render() {
         const {t} = this.props
+        const menu = (
+            <Menu>
+                <Menu.Item key="rename" onClick={this.rename}>{t("rename")}</Menu.Item>
+            </Menu>
+        )
         return (
             <div style={{flexGrow: 1, height: '100%'}}>
                 <div>
-                    <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} disabled={!this.state.isLeaf !== true} onClick={this.onRefresh}>
+                    <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}}
+                            disabled={!this.state.isLeaf !== true} onClick={this.onRefresh}>
                         <FontAwesomeIcon icon={faSyncAlt} size='lg' color="#7b7979"/>
                     </Button>
                     <div style={{
@@ -208,11 +249,13 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                         width: '6px'
                     }}/>
                     <Button title={t('createdir')} style={{color: 'rgb(151, 151, 151)'}}
-                            disabled={!this.state.isLeaf !== true} onClick={this.createFolder}>
+                            disabled={!this.state.isLeaf !== true || !this.isSelectedLoaded()}
+                            onClick={this.createFolder}>
                         <FontAwesomeIcon icon={faFolderPlus} size='lg' color="#7b7979"/>
                     </Button>
                     <Button title={t('createfile')} style={{color: 'rgb(151, 151, 151)'}}
-                            disabled={!this.state.isLeaf !== true} onClick={this.createFile}>
+                            disabled={!this.state.isLeaf !== true || !this.isSelectedLoaded()}
+                            onClick={this.createFile}>
                         <FontAwesomeIcon icon={faFile} size='lg' color="#7b7979"/>
                     </Button>
                     <Button title={t('upload')} style={{color: 'rgb(151, 151, 151)'}}
@@ -240,20 +283,33 @@ class FilesystemTree extends React.Component<Props & WithTranslation, any> {
                         <FontAwesomeIcon icon={faTrashAlt} size='sm' color="#7b7979"/>
                     </Button>
                 </div>
-                <DirectoryTree
-                    checkable={!!this.props.onCheck}
-                    selectable={!!this.props.onSelect}
-                    loadedKeys={this.state.loadedKeys}
-                    selectedKeys={this.state.selectedKeys}
-                    multiple={false}
-                    defaultExpandAll={false}
-                    onCheck={this.onCheck}
-                    onSelect={this.onSelect}
-                    onExpand={this.onExpand}
-                    onLoad={this.onLoad}
-                    treeData={this.state.treeData}
-                    loadData={this.loadData}
-                />
+                <Dropdown overlay={menu} trigger={['contextMenu']}
+                          visible={this.state.popupMenuVisible}>
+                    <DirectoryTree
+                        checkable={!!this.props.onCheck}
+                        selectable={!!this.props.onSelect}
+                        loadedKeys={this.state.loadedKeys}
+                        selectedKeys={this.state.selectedKeys}
+                        multiple={false}
+                        defaultExpandAll={false}
+                        onCheck={this.onCheck}
+                        onSelect={this.onSelect}
+                        onLoad={this.onLoad}
+                        treeData={this.state.treeData}
+                        loadData={this.loadData}
+                        onRightClick={options => {
+                            this.setState({
+                                popupMenuVisible: !this.state.popupMenuVisible,
+                            })
+                        }
+                        }
+                        onClick={e => {
+                            if (this.state.popupMenuVisible) {
+                                this.setState({popupMenuVisible: false})
+                            }
+                        }}
+                    />
+                </Dropdown>
             </div>
         )
     }

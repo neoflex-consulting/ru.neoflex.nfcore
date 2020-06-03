@@ -19,7 +19,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
     state = {
         path: undefined,
         text: "",
-        result : ""
+        result: ""
     }
 
     componentDidMount() {
@@ -36,7 +36,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         if (this.state.path) {
             API.instance().fetch("/system/fs/data?path=" + this.state.path)
                 .then(response => response.text())
-                .then(text => this.setState({text: text||""}))
+                .then(text => this.setState({text: text || ""}))
         }
     }
 
@@ -96,7 +96,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                         <FontAwesomeIcon icon={faRunning} size='lg' color="#7b7979"/>
                     </Button>
                 </div>
-                <div style={{ flexGrow: 1 }}>
+                <div style={{flexGrow: 1}}>
                     <Splitter
                         ref={this.splitterRef}
                         position="horizontal"
@@ -105,34 +105,47 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                         primaryPaneHeight={localStorage.getItem('groovy_splitter_pos') || "400px"}
                         dispatchResize={true}
                         postPoned={false}
-                        onDragFinished={()=>{
-                            const size:string = this.splitterRef.current!.panePrimary.props.style.height
+                        onDragFinished={() => {
+                            const size: string = this.splitterRef.current!.panePrimary.props.style.height
                             localStorage.setItem('groovy_splitter_pos', size)
                         }}
                     >
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto' }}>
+                        <div style={{height: '100%', width: '100%', overflow: 'auto'}}>
                             <AceEditor
                                 ref={"aceEditor"}
                                 mode={"groovy"}
                                 width={""}
                                 onChange={this.onTextChange}
-                                editorProps={{ $blockScrolling: true }}
+                                editorProps={{$blockScrolling: true}}
                                 value={this.state.text}
                                 showPrintMargin={false}
                                 theme={"tomorrow"}
                                 debounceChangePeriod={500}
                                 height={"100%"}
                                 minLines={5}
+                                enableBasicAutocompletion={true}
+                                commands={[
+                                    {
+                                        name: "Save",
+                                        bindKey: {mac: "Cmd-S", win: "Ctrl-S"},
+                                        exec: this.save
+                                    },
+                                    {
+                                        name: "Run",
+                                        bindKey: {mac: "Cmd-R", win: "Ctrl-R"},
+                                        exec: this.run
+                                    },
+                                ]}
                             />
                         </div>
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto' }}>
+                        <div style={{height: '100%', width: '100%', overflow: 'auto'}}>
                             <AceEditor
                                 ref={"console"}
                                 mode={'text'}
                                 width={''}
                                 height={'100%'}
                                 theme={'tomorrow'}
-                                editorProps={{ $blockScrolling: Infinity }}
+                                editorProps={{$blockScrolling: Infinity}}
                                 value={this.state.result}
                                 showPrintMargin={false}
                                 focus={false}
