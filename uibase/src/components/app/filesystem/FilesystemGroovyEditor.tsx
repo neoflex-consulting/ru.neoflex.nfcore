@@ -58,7 +58,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                 API.instance().errorHandlers = errorHandlers
             }
         }]
-        API.instance().fetchJson("/script/evaluate", {
+        API.instance().fetchJson("/script/evaluate?name=" + this.state.path, {
             method: 'POST',
             body: this.state.text
         }).then(ret => {

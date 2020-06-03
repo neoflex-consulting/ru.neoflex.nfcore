@@ -60,13 +60,13 @@ public class ScriptController {
     }
 
     @PostMapping("/evaluate")
-    Object evaluate(@RequestParam final Map<String,Object> params, @RequestBody String script) throws Exception {
-        logger.debug(params);
+    Object evaluate(@RequestParam String name, @RequestBody String script) throws Exception {
+        Map<String, Object> params = new HashMap<>();
         Writer out = new StringWriter();
         params.put("out", out);
         return withLogAppender(out, () -> {
             try {
-                Object result = context.inContextWithClassLoaderInTransaction(()-> groovy.eval(script, params));
+                Object result = context.inContextWithClassLoaderInTransaction(()-> groovy.eval(name, script, params));
                 Map ret = new HashMap();
                 if (result != null) {
                     ret.put("result", result);
