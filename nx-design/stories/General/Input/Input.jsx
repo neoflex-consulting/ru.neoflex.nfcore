@@ -30,7 +30,14 @@ const NXRadio = styled(Radio)`
 `
 
 const NXCheckbox = styled(Checkbox)`
-
+ .ant-checkbox-inner{
+ height: 20px;
+ width: 20px;
+ ::after{
+ height: 12px;
+ width: 8px;
+ }
+ }
 .ant-checkbox-checked .ant-checkbox-inner {
   background-color: white !important;
   border: 2px solid #424D78;
