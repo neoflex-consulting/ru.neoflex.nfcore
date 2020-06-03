@@ -17,7 +17,7 @@ import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
-import {faUser, faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
+import {faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
 import {
     IMainContext,
     MainContext,
@@ -30,6 +30,7 @@ import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
+import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 
 const backgroundColor = "#2a356c";
@@ -326,12 +327,21 @@ class EcoreApp extends React.Component<any, State> {
                 if (p.appModule === appModuleName) {splitPathFull.push(index)}
             });
             if (splitPathFull.length === 0) {
-                this.state.pathFull.forEach( (p:any) => {
-                    path.push(p)
+                this.state.pathFull.forEach( (p:any, index: any) => {
+                    path.push(p);
                 });
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
+
+                const nextPath = path[path.length - 1];
+                if (
+                    nextPath.useParentReferenceTree === true &&
+                    nextPath.tree.length !== 0 &&
+                    path.length !== 1
+                ) {
+                    path.pop()
+                }
                 path.push(urlElement)
             } else {
                 path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
@@ -373,7 +383,12 @@ class EcoreApp extends React.Component<any, State> {
                             a.eContents()[0].get('name')
                         );
                         this.setState({applicationNames, applications});
-                        this.startPageSelection(applicationNames[0])
+                        if (applicationNames.length !== 0) {
+                            this.startPageSelection(applicationNames[0])
+                        }
+                        else {
+                            this.notification("Application", "Not found","info")
+                        }
                     })
             }
         })
@@ -484,8 +499,8 @@ class EcoreApp extends React.Component<any, State> {
                             </Link>
                             <div className='header-menu'>
                                     <span style={{
-                                        fontVariantCaps: 'petite-caps',
-                                        fontSize: '18px',
+                                        textTransform: "capitalize",
+                                        fontSize: '15px',
                                         lineHeight: '39px'
                                     }}>
                                         <span>{principal.name}</span></span>
@@ -558,7 +573,7 @@ class EcoreApp extends React.Component<any, State> {
 
     renderSettings=()=>{
         const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata']
+        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata', 'filesystem']
             .filter(k => this.props.location.pathname.split('/').includes(k));
         return (
             <Layout>
@@ -594,6 +609,12 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ color: '#eeeeee' }}>{t('masterdata')}</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item style={{ fontSize: 14 }} key={'filesystem'}>
+                            <Link to={`/developer/filesystem`}>
+                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
+                                <span style={{ color: '#eeeeee' }}>{t('filesystem')}</span>
+                            </Link>
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
@@ -605,6 +626,7 @@ class EcoreApp extends React.Component<any, State> {
                             <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
                             <Route path='/developer/tools' component={Tools}/>
                             <Route path='/developer/masterdata' component={MasterdataBrowser}/>
+                            <Route path='/developer/filesystem' component={FilesystemBrowser}/>
                         </Switch>
                     </Content>
                 </Layout>

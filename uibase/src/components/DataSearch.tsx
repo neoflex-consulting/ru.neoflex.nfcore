@@ -202,11 +202,11 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                     </TabPane>
                                 </Tabs>
                             )}
+                            <FetchSpinner/>
                             <FormItem>
                                 <Button title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
                                     <Icon type="search" />
                                 </Button>
-                                <FetchSpinner/>
                             </FormItem>
                         </Form>
                     </Col>

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
@@ -22,12 +24,14 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Exporter {
+    private final static Log logger = LogFactory.getLog(Exporter.class);
     public static final String EXTERNAL_REFERENCES = "externalReferences";
     public static final String REF_OBJECT = "refObject";
     public static final String FEATURES = "features";
@@ -35,6 +39,7 @@ public class Exporter {
     public static final String NAME = "name";
     public static final String XMI = ".xmi";
     public static final String REFS = ".refs";
+    public static final String GROOVY = ".groovy";
 
     Store store;
     public Exporter(Store store) {
@@ -256,20 +261,60 @@ public class Exporter {
         return entityCount;
     }
 
-    public void unzip(Path zipFile, String fileType) throws IOException {
+    public void processZipXmi(Path zipFile) {
+        processZipFile(zipFile, XMI, (path, bytes) -> {
+            try {
+                importEObject(bytes);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    public void processZipRefs(Path zipFile) {
+        processZipFile(zipFile, REFS, (path, bytes) -> {
+            try {
+                importExternalRefs(bytes);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    public void processZipGroovy(Path zipFile) {
+        processZipFile(zipFile, GROOVY, (path, bytes) -> {
+
+//            try {
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+            return null;
+        });
+    }
+
+    public void processZipFile(Path zipFile, String ext, BiFunction<Path, byte[], Void> processor) {
+        processZipFile(zipFile, path -> path.getFileName().toString().toLowerCase().endsWith(ext), processor);
+    }
+
+    public void processZipFile(Path zipFile, Function<Path, Boolean> predicate, BiFunction<Path, byte[], Void> processor) {
         Map<String, Object> env = new HashMap<>();
-        //env.put("create", "true");
         env.put("useTempFile", Boolean.TRUE);
         java.net.URI uri = java.net.URI.create("jar:" + zipFile.toUri());
         try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env);) {
-            Iterable<Path> roots = fileSystem.getRootDirectories();
-            Path root = roots.iterator().next();
-            if (fileType.equals(XMI)) {
-                importPathXmi(root);
+            for (Path root: fileSystem.getRootDirectories()) {
+                Files.walk(root).filter(Files::isRegularFile).filter(file -> predicate.apply(file)).forEach(path -> {
+                    try {
+                        byte[] content = Files.readAllBytes(path);
+                        processor.apply(path, content);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
-            if (fileType.equals(REFS)) {
-                importPathRefs(root);
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -283,22 +328,6 @@ public class Exporter {
             }
             return null;
         });
-    }
-
-    public void importPathXmi(Path path) throws IOException {
-        List<Path> jsonPaths = Files.walk(path).filter(Files::isRegularFile).filter(file -> file.getFileName().toString().endsWith(XMI)).collect(Collectors.toList());
-        for (Path jsonPath : jsonPaths) {
-            byte[] content = Files.readAllBytes(jsonPath);
-            importEObject(content);
-        }
-    }
-
-    public void importPathRefs(Path path) throws IOException {
-        List<Path> refsPaths = Files.walk(path).filter(Files::isRegularFile).filter(file -> file.getFileName().toString().endsWith(REFS)).collect(Collectors.toList());
-        for (Path refsPath : refsPaths) {
-            byte[] content = Files.readAllBytes(refsPath);
-            importExternalRefs(content);
-        }
     }
 
     public EObject importEObject(byte[] image) throws IOException {
@@ -339,7 +368,8 @@ public class Exporter {
                 String name = feature.get(NAME).textValue();
                 EReference eReference = (EReference) referenceeObject.eClass().getEStructuralFeature(name);
                 if (eReference == null || eReference.isContainment()) {
-                    throw new RuntimeException("Non-contained EReference " + feature + " not found in object " + referenceeObject);
+                    logger.warn("Non-contained EReference " + eObject + "->" + feature + " not found in object " + referenceeObject);
+                    continue;
                 }
                 if (eReference.isMany()) {
                     EList eList = (EList) referenceeObject.eGet(eReference);
