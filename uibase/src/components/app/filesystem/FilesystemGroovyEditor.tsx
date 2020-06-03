@@ -54,10 +54,10 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         }).then(ret => {
             let result = ""
             if (ret.out) {
-                result = result + ret.out
+                result = result + ret.out + "\n"
             }
             if (ret.result && ret.result !== "null") {
-                result = result + "\n>> " + ret.result
+                result = result + ">> " + ret.result
             }
             this.setState({result})
         })
