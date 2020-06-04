@@ -109,7 +109,7 @@ class InputPage extends Component {
           </div>
           <br/><br/>
 
-          <h4>With disabled options</h4>
+          <h4>With loading options</h4>
           <div>
             <NXSelect defaultValue="lucy" loading>
               <NXOption value="lucy">Lucy</NXOption>

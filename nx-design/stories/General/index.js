@@ -7,6 +7,6 @@ import InputPage from './Input';
 
 storiesOf('General', module)
   .add('Button', () => <ButtonPage />)
-  .add('Icon', () => <IconPage />)
+  .add('Icons', () => <IconPage />)
   .add('Input', () => <InputPage />)
 
