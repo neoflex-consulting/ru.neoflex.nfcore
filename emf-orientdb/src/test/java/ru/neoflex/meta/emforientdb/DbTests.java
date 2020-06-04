@@ -42,6 +42,7 @@ public class DbTests extends TestBase {
             Resource metaRes = rs.createResource(server.createURI());
             metaRes.getContents().add(metaView);
             metaRes.save(null);
+            Assert.assertEquals(1, session.query("select from test_MetaView where qName=?", "My Meta View").size());
             return testTable;
         });
         MetaView metaView = server.inTransaction(session -> {

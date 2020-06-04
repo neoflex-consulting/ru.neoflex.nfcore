@@ -11,7 +11,6 @@ import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OIndex;
@@ -80,10 +79,10 @@ public class MasterdataProvider {
         });
     }
 
-    private OIndex<Collection<OIdentifiable>> getReferredByMap(ODatabaseDocument database) {
-        OIndex<Collection<OIdentifiable>> referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
+    private OIndex getReferredByMap(ODatabaseDocument database) {
+        OIndex referredByHashTable = database.getMetadata().getIndexManager().getIndex(REFERRED_BY_INDEX_NAME);
         if (referredByHashTable == null) {
-            referredByHashTable = (OIndex<Collection<OIdentifiable>>) database.getMetadata().getIndexManager()
+            referredByHashTable = database.getMetadata().getIndexManager()
                     .createIndex(REFERRED_BY_INDEX_NAME, OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX.toString(),
                             new OSimpleKeyIndexDefinition(OType.LINK), null, null, null);
         }
@@ -325,7 +324,7 @@ public class MasterdataProvider {
             entity.setProperty("__created", new Date());
             entity.setProperty("__createdBy", Authorization.getUserName());
             db.save(entity);
-            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            OIndex referredBy = getReferredByMap(db);
             addDocumentRefs(referredBy, entity, node);
             return new OEntity(entity);
         } catch (JsonProcessingException e) {
@@ -351,7 +350,7 @@ public class MasterdataProvider {
         try {
             ORecordId orid = new ORecordId(id);
             ODocument entity = db.load(orid);
-            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
+            OIndex referredBy = getReferredByMap(db);
             removeDocumentRefs(referredBy, entity);
             String jsonString = new ObjectMapper().writeValueAsString(node);
             entity.fromJSON(jsonString);
@@ -365,7 +364,7 @@ public class MasterdataProvider {
         }
     }
 
-    public void addDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity, ObjectNode node) {
+    public void addDocumentRefs(OIndex referredBy, ODocument entity, ObjectNode node) {
         MasterdataExporter.processOrids(node, jsonNode -> {
             ORecordId to = new ORecordId(jsonNode.asText());
             if (entity.getIdentity().compareTo(to) != 0) {
@@ -387,8 +386,8 @@ public class MasterdataProvider {
         try {
             ORecordId orid = new ORecordId(recordId);
             ODocument entity = db.load(orid);
-            OIndex<Collection<OIdentifiable>> referredBy = getReferredByMap(db);
-            Collection<OIdentifiable> deps = referredBy.get(orid);
+            OIndex referredBy = getReferredByMap(db);
+            Collection deps = (Collection) referredBy.get(orid);
             if (deps != null && deps.size() > 0) {
                 throw new RuntimeException(String.format("record %s referenced by [%s]",
                         orid.toString(), deps.stream().map(i -> i.toString()).collect(Collectors.joining(", "))));
@@ -401,7 +400,7 @@ public class MasterdataProvider {
         return db;
     }
 
-    public void removeDocumentRefs(OIndex<Collection<OIdentifiable>> referredBy, ODocument entity) throws IOException {
+    public void removeDocumentRefs(OIndex referredBy, ODocument entity) throws IOException {
         JsonNode oldNode = new ObjectMapper().readTree(entity.toJSON());
         MasterdataExporter.processOrids(oldNode, jsonNode -> {
             ORecordId to = new ORecordId(jsonNode.asText());

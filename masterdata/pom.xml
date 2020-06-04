@@ -26,7 +26,7 @@
         <ecore-xcore-version>1.13.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
         <emf-codegen-version>2.16.0</emf-codegen-version>
-        <orientdb-version>3.0.29</orientdb-version>
+        <orientdb-version>3.1.0</orientdb-version>
     </properties>
 
     <dependencies>
