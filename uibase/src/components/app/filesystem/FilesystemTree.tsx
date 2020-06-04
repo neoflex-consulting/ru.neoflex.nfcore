@@ -4,7 +4,6 @@ import {Button, Dropdown, Input, Menu, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,
-    AntTreeNodeExpandedEvent,
     AntTreeNodeSelectedEvent
 } from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
@@ -17,6 +16,7 @@ const {DirectoryTree} = Tree;
 interface Props {
     onSelect?: (path?: string, isLeaf?: boolean) => void;
     onCheck?: (keys: string[]) => void;
+    checked?: string[]
 }
 
 interface State {
@@ -28,21 +28,34 @@ interface State {
     popupMenuVisible: boolean,
 }
 
+const prepareNodes = (json: any[]): any[] => {
+    return json.map(value => {
+        return {...value,
+            checkable: true,
+            children: prepareNodes(value.children || [])
+        }
+    })
+}
+
 class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     state: State = {
         key: "/",
         isLeaf: false,
         loadedKeys: [],
         selectedKeys: ["/"],
-        treeData: [
+        treeData: prepareNodes([
             {
                 title: '/',
                 key: '/',
                 isLeaf: false,
                 children: [],
             },
-        ],
+        ]),
         popupMenuVisible: false,
+    }
+
+    componentDidMount() {
+        this.reloadKey("/")
     }
 
     updateTreeData = (list: any[], key: string, children: any[]): any[] => {
@@ -69,7 +82,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     reloadKey = (key: string) => {
         return API.instance().fetchJson(`/system/fs?path=${key}`).then(json => {
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, json),
+                treeData: this.updateTreeData(this.state.treeData, key, prepareNodes(json)),
                 loadedKeys: this.state.loadedKeys.filter((value: string) => value === key || !value.startsWith(key))
             })
         })
@@ -286,17 +299,19 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                 <Dropdown overlay={menu} trigger={['contextMenu']}
                           visible={this.state.popupMenuVisible}>
                     <DirectoryTree
+                        expandAction={'doubleClick'}
                         checkable={!!this.props.onCheck}
                         selectable={!!this.props.onSelect}
                         loadedKeys={this.state.loadedKeys}
                         selectedKeys={this.state.selectedKeys}
+                        checkedKeys={this.props.checked}
                         multiple={false}
                         defaultExpandAll={false}
                         onCheck={this.onCheck}
                         onSelect={this.onSelect}
                         onLoad={this.onLoad}
                         treeData={this.state.treeData}
-                        loadData={this.loadData}
+                        //loadData={this.loadData}
                         onRightClick={options => {
                             this.setState({
                                 popupMenuVisible: !this.state.popupMenuVisible,

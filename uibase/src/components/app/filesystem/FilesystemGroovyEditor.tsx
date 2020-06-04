@@ -9,7 +9,6 @@ import AceEditor from "react-ace";
 import 'brace/mode/groovy';
 import 'brace/mode/text';
 import 'brace/theme/tomorrow';
-import {jsonRegex} from "ts-loader/dist/constants";
 
 interface Props {
     path: string
