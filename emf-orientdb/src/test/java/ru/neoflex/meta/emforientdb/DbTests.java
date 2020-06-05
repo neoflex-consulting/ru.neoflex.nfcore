@@ -1,5 +1,15 @@
 package ru.neoflex.meta.emforientdb;
 
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
+import com.orientechnologies.orient.core.db.ODatabaseType;
+import com.orientechnologies.orient.core.db.OrientDBConfig;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.sql.executor.OResult;
+import com.orientechnologies.orient.core.sql.executor.OResultSet;
+import com.orientechnologies.orient.core.tx.OTransaction;
+import com.orientechnologies.orient.server.OServer;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -10,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.neoflex.meta.test.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +34,43 @@ public class DbTests extends TestBase {
     @AfterClass
     public static void tearDown() {
         server.close();
+    }
+
+    @Test
+    public void testSelectInTransaction() {
+        OServer oServer = server.getOServer();
+        if (!oServer.existsDatabase(DBNAME)) {
+            oServer.createDatabase(DBNAME, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+        }
+        try (ODatabaseDocumentInternal db = oServer.openDatabase(DBNAME)) {
+            db.execute("sql", "drop class test_Class if exists unsafe");
+            //db.execute("sql", "drop class EOBJECT if exists unsafe");
+            //OClass eObjectClass = db.createVertexClass("EOBJECT");
+            //eObjectClass.setAbstract(true);
+            OClass oClass = db.createClass("test_Class");
+            oClass.addSuperClass(db.getClass("EOBJECT"));
+            oClass.createProperty("name", OType.STRING);
+            oClass.createIndex("test_Class.name", OClass.INDEX_TYPE.UNIQUE, "name");
+            db.begin(OTransaction.TXTYPE.OPTIMISTIC);
+            try {
+                OElement oElement = db.newVertex("test_Class");
+                oElement.setProperty("name", "My Name");
+                oElement.save();
+                try (OResultSet rs = db.query("select from test_Class where name=?", "My Name");) {
+                    List<OElement> oElements = new ArrayList<>();
+                    while (rs.hasNext()) {
+                        OResult oResult = rs.next();
+                        oResult.getElement().ifPresent(e -> {
+                            oElements.add(e);
+                        });
+                    }
+                    Assert.assertEquals(1, oElements.size());
+                }
+            }
+            finally {
+                db.commit(true);
+            }
+        }
     }
 
     @Test
@@ -42,7 +90,8 @@ public class DbTests extends TestBase {
             Resource metaRes = rs.createResource(server.createURI());
             metaRes.getContents().add(metaView);
             metaRes.save(null);
-            Assert.assertEquals(1, session.query("select from test_MetaView where qName=?", "My Meta View").size());
+            List<Resource> resources = session.query("select from test_MetaView where qName=?", "My Meta View");
+            Assert.assertEquals(1, resources.size());
             return testTable;
         });
         MetaView metaView = server.inTransaction(session -> {
