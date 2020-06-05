@@ -3,11 +3,11 @@ import { action } from '@storybook/addon-actions';
 import { Button } from 'antd';
 
 class ButtonDisabled extends Component {
-  /* state = {
+  state = {
     isOpen: false
-  }; */
+  };
 
-  render() { 
+  render() {
     return (
       <Fragment>
         <h3 className="ex-title">Disabled</h3>
@@ -23,12 +23,12 @@ class ButtonDisabled extends Component {
           <Button className="ml20" type="danger" disabled>Danger(disabled)</Button>
         </div>
 
-        {/* <p className="text">
+        { <p className="text">
           To mark a button as
           <span className="allotted">disabled</span>,
           add the disabled property to the
           <span className="allotted">Button</span>.
-        </p>
+        </p> }
 
         <span className="ex-toggle" onClick={this.toggle}>
           { this.state.isOpen ? 'Hide ' : 'Show ' }
@@ -38,14 +38,14 @@ class ButtonDisabled extends Component {
         {  // Block Code
           this.state.isOpen ?
             this.getCode() : null
-        } */}
+        } }
       </Fragment>
     );
   }
 
-  /* toggle = () => this.setState({ isOpen: !this.state.isOpen }); */
+  toggle = () => this.setState({ isOpen: !this.state.isOpen });
 
-  /* getCode() {
+   getCode() {
     return (
       <code className="code">
         <pre><i className="blue">import</i> &#123; Button &#125; <i className="blue">from</i> <i className="green">'antd'</i>;</pre>
@@ -64,7 +64,7 @@ class ButtonDisabled extends Component {
         <pre>);</pre>
       </code>
     );
-  } */
+  }
 }
- 
+
 export default ButtonDisabled;

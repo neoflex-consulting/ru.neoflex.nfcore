@@ -1,13 +1,6 @@
 import React, { Component, Fragment } from 'react';
 
-import Type from './Types';
-import Size from './Size';
-import Icon from './Icon';
 import Disabled from './Disabled';
-import Multiple from './Multiple';
-import Loading from './Loading';
-import Group from './Group';
-import Ghost from './Ghost';
 import NXButton from './NXButton'
 
 class ButtonPage extends Component {
@@ -55,42 +48,13 @@ class ButtonPage extends Component {
               <br/>
               &lt;<span style={{color: 'red'}}>NXButton</span> <span style={{color: 'green'}}>disabled</span> /&gt;
             </div>
-              <br/>
-
+            <br/><br/>
           </div>
         </section>
-
-        <section className="example">
-          <Type />
-        </section>
-
-        <section className="example">
-          <Icon />
-        </section>
-
-        <section className="example">
-          <Size />
-        </section>
-
-        <section className="example">
+        <section>
           <Disabled />
         </section>
 
-        <section className="example">
-          <Loading />
-        </section>
-
-        <section className="example">
-          <Multiple />
-        </section>
-
-        <section className="example">
-          <Group />
-        </section>
-
-        <section className="example">
-          <Ghost />
-        </section>
       </Fragment>
     );
   }

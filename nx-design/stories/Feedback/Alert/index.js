@@ -1,12 +1,5 @@
 import React, { Component, Fragment } from 'react';
 
-import Basic from './Basic';
-import Types from './Types';
-import Closeble from './Closeble';
-import Description from './Description';
-import Icon from './Icon';
-import Custom from './Custom';
-import Banner from './Banner';
 import {NXAlert} from "./Alert";
 
 class AlertPage extends Component {
@@ -55,14 +48,6 @@ class AlertPage extends Component {
           <h3 className="ex-title">Success</h3>
           <NXAlert.success message="Success" description='This is a success alert' />
         </section>
-
-        <Basic />
-        <Types />
-        <Closeble />
-        <Description />
-        <Icon />
-        <Custom />
-        <Banner />
 
       </Fragment>
     );
