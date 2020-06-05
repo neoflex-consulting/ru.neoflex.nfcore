@@ -1,19 +1,22 @@
 import * as React from "react";
 import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag, notification} from 'antd';
-import { API } from "../modules/api";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {API} from "../modules/api";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
 // import Splitter from './CustomSplitter'
-import { faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
+import {faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle} from '@fortawesome/free-solid-svg-icons'
 import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
+import FilesystemLookup from "./app/filesystem/FilesystemLookup";
+
 const {Column} = Table;
 const ButtonGroup = Button.Group
 
-interface Props {}
+interface Props {
+}
 
 interface State {
     fileName?: string,
@@ -23,6 +26,7 @@ interface State {
     withDependents: boolean,
     recursiveDependents: boolean,
     resourceList: Ecore.Resource[],
+    checkedFiles: string[],
     branchInfo: {
         current: string,
         default: string,
@@ -40,6 +44,7 @@ class Tools extends React.Component<any, State> {
         withDependents: false,
         recursiveDependents: false,
         resourceList: [],
+        checkedFiles: [],
         branchInfo: {
             current: "master",
             default: 'master',
@@ -63,11 +68,11 @@ class Tools extends React.Component<any, State> {
     setCurrentBranch = (branch: string) => {
         API.instance().fetchJson("/system/branch/" + branch, {
             method: "PUT",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            }).then(branchInfo => {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(branchInfo => {
             this.setState({branchInfo})
         })
     }
@@ -76,7 +81,7 @@ class Tools extends React.Component<any, State> {
         let form = new FormData()
         form.append("file", file)
         this.setState({fileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
-        API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json=>{
+        API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
     }
@@ -85,7 +90,7 @@ class Tools extends React.Component<any, State> {
         let form = new FormData()
         form.append("file", file)
         this.setState({mdFileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
-        API.instance().fetchJson("/masterdata/import", {method: 'POST', body: form}).then(json=>{
+        API.instance().fetchJson("/masterdata/import", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
     }
@@ -94,7 +99,7 @@ class Tools extends React.Component<any, State> {
         let form = new FormData()
         form.append("file", file)
         this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')});
-        API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json=>{
+        API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
     }
@@ -106,12 +111,15 @@ class Tools extends React.Component<any, State> {
 
     downloadSelected = () => {
         let filename = "export.zip";
-        API.instance().download(`/system/exportdb?withReferences=${this.state.withReferences===true}&withDependents=${this.state.withDependents===true}&recursiveDependents=${this.state.recursiveDependents===true}`, {
+        API.instance().download(`/system/exportdb?withReferences=${this.state.withReferences === true}&withDependents=${this.state.withDependents === true}&recursiveDependents=${this.state.recursiveDependents === true}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(this.state.resourceList.map(r=>r.get('uri')))
+            body: JSON.stringify({
+                resources: this.state.resourceList.map(r => r.get('uri')),
+                files: this.state.checkedFiles
+            })
         }, filename)
     }
 
@@ -128,7 +136,7 @@ class Tools extends React.Component<any, State> {
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
         const {resourceList} = this.state
         resourceList.push(...resources)
-        this.setState({ modalResourceVisible: false })
+        this.setState({modalResourceVisible: false})
     }
 
     render() {
@@ -208,10 +216,10 @@ class Tools extends React.Component<any, State> {
                                 render={(text) => <Checkbox disabled={true} checked={text === true}/>}
                         />
                         <Column dataIndex={"branch"} key={"command"}
-                                render={branch=>(
+                                render={branch => (
                                     <ButtonGroup className="pull-right">
                                         <Tooltip title={"Set Current"}>
-                                            <Button type="dashed" size="small" onClick={()=>{
+                                            <Button type="dashed" size="small" onClick={() => {
                                                 this.setCurrentBranch(branch)
                                             }}>
                                                 <FontAwesomeIcon icon={faCheckCircle}/>
@@ -223,24 +231,36 @@ class Tools extends React.Component<any, State> {
                     </Table>
                     <Divider orientation="left">Export All Objects</Divider>
                     <Tooltip title={"Export"}>
-                        <Button type="dashed" size="small" onClick={()=>{
+                        <Button type="dashed" size="small" onClick={() => {
                             this.downloadAll();
                         }}>
                             <FontAwesomeIcon icon={faCloudDownloadAlt}/>
                         </Button>
                     </Tooltip>
-                    <Divider orientation="left">Export Selected Objects</Divider>
+                    <Divider orientation="left">Export Selected Files&Objects</Divider>
+                    <div>
+                        <FilesystemLookup checked={this.state.checkedFiles}
+                                          onCheck={paths => this.setState({checkedFiles: paths})}/>
+                    </div>
                     {this.state.modalResourceVisible && <Modal
                         key="add_resource_modal"
                         width={'1000px'}
                         title={t('addresource')}
                         visible={this.state.modalResourceVisible}
                         footer={null}
-                        onCancel={() => this.setState({modalResourceVisible: false})}                    >
-                        <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
+                        onCancel={() => this.setState({modalResourceVisible: false})}>
+                        <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
+                                    specialEClass={undefined}/>
                     </Modal>}
                     <div>
-                        {this.state.resourceList.map(r=>
+                        <Tooltip title={"Add Objects"}>
+                            <Button type="dashed" size="small" onClick={() => {
+                                this.setState({modalResourceVisible: true})
+                            }}>
+                                <FontAwesomeIcon icon={faPlusCircle}/>
+                            </Button>
+                        </Tooltip>
+                        {this.state.resourceList.map(r =>
                             <Tooltip title={r.eContents()[0].eClass.get('name')}>
                                 <Tag key={r.get("uri")} closable={true} onClose={() => {
                                     const index = this.state.resourceList.indexOf(r);
@@ -249,30 +269,31 @@ class Tools extends React.Component<any, State> {
                                     {r.eContents()[0].get('name') || r.get('uri')}
                                 </Tag>
                             </Tooltip>
-                            )}
+                        )}
                     </div>
                     <Form layout={"inline"}>
                         <Form.Item>
-                            <Tooltip title={"Add Objects"}>
-                                <Button type="dashed" size="small" onClick={()=>{
-                                    this.setState({modalResourceVisible: true})
-                                }}>
-                                    <FontAwesomeIcon icon={faPlusCircle}/>
-                                </Button>
-                            </Tooltip>
                             <Tooltip title={"Export with all referenced objects"}>
-                                <Checkbox checked={this.state.withReferences} onChange={(e)=>this.setState({withReferences: e.target.checked})}>With References</Checkbox>
+                                <Checkbox checked={this.state.withReferences}
+                                          onChange={(e) => this.setState({withReferences: e.target.checked})}>With
+                                    References</Checkbox>
                             </Tooltip>
                             <Tooltip title={"Export with dependent objects"}>
-                                <Checkbox checked={this.state.withDependents} onChange={(e)=>this.setState({withDependents: e.target.checked})}>With Dependents</Checkbox>
+                                <Checkbox checked={this.state.withDependents}
+                                          onChange={(e) => this.setState({withDependents: e.target.checked})}>With
+                                    Dependents</Checkbox>
                             </Tooltip>
                             <Tooltip title={"Collect dependent objects recursively"}>
-                                <Checkbox checked={this.state.recursiveDependents} onChange={(e)=>this.setState({recursiveDependents: e.target.checked})}>Recursive Dependents</Checkbox>
+                                <Checkbox checked={this.state.recursiveDependents}
+                                          onChange={(e) => this.setState({recursiveDependents: e.target.checked})}>Recursive
+                                    Dependents</Checkbox>
                             </Tooltip>
                             <Tooltip title={"Export Selected"}>
-                                <Button type="dashed" size="small" disabled={this.state.resourceList.length === 0} onClick={()=>{
-                                    this.downloadSelected()
-                                }}>
+                                <Button type="dashed" size="small"
+                                        disabled={this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0}
+                                        onClick={() => {
+                                            this.downloadSelected()
+                                        }}>
                                     <FontAwesomeIcon icon={faCloudDownloadAlt}/>
                                 </Button>
                             </Tooltip>
@@ -293,10 +314,11 @@ class Tools extends React.Component<any, State> {
                     <Divider orientation="left">Export Master Data</Divider>
                     <Form layout={"inline"}>
                         <Tooltip title={"Query data to export"}>
-                            <Input.TextArea placeholder="SQL" value={this.state.sql} onChange={(e)=>this.setState({sql: e.target.value})}></Input.TextArea>
+                            <Input.TextArea placeholder="SQL" value={this.state.sql}
+                                            onChange={(e) => this.setState({sql: e.target.value})}></Input.TextArea>
                         </Tooltip>
                         <Tooltip title={"Export Selected"}>
-                            <Button type="dashed" size="small" disabled={!this.state.sql} onClick={()=>{
+                            <Button type="dashed" size="small" disabled={!this.state.sql} onClick={() => {
                                 this.downloadSQL()
                             }}>
                                 <FontAwesomeIcon icon={faCloudDownloadAlt}/>

@@ -4,7 +4,6 @@ import {Button, Dropdown, Input, Menu, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,
-    AntTreeNodeExpandedEvent,
     AntTreeNodeSelectedEvent
 } from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
@@ -17,6 +16,7 @@ const {DirectoryTree} = Tree;
 interface Props {
     onSelect?: (path?: string, isLeaf?: boolean) => void;
     onCheck?: (keys: string[]) => void;
+    checked?: string[]
 }
 
 interface State {
@@ -28,21 +28,34 @@ interface State {
     popupMenuVisible: boolean,
 }
 
+const prepareNodes = (json: any[]): any[] => {
+    return json.map(value => {
+        return {...value,
+            checkable: true,
+            children: prepareNodes(value.children || [])
+        }
+    })
+}
+
 class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     state: State = {
         key: "/",
         isLeaf: false,
         loadedKeys: [],
         selectedKeys: ["/"],
-        treeData: [
+        treeData: prepareNodes([
             {
                 title: '/',
                 key: '/',
                 isLeaf: false,
                 children: [],
             },
-        ],
+        ]),
         popupMenuVisible: false,
+    }
+
+    componentDidMount() {
+        this.reloadKey("/")
     }
 
     updateTreeData = (list: any[], key: string, children: any[]): any[] => {
@@ -69,7 +82,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     reloadKey = (key: string) => {
         return API.instance().fetchJson(`/system/fs?path=${key}`).then(json => {
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, json),
+                treeData: this.updateTreeData(this.state.treeData, key, prepareNodes(json)),
                 loadedKeys: this.state.loadedKeys.filter((value: string) => value === key || !value.startsWith(key))
             })
         })
@@ -110,15 +123,15 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     }
 
     createFolder = () => {
-        var newCatalog = prompt("New catalog name", "NewCatalog")
+        let newCatalog = prompt("New catalog name", "NewCatalog")
         if (newCatalog) {
             console.log(newCatalog)
-            const key = this.state.key || "/"
-            const newKey = ["", ...key.slice(1).split("/"), newCatalog].join("/")
-            const children = [...this.getChildren(this.state.treeData, key),
+            const {key, treeData} = this.state
+            const newKey = ["", ...key.split("/").filter(p=>!!p), newCatalog].join("/")
+            const children = [...this.getChildren(treeData, key),
                 {key: newKey, title: newCatalog, isLeaf: false}]
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, children),
+                treeData: this.updateTreeData(treeData, key, children),
                 selectedKeys: [newKey],
                 key: newKey,
                 isLeaf: false
@@ -130,15 +143,15 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     }
 
     createFile = () => {
-        var newFile = prompt("New file name", "test.groovy")
+        let newFile = prompt("New file name", "test.groovy")
         if (newFile) {
             console.log(newFile)
-            const key = this.state.key || "/"
-            const newKey = ["", ...key.slice(1).split("/"), newFile].join("/")
-            const children = [...this.getChildren(this.state.treeData, key),
+            const {key, treeData} = this.state
+            const newKey = ["", ...key.split("/").filter(p=>!!p), newFile].join("/")
+            const children = [...this.getChildren(treeData, key),
                 {key: newKey, title: newFile, isLeaf: true}]
             this.setState({
-                treeData: this.updateTreeData(this.state.treeData, key, children),
+                treeData: this.updateTreeData(treeData, key, children),
                 selectedKeys: [newKey],
                 key: newKey,
                 isLeaf: true
@@ -159,7 +172,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                 },
 
             }).then(json => {
-                const parent = ["", ...(this.state.key || "/").slice(1).split("/")].slice(0, -1).join("/") || "/"
+                const parent = ["", ...this.state.key.split("/").filter(p=>!!p)].slice(0, -1).join("/") || "/"
                 this.setState({
                     treeData: this.updateTreeData(this.state.treeData, parent, json),
                     loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
@@ -286,17 +299,19 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                 <Dropdown overlay={menu} trigger={['contextMenu']}
                           visible={this.state.popupMenuVisible}>
                     <DirectoryTree
+                        expandAction={'doubleClick'}
                         checkable={!!this.props.onCheck}
                         selectable={!!this.props.onSelect}
                         loadedKeys={this.state.loadedKeys}
                         selectedKeys={this.state.selectedKeys}
+                        checkedKeys={this.props.checked}
                         multiple={false}
                         defaultExpandAll={false}
                         onCheck={this.onCheck}
                         onSelect={this.onSelect}
                         onLoad={this.onLoad}
                         treeData={this.state.treeData}
-                        loadData={this.loadData}
+                        //loadData={this.loadData}
                         onRightClick={options => {
                             this.setState({
                                 popupMenuVisible: !this.state.popupMenuVisible,

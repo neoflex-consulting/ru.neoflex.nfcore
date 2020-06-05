@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {API} from "../../../modules/api";
+import {API, Error} from "../../../modules/api";
 import {Button} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faRunning, faSave, faSyncAlt} from "@fortawesome/free-solid-svg-icons";
@@ -36,7 +36,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         if (this.state.path) {
             API.instance().fetch("/system/fs/data?path=" + this.state.path)
                 .then(response => response.text())
-                .then(text => this.setState({text: text || ""}))
+                .then(text => this.setState({text: text || "", result: ""}))
         }
     }
 
@@ -44,11 +44,20 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         API.instance().fetchJson("/system/fs?path=" + this.state.path, {
             method: 'PUT',
             body: this.state.text
-        }).then(value => {})
+        }).then(value => {
+        })
     }
 
     run = () => {
-        API.instance().fetchJson("/script/evaluate", {
+        this.setState({result: "Wait..."})
+        const errorHandlers = API.instance().errorHandlers
+        API.instance().errorHandlers = [{
+            handleError: (reason: Error) => {
+                this.setState({result: reason.message});
+                API.instance().errorHandlers = errorHandlers
+            }
+        }]
+        API.instance().fetchJson("/script/evaluate?name=" + this.state.path, {
             method: 'POST',
             body: this.state.text
         }).then(ret => {
@@ -60,6 +69,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                 result = result + ">> " + ret.result
             }
             this.setState({result})
+            API.instance().errorHandlers = errorHandlers
         })
     }
 
