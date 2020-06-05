@@ -17,13 +17,8 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.*;
 import java.sql.Timestamp;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static ru.neoflex.nfcore.base.util.Exporter.GROOVY;
 
 @Service
 public class DeploySupply {
@@ -43,61 +38,69 @@ public class DeploySupply {
     @PostConstruct
     void init() throws Exception {
         try {
-            context.transact("DeploySupply", () -> {
-                Path deployPath = Paths.get(deployBase);
-                Files.createDirectories(deployPath);
-                List<Path> paths = Files.walk(deployPath)
-                        .filter(Files::isRegularFile)
-                        .filter(path->path.getFileName().toString().toLowerCase().endsWith(".zip"))
-                        .filter(path->{
-                            DocFinder docFinder = DocFinder.create(
-                                    store,
-                                    SupplyPackage.Literals.SUPPLY,
-                                    new HashMap<String, String>() {{
-                                        put("name", path.getFileName().toString());
-                                    }});
-                            try {
-                                return docFinder.execute().getResources().size() == 0;
-                            } catch (IOException e) {
-                                return false;
-                            }
-                        }).collect(Collectors.toList());
-                paths.sort(Comparator.comparing(o -> o.getFileName().toString()));
-                for (Path path: paths) {
+            Path deployPath = Paths.get(deployBase);
+            Files.createDirectories(deployPath);
+            List<Path> paths = context.transact(null, () ->
+                    Files.walk(deployPath)
+                            .filter(Files::isRegularFile)
+                            .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".zip"))
+                            .filter(path -> {
+                                DocFinder docFinder = DocFinder.create(
+                                        store,
+                                        SupplyPackage.Literals.SUPPLY,
+                                        new HashMap<String, String>() {{
+                                            put("name", path.getFileName().toString());
+                                        }});
+                                try {
+                                    return docFinder.execute().getResources().size() == 0;
+                                } catch (IOException e) {
+                                    return false;
+                                }
+                            }).collect(Collectors.toList()));
+            paths.sort(Comparator.comparing(o -> o.getFileName().toString()));
+            context.transact("DeploySupply (XMI/REFS)", () -> {
+                for (Path path : paths) {
                     new Exporter(store).processZipXmi(path);
                     logger.info("File " + path.getFileName().toString() + " successfully deployed (XMI)");
                 }
-                for (Path path: paths) {
+                for (Path path : paths) {
                     new Exporter(store).processZipRefs(path);
                     logger.info("File " + path.getFileName().toString() + " successfully deployed (REFS)");
                 }
-                for (Path path: paths) {
-                    new Exporter(store).processZipFile(path, GROOVY, (p, bytes) -> {
-                        if (!p.getFileName().toString().equals("post_install.groovy")) {
-                            Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
-                            try {
-                                Files.write(to, bytes);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        return null;
-                    });
-                    logger.info("File " + path.getFileName().toString() + " successfully deployed (GROOVY)");
+                String[] suffixes = {XMI, REFS, "/post_install.groovy"};
+                for (Path path : paths) {
+                    new Exporter(store).processZipFile(path,
+                            p -> Arrays.stream(suffixes).filter(s -> !p.toString().toLowerCase().endsWith(s)).count() == 0,
+                            (p, bytes) -> {
+                                Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
+                                try {
+                                    Files.write(to, bytes);
+                                    logger.info("File " + path.getFileName().toString() + "/" + p.toString() + " successfully copied");
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                return null;
+                            });
                 }
-                for (Path path: paths) {
+                return null;
+            });
+            context.transact("DeploySupply (post_install.groovy)", () -> {
+                for (Path path : paths) {
                     new Exporter(store).processZipFile(path, (p) -> p.getFileName().toString().equals("post_install.groovy"), (p, bytes) -> {
                         try {
                             String code = new String(bytes, "utf-8");
                             context.getGroovy().eval(code, new HashMap<>());
+                            logger.info("File " + path.getFileName().toString() + "/" + p.toString() + " successfully evaluated");
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                         return null;
                     });
-                    logger.info("File " + path.getFileName().toString() + " successfully evaluated (post_install.groovy)");
                 }
-                for (Path path: paths) {
+                return null;
+            });
+            context.transact("DeploySupply (createSupply)", () -> {
+                for (Path path : paths) {
                     Supply supply = SupplyFactory.eINSTANCE.createSupply();
                     supply.setName(path.getFileName().toString());
                     supply.setDate(new Timestamp((new Date()).getTime()));
@@ -106,8 +109,7 @@ public class DeploySupply {
                 }
                 return null;
             });
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             logger.error("", e);
         }
     }
