@@ -40,7 +40,7 @@ export interface QueryResult {
 
 export class API implements IErrorHandler {
     private static _instance: API;
-    private errorHandlers: Array<IErrorHandler>;
+    public errorHandlers: Array<IErrorHandler>;
     private ePackagesPromise: Promise<Ecore.EPackage[]>;
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
