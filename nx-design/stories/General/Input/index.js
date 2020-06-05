@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 
-import {NXInput, NXCheckbox, NXRadio, NXTextArea, NXDatePicker, NXSelect, NXOption} from './Input';
+import NXInputSearch, {NXInput, NXCheckbox, NXRadio, NXTextArea, NXDatePicker, NXSelect, NXOption} from './Input';
 
 class InputPage extends Component {
   render() {
@@ -53,7 +53,14 @@ class InputPage extends Component {
           <h3 className="ex-title">Input</h3>
 
           <div>
-          <NXInput width='250px' />
+            <h4>Basic input</h4>
+            <NXInput width='250px' />
+          </div>
+        <br/>
+
+          <div>
+            <h4>Search input</h4>
+            <NXInputSearch width='250px' />
           </div>
 
         </section>

@@ -27,17 +27,36 @@ class ButtonPage extends Component {
           <h3 className="ex-title">Buttons</h3>
 
           <div>
-            <NXButton primary>
+            <NXButton primary className='ml20'>
               Primary
             </NXButton>
+            <div className='exampleStyle ml20'>
+              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
+              <br/>
+              &lt;<span style={{color: 'red'}}>NXButton</span> <span style={{color: 'green'}}>primary</span> /&gt;
+            </div>
+              <br/><br/>
 
             <NXButton className="ml20">
               Default
             </NXButton>
+            <div className='exampleStyle ml20'>
+              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
+              <br/>
+              &lt;<span style={{color: 'red'}}>NXButton</span> /&gt;
+            </div>
+              <br/><br/>
 
             <NXButton className="ml20" disabled>
               Disabled
             </NXButton>
+            <div className='exampleStyle ml20'>
+              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
+              <br/>
+              &lt;<span style={{color: 'red'}}>NXButton</span> <span style={{color: 'green'}}>disabled</span> /&gt;
+            </div>
+              <br/>
+
           </div>
         </section>
 
@@ -78,25 +97,3 @@ class ButtonPage extends Component {
 }
 
 export default ButtonPage;
-
-
-
-
-
-/* import { storiesOf } from '@storybook/react';
-
-import ButtonTypes from './Types';
-import ButtonSize from './Size';
-import ButtonLoading from './Loading';
-import ButtonDisabled from './Disabled';
-import ButtonMultiple from './Multiple';
-import ButtonGhost from './Ghost';
-
-storiesOf('Button', module)
-  .add('Types', () => <ButtonTypes />)
-  .add('Sizes', () => <ButtonSize />)
-  .add('Loadings', () => <ButtonLoading />)
-  .add('Disabled', () => <ButtonDisabled />)
-  .add('Multiple Buttons', () => <ButtonMultiple />)
-  .add('Ghost Button', () => <ButtonGhost />);
- */

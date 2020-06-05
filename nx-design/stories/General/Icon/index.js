@@ -56,12 +56,6 @@ class IconPage extends Component {
   }
 
   render() {
-    const exampleStyle = {
-      display: 'inline-block',
-      marginLeft: '20px',
-      padding: '10px 20px',
-      background: '#eee'
-    };
 
     const header = [notification,
       question,
@@ -138,7 +132,7 @@ class IconPage extends Component {
           Use tag to create an icon and set its type in the type prop, for example:
         </p>
 
-        <div style={exampleStyle}>
+        <div className='exampleStyle'>
           &lt;<span style={{color: 'red'}}>NXIcon</span> <span style={{color: 'green'}}>icon</span>="<span style={{color: 'blue'}}>iconName</span>" /&gt;
         </div>
 

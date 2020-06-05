@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Component} from 'react';
 import {Checkbox, Input, Radio, DatePicker, Select} from "antd";
 import styled from 'styled-components';
 import calendar from '../../../icons/calendar.svg';
@@ -14,6 +14,14 @@ const NXInput = styled(Input)`
     color: #333333;
     width: ${(props) => (props.width ? `${props.width}` : "100%")};
 `
+
+export default class NXInputSearch extends Component {
+  render() {
+    return (
+      <NXInput placeholder={'Поиск'} {...this.props}></NXInput>
+    )
+  }
+}
 
 const NXRadio = styled(Radio)`
 .ant-radio-inner::after {
