@@ -416,7 +416,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates = getParamsFromComponent(resource, 'serverAggregation');
             serverSorts = getParamsFromComponent(resource, 'serverSort');
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
-            serverGroupByColumn = getParamsFromComponent(resource, 'serverGroupByColumn');
+            serverGroupByColumn = getParamsFromComponent(resource, 'groupByColumn');
             highlights = getParamsFromComponent(resource, 'highlight');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
         }
