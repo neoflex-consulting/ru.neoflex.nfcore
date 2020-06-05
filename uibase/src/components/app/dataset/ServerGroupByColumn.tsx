@@ -38,48 +38,12 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableItem">
+    return <div className="SortableItemColumn">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 {value.index}
             </Col>
-            <Col span={9}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    {value.getFieldDecorator(`${value.idOperation}`,
-                        {
-                            initialValue: value.t(value.operation) || undefined,
-                            rules: [{
-                                required:
-                                value.datasetColumn,
-                                message: ' '
-                            }]
-                        })(
-                        <Select
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('operation')}
-                            style={{ width: '219px', marginRight: '10px' }}
-                            allowClear={true}
-                            onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
-                                value.handleChange(event)
-                            }}
-                        >
-                            {
-                                value.allAggregates!
-                                    .map((o: any) =>
-                                        <Select.Option
-                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                        >
-                                            {value.t(o.get('name'))}
-                                        </Select.Option>)
-                            }
-                        </Select>
-
-                    )}
-                </Form.Item>
-            </Col>
-            <Col span={10}>
+            <Col span={19}>
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
@@ -122,7 +86,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <Select
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ width: '239px', marginRight: '30px', marginLeft: '10px' }}
+                            style={{ width: '475px', marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -168,18 +132,10 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </Col>
         </Row>
-        <Row>
-            <Col span={1}>
-            </Col>
-            <Col span={23}>
-                <Input placeholder="Basic usage" />
-            </Col>
-        </Row>
-
     </div>
 });
 
-class ServerGroupBy extends DrawerParameterComponent<Props, State> {
+class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
 
     constructor(props: any) {
         super(props);
@@ -195,6 +151,26 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
+                    <Col span={24} style={{textAlign: "left"}}>
+                        <Button
+                            title="reset"
+                            style={{width: '40px', marginRight: '10px'}}
+                            key={'resetButton'}
+                            value={'resetButton'}
+                            onClick={this.reset}
+                        >
+                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
+                        </Button>
+                        <Button
+                            title="run query"
+                            style={{width: '40px'}}
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                        >
+                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
+                        </Button>
+                    </Col>
                 </Form.Item>
                 <Form.Item>
                     {
@@ -229,4 +205,4 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupBy))
+export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupByColumn))
