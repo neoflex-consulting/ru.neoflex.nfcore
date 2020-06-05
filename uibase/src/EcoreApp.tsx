@@ -271,8 +271,16 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = [], filterParams: IServerQueryParam[] = [], aggregationParams: IServerQueryParam[] = [],
-                sortParams: IServerQueryParam[] = [], groupByParams: IServerQueryParam[] = [], calculatedExpression: IServerQueryParam[] = []) => {
+    runQuery = (
+        resource_: Ecore.Resource,
+        queryParams: IServerNamedParam[] = [],
+        filterParams: IServerQueryParam[] = [],
+        aggregationParams: IServerQueryParam[] = [],
+        sortParams: IServerQueryParam[] = [],
+        groupByParams: IServerQueryParam[] = [],
+        calculatedExpression: IServerQueryParam[] = [],
+        groupByColumns: IServerQueryParam[] = []
+    ) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
@@ -283,7 +291,8 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByColumns, '/parameterGroupByColumn')])
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
