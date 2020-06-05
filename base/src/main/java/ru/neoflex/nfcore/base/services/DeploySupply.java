@@ -75,7 +75,7 @@ public class DeploySupply {
                                 Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
                                 try {
                                     Files.write(to, bytes);
-                                    logger.info("File " + path.getFileName().toString() + "/" + p.toString() + " successfully copied");
+                                    logger.info("File " + path.getFileName().toString() + p.toString() + " successfully copied");
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -90,7 +90,7 @@ public class DeploySupply {
                         try {
                             String code = new String(bytes, "utf-8");
                             context.getGroovy().eval(code, new HashMap<>());
-                            logger.info("File " + path.getFileName().toString() + "/" + p.toString() + " successfully evaluated");
+                            logger.info("File " + path.getFileName().toString() + p.toString() + " successfully evaluated");
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
