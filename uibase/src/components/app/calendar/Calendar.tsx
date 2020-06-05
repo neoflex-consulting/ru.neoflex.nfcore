@@ -658,7 +658,11 @@ class Calendar extends React.Component<any, any> {
         const {gridOptions} = this.state;
         return (
             <div
-                style="width: 98%; height: 60%; marginTop: 30px;"
+                style={{
+                    marginTop: '30px',
+                    width: '98%',
+                    height: 550
+                }}
                 className={'ag-theme-material'}
             >
                 {this.state.columnDefs.length !== 0 && <AgGridReact
