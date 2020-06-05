@@ -96,6 +96,7 @@ class DatasetComponent {
      contains QuerySort[] serverSort
      contains QueryGroupBy[] serverGroupBy
      contains QueryCalculatedExpression[] serverCalculatedExpression
+     contains QueryGroupByColumn[] groupByColumn
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
@@ -168,6 +169,11 @@ class QuerySort {
 class QueryGroupBy {
     String datasetColumn
     Aggregate operation
+    boolean enable
+}
+
+class QueryGroupByColumn {
+    String datasetColumn
     boolean enable
 }
 

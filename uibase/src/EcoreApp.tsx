@@ -271,9 +271,16 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = [], filterParams: IServerQueryParam[] = [], aggregationParams: IServerQueryParam[] = [],
-                sortParams: IServerQueryParam[] = [], groupByParams: IServerQueryParam[] = [], calculatedExpression: IServerQueryParam[] = [],
-                groupByColumns: IServerQueryParam[] = []) => {
+    runQuery = (
+        resource_: Ecore.Resource,
+        queryParams: IServerNamedParam[] = [],
+        filterParams: IServerQueryParam[] = [],
+        aggregationParams: IServerQueryParam[] = [],
+        sortParams: IServerQueryParam[] = [],
+        groupByParams: IServerQueryParam[] = [],
+        calculatedExpression: IServerQueryParam[] = [],
+        groupByColumns: IServerQueryParam[] = []
+    ) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
