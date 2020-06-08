@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 
 import Disabled from './Disabled';
-import NXButton from './NXButton'
+import {NXButton} from '../../../index'
 
 class ButtonPage extends Component {
   render() {

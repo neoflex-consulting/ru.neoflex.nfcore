@@ -2,7 +2,7 @@ import { Button } from 'antd';
 import styled from 'styled-components';
 
 
-const NXButton = styled(Button)`
+export const NXButton = styled(Button)`
     background: ${(props) => (props.primary ? '#424D78'
       : props.disabled ? '#B3B3B3'
         : '#FFFFFF')};
@@ -44,5 +44,4 @@ const NXButton = styled(Button)`
     }
 `
 
-
-export default NXButton;
+export default NXButton
