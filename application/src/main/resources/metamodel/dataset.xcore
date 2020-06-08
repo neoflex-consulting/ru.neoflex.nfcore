@@ -6,7 +6,6 @@
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
 package ru.neoflex.nfcore.dataset
-import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Text
@@ -54,8 +53,7 @@ class JdbcDataset extends Dataset {
     op JSON runQueryDataset()
 }
 
-class MetaDataset extends Dataset {
-    refers EClass metaEClass
+class GroovyDataset extends Dataset {
     op JSON loadAllColumns()
 }
 
