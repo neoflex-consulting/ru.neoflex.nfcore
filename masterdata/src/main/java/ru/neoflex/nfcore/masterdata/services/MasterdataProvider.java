@@ -644,6 +644,13 @@ public class MasterdataProvider {
         });
     }
 
+    public void execute(String sql, Object ...args) {
+        withDatabase(database -> {
+            database.execute("sql", sql, args).close();
+            return null;
+        });
+    }
+
     public List<OEntity> query(String sql) {
         return query(sql, new HashMap());
     }
