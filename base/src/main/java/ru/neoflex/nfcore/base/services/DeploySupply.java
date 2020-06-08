@@ -74,6 +74,7 @@ public class DeploySupply {
                             (p, bytes) -> {
                                 Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
                                 try {
+                                    Files.createDirectories(to.getParent());
                                     Files.write(to, bytes);
                                     logger.info("File " + path.getFileName().toString() + p.toString() + " successfully copied");
                                 } catch (IOException e) {
