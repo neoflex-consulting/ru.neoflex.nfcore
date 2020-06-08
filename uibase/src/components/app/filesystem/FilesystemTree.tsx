@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {Button, Dropdown, Input, Menu, Tree} from 'antd';
+import {Button, Dropdown, Input, Menu, Row, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,
@@ -92,7 +92,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         return this.reloadKey(node.props.eventKey || "")
     }
 
-    isSelectedLoaded = () => this.state.loadedKeys.includes(this.state.key)
+    isSelectedLoaded = () => true
 
     onSelect = (selectedKeys: string[], e: AntTreeNodeSelectedEvent) => {
         console.log('Trigger Select', selectedKeys, e);
@@ -246,7 +246,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         )
         return (
             <div style={{flexGrow: 1, height: '100%'}}>
-                <div>
+                <Row hidden={!!this.props.onCheck}>
                     <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}}
                             disabled={!this.state.isLeaf !== true} onClick={this.onRefresh}>
                         <FontAwesomeIcon icon={faSyncAlt} size='lg' color="#7b7979"/>
@@ -295,7 +295,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                             onClick={this.delete}>
                         <FontAwesomeIcon icon={faTrashAlt} size='sm' color="#7b7979"/>
                     </Button>
-                </div>
+                </Row>
                 <Dropdown overlay={menu} trigger={['contextMenu']}
                           visible={this.state.popupMenuVisible}>
                     <DirectoryTree

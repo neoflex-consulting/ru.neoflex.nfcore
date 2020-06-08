@@ -17,6 +17,7 @@ import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
 import Operations from './Operations';
 import moment from 'moment';
+import FetchSpinner from "./FetchSpinner";
 
 export interface Props {
 }
@@ -633,6 +634,7 @@ class ResourceEditor extends React.Component<any, State> {
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+                <FetchSpinner/>
                 <Layout.Header className="head-panel">
                     {this.state.isSaving ?
                         <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
@@ -738,8 +740,10 @@ class ResourceEditor extends React.Component<any, State> {
                         style={{ width: '100%' }}
                         placeholder="Please select"
                         defaultValue={[]}
-                        onChange={(uriArray: string[]) => {
-                            this.setState({ selectedRefUries: uriArray })
+                        showSearch={true}
+                        onChange={(uriArray: string[], option: any) => {
+                            const opt = option.map((o: any) => o.key);
+                            this.setState({ selectedRefUries: opt })
                         }}
                     >
                         {
@@ -749,7 +753,7 @@ class ResourceEditor extends React.Component<any, State> {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject'
                                     return isEObjectType ?
-                                        <Select.Option key={index} value={eObject.eURI()}>
+                                        <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
@@ -757,7 +761,7 @@ class ResourceEditor extends React.Component<any, State> {
                                             {`${eObject.get('name')}`}
                                         </Select.Option>
                                         :
-                                        possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={index} value={eObject.eURI()}>
+                                        possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
