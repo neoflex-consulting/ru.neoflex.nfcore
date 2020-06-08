@@ -62,6 +62,9 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
             case paramType.group:
                 this.paramNotification = "Group by notification";
                 break;
+            case paramType.groupByColumn:
+                this.paramNotification = "Group by column notification";
+                break;
             default:
                 this.paramNotification = "Param notification"
         }

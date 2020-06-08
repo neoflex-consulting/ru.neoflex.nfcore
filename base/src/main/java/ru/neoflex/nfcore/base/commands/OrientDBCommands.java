@@ -2,6 +2,7 @@ package ru.neoflex.nfcore.base.commands;
 
 import com.github.fonimus.ssh.shell.SshShellHelper;
 import com.github.fonimus.ssh.shell.commands.SshShellComponent;
+import com.orientechnologies.orient.etl.OETLProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.shell.standard.ShellMethod;
@@ -11,6 +12,7 @@ import ru.neoflex.nfcore.base.services.providers.OrientDBStoreProvider;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SshShellComponent
@@ -53,6 +55,15 @@ public class OrientDBCommands {
         }
         result.sort(String::compareTo);
         return result;
+    }
+
+    @ShellMethod("Run OETL processor")
+    public void odbOetl(File config, @ShellOption(arity = -1) String args[]) {
+        String[] args2 = new ArrayList<String>() {{
+            add(config.getPath());
+            addAll(Arrays.asList(args));
+        }}.toArray(new String[0]);
+        OETLProcessor.main(args2);
     }
 
 }

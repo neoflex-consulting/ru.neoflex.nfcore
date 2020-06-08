@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.base.services.providers;
 
+import com.orientechnologies.orient.etl.OETLPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -29,16 +30,21 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     PackageRegistry registry;
 
     private Server server;
+    private OETLPlugin oetlPlugin;
 
     @PostConstruct
     public void init() throws Exception {
         server = new Server(home, dbName, registry.getEPackages());
         server.setQualifiedNameDelegate(Store.qualifiedNameDelegate);
         server.open();
+        oetlPlugin = new OETLPlugin();
+        oetlPlugin.config(server.getOServer(), null);
+        oetlPlugin.startup();
     }
 
     @PreDestroy
     public void fini() {
+        oetlPlugin.shutdown();
         server.close();
     }
 

@@ -7,6 +7,7 @@ import {API} from "./modules/api";
 import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import {Tree} from 'antd'
+import FetchSpinner from "./components/FetchSpinner";
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
 
@@ -67,7 +68,6 @@ export class MainApp extends React.Component<any, State> {
                                         );
                                         this.setState({hideReferences: true})
                                     }
-
                                 } else {
                                     this.props.context.updateContext!(
                                         ({
@@ -81,21 +81,55 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             })
                         } else {
-                            let treeChildren = objectApp.get('referenceTree').eContents();
-                            let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
-                            let currentTree: any[] = currentAppModule['tree']
-                            for (let i = 0; i <= currentTree.length - 1; i++) {
-                                for (let t of treeChildren
-                                    .filter((t: any) => t.get('name') === currentTree[i])) {
-                                    treeChildren = t.eContents();
+                            if (objectApp.get('referenceTree') === null) {
+                                if (currentAppModule.useParentReferenceTree) {
+                                    this.props.context.updateContext!(
+                                        ({viewObject: objectApp.get('view')})
+                                    );
+                                    let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
+                                    if (app.length !== 0 && this.props.context.applicationReferenceTree === undefined) {
+                                        this.setReferenceTree(app[app.length - 1].appModule)
+                                    }
+                                } else {
+                                    this.props.context.updateContext!(
+                                        ({viewObject: objectApp.get('view'), applicationReferenceTree: undefined})
+                                    );
+                                    this.setState({hideReferences: true})
                                 }
                             }
-                            this.props.context.updateContext!(
-                                ({
-                                    viewObject: treeChildren[0],
-                                    applicationReferenceTree: objectApp.get('referenceTree')
-                                })
-                            );
+                            else {
+                                let treeChildren = objectApp.get('referenceTree').eContents();
+                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
+
+                                if (objectApp.get('name') === currentAppModule.appModule) {
+                                    let currentTree: any[] = currentAppModule['tree']
+                                    for (let i = 0; i <= currentTree.length - 1; i++) {
+                                        for (let t of treeChildren
+                                            .filter((t: any) => t.get('name') === currentTree[i])) {
+                                            if (t.eContents().length !== 0) {
+                                                treeChildren = t.eContents();
+                                            }
+                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
+                                                treeChildren = t.get('AppModule').get('view')
+                                            }
+                                        }
+                                    }
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: treeChildren[0] || treeChildren,
+                                            applicationReferenceTree: objectApp.get('referenceTree')
+                                        })
+                                    );
+                                }
+                                else {
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            applicationReferenceTree: objectApp.get('referenceTree')
+                                        })
+                                    );
+                                }
+                            }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
                             this.setState({hideReferences: false})
@@ -187,7 +221,7 @@ export class MainApp extends React.Component<any, State> {
             if (cb) cb();
         };
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree[currentAppModule.tree.length - 1] : undefined;
+        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') /*currentAppModule.tree[currentAppModule.tree.length - 1]*/ : undefined;
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
                 <Tree.DirectoryTree selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined} defaultExpandAll onSelect={onSelect}>
@@ -243,15 +277,16 @@ export class MainApp extends React.Component<any, State> {
     };
 
     private setURL(eObject: Ecore.EObject, key: any) {
-        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.appModuleName;
-        let treeValue = eObject.get('AppModule') ? undefined : key;
-        let useParentReferenceTree = eObject.get('AppModule').get('useParentReferenceTree') || false;
+        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule/*this.props.appModuleName*/;
+        let treeValue = /*eObject.get('AppModule') ? undefined :*/ key;
+        let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
         this.props.context.changeURL!(appModuleName, useParentReferenceTree, treeValue)
     }
 
     render = () => {
         return (
             <div style={{flexGrow: 1}}>
+                <FetchSpinner/>
                 <Splitter
                     minimalizedPrimaryPane={this.state.hideReferences}
                     allowResize={!this.state.hideReferences}
@@ -301,11 +336,7 @@ export class MainApp extends React.Component<any, State> {
                                                 this.props.context.viewObject === undefined ||
                                                 this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[this.props.pathFull.length - 1].appModule
                                                     ?
-                                                    <div className="loader">
-                                                        <div className="inner one"/>
-                                                        <div className="inner two"/>
-                                                        <div className="inner three"/>
-                                                    </div>
+                                                    undefined
                                                     : this.renderContent()
                                         }
                                     </div>

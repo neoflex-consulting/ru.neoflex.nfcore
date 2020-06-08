@@ -23,6 +23,7 @@
         <ecore-xcore-version>1.13.0</ecore-xcore-version>
         <ecore-xcore-lib-version>1.4.0</ecore-xcore-lib-version>
         <emf-codegen-version>2.16.0</emf-codegen-version>
+        <orientdb-version>3.0.29</orientdb-version>
     </properties>
 
     <dependencies>
@@ -149,6 +150,11 @@
             <artifactId>spring-test</artifactId>
             <version>5.1.8.RELEASE</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-etl</artifactId>
+            <version>${orientdb-version}</version>
         </dependency>
 
     </dependencies>

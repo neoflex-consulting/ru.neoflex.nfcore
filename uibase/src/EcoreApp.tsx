@@ -271,8 +271,16 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
-    runQuery = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = [], filterParams: IServerQueryParam[] = [], aggregationParams: IServerQueryParam[] = [],
-                sortParams: IServerQueryParam[] = [], groupByParams: IServerQueryParam[] = [], calculatedExpression: IServerQueryParam[] = []) => {
+    runQuery = (
+        resource_: Ecore.Resource,
+        queryParams: IServerNamedParam[] = [],
+        filterParams: IServerQueryParam[] = [],
+        aggregationParams: IServerQueryParam[] = [],
+        sortParams: IServerQueryParam[] = [],
+        groupByParams: IServerQueryParam[] = [],
+        calculatedExpression: IServerQueryParam[] = [],
+        groupByColumn: IServerQueryParam[] = []
+    ) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'runQuery';
@@ -283,7 +291,8 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression')])
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
@@ -327,12 +336,21 @@ class EcoreApp extends React.Component<any, State> {
                 if (p.appModule === appModuleName) {splitPathFull.push(index)}
             });
             if (splitPathFull.length === 0) {
-                this.state.pathFull.forEach( (p:any) => {
-                    path.push(p)
+                this.state.pathFull.forEach( (p:any, index: any) => {
+                    path.push(p);
                 });
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
+
+                const nextPath = path[path.length - 1];
+                if (
+                    nextPath.useParentReferenceTree === true &&
+                    nextPath.tree.length !== 0 &&
+                    path.length !== 1
+                ) {
+                    path.pop()
+                }
                 path.push(urlElement)
             } else {
                 path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
@@ -490,8 +508,8 @@ class EcoreApp extends React.Component<any, State> {
                             </Link>
                             <div className='header-menu'>
                                     <span style={{
-                                        fontVariantCaps: 'petite-caps',
-                                        fontSize: '18px',
+                                        textTransform: "capitalize",
+                                        fontSize: '15px',
                                         lineHeight: '39px'
                                     }}>
                                         <span>{principal.name}</span></span>

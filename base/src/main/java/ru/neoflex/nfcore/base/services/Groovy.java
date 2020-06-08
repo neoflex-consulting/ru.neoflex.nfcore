@@ -56,14 +56,16 @@ public class Groovy {
     }
 
     public Object eval(String code, Map<String, Object> args) throws Exception {
-        Binding b = new Binding();
-        if (args != null) {
-            for (String name: args.keySet()) {
-                b.setVariable(name, args.get(name));
-            }
-        }
+        Binding b = new Binding(args);
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
         Object result =  sh.evaluate(code);
+        return result;
+    }
+
+    public Object eval(String scriptName, String code, Map<String, Object> args) throws Exception {
+        Binding b = new Binding(args);
+        GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        Object result =  sh.evaluate(code, scriptName);
         return result;
     }
 

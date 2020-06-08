@@ -88,7 +88,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
+    String runQuery(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn) {
         if (column) {
             def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                     .execute().resourceSet
@@ -99,7 +99,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 return JsonOutput.toJson(getMetaDataRaw(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, eClass))
             }
             else {
-                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression))
+                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, groupByColumn))
             }
         }
         else {
@@ -114,6 +114,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             EList<QueryConditionDTO> sorts,
             EList<QueryConditionDTO> groupBy,
             EList<QueryConditionDTO> calculatedExpression,
+            EList<QueryConditionDTO> groupByColumn,
             EClass eClass) {
 
         def temp = Utils.findAllEClass(eClass)
@@ -146,7 +147,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         return rowData
     }
 
-    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
+    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn) {
         NamedParameterStatement p;
         ResultSet rs;
         def rowData = []
@@ -158,6 +159,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverAggregations = []
             def serverGroupByAggregation = []
             def serverGroupBy = []
+            def serverGroupByColumn = []
             def serverSorts = []
             def serverCalculatedExpression = []
 
@@ -285,6 +287,19 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
 
+            // GroupByColumn
+            if (groupByColumn) {
+                for (int i = 0; i <= allColumns.size() - 1; ++i) {
+                    def map = [:]
+                    if (!serverGroupByAggregation.column.contains(allColumns[i])) {
+                        map["select"] = "t.\"${allColumns[i]}\""
+                        if (!serverGroupBy.contains(map)) {
+                            serverGroupBy.add(map)
+                        }
+                    }
+                }
+            }
+
             //Aggregation overall
             if (aggregations) {
                 for (int i = 0; i <= allColumns.size() - 1; ++i) {
@@ -371,6 +386,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (serverFilters) {
                 currentQuery = "\nSELECT * \n  FROM (${currentQuery}) t" +
                         "\n WHERE ${serverFilters.select.join(' AND ')}"
+            }
+            if (serverGroupByColumn) {
+                currentQuery = " \nSELECT ${serverGroupByColumn.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t"
             }
             if (serverGroupByAggregation) {
                 if (serverGroupBy) {

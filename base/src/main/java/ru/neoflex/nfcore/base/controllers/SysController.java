@@ -35,6 +35,9 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController()
 @RequestMapping("/system")
@@ -108,32 +111,48 @@ public class SysController {
 
     @PostMapping(value = "/exportdb", consumes = {"application/json"})
     public ResponseEntity exportDb(
-            @RequestBody List<String> ids,
+            @RequestBody Map<String, List<String>> data,
             @RequestParam boolean withReferences,
             @RequestParam boolean withDependents,
             @RequestParam boolean recursiveDependents
     ) throws IOException {
+        List<String> ids = data.getOrDefault("resources", new ArrayList<>());
+        List<String> files = data.getOrDefault("files", new ArrayList<>());
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
             try {
-                store.inTransaction(true, tx -> {
-                    List<Resource> resources = new ArrayList<>();
-                    for (String id : ids) {
-                        resources.add(store.loadResource(store.getUriByIdAndRev(id, null)));
-                    }
-                    if (withDependents) {
-                        resources = DocFinder.create(store).getDependentResources(resources, recursiveDependents);
-                    }
-                    if (withReferences) {
-                        ResourceSet wr = store.createResourceSet();
-                        wr.getResources().addAll(resources);
-                        EcoreUtil.resolveAll(wr);
-                        resources = new ArrayList<>(wr.getResources());
-                    }
-                    new Exporter(store).zip(resources, pipedOutputStream);
-                    return null;
-                });
+                try (ZipOutputStream zipOutputStream = new ZipOutputStream(pipedOutputStream);) {
+                    store.inTransaction(true, tx -> {
+                        List<Resource> resources = new ArrayList<>();
+                        for (String id : ids) {
+                            resources.add(store.loadResource(store.getUriByIdAndRev(id, null)));
+                        }
+                        if (withDependents) {
+                            resources = DocFinder.create(store).getDependentResources(resources, recursiveDependents);
+                        }
+                        if (withReferences) {
+                            ResourceSet wr = store.createResourceSet();
+                            wr.getResources().addAll(resources);
+                            EcoreUtil.resolveAll(wr);
+                            resources = new ArrayList<>(wr.getResources());
+                        }
+                        new Exporter(store).zip(resources, zipOutputStream);
+                        return null;
+                    });
+                    workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
+                        for (String file: files) {
+                            Path filePath = tx.getFileSystem().getRootPath().resolve(file);
+                            if (Files.isRegularFile(filePath)) {
+                                byte[] bytes = Files.readAllBytes(filePath);
+                                ZipEntry refsEntry = new ZipEntry(file.substring(1));
+                                zipOutputStream.putNextEntry(refsEntry);
+                                zipOutputStream.write(bytes);
+                                zipOutputStream.closeEntry();
+                            }
+                        }
+                        return null;
+                    });                }
             } catch (Exception e) {
                 logger.error("Export DB", e);
             }
@@ -160,9 +179,9 @@ public class SysController {
     public ResponseEntity downloadFs(@RequestParam String path) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
             Path resolved = tx.getFileSystem().getRootPath().resolve(path);
-            byte[] contents = Files.readAllBytes(resolved);
+            byte[] contents = Files.isRegularFile(resolved) ? Files.readAllBytes(resolved) : new byte[0];
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/zip");
+            //headers.set("Content-Type", "application/zip");
             headers.set("Content-Disposition", String.format("attachment; filename=\"%s\"", resolved.getFileName().toString()));
             return new ResponseEntity(new InputStreamResource(new ByteArrayInputStream(contents)), headers, HttpStatus.OK);
         });
@@ -180,6 +199,13 @@ public class SysController {
                         childNode.put("key", key);
                         childNode.put("title", child.getFileName().toString());
                         childNode.put("isLeaf", !Files.isDirectory(child));
+                        if (Files.isDirectory(child)) {
+                            try {
+                                childNode.set("children", listPath(tx, child.toString()));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     });
         }
         return list;
@@ -203,25 +229,38 @@ public class SysController {
     }
 
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestBody String text) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestBody(required = false) String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
-            Path file = tx.getFileSystem().getRootPath().resolve(path);
-            Path parent = file.getParent();
+            Path filePath = tx.getFileSystem().getRootPath().resolve(path);
+            Path parent = filePath.getParent();
             Files.createDirectories(parent);
-            Files.write(file, text.getBytes("utf-8"));
+            byte[] bytes = text == null ? new byte[0] : text.getBytes("utf-8");
+            Files.write(filePath, bytes);
             tx.commit("Saving file " + path);
             return listPath(tx, parent.toString());
         });
     }
 
     @PostMapping(value = "/fs", produces = "application/json; charset=utf-8")
-    public JsonNode createFsFile(@RequestParam String path, @RequestParam(value = "file") final MultipartFile file) throws Exception {
+    public JsonNode createFsFile(@RequestParam String path, @RequestParam String name, @RequestParam(value = "file") final MultipartFile file) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
             Path parent = tx.getFileSystem().getRootPath().resolve(path);
-            Path filePath = parent.resolve(file.getName());
+            Path filePath = parent.resolve(name);
             Files.createDirectories(parent);
             Files.copy(file.getInputStream(), filePath);
-            tx.commit("Saving file " + path + "/" + file.getName());
+            tx.commit("Saving file " + path + "/" + name);
+            return listPath(tx, parent.toString());
+        });
+    }
+
+    @PutMapping(value = "/fs/rename", produces = "application/json; charset=utf-8")
+    public JsonNode renameFsFile(@RequestParam String path, @RequestParam String name) throws Exception {
+        return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            Path filePath = tx.getFileSystem().getRootPath().resolve(path);
+            Path parent = filePath.getParent();
+            Path newPath = parent.resolve(name);
+            Files.move(filePath, newPath);
+            tx.commit("Renaming file " + path + " to " + name);
             return listPath(tx, parent.toString());
         });
     }

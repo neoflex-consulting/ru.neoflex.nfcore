@@ -164,12 +164,16 @@ public class Exporter {
 
     public void zip(List<Resource> resources, OutputStream outputStream) throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
-            for (Resource resource: resources) {
-                zipResource(zipOutputStream, resource);
-            }
-            for (Resource resource: resources) {
-                zipResourceReferences(zipOutputStream, resource);
-            }
+            zip(resources, zipOutputStream);
+        }
+    }
+
+    public void zip(List<Resource> resources, ZipOutputStream zipOutputStream) throws IOException {
+        for (Resource resource : resources) {
+            zipResource(zipOutputStream, resource);
+        }
+        for (Resource resource : resources) {
+            zipResourceReferences(zipOutputStream, resource);
         }
     }
 
@@ -177,12 +181,7 @@ public class Exporter {
         store.inTransaction(true, tx -> {
             List<Resource> all = DocFinder.create(store).getAllResources();
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);) {
-                for (Resource resource: all) {
-                    zipResource(zipOutputStream, resource);
-                }
-                for (Resource resource: all) {
-                    zipResourceReferences(zipOutputStream, resource);
-                }
+                zip(all, zipOutputStream);
             }
             return null;
         });
