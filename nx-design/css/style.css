@@ -71,3 +71,10 @@ li {
 .mb20{
   margin-bottom: 20px !important;
 }
+
+.exampleStyle {
+  display: inline-block;
+  marginLeft: 20px;
+  padding: 10px 20px;
+  background: #eee
+}
