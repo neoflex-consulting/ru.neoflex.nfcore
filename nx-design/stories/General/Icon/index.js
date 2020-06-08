@@ -1,17 +1,127 @@
 import React, { Component, Fragment } from 'react';
-import DirectionalIcons from './Direction';
-import SuggestedIcons from './Suggested';
-import ApplicationIcons from './Application';
-import Brands from './Brands';
+import {NXIcon, notification,
+  question,
+  person,
+  exit,
+  calendar,
+  arrowUp,
+  arrowDown,
+  arrowLeft,
+  deleteIcon,
+  plus,
+  close,
+  switchIcon,
+  rubbish,
+  fill,
+  letter,
+  diagram,
+  diagramCircle,
+  diagramBlock,
+  gear,
+  settings,
+  filter,
+  plusBlock,
+  calculator,
+  barChart,
+  sort,
+  add,
+  update,
+  mark,
+  download,
+  print,
+  fullScreen,
+  undo,
+  list,
+  more,
+  table,
+  tableUp,
+  arrowLong,
+  edit,
+  menuOpen,
+  search,
+  legend,
+  tiles,
+  alert,
+  info,
+  warning} from "./Icon";
 
 class IconPage extends Component {
-  render() { 
-    const exampleStyle = {
-      display: 'inline-block',
-      marginLeft: '20px',
-      padding: '10px 20px',
-      background: '#eee'
-    };
+
+  groupIcon(arr){
+  return arr.map((icon, i) => <div className="icon">
+      <NXIcon key={i} icon={icon} />
+      <br/>
+      <span>{icon.name}</span>
+    </div>)
+  }
+
+  render() {
+
+    const header = [notification,
+      question,
+      person,
+      exit,
+      settings
+    ]
+
+    const functionalBar = [
+      filter,
+      plusBlock,
+      calculator,
+      barChart,
+      sort,
+      add,
+      update,
+      mark,
+      undo,
+      fullScreen
+    ]
+
+    const diagrams = [
+      diagram,
+      diagramCircle,
+      diagramBlock
+    ]
+
+    const arrows = [
+      arrowUp,
+      arrowDown,
+      arrowLeft
+    ]
+
+    const tables = [
+      more,
+      table,
+      tableUp
+    ]
+
+    const alerts = [
+      alert,
+      info,
+      warning
+    ]
+
+    const icons = [
+      calendar,
+      deleteIcon,
+      plus,
+      close,
+      switchIcon,
+      rubbish,
+      fill,
+      letter,
+      gear,
+      settings,
+      download,
+      print,
+      list,
+      arrowLong,
+      edit,
+      menuOpen,
+      search,
+      legend,
+      tiles
+    ]
 
     return (
       <Fragment>
@@ -22,20 +132,67 @@ class IconPage extends Component {
           Use tag to create an icon and set its type in the type prop, for example:
         </p>
 
-        <div style={exampleStyle}>
-          &lt;<span style={{color: 'red'}}>Icon</span> <span style={{color: 'green'}}>type</span>="<span style={{color: 'blue'}}>link</span>" /&gt;
+        <div className='exampleStyle'>
+          &lt;<span style={{color: 'red'}}>NXIcon</span> <span style={{color: 'green'}}>icon</span>="<span style={{color: 'blue'}}>iconName</span>" /&gt;
         </div>
 
-        <DirectionalIcons />
+        <h3 className="title">Header</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(header)
+          }
+        </section>
+        <br/><br/>
 
-        <SuggestedIcons />
+        <h3 className="title">Functional bar</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(functionalBar)
+          }
+        </section>
+        <br/><br/>
 
-        <ApplicationIcons />
+        <h3 className="title">Diagram</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(diagrams)
+          }
+        </section>
+        <br/><br/>
 
-        <Brands />
+        <h3 className="title">Arrows</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(arrows)
+          }
+        </section>
+        <br/><br/>
+
+        <h3 className="title">Table</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(tables)
+          }
+        </section>
+        <br/><br/>
+
+        <h3 className="title">Alerts</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(alerts)
+          }
+        </section>
+        <br/><br/>
+
+        <h3 className="title">Others</h3>
+        <section className="icons ml20">
+          {
+            this.groupIcon(icons)
+          }
+        </section>
       </Fragment>
     );
   }
 }
- 
+
 export default IconPage;
