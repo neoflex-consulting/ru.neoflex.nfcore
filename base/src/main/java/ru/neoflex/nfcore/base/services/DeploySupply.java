@@ -70,7 +70,7 @@ public class DeploySupply {
                 String[] suffixes = {XMI, REFS, "/post_install.groovy"};
                 for (Path path : paths) {
                     new Exporter(store).processZipFile(path,
-                            p -> Arrays.stream(suffixes).filter(s -> !p.toString().toLowerCase().endsWith(s)).count() == 0,
+                            p -> Arrays.stream(suffixes).filter(s -> p.toString().toLowerCase().endsWith(s)).count() == 0,
                             (p, bytes) -> {
                                 Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
                                 try {
