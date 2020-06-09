@@ -14,14 +14,6 @@
         <npm-version>6.14.4</npm-version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>ru.neoflex.nfcore</groupId>
-            <artifactId>nx-design</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
