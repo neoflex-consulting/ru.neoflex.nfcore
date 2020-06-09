@@ -3,7 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
-import ru.neoflex.nfcore.dataset.MetaDataset
+import ru.neoflex.nfcore.dataset.GroovyDataset
 
 class DatasetFactoryExt extends DatasetFactoryImpl {
 
@@ -13,8 +13,8 @@ class DatasetFactoryExt extends DatasetFactoryImpl {
     }
 
     @Override
-    MetaDataset createMetaDataset() {
-        return new MetaDatasetExt()
+    GroovyDataset createGroovyDataset() {
+        return new GroovyDatasetExt()
     }
 
     @Override
