@@ -3,13 +3,14 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Row, Col, Form, Select, Switch, Input} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
+
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -172,7 +173,16 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={1}>
             </Col>
             <Col span={23}>
-                <Input placeholder="Basic usage" />
+                    {localStorage.getItem('i18nextLng') === 'ru' ?
+                            <Input placeholder="Название"
+                                   onChange={(e: any) => {
+                                       const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});
+                                       value.handleChange(event)
+                                   }}/>  :
+                    localStorage.getItem('i18nextLng    ') === 'us' ?
+                            <Input placeholder="Label" />
+                            :
+                            <Input placeholder="asas" />}
             </Col>
         </Row>
 

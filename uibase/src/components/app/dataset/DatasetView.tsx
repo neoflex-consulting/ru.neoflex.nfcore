@@ -677,7 +677,7 @@ class DatasetView extends React.Component<any, State> {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
-            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.calculations,paramType.groupByColumn ].includes(paramName)) {
+            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
                     (paramName === paramType.aggregate)? serverParam: serverAggregates,

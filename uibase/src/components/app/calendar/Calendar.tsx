@@ -660,8 +660,8 @@ class Calendar extends React.Component<any, any> {
             <div
                 style={{
                     marginTop: '30px',
-                    width: '98%',
-                    height: 550
+                    height: this.state.fullScreenOn ?  550*5.5/4 : 550,
+                    width: '98%'
                 }}
                 className={'ag-theme-material'}
             >

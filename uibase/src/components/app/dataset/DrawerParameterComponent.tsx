@@ -97,7 +97,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         }
     }
 
-    handleChange(e: any) {
+        handleChange(e: any) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map( (f: any) => {
             if (f.index.toString() === target['index'].toString()) {
@@ -167,6 +167,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.refresh();
     };
 
+
     createNewRow = () => {
         let parametersArray: any = this.state.parametersArray;
         parametersArray.push(
@@ -174,7 +175,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
                 datasetColumn: undefined,
                 operation: undefined,
                 value: undefined,
-                enable: true,
+                enable: true,   
                 type: undefined,
                 highlightType: undefined,
                 backgroundColor: undefined,

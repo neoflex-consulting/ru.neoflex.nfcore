@@ -121,13 +121,13 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
         def rowData = []
 
-            def queryColumns = []
-            def serverFilters = []
-            def serverAggregations = []
-            def serverGroupByAggregation = []
-            def serverGroupBy = []
-            def serverSorts = []
-            def serverCalculatedExpression = []
+        def queryColumns = []
+        def serverFilters = []
+        def serverAggregations = []
+        def serverGroupByAggregation = []
+        def serverGroupBy = []
+        def serverSorts = []
+        def serverCalculatedExpression = []
 
         for (int i = 0; i < temp.size(); i++) {
 
