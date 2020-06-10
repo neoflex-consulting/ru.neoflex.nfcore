@@ -1157,7 +1157,7 @@ class DatasetView extends React.Component<any, State> {
                     <Drawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
-                        title={t('aggregations')}
+                        title={t('Group aggregations')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
