@@ -1,17 +1,9 @@
 import React, { Component, Fragment } from 'react';
 
-import Type from './Types';
-import Size from './Size';
-import Icon from './Icon';
-import Disabled from './Disabled';
-import Multiple from './Multiple';
-import Loading from './Loading';
-import Group from './Group';
-import Ghost from './Ghost';
-import NXButton from './NXButton'
+import {NXButton} from '../../../index'
 
 class ButtonPage extends Component {
-  render() { 
+  render() {
     return (
       <Fragment>
         <h1 className="title">Button</h1>
@@ -22,68 +14,28 @@ class ButtonPage extends Component {
           A button means an operation (or a series of operations). Clicking a button will trigger corresponding business logic.
         </p>
 
-        <h2 className="title">Exemples:</h2>
-
+        <h2 className="title">Examples:</h2>
         <section className="example">
-          <NXButton />
-        </section>
+          <h3 className="ex-title">Buttons</h3>
 
-        <section className="example">
-          <Type />
-        </section>
+          <div>
+            <NXButton primary className='ml20'>
+              Primary
+            </NXButton>
 
-        <section className="example">
-          <Icon />
-        </section>
+            <NXButton className="ml20">
+              Default
+            </NXButton>
 
-        <section className="example">
-          <Size />
-        </section>
+            <NXButton className="ml20" disabled>
+              Disabled
+            </NXButton>
 
-        <section className="example">
-          <Disabled />
-        </section>
-
-        <section className="example">
-          <Loading />
-        </section>
-
-        <section className="example">
-          <Multiple />
-        </section>
-
-        <section className="example">
-          <Group />
-        </section>
-
-        <section className="example">
-          <Ghost />
+          </div>
         </section>
       </Fragment>
     );
   }
 }
- 
+
 export default ButtonPage;
-
-
-
-
-
-/* import { storiesOf } from '@storybook/react';
-
-import ButtonTypes from './Types';
-import ButtonSize from './Size';
-import ButtonLoading from './Loading';
-import ButtonDisabled from './Disabled';
-import ButtonMultiple from './Multiple';
-import ButtonGhost from './Ghost';
-
-storiesOf('Button', module)
-  .add('Types', () => <ButtonTypes />)
-  .add('Sizes', () => <ButtonSize />)
-  .add('Loadings', () => <ButtonLoading />)
-  .add('Disabled', () => <ButtonDisabled />)
-  .add('Multiple Buttons', () => <ButtonMultiple />)
-  .add('Ghost Button', () => <ButtonGhost />);
- */
