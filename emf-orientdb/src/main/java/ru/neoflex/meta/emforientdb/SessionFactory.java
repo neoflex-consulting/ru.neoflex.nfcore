@@ -32,6 +32,7 @@ public abstract class SessionFactory {
     private final String dbName;
     protected final List<EPackage> packages;
     Map<String, URI> oClassToUriMap = new HashMap<>();
+    private Events events = new Events();
 
     public SessionFactory(String dbName, List<EPackage> packages) {
         this.dbName = dbName;
@@ -178,6 +179,10 @@ public abstract class SessionFactory {
 
     public String getDbName() {
         return dbName;
+    }
+
+    public Events getEvents() {
+        return events;
     }
 
     public interface SessionFunction<R> {

@@ -29,7 +29,7 @@ public class GitHandler extends URIHandlerImpl {
         EntityId entityId = new EntityId(id, rev);
 //        Entity old = transaction.load(entityId);
 //        Resource resource = db.entityToResource(transaction, old);
-        db.getEvents().fireBeforeDelete(resource, transaction);
+        db.getEvents().fireBeforeDelete(resource);
         transaction.delete(entityId);
     }
 
