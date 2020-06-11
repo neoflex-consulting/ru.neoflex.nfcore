@@ -6,55 +6,47 @@
     <artifactId>nx-design</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>nx-design</name>
-    <description>NX Design project for Neoflex EMF Framework</description>
+    <description>nx-design project for Neoflex EMF Framework</description>
 
     <properties>
         <java.version>1.8</java.version>
         <node-version>v12.16.3</node-version>
-      <npm-version>6.14.4</npm-version>
-      <yarn-version>v1.22.4</yarn-version>
+        <npm-version>6.14.4</npm-version>
     </properties>
 
-  <dependencies>
-  </dependencies>
-
-  <build>
+    <build>
         <plugins>
             <plugin>
-
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>1.7.6</version>
-
                 <configuration>
                     <workingDirectory></workingDirectory>
                     <installDirectory>target</installDirectory>
                 </configuration>
-
                 <executions>
                     <execution>
-                        <id>install node and yarn</id>
+                        <id>install node and npm</id>
                         <goals>
-                            <goal>install-node-and-yarn</goal>
+                            <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
                             <nodeVersion>${node-version}</nodeVersion>
-                            <yarnVersion>${yarn-version}</yarnVersion>
+                            <npmVersion>${npm-version}</npmVersion>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>yarn install</id>
+                        <id>npm install</id>
                         <goals>
-                            <goal>yarn</goal>
+                            <goal>npm</goal>
                         </goals>
                         <configuration>
                             <arguments>install</arguments>
                         </configuration>
                     </execution>
-
                 </executions>
             </plugin>
-
         </plugins>
     </build>
+
 </project>

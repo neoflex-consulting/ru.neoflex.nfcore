@@ -55,6 +55,8 @@ class JdbcDataset extends Dataset {
 
 class GroovyDataset extends Dataset {
     op JSON loadAllColumns()
+    String runQueryGroovyCode
+    String loadAllColumnGroovyCode
 }
 
 class Pivot {

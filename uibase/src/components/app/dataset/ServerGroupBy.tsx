@@ -3,7 +3,7 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Row, Col, Form, Select, Switch, Input} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";

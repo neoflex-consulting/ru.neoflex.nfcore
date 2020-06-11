@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
 
-import Disabled from './Disabled';
 import {NXButton} from '../../../index'
 
 class ButtonPage extends Component {
@@ -23,38 +22,17 @@ class ButtonPage extends Component {
             <NXButton primary className='ml20'>
               Primary
             </NXButton>
-            <div className='exampleStyle ml20'>
-              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
-              <br/>
-              &lt;<span style={{color: 'red'}}>NXButton</span> <span style={{color: 'green'}}>primary</span> /&gt;
-            </div>
-              <br/><br/>
 
             <NXButton className="ml20">
               Default
             </NXButton>
-            <div className='exampleStyle ml20'>
-              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
-              <br/>
-              &lt;<span style={{color: 'red'}}>NXButton</span> /&gt;
-            </div>
-              <br/><br/>
 
             <NXButton className="ml20" disabled>
               Disabled
             </NXButton>
-            <div className='exampleStyle ml20'>
-              <span style={{color: 'blue'}}>import</span> {'{NXButton}'} <span style={{color: 'red'}}>from</span> <span>'nx-design';</span>
-              <br/>
-              &lt;<span style={{color: 'red'}}>NXButton</span> <span style={{color: 'green'}}>disabled</span> /&gt;
-            </div>
-            <br/><br/>
+
           </div>
         </section>
-        <section>
-          <Disabled />
-        </section>
-
       </Fragment>
     );
   }

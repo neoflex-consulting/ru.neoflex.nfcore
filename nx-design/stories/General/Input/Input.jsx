@@ -18,7 +18,7 @@ const NXInput = styled(Input)`
 export default class NXInputSearch extends Component {
   render() {
     return (
-      <NXInput placeholder={'Поиск'} {...this.props}></NXInput>
+      <NXInput placeholder={'Поиск'} {...this.props}/>
     )
   }
 }

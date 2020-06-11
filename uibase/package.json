@@ -61,7 +61,6 @@
     "react-scripts": "^3.3.0",
     "react-sortable-hoc": "1.11.0",
     "react-split-pane": "^0.1.89",
-    "nx-design": "file:../nx-design",
     "styled-components": "^5.1.1",
     "table-model": "^1.5.0",
     "typescript": "3.7.3"
