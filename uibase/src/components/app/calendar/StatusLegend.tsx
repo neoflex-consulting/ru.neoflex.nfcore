@@ -71,10 +71,11 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
                             </Row>
                         )
                 }
-                <Button title={t('apply')}
-                        onClick={()=> this.apply(this.state.notificationStatus)}>
-                    {t('apply')}
-                </Button>
+                {/*<NXButton>Accept</NXButton>*/}
+                {/*     title={t('apply')}*/}
+                {/*         onClick={()=> this.apply(this.state.notificationStatus)}>*/}
+                {/*    {t('apply')}*/}
+                {/*</NXButton>*/}
             </div>
         )
     }

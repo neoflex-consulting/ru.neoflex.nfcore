@@ -1,1 +1,2 @@
-export {default as NXButton} from './stories/General/Button/NXButton';
+import {NXButton} from "./stories/General/Button/NXButton";
+export {NXButton}
