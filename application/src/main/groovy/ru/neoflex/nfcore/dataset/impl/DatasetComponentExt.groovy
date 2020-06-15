@@ -3,7 +3,6 @@ package ru.neoflex.nfcore.dataset.impl
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.EList
-import org.eclipse.emf.ecore.EClass
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
@@ -11,12 +10,10 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
-import ru.neoflex.nfcore.utils.Utils
 
 import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
-import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -93,13 +90,19 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                     .execute().resourceSet
             if (!resource.resources.empty &&
-                    resource.resources[0].contents[0].dataset.class.name != "ru.neoflex.nfcore.dataset.impl.JdbcDatasetExt"
+                    resource.resources[0].contents[0].dataset.class.name == "ru.neoflex.nfcore.dataset.impl.GroovyDatasetExt"
             ) {
-                EClass eClass = resource.resources[0].contents[0].dataset.metaEClass
-                return JsonOutput.toJson(getMetaDataRaw(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, eClass))
+                def groovyScript = resource.resources[0].contents[0].dataset.runQueryGroovyCode
+                Object[] rowData = []
+                try {
+                    rowData = Context.current.groovy.eval(groovyScript, [:])
+                } catch (Exception e) {
+                    logger.info("invalid script runQueryGroovyCode in dataset ", resource.resources[0].contents[0].dataset.name)
+                }
+                return JsonOutput.toJson(rowData)
             }
             else {
-                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression))
+                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, groupByColumn))
             }
         }
         else {
@@ -107,46 +110,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    List<Map> getMetaDataRaw(
-            EList<QueryParameter> parameters,
-            EList<QueryFilterDTO> filters,
-            EList<QueryConditionDTO> aggregations,
-            EList<QueryConditionDTO> sorts,
-            EList<QueryConditionDTO> groupBy,
-            EList<QueryConditionDTO> calculatedExpression,
-            EClass eClass) {
-
-        def temp = Utils.findAllEClass(eClass)
-
-        def rowData = []
-
-            def queryColumns = []
-            def serverFilters = []
-            def serverAggregations = []
-            def serverGroupByAggregation = []
-            def serverGroupBy = []
-            def serverSorts = []
-            def serverCalculatedExpression = []
-
-        for (int i = 0; i < temp.size(); i++) {
-
-            def map = [:]
-            for (int j = 0; j <= column.size() - 1; ++j) {
-                def object = temp.get(0).contents.get(0)["${column[j].name}"]
-                if ( object instanceof List ) {
-                    object = temp.get(0).contents.get(0)["${column[j].name}"]
-                    map["${column[j].name}"] = (object == null ? null : object.toString())
-                }
-                else {
-                    map["${column[j].name}"] = (object == null ? null : object.toString())
-                }
-            }
-            rowData.add(map)
-        }
-        return rowData
-    }
-
-    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression) {
+    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn) {
         NamedParameterStatement p;
         ResultSet rs;
         def rowData = []
@@ -158,6 +122,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverAggregations = []
             def serverGroupByAggregation = []
             def serverGroupBy = []
+            def serverGroupByColumn = []
             def serverSorts = []
             def serverCalculatedExpression = []
 
@@ -285,6 +250,19 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
 
+            // GroupByColumn
+            if (groupByColumn) {
+                for (int i = 0; i <= allColumns.size() - 1; ++i) {
+                    def map = [:]
+                    if (!serverGroupByAggregation.column.contains(allColumns[i])) {
+                        map["select"] = "t.\"${allColumns[i]}\""
+                        if (!serverGroupBy.contains(map)) {
+                            serverGroupBy.add(map)
+                        }
+                    }
+                }
+            }
+
             //Aggregation overall
             if (aggregations) {
                 for (int i = 0; i <= allColumns.size() - 1; ++i) {
@@ -371,6 +349,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (serverFilters) {
                 currentQuery = "\nSELECT * \n  FROM (${currentQuery}) t" +
                         "\n WHERE ${serverFilters.select.join(' AND ')}"
+            }
+            if (serverGroupByColumn) {
+                currentQuery = " \nSELECT ${serverGroupByColumn.select.join(' , ')}" +
+                        "\n  FROM (${currentQuery}) t"
             }
             if (serverGroupByAggregation) {
                 if (serverGroupBy) {
