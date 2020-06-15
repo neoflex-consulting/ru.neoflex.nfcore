@@ -32,6 +32,7 @@ import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
+import FetchSpinner from "./components/FetchSpinner";
 
 const backgroundColor = "#2a356c";
 
@@ -279,7 +280,7 @@ class EcoreApp extends React.Component<any, State> {
         sortParams: IServerQueryParam[] = [],
         groupByParams: IServerQueryParam[] = [],
         calculatedExpression: IServerQueryParam[] = [],
-        groupByColumns: IServerQueryParam[] = []
+        groupByColumn: IServerQueryParam[] = []
     ) => {
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
@@ -292,7 +293,7 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByColumns, '/parameterGroupByColumn')])
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
@@ -463,6 +464,7 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>;
         return (
             <Layout style={{height: '100vh'}}>
+                <FetchSpinner/>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
                     <Row style={{height: '70'}}>
                         <Col span={5} style={{display: "block", height: 'inherit', paddingLeft: '20px'}}>
