@@ -90,7 +90,7 @@ public class DatabaseTests extends TestBase {
                 groupResource.delete(null);
                 Assert.assertTrue(false);
             }
-            catch (IOException e) {
+            catch (IllegalArgumentException e) {
                 Assert.assertTrue(e.getMessage().startsWith("Object "));
             }
         }

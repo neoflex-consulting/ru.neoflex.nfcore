@@ -133,6 +133,7 @@ public class MasterdataExporter {
                     continue; // already imported
                 }
                 objectNode.remove("@rid");
+                objectNode.remove("@version");
                 processOrids(objectNode, jsonNode -> {
                     String newOrid = oridMap.get(jsonNode.asText());
                     if (newOrid == null) {

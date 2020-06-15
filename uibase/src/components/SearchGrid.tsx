@@ -76,7 +76,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             let title: string = "";
             column.get('name') === "children" ? name = "_children" :
                 name = column.get('name');
-            title = column.eContainer.eContainer.get('name') + ".eClasses." + column.eContainer.get('name') + ".eStructuralFeatures." + column.get('name') + ".caption"
+            title = column.get('name')/*column.eContainer.eContainer.get('name') + ".eClasses." + column.eContainer.get('name') + ".eStructuralFeatures." + column.get('name') + ".caption"*/
             const type: string = !!column.get('eType') && column.get('eType').eClass.get('name') === 'EDataType' ? this.getDataType(column.get('eType').get('name')) : "stringType";
             AllColumns.push({title: title, dataIndex: name, key: name, type: type,
                 sorter: (a: any, b: any) => this.sortColumns(a, b, name, type),
@@ -84,6 +84,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
                         const maxJsonLength = text.indexOf('#') + 1;
                         return text.slice(0, maxJsonLength) + "..." }
+                else if (text !== undefined && text.length > 100) {return "..."}
                 else {return text}},
                 ...this.getColumnSearchProps(name, title),
                 filterIcon: (filtered: any) => (

@@ -2,60 +2,53 @@ package ru.neoflex.meta.emfgit;
 
 import org.eclipse.emf.ecore.resource.Resource;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-public class Events {
-    public interface AfterLoad {
-        void handle(Resource resource, Transaction tx) throws IOException;
-    }
-    private List<AfterLoad> afterLoadList = new ArrayList<>();
-    public void fireAfterLoad(Resource resource, Transaction tx) throws IOException {
-        for (AfterLoad handler: afterLoadList) {
-            handler.handle(resource, tx);
+public class Events implements EventsRegistration {
+    private List<Consumer<Resource>> afterLoadList = new ArrayList<>();
+    public void fireAfterLoad(Resource resource) {
+        for (Consumer<Resource> consumer: afterLoadList) {
+            consumer.accept(resource);
         }
     }
-    public void registerAfterLoad(AfterLoad handler) {
-        afterLoadList.add(handler);
+    @Override
+    public void registerAfterLoad(Consumer<Resource> consumer) {
+        afterLoadList.add(consumer);
     }
 
-    public interface BeforeSave {
-        void handle(Resource old, Resource resource, Transaction tx) throws IOException;
-    }
-    private List<BeforeSave> beforeSaveList = new ArrayList<>();
-    public void fireBeforeSave(Resource old, Resource resource, Transaction tx) throws IOException {
-        for (BeforeSave handler: beforeSaveList) {
-            handler.handle(old, resource, tx);
+    private List<BiConsumer<Resource, Resource>> beforeSaveList = new ArrayList<>();
+    public void fireBeforeSave(Resource old, Resource resource) {
+        for (BiConsumer<Resource, Resource> consumer: beforeSaveList) {
+            consumer.accept(old, resource);
         }
     }
-    public void registerBeforeSave(BeforeSave handler) {
-        beforeSaveList.add(handler);
+    @Override
+    public void registerBeforeSave(BiConsumer<Resource, Resource> consumer) {
+        beforeSaveList.add(consumer);
     }
 
-    public interface AfterSave {
-        void handle(Resource old, Resource resource, Transaction tx) throws IOException;
-    }
-    private List<AfterSave> afterSaveList = new ArrayList<>();
-    public void fireAfterSave(Resource old, Resource resource, Transaction tx) throws IOException {
-        for (AfterSave handler: afterSaveList) {
-            handler.handle(old, resource, tx);
+    private List<BiConsumer<Resource, Resource>> afterSaveList = new ArrayList<>();
+    public void fireAfterSave(Resource old, Resource resource) {
+        for (BiConsumer<Resource, Resource> handler: afterSaveList) {
+            handler.accept(old, resource);
         }
     }
-    public void registerAfterSave(AfterSave handler) {
+    @Override
+    public void registerAfterSave(BiConsumer<Resource, Resource> handler) {
         afterSaveList.add(handler);
     }
 
-    public interface BeforeDelete {
-        void handle(Resource resource, Transaction tx) throws IOException;
-    }
-    private List<BeforeDelete> beforeDeleteList = new ArrayList<>();
-    public void fireBeforeDelete(Resource resource, Transaction tx) throws IOException {
-        for (BeforeDelete handler: beforeDeleteList) {
-            handler.handle(resource, tx);
+    private List<Consumer<Resource>> beforeDeleteList = new ArrayList<>();
+    public void fireBeforeDelete(Resource resource) {
+        for (Consumer<Resource> consumer: beforeDeleteList) {
+            consumer.accept(resource);
         }
     }
-    public void registerBeforeDelete(BeforeDelete handler) {
-        beforeDeleteList.add(handler);
+    @Override
+    public void registerBeforeDelete(Consumer<Resource> consumer) {
+        beforeDeleteList.add(consumer);
     }
 }

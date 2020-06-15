@@ -49,7 +49,7 @@ export enum paramType {
     aggregate="serverAggregates",
     sort="serverSorts",
     group="serverGroupBy",
-    groupby="serverGroupByColumn",
+    groupByColumn="serverGroupByColumn",
     highlights="highlights",
     calculations="serverCalculatedExpression",
     diagrams="diagrams",
@@ -239,7 +239,8 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('sortable', c.get('sortable'));
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
-            rowData.set('type', c.get('datasetColumn').get('convertDataType'));
+            rowData.set('type',
+                c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null);
             rowData.set('component', c.get('component'));
             columnDefs.push(rowData);
         });
@@ -430,7 +431,7 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
         this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, serverGroupByColumn, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverGroupByColumn, serverCalculatedExpression);
+        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression, serverGroupByColumn);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -572,8 +573,8 @@ class DatasetView extends React.Component<any, State> {
                 this.state.serverAggregates,
                 this.state.serverSorts,
                 this.state.serverGroupBy,
-                this.state.serverGroupByColumn,
-                this.state.serverCalculatedExpression
+                this.state.serverCalculatedExpression,
+                this.state.serverGroupByColumn
             );
         }
     }
@@ -653,7 +654,7 @@ class DatasetView extends React.Component<any, State> {
             serverAggregates: (paramName === paramType.aggregate)? param: filterParam(this.state.serverAggregates),
             serverSorts:  (paramName === paramType.sort)? param: filterParam(this.state.serverSorts),
             serverGroupBy:  (paramName === paramType.group)? param: filterParam(this.state.serverGroupBy),
-            serverGroupByColumn: (paramName === paramType.groupby)? param: filterParam(this.state.serverGroupByColumn),
+            serverGroupByColumn: (paramName === paramType.groupByColumn)? param: filterParam(this.state.serverGroupByColumn),
             highlights: (paramName === paramType.highlights)? param: filterParam(this.state.highlights),
             serverCalculatedExpression: (paramName === paramType.calculations)? param: filterParam(this.state.serverCalculatedExpression),
             diagrams: (paramName === paramType.diagrams)? param: this.state.diagrams,
@@ -677,14 +678,14 @@ class DatasetView extends React.Component<any, State> {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
-            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupby, paramType.calculations].includes(paramName)) {
+            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.calculations,paramType.groupByColumn ].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
                     (paramName === paramType.aggregate)? serverParam: serverAggregates,
                     (paramName === paramType.sort)? serverParam: serverSorts,
                     (paramName === paramType.group)? serverParam: serverGroupBy,
-                    (paramName === paramType.groupby)? serverParam: serverGroupByColumn,
                     (paramName === paramType.calculations)? serverParam: serverCalculatedExpression,
+                    (paramName === paramType.groupByColumn)? serverParam: serverGroupByColumn,
                 );
             }
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
@@ -1175,7 +1176,7 @@ class DatasetView extends React.Component<any, State> {
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
-                                    componentType={paramType.groupby}
+                                    componentType={paramType.groupByColumn}
                                 />
                                 :
                                 <ServerGroupByColumn/>
