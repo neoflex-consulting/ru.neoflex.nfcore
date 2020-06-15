@@ -322,9 +322,6 @@ export class API implements IErrorHandler {
                 if (alreadyLoaded) {
                     return Promise.resolve(alreadyLoaded);
                 }
-                if (id === fragment || fragment === '//') {
-                    return this.fetchResource(ref, level - 1, resourceSet, loading);
-                }
                 return this.fetchResource(ref, level - 1, resourceSet, loading).then(resource=>{
                     const result = resourceSet.getEObject(ref)
                     if (result) {
@@ -450,7 +447,7 @@ export class API implements IErrorHandler {
     }
 
     deleteResource(ref: string): Promise<any> {
-        return this.fetchJson(`/emf/resource?ref=${encodeURIComponent(ref)}`, {
+        return this.fetchJson(`/emf/resource?ref=${ref}`, {
             method: "DELETE",
             headers: {
                 'Accept': 'application/json',
