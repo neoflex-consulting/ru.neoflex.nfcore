@@ -1,122 +1,70 @@
 package ru.neoflex.nfcore.base.services.providers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.resource.Resource;
-import ru.neoflex.meta.emfgit.Database;
-import ru.neoflex.meta.emfgit.EntityId;
-import ru.neoflex.meta.emfgit.Finder;
-import ru.neoflex.meta.emfgit.Transaction;
-import ru.neoflex.nfcore.base.util.EmfJson;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import ru.neoflex.meta.emfgit.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class GitDBFinderProvider extends Finder implements FinderSPI {
-    private Transaction lastTx;
-
+public class GitDBFinderProvider extends AbstractSimpleFinderProvider {
     @Override
-    public JsonNode getResult() throws IOException {
-        Database db = lastTx.getDatabase();
-        ObjectMapper mapper = EmfJson.createMapper();
-        ObjectNode root = mapper.createObjectNode();
-        ArrayNode docs = root.withArray("docs");
-        for (Resource resource: new ArrayList<>(getResourceSet().getResources())) {
-            ObjectNode doc = docs.addObject();
-            URI uri = resource.getURI();
-            doc.put("_id", db.getId(uri));
-            doc.put("_rev", db.getRev(uri));
-            doc.put("contents", mapper.valueToTree(resource));
+    protected void findResourcesByClass(EClass eClass, String name, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
+        Transaction gitTx = (GitDBTransactionProvider) tx;
+        Database database = gitTx.getDatabase();
+        ResourceSet resourceSet = database.createResourceSet(gitTx);
+        try {
+            List<IndexEntry> ieList = database.findEClassIndexEntries(eClass, name, gitTx);
+            for (IndexEntry ie: ieList) {
+                EntityId entityId = new EntityId(new String(ie.getContent()), null);
+                consumeResource(consumer, gitTx, database, resourceSet, entityId);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        root.put("warning", getWarning());
-        root.put("execution_stats", getExecutionStats());
-        return root;
     }
 
     @Override
-    public void setSelector(ObjectNode selector) {
-        super.selector(selector);
+    protected void findResourcesById(String id, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) {
+        Transaction gitTx = (GitDBTransactionProvider) tx;
+        Database database = gitTx.getDatabase();
+        ResourceSet resourceSet = database.createResourceSet(gitTx);
+        EntityId entityId = new EntityId(id, null);
+        if (Files.exists(gitTx.getIdPath(entityId))) {
+            consumeResource(consumer, gitTx, database, resourceSet, entityId);
+        }
     }
 
-    @Override
-    public void setSkip(Integer value) {
-        super.skip(value);
-    }
-
-    @Override
-    public void setLimit(Integer limit) {
-        super.limit(limit);
-    }
-
-    @Override
-    public void addSort(String field, SortOrder order) {
-
-    }
-
-    @Override
-    public void addSort(String field) {
-
-    }
-
-    @Override
-    public void addField(String field) {
-
-    }
-
-    @Override
-    public void setBookmark(String key) {
-
-    }
-
-    @Override
-    public void execute(TransactionSPI tx) throws IOException {
-        this.lastTx = (GitDBTransactionProvider) tx;
-        super.execute(lastTx);
-    }
-
-    @Override
-    public String getBookmark() {
-        return null;
-    }
-
-    @Override
-    public void useIndex(String designDoc, String indexName) {
-
-    }
-
-    @Override
-    public void useIndex(String designDoc) {
-
-    }
-
-    @Override
-    public void setUpdate(boolean value) {
-
-    }
-
-    @Override
-    public void setExecutionStats(boolean value) {
-
+    private void consumeResource(Consumer<Supplier<Resource>> consumer, Transaction gitTx, Database database, ResourceSet resourceSet, EntityId entityId) {
+        consumer.accept(() -> {
+            try {
+                Entity entity = gitTx.load(entityId);
+                Resource resource = resourceSet.createResource(database.createURI(entity.getId(), entity.getRev()));
+                database.loadResource(entity.getContent(), resource);
+                return resource;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
     public void findAll(TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
-        lastTx = (GitDBTransactionProvider) tx;
-        for (EntityId entityId: lastTx.all()) {
-            Resource resource = lastTx.getDatabase().loadResource(entityId.getId(), lastTx);
+        Transaction gitTx = (GitDBTransactionProvider) tx;
+        for (EntityId entityId: gitTx.all()) {
+            Resource resource = gitTx.getDatabase().loadResource(entityId.getId(), gitTx);
             consumer.accept(() -> resource);
         }
     }
 
     @Override
     public void getDependentResources(Resource resource, TransactionSPI tx, Consumer<Supplier<Resource>> consumer) throws IOException {
-        lastTx = (GitDBTransactionProvider) tx;
-        for (Resource dep: lastTx.getDatabase().getDependentResources(resource, lastTx)) {
+        Transaction gitTx = (GitDBTransactionProvider) tx;
+        for (Resource dep: gitTx.getDatabase().getDependentResources(resource, gitTx)) {
             consumer.accept(() -> dep);
         }
     }

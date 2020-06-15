@@ -6,7 +6,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import java.io.IOException;
 
-public interface StoreSPI {
+public interface StoreSPI extends EventsRegistration {
     URI getUriByIdAndRev(String id, String rev);
 
     Resource saveResource(Resource resource) throws IOException;

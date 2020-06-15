@@ -10,12 +10,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emforientdb.Server;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
-import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.services.Store;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Service
 @ConditionalOnProperty(name = "dbtype", havingValue = "orientdb", matchIfMissing = true)
@@ -24,8 +25,6 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     String home;
     @Value("${orientdb.dbname:models}")
     String dbName;
-    @Autowired
-    Publisher publisher;
     @Autowired
     PackageRegistry registry;
 
@@ -129,5 +128,25 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
 
     public Server getServer() {
         return server;
+    }
+
+    @Override
+    public void registerAfterLoad(Consumer<Resource> consumer) {
+        getServer().getEvents().registerAfterLoad(consumer);
+    }
+
+    @Override
+    public void registerBeforeSave(BiConsumer<Resource, Resource> consumer) {
+        getServer().getEvents().registerBeforeSave(consumer);
+    }
+
+    @Override
+    public void registerAfterSave(BiConsumer<Resource, Resource> consumer) {
+        getServer().getEvents().registerAfterSave(consumer);
+    }
+
+    @Override
+    public void registerBeforeDelete(Consumer<Resource> consumer) {
+        getServer().getEvents().registerBeforeDelete(consumer);
     }
 }

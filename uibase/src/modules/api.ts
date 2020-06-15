@@ -305,7 +305,7 @@ export class API implements IErrorHandler {
             return loading[path];
         }
 
-        let result = this.fetchJson(`/emf/resource?ref=${encodeURIComponent(ref)}`).then(json => {
+        let result = this.fetchJson(`/emf/resource?ref=${ref}`).then(json => {
             let jsonObject = json.contents[0];
             return this.loadEObjectWithRefs(level, jsonObject, resourceSet, loading, json.uri);
         })
@@ -328,6 +328,10 @@ export class API implements IErrorHandler {
                                 return Promise.resolve(eClassifier);
                             }
                         }
+                    }
+                    const alreadyLoaded: EObject = resourceSet.getEObject(ref)
+                    if (alreadyLoaded) {
+                        return Promise.resolve(alreadyLoaded);
                     }
                     return this.fetchResource(ref, level - 1, resourceSet, loading);
                 });

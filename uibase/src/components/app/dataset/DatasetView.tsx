@@ -239,7 +239,8 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('sortable', c.get('sortable'));
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
-            rowData.set('type', c.get('datasetColumn').get('convertDataType'));
+            rowData.set('type',
+                c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null);
             rowData.set('component', c.get('component'));
             columnDefs.push(rowData);
         });
