@@ -299,42 +299,38 @@ export class API implements IErrorHandler {
     }
 
     fetchResource(ref: string, level: number, resourceSet: Ecore.ResourceSet, loading: any): Promise<Ecore.Resource> {
-        let {id, fragment} = API.parseRef(ref);
-        let path = id + '#' + fragment;
-        if (loading.hasOwnProperty(path)) {
-            return loading[path];
+        const {id} = API.parseRef(ref);
+        if (loading.hasOwnProperty(id)) {
+            return loading[id];
         }
 
-        let result = this.fetchJson(`/emf/resource?ref=${ref}`).then(json => {
+        let result = this.fetchJson(`/emf/resource?ref=${id}`).then(json => {
             let jsonObject = json.contents[0];
             return this.loadEObjectWithRefs(level, jsonObject, resourceSet, loading, json.uri);
         })
-        loading[path] = result;
+        loading[id] = result;
         return result;
     }
 
     loadEObjectWithRefs(level: number, jsonObject: any, resourceSet: Ecore.ResourceSet, loading: any, uri: string): Promise<Ecore.Resource> {
-        let refEObjects: Promise<any>[] = []
+        let refEObjects: Promise<EObject>[] = []
         if (level > 0) {
             let refs = Array.from(API.collectExtReferences(jsonObject).values());
             refEObjects = refs.map(ref => {
-                let resid: string|undefined, fragment: string|undefined;
-                [resid, fragment] = ref.split('#', 2);
-                return this.fetchPackages().then(packages => {
-                    let foundPackage = packages.find(p => p.get("nsURI") === resid);
-                    if(foundPackage) {
-                        for (let eClassifier of foundPackage.get('eClassifiers').array()) {
-                            if("//" + eClassifier.get("name") === fragment){
-                                return Promise.resolve(eClassifier);
-                            }
-                        }
+                const {id, fragment} = API.parseRef(ref);
+                const alreadyLoaded: EObject = resourceSet.getEObject(fragment||"") || resourceSet.getEObject(ref)
+                if (alreadyLoaded) {
+                    return Promise.resolve(alreadyLoaded);
+                }
+                return this.fetchResource(ref, level - 1, resourceSet, loading).then(resource=>{
+                    const result = resourceSet.getEObject(ref)
+                    if (result) {
+                        return result
                     }
-                    const alreadyLoaded: EObject = resourceSet.getEObject(ref)
-                    if (alreadyLoaded) {
-                        return Promise.resolve(alreadyLoaded);
-                    }
-                    return this.fetchResource(ref, level - 1, resourceSet, loading);
-                });
+                    // Сюда мы не должны попасть!
+                    console.log("ERROR: !!!We can't get here!!!")
+                    return result
+                })
             })
         }
         return Promise.all(refEObjects).then(_ => {
@@ -451,7 +447,7 @@ export class API implements IErrorHandler {
     }
 
     deleteResource(ref: string): Promise<any> {
-        return this.fetchJson(`/emf/resource?ref=${encodeURIComponent(ref)}`, {
+        return this.fetchJson(`/emf/resource?ref=${ref}`, {
             method: "DELETE",
             headers: {
                 'Accept': 'application/json',
