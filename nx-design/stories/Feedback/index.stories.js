@@ -1,7 +1,9 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 
-import Al from './Alert/index';
+import AlertPage from './Alert';
 
-storiesOf('Feedback', module)
-  .add('Alert', () => <Al />)
+
+
+storiesOf('Feedback|Alerts', module)
+  .add('Alerts', () => <AlertPage />)

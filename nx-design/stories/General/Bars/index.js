@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 
-// import { NXCalendarBar } from './Bars';
+import  NXCalendarBar from './Bars';
 
-class InputPage extends Component {
+class BarsPage extends Component {
   render() {
 
     return (
@@ -21,7 +21,7 @@ class InputPage extends Component {
           <h3 className="ex-title">Calendar</h3>
 
           <div>
-            {/*<NXCalendarBar />*/}
+            <NXCalendarBar />
           </div>
 
         </section>
@@ -30,4 +30,4 @@ class InputPage extends Component {
   }
 }
 
-export default InputPage;
+export default BarsPage;
