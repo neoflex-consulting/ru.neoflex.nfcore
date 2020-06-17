@@ -231,7 +231,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-            rowData.set('pinned', c.get('pinned'));
+                rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
@@ -555,6 +555,7 @@ class DatasetView extends React.Component<any, State> {
                         , groupByColumnParams.filter((f: any) => f.enable))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
+                        /*this.getAllDatasetComponents(true);*/
                         this.setState({rowData: result, columnDefs: newColumnDef});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {

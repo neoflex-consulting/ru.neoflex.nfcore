@@ -189,14 +189,15 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
     };
 
     refresh = () => {
-        this.props.form.validateFields((err: any, values: any) => {
+       /* this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
             }
             else {
                 this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
             }
-        });
+        });*/
+        this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
     };
 
     SortableItem = SortableElement(({value}: any) => {

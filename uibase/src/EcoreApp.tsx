@@ -271,6 +271,30 @@ class EcoreApp extends React.Component<any, State> {
         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
     };
 
+    prepareServerQueryParamColumn = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
+                :
+                param
+                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['enable'] !== undefined)
+                    .map( (p: any) => {
+                        return (
+                            pattern.create({
+                                datasetColumn: p['datasetColumn'],
+                                operation: p['operation'],
+                                value: p['value'],
+                                enable: p['enable'],
+                                type: p['type']
+                            } as IServerQueryParam)
+                        )
+                    });
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
     runQuery = (
         resource_: Ecore.Resource,
         queryParams: IServerNamedParam[] = [],
@@ -290,9 +314,9 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByParams, '/parameterGroupBy'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
+            this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
