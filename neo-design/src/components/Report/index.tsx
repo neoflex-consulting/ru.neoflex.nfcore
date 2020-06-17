@@ -1,3 +1,3 @@
-import {Report} from './Report';
+import {default as Report} from './Report';
 
 export default Report;

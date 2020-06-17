@@ -1,6 +1,6 @@
 {
-  "name": "ru.neoflex.nfcore.uireport",
-  "version": "1.0.0",
+  "name": "neo-design",
+  "version": "1.0.5",
   "description": "Library for dynamic components for project for Neoflex EMF Framework",
   "dependencies": {
     "react": "^16.12.0",
@@ -26,6 +26,7 @@
     "build": "webpack --mode production"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Neoflex",
+  "license": "ISC",
+  "main": "webpack.config.js"
 }

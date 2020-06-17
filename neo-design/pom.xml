@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.neoflex.nfcore</groupId>
-    <artifactId>uireport</artifactId>
+    <artifactId>neo-design</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>uireport</name>
+    <name>neo-design</name>
     <description>Library for dynamic components for project for Neoflex EMF Framework</description>
 
     <properties>

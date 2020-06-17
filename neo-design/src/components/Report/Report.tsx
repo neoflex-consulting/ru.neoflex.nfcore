@@ -8,7 +8,7 @@ export interface Props {
 interface State {
 }
 
-export class Report extends React.Component<Props, State> {
+class Report extends React.Component<Props, State> {
     state = {
     };
 
@@ -26,3 +26,5 @@ export class Report extends React.Component<Props, State> {
         console.info('Clicked');
     }
 }
+
+export default Report

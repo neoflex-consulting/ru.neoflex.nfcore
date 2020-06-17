@@ -10,6 +10,7 @@ import ponyCat from '../icons/ponyCat.png';
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
+import DynamicComponent from "./DynamicComponent";
 
 const FormItem = Form.Item;
 
