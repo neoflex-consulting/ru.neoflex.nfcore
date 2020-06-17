@@ -18,13 +18,9 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
@@ -504,17 +500,32 @@ public class Session implements Closeable {
             throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
                     oVertex.getIdentity(), ids));
         }
+        ResourceSet rs = createResourceSet();
+        Resource resource = rs.createResource(uri);
+        EObject eObject = createEObject(rs, oVertex);
+        resource.getContents().add(eObject);
+        populateEObject(resource.getResourceSet(), oVertex, eObject);
+        getFactory().getEvents().fireBeforeDelete(resource);
         deleteRecursive(oVertex);
     }
 
     public void save(Resource resource) {
+        Resource oldResource = null;
         ORecord firstRecord = null;
-        for (EObject eObject : resource.getContents()) {
+        for (EObject eObject: resource.getContents()) {
             OVertex oVertex = loadElement(eObject);
             if (oVertex == null) {
                 oVertex = createOVertex(eObject);
             } else {
                 checkVersion(resource.getURI(), oVertex);
+                ResourceSet rs = createResourceSet();
+                oldResource = rs.createResource(resource.getURI());
+                EObject oldObject = createEObject(rs, oVertex);
+                oldResource.getContents().add(oldObject);
+                populateEObject(rs, oVertex, oldObject);
+            }
+            if (firstRecord == null) {
+                getFactory().getEvents().fireBeforeSave(oldResource, resource);
             }
             populateOElement(eObject, oVertex);
             ORecord oRecord = oVertex.save();
@@ -524,6 +535,7 @@ public class Session implements Closeable {
         }
         if (firstRecord != null) {
             resource.setURI(factory.createResourceURI(firstRecord));
+            getFactory().getEvents().fireAfterSave(oldResource, resource);
             savedResourcesMap.put(resource, firstRecord);
         }
     }
@@ -543,6 +555,7 @@ public class Session implements Closeable {
         resource.getContents().add(eObject);
         resource.setURI(factory.createResourceURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
+        getFactory().getEvents().fireAfterLoad(resource);
 // Не нужно резолвить здесь! Это ведёт к лишним запросам и ломает Export With Dependencies
 //        EcoreUtil.resolveAll(resource);
     }
@@ -744,27 +757,7 @@ public class Session implements Closeable {
         ResourceSet resourceSet = factory.createResourceSet();
         resourceSet.getURIConverter()
                 .getURIHandlers()
-                .add(0, new URIHandlerImpl() {
-                    @Override
-                    public boolean canHandle(URI uri) {
-                        return SessionFactory.ORIENTDB.equals(uri.scheme());
-                    }
-
-                    @Override
-                    public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
-                        return new OrientDBOutputStream(Session.this, uri, options);
-                    }
-
-                    @Override
-                    public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
-                        return new OrientDBInputStream(Session.this, uri, options);
-                    }
-
-                    @Override
-                    public void delete(URI uri, Map<?, ?> options) throws IOException {
-                        Session.this.delete(uri);
-                    }
-                });
+                .add(0, new OrientDBHandler(this));
         return resourceSet;
     }
 

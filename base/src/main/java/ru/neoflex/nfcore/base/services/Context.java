@@ -8,7 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
-import ru.neoflex.nfcore.base.components.Publisher;
 import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 
 import java.util.concurrent.Callable;
@@ -23,8 +22,6 @@ public class Context {
     private Groovy groovy;
     @Autowired
     private Workspace workspace;
-    @Autowired
-    private Publisher publisher;
     @Autowired
     private Epsilon epsilon;
     @Autowired
@@ -54,10 +51,6 @@ public class Context {
 
     public Workspace getWorkspace() {
         return workspace;
-    }
-
-    public Publisher getPublisher() {
-        return publisher;
     }
 
     public Epsilon getEpsilon() {

@@ -11,22 +11,18 @@ import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.Workspace;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Service
 @ConditionalOnProperty(name = "dbtype", havingValue = "gitdb", matchIfMissing = false)
-public class GitDBStoreProvider implements StoreSPI {
+public class GitDBStoreProvider extends AbstractStoreSPI {
     @Autowired
     Workspace workspace;
 
     @Override
     public URI getUriByIdAndRev(String id, String rev) {
         return workspace.getDatabase().createURI(id, rev);
-    }
-
-    @Override
-    public Resource saveResource(Resource resource) throws IOException {
-        resource.save(null);
-        return resource;
     }
 
     @Override
@@ -42,21 +38,6 @@ public class GitDBStoreProvider implements StoreSPI {
     @Override
     public Resource createEmptyResource(ResourceSet resourceSet) {
         return workspace.getDatabase().createResource(resourceSet, null, null);
-    }
-
-    @Override
-    public Resource loadResource(URI uri, TransactionSPI tx) throws IOException {
-        Database db = workspace.getDatabase();
-        Resource resource = db.createResourceSet((Transaction) tx).createResource(uri);
-        resource.load(null);
-        return resource;
-    }
-
-    @Override
-    public void deleteResource(URI uri, TransactionSPI tx) throws IOException {
-        Database db = workspace.getDatabase();
-        Resource resource = db.createResourceSet((Transaction) tx).createResource(uri);
-        resource.delete(null);
     }
 
     @Override
@@ -86,7 +67,7 @@ public class GitDBStoreProvider implements StoreSPI {
         return new GitDBFinderProvider();
     }
 
-    public Transaction createTransaction(boolean readOnly) throws IOException {
+    private Transaction createTransaction(boolean readOnly) throws IOException {
         return new GitDBTransactionProvider(
                 workspace.getDatabase(),
                 workspace.getCurrentBranch(),
@@ -96,10 +77,8 @@ public class GitDBStoreProvider implements StoreSPI {
 
     @Override
     public TransactionSPI getCurrentTransaction() throws IOException {
-        {
-            Transaction current = Transaction.getCurrent();
-            return (GitDBTransactionProvider)current;
-        }
+        Transaction current = Transaction.getCurrent();
+        return (GitDBTransactionProvider)current;
     }
 
     public TransactionSPI setCurrentTransaction(TransactionSPI tx) throws IOException {
@@ -121,5 +100,25 @@ public class GitDBStoreProvider implements StoreSPI {
                         setCurrentTransaction(old);
                     }
                 });
+    }
+
+    @Override
+    public void registerAfterLoad(Consumer<Resource> consumer) {
+        workspace.getDatabase().getEvents().registerAfterLoad(consumer);
+    }
+
+    @Override
+    public void registerBeforeSave(BiConsumer<Resource, Resource> consumer) {
+        workspace.getDatabase().getEvents().registerBeforeSave(consumer);
+    }
+
+    @Override
+    public void registerAfterSave(BiConsumer<Resource, Resource> consumer) {
+        workspace.getDatabase().getEvents().registerAfterSave(consumer);
+    }
+
+    @Override
+    public void registerBeforeDelete(Consumer<Resource> consumer) {
+        workspace.getDatabase().getEvents().registerBeforeDelete(consumer);
     }
 }

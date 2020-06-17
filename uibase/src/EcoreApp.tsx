@@ -32,6 +32,7 @@ import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
+import FetchSpinner from "./components/FetchSpinner";
 
 const backgroundColor = "#2a356c";
 
@@ -487,6 +488,7 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>;
         return (
             <Layout style={{height: '100vh'}}>
+                <FetchSpinner/>
                 <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
                     <Row style={{height: '70'}}>
                         <Col span={5} style={{display: "block", height: 'inherit', paddingLeft: '20px'}}>

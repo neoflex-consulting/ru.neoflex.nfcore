@@ -17,21 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
-import ru.neoflex.nfcore.base.services.providers.FinderSPI;
-import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
-import ru.neoflex.nfcore.base.services.providers.StoreSPI;
-import ru.neoflex.nfcore.base.services.providers.TransactionSPI;
+import ru.neoflex.nfcore.base.services.providers.*;
 import ru.neoflex.nfcore.base.types.TypesPackage;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Service("ru.neoflex.nfcore.base.services.Store")
 @DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
-public class Store {
+public class Store implements EventsRegistration {
     private final static Log logger = LogFactory.getLog(Store.class);
     @Autowired
     Workspace workspace;
@@ -167,6 +166,26 @@ public class Store {
                     readOnly? Transaction.LockType.READ: Transaction.LockType.WRITE,
                     wtx -> f.call(tx));
         });
+    }
+
+    @Override
+    public void registerAfterLoad(Consumer<Resource> consumer) {
+        provider.registerAfterLoad(consumer);
+    }
+
+    @Override
+    public void registerBeforeSave(BiConsumer<Resource, Resource> consumer) {
+        provider.registerBeforeSave(consumer);
+    }
+
+    @Override
+    public void registerAfterSave(BiConsumer<Resource, Resource> consumer) {
+        provider.registerAfterSave(consumer);
+    }
+
+    @Override
+    public void registerBeforeDelete(Consumer<Resource> consumer) {
+        provider.registerBeforeDelete(consumer);
     }
 
     public interface TransactionalProcedure {
