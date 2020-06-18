@@ -530,7 +530,7 @@ class DatasetView extends React.Component<any, State> {
     ) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
 
         this.props.context.runQuery(resource
             , newQueryParams

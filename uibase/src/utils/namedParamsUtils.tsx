@@ -19,25 +19,13 @@ function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) 
     return replacedCommand
 };
 
-function getNamedParams(valueItems: any) {
+function getNamedParams(valueItems: any, contextItemValues: any) {
     let namedParams: IServerNamedParam[] = [];
     if (valueItems) {
         valueItems.each((item: EObject) => {
-            if (item.eClass._id === "//Select") {
-                namedParams.push({
-                    parameterName: item.get('name'),
-                    parameterValue: (item.get('value') instanceof Array)
-                        ? (item.get('value') as String[]).reduce((p, c) => p+','+c)
-                        : item.get('value')
-                })
-            } else if (item.eClass._id === "//DatePicker") {
-                namedParams.push({
-                    parameterName: item.get('name'),
-                    parameterValue: item.get('value'),
-                    parameterDataType: "Date",
-                    parameterDateFormat: item.get('format')
-                })
-            } else if (item.eClass._id === "//ValueHolder") {
+            if (contextItemValues.get(item._id.split("_")[0])) {
+                namedParams.push(contextItemValues.get(item._id.split("_")[0]))
+            } else {
                 namedParams.push({
                     parameterName: item.get('name'),
                     parameterValue: item.get('value')
