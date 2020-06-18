@@ -174,30 +174,30 @@ class Calculator extends DrawerParameterComponent<Props, State> {
     };
 
     deleteRow = () => {
-        //Удаляем смещаем на 1 вниз
-        // if (this.state.parametersArray?.length !== 1) {
-        //     let parametersArray = this.state.parametersArray?.filter((element => {
-        //         return element.NXButton_ - 1 !== this.state.currentIndex
-        //     })).map((element, index) => {
-        //         return {...element,
-        //                 index: index + 1}
-        //     });
-        //     let currentIndex = parametersArray!.length - 1;
-        //     this.setState({parametersArray, currentIndex});
-        //     this.props.onChangeParameters!(parametersArray!, this.props.componentType)
-        // //Последний обнуляем
-        // } else {
-        //     let parametersArray = this.state.parametersArray?.map((element) => {
-        //            return {index: 1,
-        //                datasetColumn: undefined,
-        //                operation: undefined,
-        //                enable: true,
-        //                type: undefined}
-        //         }
-        //     );
-        //     this.setState({parametersArray});
-        //     this.props.onChangeParameters!(parametersArray!, this.props.componentType)
-        // }
+        // Удаляем смещаем на 1 вниз
+        if (this.state.parametersArray?.length !== 1) {
+            let parametersArray = this.state.parametersArray?.filter((element => {
+                return element.index - 1 !== this.state.currentIndex
+            })).map((element, index) => {
+                return {...element,
+                        index: index + 1}
+            });
+            let currentIndex = parametersArray!.length - 1;
+            this.setState({parametersArray, currentIndex});
+            this.props.onChangeParameters!(parametersArray!, this.props.componentType)
+        //Последний обнуляем
+        } else {
+            let parametersArray = this.state.parametersArray?.map((element) => {
+                   return {index: 1,
+                       datasetColumn: undefined,
+                       operation: undefined,
+                       enable: true,
+                       type: undefined}
+                }
+            );
+            this.setState({parametersArray});
+            this.props.onChangeParameters!(parametersArray!, this.props.componentType)
+        }
     };
 
     handleSubmit = (e: any) => {
@@ -247,7 +247,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
-               {/*                 <Select getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
+                                <Select getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
                                         onChange={(e: any) => {
                                             this.setState({currentIndex:e});
@@ -255,13 +255,13 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                     {this.state.parametersArray?.map((element)=> {
                                         return <Select.Option
                                             key={(element.datasetColumn)? element.datasetColumn : ""}
-                                            value={(element.NXButton_)? element.NXButton_ - 1 : 0}
+                                            value={(element.index)? element.index - 1 : 0}
                                         >
                                             {element.datasetColumn}
                                         </Select.Option>
                                     })}
 
-                                </Select>*/}
+                                </Select>
                             )
                         }
                     </Col>
