@@ -26,6 +26,7 @@
         <module>emf-orientdb</module>
         <module>masterdata</module>
         <module>nx-design</module>
+        <module>neo-design</module>
     </modules>
 
 </project>

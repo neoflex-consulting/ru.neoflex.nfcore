@@ -19,7 +19,6 @@ import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
 import MasterdataForm from "./MasterdataForm";
 import {truncate} from './utils'
-import FetchSpinner from "../../FetchSpinner";
 import MasterdataGrid from "./MasterdataGrid";
 
 interface Props {
@@ -161,7 +160,6 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
-                <FetchSpinner/>
                 <div>
                     <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
                             onClick={this.cancel}>
@@ -209,7 +207,6 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         const entityType = this.props.entityType as EObject
         return (
             <React.Fragment>
-                <FetchSpinner/>
                 <div>
                     <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.refresh}>
                         <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon"/>

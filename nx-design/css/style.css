@@ -78,3 +78,16 @@ li {
   padding: 10px 20px;
   background: #eee
 }
+
+pre {
+  margin-top: 20px;
+  width: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1em;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+  background-color: rgb(250, 250, 250);
+  padding: 0.5rem;
+  line-height: 1.5;
+}

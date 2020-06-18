@@ -1,9 +1,12 @@
 import React,{Component} from "react";
-import NXButton from "../Button/NXButton";
-import {NXOption, NXSelect} from "../Input/Input";
+import NXButton from "../../../index";
+import {NXInput, NXOption, NXSelect} from "../Input/Input";
+import {NXIcon, legend, print, arrowLeft, plus, calendar, table, search} from "../Icon/Icon";
+import styled from "styled-components";
 
 
-class NXCalendarBar extends Component {
+
+export default class NXCalendarBar extends Component {
   constructor(props) {
     super(props);
 
@@ -44,88 +47,168 @@ class NXCalendarBar extends Component {
     }
   }
 
+  getYears() {
+    const currentYear = new Date().getFullYear();
+    let years = [];
+    for (let i = -10; i <= 10; i++) {
+      years.push(currentYear + i)
+    }
+    this.setState({years});
+  };
+
+  componentDidMount() {
+    this.getYears();
+  }
+
+  handleCalendarVisible = () => {
+    if (this.state.calendarVisible) {
+      this.setState({calendarVisible: false});
+    } else {
+      this.setState({calendarVisible: true});
+    }
+  }
+
   render() {
-    const {i18n, t} = this.props;
-    const dateFormat = "LLLL yyyy";
-    const dateFormat_ = "LLLL";
+    const StyledCalendar = styled.div`
+    display: block;
+    position: relative;
+    width: 100%;
+    background: var(--neutral-color);
+    border: 1px solid var(--border-color);
+    background-color: rgb(243, 244, 251);
+    height: 56px;
+
+   .header{
+       text-transform: capitalize;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+    height: 56px;
+   }
+   .row {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+.row:last-child {
+     border-bottom: none;
+ }
+.date button {
+    font-weight: 600;
+    align-items: center;
+}
+.NXIcon {
+    display: inline-block;
+    vertical-align: middle;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    cursor: pointer;
+    transition: .15s ease-out;
+    margin: auto;
+    height: 24px;
+}
+.col {
+    flex-basis: 0;
+    max-width: 100%;
+}
+.col-start {
+    flex-grow: 3;
+    justify-content: flex-start;
+    text-align: end;
+}
+.col-center {
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.col-end {
+    flex-grow: 3;
+    justify-content: flex-end;
+    text-align: start;
+}
+
+.col-col-center {
+    margin: 0 30px;
+}
+
+.col-text {
+    color: rgba(0, 0, 0, 0.65);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.date div {
+    font-weight: 600;
+    align-items: center;
+}
+.date > div, button {
+margin-right: 8px;
+}
+.fill path{
+  fill: #424D78
+}
+.handleCalendarVisible svg{
+padding: 3px;
+}
+
+`
     return (
+        <StyledCalendar>
       <div id="selectInFullScreen" className="header row flex-middle">
         {
           this.state.calendarVisible &&
-          <div
-            style={{display: "contents"}}
-          >
-            <div
-              className="date">
+          <div style={{display: "contents"}}>
+            <div className="date">
 
-              <NXButton
-                className='buttonToday'
-                onClick={(e) => {this.handleChange(e, 'today')}}
-              >
-                {t('today')}
+              <NXButton className='buttonToday'>
+                Сегодня
               </NXButton>
 
               <NXSelect className='selectYear'
-                      getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                      value={this.state.currentMonth.getFullYear()}
-                      style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
-                      onChange={(e) => {this.handleChange(e, 'year')}}>
+                      width='100px'
+                      getPopupContainer={() => document.getElementById ('selectInFullScreen')}
+                      value={this.state.currentMonth.getFullYear()}>
                 {
-                  this.state.years.map((y) =>
-                    <NXOption
-                      key={y}
-                      value={y}
-                    >
-                      {y}
-                    </NXOption>
+                        this.state.years.map((y) =>
+                      <NXOption
+                          key={y}
+                          value={y}
+                      >
+                        {y}
+                      </NXOption>
                   )
                 }
               </NXSelect>
 
               <NXSelect
+                width='120px'
                 className='selectMonth'
-                getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
-                style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
+                getPopupContainer={() => document.getElementById ('selectInFullScreen')}
                 onChange={(e) => {this.handleChange(e, 'month')}}
               >
-                {
-                  this.state.months.map((m) =>
-                    <NXOption
-                      className='selectMonth2'
-                      key={m}
-                      value={m}
-                    >
-                      {
-                        dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
-                        dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
-                      }
-                    </NXOption>
-                  )
-                }
+                Месяц
               </NXSelect>
             </div>
 
             <div className="col col-start">
-              <div className="icon" onClick={this.prevMonth}>
-                chevron_left
-              </div>
+                  <NXIcon style={{transform: 'scale(0.5)'}} icon={arrowLeft} />
             </div>
             <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
-                        {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
+                     Месяц
                     </span>
             </div>
             <div className="col col-end" >
-              <div className="icon" onClick={this.nextMonth}>
-                chevron_right
-              </div>
+                  <NXIcon style={{transform: 'scale(-0.5)'}} icon={arrowLeft} />
             </div>
 
-            <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
-                    onClick={this.handleLegendMenu}>
-              <img  alt="Not found" src={legend}  style={{marginLeft: '-9px', marginTop: '4px'}}/>
-            </Button>
+                <NXIcon icon={legend} />
           </div>
         }
 
@@ -135,7 +218,7 @@ class NXCalendarBar extends Component {
             style={{display: "contents", marginTop: '2px'}}
           >
             <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
-              <Input
+              <NXInput
                 style={{
                   width: '186px',
                   borderRadius: '4px',
@@ -144,13 +227,6 @@ class NXCalendarBar extends Component {
                   height: '32px'
                 }}
                 placeholder="Поиск"
-                suffix={
-                  <img
-                    alt="Not found"
-                    src={searchIcon}
-                    onClick={this.searchValue}
-                  />
-                }
                 onChange={(e) => {
                   this.changeSearchValue(e.target.value)
                 }}
@@ -159,20 +235,10 @@ class NXCalendarBar extends Component {
 
 
             <NXSelect
-              getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
+              getPopupContainer={() => document.getElementById('selectInFullScreen')}
               value={this.state.selectedValueInGrid}
               style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px'}}
-              onChange={(e) => {
-                this.handleChange(e, 'select')
-              }}
             >
-              <NXOption
-                key={this.props.viewObject.get('defaultStatus').get('name')}
-                value={this.props.viewObject.get('defaultStatus').get('name')}
-              >
-                {this.props.viewObject.get('defaultStatus').get('name')}
-              </NXOption>
-
               <NXOption
                 key={'Системные заметки'}
                 value={'Системные заметки'}
@@ -185,106 +251,33 @@ class NXCalendarBar extends Component {
           </div>
         }
 
-        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+      <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '32px'}}/>
 
+      <NXIcon icon={plus} className='NXIcon fill' />
+      <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '32px'}}/>
+      <NXIcon icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+      style={{
+        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
+        borderRadius: '2px',
+        background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
+        pointerEvents: this.state.calendarVisible ? 'none' : 'auto',
+        marginRight: '8px'
+      }}
+      />
+      <NXIcon icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+      style={{
+        border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
+        borderRadius: '2px',
+        background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
+        pointerEvents: !this.state.calendarVisible ? 'none' : 'auto'
+      }}
+      />
 
-        <Button
-          className="buttonPlus"
-          type="primary"
-          style={{
-            width: '20px',
-            height: '30px',
-            marginTop: this.state.fullScreenOn ? '11px' : '2px',
-            backgroundColor: '#293468'
-          }}
-          onClick={this.handleCreateMenu}>
-          <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-        </Button>
+      <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '32px'}}/>
 
-
-
-
-        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
-
-        <Button
-          disabled={this.state.calendarVisible}
-          className="calendarAlt"
-          style={{
-            marginRight: '10px',
-            width: '32px',
-            height: '32px',
-            backgroundColor: '#ffffff'
-          }}
-          onClick={this.handleCalendarVisible}
-        >
-          <FontAwesomeIcon color={'#6e6e6e'} icon={faCalendarAlt} size="lg"
-                           style={{
-                             marginLeft: '-8px',
-                             color: this.state.calendarVisible ? '#293468' : '#a0a0a0'
-                           }}/>
-        </Button>
-        <Button
-          disabled={!this.state.calendarVisible}
-          className="alignJustify"
-          style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: '#ffffff'
-          }}
-          onClick={this.handleCalendarVisible}
-        >
-          <FontAwesomeIcon icon={faAlignJustify} size="lg"
-                           style={{
-                             marginLeft: '-8px',
-                             color: this.state.calendarVisible ? '#a0a0a0' : '#293468'
-                           }}/>
-        </Button>
-
-        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
-
-        <Button
-          className="buttonPrint"
-          type="link"
-          ghost
-          style={{
-            marginRight: '10px',
-            width: '32px',
-            height: '32px'
-          }}
-        >
-          <img
-            alt="Not found"
-            src={printIcon}
-            style={{
-              marginLeft: '-6px',
-              color: '#515151'
-            }}
-          />
-        </Button>
-
-
-        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
-
-
-        <Button
-          className="buttonFullScreen"
-          type="link"
-          ghost
-          style={{
-            marginRight: '10px',
-            width: '32px',
-            height: '32px'
-          }}
-          onClick={this.onFullScreen}
-        >
-          {this.state.fullScreenOn  ?
-            <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
-            :
-            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
-        </Button>
+      <NXIcon icon={print} className='NXIcon fill' />
       </div>
+        </StyledCalendar>
     );
   }
 }
-
-export default NXCalendarBar;

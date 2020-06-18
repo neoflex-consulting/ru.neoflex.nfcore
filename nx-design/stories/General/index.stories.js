@@ -8,9 +8,15 @@ import IconPage from './Icon';
 import InputPage from './Input';
 import BarsPage from './Bars';
 
-storiesOf('General', module)
-  .add('Button', () => <ButtonPage />)
-  .add('Icons', () => <IconPage />)
-  .add('Input', () => <InputPage />)
-  .add('FunctionalBars', () => <BarsPage />)
+storiesOf('General|Buttons', module)
+    .add('Buttons', () => <ButtonPage />)
+
+storiesOf('General|Icons', module)
+    .add('Icons', () => <IconPage />)
+
+storiesOf('General|Inputs', module)
+    .add('Inputs', () => <InputPage />)
+
+storiesOf('General|Bars', module)
+    .add('FunctionalBars', () => <BarsPage />)
 

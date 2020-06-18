@@ -4,7 +4,6 @@ import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import {EObject} from "ecore";
-import FetchSpinner from "../../FetchSpinner";
 import {Button} from "antd";
 import Paginator from "../Paginator";
 import {getAllAttributes, truncate} from "./utils";
@@ -84,7 +83,6 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
         const {gridOptions} = this.state;
         return (
             <React.Fragment>
-                <FetchSpinner/>
                 <div style={{boxSizing: 'border-box', height: 570, width: "99,5%", backgroundColor: backgroundColor}}
                      className={'ag-theme-material'}>
                     <AgGridReact

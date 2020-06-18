@@ -29,7 +29,7 @@ const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
             {items.map((value:any) => (
-                <SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
+                <SortableItem key={`item-${value.NXButton}`} index={value.NXButton-1} value={value} />
             ))}
         </ul>
     );
@@ -39,7 +39,7 @@ const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
-                <span>{value.index}</span>
+                <span>{value.NXButton}</span>
             </Col>
             <Col span={7}>
                 <Form.Item style={{ display: 'inline-block' }}>
@@ -60,7 +60,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
+                                const event = e ? e : JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: undefined})
                                 value.handleChange(event)
                             }}
                         >
@@ -68,8 +68,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.columnDefs!
                                     .map((c: any) =>
                                         <Select.Option
-                                            key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
-                                            value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                            key={JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: c.get('field')})}
+                                            value={JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: c.get('field')})}
                                         >
                                             {c.get('headerName')}
                                         </Select.Option>)
@@ -96,7 +96,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             style={{ width: '179px', marginLeft: '5px' }}
                             allowClear={true}
                             onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
+                                const event = e ? e : JSON.stringify({index: value.NXButton, columnName: 'operation', value: undefined})
                                 value.handleChange(event)
                             }}
                         >
@@ -104,8 +104,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.allOperations!
                                     .map((o: any) =>
                                         <Select.Option
-                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                            key={JSON.stringify({index: value.NXButton, columnName: 'operation', value: o.get('name')})}
+                                            value={JSON.stringify({index: value.NXButton, columnName: 'operation', value: o.get('name')})}
                                         >
                                             {value.t(o.get('name'))}
                                         </Select.Option>)
@@ -132,10 +132,10 @@ const SortableItem = SortableElement(({value}: any) => {
                             style={{ width: '110px', marginRight: '10px' }}
                             allowClear={true}
                             onChange={(e: any) => value.handleChange(
-                                JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
+                                JSON.stringify({index: value.NXButton, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                             )}
                             title={value.value}
-                            id={value.index.toString()}
+                            id={value.NXButton.toString()}
                         />
                     )}
                 </Form.Item>
@@ -145,7 +145,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     <Switch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                            const event = JSON.stringify({index: value.NXButton, columnName: 'enable', value: e});
                             value.handleChange(event)
                         }}>
                     </Switch>
@@ -157,7 +157,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         title="delete row"
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
-                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
+                        onClick={(e: any) => {value.deleteRow({index: value.NXButton})}}
                     >
                         <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                     </Button>
@@ -222,9 +222,9 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                             .map((serverFilter: any) => (
                                 {
                                     ...serverFilter,
-                                    idDatasetColumn : `${JSON.stringify({index: serverFilter.index, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`,
-                                    idValue : `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`,
+                                    idDatasetColumn : `${JSON.stringify({index: serverFilter.NXButton, columnName: 'datasetColumn', value: serverFilter.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: serverFilter.NXButton, columnName: 'operation', value: serverFilter.operation})}`,
+                                    idValue : `${JSON.stringify({index: serverFilter.NXButton, columnName: 'value', value: serverFilter.value})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,

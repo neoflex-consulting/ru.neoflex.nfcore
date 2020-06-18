@@ -7,16 +7,21 @@ module.exports = {
       },
 
   stories: ['../stories/**/*.stories.js'],
-  addons: ['@storybook/addon-actions', '@storybook/addon-links', '@storybook/addon-docs/react/preset', "@storybook/preset-ant-design"]
+  addons: ['@storybook/addon-actions', '@storybook/addon-links', '@storybook/addon-docs/preset', "@storybook/preset-ant-design"]
 },
  {
     rules: [
         {
-            test: /\.m?js[x]$/,
-            exclude: /(node_modules|bower_components)/,
-            use: {
-                loader: "babel-loader"
-            }
+            test: /\.jsx?$/,
+            exclude: /node_modules/,
+            use: [
+                {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-react']
+                    }
+                }
+            ],
         },
         {
             test: /\.(png|svg|jpg|gif)$/,
