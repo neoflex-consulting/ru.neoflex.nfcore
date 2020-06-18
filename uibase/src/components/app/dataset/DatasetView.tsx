@@ -231,7 +231,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-            rowData.set('pinned', c.get('pinned'));
+                rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
@@ -555,6 +555,7 @@ class DatasetView extends React.Component<any, State> {
                         , groupByColumnParams.filter((f: any) => f.enable))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
+                        /*this.getAllDatasetComponents(true);*/
                         this.setState({rowData: result, columnDefs: newColumnDef});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
@@ -678,7 +679,7 @@ class DatasetView extends React.Component<any, State> {
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
-            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.calculations,paramType.groupByColumn ].includes(paramName)) {
+            if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
                     (paramName === paramType.aggregate)? serverParam: serverAggregates,
@@ -1158,7 +1159,7 @@ class DatasetView extends React.Component<any, State> {
                     <Drawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
-                        title={t('aggregations')}
+                        title={t('Group aggregations')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
