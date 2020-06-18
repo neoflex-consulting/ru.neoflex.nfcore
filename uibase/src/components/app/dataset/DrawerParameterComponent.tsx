@@ -100,7 +100,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         handleChange(e: any) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map( (f: any) => {
-            if (f.index.toString() === target['index.modules.css.js'].toString()) {
+            if (f.index.toString() === target['index'].toString()) {
                 const targetColumn = this.props.columnDefs!.find( (c: any) =>
                     c.get('field') === (f.datasetColumn || target['value'])
                 );

@@ -463,6 +463,33 @@ class DatasetView extends React.Component<any, State> {
         }*/
     }
 
+    getColumnDefGroupBy = (rowDataShow: any) => {
+        let columnDefs: any[] = [];
+        this.state.defaultColumnDefs.forEach((c:any) => {
+            if (rowDataShow[0][c.get('field')] !== undefined) {
+                columnDefs.push(c)
+            } else {
+                let rowData = new Map();
+                rowData.set('field', c.get('field'));
+                rowData.set('headerName', c.get('headerName'));
+                rowData.set('headerTooltip', c.get('headerTooltip'));
+                rowData.set('hide', true);
+                rowData.set('pinned', c.get('pinned'));
+                rowData.set('filter', c.get('filter'));
+                rowData.set('sort', c.get('sort'));
+                rowData.set('editable', c.get('editable'));
+                rowData.set('checkboxSelection', c.get('checkboxSelection'));
+                rowData.set('sortable', c.get('sortable'));
+                rowData.set('suppressMenu', c.get('suppressMenu'));
+                rowData.set('resizable', c.get('resizable'));
+                rowData.set('type', c.get('type'));
+                rowData.set('component', c.get('component'));
+                columnDefs.push(rowData);
+            }
+        });
+        return columnDefs
+    };
+
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
         let columnDefs = this.state.defaultColumnDefs.map((e:any)=> e);
         parametersArray.forEach(element => {
@@ -530,7 +557,7 @@ class DatasetView extends React.Component<any, State> {
     ) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
 
         this.props.context.runQuery(resource
             , newQueryParams
@@ -542,7 +569,12 @@ class DatasetView extends React.Component<any, State> {
             , groupByColumnParams.filter((f: any) => f.enable)
         ).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
-                let newColumnDef: any[] = this.getNewColumnDef(calculatedExpression);
+                let newColumnDef: any[];
+                if (groupByParams.length !== 0 && groupByColumnParams.length !== 0 && result.length !== 0) {
+                    newColumnDef = this.getColumnDefGroupBy(result)
+                } else {
+                    newColumnDef = this.getNewColumnDef(calculatedExpression);
+                }
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource

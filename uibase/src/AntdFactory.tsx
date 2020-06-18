@@ -76,6 +76,7 @@ class Form_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction()
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     render = () => {
@@ -274,20 +275,16 @@ class Select_ extends ViewContainer {
             this.selected = temp.join(",");
             currentValue = currentValue.join(",");
         }
-        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: (currentValue === undefined) ? null : currentValue
         });
-        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
-        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+        this.props.context.updateContext!({contextItemValues: contextItemValues},
+            ()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
-        })*/);
+        }));
     };
 
     componentDidMount(): void {
@@ -329,10 +326,11 @@ class Select_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
         if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
             && this.state.datasetComponent
             && this.props.viewObject.get('valueItems')) {
@@ -346,9 +344,10 @@ class Select_ extends ViewContainer {
                 });
                 this.setState({
                     params: newParams,
-                    currentValue: undefined,
+                    currentValue: "",
                     selectData: resArr
                 });
+                this.onChange("");
             });
         }
     }
@@ -460,24 +459,22 @@ class DatePicker_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     onChange = (currentValue: string) => {
-        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
-        this.props.viewObject.set('format', this.state.format);
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: (currentValue === undefined) ? null : currentValue,
+            parameterDataType: "Date",
+            parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
         });
-        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
-        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
+        this.props.context.updateContext!({contextItemValues: contextItemValues},
+            ()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
             itemName:this.props.viewObject.get('name')
-        })*/)
+        }));
     };
 
     render = () => {
@@ -501,7 +498,7 @@ class DatePicker_ extends ViewContainer {
 class HtmlContent_ extends ViewContainer {
     constructor(props: any) {
         super(props);
-        const params = getNamedParams(this.props.viewObject.get('valueItems'));
+        const params = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
         this.state = {
             htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'),params),
             params: params
@@ -509,7 +506,7 @@ class HtmlContent_ extends ViewContainer {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        const newParams = getNamedParams(this.props.viewObject.get('valueItems'));
+        const newParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
         if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)) {
             this.setState({
                 params: newParams,
@@ -546,8 +543,23 @@ class GroovyCommand_ extends ViewContainer {
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction()
+        this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
+
+
+    setValue = (result: any) => {
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: result
+        });
+        this.props.context.updateContext!({contextItemValues: contextItemValues},
+            ()=>this.props.context.notifyAllEventHandlers({
+                type:eventType.change,
+                itemName:this.props.viewObject.get('name')
+            }));
+    };
 
     execute = () => {
         const commandType = this.props.viewObject.get('commandType')||"Eval";
@@ -558,13 +570,9 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
-                this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemName:this.props.viewObject.get('name')
-                });
+                this.setValue(res)
             })
         } else if (commandType === "Static") {
             API.instance().fetchJson('/script/static/'+this.props.viewObject.get('gitStaticClass')+'/'+this.props.viewObject.get('gitStaticMethod'), {
@@ -572,13 +580,9 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
-                this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemName:this.props.viewObject.get('name')
-                });
+                this.setValue(res)
             })
         } else {
             API.instance().fetchJson('/script/eval', {
@@ -586,13 +590,9 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems')))
+                body: replaceNamedParam(command, getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.props.context.contextItemValues.set(this.props.viewObject.get('name'), res);
-                this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemName:this.props.viewObject.get('name')
-                });
+                this.setValue(res)
             })
         }
     };
@@ -612,20 +612,17 @@ class ValueHolder_ extends ViewContainer {
     }
 
     onChange = (currentValue?: string) => {
-        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue );
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: (currentValue === undefined) ? null : currentValue
         });
-        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
-        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
-        })*/)
+        this.props.context.updateContext!({contextItemValues: contextItemValues},
+            ()=>this.props.context.notifyAllEventHandlers({
+                type:eventType.change,
+                itemName:this.props.viewObject.get('name')
+            }));
+
     };
 
     componentDidMount(): void {
@@ -643,17 +640,19 @@ class ValueHolder_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (this.props.viewObject.get('contextWriter')) {
-            const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter').get('name'));
+            const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter')._id.split("_")[0]);
             const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
+            const currentContextValue = this.props.context.contextItemValues.get(this.props.viewObject._id.split("_")[0]);
             if (contextItem
-                && contextItem.length >= 1
+                && contextItem.parameterValue.length >= 1
                 && columnName) {
-                const value = contextItem[0][columnName];
-                if (value !== this.props.viewObject.get('value')) {
+                const value = contextItem.parameterValue[0][columnName];
+                if (value !== (currentContextValue ? currentContextValue.parameterValue: undefined)) {
                     this.onChange(value);
                 }
             }
@@ -695,23 +694,20 @@ class Input_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     onChange = (currentValue: string) => {
-        this.props.viewObject.set('value', (currentValue === undefined) ? null : currentValue);
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: (currentValue === undefined) ? null : currentValue
         });
-        const updatedViewObject__: Ecore.Resource = this.props.viewObject.eResource();
-        const newViewObject: Ecore.EObject[] = (updatedViewObject__.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
-        this.props.context.updateContext!(({viewObject: newViewObject[0]})/*,()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
-        })*/)
+        this.props.context.updateContext!({contextItemValues: contextItemValues},
+            ()=>this.props.context.notifyAllEventHandlers({
+                type:eventType.change,
+                itemName:this.props.viewObject.get('name')
+            }));
     };
 
     render = () => {
@@ -783,6 +779,7 @@ class Typography_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     private getDocxData(): docxExportObject {
@@ -910,7 +907,10 @@ class EventHandler_ extends ViewContainer {
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+        if (this.props.viewObject.get('listenItem')) {
+            this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+        }
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     render = () => {
@@ -941,7 +941,8 @@ class Drawer_ extends ViewContainer {
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction()
+        this.props.context.removeEventAction();
+        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
     }
 
     render = () => {
