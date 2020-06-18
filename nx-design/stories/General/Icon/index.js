@@ -1,54 +1,25 @@
 import React, { Component, Fragment } from 'react';
-import {NXIcon, notification,
-  question,
-  person,
-  exit,
-  calendar,
-  arrowUp,
-  arrowDown,
-  arrowLeft,
-  deleteIcon,
-  plus,
-  close,
-  switchIcon,
-  rubbish,
-  fill,
-  letter,
-  diagram,
-  diagramCircle,
-  diagramBlock,
-  gear,
-  settings,
-  filter,
-  plusBlock,
-  calculator,
-  barChart,
-  sort,
-  add,
-  update,
-  mark,
-  download,
-  print,
-  fullScreen,
-  undo,
-  list,
-  more,
-  table,
-  tableUp,
-  arrowLong,
-  edit,
-  menuOpen,
-  search,
-  legend,
-  tiles,
-  alert,
-  info,
-  warning} from "./Icon";
+import {NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,arrowLeft,deleteIcon,plus,close,
+  switchIcon,rubbish,fill,letter,diagram,diagramCircle,diagramBlock,gear,settings,filter,plusBlock,
+  calculator,barChart,sort,add,update,mark,download,print,fullScreen,undo,list,more,table,tableUp,arrowLong,
+  edit,menuOpen,search,legend,tiles,alert,info,warning
+} from "../../../index";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import {docco} from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 class IconPage extends Component {
+    copyToClipboard(e) {
+        const str = e.currentTarget.innerText.trim()
+        const el = document.createElement('textarea');
+        el.value = `<NXIcon icon={${str}} />`;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+    };
 
   groupIcon(arr){
-  return arr.map((icon, i) => <div className="icon">
+  return arr.map((icon, i) => <div className="icon" onClick={this.copyToClipboard}>
       <NXIcon key={i} icon={icon} />
       <br/>
       <span>{icon.name}</span>
@@ -125,16 +96,16 @@ class IconPage extends Component {
 
     return (
       <Fragment>
-        <h1 className="title">Icon</h1>
+        <h1 className="title">Иконки</h1>
 
-        <h2 className="title">How To Use</h2>
+        <h2 className="title">Как использовать</h2>
+            <SyntaxHighlighter language='javascript' style={docco} >
+                {`import { NXIcon, iconName } from "nx-design";`}
+            </SyntaxHighlighter>
         <p className="text">
-          Use tag to create an icon and set its type in the type prop, for example:
+          При нажатии на необходимую иконку, ее код будет скопирован в буффер.
         </p>
 
-        <div className='exampleStyle'>
-          &lt;<span style={{color: 'red'}}>NXIcon</span> <span style={{color: 'green'}}>icon</span>="<span style={{color: 'blue'}}>iconName</span>" /&gt;
-        </div>
 
         <h3 className="title">Header</h3>
         <section className="icons ml20">
@@ -143,7 +114,6 @@ class IconPage extends Component {
           }
         </section>
         <br/><br/>
-
         <h3 className="title">Functional bar</h3>
         <section className="icons ml20">
           {

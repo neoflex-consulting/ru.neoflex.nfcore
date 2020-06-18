@@ -76,16 +76,17 @@ const NXTextArea = styled(Input.TextArea)`
 
 const NXDatePicker = styled(DatePicker)`
     width: ${(props) => (props.width ? `${props.width}` : "auto")};
+    border-radius: 4px;
     .ant-calendar-picker-icon{
     content: url(${calendar});
 }
 `
 
 const NXSelect = styled(Select)`
-    border: 1px solid #2A356C;
     box-sizing: border-box;
     border-radius: 4px;
-    width: 250px;
+    width: ${(props) => (props.width ? `${props.width}` : "250px")};
+
 `
 
 const {Option} = Select
