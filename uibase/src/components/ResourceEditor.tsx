@@ -318,7 +318,7 @@ class ResourceEditor extends React.Component<any, State> {
         const addRefPossibleTypes = []
         addRefPossibleTypes.push(EObject.get('eType').get('name'))
         //Заглушка, так как "EObject.get('eType').get('eAllSubTypes') = undefined" в package ru.neoflex.nfcore.application,в других пакетак работает нормально
-        Ecore.ResourceSet.create().elements('EClass').filter((c:any)=>c.get('name')===EObject.get('eType').get('name')).map((c:any)=>c.get('eAllSubTypes')).flat().forEach((subType: Ecore.EObject) =>
+        EObject.get('eType').eResource().get('resourceSet').elements('EClass').filter((c:any)=>c.get('name')===EObject.get('eType').get('name')).map((c:any)=>c.get('eAllSubTypes')).flat().forEach((subType: Ecore.EObject) =>
             //EObject.get('eType').get('eAllSubTypes').forEach((subType: Ecore.EObject) =>
             addRefPossibleTypes.push(subType.get('name'))
         )
