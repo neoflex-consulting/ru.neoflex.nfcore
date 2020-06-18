@@ -336,7 +336,7 @@ export class API implements IErrorHandler {
         prepared.forEach(p => {db[p.id] = p})
         function create(id: any) {
             const resource = resourceSet.create(id)
-            if (resource.get('contents').size() == 0) {
+            if (resource.get('contents').size() === 0) {
                 const {rev, jObject} = db[id]
                 resource.rev = rev
                 API.collectExtReferences(jObject).forEach(ref => create(API.parseRef(ref).id))
