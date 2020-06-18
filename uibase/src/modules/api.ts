@@ -314,33 +314,37 @@ export class API implements IErrorHandler {
         })
     }
 
-    loadResourceSet(resourceSet: Ecore.ResourceSet, jsonResources: any[]): any {
-        if (jsonResources.length === 0) {
-            return null
+    indexObject(obj: any, index: Set<any>): Set<any> {
+        if (!obj || typeof obj !== 'object' || index.has(obj)) {
+            return index;
         }
-        API.removeVerFromRefs(jsonResources)
-        const jsonObjects: any[] = [];
-        let resources: Ecore.Resource[] = []
-        jsonResources.forEach(r => {
-            const {id, rev} = API.parseRef(r.uri);
-            const res = resourceSet.create(`${id}`);
-            res.get('contents').clear();
-            res.rev = rev;
-            resources.push(res)
-            const jsonObject = r.contents[0]
-            jsonObjects.push(jsonObject)
+        index.add(obj)
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
+                this.indexObject(obj[i], index)
+            }
+        }
+        return index
+    }
+
+    loadResourceSet(resourceSet: Ecore.ResourceSet, jsonResources: any[]): Ecore.Resource[] {
+        const prepared = jsonResources.map(jr=>{
+            const {id, rev} = API.parseRef(jr.uri)
+            return {id, rev, jObject: jr.contents[0]}
         })
-        const resource = resources[0]
-        const {id} = API.parseRef(resource.get("uri"));
-        resource.parse(jsonObjects as any)
-        while (resource.get('contents').size() > 1) {
-            const eObject: any = resource.get('contents').first()
-            resource.get('contents').remove(eObject)
-            const r = resourceSet.create(eObject._id)
-            r.add(eObject)
-            resourceSet.eContents().push(r)
+        const db: any = {}
+        prepared.forEach(p => {db[p.id] = p})
+        function create(id: any) {
+            const resource = resourceSet.create(id)
+            if (resource.get('contents').size() == 0) {
+                const {rev, jObject} = db[id]
+                resource.rev = rev
+                API.collectExtReferences(jObject).forEach(ref => create(API.parseRef(ref).id))
+                resource.load(jObject)
+            }
+            return resource
         }
-        return resource
+        return prepared.map(p => create(p.id))
     }
 
     fetchResourceSet(ref: string, resourceSet: Ecore.ResourceSet): Promise<Ecore.Resource> {
@@ -348,7 +352,7 @@ export class API implements IErrorHandler {
             resourceSet =  Ecore.ResourceSet.create();
         }
         return this.fetchJson(`/emf/resourceset?ref=${ref}`).then(json => {
-            return this.loadResourceSet(resourceSet, json.resources)
+            return this.loadResourceSet(resourceSet, json.resources)[0]
         })
     }
 
@@ -433,8 +437,7 @@ export class API implements IErrorHandler {
         }).then(json => {
             let {executionStats, bookmark, warning, size} = json;
             let rs = Ecore.ResourceSet.create();
-            this.loadResourceSet(rs, json.resources)
-            const resources = rs.get('resources').array().slice(0, size)
+            const resources = this.loadResourceSet(rs, json.resources).slice(0, size)
             return {resources, executionStats, bookmark, warning}
         })
     }
