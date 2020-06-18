@@ -30,7 +30,7 @@ const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
             {items.map((value:any) => (
-                <SortableItem key={`item-${value.NXButton}`} index={value.NXButton-1} value={value} />
+                <SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
             ))}
         </ul>
     );
@@ -40,7 +40,7 @@ const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableTotalItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
-                {value.NXButton}
+                {value.index}
             </Col>
             <Col span={10}>
                 <Form.Item style={{ display: 'inline-block' }}>
@@ -90,7 +90,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: undefined})
+                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
                                 value.handleChange(event)
                             }}
                         >
@@ -98,8 +98,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.columnDefs!
                                     .map((c: any) =>
                                         <Select.Option
-                                            key={JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: c.get('field')})}
-                                            value={JSON.stringify({index: value.NXButton, columnName: 'datasetColumn', value: c.get('field')})}
+                                            key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
+                                            value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                         >
                                             {c.get('headerName')}
                                         </Select.Option>)
@@ -125,7 +125,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             style={{ width: '219px', marginRight: '10px' }}
                             allowClear={true}
                             onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.NXButton, columnName: 'operation', value: undefined})
+                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
                                 value.handleChange(event)
                             }}
                         >
@@ -133,8 +133,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.allAggregates!
                                     .map((o: any) =>
                                         <Select.Option
-                                            key={JSON.stringify({index: value.NXButton, columnName: 'operation', value: o.get('name')})}
-                                            value={JSON.stringify({index: value.NXButton, columnName: 'operation', value: o.get('name')})}
+                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
+                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
                                         >
                                             {value.t(o.get('name'))}
                                         </Select.Option>)
@@ -149,7 +149,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     <Switch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.NXButton, columnName: 'enable', value: e});
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                             value.handleChange(event)
                         }}>
                     </Switch>
@@ -161,7 +161,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         title="delete row"
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
-                        onClick={(e: any) => {value.deleteRow({index: value.NXButton})}}
+                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
                         <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                     </Button>
@@ -226,8 +226,8 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                             .map((serverAggregate: any) => (
                                 {
                                     ...serverAggregate,
-                                    idDatasetColumn : `${JSON.stringify({index: serverAggregate.NXButton, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: serverAggregate.NXButton, columnName: 'operation', value: serverAggregate.operation})}`,
+                                    idDatasetColumn : `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,

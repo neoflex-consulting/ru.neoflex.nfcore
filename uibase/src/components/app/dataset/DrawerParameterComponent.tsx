@@ -100,11 +100,11 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         handleChange(e: any) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map( (f: any) => {
-            if (f.NXButton.toString() === target['index.modules.css.js'].toString()) {
+            if (f.index.toString() === target['index.modules.css.js'].toString()) {
                 const targetColumn = this.props.columnDefs!.find( (c: any) =>
                     c.get('field') === (f.datasetColumn || target['value'])
                 );
-                return {index: f.NXButton,
+                return {index: f.index,
                     datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
                     operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
                     value: target['columnName'] === 'value' ? target['value'] : f.value,
@@ -146,7 +146,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.props.form.resetFields();
         let newServerParam: IServerQueryParam[] = [];
         this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
-            if (element.index !== e.NXButton) {
+            if (element.index !== e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
                     datasetColumn: element.datasetColumn,
@@ -204,7 +204,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         return <li className="SortableItem">
             <Row gutter={[8, 0]}>
                 <Col span={24}>
-                    {value.NXButton}
+                    {value.index}
                 </Col>
             </Row>
         </li>
@@ -220,7 +220,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         return (
             <ul className="SortableList">
                 {items.map((value:any) => (
-                    <this.SortableItem key={`item-${value.NXButton}`} index={value.NXButton-1} value={value} />
+                    <this.SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
                 ))}
             </ul>
         );
@@ -269,8 +269,8 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
                             .map((serverParam: any) => (
                                 {
                                     ...serverParam,
-                                    idDatasetColumn : `${JSON.stringify({index: serverParam.NXButton, columnName: 'datasetColumn', value: serverParam.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: serverParam.NXButton, columnName: 'operation', value: serverParam.operation})}`,
+                                    idDatasetColumn : `${JSON.stringify({index: serverParam.index, columnName: 'datasetColumn', value: serverParam.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: serverParam.index, columnName: 'operation', value: serverParam.operation})}`,
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

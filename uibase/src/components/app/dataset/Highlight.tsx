@@ -35,7 +35,7 @@ const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
             {items.map((value:any) => (
-                <SortableItem key={`item-${value.NXButton}`} index={value.NXButton-1} value={value} />
+                <SortableItem key={`item-${value.index}`} index={value.index-1} value={value} />
             ))}
         </ul>
     );
@@ -45,7 +45,7 @@ const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableItemHighlight">
         <Row gutter={[8, 0]}>
             <Col span={1}>
-                <span>{value.NXButton}</span>
+                <span>{value.index}</span>
             </Col>
             <Col span={7}>
                 <Form.Item style={{display: 'inline-block'}}>
@@ -71,7 +71,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             allowClear={true}
                             onChange={(e: any) => {
                                 const event = e ? e : JSON.stringify({
-                                    index: value.NXButton,
+                                    index: value.index,
                                     columnName: 'datasetColumn',
                                     value: undefined
                                 })
@@ -83,12 +83,12 @@ const SortableItem = SortableElement(({value}: any) => {
                                     .map((c: any) =>
                                         <Select.Option
                                             key={JSON.stringify({
-                                                index: value.NXButton,
+                                                index: value.index,
                                                 columnName: 'datasetColumn',
                                                 value: c.get('field')
                                             })}
                                             value={JSON.stringify({
-                                                index: value.NXButton,
+                                                index: value.index,
                                                 columnName: 'datasetColumn',
                                                 value: c.get('field')
                                             })}
@@ -120,7 +120,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             allowClear={true}
                             onChange={(e: any) => {
                                 const event = e ? e : JSON.stringify({
-                                    index: value.NXButton,
+                                    index: value.index,
                                     columnName: 'operation',
                                     value: undefined
                                 })
@@ -132,12 +132,12 @@ const SortableItem = SortableElement(({value}: any) => {
                                     .map((o: any) =>
                                         <Select.Option
                                             key={JSON.stringify({
-                                                index: value.NXButton,
+                                                index: value.index,
                                                 columnName: 'operation',
                                                 value: o.get('name')
                                             })}
                                             value={JSON.stringify({
-                                                index: value.NXButton,
+                                                index: value.index,
                                                 columnName: 'operation',
                                                 value: o.get('name')
                                             })}
@@ -168,13 +168,13 @@ const SortableItem = SortableElement(({value}: any) => {
                             allowClear={true}
                             onChange={(e: any) => value.handleChange(
                                 JSON.stringify({
-                                    index: value.NXButton,
+                                    index: value.index,
                                     columnName: 'value',
                                     value: e.target.value === "" ? undefined : e.target.value
                                 })
                             )}
                             title={value.value}
-                            id={value.NXButton.toString()}
+                            id={value.index.toString()}
                         />
                     )}
                 </Form.Item>
@@ -184,7 +184,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     <Switch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.NXButton, columnName: 'enable', value: e});
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                             value.handleChange(event)
                         }}>
                     </Switch>
@@ -196,7 +196,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         title="delete row"
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
-                        onClick={(e: any) => {value.deleteRow({index: value.NXButton})}}
+                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
                         <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                     </Button>
@@ -215,7 +215,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         style={{width: '100px', marginLeft: '21px'}}
                         onChange={(e: any) => {
                             const event = e ? e : JSON.stringify({
-                                index: value.NXButton,
+                                index: value.index,
                                 columnName: 'highlightType',
                                 value: undefined
                             })
@@ -227,12 +227,12 @@ const SortableItem = SortableElement(({value}: any) => {
                                 .map((o: any) =>
                                     <Select.Option
                                         key={JSON.stringify({
-                                            index: value.NXButton,
+                                            index: value.index,
                                             columnName: 'highlightType',
                                             value: o.get('name')
                                         })}
                                         value={JSON.stringify({
-                                            index: value.NXButton,
+                                            index: value.index,
                                             columnName: 'highlightType',
                                             value: o.get('name')
                                         })}
@@ -247,7 +247,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Фон</div>
                 <FontAwesomeIcon
                     color={value.backgroundColor}
-                    onClick={() => value.handleColorMenu('background', value.NXButton)}
+                    onClick={() => value.handleColorMenu('background', value.index)}
                     style={{fontSize: '18px', marginLeft: '13px'}}
                     icon={faPalette}
                 />
@@ -255,13 +255,13 @@ const SortableItem = SortableElement(({value}: any) => {
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'500px'}
                     title={'Выбор цвета фона'}
-                    visible={value.backgroundColorVisible && value.colorIndex === value.NXButton}
-                    onCancel={() => value.handleColorMenu('background', value.NXButton)}
+                    visible={value.backgroundColorVisible && value.colorIndex === value.index}
+                    onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
                     mask={false}
                     onOk={() => {
                         return value.handleChange(JSON.stringify({
-                            index: value.NXButton,
+                            index: value.index,
                             columnName: 'backgroundColor',
                             value: value.stateColor !== undefined ? value.stateColor['hex'] : value.backgroundColor
                         }))
@@ -277,7 +277,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Текст</div>
                 <FontAwesomeIcon
                     color={value.color}
-                    onClick={() => value.handleColorMenu('text', value.NXButton)}
+                    onClick={() => value.handleColorMenu('text', value.index)}
                     style={{fontSize: '18px', marginLeft: '13px'}}
                     icon={faPalette}
                 />
@@ -285,12 +285,12 @@ const SortableItem = SortableElement(({value}: any) => {
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'500px'}
                     title={'Выбор цвета текста'}
-                    visible={value.textColorVisible && value.colorIndex === value.NXButton}
-                    onCancel={() => value.handleColorMenu('text', value.NXButton)}
+                    visible={value.textColorVisible && value.colorIndex === value.index}
+                    onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
                     mask={false}
                     onOk={() => value.handleChange(JSON.stringify({
-                        index: value.NXButton,
+                        index: value.index,
                         columnName: 'color',
                         value: value.stateColor !== undefined ? value.stateColor['hex'] : value.color
                     }))}
@@ -339,12 +339,12 @@ class Highlight extends DrawerParameterComponent<Props, State> {
     handleChange(e: any) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map((f: any) => {
-            if (f.NXButton.toString() === target['index.modules.css.js'].toString()) {
+            if (f.index.toString() === target['index.modules.css.js'].toString()) {
                 const targetColumn = this.props.columnDefs!.find((c: any) =>
                     c.get('field') === (f.datasetColumn || target['value'])
                 );
                 return {
-                    index: f.NXButton,
+                    index: f.index,
                     datasetColumn: target['columnName'] === 'datasetColumn' ? target['value'] : f.datasetColumn,
                     operation: target['columnName'] === 'operation' ? target['value'] : f.operation,
                     value: target['columnName'] === 'value' ? target['value'] : f.value,
@@ -371,7 +371,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
         this.props.form.resetFields();
         let newServerParam: IServerQueryParam[] = [];
         this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
-            if (element.index !== e.NXButton) {
+            if (element.index !== e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
                     datasetColumn: element.datasetColumn,
@@ -431,10 +431,10 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                             .map((highlights: any) => (
                                 {
                                     ...highlights,
-                                    idDatasetColumn : `${JSON.stringify({index: highlights.NXButton, columnName: 'datasetColumn', value: highlights.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: highlights.NXButton, columnName: 'operation', value: highlights.operation})}`,
-                                    idValue : `${JSON.stringify({index: highlights.NXButton, columnName: 'value', value: highlights.value})}`,
-                                    idHighlightType : `${JSON.stringify({index: highlights.NXButton, columnName: 'highlightType', value: highlights.highlightType})}`,
+                                    idDatasetColumn : `${JSON.stringify({index: highlights.index, columnName: 'datasetColumn', value: highlights.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: highlights.index, columnName: 'operation', value: highlights.operation})}`,
+                                    idValue : `${JSON.stringify({index: highlights.index, columnName: 'value', value: highlights.value})}`,
+                                    idHighlightType : `${JSON.stringify({index: highlights.index, columnName: 'highlightType', value: highlights.highlightType})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
