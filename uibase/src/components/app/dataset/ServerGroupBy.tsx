@@ -11,6 +11,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 
+
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
@@ -172,7 +173,16 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={1}>
             </Col>
             <Col span={23}>
-                <Input placeholder="Basic usage" />
+                    {localStorage.getItem('i18nextLng') === 'ru' ?
+                            <Input placeholder="Название"
+                                   onChange={(e: any) => {
+                                       const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});
+                                       value.handleChange(event)
+                                   }}/>  :
+                    localStorage.getItem('i18nextLng    ') === 'us' ?
+                            <Input placeholder="Label" />
+                            :
+                            <Input placeholder="asas" />}
             </Col>
         </Row>
 

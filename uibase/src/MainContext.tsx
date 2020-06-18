@@ -16,6 +16,7 @@ export interface IServerQueryParam {
     color?: string
 }
 
+
 export interface IServerNamedParam {
     parameterName: string,
     parameterValue: string,
