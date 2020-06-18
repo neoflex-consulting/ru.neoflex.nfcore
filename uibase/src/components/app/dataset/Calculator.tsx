@@ -174,7 +174,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
     };
 
     deleteRow = () => {
-        //Удаляем смещаем на 1 вниз
+        // Удаляем смещаем на 1 вниз
         if (this.state.parametersArray?.length !== 1) {
             let parametersArray = this.state.parametersArray?.filter((element => {
                 return element.index - 1 !== this.state.currentIndex
