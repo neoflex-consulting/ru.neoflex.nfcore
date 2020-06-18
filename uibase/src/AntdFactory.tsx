@@ -60,7 +60,7 @@ class Form_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isHidden: this.viewObject.get('isHidden') || false,
+            isHidden: this.viewObject.get('hidden') || false,
         };
     }
 
@@ -922,7 +922,7 @@ class Drawer_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isHidden: this.viewObject.get('isHidden') || false,
+            isHidden: this.viewObject.get('hidden') || false,
         };
     }
 
@@ -995,7 +995,8 @@ class Calendar_ extends ViewContainer {
 
 class MasterdataView_ extends ViewContainer {
     render = () => {
-        return <MasterdataEditor {...this.props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
+        const hidden = this.viewObject.get('hidden') === true
+        return hidden ? <div/> : <MasterdataEditor {...this.props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
     }
 }
 

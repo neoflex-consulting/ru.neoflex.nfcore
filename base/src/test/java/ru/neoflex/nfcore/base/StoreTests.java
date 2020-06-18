@@ -37,8 +37,7 @@ public class StoreTests {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
         superAdmin.setName("SuperAdminRole_FORTEST2");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
-        allPermission.setGrantStatus(GrantStatus.GRANTED);
-        allPermission.getActionTypes().add(ActionType.ALL);
+        allPermission.setGrantType(GrantType.ALL);
         superAdmin.getGrants().add(allPermission);
         return superAdmin;
     }
