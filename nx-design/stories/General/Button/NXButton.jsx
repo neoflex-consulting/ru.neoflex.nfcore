@@ -1,15 +1,14 @@
-import React from 'react';
-// import React from 'react';
-// import { Button } from 'antd';
+import React,{Component} from 'react';
+import { Button } from 'antd';
 import styled from 'styled-components';
-//
-//
-// class NXButton extends React.Component {
-//     constructor(props) {
-//         super(props);
-//     }
-//     render() {
-        const StyledNXButton = styled.button`
+
+
+export default class NXButton extends Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+    const StyledNXButton = styled(Button)`
     background: ${(props) => (props.primary ? '#424D78'
             : props.disabled ? '#B3B3B3'
                 : '#FFFFFF')};
@@ -50,12 +49,7 @@ import styled from 'styled-components';
                 : '1px solid #FFCC66')};
     }
 `
-//         return (<Button></Button>
-//         <StyledNXButton {...this.props}>{this.props.children}</StyledNXButton>
-//         )
-//     }
-// }
-// export {NXButton}
+        return <StyledNXButton {...this.props}>{this.props.children}</StyledNXButton>
 
-
-export const NXButton = ({children}) => <StyledNXButton>{children}</StyledNXButton>;
+    }
+}

@@ -45,11 +45,22 @@ public class EMFController {
     }
 
     @GetMapping("/resource")
-    JsonNode getObject(@RequestParam String ref) throws Exception {
+    JsonNode getResource(@RequestParam String ref) throws Exception {
         return store.inTransaction(true, tx -> {
             Resource resource = store.loadResource(ref);
             EcoreUtil.resolveAll(resource);
             ObjectNode result = EmfJson.resourceToTree(store, resource);
+            return result;
+        });
+    }
+
+    @GetMapping("/resourceset")
+    JsonNode getResourceSet(@RequestParam String ref) throws Exception {
+        return store.inTransaction(true, tx -> {
+            Resource resource = store.loadResource(ref);
+            ResourceSet rs = resource.getResourceSet();
+            EcoreUtil.resolveAll(rs);
+            ObjectNode result = EmfJson.resourceSetToTree(store, rs.getResources());
             return result;
         });
     }
@@ -72,7 +83,7 @@ public class EMFController {
             store.commit("Put " + ref);
             return resource;
         });
-        return getObject(store.getRef(created));
+        return getResource(store.getRef(created));
     }
 
     @GetMapping("/packages")
@@ -94,10 +105,11 @@ public class EMFController {
             ResourceSet resourceSet = docFinder.getResourceSet();
             List<Resource> resources = new ArrayList<>(resourceSet.getResources());
             EcoreUtil.resolveAll(resourceSet);
-            ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resources);
+            ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resourceSet.getResources());
             resourceSetNode.set("executionStats", docFinder.getExecutionStats());
             resourceSetNode.put("warning", docFinder.getWarning());
             resourceSetNode.put("bookmark", docFinder.getBookmark());
+            resourceSetNode.put("size", resources.size());
             return resourceSetNode;
         });
     }

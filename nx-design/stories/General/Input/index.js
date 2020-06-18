@@ -15,7 +15,7 @@ class InputPage extends Component {
           A button means an operation (or a series of operations). Clicking a button will trigger corresponding business logic.
         </p>
 
-        <h2 className="title">Examples:</h2>
+        <h2 className="title">Примеры:</h2>
 
         <section className="example">
           <h3 className="ex-title">Checkbox</h3>
