@@ -31,7 +31,7 @@ public class DeploySupply {
     Store store;
     @Autowired
     Context context;
-    @Value("${deploy.application:${user.dir}/deploy}")
+    @Value("${deploy.dir:${user.dir}/deploy}")
     private
     String deployBase;
 
