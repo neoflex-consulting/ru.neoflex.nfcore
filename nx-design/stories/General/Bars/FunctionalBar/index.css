@@ -1,0 +1,19 @@
+.functionalBar__header {
+    display: flex;
+    justify-content: space-between;
+    background: var(--neutral-color);
+    border: 1px solid var(--border-color);
+    background-color: var(--border-color);
+    height: 56px;
+    color: #222222;
+}
+
+.functionalBar__header .block {
+    margin: auto 16px;
+    display: flex;
+}
+
+.functionalBar__header .caption {
+    margin: auto 12px auto auto;
+    color: black;
+}
