@@ -5,10 +5,12 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.neoflex.nfcore.base.auth.AuthPackage
+import ru.neoflex.nfcore.base.auth.Role
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 
 import java.util.function.BiConsumer
+import java.util.function.Consumer
 
 class AuthPackageInit {
 
@@ -18,6 +20,26 @@ class AuthPackageInit {
             @Override
             void accept(Resource oldResource, Resource resource) {
                 resource.contents.forEach {eObject->AuditInit.setAuditInfo(eObject)}
+            }
+        })
+    }
+
+    /*Role*/
+    {
+        Context.current.store.registerAfterSave(new BiConsumer<Resource, Resource>() {
+            @Override
+            void accept(Resource oldResource, Resource resource) {
+                if (resource.contents.count {eObject->eObject instanceof Role} > 0) {
+                    Context.current.authorization.clearRolesCache()
+                }
+            }
+        })
+        Context.current.store.registerBeforeDelete(new Consumer<Resource>() {
+            @Override
+            void accept(Resource resource) {
+                if (resource.contents.count {eObject->eObject instanceof Role} > 0) {
+                    Context.current.authorization.clearRolesCache()
+                }
             }
         })
     }

@@ -186,6 +186,7 @@ public class Database implements Closeable {
 
     public Resource loadResource(byte[] content, Resource resource) throws IOException {
         ((XMIResourceImpl) resource).doLoad(new ByteArrayInputStream(content), null);
+        getEvents().fireAfterLoad(resource);
         return resource;
     }
 

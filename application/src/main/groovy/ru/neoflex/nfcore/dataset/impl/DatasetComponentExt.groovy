@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.ecore.resource.ResourceSet
 import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
@@ -10,6 +11,7 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
+import ru.neoflex.nfcore.dataset.*
 
 import java.sql.Connection
 import java.sql.Date
@@ -85,7 +87,15 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String runQuery(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn) {
+    String runQuery(
+            EList<QueryParameter> parameters,
+            EList<QueryFilterDTO> filters,
+            EList<QueryConditionDTO> aggregations,
+            EList<QueryConditionDTO> sorts,
+            EList<QueryFilterDTO> groupBy,
+            EList<QueryConditionDTO> calculatedExpression,
+            EList<QueryConditionDTO> groupByColumn
+    ) {
         if (column) {
             def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                     .execute().resourceSet
@@ -102,7 +112,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 return JsonOutput.toJson(rowData)
             }
             else {
-                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, groupByColumn))
+                return JsonOutput.toJson(connectionToDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, groupByColumn, resource))
             }
         }
         else {
@@ -110,10 +120,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryConditionDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn) {
+    List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryFilterDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn, ResourceSet resource) {
         NamedParameterStatement p;
         ResultSet rs;
         def rowData = []
+
         Connection jdbcConnection = (dataset.connection as JdbcConnectionExt).connect()
         try {
             /*Execute query*/
@@ -129,7 +140,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
                     if (column[i].class.toString().toLowerCase().contains('rdbms')) {
-                        if (queryColumns.contains("${column[i].name}")) {
+                        if (queryColumns.size() != 0 && queryColumns.contains("${column[i].name}")) {
                             throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                         } else {
                             queryColumns.add("t.\"${column[i].name}\"")
@@ -154,7 +165,22 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
 
-            def allColumns = column.name + calculatedExpression.datasetColumn
+            def allColumns
+
+            if (groupByColumn) {
+                serverGroupByColumn = groupByColumn.datasetColumn
+            }
+
+            if (groupBy && serverGroupByColumn) {
+                allColumns = groupBy.datasetColumn
+                for (int i = 0; i < serverGroupByColumn.size(); i++) {
+                    if (!allColumns.contains(serverGroupByColumn[i])) {
+                        allColumns.add(serverGroupByColumn[i])
+                    }
+                }
+            } else {
+                allColumns = column.name + calculatedExpression.datasetColumn
+            }
 
             //Filter
             if (filters) {
@@ -211,14 +237,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Group by
             if (groupBy) {
+//                boolean updateDataSetComponent = false
+//                def datasetComponentRef = Context.current.store.getRef(resource.resources.get(0))
+//                def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
                 for (int i = 0; i <= groupBy.size() - 1; ++i) {
-                    if (allColumns.contains(groupBy[i].datasetColumn) && groupBy[i].enable == true) {
+                    if (allColumns.contains(groupBy[i].datasetColumn) && groupBy[i].enable) {
                         def map = [:]
                         map["column"] = groupBy[i].datasetColumn
-                        def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
+                            def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                         if (operator == 'AVG') {
                             map["select"] = "AVG(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                         }
+//                        if (groupBy[i].value != null && groupBy[i].value != ''){
+//                                for (int l = 0; l <= column.size(); l++) {
+//                                    if(datasetComponent.column[l].name == groupBy[i].datasetColumn)
+//                                    {
+//                                        datasetComponent.column[l].headerName.name = groupBy[i].value
+//                                    }
+//                                }
+//                            updateDataSetComponent = true;
+//                        }
+
                         if (operator == 'COUNT') {
                             map["select"] = "COUNT(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                         }
@@ -248,19 +287,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                     }
                 }
-            }
-
-            // GroupByColumn
-            if (groupByColumn) {
-                for (int i = 0; i <= allColumns.size() - 1; ++i) {
-                    def map = [:]
-                    if (!serverGroupByAggregation.column.contains(allColumns[i])) {
-                        map["select"] = "t.\"${allColumns[i]}\""
-                        if (!serverGroupBy.contains(map)) {
-                            serverGroupBy.add(map)
-                        }
-                    }
-                }
+//                if (updateDataSetComponent){
+//                    Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
+//                    Context.current.store.commit("Entity was updated " + datasetComponentRef)
+//                }
             }
 
             //Aggregation overall
@@ -349,10 +379,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (serverFilters) {
                 currentQuery = "\nSELECT * \n  FROM (${currentQuery}) t" +
                         "\n WHERE ${serverFilters.select.join(' AND ')}"
-            }
-            if (serverGroupByColumn) {
-                currentQuery = " \nSELECT ${serverGroupByColumn.select.join(' , ')}" +
-                        "\n  FROM (${currentQuery}) t"
             }
             if (serverGroupByAggregation) {
                 if (serverGroupBy) {
