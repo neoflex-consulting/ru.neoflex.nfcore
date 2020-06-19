@@ -38,6 +38,13 @@ class ApplicationPackageInit {
                     processViewElement(eObject.view)
                     processTreeNode(eObject.referenceTree)
                 }
+                else if (eObject instanceof Application) {
+                    if (eObject.checkRights) {
+                        def grant = Context.current.authorization.isEObjectPermitted(eObject)
+                        eObject.hidden = !Authorization.canRead(grant)
+                        eObject.disabled = !Authorization.canWrite(grant)
+                    }
+                }
             }
         })
     }
