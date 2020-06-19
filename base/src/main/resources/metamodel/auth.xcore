@@ -7,9 +7,6 @@
 )
 package ru.neoflex.nfcore.base.auth
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EBoolean
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
@@ -28,67 +25,29 @@ class Role {
     contains Permission[] grants opposite role
     contains Audit audit
 
-    op GrantStatus permitted(ActionType actionType, EObject eObject)
+    op Integer isEObjectPermitted(EObject eObject)
 }
 
 abstract class Permission {
     container Role role opposite grants
-    GrantStatus grantStatus
-    ActionType[] actionTypes
+    GrantType grantType
 
-    op Integer priority()
-    op GrantStatus permitted(ActionType actionType, EObject eObject)
+    op Integer isEObjectPermitted(EObject eObject)
 }
 
 class AllPermission extends Permission {
-    op Integer priority() {0}
-}
-
-class PackagePermission extends Permission {
-    refers EPackage ePackage
-    op Integer priority() {1}
-}
-
-class ClassPermission extends Permission {
-    refers EClass theClass
-    op Integer priority() {2}
-}
-
-class ReferencePermission extends Permission {
-    refers EObject referencedEObject
-    op Integer priority() {3}
 }
 
 class ObjectPermission extends Permission {
     refers EObject eObject
-    op Integer priority() {4}
 }
 
-class UserProfile {
-    QName userName
-    contains Parameter[] params
-}
-
-class Parameter {
-    String key
-    String value
-}
-
-enum GrantStatus {
-    Undefined
-    Granted
-    Revoked
-}
-
-enum ActionType {
-    All
-    Read
-    Write
-    Call
-}
-
-class GrantPermission {
-    refers Permission permission
+enum GrantType {
+    Unknown =0
+    Read    =1
+    Write   =2
+    All     =3
+    Denied  =4
 }
 
 abstract class Authority {
@@ -116,10 +75,14 @@ class User extends Authority {
 class Group extends Authority {
 }
 
-@Ecore(constraints="IsValid")
-class Authorization {
-    QName name
-    op EBoolean isUserInRole(Role role, Role[] roles) {true}
-    op EBoolean permitted(ActionType actionType, EObject eObject, Timestamp ts, String name) {false}
-    op EBoolean test(String name) {false}
+// User Profile (to save ui settings)
+class UserProfile {
+    QName userName
+    contains Parameter[] params
 }
+
+class Parameter {
+    String key
+    String value
+}
+

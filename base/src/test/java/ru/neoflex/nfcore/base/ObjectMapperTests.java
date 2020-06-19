@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.neoflex.nfcore.base.auth.GrantStatus;
+import ru.neoflex.nfcore.base.auth.GrantType;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
@@ -45,9 +45,9 @@ public class ObjectMapperTests {
     public void enumTest() throws JsonProcessingException {
         //ObjectMapper mapper = context.getMapper();
         ObjectMapper mapper = new ObjectMapper();
-        GrantStatus grantStatus = GrantStatus.GRANTED;
-        Object deserGrantStatus = mapper.treeToValue(mapper.valueToTree(grantStatus), GrantStatus.class);
-        Assert.assertEquals(grantStatus, deserGrantStatus);
+        GrantType grantType = GrantType.ALL;
+        Object deserGrantType = mapper.treeToValue(mapper.valueToTree(grantType), GrantType.class);
+        Assert.assertEquals(grantType, deserGrantType);
 
     }
 

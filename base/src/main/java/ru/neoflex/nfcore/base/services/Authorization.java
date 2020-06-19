@@ -1,21 +1,19 @@
 package ru.neoflex.nfcore.base.services;
 
 import org.eclipse.emf.ecore.EObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.neoflex.nfcore.base.auth.ActionType;
 import ru.neoflex.nfcore.base.auth.AuthPackage;
-import ru.neoflex.nfcore.base.auth.GrantStatus;
+import ru.neoflex.nfcore.base.auth.GrantType;
 import ru.neoflex.nfcore.base.auth.Role;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,20 +54,53 @@ public class Authorization {
                         filter(a->a.getAuthority().equals(roleName)).count() > 0;
     }
 
-    public boolean isUserPermitted(ActionType actionType, EObject eObject) throws IOException {
-        UserDetails userDetails = getUserDetails();
-        Map<String, Role> allRoles = getAllRoles();
-        return userDetails != null &&
-                userDetails.getAuthorities().stream().
-                        map(a->allRoles.get(a.getAuthority())).anyMatch(r-> r!= null && r.permitted(actionType, eObject) == GrantStatus.GRANTED);
-    }
-
-    public synchronized Map<String, Role> getAllRoles() throws IOException {
+    public synchronized Map<String, Role> getAllRoles() {
         if (allRoles == null) {
-            allRoles = new HashMap<>();
-            DocFinder.create(store, AuthPackage.Literals.ROLE).execute().getResources().
-                    stream().map(r->(Role) r.getContents().get(0)).forEach(r->allRoles.put(r.getName(), r));
+            try {
+                allRoles = new HashMap<>();
+                DocFinder.create(store, AuthPackage.Literals.ROLE).execute().getResources().
+                        stream().map(r->(Role) r.getContents().get(0)).forEach(r->allRoles.put(r.getName(), r));
+            }
+            catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
         return allRoles;
     }
+
+    public synchronized void clearRolesCache() {
+        allRoles = null;
+    }
+
+    public List<Role> getUserRoles() {
+        List<Role> result = new ArrayList<>();
+        UserDetails userDetails = getUserDetails();
+        if (userDetails != null) {
+            result = userDetails.getAuthorities().stream()
+                    .map(a->getAllRoles().getOrDefault(a.getAuthority(), null))
+                    .filter(r->r != null).collect(Collectors.toList());
+        }
+        return result;
+    }
+
+    public Integer isEObjectPermitted(EObject eObject) {
+        Integer result = 0;
+        for (Role role: getUserRoles()) {
+            result |= role.isEObjectPermitted(eObject);
+        }
+        return result;
+    }
+
+    public static boolean denied(int grantValue) {
+        return (grantValue&GrantType.DENIED_VALUE) != 0;
+    }
+
+    public static boolean canWrite(int grantValue) {
+        return !denied(grantValue) && (grantValue&GrantType.WRITE_VALUE) != 0;
+    }
+
+    public static boolean canRead(int grantValue) {
+        return canWrite(grantValue) || (!denied(grantValue) && (grantValue&GrantType.READ_VALUE) != 0);
+    }
+
 }

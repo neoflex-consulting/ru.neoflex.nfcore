@@ -35,8 +35,7 @@ public class DeploySupply {
     private
     String deployBase;
 
-    @PostConstruct
-    void init() throws Exception {
+    void scanDeployBase() throws Exception {
         try {
             Path deployPath = Paths.get(deployBase);
             Files.createDirectories(deployPath);
@@ -116,7 +115,8 @@ public class DeploySupply {
     }
 
     @PostConstruct
-    void scheduledSupply() throws Exception {
+    void init() throws Exception {
+        scanDeployBase();
         supply = new Thread(() -> {
             try {
                 WatchService watchService = FileSystems.getDefault().newWatchService();
@@ -134,7 +134,7 @@ public class DeploySupply {
                         if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                             logger.info("Event kind:" + event.kind()
                                     + ". File affected: " + event.context() + ".");
-                            this.init();
+                            this.scanDeployBase();
                         }
                     }
                     key.reset();
