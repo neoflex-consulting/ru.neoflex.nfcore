@@ -198,6 +198,7 @@ public class Exporter {
                     String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
                     byte[] refsBytes = exportExternalRefs(eObject);
                     if (refsBytes != null) {
+                        logger.info("Export " + fileName + REFS);
                         ZipEntry refsEntry = new ZipEntry(fileName + REFS);
                         zipOutputStream.putNextEntry(refsEntry);
                         zipOutputStream.write(refsBytes);
@@ -217,6 +218,7 @@ public class Exporter {
                 String name = (String) eObject.eGet(nameAttribute);
                 if (name != null && name.length() > 0) {
                     String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    logger.info("Export " + fileName + XMI);
                     byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
                     ZipEntry zipEntry = new ZipEntry(fileName + XMI);
                     zipOutputStream.putNextEntry(zipEntry);
@@ -241,6 +243,7 @@ public class Exporter {
                         outputStream.write(buffer, 0, length);
                     }
                     if (zipEntry.getName().endsWith(XMI)) {
+                        logger.info("Import " + zipEntry.getName());
                         store.inTransaction(false, tx -> {
                             importEObject(outputStream.toByteArray());
                             tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
@@ -248,6 +251,7 @@ public class Exporter {
                         ++entityCount;
                     }
                     else if (zipEntry.getName().endsWith(REFS)) {
+                        logger.info("Import " + zipEntry.getName());
                         store.inTransaction(false, tx -> {
                             importExternalRefs(outputStream.toByteArray());
                             tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
