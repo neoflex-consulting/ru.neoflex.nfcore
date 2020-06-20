@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.services.Authorization;
 import ru.neoflex.nfcore.base.services.Context;
@@ -49,6 +50,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
+@ConditionalOnBean(OrientDBStoreProvider.class)
 public class MasterdataProvider {
     private static final Logger logger = LoggerFactory.getLogger(MasterdataProvider.class);
     private static final String REFERRED_BY_INDEX_NAME = "____REFERRED_BY____";
