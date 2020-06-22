@@ -137,7 +137,7 @@ class Calendar extends React.Component<any, any> {
         const monthEnd = dateFns.endOfMonth(monthStart);
         const dateFrom = monthStart.toString();
         const dateTo = monthEnd.toString();
-        const ref: string = this.props.viewObject._id;
+        const ref: string = this.props.viewObject.eURI();
         const methodName: string = 'getNotificationInstances';
 
         if (updateViewObject && this.state.classAppModule !== undefined) {

@@ -1,3 +1,13 @@
+:root {
+  --main-color: #1a8fff;
+  --text-color: #777;
+  --text-color-light: #ccc;
+  --border-color: #eee;
+  --bg-color: #f9f9f9;
+  /*--neutral-color: #fff;*/
+  --neutral-color: #E6E6E6;
+}
+
 .title {
   margin: 25px;
 }
@@ -36,9 +46,26 @@ li {
 }
 
 .example {
+  display: flex;
+  flex-direction: column;
+  width: auto;
   margin: 20px;
   padding: 20px;
   border: 1px solid #ddd;
+}
+
+.flex{
+  display:flex;
+}
+
+.flex-column{
+  display: flex;
+  flex-direction: column;
+}
+
+.space-between{
+  display: flex;
+  justify-content: space-between;
 }
 
 .ex-title {
@@ -79,15 +106,42 @@ li {
   background: #eee
 }
 
+.comp-descr {
+  width: 600px;
+}
+
 pre {
-  margin-top: 20px;
-  width: auto;
+  margin-top: 30px !important;
+display: inline-block;
+}
+
+.verticalLine {
+  border-left: 1px solid #B3B3B3;
+  height: 32px;
+  margin: auto 10px;
+}
+
+.NXIcon {
+  margin: auto;
+  margin: auto 3px;
+  cursor: pointer;
+}
+
+.fill path {
+  fill: #5E6785
+}
+
+.showCode {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1em;
-  font-family: Menlo, Monaco, "Courier New", monospace;
-  background-color: rgb(250, 250, 250);
-  padding: 0.5rem;
-  line-height: 1.5;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.showCode pre {
+  display:none;
+}
+
+.showCode button {
+  width: 100px;
+  margin-top: 20px;
 }

@@ -57,6 +57,9 @@ class AppModule {
 
 class Application extends AppModule {
     IconName iconName = "faUser"
+	boolean checkRights
+	boolean disabled
+    boolean hidden
 }
 
 /* Views */

@@ -4,8 +4,8 @@ import {NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,arr
   calculator,barChart,sort,add,update,mark,download,print,fullScreen,undo,list,more,table,tableUp,arrowLong,
   edit,menuOpen,search,legend,tiles,alert,info,warning
 } from "../../../index";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import {docco} from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 class IconPage extends Component {
     copyToClipboard(e) {
@@ -99,7 +99,7 @@ class IconPage extends Component {
         <h1 className="title">Иконки</h1>
 
         <h2 className="title">Как использовать</h2>
-            <SyntaxHighlighter language='javascript' style={docco} >
+            <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`import { NXIcon, iconName } from "nx-design";`}
             </SyntaxHighlighter>
         <p className="text">

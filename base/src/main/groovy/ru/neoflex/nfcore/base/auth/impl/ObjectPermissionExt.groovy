@@ -9,6 +9,8 @@ class ObjectPermissionExt extends ObjectPermissionImpl {
     @Override
     Integer isEObjectPermitted(EObject eObject) {
         def store = Context.current.store
-        return store.getId(eObject.eResource()) == store.getId(this.eObject.eResource()) ? this.grantType.value : GrantType.UNKNOWN.value
+        return this.eObject != null &&
+                store.getId(eObject.eResource()) == store.getId(this.eObject.eResource()) ?
+                this.grantType.value : GrantType.UNKNOWN.value
     }
 }

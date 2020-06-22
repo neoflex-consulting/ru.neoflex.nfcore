@@ -823,7 +823,7 @@ class Typography_ extends ViewContainer {
                     marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
                     fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
                     textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
-                    height: drawObject.get('height') === null ? '70px' : `${drawObject.get('height')}`,
+                    height: drawObject.get('height') === null ? 'auto' : `${drawObject.get('height')}`,
                     fontWeight: drawObject.get('fontWeight') || "inherit",
                     textAlign: drawObject.get('textAlign') || "left",
                     color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
