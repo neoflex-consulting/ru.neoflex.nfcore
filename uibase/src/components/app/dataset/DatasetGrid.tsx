@@ -60,7 +60,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 },
                 defaultColDef: {
                     resizable: true,
-                    filter: true,
                     sortable: true,
                 }
             },
@@ -444,9 +443,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 hide={col.get('hide') || false}
                                 editable={col.get('editable') || false}
                                 pinned={col.get('pinned') === 'Left' ? 'left' : col.get('pinned') === 'Right' ? 'right' : false}
-                                filter={col.get('filter') === 'NumberColumnFilter'
-                                    ? 'agNumberColumnFilter' : col.get('filter') === 'DateColumnFilter' ?
-                                        'agDateColumnFilter' : 'agTextColumnFilter'}
+                                // filter={col.get('filter') === 'NumberColumnFilter'
+                                //     ? 'agNumberColumnFilter' : col.get('filter') === 'DateColumnFilter' ?
+                                //         'agDateColumnFilter' : 'agTextColumnFilter'}
                                 checkboxSelection={col.get('checkboxSelection') || false}
                                 resizable={col.get('resizable') || false}
                                 sortable={col.get('sortable') || false}

@@ -205,25 +205,25 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             map["column"] = filters[i].datasetColumn
                             def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                             if (operator == 'LIKE') {
-                                map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}') OR " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}') OR " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}%') OR " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}%'))"
+                                map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('${filters[i].value}') OR " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('%${filters[i].value}') OR " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('${filters[i].value}%') OR " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('%${filters[i].value}%'))"
                             } else if (operator == 'NOT LIKE') {
-                                map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}') AND " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}') AND " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('${filters[i].value}%') AND " +
-                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) ${operator} LOWER('%${filters[i].value}%'))"
+                                map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('${filters[i].value}') AND " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('%${filters[i].value}') AND " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('${filters[i].value}%') AND " +
+                                        "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('%${filters[i].value}%'))"
                             } else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
                                 map["select"] = "t.${filters[i].datasetColumn} ${operator}"
                             } else if (operator == 'LIKE_START') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) LIKE LOWER('${filters[i].value}%')"
+                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) LIKE LOWER('${filters[i].value}%')"
                             } else if (operator == 'LIKE_NOT_START') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('${filters[i].value}%')"
+                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) NOT LIKE LOWER('${filters[i].value}%')"
                             } else if (operator == 'LIKE_END') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) LIKE LOWER('%${filters[i].value}')"
+                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) LIKE LOWER('%${filters[i].value}')"
                             } else if (operator == 'LIKE_NOT_END') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS TEXT)) NOT LIKE LOWER('%${filters[i].value}')"
+                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) NOT LIKE LOWER('%${filters[i].value}')"
                             } else {
                                 map["select"] = "t.${filters[i].datasetColumn} ${operator} '${filters[i].value}'"
                             }
@@ -237,9 +237,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Group by
             if (groupBy) {
-//                boolean updateDataSetComponent = false
-//                def datasetComponentRef = Context.current.store.getRef(resource.resources.get(0))
-//                def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
                 for (int i = 0; i <= groupBy.size() - 1; ++i) {
                     if (allColumns.contains(groupBy[i].datasetColumn) && groupBy[i].enable) {
                         def map = [:]
@@ -248,16 +245,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         if (operator == 'AVG') {
                             map["select"] = "AVG(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                         }
-//                        if (groupBy[i].value != null && groupBy[i].value != ''){
-//                                for (int l = 0; l <= column.size(); l++) {
-//                                    if(datasetComponent.column[l].name == groupBy[i].datasetColumn)
-//                                    {
-//                                        datasetComponent.column[l].headerName.name = groupBy[i].value
-//                                    }
-//                                }
-//                            updateDataSetComponent = true;
-//                        }
-
                         if (operator == 'COUNT') {
                             map["select"] = "COUNT(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
                         }
@@ -287,10 +274,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                     }
                 }
-//                if (updateDataSetComponent){
-//                    Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
-//                    Context.current.store.commit("Entity was updated " + datasetComponentRef)
-//                }
             }
 
             //Aggregation overall

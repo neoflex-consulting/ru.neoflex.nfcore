@@ -123,7 +123,7 @@ class YearBookExt extends YearBookImpl {
                     def workDaysYearBook = resource.resources.get(0).contents.get(0) as YearBook
                     def dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-                    def globalSettings = Utils.findEObject(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
+                    def globalSettings = Utils.findEClass(ApplicationPackage.Literals.GLOBAL_SETTINGS) as GlobalSettings
                     def weekendYearBook = globalSettings.getWeekendCalendar().days
                     def holidaysYearBook = globalSettings.getHolidayCalendar().days
 

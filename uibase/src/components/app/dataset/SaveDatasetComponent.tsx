@@ -19,6 +19,7 @@ interface State {
     queryAggregatePattern?: EObject;
     querySortPattern?: EObject;
     queryGroupByPattern?: EObject;
+    queryGroupByColumnPattern?: EObject;
     queryCalculatedExpressionPattern?: EObject;
     diagramPatter?: EObject;
     highlightPattern?: EObject;
@@ -125,6 +126,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'serverGroupByColumn', 'groupByColumn');
                 this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
@@ -177,6 +179,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.queryGroupByPattern) this.getPattern('QueryGroupBy', 'queryGroupByPattern');
         if (!this.state.queryCalculatedExpressionPattern) this.getPattern('QueryCalculatedExpression', 'queryCalculatedExpressionPattern');
         if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
+        if (!this.state.queryGroupByColumnPattern) this.getPattern('QueryGroupByColumn', 'queryGroupByColumnPattern');
         if (!this.state.diagramPatter) this.getPattern('Diagram', 'diagramPatter');
         if (!this.state.user) this.getUser();
     }
