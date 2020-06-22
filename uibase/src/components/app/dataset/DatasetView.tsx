@@ -835,7 +835,7 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
             >
                 <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
@@ -854,7 +854,7 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
             </Button>
-            <Button title={t('aggregationGroups')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
             >
                 <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
@@ -871,7 +871,7 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
 
-            <Button title={t('Delete')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
             >
                 <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
             </Button>
@@ -1208,7 +1208,7 @@ class DatasetView extends React.Component<any, State> {
                     <Drawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
-                        title={t('Group aggregations')}
+                        title={t('grouping')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
@@ -1282,7 +1282,7 @@ class DatasetView extends React.Component<any, State> {
                 <Drawer
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
-                    title={t('calculatable expressions')}
+                    title={t('calculator')}
                     width={'700px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}

@@ -244,7 +244,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 )}
             </Col>
                 <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
-                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Фон</div>
+                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('background')}</div>
                 <FontAwesomeIcon
                     color={value.backgroundColor}
                     onClick={() => value.handleColorMenu('background', value.index)}
@@ -274,7 +274,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Modal>
             </Col>
             <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
-                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>Текст</div>
+                <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('text')}</div>
                 <FontAwesomeIcon
                     color={value.color}
                     onClick={() => value.handleColorMenu('text', value.index)}
@@ -389,11 +389,12 @@ class Highlight extends DrawerParameterComponent<Props, State> {
     };
 
     render() {
+        const {t} = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Пользовательские фильтры</div>
+                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('highlight')}</div>
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button

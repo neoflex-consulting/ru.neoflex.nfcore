@@ -235,12 +235,13 @@ class Calculator extends DrawerParameterComponent<Props, State> {
     };
 
     render() {
+        const {t} = this.props
     return (
         <div>
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item>
                     <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Вычисляемые столбцы</div>
+                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('calculatableExpressions')}</div>
                     </Col>
                     <Col span={12}>
                         {
