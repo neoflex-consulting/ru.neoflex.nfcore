@@ -467,7 +467,24 @@ class DatasetView extends React.Component<any, State> {
         let columnDefs: any[] = [];
         this.state.defaultColumnDefs.forEach((c:any) => {
             if (rowDataShow[0][c.get('field')] !== undefined) {
-                columnDefs.push(c)
+                let rowData = new Map();
+                let newHeaderName = this.state.serverGroupBy
+                    .find((s: any) => s['datasetColumn'] === c.get('field'))
+                rowData.set('field', c.get('field'));
+                rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
+                rowData.set('headerTooltip', c.get('headerTooltip'));
+                rowData.set('hide', c.get('hide'));
+                rowData.set('pinned', c.get('pinned'));
+                rowData.set('filter', c.get('filter'));
+                rowData.set('sort', c.get('sort'));
+                rowData.set('editable', c.get('editable'));
+                rowData.set('checkboxSelection', c.get('checkboxSelection'));
+                rowData.set('sortable', c.get('sortable'));
+                rowData.set('suppressMenu', c.get('suppressMenu'));
+                rowData.set('resizable', c.get('resizable'));
+                rowData.set('type', c.get('type'));
+                rowData.set('component', c.get('component'));
+                columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 rowData.set('field', c.get('field'));
@@ -570,7 +587,7 @@ class DatasetView extends React.Component<any, State> {
         ).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[];
-                if (groupByParams.length !== 0 && groupByColumnParams.length !== 0 && result.length !== 0) {
+                if (groupByParams.length !== 0 && result.length !== 0) {
                     newColumnDef = this.getColumnDefGroupBy(result)
                 } else {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
