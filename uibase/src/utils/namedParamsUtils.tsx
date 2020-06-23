@@ -17,9 +17,9 @@ function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) 
         }
     });
     return replacedCommand
-};
+}
 
-function getNamedParams(valueItems: any, contextItemValues: any) {
+function getNamedParams(valueItems: any, contextItemValues: any, params: any[] = []) {
     let namedParams: IServerNamedParam[] = [];
     if (valueItems) {
         valueItems.each((item: EObject) => {
@@ -33,7 +33,26 @@ function getNamedParams(valueItems: any, contextItemValues: any) {
             }
         });
     }
+    //Проверка параметров в url'ах
+    namedParams = namedParams.map(param => {
+        return {
+            ...param,
+            parameterValue: param.parameterValue ? param.parameterValue : checkUrlParam(params, param.parameterName)
+        }
+    });
     return namedParams
-};
+}
+
+function checkUrlParam(params: any[], parameterName: string) {
+    let param = undefined;
+    if (params) {
+        param = params.find(p => {
+            if (p.parameterName === parameterName) {
+                return p
+            }
+        });
+        return param ? param.parameterValue : undefined
+    }
+}
 
 export {replaceNamedParam, getNamedParams}
