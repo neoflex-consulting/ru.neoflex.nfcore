@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
-import NXButton from '../../../index'
+import {NXButton} from '../../../index'
 
 export default class ButtonPage extends Component {
   render() {

@@ -1,7 +1,6 @@
 import React,{Component} from "react";
-import NXButton from "../../../../index";
 import NXInputSearch, {NXOption, NXSelect} from "../../Input/Input";
-import {NXIcon, legend, print, arrowLeft, plus, calendar, table} from "../../../../index";
+import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton} from "../../../../index";
 import './index.css'
 
 export default class NXCalendarBar extends Component {
