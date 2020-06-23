@@ -344,27 +344,29 @@ public class Session implements Closeable {
         }
         new EcoreUtil.CrossReferencer(Collections.singleton(eObject)){
             protected void add(InternalEObject internalEObject, EReference eReference, EObject crossReferencedEObject) {
-                String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, internalEObject);
-                String feature = eReference.getName();
-                EObject rootContainer = EcoreUtil.getRootContainer(crossReferencedEObject);
-                String toFragment = EcoreUtil.getRelativeURIFragmentPath(rootContainer, crossReferencedEObject);
-                int index = !eReference.isMany() ? -1 : ((EList) internalEObject.eGet(eReference)).indexOf(crossReferencedEObject);
-                OVertex crVertex = null;
-                if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
-                    URI crURI = EcoreUtil.getURI(rootContainer);
-                    ORID orid = factory.getORID(crURI);
-                    crVertex = orid != null ? db.load(orid) : createProxyOElement(crURI);
+                if (!eReference.isDerived() && !eReference.isTransient()) {
+                    String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, internalEObject);
+                    String feature = eReference.getName();
+                    EObject rootContainer = EcoreUtil.getRootContainer(crossReferencedEObject);
+                    String toFragment = EcoreUtil.getRelativeURIFragmentPath(rootContainer, crossReferencedEObject);
+                    int index = !eReference.isMany() ? -1 : ((EList) internalEObject.eGet(eReference)).indexOf(crossReferencedEObject);
+                    OVertex crVertex = null;
+                    if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
+                        URI crURI = EcoreUtil.getURI(rootContainer);
+                        ORID orid = factory.getORID(crURI);
+                        crVertex = orid != null ? db.load(orid) : createProxyOElement(crURI);
+                    }
+                    else { // internal reference
+                        crVertex = oElement;
+                    }
+                    OEdge oEdge = oElement.addEdge(crVertex, EREFERENCE);
+                    oEdge.setProperty("fromFragment", fromFragment);
+                    oEdge.setProperty("feature", feature);
+                    oEdge.setProperty("toFragment", toFragment);
+                    oEdge.setProperty("index", index);
+                    oEdge.setProperty("eClass", EcoreUtil.getURI(crossReferencedEObject.eClass()).toString());
+                    oEdge.save();
                 }
-                else { // internal reference
-                    crVertex = oElement;
-                }
-                OEdge oEdge = oElement.addEdge(crVertex, EREFERENCE);
-                oEdge.setProperty("fromFragment", fromFragment);
-                oEdge.setProperty("feature", feature);
-                oEdge.setProperty("toFragment", toFragment);
-                oEdge.setProperty("index", index);
-                oEdge.setProperty("eClass", EcoreUtil.getURI(crossReferencedEObject.eClass()).toString());
-                oEdge.save();
             }
             {
                 crossReference();
@@ -410,7 +412,20 @@ public class Session implements Closeable {
         resource.getContents().add(eObject);
         populateEObject(resource.getResourceSet(), oVertex, eObject);
         getFactory().getEvents().fireBeforeDelete(resource);
+        // workaround bug if self-link
+        deleteLinks(oVertex);
         oVertex.delete();
+    }
+
+    private static void deleteLinks(OVertex delegate) {
+        Iterable<OEdge> allEdges = delegate.getEdges(ODirection.BOTH);
+        Set<OEdge> items = new HashSet<>();
+        for (OEdge edge : allEdges) {
+            items.add(edge);
+        }
+        for (OEdge edge : items) {
+            edge.delete();
+        }
     }
 
     public void save(Resource resource) {
@@ -485,6 +500,9 @@ public class Session implements Closeable {
             String fromFragment = oEdge.getProperty("fromFragment");
             String feature = oEdge.getProperty("feature");
             EObject internalEObject = StringUtils.isEmpty(fromFragment) ? eObject : EcoreUtil.getEObject(eObject, fromFragment);
+            if (internalEObject == null) {
+                continue;
+            }
             EReference sf = (EReference) internalEObject.eClass().getEStructuralFeature(feature);
             if (sf == null) {
                 continue;
