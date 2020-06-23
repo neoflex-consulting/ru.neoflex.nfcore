@@ -318,6 +318,8 @@ class EventAction {
     Action action
     refers DynamicActionElement triggerItem
     String valueObjectKey
+    refers AppModule redirectTo
+    refers DynamicActionElement[] redirectParams
 }
 
 class EventHandler extends ViewElement {
@@ -404,6 +406,7 @@ enum Action {
     //clear
     setValue
     showMessage
+    redirect
 }
 
 enum Event {

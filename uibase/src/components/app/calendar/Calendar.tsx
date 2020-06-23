@@ -420,15 +420,18 @@ class Calendar extends React.Component<any, any> {
         this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
         this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
         this.setState({isGridReady: true});
-    }
+    };
 
     openNotification(notification: any, context: any): void  {
+        //TODO вынести в серверный код, добавить в модель сброс даты на начало месяца
+        const notificationFullDate = new Date(notification.contents[0]['notificationDateOn']);
+        const notificationDateOn = new Date(notificationFullDate.getFullYear(), notificationFullDate.getMonth(), 2).toISOString().slice(0, 10)
+
         let params: Object[] = [{
-            datasetColumn: 'reportDate',
-            operation: 'EqualTo',
-            value: notification.contents[0]['notificationDateOn'],
-            enable: true,
-            type: 'Date'
+            parameterName: 'reportDate',
+            parameterValue: notificationDateOn,
+            parameterDataType: "Date",
+            parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
         }];
         if (notification.contents[0]['AppModuleName'] !== null) {
             context.changeURL(
