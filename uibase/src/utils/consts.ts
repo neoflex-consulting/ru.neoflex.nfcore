@@ -73,7 +73,8 @@ enum actionType {
     disable="disable",
     clear="clear",
     setValue="setValue",
-    showMessage="showMessage"
+    showMessage="showMessage",
+    redirect="redirect"
 }
 
 enum eventType {

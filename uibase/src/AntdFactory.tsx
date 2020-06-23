@@ -76,7 +76,7 @@ class Form_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction()
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     render = () => {
@@ -146,9 +146,19 @@ class Row_ extends ViewContainer {
 }
 
 export class Href_ extends ViewContainer {
+
+    componentWillUnmount(): void {
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+    }
+
     render = () => {
         return <a href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
                   onClick={()=>{
+                      const contextItemValues = this.props.context.contextItemValues;
+                      contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                          parameterName: this.props.viewObject.get('name'),
+                          parameterValue: (this.props.getValue)? (this.props.viewObject.get('returnValueType') === 'object') ? this.props.data: this.props.getValue(): undefined
+                      });
                       this.props.context.notifyAllEventHandlers({
                       type:eventType.click,
                       itemName:this.props.viewObject.get('name'),
@@ -156,7 +166,7 @@ export class Href_ extends ViewContainer {
                       value:(this.props.getValue)? (this.props.viewObject.get('returnValueType') === 'object') ? this.props.data: this.props.getValue(): undefined
                       })
                   }}>
-            {this.props.viewObject.get('label')}
+            { this.props.viewObject.get('label') ? this.props.viewObject.get('label') : this.props.getValue() }
         </a>
     }
 }
@@ -236,9 +246,20 @@ export class Button_ extends ViewContainer {
 
 class Select_ extends ViewContainer {
     private selected = "";
+    private urlCurrentValue = "";
 
     constructor(props: any) {
         super(props);
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            const params = this.props.pathFull[this.props.pathFull.length - 1].params;
+            if (params !== undefined && params.length !== 0) {
+                params.forEach((f: any) => {
+                    if (f.parameterName === this.props.viewObject.get('name')) {
+                        this.urlCurrentValue = f.parameterValue
+                    }
+                })
+            }
+        }
         this.state = {
             selectData: [],
             params: [],
@@ -303,7 +324,13 @@ class Select_ extends ViewContainer {
                                 key: el[this.props.viewObject.get('keyColumn')],
                                 value: el[this.props.viewObject.get('valueColumn')]
                             }
-                        })});
+                        }),
+                        currentValue: this.urlCurrentValue ? this.urlCurrentValue : ""
+                    },()=> this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                        parameterName: this.props.viewObject.get('name'),
+                        parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
+                    })
+                    );
                 });
             }
         } else if (this.props.viewObject.get('staticValues')) {
@@ -326,7 +353,7 @@ class Select_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -344,10 +371,13 @@ class Select_ extends ViewContainer {
                 });
                 this.setState({
                     params: newParams,
-                    currentValue: "",
+                    currentValue: this.urlCurrentValue ? this.urlCurrentValue : "",
                     selectData: resArr
                 });
-                this.onChange("");
+                this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                    parameterName: this.props.viewObject.get('name'),
+                    parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
+                });
             });
         }
     }
@@ -366,8 +396,12 @@ class Select_ extends ViewContainer {
             this.selected = staticValues[0].key;
         }
         this.setState({
-            selectData:staticValues
-        })
+            selectData:staticValues,
+            currentValue: this.urlCurrentValue ? this.urlCurrentValue : ""
+        },()=> this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
+        }))
     }
 
     render = () => {
@@ -414,8 +448,19 @@ class Select_ extends ViewContainer {
 class DatePicker_ extends ViewContainer {
     constructor(props: any) {
         super(props);
+        let monent;
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            const params = this.props.pathFull[this.props.pathFull.length - 1].params;
+            if (params !== undefined && params.length !== 0) {
+                params.forEach((f: any) => {
+                    if (f.parameterName === this.props.viewObject.get('name')) {
+                        monent = moment(f.parameterValue, this.props.viewObject.get('format') || "YYYY-MM-DD")
+                    }
+                })
+            }
+        }
         this.state = {
-            pickedDate: moment(),
+            pickedDate: monent ? monent : moment(),
             format: this.props.viewObject.get('format') || "YYYY-MM-DD",
             isHidden: false,
             isDisabled: this.props.viewObject.get('disabled') || false
@@ -459,7 +504,7 @@ class DatePicker_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     onChange = (currentValue: string) => {
@@ -544,7 +589,7 @@ class GroovyCommand_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
 
@@ -636,11 +681,16 @@ class ValueHolder_ extends ViewContainer {
                 {actionType: actionType.setValue,callback: this.onChange.bind(this)}
             ]
         });
+        const contextItemValues = this.props.context.contextItemValues;
+        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+            parameterName: this.props.viewObject.get('name'),
+            parameterValue: this.props.viewObject.get('value')
+        });
     }
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -694,7 +744,7 @@ class Input_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     onChange = (currentValue: string) => {
@@ -779,7 +829,7 @@ class Typography_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     private getDocxData(): docxExportObject {
@@ -865,13 +915,16 @@ class EventHandler_ extends ViewContainer {
     handleEvent(value:any) {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
             const eventAction = this.props.context.getEventActions().find((action: IEventAction) => {
-                return el.get('triggerItem')
-                    && (action.name === el.get('triggerItem').get('name')
-                    || el.get('action') === actionType.showMessage)
+                return (el.get('triggerItem')
+                    && (action.name === el.get('triggerItem').get('name'))
+                    || el.get('action') === actionType.showMessage
+                    || el.get('action') === actionType.redirect)
             });
             if (eventAction) {
                 eventAction.actions.forEach((action:{actionType: actionType, callback: (value:string|undefined) => void}) => {
-                    if (action.actionType === (el.get('action') || actionType.execute) && action.actionType !== actionType.showMessage) {
+                    if (action.actionType === (el.get('action') || actionType.execute)
+                        && action.actionType !== actionType.showMessage
+                        && action.actionType !== actionType.redirect) {
                         if (el.get('valueObjectKey') && value === Object(value)) {
                             (value[el.get('valueObjectKey')])
                                 ? action.callback(value[el.get('valueObjectKey')])
@@ -888,9 +941,14 @@ class EventHandler_ extends ViewContainer {
                         el.get('triggerItem').get('message'),
                         el.get('triggerItem').get('messageType')||"success")
                 }
+                if (el.get('action')  === actionType.redirect) {
+                    const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
+                    const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
+                    this.props.context.changeURL(redirectTo,true, undefined, params)
+                }
             } else {
                 this.props.context.notification("Event handler warning",
-                    `Action ${el.get('action')} not supported for ${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')})`,
+                    `Action ${el.get('action')} is not supported for ${this.props.viewObject.get('name')}`,
                     "warning")
             }
         })
@@ -910,7 +968,7 @@ class EventHandler_ extends ViewContainer {
         if (this.props.viewObject.get('listenItem')) {
             this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
         }
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     render = () => {
@@ -942,7 +1000,7 @@ class Drawer_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], undefined);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
     }
 
     render = () => {

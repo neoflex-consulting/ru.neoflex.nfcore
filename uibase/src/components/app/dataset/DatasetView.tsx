@@ -370,7 +370,7 @@ class DatasetView extends React.Component<any, State> {
             let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
                 params.forEach((f: any) => {
-                    if (f) {
+                    if (f.datasetColumn) {
                         columnDefs.forEach((c: any) => {
                             if (c.get('field').toLowerCase() === f.datasetColumn.toLowerCase()) {
                                 serverParam.push({
@@ -435,7 +435,6 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        /*const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));*/
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -456,11 +455,6 @@ class DatasetView extends React.Component<any, State> {
                 this.getAllDatasetComponents(false)
             }
         }
-        /*if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
-            this.setState({
-                queryParams: newQueryParams
-            },()=>this.refresh())
-        }*/
     }
 
     getColumnDefGroupBy = (rowDataShow: any) => {
@@ -574,7 +568,9 @@ class DatasetView extends React.Component<any, State> {
     ) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems')
+                                            , this.props.context.contextItemValues
+                                            , this.props.pathFull[this.props.pathFull.length - 1].params);
 
         this.props.context.runQuery(resource
             , newQueryParams
