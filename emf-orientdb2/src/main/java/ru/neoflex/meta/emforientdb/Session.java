@@ -43,19 +43,19 @@ public class Session implements Closeable {
     final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
-    private final ODatabaseDocumentInternal currentDB;
+    private final ODatabaseDocumentInternal oldDB;
 
-    Session(SessionFactory factory, ODatabaseDocument db) {
+    Session(SessionFactory factory, ODatabaseDocument db, ODatabaseDocumentInternal oldDB) {
         this.factory = factory;
         this.db = db;
-        this.currentDB = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        this.oldDB = oldDB;
     }
 
     @Override
     public void close() {
         db.close();
-        if (currentDB != null) {
-            ODatabaseRecordThreadLocal.instance().set(currentDB);
+        if (oldDB != null) {
+            ODatabaseRecordThreadLocal.instance().set(oldDB);
         }
     }
 
@@ -354,7 +354,8 @@ public class Session implements Closeable {
                     if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
                         URI crURI = EcoreUtil.getURI(rootContainer);
                         ORID orid = factory.getORID(crURI);
-                        crVertex = orid != null ? db.load(orid) : createProxyOElement(crURI);
+                        crVertex = orid != null ?
+                                db.load(orid) : createProxyOElement(EcoreUtil.getURI(crossReferencedEObject));
                     }
                     else { // internal reference
                         crVertex = oElement;
