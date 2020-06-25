@@ -100,29 +100,27 @@ export default class NXCalendarBar extends Component {
             </div>
 
             <div className="col col-start">
-                  <NXIcon icon={arrowLeft} />
+                  <NXIcon xs margin='8px auto' icon={arrowLeft} />
             </div>
             <div className="col-col-center">
                     <span className="col-text">Месяц</span>
             </div>
             <div className="col col-end" >
-                  <NXIcon icon={arrowLeft} />
+                  <NXIcon xs margin='8px auto' rotate={100} icon={arrowLeft} />
             </div>
-                <NXIcon icon={legend} />
+                <NXIcon margin='auto' icon={legend} />
           </div>
         }
         {
           !this.state.calendarVisible &&
-          <div className='tableVisible' style={{display: "contents", marginTop: '2px'}}>
-              <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
-                <NXInputSearch width='185px'
-                  onChange={(e) => {this.changeSearchValue(e.target.value)}}/>
+          <div className='tableVisible' style={{display: "contents"}}>
+              <div style={{flexGrow: 1}}>
+                <NXInputSearch width='185px'/>
               </div>
               <NXSelect
                 width='180px'
                 getPopupContainer={() => document.getElementById('selectInFullScreen')}
-                value={this.state.selectedValueInGrid}
-                style={{ marginTop: this.state.fullScreenOn ?'8px' : '0px'}}>
+                value={this.state.selectedValueInGrid}>
                 <NXOption key={'Системные заметки'} value={'Системные заметки'}>Системные заметки</NXOption>
               </NXSelect>
           </div>
@@ -130,21 +128,21 @@ export default class NXCalendarBar extends Component {
       <div className="verticalLine" />
       <NXIcon icon={plus} className='NXIcon fill' />
       <div className="verticalLine" />
-      <NXIcon icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
-      style={{
-        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
-        borderRadius: '2px',
-        background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
-        pointerEvents: this.state.calendarVisible ? 'none' : 'auto',
-        marginRight: '8px'
-      }}/>
-      <NXIcon icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon xs icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        style={{
+          border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
+          background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
+          pointerEvents: this.state.calendarVisible ? 'none' : 'auto',
+          marginRight: '8px'
+        }}
+        />
+      <NXIcon xs icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
-        borderRadius: '2px',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
         pointerEvents: !this.state.calendarVisible ? 'none' : 'auto'
-      }}/>
+      }}
+      />
       <div className="verticalLine" />
       <NXIcon icon={print} className='NXIcon fill' />
       </div>

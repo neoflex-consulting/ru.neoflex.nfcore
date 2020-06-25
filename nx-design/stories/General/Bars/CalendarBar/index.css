@@ -33,17 +33,14 @@
     align-items: center;
 }
 
-.calendar__header .NXIcon {
+.calendar__header span {
     display: inline-block;
-    vertical-align: middle;
     text-transform: none;
     letter-spacing: normal;
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
-    cursor: pointer;
     transition: .15s ease-out;
-    height: 24px;
 }
 
 .calendar__header .col {
@@ -78,6 +75,8 @@
     color: rgba(0, 0, 0, 0.65);
     font-weight: 600;
     text-transform: uppercase;
+    vertical-align: middle;
+
 }
 
 .calendar__header .date div {
@@ -86,14 +85,13 @@
 }
 
 .calendar__header .date > div, button {
-    margin-right: 8px;
+    margin-right: 8px !important;
 }
 
 .calendar__header .handleCalendarVisible {
     border-radius: 2px;
-}
-
-.calendar__header .handleCalendarVisible svg{
+    height: auto;
+    width: 24px;
     padding: 3px;
 }
 
@@ -101,12 +99,8 @@
     font-size: 120%;
 }
 
-.calendar__header .col-start .NXIcon {
-    transform: scale(0.5);
-}
-
-.calendar__header .col-end .NXIcon {
-    transform: scale(-0.5);
+.calendar__header .col-end span {
+    transform: scale(-1) !important;
 }
 
 .calendar__header .tableVisible .NXSelect{
