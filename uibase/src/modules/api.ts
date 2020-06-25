@@ -295,7 +295,7 @@ export class API implements IErrorHandler {
             }
         }
         let obj = resource.to()
-        API.fixReferences(obj, obj._id)
+        API.fixReferences(obj, API.parseRef(resource.eURI()).id)
         return this.fetchJson(url, {
             method: "PUT",
             headers: {
