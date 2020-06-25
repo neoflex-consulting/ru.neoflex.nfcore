@@ -33,6 +33,13 @@ public class OrientDBResource extends XMLResourceImpl {
         }
     }
 
+    public void setID(EObject eObject, String id) {
+        if (id != null && !id.startsWith(("_"))) {
+            return;
+        }
+        super.setID(eObject, id);
+    }
+
     @Override
     public void doLoad(InputStream inputStream, Map<?, ?> options) throws IOException {
         ((URIConverter.Loadable)inputStream).loadResource(this);
