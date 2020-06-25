@@ -182,7 +182,7 @@ public class DbTests extends TestBase {
 
     @Test
     public void databaseTest() throws Exception {
-        try (Database db = new Database("remote:localhost", DBNAME, "admin", "admin", Collections.singletonList(TestPackage.eINSTANCE))) {
+        try (Database db = new Database("remote:localhost", DBNAME, "root", "ne0f1ex", Collections.singletonList(TestPackage.eINSTANCE))) {
             Resource roleResource = db.inTransaction(session -> {
                 ResourceSet rs = session.createResourceSet();
                 DBTable role = TestFactory.eINSTANCE.createDBTable();
