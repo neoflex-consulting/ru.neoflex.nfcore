@@ -56,41 +56,45 @@ render() {
     return (
         <NXForm style={{ marginTop: '30px', height:'100%', boxShadow:'0 0 5px #F2F2F2' }}
                 width='700px'>
-            <div style={{display:'flex', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
-                <h1>Диаграммы</h1>
-                <NXIcon icon={close}/>
+            <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
+                <h1 style={{margin:'0'}}>Диаграммы</h1>
+                <NXIcon icon={close} xs/>
             </div>
             <NXRow margin='24px 40px'><h3>Выберите тип диаграммы</h3></NXRow>
             <NXRow content='space-between' margin='15px 40px'>
-                <NXCol span={4}>
+                <NXCol span={5}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Block"})}}
-                    padding='0'>
-                    <NXIcon icon={diagramBlock} />
+                    padding='0'
+                    isIcon='24px'>
+                    <NXIcon icon={diagramBlock} xs/>
                     </NXButton>
                     <h4>Гистограмма</h4>
                 </NXCol>
-                <NXCol span={4}>
+                <NXCol span={5}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Bar"})}}
-                    padding='0'>
-                        <NXIcon icon={barChart} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={barChart} xs/>
                     </NXButton>
                     <h4>Линейчатая</h4>
                 </NXCol>
                 <NXCol span={4}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Pie"})}}
-                    padding='0'>
-                        <NXIcon icon={diagramCircle} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={diagramCircle} xs/>
                     </NXButton>
                     <h4>Круговая</h4>
                 </NXCol>
                 <NXCol span={4}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Line"})}}
-                    padding='0'>
-                        <NXIcon icon={diagram} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={diagram} xs/>
                     </NXButton>
                     <h4>График</h4>
                 </NXCol>

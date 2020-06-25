@@ -14,13 +14,14 @@ import {
     more,table,tableUp,arrowLong,edit,menuOpen,search,legend,tiles,alert,info,warning
 } from './stories/General/Icon/Icon';
 
-
+import {NXTable} from "./stories/General/Form/Table/NXTable";
 
 /*---EXPORTS---*/
 
 export {
     NXButton,
     NXForm,
+    NXTable,
     /*Grid*/
     NXCol, NXRow,
     /*Inputs*/
