@@ -76,7 +76,7 @@ class Form_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction()
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     render = () => {
@@ -148,14 +148,14 @@ class Row_ extends ViewContainer {
 export class Href_ extends ViewContainer {
 
     componentWillUnmount(): void {
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     render = () => {
         return <a href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
                   onClick={()=>{
                       const contextItemValues = this.props.context.contextItemValues;
-                      contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                      contextItemValues.set(this.props.viewObject._id, {
                           parameterName: this.props.viewObject.get('name'),
                           parameterValue: (this.props.getValue)? (this.props.viewObject.get('returnValueType') === 'object') ? this.props.data: this.props.getValue(): undefined
                       });
@@ -297,7 +297,7 @@ class Select_ extends ViewContainer {
             currentValue = currentValue.join(",");
         }
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
         });
@@ -326,7 +326,7 @@ class Select_ extends ViewContainer {
                             }
                         }),
                         currentValue: this.urlCurrentValue ? this.urlCurrentValue : ""
-                    },()=> this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                    },()=> this.props.context.contextItemValues.set(this.props.viewObject._id, {
                         parameterName: this.props.viewObject.get('name'),
                         parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
                     })
@@ -353,7 +353,7 @@ class Select_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -374,7 +374,7 @@ class Select_ extends ViewContainer {
                     currentValue: this.urlCurrentValue ? this.urlCurrentValue : "",
                     selectData: resArr
                 });
-                this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+                this.props.context.contextItemValues.set(this.props.viewObject._id, {
                     parameterName: this.props.viewObject.get('name'),
                     parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
                 });
@@ -398,7 +398,7 @@ class Select_ extends ViewContainer {
         this.setState({
             selectData:staticValues,
             currentValue: this.urlCurrentValue ? this.urlCurrentValue : ""
-        },()=> this.props.context.contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        },()=> this.props.context.contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (this.urlCurrentValue) ? this.urlCurrentValue : null
         }))
@@ -504,12 +504,12 @@ class DatePicker_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     onChange = (currentValue: string) => {
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue,
             parameterDataType: "Date",
@@ -589,13 +589,13 @@ class GroovyCommand_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
 
     setValue = (result: any) => {
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: result
         });
@@ -658,7 +658,7 @@ class ValueHolder_ extends ViewContainer {
 
     onChange = (currentValue?: string) => {
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
         });
@@ -682,7 +682,7 @@ class ValueHolder_ extends ViewContainer {
             ]
         });
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: this.props.viewObject.get('value')
         });
@@ -690,14 +690,14 @@ class ValueHolder_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (this.props.viewObject.get('contextWriter')) {
-            const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter')._id.split("_")[0]);
+            const contextItem = this.props.context.contextItemValues.get(this.props.viewObject.get('contextWriter')._id);
             const columnName = this.props.viewObject.get('groovyCommandResultColumnName');
-            const currentContextValue = this.props.context.contextItemValues.get(this.props.viewObject._id.split("_")[0]);
+            const currentContextValue = this.props.context.contextItemValues.get(this.props.viewObject._id);
             if (contextItem
                 && contextItem.parameterValue.length >= 1
                 && columnName) {
@@ -744,12 +744,12 @@ class Input_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     onChange = (currentValue: string) => {
         const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id.split("_")[0], {
+        contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
         });
@@ -829,7 +829,7 @@ class Typography_ extends ViewContainer {
         this.props.context.removeDocxHandler();
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     private getDocxData(): docxExportObject {
@@ -968,7 +968,7 @@ class EventHandler_ extends ViewContainer {
         if (this.props.viewObject.get('listenItem')) {
             this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
         }
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     render = () => {
@@ -1000,7 +1000,7 @@ class Drawer_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject._id.split("_")[0]);
+        this.props.context.contextItemValues.delete(this.props.viewObject._id);
     }
 
     render = () => {

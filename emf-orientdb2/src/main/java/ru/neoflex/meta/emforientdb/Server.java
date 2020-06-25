@@ -26,6 +26,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
+    public static final String ORIENTDB_ROOT_PASSWORD = "ORIENTDB_ROOT_PASSWORD";
+    public static final String ORIENTDB_HOME = "ORIENTDB_HOME";
     private String home;
     private OServer oServer;
     private OServerConfiguration configuration;
@@ -33,9 +35,9 @@ public class Server extends SessionFactory implements Closeable {
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
         this.home = home;
-        System.setProperty("ORIENTDB_HOME", home);
-        if (System.getProperty("ORIENTDB_ROOT_PASSWORD") == null) {
-            System.setProperty("ORIENTDB_ROOT_PASSWORD", "admin");
+        System.setProperty(ORIENTDB_HOME, home);
+        if (System.getProperty(ORIENTDB_ROOT_PASSWORD) == null) {
+            System.setProperty(ORIENTDB_ROOT_PASSWORD, "ne0f1ex");
         }
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.oServer = OServerMain.create(false);
@@ -114,7 +116,7 @@ public class Server extends SessionFactory implements Closeable {
         }};
         configuration.users = new OServerUserConfiguration[] {
 //                new OServerUserConfiguration("root", "ne0f1ex", "*"),
-                new OServerUserConfiguration("admin", "admin", "*"),
+//                new OServerUserConfiguration("admin", "admin", "*"),
         };
         configuration.properties = new OServerEntryConfiguration[] {
 //                new OServerEntryConfiguration("orientdb.www.path", "www"),
