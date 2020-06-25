@@ -179,7 +179,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     }
                 }
             } else {
-                allColumns = column.name + calculatedExpression.datasetColumn
+                allColumns = column.name + (calculatedExpression ? calculatedExpression.datasetColumn : [])
             }
 
             //Filter
@@ -388,18 +388,20 @@ class DatasetComponentExt extends DatasetComponentImpl {
             //Add Named Parameters
             p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
-                for (int i = 0; i <= parameters.size() - 1; ++i) {
-                    if (!parameters[i].parameterValue) {
-                        p.setString(parameters[i].parameterName, null)
-                    }
-                    if (parameters[i].parameterDataType == "Date") {
-                        p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                    } else if (parameters[i].parameterDataType == "Timestamp") {
-                        p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                    } else if (parameters[i].parameterDataType == "Int") {
-                        p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-                    } else {
-                        p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+                if (parameters) {
+                    for (int i = 0; i <= parameters.size() - 1; ++i) {
+                        if (!parameters[i].parameterValue) {
+                            p.setString(parameters[i].parameterName, null)
+                        }
+                        if (parameters[i].parameterDataType == "Date") {
+                            p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+                        } else if (parameters[i].parameterDataType == "Timestamp") {
+                            p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+                        } else if (parameters[i].parameterDataType == "Int") {
+                            p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
+                        } else {
+                            p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+                        }
                     }
                 }
                 try {
