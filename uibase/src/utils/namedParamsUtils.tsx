@@ -23,8 +23,8 @@ function getNamedParams(valueItems: any, contextItemValues: any, params: any[] =
     let namedParams: IServerNamedParam[] = [];
     if (valueItems) {
         valueItems.each((item: EObject) => {
-            if (contextItemValues.get(item._id.split("_")[0])) {
-                namedParams.push(contextItemValues.get(item._id.split("_")[0]))
+            if (contextItemValues.get(item._id)) {
+                namedParams.push(contextItemValues.get(item._id))
             } else {
                 namedParams.push({
                     parameterName: item.get('name'),
