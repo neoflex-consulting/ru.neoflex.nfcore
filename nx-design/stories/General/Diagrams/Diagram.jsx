@@ -27,7 +27,7 @@ export default class NXDiagram extends React.Component {
 
 render() {
     return (
-        <NXForm style={{ marginTop: '30px', height:'inherit', boxShadow:'0 0 5px #F2F2F2' }}
+        <NXForm style={{ height:'100vh', boxShadow:'0 0 5px #F2F2F2' }}
                 width='700px'>
             <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
                 <h1 style={{margin:'0'}}>Диаграммы</h1>
@@ -120,7 +120,7 @@ render() {
                 </NXCol>
             </NXRow>
             </div>
-            <div style={{minHeight:'319px', height:'auto'}}>
+            <div style={{minHeight:'34%'}}>
 
             </div>
             <div style={{backgroundColor: '#F2F2F2', padding:'16px 40px', height:'64px'}}>
