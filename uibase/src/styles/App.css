@@ -271,3 +271,8 @@
   animation: rotate-three 1s linear infinite;
   border-top: 8px solid #293468;
 }
+
+/*Antd styles*/
+.ant-menu-submenu-title {
+  color: black;
+}
