@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.eclipse.emf.ecore.util.EcoreUtil.isAncestor;
 
@@ -405,12 +406,7 @@ public class Session implements Closeable {
             return;
         }
         checkVersion(uri, oVertex);
-        List<Resource> dependent = getDependentResources(orid);
-        if (dependent.size() > 0) {
-            String ids = dependent.stream().map(resource -> factory.getORID(resource.getURI()).toString()).collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
-                    oVertex.getIdentity(), ids));
-        }
+        checkDependencies(oVertex);
         ResourceSet rs = createResourceSet();
         Resource resource = rs.createResource(uri);
         EObject eObject = createEObject(rs, oVertex);
@@ -420,6 +416,17 @@ public class Session implements Closeable {
         // workaround bug if self-link
         deleteLinks(oVertex);
         oVertex.delete();
+    }
+
+    private void checkDependencies(OVertex oVertex) {
+        Set<String> dependent = StreamSupport.stream(oVertex.getEdges(ODirection.IN).spliterator(), false)
+                .map(oEdge -> oEdge.getFrom().getIdentity().toString())
+                .collect(Collectors.toSet());
+        if (dependent.size() > 0) {
+            String ids = dependent.stream().collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
+                    oVertex.getIdentity(), ids));
+        }
     }
 
     private static void deleteLinks(OVertex delegate) {
@@ -442,6 +449,7 @@ public class Session implements Closeable {
                 oVertex = createOVertex(eObject);
             } else {
                 checkVersion(resource.getURI(), oVertex);
+                checkDependencies(resource, oVertex);
                 ResourceSet rs = createResourceSet();
                 oldResource = rs.createResource(resource.getURI());
                 EObject oldObject = createEObject(rs, oVertex);
@@ -461,6 +469,20 @@ public class Session implements Closeable {
             resource.setURI(factory.createResourceURI(firstRecord));
             getFactory().getEvents().fireAfterSave(oldResource, resource);
             savedResourcesMap.put(resource, firstRecord);
+        }
+    }
+
+    private void checkDependencies(Resource resource, OVertex oVertex) {
+        Set<String> dependent = StreamSupport.stream(oVertex.getEdges(ODirection.IN).spliterator(), false)
+                .filter(oEdge -> resource.getEObject(oEdge.getProperty("toFragment")) == null)
+                .map(oEdge -> oEdge.getFrom().getIdentity().toString() + "#" + oEdge.getProperty("fromFragment") +
+                        "." + oEdge.getProperty("feature") + "->" +
+                        oEdge.getTo().getIdentity().toString() + "#" + oEdge.getProperty("toFragment"))
+                .collect(Collectors.toSet());
+        if (dependent.size() > 0) {
+            String ids = dependent.stream().collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format("Can not save element %s with broken references [%s]",
+                    oVertex.getIdentity(), ids));
         }
     }
 

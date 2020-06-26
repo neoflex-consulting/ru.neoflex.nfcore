@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestBase {
-    public static final String DBNAME = "test-emf-orientdb";
+    public static final String DBNAME = "test-emf-orientdb2";
     public static Server server;
 
     public static boolean deleteDirectory(File directoryToBeDeleted) {
