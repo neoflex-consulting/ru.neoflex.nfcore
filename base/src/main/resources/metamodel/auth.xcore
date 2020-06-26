@@ -11,6 +11,7 @@ import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 class Audit {
     String createdBy
@@ -25,21 +26,21 @@ class Role {
     contains Permission[] grants opposite role
     contains Audit audit
 
-    op Integer isEObjectPermitted(EObject eObject)
-}
+    op int isEObjectPermitted(EObject eObject) {
+        var i = 0
+        for (Permission grant: grants) {
+            i = i.bitwiseOr(grant.isEObjectPermitted(eObject))
+        }
+        return i
+    }
 
-abstract class Permission {
-    container Role role opposite grants
-    GrantType grantType
-
-    op Integer isEObjectPermitted(EObject eObject)
-}
-
-class AllPermission extends Permission {
-}
-
-class ObjectPermission extends Permission {
-    refers EObject eObject
+    op int isResourcePermitted(String path) {
+        var i = 0
+        for (Permission grant: grants) {
+            i = i.bitwiseOr(grant.isResourcePermitted(path))
+        }
+        return i
+    }
 }
 
 enum GrantType {
@@ -48,6 +49,34 @@ enum GrantType {
     Write   =2
     All     =3
     Denied  =4
+}
+
+abstract class Permission {
+    container Role role opposite grants
+    GrantType grantType
+    op int isEObjectPermitted(EObject eObject) {GrantType::UNKNOWN_VALUE}
+    op int isResourcePermitted(String path) {GrantType::UNKNOWN_VALUE}
+}
+
+class AllPermission extends Permission {
+    op int isEObjectPermitted(EObject eObject) {this.grantType.getValue()}
+    op int isResourcePermitted(String path) {this.grantType.getValue()}
+}
+
+class ObjectPermission extends Permission {
+    refers EObject eObject
+    op int isEObjectPermitted(EObject eObject) {
+        if (EcoreUtil.getURI(getEObject()) == EcoreUtil.getURI(eObject)) return this.grantType.getValue()
+        else return GrantType::UNKNOWN_VALUE
+    }
+}
+
+class ResourcePermission extends Permission {
+    String path
+    op int isResourcePermitted(String path) {
+        if (path.startsWith(this.path)) return this.grantType.getValue()
+        else return GrantType::UNKNOWN_VALUE
+    }
 }
 
 abstract class Authority {
