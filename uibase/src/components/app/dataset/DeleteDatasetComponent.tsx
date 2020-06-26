@@ -9,17 +9,19 @@ import {API} from "../../../modules/api";
 interface Props {
     closeModal?: () => void;
     handleDeleteMenuForCancel: () => void;
-    currentDatasetComponent?: any;
+    currentDatasetComponent: any;
     allDatasetComponent?: any;
 }
 
 class DeleteDatasetComponent extends React.Component<any, any> {
 
     onClick(): void {
+        let e = this.props.currentDatasetComponent.eContents()[0].get('name')
         this.props.closeModal!();
             const ref: string = `${this.props.currentDatasetComponent.get('uri')}?rev=${this.props.currentDatasetComponent.rev}`;
             API.instance().deleteResource(ref).then((response: any) => {
                 if (response.result === "ok") {
+                        this.props.context.notification(e, "deleted ", "info")
 
                 }
             })
@@ -39,7 +41,6 @@ class DeleteDatasetComponent extends React.Component<any, any> {
                         <FontAwesomeIcon icon={faBan} size='1x'/>
                     </Button>
             </div>
-
         )
     }
 }
