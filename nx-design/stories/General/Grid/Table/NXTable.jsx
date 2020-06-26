@@ -1,70 +1,6 @@
 import React from "react";
-import {NXTable}  from '../../../../index';
-import styled from 'styled-components'
-
-const columns = [
-    {
-        title: 'Column_1',
-        dataIndex: 'Column_1',
-    },
-    {
-        title: 'Column_2',
-        dataIndex: 'Column_2',
-        sorter: (a, b) => a.age - b.age,
-    },
-    {
-        title: 'Column_3',
-        dataIndex: 'Column_3',
-        filters: [
-            {
-                text: 'London',
-                value: 'London',
-            },
-            {
-                text: 'New York',
-                value: 'New York',
-            },
-        ],
-        onFilter: (value, record) => record.address.indexOf(value) === 0,
-    },
-    {
-        title: 'Column_4',
-        key: 'Column_4',
-        sorter: true,
-        render: () => (
-            <span>
-        <a style={{ marginRight: 16 }}>Delete</a>
-        <a className="ant-dropdown-link">
-         fgdfg
-        </a>
-      </span>
-        ),
-    },
-    {
-        title: 'Column_5',
-        dataIndex: 'Column_5',
-    },
-    {
-        title: 'Column_6',
-        dataIndex: 'Column_6',
-    },
-    {
-        title: 'Column_6',
-        dataIndex: 'Column_6',
-    }
-];
-
-const data = [];
-for (let i = 1; i <= 10; i++) {
-    data.push({
-        key: i,
-        Column_1: `Row${i}`,
-        Column_2: `Row${i}`,
-        Column_3: `Row${i}`,
-        Column_4: `Row${i}`,
-    });
-}
-
+import {table, tableUp, NXIcon, NXTable, more} from '../../../../index';
+import './index.css'
 
 export default class Table extends React.Component {
     state = {
@@ -79,9 +15,86 @@ export default class Table extends React.Component {
         tableLayout: undefined,
         top: 'none',
         ellipsis: false,
+        pagination: false,
     };
 
     render() {
+
+        const columns = [
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_1',
+            },
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_2',
+            },
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_3',
+            },
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_4',
+
+            },
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_5',
+            },
+            {
+                title: <div className='table__column_header'>
+                    <span>Название колонки</span>
+                    <div>
+                        <NXIcon sm icon={tableUp} />
+                        <NXIcon sm icon={table} />
+                    </div>
+                </div>,
+                dataIndex: 'Column_6',
+            },
+            {
+                title: <NXIcon sm margin='0' icon={more} />,
+                dataIndex: 'Column_6',
+            }
+        ];
+
+        const data = [];
+        for (let i = 1; i <= 10; i++) {
+            data.push({
+                key: i,
+                Column_1: `Row${i}`,
+            });
+        }
 
         return (
             <>

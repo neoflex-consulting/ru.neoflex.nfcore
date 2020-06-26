@@ -173,16 +173,11 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={1}>
             </Col>
             <Col span={23}>
-                    {localStorage.getItem('i18nextLng') === 'ru' ?
-                            <Input placeholder="Название"
+                            <Input placeholder={value.t('label')}
                                    onChange={(e: any) => {
                                        const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});
                                        value.handleChange(event)
-                                   }}/>  :
-                    localStorage.getItem('i18nextLng    ') === 'us' ?
-                            <Input placeholder="Label" />
-                            :
-                            <Input placeholder="asas" />}
+                                   }}/>
             </Col>
         </Row>
 

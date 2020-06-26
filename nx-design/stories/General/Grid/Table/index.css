@@ -1,0 +1,11 @@
+.ant-table-cell {
+    text-align: center !important;
+}
+
+thead .table__column_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    line-height: 14px;
+}
