@@ -47,41 +47,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
-                            rules: [{
-                                required:value.operation,
-                                message: ' '
-                            },{
-                                validator: (rule: any, value: any, callback: any) => {
-                                    let isDuplicate: boolean = false;
-                                    if (value.parametersArray !== undefined) {
-                                        const valueArr = value.parametersArray
-                                            .filter((currentObject:IServerQueryParam) => {
-                                                let currentField: string;
-                                                try {
-                                                    //Либо объект при валидации отдельного поля
-                                                    currentField = JSON.parse(rule.value).value
-                                                } catch (e) {
-                                                    //Либо значение этого поля при валидации перед запуском
-                                                    currentField = value
-                                                }
-                                                return (currentField)? currentObject.datasetColumn === currentField: false
-                                            })
-                                            .map(function (currentObject:IServerQueryParam) {
-                                                return currentObject.datasetColumn
-                                            });
-                                        isDuplicate = valueArr.some(function (item:any, idx:number) {
-                                            return valueArr.indexOf(item) !== idx
-                                        });
-                                    }
-                                    if (isDuplicate) {
-                                        callback('Error message');
-                                        return;
-                                    }
-                                    callback();
-                                },
-                                message: 'duplicate row',
-                            }]
+                            initialValue: value.datasetColumn
                         })(
                         <Select
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
@@ -175,11 +141,10 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
                 <Form.Item>
                     {
                         <SortableList items={this.state.parametersArray!
-                            .map((serverGroupBy: any) => (
+                            .map((serverGroupByColumn: any) => (
                                 {
-                                    ...serverGroupBy,
-                                    idDatasetColumn : `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`,
+                                    ...serverGroupByColumn,
+                                    idDatasetColumn : `${JSON.stringify({index: serverGroupByColumn.index, columnName: 'datasetColumn', value: serverGroupByColumn.datasetColumn})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
