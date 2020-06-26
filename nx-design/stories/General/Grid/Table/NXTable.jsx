@@ -83,7 +83,7 @@ export default class Table extends React.Component {
                 dataIndex: 'Column_6',
             },
             {
-                title: <NXIcon sm margin='0' icon={more} />,
+                title: <NXIcon sm margin='3px auto' icon={more} />,
                 dataIndex: 'Column_6',
             }
         ];

@@ -10,25 +10,20 @@ interface Props {
     closeModal?: () => void;
     handleDeleteMenuForCancel: () => void;
     currentDatasetComponent: any;
-    allDatasetComponent?: any;
 }
 
 class DeleteDatasetComponent extends React.Component<any, any> {
 
     onClick(): void {
-        let e = this.props.currentDatasetComponent.eContents()[0].get('name')
+        const name = this.props.currentDatasetComponent.eContents()[0].get('name')
         this.props.closeModal!();
             const ref: string = `${this.props.currentDatasetComponent.get('uri')}?rev=${this.props.currentDatasetComponent.rev}`;
             API.instance().deleteResource(ref).then((response: any) => {
                 if (response.result === "ok") {
-                        this.props.context.notification(e, "deleted ", "info")
-
+                        this.props.context.notification(name, "deleted ", "info")
                 }
             })
-
     }
-
-
 
     render() {
         const { t } = this.props;

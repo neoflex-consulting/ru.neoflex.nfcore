@@ -66,7 +66,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     addComponentServerParam(currentDatasetComponent: Ecore.EObject, pattern: Ecore.EObject, userProfileValue: Ecore.EObject[], paramName: string, componentName: string): void {
         currentDatasetComponent.get(componentName).clear();
         JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
-            if (f['operation'] !== undefined) {
+            if (f['operation'] !== undefined || (componentName === 'groupByColumn' && f['datasetColumn'] !== undefined)) {
                 let params;
                 params = pattern.create({
                     datasetColumn: f['datasetColumn'],
@@ -107,7 +107,6 @@ class SaveDatasetComponent extends React.Component<any, State> {
     saveDatasetComponentOptions(): void {
         let objectId = this.props.viewObject._id;
         let params: any = {};
-        if (this.props.viewObject.get('showUniqRow') !== null) {params['showUniqRow'] = this.props.viewObject.get('showUniqRow')}
         this.props.context.changeUserProfile(objectId, params).then (()=> {
             let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
             currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
@@ -126,7 +125,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'serverGroupByColumn', 'groupByColumn');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
                 this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
             this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
