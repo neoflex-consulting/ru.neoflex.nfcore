@@ -27,55 +27,63 @@ export default class NXDiagram extends React.Component {
 
 render() {
     return (
-        <NXForm style={{ marginTop: '30px', height:'100%', boxShadow:'0 0 5px #F2F2F2' }}
+        <NXForm style={{ height:'100vh', boxShadow:'0 0 5px #F2F2F2' }}
                 width='700px'>
-            <div style={{display:'flex', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
-                <h1>Диаграммы</h1>
-                <NXIcon icon={close}/>
+            <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
+                <h1 style={{margin:'0'}}>Диаграммы</h1>
+                <NXIcon icon={close} xs/>
             </div>
+            <div style={{height:'106px'}}>
             <NXRow margin='24px 40px'><h3>Выберите тип диаграммы</h3></NXRow>
             <NXRow content='space-between' margin='15px 40px'>
-                <NXCol span={4}>
+                <NXCol span={5}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Block"})}}
-                    padding='0'>
-                    <NXIcon icon={diagramBlock} />
+                    padding='0'
+                    isIcon='24px'>
+                    <NXIcon icon={diagramBlock} xs/>
                     </NXButton>
                     <h4>Гистограмма</h4>
                 </NXCol>
-                <NXCol span={4}>
+                <NXCol span={5}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Bar"})}}
-                    padding='0'>
-                        <NXIcon icon={barChart} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={barChart} xs/>
                     </NXButton>
                     <h4>Линейчатая</h4>
                 </NXCol>
                 <NXCol span={4}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Pie"})}}
-                    padding='0'>
-                        <NXIcon icon={diagramCircle} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={diagramCircle} xs/>
                     </NXButton>
                     <h4>Круговая</h4>
                 </NXCol>
                 <NXCol span={4}>
                     <NXButton
                     onClick={()=>{this.setState({diagramType:"Line"})}}
-                    padding='0'>
-                        <NXIcon icon={diagram} />
+                    padding='0'
+                    isIcon='24px'>
+                        <NXIcon icon={diagram} xs/>
                     </NXButton>
                     <h4>График</h4>
                 </NXCol>
             </NXRow>
-            <div style={{border: 'solid 1px #F2F2F2'}}>
+            </div>
+            <div style={{border: 'solid 1px #F2F2F2', maxHeight:'298px'}}>
             <NXRow margin='8px 40px'>
                 <NXInput placeholder='Название диаграммы' />
             </NXRow>
-            <NXRow margin='8px 40px'>
-                {(this.state.diagramType==="Line")?<NXInput placeholder='Легенда'/>:""}
+                {(this.state.diagramType==="Line")?
+            <NXRow margin='16px 40px'>
+                    <NXInput placeholder='Легенда'/>
             </NXRow>
-            <NXRow content='space-between' margin='8px 40px'>
+                    :""}
+            <NXRow content='space-between' margin='16px 40px'>
                 <NXCol span={11.5}>
                     {this.getColumnSelectOptions("axisXColumnName", "Ось X")}
                 </NXCol>
@@ -83,37 +91,46 @@ render() {
                     {this.getColumnSelectOptions("axisYColumnName", "Ось Y")}
                 </NXCol>
             </NXRow>
-            <NXRow content='space-between' margin='8px 40px'>
+                    {
+                        (this.state.diagramType!=="Pie")?
+            <NXRow content='space-between' margin='16px 40px'>
                 <NXCol span={11.5}>
-                    {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel", "Подпись оси X"):""}
+                    {this.getInput("axisXLabel", "Подпись оси X")}
                 </NXCol>
                 <NXCol span={11.5}>
-                    {(this.state.diagramType!=="Pie")?this.getColumnSelectOptions("axisXPosition","Положение оси X"):""}
-                </NXCol>
-            </NXRow>
-            <NXRow content='space-between' margin='8px 40px'>
-                <NXCol span={11.5}>
-                    {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel", "Подпись оси Y"):""}
-                </NXCol>
-                <NXCol span={11.5}>
-                    {(this.state.diagramType!=="Pie")?this.getColumnSelectOptions("axisYPosition","Положение оси Y"):""}
+                    {this.getColumnSelectOptions("axisXPosition","Положение оси X")}
                 </NXCol>
             </NXRow>
+                        :""}
+                    {
+                        (this.state.diagramType!=="Pie")?
+            <NXRow content='space-between' margin='16px 40px'>
+                <NXCol span={11.5}>
+                    {this.getInput("axisYLabel", "Подпись оси Y")}
+                </NXCol>
+                <NXCol span={11.5}>
+                    {this.getColumnSelectOptions("axisYPosition","Положение оси Y")}
+                </NXCol>
+            </NXRow>
+                        :""
+                    }
             <NXRow margin='8px 40px'>
                 <NXCol span={24}>
                     {this.getColumnSelectOptions("legendPosition", 'Положение легенды')}
                 </NXCol>
             </NXRow>
             </div>
-            <div style={{backgroundColor: '#F2F2F2', padding:'16px 40px'}}>
+            <div style={{minHeight:'34%'}}>
+
+            </div>
+            <div style={{backgroundColor: '#F2F2F2', padding:'16px 40px', height:'64px'}}>
             <NXRow content='flex-start'>
                 {this.props.action === "edit"
-                    ?<NXCol span={6}><NXButton htmlType="submit">Редактировать</NXButton></NXCol>
-                    :<NXCol span={6}><NXButton htmlType="submit" primary>Добавить</NXButton></NXCol>}
-                <NXCol span={6}><NXButton>Очистить</NXButton></NXCol>
+                    ?<NXCol span={5}><NXButton htmlType="submit">Редактировать</NXButton></NXCol>
+                    :<NXCol span={5}><NXButton htmlType="submit" primary>Добавить</NXButton></NXCol>}
+                <NXCol span={5}><NXButton>Очистить</NXButton></NXCol>
             </NXRow>
             </div>
-            <NXRow />
         </NXForm>
     )
 }

@@ -71,15 +71,15 @@ export default class NXCalendarBar extends Component {
             </div>
 
             <div className="col col-start">
-                  <NXIcon icon={arrowLeft} />
+                  <NXIcon xs margin='8px auto' icon={arrowLeft} />
             </div>
             <div className="col-col-center">
                     <span className="col-text">Месяц</span>
             </div>
             <div className="col col-end" >
-                  <NXIcon icon={arrowLeft} />
+                  <NXIcon xs margin='8px auto' rotate={100} icon={arrowLeft} />
             </div>
-                <NXIcon icon={legend} />
+                <NXIcon sm margin='auto' icon={legend} />
           </div>
         }
         {
@@ -97,23 +97,25 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon icon={plus} className='NXIcon fill' />
+      <NXIcon sm icon={plus} className='NXIcon fill' />
       <div className="verticalLine" />
-      <NXIcon icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
-      style={{
-        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
-        background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
-        pointerEvents: this.state.calendarVisible ? 'none' : 'auto',
-        marginRight: '8px'
-      }}/>
-      <NXIcon icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon xs icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        style={{
+          border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
+          background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
+          pointerEvents: this.state.calendarVisible ? 'none' : 'auto',
+          marginRight: '8px'
+        }}
+        />
+      <NXIcon xs icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
         pointerEvents: !this.state.calendarVisible ? 'none' : 'auto'
-      }}/>
+      }}
+      />
       <div className="verticalLine" />
-      <NXIcon icon={print} className='NXIcon fill' />
+      <NXIcon sm icon={print} className='NXIcon fill' />
       </div>
         </div>
     );

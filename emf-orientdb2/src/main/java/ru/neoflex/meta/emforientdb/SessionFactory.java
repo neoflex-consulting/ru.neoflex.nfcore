@@ -89,14 +89,6 @@ public abstract class SessionFactory {
     }
 
     public String getId(URI uri) {
-        if (uri.hasFragment()) {
-            if (!uri.fragment().startsWith("/")) {
-                return uri.fragment();
-            }
-            if (!uri.fragment().equals("/")) {
-                return null;
-            }
-        }
         if (uri.segmentCount() >= 1) {
             return uri.segment(0);
         }
@@ -155,7 +147,7 @@ public abstract class SessionFactory {
                 .put(ORIENTDB, new ResourceFactoryImpl() {
                     @Override
                     public Resource createResource(URI uri) {
-                        return new OrientDBResource(uri, SessionFactory.this);
+                        return new OrientDBResource(uri);
                     }
                 });
         return resourceSet;
