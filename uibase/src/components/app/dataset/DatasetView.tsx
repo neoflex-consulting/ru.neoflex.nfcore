@@ -39,6 +39,7 @@ import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
+import DeleteDatasetComponent from "./DeleteDatasetComponent";
 
 
 
@@ -102,6 +103,7 @@ interface State {
     diagramAddMenuVisible: boolean;
     diagramEditMenuVisible: boolean;
     saveMenuVisible: boolean;
+    deleteMenuVisible: boolean;
     allOperations: Array<EObject>;
     allAggregates: Array<EObject>;
     allSorts: Array<EObject>;
@@ -135,6 +137,7 @@ class DatasetView extends React.Component<any, State> {
             currentDiagram: undefined,
             columnDefs: [],
             defaultColumnDefs: [],
+            deleteMenuVisible: false,
             rowData: [],
             highlights: [],
             calculations: [],
@@ -165,7 +168,7 @@ class DatasetView extends React.Component<any, State> {
             allLegendPosition: [],
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true,
+            isHighlightsUpdated: true
         }
     }
 
@@ -231,7 +234,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-                rowData.set('pinned', c.get('pinned'));
+            rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
@@ -669,6 +672,7 @@ class DatasetView extends React.Component<any, State> {
         this.findColumnDefs(currentDatasetComponent[0]);
     }
 
+
     handleDrawerVisibility = (p: paramType, v:boolean) => {
         this.setState({
             filtersMenuVisible: (p === paramType.filter || p === paramType.highlights) ? v : false
@@ -854,10 +858,15 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
 
-            <Button title={t('Delete')} style={{color: 'rgb(151, 151, 151)'}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
-            </Button>
+            {
+                 this.state.currentDatasetComponent.rev !== undefined &&
+                 this.state.currentDatasetComponent.eContents()[0].get( 'access') !== 'Default' &&
+                <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
+                >
+                    <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon"
+                         onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}/>
+                </Button>
+            }
 
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -1069,6 +1078,24 @@ class DatasetView extends React.Component<any, State> {
 
     handleSaveMenu = () => {
         this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+    };
+
+    handleDeleteMenu = () => {
+        this.state.deleteMenuVisible ? this.setState({ deleteMenuVisible: false }) : this.setState({ deleteMenuVisible: true })
+        if(this.state.deleteMenuVisible) {
+            for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
+                if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
+                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'))
+                    this.getAllDatasetComponents(true)
+
+                }
+            }
+        }
+    };
+
+    handleDeleteMenuForCancel = () => {
+        this.state.deleteMenuVisible ? this.setState({ deleteMenuVisible: false }) : this.setState({ deleteMenuVisible: true })
+
     };
 
     onFullScreen = () => {
@@ -1347,22 +1374,42 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </Drawer>
                 </div>
+                <div id="delete_menuButton">
+                    <Modal
+                        getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
+                        key="save_menu"
+                        width={'250px'}
+                        title={t('delete report')}
+                        visible={this.state.deleteMenuVisible}
+                        footer={null}
+                        onCancel={this.handleDeleteMenuForCancel}
+                    >
+                        <DeleteDatasetComponent
+                            {...this.props}
+                            closeModal={this.handleDeleteMenu}
+                            handleDeleteMenuForCancel={this.handleDeleteMenuForCancel}
+                            allDatasetComponent={this.state.allDatasetComponents}
+                            currentDatasetComponent={this.state.currentDatasetComponent}
+
+                        />
+                    </Modal>
+                </div>
                 <div id="save_menuButton">
-                <Modal
-                    getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
-                    key="save_menu"
-                    width={'500px'}
-                    title={t('saveReport')}
-                    visible={this.state.saveMenuVisible}
-                    footer={null}
-                    onCancel={this.handleSaveMenu}
-                >
-                    <SaveDatasetComponent
-                        {...this.props}
-                        currentDatasetComponent={this.state.currentDatasetComponent}
-                        closeModal={this.handleSaveMenu}
-                    />
-                </Modal>
+                    <Modal
+                        getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
+                        key="save_menu"
+                        width={'500px'}
+                        title={t('saveReport')}
+                        visible={this.state.saveMenuVisible}
+                        footer={null}
+                        onCancel={this.handleSaveMenu}
+                    >
+                        <SaveDatasetComponent
+                            {...this.props}
+                            currentDatasetComponent={this.state.currentDatasetComponent}
+                            closeModal={this.handleSaveMenu}
+                        />
+                    </Modal>
                 </div>
             </div>
             </Fullscreen>
