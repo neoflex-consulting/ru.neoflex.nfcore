@@ -180,11 +180,12 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
     }
 
     render() {
+        const {t} = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Системные фильтры</div>
+                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('sysfilters')}</div>
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button

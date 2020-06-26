@@ -6,7 +6,6 @@
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
 package ru.neoflex.nfcore.application
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
@@ -58,6 +57,9 @@ class AppModule {
 
 class Application extends AppModule {
     IconName iconName = "faUser"
+	boolean checkRights
+	boolean disabled
+    boolean hidden
 }
 
 /* Views */
@@ -65,6 +67,9 @@ class Application extends AppModule {
 abstract class ViewElement {
 	String name
 	container ViewContainer parent opposite children
+	boolean checkRights
+	boolean disabled
+    boolean hidden
 }
 
 abstract class ViewContainer extends ViewElement {
@@ -118,7 +123,6 @@ class FAIcon extends Icon {
 }
 
 class Form extends ViewContainer, DynamicActionElement {
-    boolean isHidden
 }
 
 class FormItem extends ViewContainer {
@@ -213,7 +217,6 @@ class GradientStyle extends Style {
 }
 
 class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElement {
-    boolean disabled
     boolean showSearch
     String placeholder
     SelectMode mode = "Default"
@@ -226,7 +229,6 @@ class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElemen
 }
 
 class DatePicker extends ViewElement, ValueItem, DynamicActionElement {
-    boolean disabled
     boolean allowClear
     String width = "200"
     String format = "YYYY-MM-DD"
@@ -293,6 +295,9 @@ class ButtonStyle extends Style {
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
     String name
+	boolean checkRights
+	boolean disabled
+    boolean hidden
 }
 
 class AppModuleNode extends TreeNode {
@@ -304,17 +309,6 @@ class CatalogNode extends TreeNode {
     contains TreeNode[] children
 }
 
-class DynamicNode extends TreeNode {
-    String methodName
-    refers EObject eObject
-}
-
-class EClassNode extends TreeNode {
-    contains ViewElement view
-    refers EObject eObject
-    refers EClass aClass
-}
-
 class ViewNode extends TreeNode {
     contains ViewElement view
     refers EObject eObject
@@ -324,6 +318,8 @@ class EventAction {
     Action action
     refers DynamicActionElement triggerItem
     String valueObjectKey
+    refers AppModule redirectTo
+    refers DynamicActionElement[] redirectParams
 }
 
 class EventHandler extends ViewElement {
@@ -333,7 +329,6 @@ class EventHandler extends ViewElement {
 }
 
 class Drawer extends ViewContainer, DynamicActionElement {
-    boolean isHidden
     TabPosition position
 }
 
@@ -411,6 +406,7 @@ enum Action {
     //clear
     setValue
     showMessage
+    redirect
 }
 
 enum Event {

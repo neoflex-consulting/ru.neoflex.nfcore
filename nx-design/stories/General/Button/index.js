@@ -1,8 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-
-import NXButton from '../../../index'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {NXButton} from '../../../index'
 
 export default class ButtonPage extends Component {
   render() {
@@ -36,7 +35,7 @@ export default class ButtonPage extends Component {
           </p>
 
           <h2 className="title">Как использовать</h2>
-          <SyntaxHighlighter language='javascript' style={docco} >
+          <SyntaxHighlighter language='jsx' style={okaidia} >
               {`import NXButton from 'nx-design';`}
           </SyntaxHighlighter>
 
@@ -56,9 +55,8 @@ export default class ButtonPage extends Component {
             </NXButton>
 
           </div>
-                <SyntaxHighlighter language='javascript' style={docco} >
-                    {`
-<NXButton primary> Primary </NXButton>
+                <SyntaxHighlighter language='jsx' style={okaidia} >
+                    {`<NXButton primary> Primary </NXButton>
 
 <NXButton> Default </NXButton>
 

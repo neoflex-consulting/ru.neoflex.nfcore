@@ -1,4 +1,4 @@
-import React,{Component} from 'react';
+import React, {Component} from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
 
@@ -17,10 +17,13 @@ export default class NXButton extends Component {
     font-size: 12px;
     line-height: 14px;
     border-radius: 4px;
-    padding: 9px 32px;
-    height: 32px;
-    width: auto;
+    padding: ${(props) => (props.isIcon? '0' : props.padding ? `${props.padding}` : "9px 32px")};
+    margin: ${(props) => (props.margin ? `${props.margin}` : "")};
+
+    height: ${(props) => (props.isIcon ? `${props.isIcon}` : "32px")};
+    width: ${(props) => (props.isIcon ? `${props.isIcon}` : "auto")};
     text-align: center;
+    align-items: center;
     border: ${(props) => (props.primary ? 'none'
             : props.disabled ? 'none'
                 : '1px solid #424D78')};
@@ -35,6 +38,7 @@ export default class NXButton extends Component {
     border: ${(props) => (props.primary ? 'none'
             : props.disabled ? 'none'
                 : '1px solid #171D45')};
+    box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);
     }
 
     :focus {

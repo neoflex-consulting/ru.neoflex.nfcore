@@ -35,18 +35,16 @@ public class GroovyTests {
     public void invokeEval() throws Exception {
         Role superAdmin = createSuperAdminRole();
         List args = new ArrayList();
-        args.add(ActionType.CALL);
         args.add(superAdmin);
-        Object result =  groovy.eval(superAdmin, "permitted", args);
-        Assert.assertEquals(GrantStatus.GRANTED, result);
+        Object result =  groovy.eval(superAdmin, "isEObjectPermitted", args);
+        Assert.assertEquals(GrantType.ALL.getValue(), result);
     }
 
     public static Role createSuperAdminRole() {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
         superAdmin.setName("SuperAdmin");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
-        allPermission.setGrantStatus(GrantStatus.GRANTED);
-        allPermission.getActionTypes().add(ActionType.ALL);
+        allPermission.setGrantType(GrantType.ALL);
         superAdmin.getGrants().add(allPermission);
         return superAdmin;
     }
@@ -54,17 +52,15 @@ public class GroovyTests {
     @Test
     public void invokeDynamic() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException, InstantiationException {
         Role role = createSuperAdminRole();
-        Object actionType =  ActionType.CALL;
         List parameters = new ArrayList();
         parameters.add(role);
-        parameters.add(actionType);
         parameters.add(role);
         String svcClassName = "ru.neoflex.nfcore.base.auth.endpoint.Test";
         String methodName = "permitted";
         Class scriptClass = Thread.currentThread().getContextClassLoader().loadClass(svcClassName);
-        Method declaredMethod = scriptClass.getDeclaredMethod(methodName, new Class[] {Role.class, ActionType.class, EObject.class} );
-        Object result = declaredMethod.invoke(null, new Object[]{role, actionType, role});
-        Assert.assertEquals(GrantStatus.GRANTED, result);
+        Method declaredMethod = scriptClass.getDeclaredMethod(methodName, new Class[] {Role.class, EObject.class} );
+        Object result = declaredMethod.invoke(null, new Object[]{role, role});
+        Assert.assertEquals(GrantType.ALL.getValue(), result);
     }
 
     @Test
@@ -74,12 +70,11 @@ public class GroovyTests {
         ObjectNode args = mapper.createObjectNode();
         JsonNode superAdminNode = mapper.valueToTree(superAdmin);
         args.set("role", superAdminNode);
-        args.set("actionType", mapper.valueToTree(ActionType.CALL));
         args.set("eObject", superAdminNode);
         String svcClassName = "ru.neoflex.nfcore.base.auth.endpoint.Test";
         String methodName = "permitted";
         Object result =  groovy.callStatic(svcClassName, methodName, args);
-        Assert.assertEquals(GrantStatus.GRANTED, result);
+        Assert.assertEquals(GrantType.ALL.getValue(), result);
     }
 
     @Test

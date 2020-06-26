@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.neoflex.meta.emfgit.Transaction;
+import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.DeploySupply;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
@@ -32,10 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -47,6 +45,8 @@ public class SysController {
     Workspace workspace;
     @Autowired
     Store store;
+    @Autowired
+    Context context;
     @Autowired
     DeploySupply deploySupply;
 
@@ -69,7 +69,9 @@ public class SysController {
 
     @PostMapping(value = "/importdb", produces = {"application/json"})
     public ObjectNode importDb(@RequestParam(value = "file") final MultipartFile file) throws Exception {
-        int count = new Exporter(store).unzip(file.getInputStream());
+        int count = context.inContext(()->
+            new Exporter(store).unzip(file.getInputStream())
+        );
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode().put("count", count);
         return result;
@@ -97,7 +99,10 @@ public class SysController {
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
             try {
-                new Exporter(store).zipAll(pipedOutputStream);
+                context.inContext(()->store.inTransaction(true, tx -> {
+                    new Exporter(store).zipAll(pipedOutputStream);
+                    return null;
+                }));
             } catch (Exception e) {
                 logger.error("Export DB", e);
             }
@@ -116,14 +121,14 @@ public class SysController {
             @RequestParam boolean withDependents,
             @RequestParam boolean recursiveDependents
     ) throws IOException {
-        List<String> ids = data.getOrDefault("resources", new ArrayList<>());
-        List<String> files = data.getOrDefault("files", new ArrayList<>());
+        List<String> ids = data.getOrDefault("resources", Collections.emptyList());
+        List<String> files = data.getOrDefault("files", Collections.emptyList());
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
             try {
                 try (ZipOutputStream zipOutputStream = new ZipOutputStream(pipedOutputStream);) {
-                    store.inTransaction(true, tx -> {
+                    context.inContext(()->store.inTransaction(true, tx -> {
                         List<Resource> resources = new ArrayList<>();
                         for (String id : ids) {
                             resources.add(store.loadResource(store.getUriByIdAndRev(id, null)));
@@ -139,11 +144,12 @@ public class SysController {
                         }
                         new Exporter(store).zip(resources, zipOutputStream);
                         return null;
-                    });
+                    }));
                     workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
-                        for (String file: files) {
+                        for (String file : files) {
                             Path filePath = tx.getFileSystem().getRootPath().resolve(file);
                             if (Files.isRegularFile(filePath)) {
+                                logger.info("Export " + file);
                                 byte[] bytes = Files.readAllBytes(filePath);
                                 ZipEntry refsEntry = new ZipEntry(file.substring(1));
                                 zipOutputStream.putNextEntry(refsEntry);
@@ -152,7 +158,8 @@ public class SysController {
                             }
                         }
                         return null;
-                    });                }
+                    });
+                }
             } catch (Exception e) {
                 logger.error("Export DB", e);
             }
@@ -218,8 +225,7 @@ public class SysController {
             if (Files.isDirectory(resolved)) {
                 workspace.getDatabase().deleteRecursive(resolved);
                 tx.commit("Deleting directory " + path);
-            }
-            else if (Files.isRegularFile(resolved)) {
+            } else if (Files.isRegularFile(resolved)) {
                 Files.delete(resolved);
                 tx.commit("Deleting file " + path);
             }

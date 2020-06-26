@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from 'react';
 
 import NXInputSearch, {NXInput, NXCheckbox, NXRadio, NXTextArea, NXDatePicker, NXSelect, NXOption} from './Input';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 class InputPage extends Component {
   render() {
@@ -18,12 +20,16 @@ class InputPage extends Component {
         <h2 className="title">Примеры:</h2>
 
         <section className="example">
+          <div>
           <h3 className="ex-title">Checkbox</h3>
 
-          <div>
             <NXCheckbox>Checkbox</NXCheckbox>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXCheckbox } from "nx-design";
 
+<NXCheckbox>Checkbox</NXCheckbox>`}
+          </SyntaxHighlighter>
         </section>
 
         <section className="example">
@@ -32,11 +38,21 @@ class InputPage extends Component {
             <h4>Basic</h4>
             <NXRadio>Radio</NXRadio>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXRadio } from "nx-design";
+
+<NXRadio>Radio</NXRadio>`}
+          </SyntaxHighlighter>
           <br/>
           <div>
             <h4>Disabled</h4>
             <NXRadio disabled>Radio</NXRadio>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXRadio } from "nx-design";
+
+<NXRadio disabled>Radio</NXRadio>`}
+          </SyntaxHighlighter>
         <br/>
           <div>
             <h4>Radio group</h4>
@@ -46,7 +62,15 @@ class InputPage extends Component {
             <NXRadio value={3}>Radio 3</NXRadio>
             </NXRadio.Group>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXRadio } from "nx-design";
 
+<NXRadio.Group defaultValue={1}>
+<NXRadio value={1}>Radio 1</NXRadio>
+<NXRadio value={2}>Radio 2</NXRadio>
+<NXRadio value={3}>Radio 3</NXRadio>
+</NXRadio.Group>`}
+          </SyntaxHighlighter>
         </section>
 
         <section className="example">
@@ -56,13 +80,22 @@ class InputPage extends Component {
             <h4>Basic input</h4>
             <NXInput width='250px' />
           </div>
-        <br/>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXInput } from "nx-design";
+
+<NXInput width='250px' />`}
+          </SyntaxHighlighter>
+          <br/>
 
           <div>
             <h4>Search input</h4>
             <NXInputSearch width='250px' />
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import NXInputSearch from "nx-design";
 
+<NXInputSearch width='250px' />`}
+          </SyntaxHighlighter>
         </section>
 
         <section className="example">
@@ -71,7 +104,11 @@ class InputPage extends Component {
           <div>
             <NXTextArea width='250px' />
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXTextArea } from "nx-design";
 
+<NXTextArea width='250px' />`}
+          </SyntaxHighlighter>
         </section>
 
         <section className="example">
@@ -80,7 +117,11 @@ class InputPage extends Component {
           <div>
             <NXDatePicker />
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXDatePicker } from "nx-design";
 
+<NXDatePicker />`}
+          </SyntaxHighlighter>
         </section>
 
         <section className="example">
@@ -94,6 +135,15 @@ class InputPage extends Component {
               <NXOption value="john">John</NXOption>
             </NXSelect>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXSelect, NXOption } from "nx-design";
+
+<NXSelect defaultValue="lucy">
+<NXOption value="lucy">Lucy</NXOption>
+<NXOption value="jack">Jack</NXOption>
+<NXOption value="john">John</NXOption>
+</NXSelect>`}
+          </SyntaxHighlighter>
           <br/><br/>
 
           <h4>Disabled Select</h4>
@@ -104,6 +154,15 @@ class InputPage extends Component {
               <NXOption value="john">John</NXOption>
             </NXSelect>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXSelect, NXOption } from "nx-design";
+
+<NXSelect defaultValue="lucy" disabled>
+<NXOption value="lucy">Lucy</NXOption>
+<NXOption value="jack">Jack</NXOption>
+<NXOption value="john">John</NXOption>
+</NXSelect>`}
+          </SyntaxHighlighter>
           <br/><br/>
 
           <h4>With disabled options</h4>
@@ -114,6 +173,15 @@ class InputPage extends Component {
               <NXOption value="john" disabled>John</NXOption>
             </NXSelect>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXSelect, NXOption } from "nx-design";
+
+<NXSelect defaultValue="lucy">
+<NXOption value="lucy">Lucy</NXOption>
+<NXOption value="jack" disabled>Jack</NXOption>
+<NXOption value="john" disabled>John</NXOption>
+</NXSelect>`}
+          </SyntaxHighlighter>
           <br/><br/>
 
           <h4>With loading options</h4>
@@ -124,6 +192,15 @@ class InputPage extends Component {
               <NXOption value="john" disabled>John</NXOption>
             </NXSelect>
           </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXSelect, NXOption } from "nx-design";
+
+<NXSelect defaultValue="lucy" loading>
+<NXOption value="lucy">Lucy</NXOption>
+<NXOption value="jack" disabled>Jack</NXOption>
+<NXOption value="john" disabled>John</NXOption>
+</NXSelect>`}
+          </SyntaxHighlighter>
         </section>
 
       </Fragment>

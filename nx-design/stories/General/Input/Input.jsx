@@ -85,12 +85,16 @@ const NXDatePicker = styled(DatePicker)`
 const NXSelect = styled(Select)`
     box-sizing: border-box;
     border-radius: 4px;
+    margin: auto 0px;
     width: ${(props) => (props.width ? `${props.width}` : "250px")};
-
+div{
+border-radius: 4px !important;
+}
 `
 
 const {Option} = Select
 const NXOption = styled(Option)`
+
 `
 
 export {NXInput, NXCheckbox, NXTextArea, NXRadio, NXDatePicker, NXSelect, NXOption}

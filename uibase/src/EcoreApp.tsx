@@ -357,9 +357,9 @@ class EcoreApp extends React.Component<any, State> {
             });
         } else if (appModuleName !== this.state.appModuleName) {
             let splitPathFull: any = [];
-            this.state.pathFull.forEach((p: any, index: any) => {
+            /*this.state.pathFull.forEach((p: any, index: any) => {
                 if (p.appModule === appModuleName) {splitPathFull.push(index)}
-            });
+            });*/
             if (splitPathFull.length === 0) {
                 this.state.pathFull.forEach( (p:any, index: any) => {
                     path.push(p);
@@ -367,6 +367,14 @@ class EcoreApp extends React.Component<any, State> {
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
+                /*Передача параметров из context в url
+                if (!params) {
+                    let contextParams: any[] = [];
+                    this.state.context.contextItemValues?.forEach(obj => {
+                        contextParams = contextParams.concat(obj)
+                    });
+                    urlElement.params = contextParams;
+                }*/
 
                 const nextPath = path[path.length - 1];
                 if (

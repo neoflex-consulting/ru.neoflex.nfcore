@@ -9,11 +9,6 @@ class AuthFactoryExt extends AuthFactoryImpl{
     }
 
     @Override
-    ClassPermission createClassPermission() {
-        return new ClassPermissionExt()
-    }
-
-    @Override
     ObjectPermission createObjectPermission() {
         return new ObjectPermissionExt()
     }
@@ -21,17 +16,5 @@ class AuthFactoryExt extends AuthFactoryImpl{
     @Override
     Role createRole() {
         return new RoleExt()
-    }
-
-    @Override
-    ReferencePermission createReferencePermission() {
-        return new ReferencePermissionExt()
-    }
-
-    @Override
-    Authorization createAuthorization() {
-        return new AuthorizationImpl() {
-
-        }
     }
 }

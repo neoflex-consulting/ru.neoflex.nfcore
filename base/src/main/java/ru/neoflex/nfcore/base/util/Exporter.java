@@ -36,6 +36,7 @@ public class Exporter {
     public static final String REF_OBJECT = "refObject";
     public static final String FEATURES = "features";
     public static final String FRAGMENT = "fragment";
+    public static final String INDEX = "index";
     public static final String NAME = "name";
     public static final String XMI = ".xmi";
     public static final String REFS = ".refs";
@@ -77,6 +78,14 @@ public class Exporter {
                 EObject child = setting.getEObject();
                 String fragment = EcoreUtil.getRelativeURIFragmentPath(eObject, child);
                 feature.put(FRAGMENT, fragment);
+                EStructuralFeature sf = setting.getEStructuralFeature();
+                int index = -1;
+                if (sf.isMany()) {
+                    EList eList = (EList) child.eGet(sf);
+                    index = eList.indexOf(refObject);
+                }
+                feature.put(INDEX, index);
+
             }
         }
         return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(objectNode);
@@ -99,7 +108,15 @@ public class Exporter {
         Map<EObject, Collection<EStructuralFeature.Setting>> crs = EcoreUtil.ExternalCrossReferencer.find(Collections.singleton(eObject));
         for (EObject refObject: crs.keySet()) {
             for (EStructuralFeature.Setting setting: crs.get(refObject)) {
-                setting.unset();
+                EStructuralFeature sf = setting.getEStructuralFeature();
+                if (!sf.isMany()) {
+                    setting.unset();
+                }
+                else {
+                    EObject owner = setting.getEObject();
+                    EList eList = (EList) owner.eGet(sf);
+                    eList.remove(refObject);
+                }
             }
         }
     }
@@ -198,6 +215,7 @@ public class Exporter {
                     String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
                     byte[] refsBytes = exportExternalRefs(eObject);
                     if (refsBytes != null) {
+                        logger.info("Export " + fileName + REFS);
                         ZipEntry refsEntry = new ZipEntry(fileName + REFS);
                         zipOutputStream.putNextEntry(refsEntry);
                         zipOutputStream.write(refsBytes);
@@ -217,6 +235,7 @@ public class Exporter {
                 String name = (String) eObject.eGet(nameAttribute);
                 if (name != null && name.length() > 0) {
                     String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    logger.info("Export " + fileName + XMI);
                     byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
                     ZipEntry zipEntry = new ZipEntry(fileName + XMI);
                     zipOutputStream.putNextEntry(zipEntry);
@@ -241,6 +260,7 @@ public class Exporter {
                         outputStream.write(buffer, 0, length);
                     }
                     if (zipEntry.getName().endsWith(XMI)) {
+                        logger.info("Import " + zipEntry.getName());
                         store.inTransaction(false, tx -> {
                             importEObject(outputStream.toByteArray());
                             tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
@@ -248,6 +268,7 @@ public class Exporter {
                         ++entityCount;
                     }
                     else if (zipEntry.getName().endsWith(REFS)) {
+                        logger.info("Import " + zipEntry.getName());
                         store.inTransaction(false, tx -> {
                             importExternalRefs(outputStream.toByteArray());
                             tx.commit("Import database: " + entryName, Authorization.getUserName(), "");
@@ -354,29 +375,44 @@ public class Exporter {
         return eObject;
     }
 
+    private static class Setting {
+        EObject referenceeObject;
+        EReference eReference;
+        EObject refObject;
+        int index;
+    };
     public EObject importExternalRefs(byte[] refs) throws IOException {
         ObjectNode objectNode = (ObjectNode) new ObjectMapper().readTree(refs);
         EObject eObject = treeToObject(objectNode);
         unsetExternalReferences(eObject);
+        List<Setting> settings = new ArrayList<>();
         ArrayNode externalReferences = objectNode.withArray(EXTERNAL_REFERENCES);
         for (JsonNode externalReference: externalReferences) {
             EObject refObject = treeToObject(externalReference.get(REF_OBJECT));
             for (JsonNode feature: externalReference.withArray(FEATURES)) {
+                Setting setting = new Setting();
+                setting.refObject = refObject;
                 String fragment = feature.get(FRAGMENT).textValue();
-                EObject referenceeObject = fragment == null || fragment.length() == 0 ? eObject : EcoreUtil.getEObject(eObject, fragment);
+                setting.referenceeObject = fragment == null || fragment.length() == 0 ? eObject : EcoreUtil.getEObject(eObject, fragment);
                 String name = feature.get(NAME).textValue();
-                EReference eReference = (EReference) referenceeObject.eClass().getEStructuralFeature(name);
-                if (eReference == null || eReference.isContainment()) {
-                    logger.warn("Non-contained EReference " + eObject + "->" + feature + " not found in object " + referenceeObject);
+                setting.eReference = (EReference) setting.referenceeObject.eClass().getEStructuralFeature(name);
+                if (setting.eReference == null || setting.eReference.isContainment()) {
+                    logger.warn("Non-contained EReference '" + feature + "' not found in class " + EcoreUtil.getURI(setting.referenceeObject.eClass()));
                     continue;
                 }
-                if (eReference.isMany()) {
-                    EList eList = (EList) referenceeObject.eGet(eReference);
-                    eList.add(refObject);
-                }
-                else {
-                    referenceeObject.eSet(eReference, refObject);
-                }
+                JsonNode indexNode = feature.get(INDEX);
+                setting.index = indexNode == null ? -1 : objectNode.asInt(-1);
+                settings.add(setting);
+            }
+        }
+        settings.sort(Comparator.comparing(s->s.index));
+        for (Setting setting: settings) {
+            if (setting.eReference.isMany()) {
+                EList eList = (EList) setting.referenceeObject.eGet(setting.eReference);
+                eList.add(setting.index >= 0 ? setting.index : eList.size(), setting.refObject);
+            }
+            else {
+                setting.referenceeObject.eSet(setting.eReference, setting.refObject);
             }
         }
         eObject.eResource().save(null);

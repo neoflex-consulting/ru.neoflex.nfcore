@@ -128,7 +128,9 @@ public class EMFController {
         return store.inTransaction(readOnly, tx -> {
             Resource resource = store.loadResource(ref);
             EcoreUtil.resolveAll(resource.getResourceSet());
-            EObject eObject = resource.getContents().get(0);
+            String fragment = URI.createURI(ref).fragment();
+            EObject eObject = fragment == null ?
+                    resource.getContents().get(0) : resource.getEObject(fragment);
             EClass eClass = eObject.eClass();
             for (EOperation eOperation: eClass.getEAllOperations()) {
                 if (eOperation.getName().equals(method)) {

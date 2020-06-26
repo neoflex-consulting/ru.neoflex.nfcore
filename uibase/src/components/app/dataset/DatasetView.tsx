@@ -168,7 +168,7 @@ class DatasetView extends React.Component<any, State> {
             allLegendPosition: [],
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true
+            isHighlightsUpdated: true,
         }
     }
 
@@ -234,7 +234,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-            rowData.set('pinned', c.get('pinned'));
+                rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
@@ -373,7 +373,7 @@ class DatasetView extends React.Component<any, State> {
             let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
                 params.forEach((f: any) => {
-                    if (f) {
+                    if (f.datasetColumn) {
                         columnDefs.forEach((c: any) => {
                             if (c.get('field').toLowerCase() === f.datasetColumn.toLowerCase()) {
                                 serverParam.push({
@@ -438,7 +438,6 @@ class DatasetView extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
-        /*const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'));*/
         if (this.state.currentDatasetComponent.rev !== undefined) {
             let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
                 this.props.context.userProfile.eResource().to().params
@@ -459,18 +458,30 @@ class DatasetView extends React.Component<any, State> {
                 this.getAllDatasetComponents(false)
             }
         }
-        /*if (JSON.stringify(this.state.queryParams) !== JSON.stringify(newQueryParams)) {
-            this.setState({
-                queryParams: newQueryParams
-            },()=>this.refresh())
-        }*/
     }
 
     getColumnDefGroupBy = (rowDataShow: any) => {
         let columnDefs: any[] = [];
         this.state.defaultColumnDefs.forEach((c:any) => {
             if (rowDataShow[0][c.get('field')] !== undefined) {
-                columnDefs.push(c)
+                let rowData = new Map();
+                let newHeaderName = this.state.serverGroupBy
+                    .find((s: any) => s['datasetColumn'] === c.get('field'))
+                rowData.set('field', c.get('field'));
+                rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
+                rowData.set('headerTooltip', c.get('headerTooltip'));
+                rowData.set('hide', c.get('hide'));
+                rowData.set('pinned', c.get('pinned'));
+                rowData.set('filter', c.get('filter'));
+                rowData.set('sort', c.get('sort'));
+                rowData.set('editable', c.get('editable'));
+                rowData.set('checkboxSelection', c.get('checkboxSelection'));
+                rowData.set('sortable', c.get('sortable'));
+                rowData.set('suppressMenu', c.get('suppressMenu'));
+                rowData.set('resizable', c.get('resizable'));
+                rowData.set('type', c.get('type'));
+                rowData.set('component', c.get('component'));
+                columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 rowData.set('field', c.get('field'));
@@ -560,7 +571,9 @@ class DatasetView extends React.Component<any, State> {
     ) {
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
-        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems'), this.props.context.contextItemValues);
+        const newQueryParams = getNamedParams(this.props.viewObject.get('valueItems')
+                                            , this.props.context.contextItemValues
+                                            , this.props.pathFull[this.props.pathFull.length - 1].params);
 
         this.props.context.runQuery(resource
             , newQueryParams
@@ -573,7 +586,7 @@ class DatasetView extends React.Component<any, State> {
         ).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[];
-                if (groupByParams.length !== 0 && groupByColumnParams.length !== 0 && result.length !== 0) {
+                if (groupByParams.length !== 0 && result.length !== 0) {
                     newColumnDef = this.getColumnDefGroupBy(result)
                 } else {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
@@ -822,7 +835,7 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('calculable expressions')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
             >
                 <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
@@ -841,7 +854,7 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
             </Button>
-            <Button title={t('aggregationGroups')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
             >
                 <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
@@ -1218,7 +1231,7 @@ class DatasetView extends React.Component<any, State> {
                     <Drawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
-                        title={t('Group aggregations')}
+                        title={t('grouping')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
@@ -1292,7 +1305,7 @@ class DatasetView extends React.Component<any, State> {
                 <Drawer
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
-                    title={t('calculatable expressions')}
+                    title={t('calculator')}
                     width={'700px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}

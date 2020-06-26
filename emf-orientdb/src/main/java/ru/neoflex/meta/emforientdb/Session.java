@@ -555,9 +555,9 @@ public class Session implements Closeable {
         resource.getContents().add(eObject);
         resource.setURI(factory.createResourceURI(oElement));
         populateEObject(resource.getResourceSet(), oElement, eObject);
-        getFactory().getEvents().fireAfterLoad(resource);
 // Не нужно резолвить здесь! Это ведёт к лишним запросам и ломает Export With Dependencies
 //        EcoreUtil.resolveAll(resource);
+        getFactory().getEvents().fireAfterLoad(resource);
     }
 
     public EObject createEObject(ResourceSet rs, OElement oElement) {
@@ -773,6 +773,7 @@ public class Session implements Closeable {
                     Resource resource = rs.createResource(factory.createResourceURI(oElement));
                     resource.getContents().add(eObject);
                     populateEObject(rs, oElement, eObject);
+                    getFactory().getEvents().fireAfterLoad(resource);
                     return resource;
                 });
             }

@@ -7,6 +7,8 @@ import ButtonPage from './Button';
 import IconPage from './Icon';
 import InputPage from './Input';
 import BarsPage from './Bars';
+import DiagramsPage from './Diagrams';
+import TablesPage from './Grid'
 
 storiesOf('General|Buttons', module)
     .add('Buttons', () => <ButtonPage />)
@@ -20,3 +22,8 @@ storiesOf('General|Inputs', module)
 storiesOf('General|Bars', module)
     .add('FunctionalBars', () => <BarsPage />)
 
+storiesOf('General|Diagrams', module)
+    .add('Diagrams', () => <DiagramsPage />)
+
+storiesOf('General|Grid', module)
+    .add('Tables', () => <TablesPage />)
