@@ -15,10 +15,11 @@ import {
 } from './stories/General/Icon/Icon';
 
 import {NXTable} from "./stories/General/Form/Table/NXTable";
-
+import NXHint from "./stories/Other/Components/NXHint";
 /*---EXPORTS---*/
 
 export {
+    NXHint,
     NXButton,
     NXForm,
     NXTable,

@@ -125,20 +125,11 @@ display: inline-block;
   margin: auto 10px;
 }
 
-.NXIcon {
-  margin: auto;
-  margin: auto 3px;
-  cursor: pointer;
-}
-
-.fill path {
-  fill: #5E6785
-}
-
 .showCode {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 
 .showCode pre {
@@ -149,3 +140,27 @@ display: inline-block;
   width: 100px;
   margin-top: 20px;
 }
+
+/*Components*/
+.NXIcon {
+  margin: auto;
+  margin: auto 3px;
+  cursor: pointer;
+}
+
+.fill path {
+  fill: #5E6785
+}
+
+/*Hint*/
+.ant-tooltip-inner, .ant-tooltip-arrow-content {
+  background-color: white !important;
+  color: black !important;
+}
+
+.ant-tooltip-inner {
+  border-radius: 4px !important;
+  box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/*----------*/

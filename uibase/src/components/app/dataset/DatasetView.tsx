@@ -1094,7 +1094,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDeleteMenu = () => {
-        this.state.deleteMenuVisible ? this.setState({ deleteMenuVisible: false }) : this.setState({ deleteMenuVisible: true })
+       this.handleDeleteMenuForCancel()
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
