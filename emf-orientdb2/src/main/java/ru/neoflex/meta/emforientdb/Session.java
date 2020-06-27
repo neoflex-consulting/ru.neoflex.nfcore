@@ -442,35 +442,29 @@ public class Session implements Closeable {
     }
 
     public void save(Resource resource) {
+        if (resource.getContents().size() != 1) {
+            throw new IllegalArgumentException("Resource with single object only supported");
+        }
+        EObject eObject = resource.getContents().get(0);
+        OVertex oVertex = loadElement(eObject);
         Resource oldResource = null;
-        ORecord firstRecord = null;
-        for (EObject eObject: resource.getContents()) {
-            OVertex oVertex = loadElement(eObject);
-            if (oVertex == null) {
-                oVertex = createOVertex(eObject);
-            } else {
-                checkVersion(resource.getURI(), oVertex);
-                checkDependencies(resource, oVertex);
-                ResourceSet rs = createResourceSet();
-                oldResource = rs.createResource(resource.getURI());
-                EObject oldObject = createEObject(rs, oVertex);
-                oldResource.getContents().add(oldObject);
-                populateEObject(rs, oVertex, oldObject);
-            }
-            if (firstRecord == null) {
-                getFactory().getEvents().fireBeforeSave(oldResource, resource);
-            }
-            populateOElement(eObject, oVertex);
-            ORecord oRecord = oVertex.save();
-            if (firstRecord == null) {
-                firstRecord = oRecord;
-            }
+        if (oVertex == null) {
+            oVertex = createOVertex(eObject);
+        } else {
+            checkVersion(resource.getURI(), oVertex);
+            checkDependencies(resource, oVertex);
+            ResourceSet rs = createResourceSet();
+            oldResource = rs.createResource(resource.getURI());
+            EObject oldObject = createEObject(rs, oVertex);
+            oldResource.getContents().add(oldObject);
+            populateEObject(rs, oVertex, oldObject);
         }
-        if (firstRecord != null) {
-            resource.setURI(factory.createResourceURI(firstRecord));
-            getFactory().getEvents().fireAfterSave(oldResource, resource);
-            savedResourcesMap.put(resource, firstRecord);
-        }
+        getFactory().getEvents().fireBeforeSave(oldResource, resource);
+        populateOElement(eObject, oVertex);
+        ORecord oRecord = oVertex.save();
+        resource.setURI(factory.createResourceURI(oRecord));
+        getFactory().getEvents().fireAfterSave(oldResource, resource);
+        savedResourcesMap.put(resource, oRecord);
     }
 
     private void checkDependencies(Resource resource, OVertex oVertex) {
