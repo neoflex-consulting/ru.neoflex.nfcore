@@ -83,10 +83,18 @@ public class Authorization {
         return result;
     }
 
-    public Integer isEObjectPermitted(EObject eObject) {
+    public int isEObjectPermitted(EObject eObject) {
         Integer result = 0;
         for (Role role: getUserRoles()) {
             result |= role.isEObjectPermitted(eObject);
+        }
+        return result;
+    }
+
+    public int isResourcePermitted(final String path) {
+        Integer result = 0;
+        for (Role role: getUserRoles()) {
+            result |= role.isResourcePermitted(path);
         }
         return result;
     }

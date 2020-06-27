@@ -173,11 +173,30 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={1}>
             </Col>
             <Col span={23}>
-                            <Input placeholder={value.t('label')}
-                                   onChange={(e: any) => {
-                                       const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});
-                                       value.handleChange(event)
-                                   }}/>
+                <Form.Item style={{ display: 'inline-block' }}>
+                    {value.getFieldDecorator(`${value.idValue}`,
+                        {
+                            initialValue: value.value
+                        })(
+                        <Input
+                            placeholder={value.t('label')}
+                            allowClear={true}
+                            onChange={(e: any) => value.handleChange(
+                                JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
+                            )}
+                            title={value.value}
+                            id={value.index.toString()}
+                        />
+                    )}
+                </Form.Item>
+
+
+                {/*<Input placeholder={value.t('label')}*/}
+                {/*       onChange={(e: any) => {*/}
+                {/*           const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});*/}
+                {/*           value.handleChange(event)*/}
+                {/*       }}*/}
+                {/*/>*/}
             </Col>
         </Row>
 
@@ -209,6 +228,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                     ...serverGroupBy,
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupBy.index, columnName: 'datasetColumn', value: serverGroupBy.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`,
+                                    idValue: `${JSON.stringify({index: serverGroupBy.index, columnName: 'value', value: serverGroupBy.value})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,

@@ -46,10 +46,10 @@ public class Session implements Closeable {
     private final ODatabaseDocument db;
     private final ODatabaseDocumentInternal oldDB;
 
-    Session(SessionFactory factory, ODatabaseDocument db, ODatabaseDocumentInternal oldDB) {
+    Session(SessionFactory factory) {
         this.factory = factory;
-        this.db = db;
-        this.oldDB = oldDB;
+        this.oldDB = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        this.db = factory.createDatabaseDocument();
     }
 
     @Override
@@ -413,13 +413,14 @@ public class Session implements Closeable {
         resource.getContents().add(eObject);
         populateEObject(resource.getResourceSet(), oVertex, eObject);
         getFactory().getEvents().fireBeforeDelete(resource);
-        // workaround bug if self-link
+        // workaround for bug if self-link
         deleteLinks(oVertex);
         oVertex.delete();
     }
 
     private void checkDependencies(OVertex oVertex) {
         Set<String> dependent = StreamSupport.stream(oVertex.getEdges(ODirection.IN).spliterator(), false)
+                .filter(oEdge -> !oEdge.getFrom().equals(oVertex))
                 .map(oEdge -> oEdge.getFrom().getIdentity().toString())
                 .collect(Collectors.toSet());
         if (dependent.size() > 0) {
