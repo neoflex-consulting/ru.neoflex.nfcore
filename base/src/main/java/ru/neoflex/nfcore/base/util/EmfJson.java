@@ -77,13 +77,13 @@ public class EmfJson {
                 .with(attributes)
                 .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
-        if (resource instanceof OrientDBResource) {
-            OrientDBResource orientDBResource = (OrientDBResource) resource;
-            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
-                EObject eObject = it.next();
-                orientDBResource.setID(eObject, jsonResource.getID(eObject));
-            }
-        }
+//        if (resource instanceof OrientDBResource) {
+//            OrientDBResource orientDBResource = (OrientDBResource) resource;
+//            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
+//                EObject eObject = it.next();
+//                orientDBResource.setID(eObject, jsonResource.getID(eObject));
+//            }
+//        }
         resource.getContents().addAll(jsonResource.getContents());
         return resource;
     }
