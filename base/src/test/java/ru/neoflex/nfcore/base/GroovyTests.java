@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,15 +13,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.neoflex.meta.emfgit.Transaction;
-import ru.neoflex.nfcore.base.auth.*;
+import ru.neoflex.nfcore.base.auth.AuthFactory;
+import ru.neoflex.nfcore.base.auth.GrantType;
+import ru.neoflex.nfcore.base.auth.Permission;
+import ru.neoflex.nfcore.base.auth.Role;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
 import ru.neoflex.nfcore.base.util.EmfJson;
+import ru.neoflex.nfcore.dsl.EcoreBuilder;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,6 +110,42 @@ public class GroovyTests {
             tx.commit("Deleted Test.groovy");
             Assert.assertEquals(3, result);
         }
+    }
 
+    private static String getResourceContents(String name) throws IOException, URISyntaxException {
+        Path resourcePath = Paths.get(Thread.currentThread().getContextClassLoader().getResource(name).toURI());
+        Assert.assertTrue(Files.isRegularFile(resourcePath));
+        return new String(Files.readAllBytes(resourcePath), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    public void testDSL() throws Exception {
+        EcoreBuilder builder = new EcoreBuilder();
+        String myRole = getResourceContents("auth_Role_MyRole.groovy");
+        builder.eval(myRole);
+        String myAppModule = getResourceContents("auth_UserProfile_ivanov.groovy");
+        builder.eval(myAppModule);
+        List<EObject> eObjects = builder.resolve();
+        Assert.assertEquals(2, eObjects.size());
+        Role role = (Role) eObjects.get(0);
+        Assert.assertEquals("My Role!", role.getName());
+        Resource resource = context.getStore().inTransaction(false, tx -> {
+            Resource emptyResource = context.getStore().createEmptyResource();
+            emptyResource.getContents().addAll(EcoreUtil.copyAll(eObjects));
+            emptyResource.save(null);
+            return emptyResource;
+        });
+        Resource resource2 = context.getStore().inTransaction(false, tx -> {
+            Resource emptyResource = context.getStore().createEmptyResource();
+            emptyResource.setURI(resource.getURI());
+            emptyResource.load(null);
+            return emptyResource;
+        });
+        Assert.assertEquals(2, resource2.getContents().size());
+        context.getStore().inTransaction(false, tx -> {
+            Resource emptyResource = context.getStore().createEmptyResource();
+            emptyResource.setURI(resource2.getURI());
+            emptyResource.delete(null);
+        });
     }
 }
