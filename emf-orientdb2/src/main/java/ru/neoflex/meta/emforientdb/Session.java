@@ -41,7 +41,7 @@ public class Session implements Closeable {
     public static final String EPROXY = "EProxy";
     public static final String ORIENTDB_SOURCE = "http://orientdb.com/meta";
     public static final String ANN_O_CLASS_NAME = "oClassName";
-    final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
+    final Map<Resource, List<OVertex>> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
     private final ODatabaseDocumentInternal oldDB;
@@ -261,24 +261,21 @@ public class Session implements Closeable {
                             " where " + eIDAttribute.getName() + "=?",
                     objectToOObject(eIDAttribute.getEAttributeType(), eObject.eGet(eIDAttribute)));
         }
+        int index = eObject.eResource().getContents().indexOf(eObject);
         URI uri = EcoreUtil.getURI(eObject);
-        return loadElement(uri);
+        return loadElement(uri, index);
     }
 
-    private OVertex loadElement(URI uri) {
-        ORID orid = factory.getORID(uri);
-        if (orid == null) {
+    private OVertex loadElement(URI uri, int index) {
+        List<ORID> orids = factory.getORIDs(uri).collect(Collectors.toList());
+        if (index >= orids.size()) {
             return null;
         }
-        return db.load(orid);
+        return db.load(orids.get(index));
     }
 
-    private OVertex loadElementOrThrow(URI uri) {
-        OVertex oElement = loadElement(uri);
-        if (oElement == null) {
-            throw new RuntimeException("Can not load element with uri: " + uri);
-        }
-        return oElement;
+    private Stream<OElement> loadElements(URI uri) {
+        return factory.getORIDs(uri).map(orid -> db.load(orid));
     }
 
     private Object objectToOObject(EDataType eDataType, Object value) {
@@ -358,9 +355,9 @@ public class Session implements Closeable {
                     OVertex crVertex = null;
                     if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
                         URI crURI = EcoreUtil.getURI(crossReferencedEObject);
-                        ORID orid = factory.getORID(crURI);
-                        crVertex = orid != null ?
-                                db.load(orid) : createProxyOElement(crURI);
+                        List<ORID> orids = factory.getORIDs(crURI).collect(Collectors.toList());
+                        crVertex = orids.size() > 0 && orids.get(0) != null ?
+                                db.load(orids.get(0)) : createProxyOElement(crURI);
                     }
                     else { // internal reference
                         crVertex = oElement;
@@ -400,22 +397,27 @@ public class Session implements Closeable {
     }
 
     public void delete(URI uri) {
-        ORID orid = factory.getORID(uri);
-        OVertex oVertex = db.load(orid);
-        if (oVertex == null) {
-            return;
-        }
-        checkVersion(uri, oVertex);
-        checkDependencies(oVertex);
         ResourceSet rs = createResourceSet();
-        Resource resource = rs.createResource(uri);
-        EObject eObject = createEObject(rs, oVertex);
-        resource.getContents().add(eObject);
-        populateEObject(resource.getResourceSet(), oVertex, eObject);
-        getFactory().getEvents().fireBeforeDelete(resource);
-        // workaround for bug if self-link
-        deleteLinks(oVertex);
-        oVertex.delete();
+        List<Integer> versions = factory.getVersions(uri).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(uri).collect(Collectors.toList());
+        for (int i = 0; i < orids.size(); ++i) {
+            ORID orid = orids.get(i);
+            Integer version = versions.get(i);
+            OVertex oVertex = db.load(orid);
+            if (oVertex == null) {
+                throw new IllegalArgumentException(String.format("Can't delete element with @rid %s", orid.toString()));
+            }
+            checkVersion(version, oVertex);
+            checkDependencies(oVertex);
+            Resource resource = rs.createResource(uri);
+            EObject eObject = createEObject(rs, oVertex);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), oVertex, eObject);
+            getFactory().getEvents().fireBeforeDelete(resource);
+            // workaround for bug if self-link
+            deleteLinks(oVertex);
+            oVertex.delete();
+        };
     }
 
     private void checkDependencies(OVertex oVertex) {
@@ -442,29 +444,37 @@ public class Session implements Closeable {
     }
 
     public void save(Resource resource) {
-        if (resource.getContents().size() != 1) {
-            throw new IllegalArgumentException("Resource with single object only supported");
-        }
-        EObject eObject = resource.getContents().get(0);
-        OVertex oVertex = loadElement(eObject);
-        Resource oldResource = null;
-        if (oVertex == null) {
-            oVertex = createOVertex(eObject);
-        } else {
-            checkVersion(resource.getURI(), oVertex);
-            checkDependencies(resource, oVertex);
-            ResourceSet rs = createResourceSet();
-            oldResource = rs.createResource(resource.getURI());
-            EObject oldObject = createEObject(rs, oVertex);
-            oldResource.getContents().add(oldObject);
-            populateEObject(rs, oVertex, oldObject);
+        ResourceSet rs = createResourceSet();
+        Resource oldResource = rs.createResource(resource.getURI());
+        List<Integer> versions = factory.getVersions(resource.getURI()).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(resource.getURI()).collect(Collectors.toList());
+        List<OVertex> vertexes = new ArrayList<>();
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex;
+            if (i >= orids.size() || orids.get(i) == null) {
+                oVertex = createOVertex(eObject);
+            } else {
+                oVertex = db.load(orids.get(i));
+                checkVersion(versions.get(i), oVertex);
+                checkDependencies(resource, oVertex);
+                EObject oldObject = createEObject(rs, oVertex);
+                oldResource.getContents().add(oldObject);
+                populateEObject(rs, oVertex, oldObject);
+            }
+            vertexes.add(oVertex);
         }
         getFactory().getEvents().fireBeforeSave(oldResource, resource);
-        populateOElement(eObject, oVertex);
-        ORecord oRecord = oVertex.save();
-        resource.setURI(factory.createResourceURI(oRecord));
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex = vertexes.get(i);
+            populateOElement(eObject, oVertex);
+            OVertex oRecord = oVertex.save();
+            vertexes.set(i, oRecord);
+        }
         getFactory().getEvents().fireAfterSave(oldResource, resource);
-        savedResourcesMap.put(resource, oRecord);
+        resource.setURI(factory.createResourceURI(vertexes));
+        savedResourcesMap.put(resource, vertexes);
     }
 
     private void checkDependencies(Resource resource, OVertex oVertex) {
@@ -481,23 +491,24 @@ public class Session implements Closeable {
         }
     }
 
-    public void checkVersion(URI uri, OVertex oElement) {
-        if (oElement.getVersion() != factory.getVersion(uri)) {
-            throw new ConcurrentModificationException("OElement " + factory.getORID(uri) +
-                    " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
-                    factory.getVersion(uri));
+    public void checkVersion(Integer version, OVertex oElement) {
+        if (oElement.getVersion() != version) {
+            throw new ConcurrentModificationException("OElement has been modified.\n" +
+                    "Database version is " + oElement.getVersion() + ", record version is " +
+                    version);
         }
     }
 
     public void load(Resource resource) {
-        OVertex oElement = loadElementOrThrow(resource.getURI());
-        EObject eObject = createEObject(resource.getResourceSet(), oElement);
         resource.getContents().clear();
-        resource.getContents().add(eObject);
-        resource.setURI(factory.createResourceURI(oElement));
-        populateEObject(resource.getResourceSet(), oElement, eObject);
-// Не нужно резолвить здесь! Это ведёт к лишним запросам и ломает Export With Dependencies
-//        EcoreUtil.resolveAll(resource);
+        List<OElement> elements = new ArrayList<>();
+        loadElements(resource.getURI()).forEach(oElement -> {
+            elements.add(oElement);
+            EObject eObject = createEObject(resource.getResourceSet(), oElement);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), (OVertex) oElement, eObject);
+        });
+        resource.setURI(factory.createResourceURI(elements));
         getFactory().getEvents().fireAfterLoad(resource);
     }
 
@@ -701,23 +712,27 @@ public class Session implements Closeable {
     }
 
     public void getDependentResources(URI uri, Consumer<Supplier<Resource>> consumer) {
-        getDependentResources(factory.getORID(uri), consumer);
+        factory.getORIDs(uri).forEach(orid -> {
+            getDependentResources(orid, consumer);
+        });
     }
 
-    public List<Resource> getDependentResources(ORID orid) {
+    public List<Resource> getDependentResources(Stream<ORID> orids) {
         List<Resource> resources = new ArrayList<>();
-        getDependentResources(orid, resourceSupplier -> {
-            resources.add(resourceSupplier.get());
+        orids.forEach(orid -> {
+            getDependentResources(orid, resourceSupplier -> {
+                resources.add(resourceSupplier.get());
+            });
         });
         return resources;
     }
 
     public List<Resource> getDependentResources(Resource resource) {
-        return getDependentResources(factory.getORID(resource.getURI()));
+        return getDependentResources(factory.getORIDs(resource.getURI()));
     }
 
     public void getAll(Consumer<Supplier<Resource>> consumer) {
-        query("select from EObject where in('EContains').size() == 0", consumer);
+        query("select from EObject", consumer);
     }
 
     public List<Resource> getAll() {

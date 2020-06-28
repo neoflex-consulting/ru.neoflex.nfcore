@@ -15,11 +15,10 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class SessionFactory {
     public final static String ORIENTDB = "orientdb";
@@ -74,10 +73,14 @@ public abstract class SessionFactory {
         return uri;
     }
 
-    public URI createResourceURI(ORecord oElement) {
-        ORID orid = oElement.getIdentity();
-        String id = getId(orid);
-        String ref = String.format("%s?rev=%d", id, oElement.getVersion());
+    public URI createResourceURI(ORecord oRecords) {
+        return createResourceURI(Collections.singletonList(oRecords));
+
+    }
+    public URI createResourceURI(List<? extends ORecord> oRecords) {
+        String id = oRecords.stream().map(oRecord -> getId(oRecord.getIdentity())).collect(Collectors.joining(","));
+        String rev = oRecords.stream().map(oRecord -> String.valueOf(oRecord.getVersion())).collect(Collectors.joining(","));
+        String ref = String.format("%s?rev=%s", id, rev);
         return createURI(ref);
     }
 
@@ -92,33 +95,39 @@ public abstract class SessionFactory {
         return null;
     }
 
-    public ORID getORID(URI uri) {
+    public Stream<ORID> getORIDs(URI uri) {
         String id = getId(uri);
         if (id == null) {
-            return null;
+            return Stream.empty();
         }
-        return getORID(id);
+        return getORIDs(id);
     }
 
-    public ORID getORID(String id) {
-        String[] ids = id.split("_", 2);
-        if (ids.length != 2) {
-            return null;
-        }
-        try {
-            return new ORecordId(new Integer(ids[0]), new Long(ids[1]));
-        }
-        catch (NumberFormatException nfe) {
-            return null;
-        }
+    public ORID getORID(String idl) {
+        return getORIDs(idl).findFirst().get();
     }
 
-    public Integer getVersion(URI uri) {
+    public Stream<ORID> getORIDs(String idl) {
+        return Arrays.stream(idl.split(",")).map(id -> {
+            String[] ids = id.split("_", 2);
+            if (ids.length != 2) {
+                return null;
+            }
+            try {
+                return new ORecordId(new Integer(ids[0]), new Long(ids[1]));
+            }
+            catch (NumberFormatException nfe) {
+                return null;
+            }
+        });
+    }
+
+    public Stream<Integer> getVersions(URI uri) {
         String query = uri.query();
         if (query == null || !query.contains("rev=")) {
-            return null;
+            return Stream.empty();
         }
-        return Integer.valueOf(query.split("rev=")[1]);
+        return Arrays.stream(query.split("rev=")[1].split(",")).map(s -> Integer.valueOf(s));
     }
 
     public EPackage getEPackage(String part) {
