@@ -94,7 +94,7 @@ class TabsViewReport_ extends ViewContainer {
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
         return (
-            <Tabs defaultActiveKey={children[0]._id} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
+            <Tabs defaultActiveKey={children[0] ? children[0]._id : undefined} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('name')} key={c._id} >
