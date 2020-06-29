@@ -9,22 +9,12 @@ public class OrientDBResource extends XMLResourceImpl {
         super(uri);
     }
 
-    protected boolean useUUIDs()
-    {
-        return false;
+    @Override
+    protected boolean isAttachedDetachedHelperRequired() {
+        return true;
     }
 
     protected boolean useIDs() {
         return true;
     }
-
-//    public void setID(EObject eObject, String id) {
-//        if (id == null || !id.startsWith("ui_generated")) {
-//            super.setID(eObject, id);
-//        }
-//    }
-
-//    private boolean isGUID(String id) {
-//        return id != null && id.length() == 23 && id.startsWith("_");
-//    }
 }
