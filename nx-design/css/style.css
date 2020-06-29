@@ -154,8 +154,8 @@ display: inline-block;
 
 /*Hint*/
 .ant-tooltip-inner, .ant-tooltip-arrow-content {
-  background-color: white !important;
-  color: black !important;
+  background-color: #2A356C !important;
+  color: #FFFFFF !important;
 }
 
 .ant-tooltip-inner {
