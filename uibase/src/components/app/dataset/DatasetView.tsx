@@ -175,19 +175,19 @@ class DatasetView extends React.Component<any, State> {
     //TODO нужна оптимизация
     getAllDatasetComponents(findColumn: boolean) {
         API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === '//DatasetComponent');
+            const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//DatasetComponent');
             let allDatasetComponents: any[] = [];
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
                     .then((result: Ecore.Resource[]) => {
                         const userComponentName = this.props.context.userProfile.get('params').array()
-                            .filter( (p: any) => p.get('key') === this.props.viewObject._id);
+                            .filter( (p: any) => p.get('key') === this.props.viewObject.eURI());
                         let currentDatasetComponent = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
                             result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
                             : result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === JSON.parse(userComponentName[0].get('value'))['name']);
                         if (currentDatasetComponent === undefined) {
                             currentDatasetComponent = result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'));
-                            this.props.context.changeUserProfile(this.props.viewObject._id, undefined)
+                            this.props.context.changeUserProfile(this.props.viewObject.eURI(), undefined)
                         }
                         if (currentDatasetComponent) {
                             this.setState({currentDatasetComponent});
@@ -403,7 +403,7 @@ class DatasetView extends React.Component<any, State> {
         let serverCalculatedExpression: IServerQueryParam[] = [];
         let diagrams: IDiagram[] = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
-            .filter( (p: any) => p.get('key') === resource.eContents()[0]._id);
+            .filter( (p: any) => p.get('key') === resource.eContents()[0].eURI());
         if (userProfileValue.length !== 0) {
             serverFilters = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverFilters);
             serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
@@ -678,7 +678,7 @@ class DatasetView extends React.Component<any, State> {
 
     handleChange(e: any): void {
         let params: any = {name: e};
-        this.props.context.changeUserProfile(this.props.viewObject._id, params);
+        this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
             .filter((c: any) => c.eContents()[0].get('name') === e);
         this.setState({currentDatasetComponent: currentDatasetComponent[0]});
@@ -721,11 +721,11 @@ class DatasetView extends React.Component<any, State> {
         const serverGroupBy = filterParam(this.state.serverGroupBy);
         const groupByColumn = filterParam(this.state.groupByColumn);
         const serverCalculatedExpression = filterParam(this.state.serverCalculatedExpression);
-        const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+        const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
         if (newServerParam !== undefined) {
             const serverParam = filterParam(newServerParam);
-            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0]._id;
+            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
@@ -786,7 +786,7 @@ class DatasetView extends React.Component<any, State> {
                 })
             }
         }
-        this.datasetViewChangeUserProfile(this.state.currentDatasetComponent.eContents()[0]._id
+        this.datasetViewChangeUserProfile(this.state.currentDatasetComponent.eContents()[0].eURI()
             , paramType.diagrams
             , newDiagrams);
     };

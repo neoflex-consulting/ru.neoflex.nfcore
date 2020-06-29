@@ -146,7 +146,7 @@ public class DbTests extends TestBase {
                 Assert.fail("Can't delete referenced Resource");
             }
             catch (IllegalArgumentException e) {
-                Assert.assertTrue(e.getMessage().startsWith("Can not delete"));
+                Assert.assertTrue(e.getMessage().startsWith("Can't delete"));
             }
         });
         DBView extView = server.inTransaction(session -> {

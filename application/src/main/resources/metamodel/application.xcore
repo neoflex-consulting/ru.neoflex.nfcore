@@ -91,6 +91,9 @@ class Calendar extends ViewElement {
     op JSON getNotificationInstances(String dateFrom, String dateTo)
     op JSON createNotification(JSON newNotification)
 }
+class Collapse extends ViewElement {
+
+}
 
 class YearBook {
     QName name
@@ -240,7 +243,7 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement {
+class Input extends ViewElement, DynamicActionElement {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
@@ -418,6 +421,7 @@ enum Event {
 enum GridComponentValueType {
     string
     object
+    none
 }
 
 enum MessageType {

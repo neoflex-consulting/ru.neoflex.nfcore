@@ -594,7 +594,7 @@ class ResourceEditor extends React.Component<any, State> {
                     isSaving: false,
                     mainEObject: resource.eResource().eContents()[0],
                     resourceJSON: nestedJSON,
-                    targetObject: updatedTargetObject,
+                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
                     resource: resource
                 });
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
