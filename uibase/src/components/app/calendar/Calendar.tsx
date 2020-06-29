@@ -423,13 +423,9 @@ class Calendar extends React.Component<any, any> {
     };
 
     openNotification(notification: any, context: any): void  {
-        //TODO вынести в серверный код, добавить в модель сброс даты на начало месяца
-        const notificationFullDate = new Date(notification.contents[0]['notificationDateOn']);
-        const notificationDateOn = new Date(notificationFullDate.getFullYear(), notificationFullDate.getMonth(), 2).toISOString().slice(0, 10)
-
         let params: Object[] = [{
             parameterName: 'reportDate',
-            parameterValue: notificationDateOn,
+            parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date",
             parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
         }];
