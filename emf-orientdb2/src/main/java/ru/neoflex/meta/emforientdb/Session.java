@@ -470,6 +470,7 @@ public class Session implements Closeable {
     }
     private void checkDependencies(Resource resource, OVertex oVertex) {
         Set<String> dependent = StreamSupport.stream(oVertex.getEdges(ODirection.IN).spliterator(), false)
+                .filter(oEdge -> !oEdge.getFrom().equals(oVertex))
                 .filter(oEdge -> resource.getEObject(oEdge.getProperty("toFragment")) == null ||
                         resource.getEObject(oEdge.getProperty("toFragment")).eClass() !=
                                 resource.getResourceSet().getEObject(URI.createURI(oEdge.getProperty("eClass")), false))
