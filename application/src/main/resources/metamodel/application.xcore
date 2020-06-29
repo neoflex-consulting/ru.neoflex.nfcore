@@ -243,7 +243,7 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement {
+class Input extends ViewElement, DynamicActionElement {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
@@ -421,6 +421,7 @@ enum Event {
 enum GridComponentValueType {
     string
     object
+    none
 }
 
 enum MessageType {

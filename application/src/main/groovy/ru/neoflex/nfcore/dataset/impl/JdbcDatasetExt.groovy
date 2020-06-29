@@ -64,6 +64,8 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                     jdbcDataset.datasetColumn.add(datasetColumn)
                 }
                 Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
+                Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
+                return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created")
             }
         }
     }
