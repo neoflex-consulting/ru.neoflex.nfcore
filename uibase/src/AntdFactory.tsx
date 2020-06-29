@@ -94,7 +94,7 @@ class TabsViewReport_ extends ViewContainer {
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
         return (
-            <Tabs defaultActiveKey={children[0]._id} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
+            <Tabs defaultActiveKey={children[0] ? children[0]._id : undefined} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('name')} key={c._id} >
@@ -319,18 +319,17 @@ class Select_ extends ViewContainer {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
         });
-        this.props.context.updateContext!({contextItemValues: contextItemValues},
-            ()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name')
-        }));
+        this.setState({currentValue:currentValue},()=>
+            this.props.context.updateContext!({contextItemValues: contextItemValues},
+                ()=>this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name'),
+                    value:this.selected
+                }))
+        );
     };
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         if (this.props.viewObject.get('isDynamic')
             && this.props.viewObject.get('datasetComponent')) {
             this.setState({datasetComponent:this.props.viewObject.get('datasetComponent').eContainer});
@@ -363,7 +362,12 @@ class Select_ extends ViewContainer {
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
         });
     }
 
@@ -500,10 +504,6 @@ class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.onChange(this.state.pickedDate.format(this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
@@ -515,6 +515,10 @@ class DatePicker_ extends ViewContainer {
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
         });
     }
 
@@ -536,7 +540,8 @@ class DatePicker_ extends ViewContainer {
         this.props.context.updateContext!({contextItemValues: contextItemValues},
             ()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+            itemName:this.props.viewObject.get('name'),
+            value:currentValue
         }));
     };
 
@@ -600,10 +605,6 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
@@ -613,6 +614,10 @@ class GroovyCommand_ extends ViewContainer {
         if (this.props.viewObject.get('executeOnStartup')) {
             this.execute()
         }
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
+        });
     }
 
     componentWillUnmount(): void {
@@ -681,6 +686,7 @@ class ValueHolder_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
+            currentValue: this.props.viewObject.get('value')
         };
     }
 
@@ -690,19 +696,17 @@ class ValueHolder_ extends ViewContainer {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
         });
-        this.props.context.updateContext!({contextItemValues: contextItemValues},
-            ()=>this.props.context.notifyAllEventHandlers({
-                type:eventType.change,
-                itemName:this.props.viewObject.get('name')
-            }));
-
+        this.setState({currentValue:currentValue},()=>
+            this.props.context.updateContext!({contextItemValues: contextItemValues},
+                ()=>this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name'),
+                    value:currentValue
+                }))
+        );
     };
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.props.context.addEventAction({
             name: this.props.viewObject.get('name'),
             actions: [
@@ -713,6 +717,11 @@ class ValueHolder_ extends ViewContainer {
         contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: this.props.viewObject.get('value')
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name'),
+            value: this.props.viewObject.get('value')
         });
     }
 
@@ -756,10 +765,6 @@ class Input_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
@@ -769,6 +774,10 @@ class Input_ extends ViewContainer {
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.setValue, callback: this.onChange.bind(this)}
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
         });
     }
 
@@ -787,7 +796,8 @@ class Input_ extends ViewContainer {
             this.props.context.updateContext!({contextItemValues: contextItemValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
-                    itemName:this.props.viewObject.get('name')
+                    itemName:this.props.viewObject.get('name'),
+                    value:currentValue
                 }))
         );
     };
@@ -844,10 +854,6 @@ class Typography_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
@@ -857,6 +863,10 @@ class Typography_ extends ViewContainer {
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.setValue,callback: this.onChange.bind(this)},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
         });
     }
 
@@ -884,7 +894,8 @@ class Typography_ extends ViewContainer {
     onChange = (str: string) => {
         this.setState({label: str},()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
-            itemName:this.props.viewObject.get('name')
+            itemName:this.props.viewObject.get('name'),
+            value:str
         }));
     };
 
@@ -1035,16 +1046,16 @@ class Drawer_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
-        });
         this.props.context.addEventAction({
             name:this.props.viewObject.get('name'),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemName:this.props.viewObject.get('name')
         });
     }
 

@@ -128,9 +128,6 @@ class FAIcon extends Icon {
 class Form extends ViewContainer, DynamicActionElement {
 }
 
-class FormItem extends ViewContainer {
-}
-
 abstract class ValueItem {
     String value
 }
@@ -220,7 +217,6 @@ class GradientStyle extends Style {
 }
 
 class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElement {
-    boolean showSearch
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
@@ -243,11 +239,10 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement, DynamicActionElement {
+class Input extends ViewElement, ValueItem, DynamicActionElement {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
-    String value
     String step = "1"
     String placeholder
     String width = "200"
