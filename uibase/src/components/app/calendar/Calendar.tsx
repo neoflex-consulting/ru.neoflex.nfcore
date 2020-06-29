@@ -133,24 +133,26 @@ class Calendar extends React.Component<any, any> {
     };
 
     getAllNotificationInstances(currentMonth: Date, updateViewObject: boolean) {
-        const monthStart = dateFns.startOfMonth(currentMonth);
-        const monthEnd = dateFns.endOfMonth(monthStart);
-        const dateFrom = monthStart.toString();
-        const dateTo = monthEnd.toString();
-        const ref: string = this.props.viewObject.eURI();
-        const methodName: string = 'getNotificationInstances';
+        if (this.props.viewObject.get('yearBook') !== null) {
+            const monthStart = dateFns.startOfMonth(currentMonth);
+            const monthEnd = dateFns.endOfMonth(monthStart);
+            const dateFrom = monthStart.toString();
+            const dateTo = monthEnd.toString();
+            const ref: string = this.props.viewObject.eURI();
+            const methodName: string = 'getNotificationInstances';
 
-        if (updateViewObject && this.state.classAppModule !== undefined) {
-            API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
-                .then((result) => {
-                    this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
-                })
+            if (updateViewObject && this.state.classAppModule !== undefined) {
+                API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
+                    .then((result) => {
+                        this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
+                    })
+            }
+
+            API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
+                let notificationInstancesDTO = JSON.parse(result).resources;
+                this.setState({notificationInstancesDTO, spinnerVisible: false});
+            });
         }
-
-        API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
-            let notificationInstancesDTO = JSON.parse(result).resources;
-            this.setState({notificationInstancesDTO, spinnerVisible: false});
-        });
     };
 
     getAllStatuses() {
@@ -423,13 +425,9 @@ class Calendar extends React.Component<any, any> {
     };
 
     openNotification(notification: any, context: any): void  {
-        //TODO вынести в серверный код, добавить в модель сброс даты на начало месяца
-        const notificationFullDate = new Date(notification.contents[0]['notificationDateOn']);
-        const notificationDateOn = new Date(notificationFullDate.getFullYear(), notificationFullDate.getMonth(), 2).toISOString().slice(0, 10)
-
         let params: Object[] = [{
             parameterName: 'reportDate',
-            parameterValue: notificationDateOn,
+            parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date",
             parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
         }];
@@ -445,7 +443,7 @@ class Calendar extends React.Component<any, any> {
 
     private getTitle(day: any) {
         let temp: any = [];
-            this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
+        this.props.viewObject.get('yearBook') !== null && this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
                 dateFns.isSameYear(day, dateFns.parseISO(r.get('date')))
                 && dateFns.isSameMonth(day, dateFns.parseISO(r.get('date')))
                 && dateFns.isSameDay(day, dateFns.parseISO(r.get('date')))
@@ -1043,10 +1041,24 @@ class Calendar extends React.Component<any, any> {
         }
         return (
             <div>
+                {this.calendarNotifications()}
                 <div className="body">{rows}</div>
             </div>
         )
     }
+
+    calendarNotifications = () => {
+        let description = []
+        if (this.props.viewObject.get('yearBook') === null) {
+            description.push('YearBook not connected to calendar')
+        }
+        if (this.props.viewObject.get('notifications').array().length === 0) {
+            description.push(' Calendar does not contain notifications')
+        }
+        if (description.length !== 0) {
+            this.props.context.notification('Calendar', description.toString(), 'info')
+        }
+    };
 
     render() {
         return (
