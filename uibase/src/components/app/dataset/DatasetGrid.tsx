@@ -78,9 +78,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
 
     onPaginationChanged = () => {
-        this.setState({ paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1});
-        this.setState({ paginationTotalPage: this.grid.current.api.paginationGetTotalPages()});
-        this.setState({isGridReady: true});
+        if(this.grid.current !== null) {
+            this.setState({
+                paginationCurrentPage: this.grid.current.api.paginationGetCurrentPage() + 1,
+                paginationTotalPage: this.grid.current.api.paginationGetTotalPages(),
+                isGridReady: true
+            });
+        }
     }
 
 

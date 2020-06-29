@@ -1,7 +1,7 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, DatePicker, Drawer, Form, Input, InputNumber, Row, Select, Tabs, Typography} from 'antd';
+import {Button, Col, DatePicker, Drawer, Form, Input, InputNumber, Row, Select, Tabs, Typography, Collapse} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import DatasetPivot from './components/app/dataset/DatasetPivot';
@@ -1054,6 +1054,8 @@ class Drawer_ extends ViewContainer {
     }
 
     render = () => {
+
+
         return (
             <Drawer
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
@@ -1068,6 +1070,30 @@ class Drawer_ extends ViewContainer {
             >
                 {this.renderChildren()}
             </Drawer>
+        )
+    }
+}
+
+class Collapse_ extends ViewContainer {
+
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+        };
+    }
+
+
+       render = () => {
+        return (
+            <div>
+                <Collapse
+                    defaultActiveKey={['1']}
+                    expandIconPosition={'left'}
+                >
+                </Collapse>
+
+            </div>
         )
     }
 }
@@ -1136,6 +1162,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
         this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
         this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
+        this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

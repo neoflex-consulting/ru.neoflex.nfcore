@@ -91,6 +91,9 @@ class Calendar extends ViewElement {
     op JSON getNotificationInstances(String dateFrom, String dateTo)
     op JSON createNotification(JSON newNotification)
 }
+class Collapse extends ViewElement {
+
+}
 
 class YearBook {
     QName name
