@@ -57,17 +57,13 @@ public class DeploySupply {
                                 }
                             }).collect(Collectors.toList()));
             paths.sort(Comparator.comparing(o -> o.getFileName().toString()));
-            context.transact("DeploySupply (XMI/REFS)", () -> {
-                for (Path path : paths) {
+            String[] suffixes = {XMI, REFS, "/post_install.groovy"};
+            for (Path path : paths) {
+                context.transact("DeploySupply " + path.getFileName().toString(), () -> {
                     logger.info("Load XMI files from " + path.getFileName().toString());
                     new Exporter(store).processZipXmi(path);
-                }
-                for (Path path : paths) {
                     logger.info("Load REFS files from " + path.getFileName().toString());
                     new Exporter(store).processZipRefs(path);
-                }
-                String[] suffixes = {XMI, REFS, "/post_install.groovy"};
-                for (Path path : paths) {
                     new Exporter(store).processZipFile(path,
                             p -> Arrays.stream(suffixes).filter(s -> p.toString().toLowerCase().endsWith(s)).count() == 0,
                             (p, bytes) -> {
@@ -81,11 +77,6 @@ public class DeploySupply {
                                 }
                                 return null;
                             });
-                }
-                return null;
-            });
-            context.transact("DeploySupply (post_install.groovy)", () -> {
-                for (Path path : paths) {
                     new Exporter(store).processZipFile(path, (p) -> p.getFileName().toString().equals("post_install.groovy"), (p, bytes) -> {
                         try {
                             logger.info("Evaluate " + path.getFileName().toString() + p.toString());
@@ -96,19 +87,14 @@ public class DeploySupply {
                         }
                         return null;
                     });
-                }
-                return null;
-            });
-            context.transact("DeploySupply (createSupply)", () -> {
-                for (Path path : paths) {
                     logger.info("Create Supply instance " + path.getFileName().toString());
                     Supply supply = SupplyFactory.eINSTANCE.createSupply();
                     supply.setName(path.getFileName().toString());
                     supply.setDate(new Timestamp((new Date()).getTime()));
                     store.createEObject(supply);
-                }
-                return null;
-            });
+                    return null;
+                });
+            }
         } catch (Throwable e) {
             logger.error("", e);
         }
