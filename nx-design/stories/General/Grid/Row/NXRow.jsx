@@ -17,7 +17,9 @@ export default class NXRow extends Component {
                             : props.content==='space-between' ? 'space-between'
                                 : 'flex-start')};
         margin: ${(props) => (props.margin ? `${props.margin}` : "")};
+        padding: ${(props) => (props.padding ? `${props.padding}` : "")};
         height: ${(props) => (props.height ? `${props.height}` : "auto")};
+        width: ${(props) => (props.width ? `${props.width}` : "auto")};
         background-color: ${(props) => (props.color ? `${props.color}` : "")}
         `
         return (
