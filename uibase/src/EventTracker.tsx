@@ -8,14 +8,14 @@ export default class EventTracker {
         this.handlers.push(eventHandler)
     }
 
-    removeEventHandler(name: string) {
-        this.handlers = this.handlers.filter(el => el.name !== name);
+    removeEventHandler(itemId: string) {
+        this.handlers = this.handlers.filter(el => el.itemId !== itemId);
 
     }
 
     notifyAllEventHandlers(event: IEvent) {
         this.handlers.forEach(el => {
-            if (el.name === event.itemName && el.eventType === event.type)
+            if (el.itemId === event.itemId && el.eventType === event.type)
                 el.callback(event.value)
         })
     }

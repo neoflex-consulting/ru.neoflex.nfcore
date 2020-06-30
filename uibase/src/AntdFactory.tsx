@@ -67,7 +67,7 @@ class Form_ extends ViewContainer {
 
     componentDidMount(): void {
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -170,7 +170,7 @@ export class Href_ extends ViewContainer {
                       });
                       this.props.context.notifyAllEventHandlers({
                       type:eventType.click,
-                      itemName:this.props.viewObject.get('name'),
+                      itemId:this.props.viewObject.eURI(),
                       value:value
                       })
                   }}>
@@ -183,47 +183,10 @@ export class Href_ extends ViewContainer {
 
 export class Button_ extends ViewContainer {
 
-    saveResource = () => {
-        API.instance().saveResource(this.props.viewObject.eResource(), 99999)
-            .then((newResource: Ecore.Resource) => {
-                startResource = newResource.to()
-                const newViewObject: Ecore.EObject[] = (newResource.eContainer as Ecore.ResourceSet).elements()
-                    .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-                    .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-                    .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}))
-            })};
-
-    cancelChange = () => {
-        const resource: Ecore.Resource = this.props.viewObject.eResource();
-        resource.clear();
-        const oldResource = resource.parse(startResource as Ecore.EObject);
-        const oldViewObject: Ecore.EObject[] = (oldResource.eContainer as Ecore.ResourceSet).elements()
-            .filter( (r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
-            .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
-            .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-        this.props.context.updateContext!(({viewObject: oldViewObject[0]}))
-    };
-
-    backStartPage = () => {
-        const appModule = this.props.pathFull[this.props.pathFull.length - 1];
-        let params: Object[] = appModule.params;
-        this.props.context.changeURL!(appModule.appModule, false, undefined, params);
-    };
-
-    getCancelButton = (t: any, label: any, span: any) => {
-        return <Button title={'Cancel'} style={{ width: '100px', right: span, marginBottom: marginBottom}} onClick={() => this.cancelChange()}>
-        {(label)? label: t('cancel')}
-    </Button>
-    };
-
-    getSaveButton = (t: any, label: any, span: any) => {
-        return <Button title={'Save'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => this.saveResource()}>
-            {(label)? label: t('save')}
-        </Button>
-    };
-
-    getSubmitButton = (t: any, label: any, span: any) => {
+    render = () => {
+        const { t } = this.props as WithTranslation;
+        const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
+        const label = t(this.props.viewObject.get('label'));
         let value : string;
         const returnValueType = this.props.viewObject.get('returnValueType') || 'string';
         //this.props.data/this.props.getValue props из ag-grid
@@ -233,31 +196,15 @@ export class Button_ extends ViewContainer {
         if (returnValueType === 'string') {
             value = this.props.getValue ? this.props.getValue() : this.props.viewObject.get('ref')
         }
-        return <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
-            this.props.context.notifyAllEventHandlers({
-                type:eventType.click,
-                itemName:this.props.viewObject.get('name'),
-                value:value});
-        }}>
-            {(label)? label: t('submit')}
-        </Button>
-    };
-
-    getBackButton = (t: any, label: any, span: any) => {
-        return <Button title={'Back Start Page'} style={{ width: '170px', left: span, marginBottom: marginBottom}} onClick={() => this.backStartPage()}>
-            {(label)? label: t('backStartPage')}
-        </Button>
-    };
-
-    render = () => {
-        const { t } = this.props as WithTranslation;
-        const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
-        const label = t(this.props.viewObject.get('label'));
         return <div key={this.viewObject._id}>
-            {this.props.viewObject.get('buttonCancel') === true && this.getCancelButton(t, label, span)}
-            {this.props.viewObject.get('buttonSave') === true && this.getSaveButton(t, label, span)}
-            {this.props.viewObject.get('buttonSubmit') === true &&  this.getSubmitButton(t, label, span)}
-            {this.props.viewObject.get('backStartPage') === true && this.getBackButton(t, label, span)}
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
+                this.props.context.notifyAllEventHandlers({
+                    type:eventType.click,
+                    itemId:this.props.viewObject.eURI(),
+                    value:value});
+            }}>
+                {(label)? label: t('submit')}
+            </Button>
         </div>
     }
 }
@@ -330,7 +277,7 @@ class Select_ extends ViewContainer {
             this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
-                    itemName:this.props.viewObject.get('name'),
+                    itemId:this.props.viewObject.eURI(),
                     value:this.selected
                 }))
         );
@@ -363,7 +310,7 @@ class Select_ extends ViewContainer {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -374,7 +321,7 @@ class Select_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -528,7 +475,7 @@ class DatePicker_ extends ViewContainer {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -538,7 +485,7 @@ class DatePicker_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -566,7 +513,7 @@ class DatePicker_ extends ViewContainer {
             this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
-                    itemName:this.props.viewObject.get('name'),
+                    itemId:this.props.viewObject.eURI(),
                     value:currentValue
                 }))
         );
@@ -634,7 +581,7 @@ class HtmlContent_ extends ViewContainer {
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
         this.props.context.addEventAction({
-            name: this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions: [
                 {actionType: actionType.execute,callback: this.execute.bind(this)},
                 ]
@@ -644,7 +591,7 @@ class GroovyCommand_ extends ViewContainer {
         }
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -663,7 +610,7 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.updateContext!({contextItemValues: contextItemValues},
             ()=>this.props.context.notifyAllEventHandlers({
                 type:eventType.change,
-                itemName:this.props.viewObject.get('name')
+                itemId:this.props.viewObject.eURI()
             }));
     };
 
@@ -744,7 +691,7 @@ class ValueHolder_ extends ViewContainer {
             this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
-                    itemName:this.props.viewObject.get('name'),
+                    itemId:this.props.viewObject.eURI(),
                     value:currentValue
                 }))
         );
@@ -752,7 +699,7 @@ class ValueHolder_ extends ViewContainer {
 
     componentDidMount(): void {
         this.props.context.addEventAction({
-            name: this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions: [
                 {actionType: actionType.setValue,callback: this.onChange.bind(this)}
             ]
@@ -764,7 +711,7 @@ class ValueHolder_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             value: this.props.viewObject.get('value')
         });
     }
@@ -821,7 +768,7 @@ class Input_ extends ViewContainer {
 
     componentDidMount(): void {
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -832,7 +779,7 @@ class Input_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -856,7 +803,7 @@ class Input_ extends ViewContainer {
             this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
-                    itemName:this.props.viewObject.get('name'),
+                    itemId:this.props.viewObject.eURI(),
                     value:currentValue
                 }))
         );
@@ -917,7 +864,7 @@ class Typography_ extends ViewContainer {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -926,7 +873,7 @@ class Typography_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -954,7 +901,7 @@ class Typography_ extends ViewContainer {
     onChange = (str: string) => {
         this.setState({label: str},()=>this.props.context.notifyAllEventHandlers({
             type:eventType.change,
-            itemName:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             value:str
         }));
     };
@@ -1023,7 +970,7 @@ class EventHandler_ extends ViewContainer {
         this.props.viewObject.get('eventActions').each((el: EObject)=>{
             const eventAction : IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                 return (el.get('triggerItem')
-                    && (action.name === el.get('triggerItem').get('name'))
+                    && (action.itemId === el.get('triggerItem').eURI())
                     || el.get('action') === actionType.showMessage
                     || el.get('action') === actionType.redirect)
             });
@@ -1078,7 +1025,7 @@ class EventHandler_ extends ViewContainer {
     componentDidMount(): void {
         if (this.props.viewObject.get('listenItem')) {
             this.props.context.addEventHandler({
-                name: this.props.viewObject.get('listenItem').get('name'),
+                itemId: this.props.viewObject.get('listenItem').eURI(),
                 eventType: this.props.viewObject.get('event') || "click",
                 callback: this.handleEvent.bind(this)
             })
@@ -1087,7 +1034,7 @@ class EventHandler_ extends ViewContainer {
 
     componentWillUnmount(): void {
         if (this.props.viewObject.get('listenItem')) {
-            this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').get('name'))
+            this.props.context.removeEventHandler(this.props.viewObject.get('listenItem').eURI())
         }
         this.props.context.contextItemValues.delete(this.props.viewObject.eURI());
     }
@@ -1107,7 +1054,7 @@ class Drawer_ extends ViewContainer {
 
     componentDidMount(): void {
         this.props.context.addEventAction({
-            name:this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -1115,7 +1062,7 @@ class Drawer_ extends ViewContainer {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemName:this.props.viewObject.get('name')
+            itemId:this.props.viewObject.eURI()
         });
     }
 
