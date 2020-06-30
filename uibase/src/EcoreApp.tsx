@@ -83,6 +83,7 @@ class EcoreApp extends React.Component<any, State> {
             getEventActions: ()=>{return this.eventActions},
             //По событию на странице
             contextItemValues: new Map(),
+            globalValues: new Map(),
             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
@@ -367,14 +368,15 @@ class EcoreApp extends React.Component<any, State> {
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
                 urlElement.params = params;
-                /*Передача параметров из context в url
+                //Передача параметров из context в url
+                //TODO merge параметров при передае
                 if (!params) {
                     let contextParams: any[] = [];
-                    this.state.context.contextItemValues?.forEach(obj => {
+                    this.state.context.globalValues?.forEach(obj => {
                         contextParams = contextParams.concat(obj)
                     });
                     urlElement.params = contextParams;
-                }*/
+                }
 
                 const nextPath = path[path.length - 1];
                 if (

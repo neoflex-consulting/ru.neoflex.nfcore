@@ -18,6 +18,7 @@ import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {actionType, eventType, positionEnum} from "./utils/consts";
+import {getUrlParam} from "./utils/urlUtils";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -268,24 +269,26 @@ class Select_ extends ViewContainer {
 
     constructor(props: any) {
         super(props);
+        let value;
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            const params = this.props.pathFull[this.props.pathFull.length - 1].params;
-            if (params !== undefined && params.length !== 0) {
-                params.forEach((f: any) => {
-                    if (f.parameterName === this.props.viewObject.get('name')) {
-                        this.urlCurrentValue = f.parameterValue
-                    }
-                })
-            }
+            this.urlCurrentValue = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.props.viewObject.get('name'));
         }
+        value = this.urlCurrentValue ? this.urlCurrentValue : this.props.viewObject.get('value') || "";
+
         this.state = {
             selectData: [],
             params: [],
-            currentValue: this.props.viewObject.get('value') || "",
+            currentValue: undefined,
             datasetComponent: undefined,
             isHidden: false,
             isDisabled: this.props.viewObject.get('disabled'),
         };
+        if (this.props.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.props.viewObject.get('name'),{
+                parameterName: this.props.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
     }
 
     private getDocxData(): docxExportObject {
@@ -314,13 +317,18 @@ class Select_ extends ViewContainer {
             this.selected = temp.join(",");
             currentValue = currentValue.join(",");
         }
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id, {
+        let contextItemValues = this.props.context.contextItemValues;
+        let globalValues = this.props.context.globalValues;
+        const parameterObj = {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
-        });
+        };
+        contextItemValues.set(this.props.viewObject._id, parameterObj);
+        if (this.props.viewObject.get('isGlobal')) {
+            globalValues.set(this.props.viewObject.get('name'), parameterObj)
+        }
         this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues},
+            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
                     itemName:this.props.viewObject.get('name'),
@@ -342,7 +350,7 @@ class Select_ extends ViewContainer {
                                 value: el[this.props.viewObject.get('valueColumn')]
                             }
                         }),
-                        currentValue: this.props.viewObject.get('value') ? this.props.viewObject.get('value') : (this.urlCurrentValue ? this.urlCurrentValue : "")
+                        currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.props.viewObject.get('value') ? this.props.viewObject.get('value') : "")
                     },()=> this.props.context.contextItemValues.set(this.props.viewObject._id, {
                         parameterName: this.props.viewObject.get('name'),
                         parameterValue: this.state.currentValue
@@ -391,9 +399,20 @@ class Select_ extends ViewContainer {
                         value: el[this.props.viewObject.get('valueColumn')]
                     }
                 });
+                let currentValue: string;
+                if (this.urlCurrentValue) {
+                    currentValue = this.urlCurrentValue;
+                    //Чтобы не восстанавливать значение при смене параметров
+                    this.urlCurrentValue = "";
+                } else {
+                    currentValue = this.state.currentValue
+                }
+                const isContainsValue = resArr.find((obj:any) => {
+                    return obj.key === currentValue
+                });
                 this.setState({
                     params: newParams,
-                    currentValue: this.urlCurrentValue ? this.urlCurrentValue : "",
+                    currentValue: isContainsValue ? currentValue : "",
                     selectData: resArr
                 });
                 this.props.context.contextItemValues.set(this.props.viewObject._id, {
@@ -419,7 +438,7 @@ class Select_ extends ViewContainer {
         }
         this.setState({
             selectData:staticValues,
-            currentValue: this.state.currentValue ? this.state.currentValue : (this.urlCurrentValue ? this.urlCurrentValue : "")
+            currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.props.viewObject.get('value') ? this.props.viewObject.get('value') : "")
         },()=> this.props.context.contextItemValues.set(this.props.viewObject._id, {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: this.state.currentValue
@@ -470,23 +489,25 @@ class Select_ extends ViewContainer {
 class DatePicker_ extends ViewContainer {
     constructor(props: any) {
         super(props);
-        let monent;
+        let value;
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            const params = this.props.pathFull[this.props.pathFull.length - 1].params;
-            if (params !== undefined && params.length !== 0) {
-                params.forEach((f: any) => {
-                    if (f.parameterName === this.props.viewObject.get('name')) {
-                        monent = moment(f.parameterValue, this.props.viewObject.get('format') || "YYYY-MM-DD")
-                    }
-                })
-            }
+            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.props.viewObject.get('name'));
         }
+        value = value ? value : this.props.viewObject.get('value');
+
         this.state = {
-            pickedDate: monent ? monent : moment(),
+            pickedDate: value ? moment(value, this.props.viewObject.get('format') || "YYYY-MM-DD") : moment(),
+            currentValue: value,
             format: this.props.viewObject.get('format') || "YYYY-MM-DD",
             isHidden: false,
             isDisabled: this.props.viewObject.get('disabled') || false
         };
+        if (this.props.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.props.viewObject.get('name'),{
+                parameterName: this.props.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
     }
 
     private getDocxData(): docxExportObject {
@@ -530,19 +551,26 @@ class DatePicker_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id, {
+        let contextItemValues = this.props.context.contextItemValues;
+        let globalValues = this.props.context.globalValues;
+        const parameterObj = {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue,
             parameterDataType: "Date",
             parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
-        });
-        this.props.context.updateContext!({contextItemValues: contextItemValues},
-            ()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemName:this.props.viewObject.get('name'),
-            value:currentValue
-        }));
+        };
+        contextItemValues.set(this.props.viewObject._id, parameterObj);
+        if (this.props.viewObject.get('isGlobal')) {
+            globalValues.set(this.props.viewObject.get('name'), parameterObj)
+        }
+        this.setState({currentValue:currentValue},()=>
+            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
+                ()=>this.props.context.notifyAllEventHandlers({
+                    type:eventType.change,
+                    itemName:this.props.viewObject.get('name'),
+                    value:currentValue
+                }))
+        );
     };
 
     render = () => {
@@ -551,6 +579,7 @@ class DatePicker_ extends ViewContainer {
                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
+                    value={moment(this.state.currentValue, this.props.viewObject.get('format') || "YYYY-MM-DD")}
                     disabled={this.state.isDisabled}
                     allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
@@ -685,19 +714,35 @@ class GroovyCommand_ extends ViewContainer {
 class ValueHolder_ extends ViewContainer {
     constructor(props: any) {
         super(props);
+        let value;
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.props.viewObject.get('name'));
+        }
+        value = value ? value : this.props.viewObject.get('value') || "";
         this.state = {
-            currentValue: this.props.viewObject.get('value')
+            currentValue: value
         };
+        if (this.props.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.props.viewObject.get('name'),{
+                parameterName: this.props.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
     }
 
     onChange = (currentValue?: string) => {
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id, {
+        let contextItemValues = this.props.context.contextItemValues;
+        let globalValues = this.props.context.globalValues;
+        const parameterObj = {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
-        });
+        };
+        contextItemValues.set(this.props.viewObject._id, parameterObj);
+        if (this.props.viewObject.get('isGlobal')) {
+            globalValues.set(this.props.viewObject.get('name'), parameterObj)
+        }
         this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues},
+            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
                     itemName:this.props.viewObject.get('name'),
@@ -757,11 +802,22 @@ class ValueHolder_ extends ViewContainer {
 class Input_ extends ViewContainer {
     constructor(props: any) {
         super(props);
+        let value;
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.props.viewObject.get('name'));
+        }
+        value = value ? value : this.props.viewObject.get('value') || "";
         this.state = {
             isHidden: false,
             isDisabled: false,
-            currentValue: this.props.viewObject.get('value') || ""
+            currentValue: value
         };
+        if (this.props.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.props.viewObject.get('name'),{
+                parameterName: this.props.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
     }
 
     componentDidMount(): void {
@@ -787,13 +843,18 @@ class Input_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.props.viewObject._id, {
+        let contextItemValues = this.props.context.contextItemValues;
+        let globalValues = this.props.context.globalValues;
+        const parameterObj = {
             parameterName: this.props.viewObject.get('name'),
             parameterValue: (currentValue === undefined) ? null : currentValue
-        });
+        };
+        contextItemValues.set(this.props.viewObject._id, parameterObj);
+        if (this.props.viewObject.get('isGlobal')) {
+            globalValues.set(this.props.viewObject.get('name'), parameterObj)
+        }
         this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues},
+            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
                     itemName:this.props.viewObject.get('name'),

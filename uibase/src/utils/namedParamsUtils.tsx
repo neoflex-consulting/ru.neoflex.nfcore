@@ -1,5 +1,6 @@
 import {IServerNamedParam} from "../MainContext";
 import {EObject} from "ecore";
+import {getUrlParam} from "./urlUtils";
 
 function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) {
     const params = namedParams.sort((a, b) => {
@@ -37,22 +38,11 @@ function getNamedParams(valueItems: any, contextItemValues: any, params: any[] =
     namedParams = namedParams.map(param => {
         return {
             ...param,
-            parameterValue: param.parameterValue ? param.parameterValue : checkUrlParam(params, param.parameterName)
+            parameterValue: param.parameterValue ? param.parameterValue : getUrlParam(params, param.parameterName)
         }
     });
     return namedParams
 }
 
-function checkUrlParam(params: any[], parameterName: string) {
-    let param = undefined;
-    if (params) {
-        param = params.find(p => {
-            if (p.parameterName === parameterName) {
-                return p
-            }
-        });
-        return param ? param.parameterValue : undefined
-    }
-}
 
 export {replaceNamedParam, getNamedParams}

@@ -74,6 +74,7 @@ export interface IMainContext {
     getExcelHandlers?: ()=>any[];
     getEventActions?: ()=>IEventAction[];
     contextItemValues?: Map<String, any>;
+    globalValues?: Map<String, any>;
     addEventHandler?: (eventHandler: IEventHandler)=>void;
     removeEventHandler?: (name: string)=>void;
     notifyAllEventHandlers?: (event: IEvent)=>void;
