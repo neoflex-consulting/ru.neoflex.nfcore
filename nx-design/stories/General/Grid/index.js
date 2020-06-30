@@ -1,129 +1,51 @@
 import React, { Component, Fragment } from 'react';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
-import Table from "./Table/NXTable";
 import showCode from "../../../utils/helpers";
+import {NXCol, NXRow} from "../../../index";
 
-export default class TablesPage extends Component {
+export default class GridPage extends Component {
     render() {
         return (
             <Fragment>
-                <h1 className="title">Таблицы</h1>
+                <h1 className="title">Сетка</h1>
 
                 <h2 className="title">Примеры:</h2>
                 <section className="example">
-                    <div>
-                        <Table />
-                    </div>
+                    <NXRow gutter={16} style={{height:'350px'}}>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                        <NXCol span={2}><div style={{width:'100%', height:'100%', backgroundColor:"rgba(51, 51, 51, 0.2)"}}></div></NXCol>
+                    </NXRow>
                     <div className='showCode'>
                         <button id='table' onClick={showCode}>Show Code</button>
-                    <SyntaxHighlighter id='table' language='jsx' style={okaidia}>
-                        {`import React from "react";
-import {table, tableUp, NXIcon, NXTable, more} from 'nx-design';
+                        <SyntaxHighlighter id='table' language='jsx' style={okaidia}>
+                            {`import {NXCol, NXRow} from 'nx-design';
 
-export default class Table extends React.Component {
-    state = {
-        bordered: true,
-        loading: false,
-        size: 'small',
-        expandable: 'enable',
-        title: undefined,
-        showHeader: true,
-        scroll: undefined,
-        hasData: true,
-        tableLayout: undefined,
-        top: 'none',
-        ellipsis: false,
-        pagination: false,
-    };
-
-    render() {
-
-        const columns = [
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_1',
-            },
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_2',
-            },
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_3',
-            },
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_4',
-
-            },
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_5',
-            },
-            {
-                title: <div className='table__column_header'>
-                    <span>Название колонки</span>
-                    <div>
-                        <NXIcon sm icon={tableUp} />
-                        <NXIcon sm icon={table} />
-                    </div>
-                </div>,
-                dataIndex: 'Column_6',
-            },
-            {
-                title: <NXIcon sm margin='0' icon={more} />,
-                dataIndex: 'Column_7',
-            }
-        ];
-
-        const data = [];
-        for (let i = 1; i <= 10; i++) {
-            data.push({
-                key: i,
-                Column_1: Row${`i`}
-            });
-        }
-
-        return (
-            <>
-                    <NXTable columns={columns} dataSource={data} size="middle" {...this.state} />
-            </>
-        );
-    }
-}
-`}
-                    </SyntaxHighlighter>
+<NXRow style={{height:'350px'}}>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+    <NXCol span={2}></NXCol>
+</NXRow>`}
+                        </SyntaxHighlighter>
                     </div>
                 </section>
             </Fragment>

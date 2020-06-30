@@ -7,7 +7,7 @@ import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import "../../../utils/helpers";
 import showCode from "../../../utils/helpers";
 
-class BarsPage extends Component {
+export default class DiagramsPage extends Component {
     render() {
 
         return (
@@ -169,4 +169,3 @@ render() {
     }
 }
 
-export default BarsPage;
