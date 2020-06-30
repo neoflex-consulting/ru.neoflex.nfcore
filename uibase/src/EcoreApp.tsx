@@ -367,16 +367,10 @@ class EcoreApp extends React.Component<any, State> {
                 });
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
-                urlElement.params = params;
-                //Передача параметров из context в url
-                //TODO merge параметров при передае
-                if (!params) {
-                    let contextParams: any[] = [];
-                    this.state.context.globalValues?.forEach(obj => {
-                        contextParams = contextParams.concat(obj)
-                    });
-                    urlElement.params = contextParams;
-                }
+                urlElement.params = params ? params : [];
+                this.state.context.globalValues?.forEach(obj => {
+                    urlElement.params = urlElement.params!.concat(obj)
+                });
 
                 const nextPath = path[path.length - 1];
                 if (
