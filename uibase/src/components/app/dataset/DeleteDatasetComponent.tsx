@@ -35,7 +35,10 @@ class DeleteDatasetComponent extends React.Component<any, any> {
                     <Button title={t('cancel')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.props.handleDeleteMenuForCancel()}>
                         <FontAwesomeIcon icon={faBan} size='1x'/>
                     </Button>
+
             </div>
+
+
         )
     }
 }

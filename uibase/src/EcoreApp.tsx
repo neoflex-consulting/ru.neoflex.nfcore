@@ -378,8 +378,8 @@ class EcoreApp extends React.Component<any, State> {
 
                 const nextPath = path[path.length - 1];
                 if (
-                    nextPath.useParentReferenceTree === true &&
-                    nextPath.tree.length !== 0 &&
+                    nextPath &&
+                    nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
                     path.length !== 1
                 ) {
                     path.pop()

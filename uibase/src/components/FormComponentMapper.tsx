@@ -24,8 +24,6 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
         password: Password
     }
 
-    const splitedString = props.value ? props.value.toString().split('\n') : []
-    const lines = splitedString.length
     const InputComponent = types[props.type];
     const [isEdited, setIsEdited] = useState<boolean>(false);
 
@@ -37,7 +35,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 <InputComponent autoFocus
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
-                    autosize={{ maxRows: lines <= 15 ? lines + 1.5 : 15 }}
+                    autosize={{ maxRows: 15 }}
                     defaultValue={value}
                     onBlur={(e: any) => {
                         onChange && onChange!(e)
@@ -46,7 +44,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 :
                 <InputComponent readOnly
                     key={`textview_${ukey}${idx}`}
-                    autosize={{ maxRows: lines <= 15 ? lines + 1.5 : 15 }}
+                    autosize={{ maxRows: 15 }}
                     value={value}
                     style={{
                         whiteSpace: 'pre',

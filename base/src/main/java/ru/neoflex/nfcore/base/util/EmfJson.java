@@ -22,7 +22,6 @@ import ru.neoflex.meta.emforientdb.OrientDBResource;
 import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,13 +76,13 @@ public class EmfJson {
                 .with(attributes)
                 .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
-        if (resource instanceof OrientDBResource) {
-            OrientDBResource orientDBResource = (OrientDBResource) resource;
-            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
-                EObject eObject = it.next();
-                orientDBResource.setID(eObject, jsonResource.getID(eObject));
-            }
-        }
+//        if (resource instanceof OrientDBResource) {
+//            OrientDBResource orientDBResource = (OrientDBResource) resource;
+//            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
+//                EObject eObject = it.next();
+//                orientDBResource.setID(eObject, jsonResource.getID(eObject));
+//            }
+//        }
         resource.getContents().addAll(jsonResource.getContents());
         return resource;
     }
@@ -93,13 +92,13 @@ public class EmfJson {
         ObjectNode result = mapper.createObjectNode();
         result.put("uri", store.getRef(resource));
         JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI());
-        if (resource instanceof OrientDBResource) {
-            OrientDBResource orientDBResource = (OrientDBResource) resource;
-            for (Iterator<EObject> it = orientDBResource.getAllContents();it.hasNext();) {
-                EObject eObject = it.next();
-                jsonResource.setID(eObject, orientDBResource.getID(eObject));
-            }
-        }
+//        if (resource instanceof OrientDBResource) {
+//            OrientDBResource orientDBResource = (OrientDBResource) resource;
+//            for (Iterator<EObject> it = orientDBResource.getAllContents();it.hasNext();) {
+//                EObject eObject = it.next();
+//                jsonResource.setID(eObject, orientDBResource.getID(eObject));
+//            }
+//        }
         jsonResource.getContents().addAll(resource.getContents());
         result.withArray("contents").add(mapper.valueToTree(jsonResource.getContents().get(0)));
         return result;
