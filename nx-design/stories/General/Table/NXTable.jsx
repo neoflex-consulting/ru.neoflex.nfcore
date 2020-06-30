@@ -1,5 +1,5 @@
 import React from "react";
-import {table, tableUp, NXIcon, NXTable, more} from '../../../../index';
+import {table, tableUp, NXIcon, NXTable, more} from '../../../index';
 import './index.css'
 
 export default class Table extends React.Component {

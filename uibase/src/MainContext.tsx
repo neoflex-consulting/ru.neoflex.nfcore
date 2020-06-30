@@ -26,12 +26,12 @@ export interface IServerNamedParam {
 
 export interface IEvent {
     type: eventType,
-    itemName: string,
+    itemId: string,
     value?: string
 }
 
 export interface IEventAction {
-    name: string,
+    itemId: string,
     actions: {
         actionType: actionType,
         callback: (value:string|undefined) => void
@@ -39,7 +39,7 @@ export interface IEventAction {
 }
 
 export interface IEventHandler {
-    name: string,
+    itemId: string,
     eventType: eventType,
     callback: (value:string|undefined) => void
 }
@@ -74,6 +74,7 @@ export interface IMainContext {
     getExcelHandlers?: ()=>any[];
     getEventActions?: ()=>IEventAction[];
     contextItemValues?: Map<String, any>;
+    globalValues?: Map<String, any>;
     addEventHandler?: (eventHandler: IEventHandler)=>void;
     removeEventHandler?: (name: string)=>void;
     notifyAllEventHandlers?: (event: IEvent)=>void;
