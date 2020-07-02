@@ -20,7 +20,7 @@ import plusIcon from "../../../icons/plusIcon.svg";
 import MasterdataForm from "./MasterdataForm";
 import {truncate} from './utils'
 import MasterdataGrid from "./MasterdataGrid";
-import {actionType, eventType} from "../../../utils/consts";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 interface Props {
     entityType: EObject,
@@ -28,7 +28,8 @@ interface Props {
     hidden?: boolean,
     disabled?: boolean,
     context?: any,
-    viewObject?: any
+    viewObject?: any,
+    grantType?: any
 }
 
 class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
@@ -48,7 +49,8 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         themes: [],
         cellStyle: {},
         isHidden: this.props.hidden,
-        isDisabled: this.props.disabled
+        isDisabled: this.props.disabled,
+        isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
     }
 
     componentDidMount(): void {

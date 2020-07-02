@@ -25,7 +25,7 @@ import printIcon from '../../../icons/printIcon.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
-import {actionType, eventType} from "../../../utils/consts";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 const myNote = 'Личная заметка';
 
@@ -82,6 +82,7 @@ class Calendar extends React.Component<any, any> {
             classAppModule: undefined,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)

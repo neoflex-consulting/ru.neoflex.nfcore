@@ -20,7 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType, eventType} from "../../../utils/consts";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -116,6 +116,7 @@ interface State {
     isHighlightsUpdated: boolean;
     isHidden: boolean;
     isDisabled: boolean;
+    isReadOnly: boolean;
 }
 
 const defaultComponentValues = {
@@ -173,6 +174,7 @@ class DatasetView extends React.Component<any, State> {
             isHighlightsUpdated: true,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
         }
     }
 

@@ -14,7 +14,7 @@ import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
-import {actionType, eventType, positionEnum} from "./utils/consts";
+import {actionType, eventType, grantType, positionEnum} from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
 
 const { TabPane } = Tabs;
@@ -68,6 +68,7 @@ class Col_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <Col span={this.props.viewObject.get('span') || 24}
                  key={this.viewObject._id}
@@ -110,6 +111,7 @@ class Form_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <Form style={{marginBottom: marginBottom}}
                   hidden={this.state.isHidden}
@@ -151,6 +153,7 @@ class TabsViewReport_ extends ViewContainer {
 
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <div hidden={this.state.isHidden}>
             <Tabs
@@ -204,6 +207,7 @@ class Row_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}`;
         const marginBottom = this.props.viewObject.get('marginBottom') === null ? '0px' : `${this.props.viewObject.get('marginBottom')}`;
         const marginTop = this.props.viewObject.get('marginTop') === null ? '0px' : `${this.props.viewObject.get('marginTop')}`;
@@ -258,6 +262,7 @@ export class Href_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         let value : string;
         const returnValueType = this.props.viewObject.get('returnValueType') || 'string';
         //this.props.data/this.props.getValue props из ag-grid
@@ -270,7 +275,7 @@ export class Href_ extends ViewContainer {
         return <a
             hidden={this.state.isHidden}
             href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
-                  onClick={this.state.isDisabled ? ()=>{} : ()=>{
+                  onClick={isReadOnly ? ()=>{} : ()=>{
                       const contextItemValues = this.props.context.contextItemValues;
                       contextItemValues.set(this.props.viewObject.eURI(), {
                           parameterName: this.props.viewObject.get('name'),
@@ -315,6 +320,7 @@ export class Button_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         const { t } = this.props as WithTranslation;
         const span = this.props.viewObject.get('span') ? `${this.props.viewObject.get('span')}px` : '0px';
         const label = t(this.props.viewObject.get('label'));
@@ -331,7 +337,7 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
-                    onClick={this.state.isDisabled ? ()=>{} : () => {
+                    onClick={isReadOnly ? ()=>{} : () => {
                                     this.props.context.notifyAllEventHandlers({
                                         type:eventType.click,
                                         itemId:this.props.viewObject.eURI(),
@@ -526,6 +532,7 @@ class Select_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
                 <div
@@ -533,7 +540,7 @@ class Select_ extends ViewContainer {
                     style={{marginBottom: marginBottom}}>
                     <Select
                         key={this.viewObject._id}
-                        disabled={this.state.isDisabled}
+                        disabled={isReadOnly}
                         showSearch={this.props.viewObject.get('showSearch')}
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
@@ -656,6 +663,7 @@ class DatePicker_ extends ViewContainer {
     };
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <div hidden={this.state.isHidden}
                  style={{marginBottom: marginBottom}}>
@@ -663,7 +671,7 @@ class DatePicker_ extends ViewContainer {
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
                     value={moment(this.state.currentValue, this.props.viewObject.get('format') || "YYYY-MM-DD")}
-                    disabled={this.state.isDisabled}
+                    disabled={isReadOnly}
                     allowClear={this.props.viewObject.get('allowClear') || false}
                     format={this.state.format}
                     style={{width: this.props.viewObject.get('width') || "200px", display: (this.state.isHidden) ? 'none' : undefined}}
@@ -725,8 +733,10 @@ class HtmlContent_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <div hidden={this.state.isHidden}
+                 aria-disabled={isReadOnly}
                  style={{marginBottom: marginBottom}}
                  className="content"
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
@@ -965,6 +975,7 @@ class Input_ extends ViewContainer {
     };
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
         if (this.props.viewObject.get('inputType') === 'InputNumber' ) {
             return(
@@ -974,7 +985,7 @@ class Input_ extends ViewContainer {
                     <InputNumber
                         hidden={this.state.isHidden}
                         style={{width: width}}
-                        disabled={this.state.isDisabled}
+                        disabled={isReadOnly}
                         min={this.props.viewObject.get('minValue') || 1}
                         max={this.props.viewObject.get('maxValue') || 99}
                         step={this.props.viewObject.get('step') || 1}
@@ -994,7 +1005,7 @@ class Input_ extends ViewContainer {
                     <Input
                         hidden={this.state.isHidden}
                         style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
-                        disabled={this.state.isDisabled}
+                        disabled={isReadOnly}
                         placeholder={this.props.viewObject.get('placeholder')}
                         defaultValue={this.props.viewObject.get('value')}
                         onChange={(currentValue: any) => {
@@ -1067,6 +1078,7 @@ class Typography_ extends ViewContainer {
     };
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         let drawObject = this.props.viewObject;
         if (this.props.viewObject.get('typographyStyle') !== null) {
             drawObject = this.props.viewObject.get('typographyStyle')
@@ -1107,7 +1119,7 @@ class Typography_ extends ViewContainer {
                     editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
                     code={drawObject.get('codeStyle')}
                     delete={drawObject.get('deleteStyle')}
-                    disabled={this.state.isDisabled}
+                    disabled={isReadOnly}
                     ellipsis={{rows: drawObject.get('ellipsisRow'), expandable: false}}
                     mark={drawObject.get('markStyle')}
                     underline={drawObject.get('underlineStyle')}
@@ -1240,6 +1252,7 @@ class Drawer_ extends ViewContainer {
     }
 
     render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
         return (
             <Drawer
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
@@ -1288,10 +1301,12 @@ class DatasetView_ extends ViewContainer {
     render = () => {
         const hidden = this.props.viewObject.get('hidden') || false;
         const disabled = this.props.viewObject.get('disabled') || false;
+        const grantType = this.viewObject.get('grantType');
         const props = {
             ...this.props,
             disabled: disabled,
             hidden: hidden,
+            grantType: grantType,
         };
         return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
     }
@@ -1299,12 +1314,14 @@ class DatasetView_ extends ViewContainer {
 
 class Calendar_ extends ViewContainer {
     render = () => {
-        const hidden = this.props.viewObject.get('hidden') || false;
-        const disabled = this.props.viewObject.get('disabled') || false;
+        const hidden = this.viewObject.get('hidden') || false;
+        const disabled = this.viewObject.get('disabled') || false;
+        const grantType = this.viewObject.get('grantType');
         const props = {
             ...this.props,
             disabled: disabled,
             hidden: hidden,
+            grantType: grantType,
         };
         return <Calendar {...props} key={this.viewObject._id}/>
     }
@@ -1314,10 +1331,12 @@ class MasterdataView_ extends ViewContainer {
     render = () => {
         const hidden = this.props.viewObject.get('hidden') || false;
         const disabled = this.props.viewObject.get('disabled') || false;
+        const grantType = this.viewObject.get('grantType');
         const props = {
             ...this.props,
             disabled: disabled,
             hidden: hidden,
+            grantType: grantType,
         };
         return <MasterdataEditor {...props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
     }
@@ -1358,9 +1377,9 @@ class AntdFactory implements ViewFactory {
         if (!Component) {
             Component = View
         }
-
+        const isAccessDenied = viewObject.get('grantType') === grantType.denied;
         return (
-            <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} />
+            isAccessDenied ? <div/> : <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} />
         )
 
     }

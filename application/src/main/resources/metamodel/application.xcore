@@ -70,6 +70,7 @@ abstract class ViewElement {
 	boolean checkRights
     GrantType grantType
     boolean hidden
+    boolean disabled
 }
 
 abstract class ViewContainer extends ViewElement {
