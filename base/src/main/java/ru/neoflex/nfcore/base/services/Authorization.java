@@ -99,16 +99,16 @@ public class Authorization {
         return result;
     }
 
-    public static boolean denied(int grantValue) {
-        return (grantValue&GrantType.DENIED_VALUE) != 0;
+    public GrantType getGrantType(int grantValue) {
+        if ((grantValue&GrantType.DENIED_VALUE) != 0) {
+            return GrantType.DENIED;
+        }
+        if ((grantValue&GrantType.WRITE_VALUE) != 0) {
+            return GrantType.WRITE;
+        }
+        if ((grantValue&GrantType.READ_VALUE) != 0) {
+            return GrantType.READ;
+        }
+        return GrantType.DENIED;
     }
-
-    public static boolean canWrite(int grantValue) {
-        return !denied(grantValue) && (grantValue&GrantType.WRITE_VALUE) != 0;
-    }
-
-    public static boolean canRead(int grantValue) {
-        return canWrite(grantValue) || (!denied(grantValue) && (grantValue&GrantType.READ_VALUE) != 0);
-    }
-
 }
