@@ -11,17 +11,17 @@ export default class NXFunctionalBar extends Component {
                 <div className='block'>
                     <NXInputSearch width='192px' />
                         <div className='verticalLine' />
-                    <NXIcon icon={plus} className='NXIcon fill' />
+                    <NXIcon icon={plus} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={filter} className='NXIcon fill' />
-                    <NXIcon icon={sort} className='NXIcon fill' />
+                    <NXIcon icon={filter} fill='#5E6785' />
+                    <NXIcon icon={sort} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={calculator} className='NXIcon fill' />
-                    <NXIcon icon={plusBlock} className='NXIcon fill' />
-                    <NXIcon icon={barChart} className='NXIcon fill' />
-                    <NXIcon icon={add} className='NXIcon fill' />
+                    <NXIcon icon={calculator} fill='#5E6785' />
+                    <NXIcon icon={plusBlock} fill='#5E6785' />
+                    <NXIcon icon={barChart} fill='#5E6785' />
+                    <NXIcon icon={add} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={mark} className='NXIcon fill' />
+                    <NXIcon icon={mark} fill='#5E6785' />
                         <div className='verticalLine' />
                 </div>
 
@@ -33,9 +33,9 @@ export default class NXFunctionalBar extends Component {
                         </NXOption>
                     </NXSelect>
                 <div className='verticalLine' />
-                <NXIcon icon={download} className='NXIcon fill' />
-                <NXIcon icon={print} className='NXIcon fill' />
-                <NXIcon icon={fullScreen} className='NXIcon fill' />
+                <NXIcon icon={download} fill='#5E6785' />
+                <NXIcon icon={print} fill='#5E6785' />
+                <NXIcon icon={fullScreen} fill='#5E6785' />
                 </div>
 
             </div>

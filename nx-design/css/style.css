@@ -168,15 +168,6 @@ h4 {
 
 
 /*Components*/
-.NXIcon {
-  margin: auto;
-  margin: auto 3px;
-  cursor: pointer;
-}
-
-.fill path {
-  fill: #5E6785
-}
 
 /*Hint*/
 .ant-tooltip-inner, .ant-tooltip-arrow-content {
