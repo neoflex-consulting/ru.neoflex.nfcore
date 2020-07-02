@@ -1,30 +1,30 @@
 <%
     org.eclipse.emf.ecore.EObject eObject = object
-    def getFeature = {org.eclipse.emf.ecore.EObject eObj, String name->
-        def sf = eObj.eClass().getEStructuralFeature(name)
-        if (!sf) throw new IllegalArgumentException(name)
-        return eObj.eGet(sf)
+    def getQName = {org.eclipse.emf.ecore.EObject eObj->
+        def sf = ru.neoflex.nfcore.base.services.Store.qualifiedNameDelegate.apply(eObj.eClass())
+        if (!sf) throw new IllegalArgumentException(eObj.eClass().EPackage.nsPrefix + "_" + eObj.eClass().name + "_qName")
+        return eObj.eGet(sf) as String
     }
     def getAsString = {sf, value->
         org.eclipse.emf.ecore.util.EcoreUtil.convertToString((sf as org.eclipse.emf.ecore.EAttribute).EAttributeType, value)
     }
     def getRootId = {org.eclipse.emf.ecore.EObject eObj->
-        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObject)
-        return container.eClass().EPackage.nsPrefix + "_" + container.eClass().name + "_" + getFeature(container, "name")
+        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObj)
+        return container.eClass().EPackage.nsPrefix + "_" + container.eClass().name + "_" + getQName(container)
     }
     def getFragment = {org.eclipse.emf.ecore.EObject eObj->
-        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObject)
-        if (container == eObject) {
+        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObj)
+        if (container == eObj) {
             return "/"
         }
-        return org.eclipse.emf.ecore.util.EcoreUtil.getRelativeURIFragmentPath(container, eObject)
+        return org.eclipse.emf.ecore.util.EcoreUtil.getRelativeURIFragmentPath(container, eObj)
     }
     def getId = {org.eclipse.emf.ecore.EObject eObj->
-        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObject)
-        if (container == eObject) {
+        def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObj)
+        if (container == eObj) {
             return getRootId(container)
         }
-        return org.eclipse.emf.ecore.util.EcoreUtil.getRelativeURIFragmentPath(container, eObject)
+        return org.eclipse.emf.ecore.util.EcoreUtil.getRelativeURIFragmentPath(container, eObj)
     }%>{
     id "<%= getId(eObject)%>"<%
     for (sf in eObject.eClass().EAllStructuralFeatures) {
@@ -44,7 +44,7 @@
                     if (!eReference.isContainment()) {
                         if (!sf.isMany()) {
                             def obj = eObject.eGet(sf) %>
-    refers "<%= sf.name %>", "<%= getRootId(obj) %>", "<%= getFragment(obj) %>", <%= org.eclipse.emf.ecore.util.EcoreUtil.getURI(obj) %><%
+    refers "<%= sf.name %>", "<%= getRootId(obj) %>", "<%= getFragment(obj) %>"<%
                         }
                         else {
                             for (obj in (eObject.eGet(sf) as List)) { %>
@@ -55,11 +55,11 @@
                     else {
                         if (!sf.isMany()) {
                             org.eclipse.emf.ecore.EObject obj = eObject.eGet(sf) %>
-    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
+    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
                         }
                         else {
                             for (org.eclipse.emf.ecore.EObject obj in (eObject.eGet(sf) as List)) { %>
-    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
+    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
                             }
                         }
                     }

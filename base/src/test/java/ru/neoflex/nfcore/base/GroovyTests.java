@@ -3,7 +3,6 @@ package ru.neoflex.nfcore.base;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import groovy.text.Template;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -32,9 +31,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static ru.neoflex.nfcore.templates.Utils.generateEcoreBuilder;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
@@ -148,16 +147,15 @@ public class GroovyTests {
             return emptyResource;
         });
         Assert.assertEquals(2, resource2.getContents().size());
-        String templateText = getResourceContents("ecoreBuilder.gsp");
-        Template template = new groovy.text.StreamingTemplateEngine().createTemplate(templateText);
-        Map binding = new HashMap<>();
-        binding.put("object", resource2.getContents().get(0));
-        String code = template.make(binding).toString();
+        String code = generateEcoreBuilder(resource2.getContents().get(0));
         Assert.assertNotNull(code);
         context.getStore().inTransaction(false, tx -> {
             Resource emptyResource = context.getStore().createEmptyResource();
             emptyResource.setURI(resource2.getURI());
             emptyResource.delete(null);
         });
+        EcoreBuilder builder2 = new EcoreBuilder();
+        builder2.eval(code);
+        Assert.assertEquals("My Role!", ((Role)builder2.eObjects().get(0)).getName());
     }
 }
