@@ -7,6 +7,19 @@ import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import "../../../utils/helpers";
 import showCode from "../../../utils/helpers";
+import {
+    add,
+    barChart,
+    calculator, download,
+    filter, fullScreen,
+    mark,
+    NXIcon,
+    NXInputSearch, NXOption,
+    NXSelect,
+    plus,
+    plusBlock, print,
+    sort
+} from "../../../index";
 
 class BarsPage extends Component {
   render() {
@@ -27,7 +40,6 @@ class BarsPage extends Component {
             <button id='calendar' onClick={showCode}>Show Code</button>
             <SyntaxHighlighter id='calendar' language='jsx' style={okaidia} >
                 {`import React,{Component} from "react";
-import NXInputSearch, {NXOption, NXSelect} from "../../Input/Input";
 import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton, NXInputSearch, NXOption, NXSelect} from "nx-design";
 import './index.css';
 
@@ -121,9 +133,9 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon sm icon={plus} className='NXIcon fill' />
+      <NXIcon sm icon={plus} fill='#5E6785' />
       <div className="verticalLine" />
-        <NXIcon xs icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon xs icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
         style={{
           border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
           background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
@@ -131,7 +143,7 @@ export default class NXCalendarBar extends Component {
           marginRight: '8px'
         }}
         />
-      <NXIcon xs icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+      <NXIcon xs icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
@@ -139,12 +151,13 @@ export default class NXCalendarBar extends Component {
       }}
       />
       <div className="verticalLine" />
-      <NXIcon sm icon={print} className='NXIcon fill' />
+      <NXIcon sm icon={print} fill='#5E6785' />
       </div>
         </div>
     );
   }
 }
+
 `}
             </SyntaxHighlighter>
             </div>
@@ -172,17 +185,17 @@ export default class NXFunctionalBar extends Component {
                 <div className='block'>
                     <NXInputSearch width='192px' />
                         <div className='verticalLine' />
-                    <NXIcon icon={plus} className='NXIcon fill' />
+                    <NXIcon icon={plus} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={filter} className='NXIcon fill' />
-                    <NXIcon icon={sort} className='NXIcon fill' />
+                    <NXIcon icon={filter} sm fill='#5E6785' />
+                    <NXIcon icon={sort} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={calculator} className='NXIcon fill' />
-                    <NXIcon icon={plusBlock} className='NXIcon fill' />
-                    <NXIcon icon={barChart} className='NXIcon fill' />
-                    <NXIcon icon={add} className='NXIcon fill' />
+                    <NXIcon icon={calculator} sm fill='#5E6785' />
+                    <NXIcon icon={plusBlock} sm fill='#5E6785' />
+                    <NXIcon icon={barChart} sm fill='#5E6785' />
+                    <NXIcon icon={add} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={mark} className='NXIcon fill' />
+                    <NXIcon icon={mark} sm fill='#5E6785' />
                         <div className='verticalLine' />
                 </div>
 
@@ -194,15 +207,16 @@ export default class NXFunctionalBar extends Component {
                         </NXOption>
                     </NXSelect>
                 <div className='verticalLine' />
-                <NXIcon icon={download} className='NXIcon fill' />
-                <NXIcon icon={print} className='NXIcon fill' />
-                <NXIcon icon={fullScreen} className='NXIcon fill' />
+                <NXIcon icon={download} sm fill='#5E6785' />
+                <NXIcon icon={print} sm fill='#5E6785' />
+                <NXIcon icon={fullScreen} sm fill='#5E6785' />
                 </div>
 
             </div>
         );
     }
 }
+
 `}
               </SyntaxHighlighter>
               </div>
