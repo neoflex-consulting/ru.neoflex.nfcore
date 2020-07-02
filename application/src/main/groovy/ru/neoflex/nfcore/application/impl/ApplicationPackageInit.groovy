@@ -13,8 +13,8 @@ class ApplicationPackageInit {
         if (viewElement == null) return
         viewElement.grantType = GrantType.WRITE
         if (viewElement.checkRights) {
-            def grant = Context.current.authorization.isEObjectPermitted(viewElement)
-            viewElement.grantType = !Authorization.getGrantType(grant)
+            int grant = Context.current.authorization.isEObjectPermitted(viewElement)
+            viewElement.grantType = Authorization.getGrantType(grant)
         }
         if (viewElement instanceof ViewContainer) viewElement.children.each {c->processViewElement(c)}
     }
@@ -23,8 +23,8 @@ class ApplicationPackageInit {
         if (treeNode == null) return
         treeNode.grantType = GrantType.WRITE
         if (treeNode.checkRights) {
-            def grant = Context.current.authorization.isEObjectPermitted(treeNode)
-            treeNode.grantType = !Authorization.getGrantType(grant)
+            int grant = Context.current.authorization.isEObjectPermitted(treeNode)
+            treeNode.grantType = Authorization.getGrantType(grant)
         }
         if (treeNode instanceof CatalogNode) treeNode.children.each {c->processTreeNode(c)}
         else if (treeNode instanceof ViewNode) processViewElement(treeNode.view)
@@ -42,8 +42,8 @@ class ApplicationPackageInit {
                 else if (eObject instanceof Application) {
                     eObject.grantType = GrantType.WRITE
                     if (eObject.checkRights) {
-                        def grant = Context.current.authorization.isEObjectPermitted(eObject)
-                        eObject.grantType = !Authorization.getGrantType(grant)
+                        int grant = Context.current.authorization.isEObjectPermitted(eObject)
+                        eObject.grantType = Authorization.getGrantType(grant)
                     }
                 }
             }

@@ -84,7 +84,7 @@ public class Authorization {
     }
 
     public int isEObjectPermitted(EObject eObject) {
-        Integer result = 0;
+        int result = 0;
         for (Role role: getUserRoles()) {
             result |= role.isEObjectPermitted(eObject);
         }
@@ -92,14 +92,14 @@ public class Authorization {
     }
 
     public int isResourcePermitted(final String path) {
-        Integer result = 0;
+        int result = 0;
         for (Role role: getUserRoles()) {
             result |= role.isResourcePermitted(path);
         }
         return result;
     }
 
-    public GrantType getGrantType(int grantValue) {
+    public static GrantType getGrantType(int grantValue) {
         if ((grantValue&GrantType.DENIED_VALUE) != 0) {
             return GrantType.DENIED;
         }
