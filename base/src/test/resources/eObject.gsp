@@ -44,7 +44,7 @@
                     if (!eReference.isContainment()) {
                         if (!sf.isMany()) {
                             def obj = eObject.eGet(sf) %>
-    refers "<%= sf.name %>", "<%= getRootId(obj) %>", "<%= getFragment(obj) %>"<%
+    refers "<%= sf.name %>", "<%= getRootId(obj) %>", "<%= getFragment(obj) %>", <%= org.eclipse.emf.ecore.util.EcoreUtil.getURI(obj) %><%
                         }
                         else {
                             for (obj in (eObject.eGet(sf) as List)) { %>

@@ -353,8 +353,9 @@ public class Session implements Closeable {
                     if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
                         URI crURI = EcoreUtil.getURI(crossReferencedEObject);
                         List<ORID> orids = factory.getORIDs(crURI).collect(Collectors.toList());
-                        crVertex = orids.size() > 0 && orids.get(0) != null ?
-                                db.load(orids.get(0)) : createProxyOElement(crURI);
+                        int oridIndex = crossReferencedRoot.eResource().getContents().indexOf(crossReferencedRoot);
+                        crVertex = oridIndex >= 0 && orids.size() > oridIndex && orids.get(oridIndex) != null ?
+                                db.load(orids.get(oridIndex)) : createProxyOElement(crURI);
                     } else { // internal reference
                         crVertex = oElement;
                     }
