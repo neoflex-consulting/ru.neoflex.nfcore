@@ -26,6 +26,7 @@ interface State {
     colorIndex?: any;
     color?: any;
     currentIndex?: number;
+    solidPicker?: boolean;
 }
 
 export class DrawerParameterComponent<T extends Props, V extends State> extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {

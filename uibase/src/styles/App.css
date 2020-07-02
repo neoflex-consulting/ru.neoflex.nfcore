@@ -276,3 +276,62 @@
 .ant-menu-submenu-title {
   color: black;
 }
+
+.circle-picker span div span div {
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Color Picker ! */
+.ant-radio-group {
+  margin-bottom: 10px !important;
+
+}
+
+.ant-radio-button-wrapper{
+  color: black !important;
+  backgroundColor: #ffffff !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+}
+
+.ant-radio-button-wrapper:hover, .ant-radio-button-wrapper-checked {
+  border-bottom: 2px solid #eebf59 !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  box-shadow: none !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+   opacity: 0 !important;
+}
+
+.ant-radio-button-wrapper:not(:first-child)::before {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  display: none !important;
+  width: 0px !important;
+  height: 100%;
+  background-color: #ffffff !important;
+  content: '';
+}
+
+.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled),
+.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+  color: black !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-bottom: 2px solid #eebf59 !important;
+
+}
+
+.sketch-picker {
+  width: 271px !important;
+  padding: 0 !important;
+  box-sizing: initial;
+  background: rgb(255, 255, 255);
+  border-radius: 4px;
+  box-shadow: none !important;
+}
