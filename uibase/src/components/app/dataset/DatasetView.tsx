@@ -639,7 +639,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
         this.props.context.addEventAction({
-            name: this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions: [
                 {actionType: actionType.execute,callback: this.refresh.bind(this)}
             ]

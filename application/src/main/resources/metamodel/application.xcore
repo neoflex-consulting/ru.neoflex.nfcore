@@ -130,6 +130,7 @@ class Form extends ViewContainer, DynamicActionElement {
 
 abstract class ValueItem {
     String value
+    boolean isGlobal
 }
 
 abstract class CommandElement {
