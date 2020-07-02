@@ -1,7 +1,6 @@
 import React,{Component} from "react";
-import NXInputSearch, {NXOption, NXSelect} from "../../Input/Input";
-import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton} from "../../../../index";
-import './index.css'
+import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton, NXInputSearch, NXOption, NXSelect} from "../../../../index";
+import './index.css';
 
 export default class NXCalendarBar extends Component {
   constructor(props) {
@@ -16,10 +15,6 @@ export default class NXCalendarBar extends Component {
       searchValue: undefined,
     }
   }
-
-  changeSearchValue = (e) => {
-    this.setState({searchValue: e})
-  };
 
   getYears() {
     const currentYear = new Date().getFullYear();
@@ -97,9 +92,9 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon sm icon={plus} className='NXIcon fill' />
+      <NXIcon sm icon={plus} fill='#5E6785' />
       <div className="verticalLine" />
-        <NXIcon xs icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon xs icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
         style={{
           border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
           background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
@@ -107,7 +102,7 @@ export default class NXCalendarBar extends Component {
           marginRight: '8px'
         }}
         />
-      <NXIcon xs icon={table} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
+      <NXIcon xs icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
@@ -115,7 +110,7 @@ export default class NXCalendarBar extends Component {
       }}
       />
       <div className="verticalLine" />
-      <NXIcon sm icon={print} className='NXIcon fill' />
+      <NXIcon sm icon={print} fill='#5E6785' />
       </div>
         </div>
     );
