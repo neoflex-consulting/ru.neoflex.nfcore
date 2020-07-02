@@ -13,9 +13,10 @@ export const NXAlert = {
   background: #FFFFFF;
   border: none;
   justify-content: center;
-
+  
   .ant-alert-message {
 
+    color: #8C8C8C;
     display: flex;
     height: 24px;
     align-items: center;
@@ -41,8 +42,18 @@ export const NXAlert = {
     padding: 16px;
     font-size: 14px;
 
+    .ant-alert-close-icon{
+    margin-right: 0px !important;
+    right: 16px;
+    top: 16px !important;
+    }
+    
+    .ant-alert-description{
+    color: #8C8C8C;
+    }
+    
     .ant-alert-message {
-
+    color: #8C8C8C;
     display: flex;
     height: 24px;
     align-items: center;
@@ -73,8 +84,18 @@ export const NXAlert = {
     padding: 16px;
     font-size: 14px;
 
+    .ant-alert-close-icon{
+    margin-right: 0px !important;
+    right: 16px;
+    top: 16px !important;
+    }
+    
+    .ant-alert-description{
+    color: #8C8C8C;
+    }
+    
     .ant-alert-message {
-
+    color: #8C8C8C;
     display: flex;
     height: 24px;
     align-items: center;
@@ -104,9 +125,19 @@ export const NXAlert = {
     border-radius: 4px;
     padding: 16px;
     font-size: 14px;
-
+    
+    .ant-alert-close-icon{
+    margin-right: 0px !important;
+    right: 16px;
+    top: 16px !important;
+    }
+    
+    .ant-alert-description{
+    color: #8C8C8C;
+    }
+    
     .ant-alert-message {
-
+    color: #8C8C8C;
     display: flex;
     height: 24px;
     align-items: center;
@@ -126,7 +157,7 @@ export const NXAlert = {
       }
 }
   `,
-  success:styled(Alert)`
+  success: styled(Alert)`
     min-height: 80px;
     width: ${(props) => (props.width ? `${props.width}` : '370px')};
     background: #FFFFFF;
@@ -136,9 +167,19 @@ export const NXAlert = {
     border-radius: 4px;
     padding: 16px;
     font-size: 14px;
+    
+    .ant-alert-close-icon{
+    margin-right: 0px !important;
+    right: 16px;
+    top: 16px !important;
+    }
+
+    .ant-alert-description{
+    color: #8C8C8C;
+    }
 
     .ant-alert-message {
-
+    color: #8C8C8C;
     display: flex;
     height: 24px;
     align-items: center;

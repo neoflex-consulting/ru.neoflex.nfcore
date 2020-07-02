@@ -27,10 +27,9 @@ class BarsPage extends Component {
             <button id='calendar' onClick={showCode}>Show Code</button>
             <SyntaxHighlighter id='calendar' language='jsx' style={okaidia} >
                 {`import React,{Component} from "react";
-import NXButton from "nx-design";
-import NXInputSearch, {NXOption, NXSelect} from "nx-design";
-import {NXIcon, legend, print, arrowLeft, plus, calendar, table} from "nx-design";
-import './index.css'
+import NXInputSearch, {NXOption, NXSelect} from "../../Input/Input";
+import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton, NXInputSearch, NXOption, NXSelect} from "nx-design";
+import './index.css';
 
 export default class NXCalendarBar extends Component {
   constructor(props) {
@@ -45,10 +44,6 @@ export default class NXCalendarBar extends Component {
       searchValue: undefined,
     }
   }
-
-  changeSearchValue = (e) => {
-    this.setState({searchValue: e})
-  };
 
   getYears() {
     const currentYear = new Date().getFullYear();
@@ -108,7 +103,7 @@ export default class NXCalendarBar extends Component {
             <div className="col col-end" >
                   <NXIcon xs margin='8px auto' rotate={100} icon={arrowLeft} />
             </div>
-                <NXIcon margin='auto' icon={legend} />
+                <NXIcon sm margin='auto' icon={legend} />
           </div>
         }
         {
@@ -126,7 +121,7 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon icon={plus} className='NXIcon fill' />
+      <NXIcon sm icon={plus} className='NXIcon fill' />
       <div className="verticalLine" />
         <NXIcon xs icon={calendar} className='NXIcon fill handleCalendarVisible' onClick={this.handleCalendarVisible}
         style={{
@@ -144,7 +139,7 @@ export default class NXCalendarBar extends Component {
       }}
       />
       <div className="verticalLine" />
-      <NXIcon icon={print} className='NXIcon fill' />
+      <NXIcon sm icon={print} className='NXIcon fill' />
       </div>
         </div>
     );
@@ -164,8 +159,8 @@ export default class NXCalendarBar extends Component {
               <div className='showCode'>
                   <button id='functionalBar' onClick={showCode}>Show Code</button>
               <SyntaxHighlighter id='functionalBar' language='jsx' style={okaidia} >
-                  {`import NXInputSearch, {NXSelect, NXOption} from "../../Input/Input";
-import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print} from '../../../../index';
+                  {`import React, {Component} from 'react';
+import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print, NXInputSearch, NXSelect, NXOption} from 'nx-design';
 import './index.css';
 
 export default class NXFunctionalBar extends Component {
@@ -207,7 +202,8 @@ export default class NXFunctionalBar extends Component {
             </div>
         );
     }
-}`}
+}
+`}
               </SyntaxHighlighter>
               </div>
 

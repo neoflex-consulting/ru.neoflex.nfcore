@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import NXInputSearch, {NXSelect, NXOption} from "../../Input/Input";
-import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print} from '../../../../index';
+import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print, NXInputSearch, NXSelect, NXOption} from '../../../../index';
 import './index.css';
 
 export default class NXFunctionalBar extends Component {

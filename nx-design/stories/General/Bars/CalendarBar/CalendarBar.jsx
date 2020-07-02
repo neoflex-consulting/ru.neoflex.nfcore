@@ -1,7 +1,6 @@
 import React,{Component} from "react";
-import NXInputSearch, {NXOption, NXSelect} from "../../Input/Input";
-import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton} from "../../../../index";
-import './index.css'
+import {NXIcon, legend, print, arrowLeft, plus, calendar, table, NXButton, NXInputSearch, NXOption, NXSelect} from "../../../../index";
+import './index.css';
 
 export default class NXCalendarBar extends Component {
   constructor(props) {
@@ -16,10 +15,6 @@ export default class NXCalendarBar extends Component {
       searchValue: undefined,
     }
   }
-
-  changeSearchValue = (e) => {
-    this.setState({searchValue: e})
-  };
 
   getYears() {
     const currentYear = new Date().getFullYear();
