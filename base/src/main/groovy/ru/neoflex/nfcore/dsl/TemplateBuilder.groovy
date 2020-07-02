@@ -1,9 +1,51 @@
 package ru.neoflex.nfcore.dsl
 
+import groovy.text.StreamingTemplateEngine
+import groovy.text.Template
+
 class TemplateBuilder {
-    Map<String, Closure> closureHashMap = new HashMap<>()
-    Writer out = new StringWriter()
-    int offset = 0
+    static test = '''import ru.neoflex.nfcore.dsl.TemplateBuilder
+
+def builder = TemplateBuilder.build {
+    mDefine "row", {
+        """\\
+        |{
+        |  <% for (col in row) {%><%=col%>, <%}%>
+        |}
+        |"""
+    }
+    mDefine "main", {
+        """\\
+        |{
+        |  <% for (row in data) {%><%= mCall "row", [row: row]%><%}%>
+        |}
+        |"""
+    }
+}
+
+def model = [data: [
+        ["a", "b", "c"],
+        ["x", "y", "z"],
+]]
+builder.mCall("main", model)
+println builder.out
+'''
+    def templateEngine = new StreamingTemplateEngine()
+    Map<String, Template> templateMap = new HashMap<>()
+    def out = new TemplateWriter()
+    static class TemplateWriter extends StringWriter {
+        String last = ""
+
+        void superWrite(String s) {
+            super.write(s);
+        }
+
+        @Override
+        void write(String str) {
+            super.write(str)
+            last = (last + str).split('''\n''').last()
+        }
+    }
 
     static TemplateBuilder build(@DelegatesTo(TemplateBuilder) Closure closure) {
         TemplateBuilder builder = new TemplateBuilder()
@@ -13,27 +55,29 @@ class TemplateBuilder {
         return builder
     }
 
-    void defineMacro(String name, @DelegatesTo(TemplateBuilder) Closure closure) {
+    void mDefine(String name, @DelegatesTo(TemplateBuilder) Closure closure) {
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.delegate = this
-        closureHashMap.put(name, closure)
+        String body = closure.call()
+        body = body.split('''\r?\n''')
+                .collect {it.replaceAll('''^[\t ]*[|]''', "")}
+                .join('''\n''')
+        Template template = templateEngine.createTemplate(body)
+        templateMap.put(name, template)
     }
 
-    void write(@DelegatesTo(TemplateBuilder) Closure closure) {
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.delegate = this
-        out << closure.call()
-    }
+    String mCall(String name, Map binding) {
+        def template = templateMap.get(name)
+        Closure closure = template.make(binding)
+        closure.mCall = {String x, Map y->mCall(x, y)}
+//        template.resolveStrategy = Closure.TO_SELF
+        def mout = new TemplateWriter()
+        closure.call(mout)
+        def text = mout.toString()
+        def prefix = out.last.replaceAll('''[^\t ]''', " ")
+        text = text.split('''\n''').join('''\n''' + prefix)
+        out.write(text)
+        return ""
 
-    void callMacro(String name, Object ...args) {
-        Closure closure = closureHashMap.get(name)
-        Object result = closure.call(*args)
-        write {result.toString()}
-    }
-
-    void callClosure(@DelegatesTo(TemplateBuilder) Closure closure, Object ...args) {
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.delegate = this
-        closure.call(*args)
     }
 }
