@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
+import ru.neoflex.nfcore.base.auth.GrantType
 
 /* Components */
 abstract class Component {
@@ -58,8 +59,7 @@ class AppModule {
 class Application extends AppModule {
     IconName iconName = "faUser"
 	boolean checkRights
-	boolean disabled
-    boolean hidden
+    GrantType grantType
 }
 
 /* Views */
@@ -68,7 +68,7 @@ abstract class ViewElement {
 	String name
 	container ViewContainer parent opposite children
 	boolean checkRights
-	boolean disabled
+    GrantType grantType
     boolean hidden
 }
 
@@ -295,8 +295,7 @@ class ButtonStyle extends Style {
 abstract class TreeNode {
     String name
 	boolean checkRights
-	boolean disabled
-    boolean hidden
+    GrantType grantType
 }
 
 class AppModuleNode extends TreeNode {

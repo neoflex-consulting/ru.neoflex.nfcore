@@ -43,7 +43,7 @@ println builder.out
         @Override
         void write(String str) {
             super.write(str)
-            last = (last + str).split('''\n''').last()
+            last = (last + str).split('''\n''', -1).last()
         }
     }
 
@@ -59,7 +59,7 @@ println builder.out
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.delegate = this
         String body = closure.call()
-        body = body.split('''\r?\n''')
+        body = body.split('''\r?\n''', -1)
                 .collect {it.replaceAll('''^[\t ]*[|]''', "")}
                 .join('''\n''')
         Template template = templateEngine.createTemplate(body)
@@ -67,17 +67,16 @@ println builder.out
     }
 
     String mCall(String name, Map binding) {
+        def prefix = out.last.replaceAll('''[^\t ]''', " ")
         def template = templateMap.get(name)
         Closure closure = template.make(binding)
         closure.mCall = {String x, Map y->mCall(x, y)}
 //        template.resolveStrategy = Closure.TO_SELF
-        def mout = new TemplateWriter()
-        closure.call(mout)
-        def text = mout.toString()
-        def prefix = out.last.replaceAll('''[^\t ]''', " ")
-        text = text.split('''\n''').join('''\n''' + prefix)
-        out.write(text)
-        return ""
+        def temp = new TemplateWriter()
+        closure.call(temp)
+        def text = temp.toString()
+        text = text.split('''\n''', -1).join('''\n''' + prefix)
+        return text
 
     }
 }
