@@ -20,10 +20,15 @@ import plusIcon from "../../../icons/plusIcon.svg";
 import MasterdataForm from "./MasterdataForm";
 import {truncate} from './utils'
 import MasterdataGrid from "./MasterdataGrid";
+import {actionType, eventType} from "../../../utils/consts";
 
 interface Props {
     entityType: EObject,
-    onSelect?: ((row: any)=>void)
+    onSelect?: ((row: any)=>void),
+    hidden?: boolean,
+    disabled?: boolean,
+    context?: any,
+    viewObject?: any
 }
 
 class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
@@ -41,14 +46,33 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         paginationPageSize: 20,
         currentTheme: 'material',
         themes: [],
-        cellStyle: {}
+        cellStyle: {},
+        isHidden: this.props.hidden,
+        isDisabled: this.props.disabled
     }
 
     componentDidMount(): void {
         // if (this.state.themes.length === 0) {
         //     this.getAllThemes()
         // }
-        this.loadData()
+        this.loadData();
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions: [
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
+        });
+    }
+
+    componentWillUnmount() {
+        this.props.context.removeEventAction()
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {
@@ -159,45 +183,47 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         const {currentRow} = this.state
         const entityType = this.props.entityType as EObject
         return (
-            <React.Fragment>
-                <div>
-                    <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
-                            onClick={this.cancel}>
-                        <FontAwesomeIcon icon={faBackward} size='lg' color="#7b7979"/>
-                    </Button>
-                    <div style={{
-                        display: 'inline-block',
-                        height: '30px',
-                        borderLeft: '1px solid rgb(217, 217, 217)',
-                        marginLeft: '10px',
-                        marginRight: '10px',
-                        marginBottom: '-10px',
-                        borderRight: '1px solid rgb(217, 217, 217)',
-                        width: '6px'
-                    }}/>
-                    <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
-                            onClick={this.save}>
-                        <FontAwesomeIcon icon={faSave} size='lg' color="#7b7979"/>
-                    </Button>
-                    {currentRow!['@rid'] &&
-                    <Button title={t('clone')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
-                            onClick={this.clone}>
-                        <FontAwesomeIcon icon={faClone} size='lg'/>
-                    </Button>}
-                    {currentRow!['@rid'] &&
-                    <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
-                            onClick={this.delete}>
-                        <FontAwesomeIcon icon={faTrash} size='lg' color="red"/>
-                    </Button>}
-                </div>
-                <MasterdataForm
-                    entityType={entityType}
-                    data={currentRow}
-                    updateData={(data: Object) => {
-                        this.setState({currentRow: update(currentRow || {}, {$merge: data})})
-                    }}
-                />
-            </React.Fragment>
+            <div hidden={this.state.isHidden}>
+                <React.Fragment>
+                    <div>
+                        <Button title={t('cancel')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                                onClick={this.cancel}>
+                            <FontAwesomeIcon icon={faBackward} size='lg' color="#7b7979"/>
+                        </Button>
+                        <div style={{
+                            display: 'inline-block',
+                            height: '30px',
+                            borderLeft: '1px solid rgb(217, 217, 217)',
+                            marginLeft: '10px',
+                            marginRight: '10px',
+                            marginBottom: '-10px',
+                            borderRight: '1px solid rgb(217, 217, 217)',
+                            width: '6px'
+                        }}/>
+                        <Button title={t('save')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                                onClick={this.save}>
+                            <FontAwesomeIcon icon={faSave} size='lg' color="#7b7979"/>
+                        </Button>
+                        {currentRow!['@rid'] &&
+                        <Button title={t('clone')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                                onClick={this.clone}>
+                            <FontAwesomeIcon icon={faClone} size='lg'/>
+                        </Button>}
+                        {currentRow!['@rid'] &&
+                        <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)', marginTop: '15px'}}
+                                onClick={this.delete}>
+                            <FontAwesomeIcon icon={faTrash} size='lg' color="red"/>
+                        </Button>}
+                    </div>
+                    <MasterdataForm
+                        entityType={entityType}
+                        data={currentRow}
+                        updateData={(data: Object) => {
+                            this.setState({currentRow: update(currentRow || {}, {$merge: data})})
+                        }}
+                    />
+                </React.Fragment>
+            </div>
         )
     }
 
@@ -221,12 +247,14 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
                         borderRight: '1px solid rgb(217, 217, 217)',
                         width: '6px'
                     }}/>
-                    <Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.create}>
+                    {this.state.isDisabled
+                        ? <div/>
+                        :<Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.create}>
                         <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon"/>
-                    </Button>
+                    </Button>}
                 </div>
                 <MasterdataGrid entityType={entityType} rowData={rowData} onSelect={row =>
-                    onSelect? onSelect(row) : this.edit(row['@rid'])
+                    onSelect? onSelect(row) : (this.state.isDisabled ? null : this.edit(row['@rid']))
                 }/>
             </React.Fragment>
         )

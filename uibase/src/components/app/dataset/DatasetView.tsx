@@ -20,7 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType} from "../../../utils/consts";
+import {actionType, eventType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -114,6 +114,8 @@ interface State {
     currentTheme: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
+    isHidden: boolean;
+    isDisabled: boolean;
 }
 
 const defaultComponentValues = {
@@ -169,6 +171,8 @@ class DatasetView extends React.Component<any, State> {
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
+            isHidden: this.props.hidden,
+            isDisabled: this.props.disabled,
         }
     }
 
@@ -641,8 +645,16 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.addEventAction({
             itemId:this.props.viewObject.eURI(),
             actions: [
-                {actionType: actionType.execute,callback: this.refresh.bind(this)}
+                {actionType: actionType.execute,callback: this.refresh.bind(this)},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -1123,7 +1135,8 @@ class DatasetView extends React.Component<any, State> {
     render() {
         const { t } = this.props;
         return (
-            <Fullscreen
+        <div hidden={this.state.isHidden}>
+        <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
@@ -1425,7 +1438,8 @@ class DatasetView extends React.Component<any, State> {
                     </Modal>
                 </div>
             </div>
-            </Fullscreen>
+        </Fullscreen>
+        </div>
         )
     }
 }

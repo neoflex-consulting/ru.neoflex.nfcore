@@ -4,12 +4,9 @@ import * as React from 'react';
 import {Button, Col, DatePicker, Drawer, Form, Input, InputNumber, Row, Select, Tabs, Typography, Collapse} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
-import DatasetPivot from './components/app/dataset/DatasetPivot';
-import DatasetDiagram from './components/app/dataset/DatasetDiagram';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
 import {API} from './modules/api';
 import {WithTranslation} from 'react-i18next';
-import DatasetGrid from "./components/app/dataset/DatasetGrid";
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
@@ -30,21 +27,51 @@ abstract class ViewContainer extends View {
     renderChildren = () => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
         let childrenView = children.map(
-            (c: Ecore.EObject) => this.viewFactory.createView(c, this.props));
+            (c: Ecore.EObject) => {
+                return this.viewFactory.createView(c, this.props)
+            }
+        );
         return <div key={this.viewObject._id.toString() + '_2'}>{childrenView}</div>
 
     };
 
     render = () => {
-        return <div key={this.viewObject._id.toString() + '_3'}>{this.renderChildren()}</div>
+        return <div key={this.viewObject._id.toString() + '_3'}>{
+            this.renderChildren()
+        }</div>
     }
 }
 
 class Col_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
+
     render = () => {
         return (
             <Col span={this.props.viewObject.get('span') || 24}
                  key={this.viewObject._id}
+                 hidden={this.state.isHidden}
                  style={{
                 borderRight: this.props.viewObject.get('borderRight') ? '1px solid #eeeff0' : 'none',
                 borderBottom: this.props.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
@@ -62,6 +89,7 @@ class Form_ extends ViewContainer {
         super(props);
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
         };
     }
 
@@ -71,19 +99,20 @@ class Form_ extends ViewContainer {
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
         });
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction()
-        this.props.context.contextItemValues.delete(this.props.viewObject.eURI());
+        this.props.context.removeEventAction();
     }
 
     render = () => {
         return (
-            <Form style={{marginBottom: marginBottom,
-                          display: (this.state.isHidden)? 'none' : undefined}}
+            <Form style={{marginBottom: marginBottom}}
+                  hidden={this.state.isHidden}
                   key={this.viewObject._id.toString() + '_4'}>
                 {this.renderChildren()}
             </Form>
@@ -92,10 +121,41 @@ class Form_ extends ViewContainer {
 }
 
 class TabsViewReport_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
+
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
         return (
-            <Tabs defaultActiveKey={children[0] ? children[0]._id : undefined} tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
+            <div hidden={this.state.isHidden}>
+            <Tabs
+                defaultActiveKey={children[0] ? children[0]._id : undefined}
+                tabPosition={this.props.viewObject.get('tabPosition') ? this.props.viewObject.get('tabPosition').toLowerCase() : 'top'}>
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('name')} key={c._id} >
@@ -104,6 +164,7 @@ class TabsViewReport_ extends ViewContainer {
                     )
                 }
             </Tabs>
+            </div>
         )
     }
 }
@@ -118,6 +179,29 @@ class ComponentElement_ extends ViewContainer {
 }
 
 class Row_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
 
     render = () => {
         const marginRight = this.props.viewObject.get('marginRight') === null ? '0px' : `${this.props.viewObject.get('marginRight')}`;
@@ -129,6 +213,7 @@ class Row_ extends ViewContainer {
         return (
             <Row
                 key={this.viewObject._id.toString() + '_7'}
+                hidden={this.state.isHidden}
                 style={{
                     textAlign: this.props.viewObject.get('textAlign') || 'left',
                     marginRight: marginRight,
@@ -147,7 +232,28 @@ class Row_ extends ViewContainer {
 }
 
 export class Href_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.props.viewObject.get('hidden'),
+            isDisabled: this.props.viewObject.get('disabled'),
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+    }
+
     componentWillUnmount(): void {
+        this.props.context.removeEventAction();
         this.props.context.contextItemValues.delete(this.props.viewObject.eURI());
     }
 
@@ -161,8 +267,10 @@ export class Href_ extends ViewContainer {
         if (returnValueType === 'string') {
             value = this.props.getValue ? this.props.getValue() : this.props.viewObject.get('label')
         }
-        return <a href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
-                  onClick={()=>{
+        return <a
+            hidden={this.state.isHidden}
+            href={this.props.viewObject.get('ref') ? this.props.viewObject.get('ref') : "#"}
+                  onClick={this.state.isDisabled ? ()=>{} : ()=>{
                       const contextItemValues = this.props.context.contextItemValues;
                       contextItemValues.set(this.props.viewObject.eURI(), {
                           parameterName: this.props.viewObject.get('name'),
@@ -182,6 +290,29 @@ export class Href_ extends ViewContainer {
 }
 
 export class Button_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.props.viewObject.get('hidden'),
+            isDisabled: this.props.viewObject.get('disabled'),
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
 
     render = () => {
         const { t } = this.props as WithTranslation;
@@ -196,13 +327,16 @@ export class Button_ extends ViewContainer {
         if (returnValueType === 'string') {
             value = this.props.getValue ? this.props.getValue() : this.props.viewObject.get('ref')
         }
-        return <div key={this.viewObject._id}>
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}} onClick={() => {
-                this.props.context.notifyAllEventHandlers({
-                    type:eventType.click,
-                    itemId:this.props.viewObject.eURI(),
-                    value:value});
-            }}>
+        return <div
+            hidden={this.state.isHidden}
+            key={this.viewObject._id}>
+            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
+                    onClick={this.state.isDisabled ? ()=>{} : () => {
+                                    this.props.context.notifyAllEventHandlers({
+                                        type:eventType.click,
+                                        itemId:this.props.viewObject.eURI(),
+                                        value:value});
+                                }}>
                 {(label)? label: t('submit')}
             </Button>
         </div>
@@ -226,7 +360,7 @@ class Select_ extends ViewContainer {
             params: [],
             currentValue: undefined,
             datasetComponent: undefined,
-            isHidden: false,
+            isHidden: this.props.viewObject.get('hidden'),
             isDisabled: this.props.viewObject.get('disabled'),
         };
         if (this.props.viewObject.get('isGlobal')) {
@@ -394,14 +528,16 @@ class Select_ extends ViewContainer {
     render = () => {
         const width = this.props.viewObject.get('width') === null ? '200px' : `${this.props.viewObject.get('width')}px`;
             return (
-                <div style={{marginBottom: marginBottom}}>
+                <div
+                    hidden={this.state.isHidden}
+                    style={{marginBottom: marginBottom}}>
                     <Select
                         key={this.viewObject._id}
                         disabled={this.state.isDisabled}
                         showSearch={this.props.viewObject.get('showSearch')}
                         placeholder={this.props.viewObject.get('placeholder')}
                         mode={this.props.viewObject.get('mode') !== null ? this.props.viewObject.get('mode').toLowerCase() : 'default'}
-                        style={{width: width, display: (this.state.isHidden)? 'none' : undefined}}
+                        style={{width: width}}
                         defaultValue={this.props.viewObject.get('value') || undefined}
                         value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
@@ -445,7 +581,7 @@ class DatePicker_ extends ViewContainer {
             pickedDate: value ? moment(value, this.props.viewObject.get('format') || "YYYY-MM-DD") : moment(),
             currentValue: value,
             format: this.props.viewObject.get('format') || "YYYY-MM-DD",
-            isHidden: false,
+            isHidden: this.props.viewObject.get('hidden') || false,
             isDisabled: this.props.viewObject.get('disabled') || false
         };
         if (this.props.viewObject.get('isGlobal')) {
@@ -521,8 +657,9 @@ class DatePicker_ extends ViewContainer {
 
     render = () => {
         return (
-            <div style={{marginBottom: marginBottom}}>
-                <DatePicker
+            <div hidden={this.state.isHidden}
+                 style={{marginBottom: marginBottom}}>
+                 <DatePicker
                     key={this.viewObject._id}
                     defaultValue={this.state.pickedDate}
                     value={moment(this.state.currentValue, this.props.viewObject.get('format') || "YYYY-MM-DD")}
@@ -549,8 +686,27 @@ class HtmlContent_ extends ViewContainer {
         });
         this.state = {
             htmlContent: replaceNamedParam(this.props.viewObject.get('htmlContent'),params),
-            params: params
+            params: params,
+            isHidden: this.props.viewObject.get('hidden') || false,
+            isDisabled: this.props.viewObject.get('disabled') || false,
         };
+    }
+
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -570,7 +726,8 @@ class HtmlContent_ extends ViewContainer {
 
     render = () => {
         return (
-            <div style={{marginBottom: marginBottom}}
+            <div hidden={this.state.isHidden}
+                 style={{marginBottom: marginBottom}}
                  className="content"
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
@@ -651,8 +808,7 @@ class GroovyCommand_ extends ViewContainer {
     };
     render = () => {
         return (
-            <div style={{marginBottom: marginBottom}}>
-            </div>
+            <div/>
         )
     }
 }
@@ -739,8 +895,7 @@ class ValueHolder_ extends ViewContainer {
 
     render = () => {
         return (
-            <div style={{marginBottom: marginBottom}}>
-            </div>
+            <div/>
         )
     }
 }
@@ -754,8 +909,8 @@ class Input_ extends ViewContainer {
         }
         value = value ? value : this.props.viewObject.get('value') || "";
         this.state = {
-            isHidden: false,
-            isDisabled: false,
+            isHidden: this.props.viewObject.get('hidden') || false,
+            isDisabled: this.props.viewObject.get('disabled') || false,
             currentValue: value
         };
         if (this.props.viewObject.get('isGlobal')) {
@@ -817,7 +972,8 @@ class Input_ extends ViewContainer {
                     key={this.viewObject._id}
                     style={{marginBottom: marginBottom}}>
                     <InputNumber
-                        style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
+                        hidden={this.state.isHidden}
+                        style={{width: width}}
                         disabled={this.state.isDisabled}
                         min={this.props.viewObject.get('minValue') || 1}
                         max={this.props.viewObject.get('maxValue') || 99}
@@ -836,6 +992,7 @@ class Input_ extends ViewContainer {
                 <div key={this.viewObject._id}
                      style={{marginBottom: marginBottom}}>
                     <Input
+                        hidden={this.state.isHidden}
                         style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={this.state.isDisabled}
                         placeholder={this.props.viewObject.get('placeholder')}
@@ -855,7 +1012,8 @@ class Typography_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
-            isHidden: false,
+            isHidden: this.props.viewObject.get('hidden') || false,
+            isDisabled: this.props.viewObject.get('disabled') || false,
             label: "",
         };
     }
@@ -868,6 +1026,8 @@ class Typography_ extends ViewContainer {
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
                 {actionType: actionType.setValue,callback: this.onChange.bind(this)},
             ]
         });
@@ -919,41 +1079,43 @@ class Typography_ extends ViewContainer {
             })
         }
         return (
-            <Paragraph
-                key={this.viewObject._id}
-                style={{
-                    marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
-                    marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
-                    fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
-                    textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
-                    height: drawObject.get('height') === null ? 'auto' : `${drawObject.get('height')}`,
-                    fontWeight: drawObject.get('fontWeight') || "inherit",
-                    textAlign: drawObject.get('textAlign') || "left",
-                    color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
-                        drawObject.get('color') : undefined,
-                    background: drawObject.get('backgroundColor') !== null && drawObject.get('gradientStyle') === null
-                        ?
-                        drawObject.get('backgroundColor')
-                        :
-                        drawObject.get('gradientStyle') !== null
-                            ? `linear-gradient(${drawObject.get('gradientStyle').get('position')}, ${gradients})`
-                            : undefined,
-                    WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
-                    WebkitTextFillColor: gradients !== "" ? "transparent" : "unset",
-                    display: (this.state.isHidden) ? 'none' : undefined
-                }}
-                copyable={drawObject.get('buttonCopyable')}
-                editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
-                code={drawObject.get('codeStyle')}
-                delete={drawObject.get('deleteStyle')}
-                disabled={drawObject.get('disabledStyle')}
-                ellipsis={{rows: drawObject.get('ellipsisRow'), expandable: false}}
-                mark={drawObject.get('markStyle')}
-                underline={drawObject.get('underlineStyle')}
-                strong={drawObject.get('strongStyle')}
-            >
-                {(this.state.label) ? this.state.label : this.props.viewObject.get('name')}
-            </Paragraph>
+            <div hidden={this.state.isHidden}>
+                <Paragraph
+                    key={this.viewObject._id}
+                    style={{
+                        marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
+                        marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
+                        fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
+                        textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
+                        height: drawObject.get('height') === null ? 'auto' : `${drawObject.get('height')}`,
+                        fontWeight: drawObject.get('fontWeight') || "inherit",
+                        textAlign: drawObject.get('textAlign') || "left",
+                        color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
+                            drawObject.get('color') : undefined,
+                        background: drawObject.get('backgroundColor') !== null && drawObject.get('gradientStyle') === null
+                            ?
+                            drawObject.get('backgroundColor')
+                            :
+                            drawObject.get('gradientStyle') !== null
+                                ? `linear-gradient(${drawObject.get('gradientStyle').get('position')}, ${gradients})`
+                                : undefined,
+                        WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
+                        WebkitTextFillColor: gradients !== "" ? "transparent" : "unset",
+                        display: (this.state.isHidden) ? 'none' : undefined
+                    }}
+                    copyable={drawObject.get('buttonCopyable')}
+                    editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
+                    code={drawObject.get('codeStyle')}
+                    delete={drawObject.get('deleteStyle')}
+                    disabled={this.state.isDisabled}
+                    ellipsis={{rows: drawObject.get('ellipsisRow'), expandable: false}}
+                    mark={drawObject.get('markStyle')}
+                    underline={drawObject.get('underlineStyle')}
+                    strong={drawObject.get('strongStyle')}
+                >
+                    {(this.state.label) ? this.state.label : this.props.viewObject.get('name')}
+                </Paragraph>
+            </div>
         )
     }
 }
@@ -962,64 +1124,68 @@ class EventHandler_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
+            isHidden: this.props.viewObject.get('hidden') || false,
+            isDisabled: this.props.viewObject.get('disabled') || false,
         };
     }
 
     handleEvent(value:any) {
-        let isHandled = false;
-        this.props.viewObject.get('eventActions').each((el: EObject)=>{
-            const eventAction : IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
-                return (el.get('triggerItem')
-                    && (action.itemId === el.get('triggerItem').eURI())
-                    || el.get('action') === actionType.showMessage
-                    || el.get('action') === actionType.redirect)
-            });
-            //ViewObject handler
-            if (eventAction) {
-                eventAction.actions.forEach((action) => {
-                    if (action.actionType === (el.get('action') || actionType.execute)
-                        && action.actionType !== actionType.showMessage
-                        && action.actionType !== actionType.redirect) {
-                        if (el.get('valueObjectKey') && value === Object(value)) {
-                            (value[el.get('valueObjectKey')])
-                                ? action.callback(value[el.get('valueObjectKey')])
-                                : this.props.context.notification("Event handler warning",
-                                `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                "warning")
-                            isHandled = true;
-                        } else if (value === Object(value) && action.actionType === actionType.setValue) {
-                            this.props.context.notification("Event handler warning",
-                                `Object Key is not specified in action=${el.get('action')} / event=${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                "warning")
-                            isHandled = true;
-                        } else {
-                            action.callback(value);
-                            isHandled = true;
-                        }
-                    }
+        if (!this.state.isDisabled) {
+            let isHandled = false;
+            this.props.viewObject.get('eventActions').each((el: EObject) => {
+                const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
+                    return (el.get('triggerItem')
+                        && (action.itemId === el.get('triggerItem').eURI())
+                        || el.get('action') === actionType.showMessage
+                        || el.get('action') === actionType.redirect)
                 });
-            }
-            //Other events
-            if (el.get('action')  === actionType.showMessage
-                && el.get('triggerItem')
-                && el.get('triggerItem').get('message')) {
-                this.props.context.notification(el.get('triggerItem').get('header'),
-                    el.get('triggerItem').get('message'),
-                    el.get('triggerItem').get('messageType')||"success")
-                isHandled = true;
-            }
-            if (el.get('action')  === actionType.redirect ) {
-                const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
-                const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
-                this.props.context.changeURL(redirectTo,true, undefined, params);
-                isHandled = true;
-            }
-            if (!isHandled) {
-                this.props.context.notification("Event handler warning",
-                    `Action ${el.get('action') || actionType.execute} is not supported for ${this.props.viewObject.get('name')}`,
-                    "warning")
-            }
-        })
+                //ViewObject handler
+                if (eventAction) {
+                    eventAction.actions.forEach((action) => {
+                        if (action.actionType === (el.get('action') || actionType.execute)
+                            && action.actionType !== actionType.showMessage
+                            && action.actionType !== actionType.redirect) {
+                            if (el.get('valueObjectKey') && value === Object(value)) {
+                                (value[el.get('valueObjectKey')])
+                                    ? action.callback(value[el.get('valueObjectKey')])
+                                    : this.props.context.notification("Event handler warning",
+                                    `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
+                                    "warning")
+                                isHandled = true;
+                            } else if (value === Object(value) && action.actionType === actionType.setValue) {
+                                this.props.context.notification("Event handler warning",
+                                    `Object Key is not specified in action=${el.get('action')} / event=${this.props.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
+                                    "warning")
+                                isHandled = true;
+                            } else {
+                                action.callback(value);
+                                isHandled = true;
+                            }
+                        }
+                    });
+                }
+                //Other events
+                if (el.get('action') === actionType.showMessage
+                    && el.get('triggerItem')
+                    && el.get('triggerItem').get('message')) {
+                    this.props.context.notification(el.get('triggerItem').get('header'),
+                        el.get('triggerItem').get('message'),
+                        el.get('triggerItem').get('messageType') || "success")
+                    isHandled = true;
+                }
+                if (el.get('action') === actionType.redirect) {
+                    const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
+                    const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
+                    this.props.context.changeURL(redirectTo, true, undefined, params);
+                    isHandled = true;
+                }
+                if (!isHandled) {
+                    this.props.context.notification("Event handler warning",
+                        `Action ${el.get('action') || actionType.execute} is not supported for ${this.props.viewObject.get('name')}`,
+                        "warning")
+                }
+            })
+        }
     }
 
     componentDidMount(): void {
@@ -1049,6 +1215,7 @@ class Drawer_ extends ViewContainer {
         super(props);
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
         };
     }
 
@@ -1058,6 +1225,8 @@ class Drawer_ extends ViewContainer {
             actions:[
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
         });
         this.props.context.notifyAllEventHandlers({
@@ -1068,12 +1237,9 @@ class Drawer_ extends ViewContainer {
 
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.props.viewObject.eURI());
     }
 
     render = () => {
-
-
         return (
             <Drawer
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
@@ -1084,7 +1250,9 @@ class Drawer_ extends ViewContainer {
                 mask={false}
                 maskClosable={false}
                 getContainer={false}
-                style={{ position: 'absolute' }}
+                style={{
+                    position: 'absolute',
+                }}
             >
                 {this.renderChildren()}
             </Drawer>
@@ -1118,38 +1286,40 @@ class Collapse_ extends ViewContainer {
 
 class DatasetView_ extends ViewContainer {
     render = () => {
-        return <DatasetView {...this.props} key={this.viewObject._id.toString() + '_5'}/>
-    }
-}
-
-class DatasetGridView_ extends ViewContainer {
-    render = () => {
-        return <DatasetGrid {...this.props} key={this.viewObject._id.toString() + '_6'}/>
-    };
-}
-
-class DatasetPivotView_ extends ViewContainer {
-    render = () => {
-        return <DatasetPivot {...this.props} key={this.viewObject._id}/>
-    }
-}
-
-class DatasetDiagramView_ extends ViewContainer {
-    render = () => {
-        return <DatasetDiagram {...this.props} key={this.viewObject._id}/>
+        const hidden = this.props.viewObject.get('hidden') || false;
+        const disabled = this.props.viewObject.get('disabled') || false;
+        const props = {
+            ...this.props,
+            disabled: disabled,
+            hidden: hidden,
+        };
+        return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
     }
 }
 
 class Calendar_ extends ViewContainer {
     render = () => {
-        return <Calendar {...this.props} key={this.viewObject._id}/>
+        const hidden = this.props.viewObject.get('hidden') || false;
+        const disabled = this.props.viewObject.get('disabled') || false;
+        const props = {
+            ...this.props,
+            disabled: disabled,
+            hidden: hidden,
+        };
+        return <Calendar {...props} key={this.viewObject._id}/>
     }
 }
 
 class MasterdataView_ extends ViewContainer {
     render = () => {
-        const hidden = this.viewObject.get('hidden') === true
-        return hidden ? <div/> : <MasterdataEditor {...this.props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
+        const hidden = this.props.viewObject.get('hidden') || false;
+        const disabled = this.props.viewObject.get('disabled') || false;
+        const props = {
+            ...this.props,
+            disabled: disabled,
+            hidden: hidden,
+        };
+        return <MasterdataEditor {...props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
     }
 }
 
@@ -1163,9 +1333,6 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
         this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetGridView', DatasetGridView_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetPivotView', DatasetPivotView_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetDiagramView', DatasetDiagramView_);
         this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
         this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
         this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
