@@ -8,21 +8,29 @@ import {API} from "../../../modules/api";
 
 interface Props {
     closeModal?: () => void;
+    closeModalGrid: () => void;
     handleDeleteMenuForCancel: () => void;
     currentDatasetComponent: any;
+    IsGrid: any;
 }
 
 class DeleteDatasetComponent extends React.Component<any, any> {
 
     onClick(): void {
-        const name = this.props.currentDatasetComponent.eContents()[0].get('name')
-        this.props.closeModal!();
+
+        if (this.props.IsGrid){
+            this.props.closeModalGrid();
+        }
+        else {
+            const name = this.props.currentDatasetComponent.eContents()[0].get('name')
+            this.props.closeModal!();
             const ref: string = `${this.props.currentDatasetComponent.get('uri')}?rev=${this.props.currentDatasetComponent.rev}`;
             API.instance().deleteResource(ref).then((response: any) => {
                 if (response.result === "ok") {
-                        this.props.context.notification(name, "deleted ", "info")
+                    this.props.context.notification(name, "deleted ", "info")
                 }
             })
+        }
     }
 
     render() {

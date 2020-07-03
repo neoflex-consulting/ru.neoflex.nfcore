@@ -1291,14 +1291,20 @@ class Collapse_ extends ViewContainer {
     }
 
 
+
        render = () => {
+
         return (
             <div>
                 <Collapse
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}
                 >
+                    <Collapse.Panel header={this.viewObject.get("name")} key={"1"}>
+                        {this.renderChildren()}
+                    </Collapse.Panel>
                 </Collapse>
+
 
             </div>
         )
