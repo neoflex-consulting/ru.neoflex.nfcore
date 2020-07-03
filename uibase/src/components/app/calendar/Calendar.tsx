@@ -25,6 +25,7 @@ import printIcon from '../../../icons/printIcon.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 const myNote = 'Личная заметка';
 
@@ -33,6 +34,8 @@ interface Props {
     paginationTotalPage: number,
     paginationPageSize: number,
     isGridReady: boolean,
+    context: any,
+    viewObject: any,
 }
 
 class Calendar extends React.Component<any, any> {
@@ -76,7 +79,10 @@ class Calendar extends React.Component<any, any> {
             myNotificationVisible: false,
             searchValue: undefined,
             deletedItem: false,
-            classAppModule: undefined
+            classAppModule: undefined,
+            isHidden: this.props.hidden,
+            isDisabled: this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
@@ -493,7 +499,24 @@ class Calendar extends React.Component<any, any> {
         this.getAllPeriodicity();
         this.getYears();
         this.setGridData(false);
-        this.getClassAppModule()
+        this.getClassAppModule();
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions: [
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
+        });
+    }
+
+    componentWillUnmount() {
+        this.props.context.removeEventAction()
     }
 
     setGridData(myNotificationVisible: boolean, newNotification?: any): void {
@@ -1062,24 +1085,25 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <MainContext.Consumer>
-                { context => (
-                    <Fullscreen
-                        enabled={this.state.fullScreenOn}
-                        onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-                    <div className="calendar">
-                        {this.state.createMenuVisible && this.renderCreateNotification()}
-                        {this.state.editMenuVisible && this.renderEditNotification()}
-                        {this.state.legendMenuVisible && this.renderLegend()}
-                        {this.renderHeader()}
-                        {this.state.calendarVisible && this.renderDays()}
-                        {this.state.calendarVisible && this.renderCells(context)}
-                        {!this.state.calendarVisible && this.renderGrid()}
-                    </div>
-                    </Fullscreen>
-                )}
-            </MainContext.Consumer>
-
+            <div hidden={this.state.isHidden}>
+                <MainContext.Consumer>
+                    { context => (
+                        <Fullscreen
+                            enabled={this.state.fullScreenOn}
+                            onChange={fullScreenOn => this.setState({ fullScreenOn })}>
+                        <div className="calendar">
+                            {this.state.createMenuVisible && this.renderCreateNotification()}
+                            {this.state.editMenuVisible && this.renderEditNotification()}
+                            {this.state.legendMenuVisible && this.renderLegend()}
+                            {this.renderHeader()}
+                            {this.state.calendarVisible && this.renderDays()}
+                            {this.state.calendarVisible && this.renderCells(context)}
+                            {!this.state.calendarVisible && this.renderGrid()}
+                        </div>
+                        </Fullscreen>
+                    )}
+                </MainContext.Consumer>
+            </div>
         );
     }
 }

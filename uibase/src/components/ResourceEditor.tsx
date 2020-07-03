@@ -746,6 +746,14 @@ class ResourceEditor extends React.Component<any, State> {
                             const opt = option.map((o: any) => o.key);
                             this.setState({ selectedRefUries: opt })
                         }}
+                        filterOption={(input, option) => {
+                            function toString(el: any): string {
+                                if (typeof el === "string") return el
+                                if (el.children) return el.children.map((c:any)=>toString(c)).join(" ")
+                                return ""
+                            }
+                            return toString(option.props).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }}
                     >
                         {
                             this.state.mainEObject.eClass &&
@@ -754,7 +762,7 @@ class ResourceEditor extends React.Component<any, State> {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject'
                                     return isEObjectType ?
-                                        <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
+                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}

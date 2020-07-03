@@ -193,15 +193,16 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
                     let columnValue;
                     let filterValue;
+                    if (h['datasetColumn'] === params.colDef.field) {
+
+
                     if (type === 'Integer' || type === 'Decimal') {
                         columnValue = Number(params.value);
                         filterValue = Number(value)
-                    }
-                    else if (type === 'Date' || type === 'Timestamp') {
+                    } else if (type === 'Date' || type === 'Timestamp') {
                         columnValue = new Date(params.value);
                         filterValue = new Date(value)
-                    }
-                    else if (type === 'String' || type === 'Boolean') {
+                    } else if (type === 'String' || type === 'Boolean') {
                         columnValue = params.value;
                         filterValue = value
                     }
@@ -258,8 +259,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 return {background: backgroundColor, color: color}
                             }
                         }
-                    }
-                    else if (params.data[columnName] === null) {
+                    } else if (params.data[columnName] === null) {
                         if (operation === 'IsEmpty' ||
                             operation === 'NotIncludeIn' ||
                             operation === 'NotEndOn' ||
@@ -267,6 +267,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             return {background: backgroundColor, color: color}
                         }
                     }
+                }
                 });
                 if (temp !== undefined) {
                     return {background: temp['backgroundColor'], color: temp['color']}

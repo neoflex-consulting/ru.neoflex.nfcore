@@ -80,12 +80,13 @@ enum actionType {
 enum eventType {
     click="click",
     change="change",
-    componentLoad="componentLoad"
+    componentLoad="componentLoad",
 }
 
-export {positionMap}
-export {positionEnum}
-export {colorScheme};
-export {diagramAnchorMap};
-export {actionType};
-export {eventType};
+enum grantType {
+    read="Read",
+    write="Write",
+    denied="Denied",
+}
+
+export {positionMap, positionEnum, colorScheme, diagramAnchorMap, actionType, eventType, grantType}

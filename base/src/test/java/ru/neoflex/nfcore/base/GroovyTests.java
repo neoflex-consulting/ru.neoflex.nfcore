@@ -121,7 +121,7 @@ public class GroovyTests {
         return new String(Files.readAllBytes(resourcePath), StandardCharsets.UTF_8);
     }
 
-    //@Test
+    @Test
     public void testDSL() throws Exception {
         EcoreBuilder builder = new EcoreBuilder();
         String myRole = getResourceContents("auth_Role_MyRole.groovy");

@@ -8,6 +8,7 @@ import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import {Tree} from 'antd'
 import FetchSpinner from "./components/FetchSpinner";
+import {grantType} from "./utils/consts";
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
 
@@ -271,7 +272,7 @@ export class MainApp extends React.Component<any, State> {
                 }
             })
         }
-        return (
+        return eObject.get('grantType') === grantType.denied ? undefined : (
             <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
         )
     };
