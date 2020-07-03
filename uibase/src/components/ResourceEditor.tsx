@@ -749,7 +749,9 @@ class ResourceEditor extends React.Component<any, State> {
                         filterOption={(input, option) => {
                             function toString(el: any): string {
                                 if (typeof el === "string") return el
-                                if (el.children) return el.children.map((c:any)=>toString(c)).join(" ")
+                                if (Array.isArray(el)) return el.map((c:any)=>toString(c)).join(" ")
+                                if (el.children) return toString(el.children)
+                                if (el.props) return toString(el.props)
                                 return ""
                             }
                             return toString(option.props).toLowerCase().indexOf(input.toLowerCase()) >= 0
