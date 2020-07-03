@@ -28,7 +28,11 @@ class EcoreBuilder {
         builders.put(builder.id, builder)
     }
 
-    List<EObject> resolve() {
+    List<EObject> eObjects() {
+        return builders.values().collect {it.eObject}
+    }
+
+    void resolve() {
         builders.values().each {builder->
             builder.extRefList.each {
                 def id =  (StringUtils.isEmpty(it.id) || it.id == "/") ? builder.id : it.id
@@ -44,7 +48,6 @@ class EcoreBuilder {
                 }
             }
         }
-        return builders.values().collect {it.eObject}
     }
 
     static EObjectBuilder build(String nsPrefix, String className, @DelegatesTo(EObjectBuilder) Closure closure) {

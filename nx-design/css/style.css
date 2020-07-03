@@ -141,21 +141,38 @@ display: inline-block;
   margin-top: 20px;
 }
 
-/*Components*/
-.NXIcon {
-  margin: auto;
-  margin: auto 3px;
-  cursor: pointer;
+
+/*nx-design*/
+h1, h2, h3, h4, h5, h6 {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+h1 {
+  font-size: 56px !important;
+  font-weight: normal !important;
+  line-height: 66px;
+}
+h2 {
+  font-size: 32px !important;
+  font-weight: normal !important;
+  line-height: 37px;
+}
+h3 {
+  font-size: 20px !important;
+  line-height: 23px;
+}
+h4 {
+  font-size: 16px !important;
+  line-height: 19px;
 }
 
-.fill path {
-  fill: #5E6785
-}
+
+
+/*Components*/
 
 /*Hint*/
 .ant-tooltip-inner, .ant-tooltip-arrow-content {
-  background-color: white !important;
-  color: black !important;
+  background-color: #2A356C !important;
+  color: #FFFFFF !important;
 }
 
 .ant-tooltip-inner {

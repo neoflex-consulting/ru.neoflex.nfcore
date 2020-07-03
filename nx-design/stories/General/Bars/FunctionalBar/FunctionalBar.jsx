@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import NXInputSearch, {NXSelect, NXOption} from "../../Input/Input";
-import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print} from '../../../../index';
+import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print, NXInputSearch, NXSelect, NXOption} from '../../../../index';
 import './index.css';
 
 export default class NXFunctionalBar extends Component {
@@ -12,17 +11,17 @@ export default class NXFunctionalBar extends Component {
                 <div className='block'>
                     <NXInputSearch width='192px' />
                         <div className='verticalLine' />
-                    <NXIcon icon={plus} className='NXIcon fill' />
+                    <NXIcon icon={plus} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={filter} className='NXIcon fill' />
-                    <NXIcon icon={sort} className='NXIcon fill' />
+                    <NXIcon icon={filter} sm fill='#5E6785' />
+                    <NXIcon icon={sort} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={calculator} className='NXIcon fill' />
-                    <NXIcon icon={plusBlock} className='NXIcon fill' />
-                    <NXIcon icon={barChart} className='NXIcon fill' />
-                    <NXIcon icon={add} className='NXIcon fill' />
+                    <NXIcon icon={calculator} sm fill='#5E6785' />
+                    <NXIcon icon={plusBlock} sm fill='#5E6785' />
+                    <NXIcon icon={barChart} sm fill='#5E6785' />
+                    <NXIcon icon={add} sm fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={mark} className='NXIcon fill' />
+                    <NXIcon icon={mark} sm fill='#5E6785' />
                         <div className='verticalLine' />
                 </div>
 
@@ -34,9 +33,9 @@ export default class NXFunctionalBar extends Component {
                         </NXOption>
                     </NXSelect>
                 <div className='verticalLine' />
-                <NXIcon icon={download} className='NXIcon fill' />
-                <NXIcon icon={print} className='NXIcon fill' />
-                <NXIcon icon={fullScreen} className='NXIcon fill' />
+                <NXIcon icon={download} sm fill='#5E6785' />
+                <NXIcon icon={print} sm fill='#5E6785' />
+                <NXIcon icon={fullScreen} sm fill='#5E6785' />
                 </div>
 
             </div>

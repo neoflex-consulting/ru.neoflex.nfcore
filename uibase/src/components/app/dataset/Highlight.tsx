@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch, Input, Modal} from 'antd';
+import {Button, Row, Col, Form, Select, Switch, Input, Modal, Radio} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPalette, faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -10,7 +10,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {SliderPicker} from "react-color";
+import {CirclePicker, SketchPicker} from "react-color";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -42,6 +42,32 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
+    const circlePicker = () => {
+        return <CirclePicker
+            circleSize={24}
+            circleSpacing={3}
+            width='100%'
+            onChange={(e: any) => value.changeColor(e)}
+            color={ value.stateColor !== undefined ? value.stateColor['hex'] :
+                value.color !== undefined ? value.color : 'white' }
+            colors={['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3','#ffffff',
+                '#8b1a10', '#eb3223', '#f29d38', '#fffd54', '#75f94c', '#73fbfd', '#5687e1', '#0023f5', '#8b2ef5', '#ea3ff7',
+                '#dfbab1', '#eecdcd', '#f8e5d0', '#fdf2d0', '#dce9d5', '#d3e0e3', '#ccdaf5', '#d2e2f1', '#d8d3e7', '#e6d2dc',
+                '#d18270', '#df9d9b', '#f2cca2', '#fbe5a3', '#bdd5ac', '#a8c3c8', '#a9c2f0', '#a6c5e5', '#b2a8d3', '#cea8bc',
+                '#bd4b31', '#d16d6a', '#ecb476', '#f9d978', '#9dc284', '#80a4ae', '#769ee5', '#7ba8d7', '#8b7ebe', '#b87f9e',
+                '#992a15', '#bc261a', '#db944b', '#eac251', '#78a55a', '#53808c', '#4979d1', '#4e85c1', '#6252a2', '#9b5377',
+                '#7b2817', '#8c1a11', '#a96324', '#b89130', '#48742c', '#254e5a', '#2358c5', '#22538f', '#312170', '#6b2346',
+                '#531607', '#5d0e07', '#714116', '#7b601d', '#314c1c', '#18333c', '#254683', '#153760', '#1d154a', '#46162f']}
+        />
+    }
+    const sketchPicker = () => {
+        return <SketchPicker
+            disableAlpha={true}
+            onChange={(e: any) => value.changeColor(e)}
+            color={ value.stateColor !== undefined ? value.stateColor['hex'] :
+                value.color !== undefined ? value.color : 'white' }
+        />
+    }
     return <div className="SortableItemHighlight">
         <Row gutter={[8, 0]}>
             <Col span={1}>
@@ -253,7 +279,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 />
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
-                    width={'500px'}
+                    width={'320px'}
                     title={'Выбор цвета фона'}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('background', value.index)}
@@ -266,11 +292,21 @@ const SortableItem = SortableElement(({value}: any) => {
                             value: value.stateColor !== undefined ? value.stateColor['hex'] : value.backgroundColor
                         }))
                     }}>
-                    <SliderPicker
-                        onChange={(e: any) => value.changeColor(e)}
-                        color={value.stateColor !== undefined ? value.stateColor['hex'] :
-                            value.backgroundColor !== undefined ? value.backgroundColor : 'white'}
-                    />
+                    <Radio.Group defaultValue="solid" buttonStyle="solid">
+                        <Radio.Button
+                            style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
+                            onClick={()=>value.handleColorPicker('solid')} value="solid"
+                            checked={value.solidPicker}>Основной</Radio.Button>
+                        <Radio.Button
+                            onClick={()=>value.handleColorPicker('gradient')} value="gradient"
+                            checked={!value.solidPicker}>Расширенный</Radio.Button>
+                    </Radio.Group>
+                    {value.solidPicker && (
+                        circlePicker()
+                    )}
+                    {!value.solidPicker && (
+                        sketchPicker()
+                    )}
                 </Modal>
             </Col>
             <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
@@ -283,7 +319,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 />
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
-                    width={'500px'}
+                    width={'320px'}
                     title={'Выбор цвета текста'}
                     visible={value.textColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('text', value.index)}
@@ -295,11 +331,21 @@ const SortableItem = SortableElement(({value}: any) => {
                         value: value.stateColor !== undefined ? value.stateColor['hex'] : value.color
                     }))}
                 >
-                    <SliderPicker
-                        onChange={(e: any) => value.changeColor(e)}
-                        color={ value.stateColor !== undefined ? value.stateColor['hex'] :
-                            value.color !== undefined ? value.color : 'white' }
-                    />
+                    <Radio.Group defaultValue="solid" buttonStyle="solid">
+                    <Radio.Button
+                        style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
+                        onClick={()=>value.handleColorPicker('solid')} value="solid"
+                        checked={value.solidPicker}>Основной</Radio.Button>
+                    <Radio.Button
+                        onClick={()=>value.handleColorPicker('gradient')} value="gradient"
+                        checked={!value.solidPicker}>Расширенный</Radio.Button>
+                </Radio.Group>
+                    {value.solidPicker && (
+                        circlePicker()
+                    )}
+                    {!value.solidPicker && (
+                        sketchPicker()
+                    )}
                 </Modal>
             </Col>
         </Row>
@@ -315,11 +361,20 @@ class Highlight extends DrawerParameterComponent<Props, State> {
             backgroundColorVisible: false,
             textColorVisible: false,
             colorIndex: undefined,
-            color: undefined
+            color: undefined,
+            solidPicker: true
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
         this.getFieldDecorator = this.props.form.getFieldDecorator;
+    }
+
+    handleColorPicker = (type: string) => {
+        if (type === 'solid') {
+            this.setState({solidPicker: true})
+        } else if (type === 'gradient') {
+            this.setState({solidPicker: false})
+        }
     }
 
     handleColorMenu = (type: string, index: string) => {
@@ -450,7 +505,9 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                                     colorIndex: this.state.colorIndex,
                                     stateColor: this.state.color,
                                     changeColor: this.changeColor.bind(this),
-                                    textColorVisible: this.state.textColorVisible
+                                    textColorVisible: this.state.textColorVisible,
+                                    handleColorPicker: this.handleColorPicker.bind(this),
+                                    solidPicker: this.state.solidPicker
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

@@ -34,7 +34,7 @@ export default class AlertPage extends Component {
         <section className="example space-between">
             <div>
           <h3 className="ex-title">Error</h3>
-          <NXAlert.error message="Error" description='This is an error alert' />
+          <NXAlert.error message="Error" description='This is an error alert' closable />
 
             <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`<NXAlert.error message='Error' description='This is an error alert' />`}
@@ -49,7 +49,7 @@ export default class AlertPage extends Component {
         <section className="example space-between">
             <div>
           <h3 className="ex-title">Info</h3>
-          <NXAlert.info message="Info" description='This is an info alert' />
+          <NXAlert.info message="Info" description='This is an info alert' closable />
 
             <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`<NXAlert.info message="Info" description='This is an info alert' />`}
@@ -65,7 +65,7 @@ export default class AlertPage extends Component {
         <section className="example space-between">
             <div>
           <h3 className="ex-title">Warning</h3>
-          <NXAlert.warning message="Warning" description='This is a warning alert' />
+          <NXAlert.warning message="Warning" description='This is a warning alert' closable />
 
             <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`<NXAlert.warning message="Warning" description='This is a warning alert' />`}
@@ -81,7 +81,7 @@ export default class AlertPage extends Component {
         <section className="example space-between">
             <div>
           <h3 className="ex-title">Success</h3>
-          <NXAlert.success message="Success" description='This is a success alert' />
+          <NXAlert.success message="Success" description='This is a success alert' closable />
 
             <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`<NXAlert.success message="Success" description='This is a success alert' />`}

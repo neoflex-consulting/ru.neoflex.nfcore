@@ -25,6 +25,7 @@ import printIcon from '../../../icons/printIcon.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 const myNote = 'Личная заметка';
 
@@ -33,6 +34,8 @@ interface Props {
     paginationTotalPage: number,
     paginationPageSize: number,
     isGridReady: boolean,
+    context: any,
+    viewObject: any,
 }
 
 class Calendar extends React.Component<any, any> {
@@ -76,7 +79,10 @@ class Calendar extends React.Component<any, any> {
             myNotificationVisible: false,
             searchValue: undefined,
             deletedItem: false,
-            classAppModule: undefined
+            classAppModule: undefined,
+            isHidden: this.props.hidden,
+            isDisabled: this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
@@ -133,24 +139,26 @@ class Calendar extends React.Component<any, any> {
     };
 
     getAllNotificationInstances(currentMonth: Date, updateViewObject: boolean) {
-        const monthStart = dateFns.startOfMonth(currentMonth);
-        const monthEnd = dateFns.endOfMonth(monthStart);
-        const dateFrom = monthStart.toString();
-        const dateTo = monthEnd.toString();
-        const ref: string = this.props.viewObject.eURI();
-        const methodName: string = 'getNotificationInstances';
+        if (this.props.viewObject.get('yearBook') !== null) {
+            const monthStart = dateFns.startOfMonth(currentMonth);
+            const monthEnd = dateFns.endOfMonth(monthStart);
+            const dateFrom = monthStart.toString();
+            const dateTo = monthEnd.toString();
+            const ref: string = this.props.viewObject.eURI();
+            const methodName: string = 'getNotificationInstances';
 
-        if (updateViewObject && this.state.classAppModule !== undefined) {
-            API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
-                .then((result) => {
-                    this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
-                })
+            if (updateViewObject && this.state.classAppModule !== undefined) {
+                API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
+                    .then((result) => {
+                        this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
+                    })
+            }
+
+            API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
+                let notificationInstancesDTO = JSON.parse(result).resources;
+                this.setState({notificationInstancesDTO, spinnerVisible: false});
+            });
         }
-
-        API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
-            let notificationInstancesDTO = JSON.parse(result).resources;
-            this.setState({notificationInstancesDTO, spinnerVisible: false});
-        });
     };
 
     getAllStatuses() {
@@ -423,13 +431,9 @@ class Calendar extends React.Component<any, any> {
     };
 
     openNotification(notification: any, context: any): void  {
-        //TODO вынести в серверный код, добавить в модель сброс даты на начало месяца
-        const notificationFullDate = new Date(notification.contents[0]['notificationDateOn']);
-        const notificationDateOn = new Date(notificationFullDate.getFullYear(), notificationFullDate.getMonth(), 2).toISOString().slice(0, 10)
-
         let params: Object[] = [{
             parameterName: 'reportDate',
-            parameterValue: notificationDateOn,
+            parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date",
             parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
         }];
@@ -445,7 +449,7 @@ class Calendar extends React.Component<any, any> {
 
     private getTitle(day: any) {
         let temp: any = [];
-            this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
+        this.props.viewObject.get('yearBook') !== null && this.props.viewObject.get('yearBook').get('days').array().filter((r: any) =>
                 dateFns.isSameYear(day, dateFns.parseISO(r.get('date')))
                 && dateFns.isSameMonth(day, dateFns.parseISO(r.get('date')))
                 && dateFns.isSameDay(day, dateFns.parseISO(r.get('date')))
@@ -495,7 +499,24 @@ class Calendar extends React.Component<any, any> {
         this.getAllPeriodicity();
         this.getYears();
         this.setGridData(false);
-        this.getClassAppModule()
+        this.getClassAppModule();
+        this.props.context.addEventAction({
+            itemId:this.props.viewObject.eURI(),
+            actions: [
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
+        });
+    }
+
+    componentWillUnmount() {
+        this.props.context.removeEventAction()
     }
 
     setGridData(myNotificationVisible: boolean, newNotification?: any): void {
@@ -1043,31 +1064,46 @@ class Calendar extends React.Component<any, any> {
         }
         return (
             <div>
+                {this.calendarNotifications()}
                 <div className="body">{rows}</div>
             </div>
         )
     }
 
+    calendarNotifications = () => {
+        let description = []
+        if (this.props.viewObject.get('yearBook') === null) {
+            description.push('YearBook not connected to calendar')
+        }
+        if (this.props.viewObject.get('notifications').array().length === 0) {
+            description.push(' Calendar does not contain notifications')
+        }
+        if (description.length !== 0) {
+            this.props.context.notification('Calendar', description.toString(), 'info')
+        }
+    };
+
     render() {
         return (
-            <MainContext.Consumer>
-                { context => (
-                    <Fullscreen
-                        enabled={this.state.fullScreenOn}
-                        onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-                    <div className="calendar">
-                        {this.state.createMenuVisible && this.renderCreateNotification()}
-                        {this.state.editMenuVisible && this.renderEditNotification()}
-                        {this.state.legendMenuVisible && this.renderLegend()}
-                        {this.renderHeader()}
-                        {this.state.calendarVisible && this.renderDays()}
-                        {this.state.calendarVisible && this.renderCells(context)}
-                        {!this.state.calendarVisible && this.renderGrid()}
-                    </div>
-                    </Fullscreen>
-                )}
-            </MainContext.Consumer>
-
+            <div hidden={this.state.isHidden}>
+                <MainContext.Consumer>
+                    { context => (
+                        <Fullscreen
+                            enabled={this.state.fullScreenOn}
+                            onChange={fullScreenOn => this.setState({ fullScreenOn })}>
+                        <div className="calendar">
+                            {this.state.createMenuVisible && this.renderCreateNotification()}
+                            {this.state.editMenuVisible && this.renderEditNotification()}
+                            {this.state.legendMenuVisible && this.renderLegend()}
+                            {this.renderHeader()}
+                            {this.state.calendarVisible && this.renderDays()}
+                            {this.state.calendarVisible && this.renderCells(context)}
+                            {!this.state.calendarVisible && this.renderGrid()}
+                        </div>
+                        </Fullscreen>
+                    )}
+                </MainContext.Consumer>
+            </div>
         );
     }
 }

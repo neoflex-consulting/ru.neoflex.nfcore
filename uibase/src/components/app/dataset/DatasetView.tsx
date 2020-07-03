@@ -20,7 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType} from "../../../utils/consts";
+import {actionType, eventType, grantType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -114,6 +114,9 @@ interface State {
     currentTheme: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
+    isHidden: boolean;
+    isDisabled: boolean;
+    isReadOnly: boolean;
     IsGrid: boolean;
 }
 
@@ -170,6 +173,9 @@ class DatasetView extends React.Component<any, State> {
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
+            isHidden: this.props.hidden,
+            isDisabled: this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
             IsGrid: false,
         }
     }
@@ -641,10 +647,18 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
         this.props.context.addEventAction({
-            name: this.props.viewObject.get('name'),
+            itemId:this.props.viewObject.eURI(),
             actions: [
-                {actionType: actionType.execute,callback: this.refresh.bind(this)}
+                {actionType: actionType.execute,callback: this.refresh.bind(this)},
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.props.viewObject.eURI()
         });
     }
 
@@ -1015,7 +1029,6 @@ class DatasetView extends React.Component<any, State> {
             </Button>
             <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
-                    /*onClick={()=>{this.handleDiagramChange("delete")}}*/
             >
                 <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
             </Button>
@@ -1131,7 +1144,8 @@ class DatasetView extends React.Component<any, State> {
     render() {
         const { t } = this.props;
         return (
-            <Fullscreen
+        <div hidden={this.state.isHidden}>
+        <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
@@ -1435,7 +1449,8 @@ class DatasetView extends React.Component<any, State> {
                     </Modal>
                 </div>
             </div>
-            </Fullscreen>
+        </Fullscreen>
+        </div>
         )
     }
 }

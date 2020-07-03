@@ -9,13 +9,14 @@ export default class NXCol extends Component {
     render() {
         const StyledCol = styled(Col)`
         display: flex;
-        align-items: center;
+        width: 96px;
+        height: 100%;
         justify-content: ${(props) => (props.content==='center' ? 'center'
             : props.content==='flex-start' ? 'flex-start'
                 : props.content==='flex-end' ? 'flex-end'
                     : props.content==='space-around' ? 'space-around'
                         : props.content==='space-between' ? 'space-between'
-                            : 'flex-start')};
+                            : 'center')};
         margin: ${(props) => (props.margin ? `${props.margin}` : "")};
         `
         return (

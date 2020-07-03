@@ -205,10 +205,10 @@ public class Session implements Closeable {
         getOrCreateEReferenceEdge();
         for (EClass eClass : factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
-            OProperty idProperty = oClass.getProperty("_id");
-            if (idProperty == null) {
-                oClass.createProperty("_id", OType.STRING);
-            }
+//            OProperty idProperty = oClass.getProperty("_id");
+//            if (idProperty == null) {
+//                oClass.createProperty("_id", OType.STRING);
+//            }
             EAttribute id = null;
             for (EStructuralFeature sf : eClass.getEStructuralFeatures()) {
                 if (!sf.isDerived() && !sf.isTransient()) {
@@ -293,7 +293,7 @@ public class Session implements Closeable {
     }
 
     private void populateOElementContainment(EObject eObject, OElement oElement) {
-        oElement.setProperty("_id", EcoreUtil.getURI(eObject).fragment());
+//        oElement.setProperty("_id", EcoreUtil.getURI(eObject).fragment());
         EClass eClass = eObject.eClass();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient()) {
@@ -344,16 +344,18 @@ public class Session implements Closeable {
 
             protected void add(InternalEObject internalEObject, EReference eReference, EObject crossReferencedEObject) {
                 if (!eReference.isDerived() && !eReference.isTransient() && !eReference.isContainer() && internalEObject.eIsSet(eReference)) {
-                    String fromFragment = EcoreUtil.getURI(internalEObject).fragment();
+                    String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, internalEObject);
                     String feature = eReference.getName();
-                    String toFragment = EcoreUtil.getURI(crossReferencedEObject).fragment();
+                    EObject crossReferencedRoot = EcoreUtil.getRootContainer(crossReferencedEObject);
+                    String toFragment = EcoreUtil.getRelativeURIFragmentPath(crossReferencedRoot, crossReferencedEObject);
                     int index = !eReference.isMany() ? -1 : ((EList) internalEObject.eGet(eReference)).indexOf(crossReferencedEObject);
                     OVertex crVertex = null;
                     if (!isAncestor(emfObjects, crossReferencedEObject)) { // external reference
                         URI crURI = EcoreUtil.getURI(crossReferencedEObject);
                         List<ORID> orids = factory.getORIDs(crURI).collect(Collectors.toList());
-                        crVertex = orids.size() > 0 && orids.get(0) != null ?
-                                db.load(orids.get(0)) : createProxyOElement(crURI);
+                        int oridIndex = crossReferencedRoot.eResource().getContents().indexOf(crossReferencedRoot);
+                        crVertex = oridIndex >= 0 && orids.size() > oridIndex && orids.get(oridIndex) != null ?
+                                db.load(orids.get(oridIndex)) : createProxyOElement(crURI);
                     } else { // internal reference
                         crVertex = oElement;
                     }
@@ -439,7 +441,7 @@ public class Session implements Closeable {
             } else {
                 oVertex = db.load(orids.get(i));
                 checkVersion(versions.get(i), oVertex);
-                checkDependencies(resource, oVertex);
+                checkDependencies(eObject, oVertex);
                 EObject oldObject = createEObject(rs, oVertex);
                 oldResource.getContents().add(oldObject);
                 populateEObject(rs, oVertex, oldObject);
@@ -462,18 +464,24 @@ public class Session implements Closeable {
     private static String elementLabel(OElement oElement) {
         return oElement.getSchemaType().get().getName() + "(" + oElement.getIdentity().toString() + ")";
     }
+
     private String edgeLabel(OEdge oEdge) {
         EClass eClass = (EClass) createResourceSet().getEObject(URI.createURI(oEdge.getProperty("eClass")), false);
         return elementLabel(oEdge.getFrom()) + oEdge.getProperty("fromFragment") +
                 "." + oEdge.getProperty("feature") + "->" + getOClassName(eClass) + "(" +
                 oEdge.getProperty("toFragment") + ")";
     }
-    private void checkDependencies(Resource resource, OVertex oVertex) {
+
+    private void checkDependencies(EObject eObject, OVertex oVertex) {
         Set<String> dependent = StreamSupport.stream(oVertex.getEdges(ODirection.IN).spliterator(), false)
                 .filter(oEdge -> !oEdge.getFrom().equals(oVertex))
-                .filter(oEdge -> resource.getEObject(oEdge.getProperty("toFragment")) == null ||
-                        resource.getEObject(oEdge.getProperty("toFragment")).eClass() !=
-                                resource.getResourceSet().getEObject(URI.createURI(oEdge.getProperty("eClass")), false))
+                .filter(oEdge -> {
+                    String toFragment = oEdge.getProperty("toFragment");
+                    URI classURI = URI.createURI(oEdge.getProperty("eClass"));
+                    EObject target = StringUtils.isEmpty(toFragment) ? eObject : EcoreUtil.getEObject(eObject, toFragment);
+                    return target == null || target.eClass() !=
+                            eObject.eResource().getResourceSet().getEObject(classURI, false);
+                })
                 .map(oEdge -> edgeLabel(oEdge))
                 .collect(Collectors.toSet());
         if (dependent.size() > 0) {
@@ -524,7 +532,7 @@ public class Session implements Closeable {
         for (OEdge oEdge : oEdges) {
             String fromFragment = oEdge.getProperty("fromFragment");
             String feature = oEdge.getProperty("feature");
-            EObject internalEObject = StringUtils.isEmpty(fromFragment) ? eObject : eObject.eResource().getEObject(fromFragment);
+            EObject internalEObject = StringUtils.isEmpty(fromFragment) ? eObject : EcoreUtil.getEObject(eObject, fromFragment);
             if (internalEObject == null) {
                 throw new IllegalArgumentException("Owner object not found for feature " + feature);
             }
@@ -539,7 +547,7 @@ public class Session implements Closeable {
             EObject crossReferencedEObject = null;
             if (oEdgeTo.equals(oElement)) {
                 crossReferencedEObject = StringUtils.isEmpty(toFragment) ?
-                        eObject : eObject.eResource().getEObject(toFragment);
+                        eObject : EcoreUtil.getEObject(eObject, toFragment);
             } else {
                 crossReferencedEObject = EcoreUtil.create(eClass);
                 URI crURI = null;
@@ -548,7 +556,7 @@ public class Session implements Closeable {
                     crURI = URI.createURI(uri);
                 } else {
                     crURI = factory.createResourceURI(oEdgeTo).appendFragment(
-                            StringUtils.isNotEmpty(toFragment) ? toFragment : "/");
+                            StringUtils.isNotEmpty(toFragment) ? "//" + toFragment : "/");
                 }
                 ((InternalEObject) crossReferencedEObject).eSetProxyURI(crURI);
             }
@@ -577,7 +585,7 @@ public class Session implements Closeable {
     }
 
     private void populateEObjectContains(ResourceSet rs, OElement oElement, EObject eObject) {
-        ((OrientDBResource) eObject.eResource()).setID(eObject, oElement.getProperty("_id"));
+//        ((OrientDBResource) eObject.eResource()).setID(eObject, oElement.getProperty("_id"));
         EClass eClass = eObject.eClass();
         Set<String> propertyNames = oElement.getPropertyNames();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
@@ -624,7 +632,7 @@ public class Session implements Closeable {
         }
         if (crObject.eIsProxy()) {
             if (!sf.isResolveProxies()) {
-                crObject = EcoreUtil.resolve(crObject, rs);
+                EcoreUtil.resolve(crObject, rs);
             }
         } else {
             populateEObjectContains(rs, crVertex, crObject);

@@ -33,6 +33,7 @@ import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
+import {grantType} from "./utils/consts";
 
 const backgroundColor = "#2a356c";
 
@@ -83,6 +84,7 @@ class EcoreApp extends React.Component<any, State> {
             getEventActions: ()=>{return this.eventActions},
             //По событию на странице
             contextItemValues: new Map(),
+            globalValues: new Map(),
             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
@@ -366,15 +368,10 @@ class EcoreApp extends React.Component<any, State> {
                 });
                 urlElement.appModule = appModuleName;
                 urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
-                urlElement.params = params;
-                /*Передача параметров из context в url
-                if (!params) {
-                    let contextParams: any[] = [];
-                    this.state.context.contextItemValues?.forEach(obj => {
-                        contextParams = contextParams.concat(obj)
-                    });
-                    urlElement.params = contextParams;
-                }*/
+                urlElement.params = params ? params : [];
+                this.state.context.globalValues?.forEach(obj => {
+                    urlElement.params = urlElement.params!.concat(obj)
+                });
 
                 const nextPath = path[path.length - 1];
                 if (
@@ -421,6 +418,7 @@ class EcoreApp extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((applications) => {
+                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
                         let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );

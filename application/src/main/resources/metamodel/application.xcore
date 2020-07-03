@@ -16,6 +16,7 @@ import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
+import ru.neoflex.nfcore.base.auth.GrantType
 
 /* Components */
 abstract class Component {
@@ -58,8 +59,7 @@ class AppModule {
 class Application extends AppModule {
     IconName iconName = "faUser"
 	boolean checkRights
-	boolean disabled
-    boolean hidden
+    GrantType grantType
 }
 
 /* Views */
@@ -68,8 +68,9 @@ abstract class ViewElement {
 	String name
 	container ViewContainer parent opposite children
 	boolean checkRights
-	boolean disabled
+    GrantType grantType
     boolean hidden
+    boolean disabled
 }
 
 abstract class ViewContainer extends ViewElement {
@@ -129,11 +130,9 @@ class FAIcon extends Icon {
 class Form extends ViewContainer, DynamicActionElement {
 }
 
-class FormItem extends ViewContainer {
-}
-
 abstract class ValueItem {
     String value
+    boolean isGlobal
 }
 
 abstract class CommandElement {
@@ -221,7 +220,6 @@ class GradientStyle extends Style {
 }
 
 class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElement {
-    boolean showSearch
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
@@ -244,11 +242,10 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement, DynamicActionElement {
+class Input extends ViewElement, ValueItem, DynamicActionElement {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
-    String value
     String step = "1"
     String placeholder
     String width = "200"
@@ -300,8 +297,7 @@ class ButtonStyle extends Style {
 abstract class TreeNode {
     String name
 	boolean checkRights
-	boolean disabled
-    boolean hidden
+    GrantType grantType
 }
 
 class AppModuleNode extends TreeNode {

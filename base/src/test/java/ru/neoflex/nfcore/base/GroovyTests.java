@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.base;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import groovy.text.Template;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -31,7 +32,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"dbtype=orientdb", "orientdb.dbname=modelstest"})
@@ -125,13 +128,15 @@ public class GroovyTests {
         builder.eval(myRole);
         String myAppModule = getResourceContents("auth_UserProfile_ivanov.groovy");
         builder.eval(myAppModule);
-        List<EObject> eObjects = builder.resolve();
+        List<EObject> eObjects = builder.eObjects();
         Assert.assertEquals(2, eObjects.size());
         Role role = (Role) eObjects.get(0);
         Assert.assertEquals("My Role!", role.getName());
         Resource resource = context.getStore().inTransaction(false, tx -> {
             Resource emptyResource = context.getStore().createEmptyResource();
-            emptyResource.getContents().addAll(EcoreUtil.copyAll(eObjects));
+            emptyResource.getContents().addAll(eObjects);
+            emptyResource.save(null);
+            builder.resolve();
             emptyResource.save(null);
             return emptyResource;
         });
@@ -139,9 +144,16 @@ public class GroovyTests {
             Resource emptyResource = context.getStore().createEmptyResource();
             emptyResource.setURI(resource.getURI());
             emptyResource.load(null);
+            EcoreUtil.resolveAll(emptyResource);
             return emptyResource;
         });
         Assert.assertEquals(2, resource2.getContents().size());
+        String templateText = getResourceContents("ecoreBuilder.gsp");
+        Template template = new groovy.text.StreamingTemplateEngine().createTemplate(templateText);
+        Map binding = new HashMap<>();
+        binding.put("object", resource2.getContents().get(0));
+        String code = template.make(binding).toString();
+        Assert.assertNotNull(code);
         context.getStore().inTransaction(false, tx -> {
             Resource emptyResource = context.getStore().createEmptyResource();
             emptyResource.setURI(resource2.getURI());
