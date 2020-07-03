@@ -14,6 +14,8 @@ import AlertPage from "./Feedback/Alert";
 import GridPageDoc from "./Documentation/Grid";
 import GridPage from "./General/Grid";
 import TypographyPageDoc from "./Documentation/Typography";
+import MainColorPageDoc from "./Documentation/ColorPallete/Main";
+import AccentColorPageDoc from "./Documentation/ColorPallete/Accent";
 
 /*Documentation*/
 storiesOf('Documentation|Description', module)
@@ -25,6 +27,11 @@ storiesOf('Documentation|Grid', module)
 storiesOf('Documentation|Typography', module)
     .add('Typography', () => <TypographyPageDoc />)
 
+storiesOf('Documentation|Color', module)
+    .add('Main', () => <MainColorPageDoc />)
+
+storiesOf('Documentation|Color', module)
+    .add('Accent', () => <AccentColorPageDoc />)
 /*General*/
 storiesOf('General|Buttons', module)
     .add('Buttons', () => <ButtonPage />)
