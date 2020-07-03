@@ -114,6 +114,7 @@ interface State {
     currentTheme: string;
     showUniqRow: boolean;
     isHighlightsUpdated: boolean;
+    IsGrid: boolean;
 }
 
 const defaultComponentValues = {
@@ -169,6 +170,7 @@ class DatasetView extends React.Component<any, State> {
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
             isHighlightsUpdated: true,
+            IsGrid: false,
         }
     }
 
@@ -751,7 +753,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-    handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+        handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
         let newDiagrams:IDiagram[] = [];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
@@ -1012,7 +1014,8 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
             <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDiagramChange("delete")}}
+                    onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
+                    /*onClick={()=>{this.handleDiagramChange("delete")}}*/
             >
                 <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
             </Button>
@@ -1104,6 +1107,11 @@ class DatasetView extends React.Component<any, State> {
                 }
             }
         }
+    };
+
+    handleDeleteGridMenu = () => {
+        this.handleDiagramChange("delete")
+        this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
     handleDeleteMenuForCancel = () => {
@@ -1390,7 +1398,7 @@ class DatasetView extends React.Component<any, State> {
                 <div id="delete_menuButton">
                     <Modal
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
-                        key="save_menu"
+                        key="delete_menu"
                         width={'250px'}
                         title={t('delete report')}
                         visible={this.state.deleteMenuVisible}
@@ -1400,9 +1408,11 @@ class DatasetView extends React.Component<any, State> {
                         <DeleteDatasetComponent
                             {...this.props}
                             closeModal={this.handleDeleteMenu}
+                            closeModalGrid={this.handleDeleteGridMenu}
                             handleDeleteMenuForCancel={this.handleDeleteMenuForCancel}
                             allDatasetComponent={this.state.allDatasetComponents}
                             currentDatasetComponent={this.state.currentDatasetComponent}
+                            IsGrid = {this.state.IsGrid}
 
                         />
                     </Modal>
