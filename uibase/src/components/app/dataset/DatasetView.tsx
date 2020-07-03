@@ -174,7 +174,7 @@ class DatasetView extends React.Component<any, State> {
             isHighlightsUpdated: true,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
-            isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
         }
     }
 

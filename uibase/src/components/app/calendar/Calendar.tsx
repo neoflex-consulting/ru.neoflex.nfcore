@@ -82,7 +82,7 @@ class Calendar extends React.Component<any, any> {
             classAppModule: undefined,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
-            isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
+            isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
