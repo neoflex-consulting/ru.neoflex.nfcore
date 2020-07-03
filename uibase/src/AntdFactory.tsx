@@ -24,11 +24,15 @@ const marginBottom = '20px';
 let startResource: Object;
 
 abstract class ViewContainer extends View {
-    renderChildren = () => {
+    renderChildren = (isParentDisabled:boolean = false) => {
         let children = this.viewObject.get('children') as Ecore.EObject[];
+        const props = {
+            ...this.props,
+            isParentDisabled: isParentDisabled
+        };
         let childrenView = children.map(
             (c: Ecore.EObject) => {
-                return this.viewFactory.createView(c, this.props)
+                return this.viewFactory.createView(c, props)
             }
         );
         return <div key={this.viewObject._id.toString() + '_2'}>{childrenView}</div>
@@ -68,7 +72,7 @@ class Col_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <Col span={this.viewObject.get('span') || 24}
                  key={this.viewObject._id}
@@ -79,7 +83,7 @@ class Col_ extends ViewContainer {
                 borderTop: this.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
                 borderLeft: this.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
             }}>
-                {this.renderChildren()}
+                {this.renderChildren(isReadOnly)}
             </Col>
         )
     }
@@ -111,12 +115,12 @@ class Form_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <Form style={{marginBottom: marginBottom}}
                   hidden={this.state.isHidden}
                   key={this.viewObject._id.toString() + '_4'}>
-                {this.renderChildren()}
+                {this.renderChildren(isReadOnly)}
             </Form>
         )
     }
@@ -153,7 +157,11 @@ class TabsViewReport_ extends ViewContainer {
 
     render = () => {
         let children = this.viewObject.get('children').array() as Ecore.EObject[];
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        const props = {
+            ...this.props,
+            isParentDisabled: isReadOnly
+        }
         return (
             <div hidden={this.state.isHidden}>
             <Tabs
@@ -162,7 +170,7 @@ class TabsViewReport_ extends ViewContainer {
                 {
                     children.map((c: Ecore.EObject) =>
                         <TabPane tab={c.get('name')} key={c._id} >
-                            {this.viewFactory.createView(c, this.props)}
+                            {this.viewFactory.createView(c, props)}
                         </TabPane>
                     )
                 }
@@ -207,7 +215,7 @@ class Row_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const marginRight = this.viewObject.get('marginRight') === null ? '0px' : `${this.viewObject.get('marginRight')}`;
         const marginBottom = this.viewObject.get('marginBottom') === null ? '0px' : `${this.viewObject.get('marginBottom')}`;
         const marginTop = this.viewObject.get('marginTop') === null ? '0px' : `${this.viewObject.get('marginTop')}`;
@@ -229,7 +237,7 @@ class Row_ extends ViewContainer {
                 }}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
-                {this.renderChildren()}
+                {this.renderChildren(isReadOnly)}
             </Row>
         )
     }
@@ -262,7 +270,7 @@ export class Href_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         let value : string;
         const returnValueType = this.viewObject.get('returnValueType') || 'string';
         //this.props.data/this.props.getValue props из ag-grid
@@ -320,7 +328,7 @@ export class Button_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
         const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
         const label = t(this.viewObject.get('label'));
@@ -532,7 +540,7 @@ class Select_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
             return (
                 <div
@@ -663,7 +671,7 @@ class DatePicker_ extends ViewContainer {
     };
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <div hidden={this.state.isHidden}
                  style={{marginBottom: marginBottom}}>
@@ -733,7 +741,7 @@ class HtmlContent_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <div hidden={this.state.isHidden}
                  aria-disabled={isReadOnly}
@@ -975,7 +983,7 @@ class Input_ extends ViewContainer {
     };
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
@@ -1078,7 +1086,7 @@ class Typography_ extends ViewContainer {
     };
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         let drawObject = this.viewObject;
         if (this.viewObject.get('typographyStyle') !== null) {
             drawObject = this.viewObject.get('typographyStyle')
@@ -1252,7 +1260,7 @@ class Drawer_ extends ViewContainer {
     }
 
     render = () => {
-        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled;
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <Drawer
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
@@ -1267,7 +1275,7 @@ class Drawer_ extends ViewContainer {
                     position: 'absolute',
                 }}
             >
-                {this.renderChildren()}
+                {this.renderChildren(isReadOnly)}
             </Drawer>
         )
     }

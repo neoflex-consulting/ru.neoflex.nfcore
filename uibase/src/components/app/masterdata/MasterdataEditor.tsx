@@ -27,6 +27,7 @@ interface Props {
     onSelect?: ((row: any)=>void),
     hidden?: boolean,
     disabled?: boolean,
+    isParentDisabled?: boolean,
     context?: any,
     viewObject?: any,
     grantType?: any
@@ -50,7 +51,7 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         cellStyle: {},
         isHidden: this.props.hidden,
         isDisabled: this.props.disabled,
-        isReadOnly: this.props.grantType === grantType.read || this.props.disabled,
+        isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
     }
 
     componentDidMount(): void {
