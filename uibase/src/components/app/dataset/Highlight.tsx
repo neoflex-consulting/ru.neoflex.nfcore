@@ -3,7 +3,7 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Button, Row, Col, Form, Select, Switch, Input, Modal, Radio} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPalette, faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
@@ -271,11 +271,12 @@ const SortableItem = SortableElement(({value}: any) => {
             </Col>
                 <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('background')}</div>
-                <FontAwesomeIcon
-                    color={value.backgroundColor}
+                <div
                     onClick={() => value.handleColorMenu('background', value.index)}
-                    style={{fontSize: '18px', marginLeft: '13px'}}
-                    icon={faPalette}
+                    style={{
+                    backgroundColor: value.backgroundColor, height: '18px', width: '38px',
+                    display: 'inline-block', verticalAlign: '-0.2em', marginLeft:'13px',
+                    borderRadius:'4px', border: '1px solid grey'}}
                 />
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
@@ -311,11 +312,12 @@ const SortableItem = SortableElement(({value}: any) => {
             </Col>
             <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('text')}</div>
-                <FontAwesomeIcon
-                    color={value.color}
+                <div
                     onClick={() => value.handleColorMenu('text', value.index)}
-                    style={{fontSize: '18px', marginLeft: '13px'}}
-                    icon={faPalette}
+                    style={{
+                        backgroundColor: value.color, height: '18px', width: '38px',
+                        display: 'inline-block', verticalAlign: '-0.2em', marginLeft:'13px',
+                        borderRadius:'4px', border: '1px solid grey'}}
                 />
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}

@@ -84,7 +84,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
 
     const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)
     const elements = value && value !== null ?
-        upperBound === -1 && value.length !== 0?
+        upperBound === -1 ? (value.length !== 0?
             value.map((el: { [key: string]: any }, idx: number) =>
                 <Tag
                     onClose={(e: any) => {
@@ -95,7 +95,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 >
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp; 
-                </Tag>)
+                </Tag>) : [])
             :
             <Tag
                 onClose={(e: any) => {
