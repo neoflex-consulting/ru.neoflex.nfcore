@@ -33,7 +33,7 @@ render() {
             </div>
             <div style={{height:'106px', padding:'24px 40px'}}>
                 <NXRow><h3>Выберите тип диаграммы</h3></NXRow>
-                <NXRow margin='5px 0 0 0' content='space-between'>
+                <NXRow margin='15px 0 0 0' content='space-between'>
                     <NXCol span={5}>
                         <NXButton
                         onClick={()=>{this.setState({diagramType:"Block"})}}

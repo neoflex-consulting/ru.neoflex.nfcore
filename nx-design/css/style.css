@@ -7,23 +7,28 @@
   /*--neutral-color: #fff;*/
   --neutral-color: #E6E6E6;
 }
+body {
+  font-size: 14px;
+}
 
 .title {
   margin: 25px;
 }
 
 h1,h2,h3,h4,h5{
-  margin: 0;
+  margin: 0 !important;
 }
 
 h1.title {
   font-size: 34px;
   color: #444;
+  margin: 10px 0 0 30px !important;
 }
 
 h2.title {
   font-size: 26px;
   color: #555;
+  margin: 10px 0 0 30px !important;
 }
 
 h3.title {
@@ -144,27 +149,36 @@ display: inline-block;
 
 /*nx-design*/
 h1, h2, h3, h4, h5, h6 {
-  color: rgba(0, 0, 0, 0.85) !important;
+  color: rgba(0, 0, 0, 0.85);
 }
 h1 {
   font-size: 56px !important;
   font-weight: normal !important;
-  line-height: 66px;
+  line-height: inherit;
 }
 h2 {
   font-size: 32px !important;
   font-weight: normal !important;
-  line-height: 37px;
+  line-height: inherit;
 }
 h3 {
   font-size: 20px !important;
-  line-height: 23px;
+  font-weight: normal !important;
+  line-height: inherit;
 }
 h4 {
   font-size: 16px !important;
-  line-height: 19px;
+  font-weight: normal !important;
+  line-height: inherit;
 }
 
+.medium {
+  font-weight: 500 !important;
+}
+
+.light {
+  font-weight: 300 !important;
+}
 
 
 /*Components*/
