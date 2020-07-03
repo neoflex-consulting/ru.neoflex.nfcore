@@ -117,6 +117,7 @@ interface State {
     isHidden: boolean;
     isDisabled: boolean;
     isReadOnly: boolean;
+    IsGrid: boolean;
 }
 
 const defaultComponentValues = {
@@ -175,6 +176,7 @@ class DatasetView extends React.Component<any, State> {
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
+            IsGrid: false,
         }
     }
 
@@ -202,15 +204,17 @@ class DatasetView extends React.Component<any, State> {
                         result.forEach( (d: Ecore.Resource) => {
                             if (d.eContents()[0].get('dataset')) {
                                 if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    if (this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
-                                        allDatasetComponents.push(d)
-                                    }
-                                    else if (this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
-                                        allDatasetComponents.push(d)
-                                    }
-                                    else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
-                                        allDatasetComponents.push(d)
-                                    }
+                                    allDatasetComponents.push(d);
+                                    //TODO тут выдаются права на видимость ПРиватных и публичным DatasetComponent пользователям
+                                    // if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
+                                    //     allDatasetComponents.push(d)
+                                    // }
+                                    // else if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
+                                    //     allDatasetComponents.push(d)
+                                    // }
+                                    // else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
+                                    //     allDatasetComponents.push(d)
+                                    // }
                                 }
                             }
                         });
@@ -765,7 +769,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-    handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+        handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
         let newDiagrams:IDiagram[] = [];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
@@ -1026,7 +1030,7 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
             <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDiagramChange("delete")}}
+                    onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
             >
                 <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
             </Button>
@@ -1118,6 +1122,11 @@ class DatasetView extends React.Component<any, State> {
                 }
             }
         }
+    };
+
+    handleDeleteGridMenu = () => {
+        this.handleDiagramChange("delete")
+        this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
     handleDeleteMenuForCancel = () => {
@@ -1405,7 +1414,7 @@ class DatasetView extends React.Component<any, State> {
                 <div id="delete_menuButton">
                     <Modal
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
-                        key="save_menu"
+                        key="delete_menu"
                         width={'250px'}
                         title={t('delete report')}
                         visible={this.state.deleteMenuVisible}
@@ -1415,9 +1424,11 @@ class DatasetView extends React.Component<any, State> {
                         <DeleteDatasetComponent
                             {...this.props}
                             closeModal={this.handleDeleteMenu}
+                            closeModalGrid={this.handleDeleteGridMenu}
                             handleDeleteMenuForCancel={this.handleDeleteMenuForCancel}
                             allDatasetComponent={this.state.allDatasetComponents}
                             currentDatasetComponent={this.state.currentDatasetComponent}
+                            IsGrid = {this.state.IsGrid}
 
                         />
                     </Modal>
