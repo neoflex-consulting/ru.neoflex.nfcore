@@ -33,6 +33,7 @@ import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
+import {grantType} from "./utils/consts";
 
 const backgroundColor = "#2a356c";
 
@@ -417,6 +418,7 @@ class EcoreApp extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
                     .then((applications) => {
+                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
                         let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
