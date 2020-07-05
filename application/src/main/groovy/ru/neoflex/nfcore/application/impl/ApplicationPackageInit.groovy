@@ -34,15 +34,16 @@ class ApplicationPackageInit {
         Context.current.store.registerAfterLoad(new Consumer<Resource>() {
             @Override
             void accept(Resource resource) {
-                def eObject = resource.contents[0]
-                if (eObject instanceof AppModule) {
-                    processViewElement(eObject.view)
-                    processTreeNode(eObject.referenceTree)
-                    if (eObject instanceof Application) {
-                        eObject.grantType = GrantType.WRITE
-                        if (eObject.checkRights) {
-                            int grant = Context.current.authorization.isEObjectPermitted(eObject)
-                            eObject.grantType = Authorization.getGrantType(grant)
+                resource.contents.each {eObject->
+                    if (eObject instanceof AppModule) {
+                        processViewElement(eObject.view)
+                        processTreeNode(eObject.referenceTree)
+                        if (eObject instanceof Application) {
+                            eObject.grantType = GrantType.WRITE
+                            if (eObject.checkRights) {
+                                int grant = Context.current.authorization.isEObjectPermitted(eObject)
+                                eObject.grantType = Authorization.getGrantType(grant)
+                            }
                         }
                     }
                 }
