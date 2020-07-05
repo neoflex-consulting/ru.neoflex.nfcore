@@ -59,7 +59,7 @@ class AppModule {
 class Application extends AppModule {
     IconName iconName = "faUser"
 	boolean checkRights
-    GrantType grantType
+    GrantType grantType = "Write"
 }
 
 /* Views */
@@ -68,7 +68,7 @@ abstract class ViewElement {
 	String name
 	container ViewContainer parent opposite children
 	boolean checkRights
-    GrantType grantType
+    GrantType grantType = "Write"
     boolean hidden
     boolean disabled
 }
@@ -297,7 +297,7 @@ class ButtonStyle extends Style {
 abstract class TreeNode {
     String name
 	boolean checkRights
-    GrantType grantType
+    GrantType grantType = "Write"
 }
 
 class AppModuleNode extends TreeNode {

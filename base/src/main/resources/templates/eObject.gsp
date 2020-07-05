@@ -6,7 +6,7 @@
         return eObj.eGet(sf) as String
     }
     def getAsString = {sf, value->
-        org.eclipse.emf.ecore.util.EcoreUtil.convertToString((sf as org.eclipse.emf.ecore.EAttribute).EAttributeType, value)
+        org.eclipse.emf.ecore.util.EcoreUtil.convertToString((sf as org.eclipse.emf.ecore.EAttribute).EAttributeType, value).replaceAll('[\\\\]', '\\\\\\\\')
     }
     def getRootId = {org.eclipse.emf.ecore.EObject eObj->
         def container = org.eclipse.emf.ecore.util.EcoreUtil.getRootContainer(eObj)
@@ -32,10 +32,10 @@
             if (sf instanceof org.eclipse.emf.ecore.EAttribute) {
                 if (!sf.isMany())
                 {%>
-    attr "<%= sf.name %>", "<%= getAsString(sf, eObject.eGet(sf)) %>"<%}
+    attr "<%= sf.name %>", '''<%= getAsString(sf, eObject.eGet(sf)) %>'''<%}
                 else {
                     for (obj in (eObject.eGet(sf) as List)) {%>
-    attr "<%= sf.name %>", "<%= getAsString(sf, obj) %>"<%}
+    attr "<%= sf.name %>", '''<%= getAsString(sf, obj) %>'''<%}
                 }
             }
             else {
@@ -55,11 +55,11 @@
                     else {
                         if (!sf.isMany()) {
                             org.eclipse.emf.ecore.EObject obj = eObject.eGet(sf) %>
-    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
+    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj], 4) %><%
                         }
                         else {
                             for (org.eclipse.emf.ecore.EObject obj in (eObject.eGet(sf) as List)) { %>
-    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj, level: level + 1], (level + 1)*4) %><%
+    contains "<%= sf.name %>", "<%= obj.eClass().EPackage.nsPrefix %>", "<%= obj.eClass().name %>", <%= ru.neoflex.nfcore.templates.Utils.generate("templates/eObject.gsp", [object: obj], 4) %><%
                             }
                         }
                     }
