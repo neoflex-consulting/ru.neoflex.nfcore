@@ -66,7 +66,7 @@ class AllPermission extends Permission {
 class ObjectPermission extends Permission {
     refers EObject eObject
     op int isEObjectPermitted(EObject eObject) {
-        if (getEObject() != null && EcoreUtil.getURI(getEObject()) == EcoreUtil.getURI(eObject)) return this.grantType.getValue()
+        if (getEObject() !== null && EcoreUtil.getURI(getEObject()).trimQuery() == EcoreUtil.getURI(eObject).trimQuery()) return this.grantType.getValue()
         else return GrantType::UNKNOWN_VALUE
     }
 }

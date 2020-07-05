@@ -21,7 +21,6 @@ import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Groovy;
 import ru.neoflex.nfcore.base.util.EmfJson;
 import ru.neoflex.nfcore.dsl.EcoreBuilder;
-import ru.neoflex.nfcore.templates.Utils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -158,6 +157,6 @@ public class GroovyTests {
         EcoreBuilder builder2 = new EcoreBuilder();
         builder2.eval(code);
         Assert.assertEquals("My Role!", ((Role)builder2.eObjects().get(0)).getName());
-        Utils.dumpAll();
+//        Utils.dumpAll();
     }
 }
