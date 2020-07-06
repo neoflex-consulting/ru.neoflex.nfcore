@@ -11,6 +11,8 @@ export default class NXCol extends Component {
         display: flex;
         width: 96px;
         height: 100%;
+        text-align: ${(props) => (props.align ? `${props.align}` : "")};
+        flex-direction: ${(props) => (props.direction ? `${props.direction}` : "")};
         justify-content: ${(props) => (props.content==='center' ? 'center'
             : props.content==='flex-start' ? 'flex-start'
                 : props.content==='flex-end' ? 'flex-end'

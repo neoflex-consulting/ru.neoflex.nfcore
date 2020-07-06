@@ -204,15 +204,17 @@ class DatasetView extends React.Component<any, State> {
                         result.forEach( (d: Ecore.Resource) => {
                             if (d.eContents()[0].get('dataset')) {
                                 if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    if (this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
-                                        allDatasetComponents.push(d)
-                                    }
-                                    else if (this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
-                                        allDatasetComponents.push(d)
-                                    }
-                                    else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
-                                        allDatasetComponents.push(d)
-                                    }
+                                    allDatasetComponents.push(d);
+                                    //TODO тут выдаются права на видимость ПРиватных и публичным DatasetComponent пользователям
+                                    // if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
+                                    //     allDatasetComponents.push(d)
+                                    // }
+                                    // else if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
+                                    //     allDatasetComponents.push(d)
+                                    // }
+                                    // else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
+                                    //     allDatasetComponents.push(d)
+                                    // }
                                 }
                             }
                         });
