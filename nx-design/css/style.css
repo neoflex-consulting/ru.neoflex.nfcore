@@ -185,6 +185,9 @@ a {
   font-weight: 300 !important;
 }
 
+table {
+  font-size: 12px;
+}
 
 /*Components*/
 
