@@ -175,6 +175,11 @@ h4 {
 a {
   display: flex;
   align-items: center;
+  color: #333333 !important;
+}
+
+a:hover {
+  text-decoration: #333333 underline !important;
 }
 
 .medium {

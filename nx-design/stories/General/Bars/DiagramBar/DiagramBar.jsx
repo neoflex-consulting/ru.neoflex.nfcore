@@ -8,8 +8,8 @@ export default class NXDiagramBar extends Component {
             <div className='functionalBar__header'>
                 <div className='block'>
                     <a>
-                    <NXIcon icon={arrowLong} margin='auto 8px auto 0' sm fill='#5E6785' />
-                    <span className='caption'>Вернуться к таблице</span>
+                    <NXIcon icon={arrowLong} margin='0 12px 0 0' sm fill='#5E6785' />
+                    <span>Вернуться к таблице</span>
                     </a>
                     <div className='verticalLine' />
                     <NXIcon icon={plus} sm fill='#5E6785' />
