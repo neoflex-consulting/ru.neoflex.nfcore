@@ -249,7 +249,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', c.get('editable'));
             rowData.set('checkboxSelection', c.get('checkboxSelection'));
-            rowData.set('sortable', c.get('sortable'));
+            rowData.set('sortable', false);
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
             rowData.set('type',
@@ -777,6 +777,7 @@ class DatasetView extends React.Component<any, State> {
                 currentDiagram: newDiagram,
                 diagrams: newDiagrams
             });
+            this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
         } else if (action === "edit" && newDiagram) {
             newDiagrams = this.state.diagrams.map(value => {
                 return (value.id === newDiagram.id)? newDiagram : value
@@ -785,6 +786,7 @@ class DatasetView extends React.Component<any, State> {
                 currentDiagram: newDiagram,
                 diagrams: newDiagrams
             });
+            this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)
         } else {
             if (this.state.diagrams.length > 1) {
                 newDiagrams = this.state.diagrams.filter(value => {
@@ -910,7 +912,6 @@ class DatasetView extends React.Component<any, State> {
                     getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                     style={{ width: '250px'}}
                     showSearch={true}
-                    allowClear={true}
                     value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                     onChange={(e: any) => {
                         this.handleChange(e)
@@ -994,6 +995,18 @@ class DatasetView extends React.Component<any, State> {
 
     getDiagramPanel = () => {
         const { t } = this.props;
+        const menu = (<Menu
+            key='actionMenu'
+            onClick={(e: any) => this.onActionMenu(e)}
+            style={{width: '150px'}}
+        >
+            <Menu.Item key='exportToDocx'>
+                exportToDocx
+            </Menu.Item>
+            <Menu.Item key='exportToExcel'>
+                exportToExcel
+            </Menu.Item>
+        </Menu>)
         return <div id="selectInGetDiagramPanel">
             <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
@@ -1042,7 +1055,6 @@ class DatasetView extends React.Component<any, State> {
                     getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
                     style={{ width: '250px'}}
                     showSearch={true}
-                    allowClear={true}
                     value={this.state.currentDiagram?.diagramName}
                     onChange={(e: string) => {
                         this.setState({
@@ -1065,26 +1077,17 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{
-                        handleExportExcel(this.props.context.excelHandlers).then((blob) => {
-                                saveAs(new Blob([blob]), 'example.xlsx');
-                                console.log("Document created successfully");
-                            }
-                        );
-                    }}
-            >
-                <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-            </Button>
+
+            <Dropdown overlay={menu} placement="bottomLeft">
+                <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
+                    <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+                </Button>
+            </Dropdown>
+
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
             >
                 <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
-            </Button>
-            <Button title={t('about')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={questionMarkIcon} alt="questionMarkIcon" />
             </Button>
             <Button
                 className="buttonFullScreen"
