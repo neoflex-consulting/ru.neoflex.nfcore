@@ -1013,6 +1013,7 @@ class DatasetView extends React.Component<any, State> {
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined})
+                        this.getAllDatasetComponents(true)
                     }}
             >
                 Вернуться к таблице

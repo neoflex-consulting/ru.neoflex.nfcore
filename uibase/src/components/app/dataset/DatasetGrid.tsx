@@ -469,7 +469,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         )}
                     </AgGridReact>
                     }
-                    <div style={{marginLeft: "800px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                    <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
