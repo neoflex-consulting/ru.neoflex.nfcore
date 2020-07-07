@@ -515,6 +515,9 @@ public class Session implements Closeable {
     public EObject createEObject(ResourceSet rs, OElement oElement) {
         OClass oClass = oElement.getSchemaType().get();
         URI eClassURI = factory.oClassToUriMap.get(oClass.getName());
+        if (eClassURI == null) {
+            throw new IllegalArgumentException("Can't find URI for class " + oClass.getName());
+        }
         EClass eClass = (EClass) rs.getEObject(eClassURI, false);
         EObject eObject = EcoreUtil.create(eClass);
         return eObject;

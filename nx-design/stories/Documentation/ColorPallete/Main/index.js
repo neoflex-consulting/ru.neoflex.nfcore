@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import {NXCol, NXRow} from "../../../index";
+import {NXCol, NXRow} from "../../../../index";
 
-export default class ColorPageDoc extends Component {
+export default class MainColorPageDoc extends Component {
     state = {}
     render() {
         return (

@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {NXIcon, filter, plus, sort, calculator, plusBlock, barChart, add, mark, download, fullScreen, print, NXInputSearch, NXSelect, NXOption} from '../../../../index';
-import './index.css';
 
 export default class NXFunctionalBar extends Component {
 
