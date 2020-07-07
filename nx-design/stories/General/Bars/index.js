@@ -2,24 +2,12 @@ import React, { Component, Fragment } from 'react';
 
 import NXCalendarBar from './CalendarBar/CalendarBar';
 import NXFunctionalBar from "./FunctionalBar/FunctionalBar";
+import NXDiagramBar from "./DiagramBar/DiagramBar";
 
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import "../../../utils/helpers";
 import showCode from "../../../utils/helpers";
-import {
-    add,
-    barChart,
-    calculator, download,
-    filter, fullScreen,
-    mark,
-    NXIcon,
-    NXInputSearch, NXOption,
-    NXSelect,
-    plus,
-    plusBlock, print,
-    sort
-} from "../../../index";
 
 class BarsPage extends Component {
   render() {
@@ -219,6 +207,57 @@ export default class NXFunctionalBar extends Component {
 
 `}
               </SyntaxHighlighter>
+              </div>
+
+          </section>
+          <section className="example">
+              <h3 className="ex-title">DiagramBar</h3>
+              <div>
+                  <NXDiagramBar />
+              </div>
+
+              <div className='showCode'>
+                  <button id='diagramBar' onClick={showCode}>Show Code</button>
+                  <SyntaxHighlighter id='diagramBar' language='jsx' style={okaidia} >
+                      {`import {arrowLong, edit, rubbish, NXIcon, plus, mark, download, fullScreen, print, NXSelect, NXOption} from '../../../../index';
+
+export default class NXDiagramBar extends Component {
+
+    render() {
+        return (
+            <div className='functionalBar__header'>
+                <div className='block'>
+                    <a href='*ССЫЛКА*'>
+                    <NXIcon icon={arrowLong} margin='auto 8px auto 0' sm fill='#5E6785' />
+                    <span className='caption'>Вернуться к таблице</span>
+                    </a>
+                    <div className='verticalLine' />
+                    <NXIcon icon={plus} sm fill='#5E6785' />
+                    <NXIcon icon={edit} sm fill='#5E6785' />
+                    <div className='verticalLine' />
+                    <NXIcon icon={mark} sm fill='#5E6785' />
+                    <NXIcon icon={rubbish} sm fill='#5E6785' />
+                    <div className='verticalLine' />
+                </div>
+
+                <div className='block'>
+                    <span className='caption'>Версия</span>
+                    <NXSelect width='185px' defaultValue='default'>
+                        <NXOption value='default'>
+                            По умолчанию
+                        </NXOption>
+                    </NXSelect>
+                    <div className='verticalLine' />
+                    <NXIcon icon={download} sm fill='#5E6785' />
+                    <NXIcon icon={print} sm fill='#5E6785' />
+                    <NXIcon icon={fullScreen} sm fill='#5E6785' />
+                </div>
+            </div>
+        );
+    }
+}
+`}
+                  </SyntaxHighlighter>
               </div>
 
           </section>

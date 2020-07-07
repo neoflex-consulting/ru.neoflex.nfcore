@@ -7,6 +7,8 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.util.EcoreUtil
+import ru.neoflex.nfcore.base.components.PackageRegistry
+import ru.neoflex.nfcore.base.components.SpringContext
 
 class EcoreBuilder {
     Map<String, EObjectBuilder> builders = new HashMap<>();
@@ -56,7 +58,9 @@ class EcoreBuilder {
     }
 
     EObjectBuilder eObject(String nsPrefix, String className, @DelegatesTo(EObjectBuilder) Closure closure) {
-        EPackage ePackage = EPackage.Registry.INSTANCE.values().find { ePackage->(ePackage as EPackage).nsPrefix == nsPrefix} as EPackage
+        EPackage ePackage = SpringContext.getBean(PackageRegistry.class).EPackages.find { ePackage->
+            ePackage.nsPrefix == nsPrefix
+        }
         if (ePackage == null) {
             throw new IllegalArgumentException("EPackage ${nsPrefix} not found")
         }

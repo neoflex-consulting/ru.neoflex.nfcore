@@ -16,7 +16,7 @@ export const NXAlert = {
   
   .ant-alert-message {
 
-    color: #8C8C8C;
+    color: #333333;
     display: flex;
     height: 24px;
     align-items: center;
@@ -53,7 +53,7 @@ export const NXAlert = {
     }
     
     .ant-alert-message {
-    color: #8C8C8C;
+    color: #333333;
     display: flex;
     height: 24px;
     align-items: center;
@@ -95,7 +95,7 @@ export const NXAlert = {
     }
     
     .ant-alert-message {
-    color: #8C8C8C;
+    color: #333333;
     display: flex;
     height: 24px;
     align-items: center;
@@ -137,7 +137,7 @@ export const NXAlert = {
     }
     
     .ant-alert-message {
-    color: #8C8C8C;
+    color: #333333;
     display: flex;
     height: 24px;
     align-items: center;
@@ -179,7 +179,7 @@ export const NXAlert = {
     }
 
     .ant-alert-message {
-    color: #8C8C8C;
+    color: #333333;
     display: flex;
     height: 24px;
     align-items: center;
