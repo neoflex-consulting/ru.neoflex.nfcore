@@ -1,6 +1,15 @@
 import React, { Component, Fragment } from 'react';
 
-import NXInputSearch, {NXInput, NXCheckbox, NXRadio, NXTextArea, NXDatePicker, NXSelect, NXOption} from './Input';
+import NXInputSearch, {
+  NXInput,
+  NXCheckbox,
+  NXRadio,
+  NXTextArea,
+  NXDatePicker,
+  NXSelect,
+  NXOption,
+  NXInputClear
+} from './Input';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -22,7 +31,6 @@ class InputPage extends Component {
         <section className="example">
           <div>
           <h3 className="ex-title">Checkbox</h3>
-
             <NXCheckbox>Checkbox</NXCheckbox>
           </div>
           <SyntaxHighlighter language='jsx' style={okaidia} >
@@ -96,6 +104,18 @@ class InputPage extends Component {
 
 <NXInputSearch width='250px' />`}
           </SyntaxHighlighter>
+          <br/>
+
+          <div>
+            <h4>Clear input</h4>
+            <NXInputClear width='250px' />
+          </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXInput } from "nx-design";
+
+<NXInputClear width='250px' />`}
+          </SyntaxHighlighter>
+          <br/>
         </section>
 
         <section className="example">
