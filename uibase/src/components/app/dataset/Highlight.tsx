@@ -81,7 +81,8 @@ const SortableItem = SortableElement(({value}: any) => {
                             rules: [{
                                 required:
                                     value.operation ||
-                                    value.value,
+                                    value.value ||
+                                    value.highlightType,
                                 message: ' '
                             }]
                         })(
@@ -133,8 +134,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.t(value.operation) || undefined,
                             rules: [{
                                 required:
-                                    value.datasetColumn ||
-                                    value.value,
+                                    value.highlightType !== 'Column',
                                 message: ' '
                             }]
                         })(
@@ -182,8 +182,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.value,
                             rules: [{
                                 required:
-                                    value.datasetColumn ||
-                                    value.operation,
+                                    value.highlightType !== 'Column',
                                 message: ' '
                             }]
                         })(
