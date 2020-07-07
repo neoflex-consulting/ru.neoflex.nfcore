@@ -346,7 +346,7 @@ class DatasetView extends React.Component<any, State> {
                             operation: f.get('operation') || defaultComponentValues[componentName],
                             value: f.get('value'),
                             enable: (f.get('enable') !== null ? f.get('enable') : false),
-                            type: f.get('datasetColumn'),
+                            type: getColumnType(columnDefs, f.get('datasetColumn')),
                             highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
                             backgroundColor: f.get('backgroundColor'),
                             color: f.get('color')
@@ -355,6 +355,20 @@ class DatasetView extends React.Component<any, State> {
                 });
             }
             return serverParam
+        }
+        function getColumnType (columnDefs: Object[], datasetColumn: string): string | undefined {
+            if (columnDefs.length !== 0) {
+                const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn)
+                if (column !== null) {
+                    const type = column.map((column:any) => column.get('type'))
+                    if (type.length !== 0) {
+                        return type[0]
+                    }
+                }
+            }
+            else {
+                return 'String'
+            }
         }
         function getDiagramsFromComponent (resource: Ecore.EObject, componentName: string): IDiagram[] {
             let diagrams: IDiagram[] = [];
@@ -1013,6 +1027,7 @@ class DatasetView extends React.Component<any, State> {
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined})
+                        this.getAllDatasetComponents(true)
                     }}
             >
                 Вернуться к таблице

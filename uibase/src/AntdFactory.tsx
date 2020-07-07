@@ -16,6 +16,7 @@ import DOMPurify from 'dompurify'
 import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {actionType, eventType, grantType, positionEnum} from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
+import {saveAs} from "file-saver";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -800,7 +801,11 @@ class GroovyCommand_ extends ViewContainer {
                 },
                 body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.setValue(res)
+                this.setValue(res);
+                if (this.viewObject.get('downloadFile')) {
+                    saveAs(new Blob([res]), "file.txt");
+                    console.log("Document created successfully");
+                }
             })
         } else if (commandType === "Static") {
             API.instance().fetchJson('/script/static/'+this.viewObject.get('gitStaticClass')+'/'+this.viewObject.get('gitStaticMethod'), {
@@ -810,7 +815,11 @@ class GroovyCommand_ extends ViewContainer {
                 },
                 body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.setValue(res)
+                this.setValue(res);
+                if (this.viewObject.get('downloadFile')) {
+                    saveAs(new Blob([res]), "file.txt");
+                    console.log("Document created successfully");
+                }
             })
         } else {
             API.instance().fetchJson('/script/eval', {
@@ -820,7 +829,11 @@ class GroovyCommand_ extends ViewContainer {
                 },
                 body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
             }).then(res => {
-                this.setValue(res)
+                this.setValue(res);
+                if (this.viewObject.get('downloadFile')) {
+                    saveAs(new Blob([res]), "file.txt");
+                    console.log("Document created successfully");
+                }
             })
         }
     };
