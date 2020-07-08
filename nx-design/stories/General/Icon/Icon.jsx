@@ -249,11 +249,15 @@ import styled from 'styled-components'
 const styledNXIcon = props => <Icon component={props.icon} className='NXIcon' {...props} />
 const NXIcon = styled(styledNXIcon)`
     height: auto;
-    width: ${(props) => (props.xs ? "16px" : props.sm ? "16px" : "24px")};
+    width: ${(props) => (props.small ? "8px" : props.big ? "24px" : "16px")};
     cursor: pointer;
     margin: ${(props) => (props.margin ? `${props.margin}` : "auto 3px")};
     
     svg path{
+    fill: ${(props)=> (props.fill ? props.fill : '')} !important;
+    }
+    
+    svg rect{
     fill: ${(props)=> (props.fill ? props.fill : '')} !important;
     }
 `

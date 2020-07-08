@@ -95,15 +95,15 @@ export default class NXCalendarBar extends Component {
             </div>
 
             <div className="col col-start">
-                  <NXIcon xs margin='8px auto' icon={arrowLeft} />
+                  <NXIcon margin='8px auto' icon={arrowLeft} />
             </div>
             <div className="col-col-center">
                     <span className="col-text">Месяц</span>
             </div>
             <div className="col col-end" >
-                  <NXIcon xs margin='8px auto' rotate={100} icon={arrowLeft} />
+                  <NXIcon margin='8px auto' rotate={100} icon={arrowLeft} />
             </div>
-                <NXIcon sm margin='auto' icon={legend} />
+                <NXIcon big margin='auto' icon={legend} />
           </div>
         }
         {
@@ -121,9 +121,9 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon sm icon={plus} fill='#5E6785' />
+      <NXIcon big icon={plus} fill='#5E6785' />
       <div className="verticalLine" />
-        <NXIcon xs icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
         style={{
           border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
           background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
@@ -131,7 +131,7 @@ export default class NXCalendarBar extends Component {
           marginRight: '8px'
         }}
         />
-      <NXIcon xs icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
+      <NXIcon icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
@@ -139,7 +139,7 @@ export default class NXCalendarBar extends Component {
       }}
       />
       <div className="verticalLine" />
-      <NXIcon sm icon={print} fill='#5E6785' />
+      <NXIcon icon={print} big fill='#5E6785' />
       </div>
         </div>
     );
@@ -173,17 +173,17 @@ export default class NXFunctionalBar extends Component {
                 <div className='block'>
                     <NXInputSearch width='192px' />
                         <div className='verticalLine' />
-                    <NXIcon icon={plus} sm fill='#5E6785' />
+                    <NXIcon big icon={plus} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={filter} sm fill='#5E6785' />
-                    <NXIcon icon={sort} sm fill='#5E6785' />
+                    <NXIcon big icon={filter} fill='#5E6785' />
+                    <NXIcon big icon={sort} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={calculator} sm fill='#5E6785' />
-                    <NXIcon icon={plusBlock} sm fill='#5E6785' />
-                    <NXIcon icon={barChart} sm fill='#5E6785' />
-                    <NXIcon icon={add} sm fill='#5E6785' />
+                    <NXIcon big icon={calculator} fill='#5E6785' />
+                    <NXIcon big icon={plusBlock} fill='#5E6785' />
+                    <NXIcon big icon={barChart} fill='#5E6785' />
+                    <NXIcon big icon={add} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={mark} sm fill='#5E6785' />
+                    <NXIcon big icon={mark} fill='#5E6785' />
                         <div className='verticalLine' />
                 </div>
 
@@ -195,9 +195,9 @@ export default class NXFunctionalBar extends Component {
                         </NXOption>
                     </NXSelect>
                 <div className='verticalLine' />
-                <NXIcon icon={download} sm fill='#5E6785' />
-                <NXIcon icon={print} sm fill='#5E6785' />
-                <NXIcon icon={fullScreen} sm fill='#5E6785' />
+                <NXIcon big icon={download} fill='#5E6785' />
+                <NXIcon big icon={print} fill='#5E6785' />
+                <NXIcon big icon={fullScreen} fill='#5E6785' />
                 </div>
 
             </div>
@@ -227,16 +227,16 @@ export default class NXDiagramBar extends Component {
         return (
             <div className='functionalBar__header'>
                 <div className='block'>
-                    <a href='*ССЫЛКА*'>
-                    <NXIcon icon={arrowLong} margin='auto 8px auto 0' sm fill='#5E6785' />
-                    <span className='caption'>Вернуться к таблице</span>
+                    <a>
+                    <NXIcon icon={arrowLong} margin='0 12px 0 0' fill='#5E6785' />
+                    <span>Вернуться к таблице</span>
                     </a>
                     <div className='verticalLine' />
-                    <NXIcon icon={plus} sm fill='#5E6785' />
-                    <NXIcon icon={edit} sm fill='#5E6785' />
+                    <NXIcon big icon={plus} fill='#5E6785' />
+                    <NXIcon big icon={edit} fill='#5E6785' />
                     <div className='verticalLine' />
-                    <NXIcon icon={mark} sm fill='#5E6785' />
-                    <NXIcon icon={rubbish} sm fill='#5E6785' />
+                    <NXIcon big icon={mark} fill='#5E6785' />
+                    <NXIcon big icon={rubbish} fill='#5E6785' />
                     <div className='verticalLine' />
                 </div>
 
@@ -248,9 +248,9 @@ export default class NXDiagramBar extends Component {
                         </NXOption>
                     </NXSelect>
                     <div className='verticalLine' />
-                    <NXIcon icon={download} sm fill='#5E6785' />
-                    <NXIcon icon={print} sm fill='#5E6785' />
-                    <NXIcon icon={fullScreen} sm fill='#5E6785' />
+                    <NXIcon big icon={download} fill='#5E6785' />
+                    <NXIcon big icon={print} fill='#5E6785' />
+                    <NXIcon big icon={fullScreen} fill='#5E6785' />
                 </div>
             </div>
         );

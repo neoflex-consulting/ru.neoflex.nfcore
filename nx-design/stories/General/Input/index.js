@@ -12,6 +12,7 @@ import NXInputSearch, {
 } from './Input';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {PropsTab} from "../../../utils/helpers";
 
 class InputPage extends Component {
   render() {
@@ -222,7 +223,12 @@ class InputPage extends Component {
 </NXSelect>`}
           </SyntaxHighlighter>
         </section>
+        <PropsTab Props={
+          [
+            {name:'width', default:'100%', description:'Ширина'},
 
+          ]
+        }/>
       </Fragment>
     );
   }
