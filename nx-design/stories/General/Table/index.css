@@ -15,7 +15,7 @@ thead {
     background-color: #F2F2F2 !important;
 }
 tr th:last-child{
-    width: 32px;
+    width: 32px !important;
     align-items: center !important;
 
 }

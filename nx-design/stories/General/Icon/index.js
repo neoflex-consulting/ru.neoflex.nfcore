@@ -6,6 +6,7 @@ import {NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,arr
 } from "../../../index";
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {PropsTab} from "../../../utils/helpers";
 
 class IconPage extends Component {
     copyToClipboard(e) {
@@ -160,6 +161,14 @@ class IconPage extends Component {
             this.groupIcon(icons)
           }
         </section>
+          <PropsTab Props={
+              [
+                  {name:'small', default:'16px', description:'Размер иконки - 8px'},
+                  {name:'big', default:'16px', description:'Размер иконки - 24px'},
+                  {name:'margin', default:'auto 3px', description:'Внешний отступ'},
+                  {name:'fill', default:'-', description:'Цвет иконки'}
+              ]
+          }/>
       </Fragment>
     );
   }

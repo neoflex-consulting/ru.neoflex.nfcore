@@ -10,17 +10,17 @@ export default class NXFunctionalBar extends Component {
                 <div className='block'>
                     <NXInputSearch width='192px' />
                         <div className='verticalLine' />
-                    <NXIcon icon={plus} sm fill='#5E6785' />
+                    <NXIcon big icon={plus} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={filter} sm fill='#5E6785' />
-                    <NXIcon icon={sort} sm fill='#5E6785' />
+                    <NXIcon big icon={filter} fill='#5E6785' />
+                    <NXIcon big icon={sort} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={calculator} sm fill='#5E6785' />
-                    <NXIcon icon={plusBlock} sm fill='#5E6785' />
-                    <NXIcon icon={barChart} sm fill='#5E6785' />
-                    <NXIcon icon={add} sm fill='#5E6785' />
+                    <NXIcon big icon={calculator} fill='#5E6785' />
+                    <NXIcon big icon={plusBlock} fill='#5E6785' />
+                    <NXIcon big icon={barChart} fill='#5E6785' />
+                    <NXIcon big icon={add} fill='#5E6785' />
                         <div className='verticalLine' />
-                    <NXIcon icon={mark} sm fill='#5E6785' />
+                    <NXIcon big icon={mark} fill='#5E6785' />
                         <div className='verticalLine' />
                 </div>
 
@@ -32,9 +32,9 @@ export default class NXFunctionalBar extends Component {
                         </NXOption>
                     </NXSelect>
                 <div className='verticalLine' />
-                <NXIcon icon={download} sm fill='#5E6785' />
-                <NXIcon icon={print} sm fill='#5E6785' />
-                <NXIcon icon={fullScreen} sm fill='#5E6785' />
+                <NXIcon big icon={download} fill='#5E6785' />
+                <NXIcon big icon={print} fill='#5E6785' />
+                <NXIcon big icon={fullScreen} fill='#5E6785' />
                 </div>
 
             </div>
