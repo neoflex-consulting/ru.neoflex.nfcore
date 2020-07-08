@@ -2,7 +2,6 @@ package ru.neoflex.nfcore.base.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,6 @@ import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.meta.emfgit.TransactionClassLoader;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.providers.GitDBTransactionProvider;
-import ru.neoflex.nfcore.base.types.TypesPackage;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,7 +24,7 @@ import java.util.concurrent.Callable;
 
 import static ru.neoflex.nfcore.base.services.Store.qualifiedNameDelegate;
 
-@Service
+@Service("ru.neoflex.nfcore.base.services.Workspace")
 public class Workspace {
     private final static Log logger = LogFactory.getLog(Workspace.class);
     private static final ThreadLocal<String> tlCurrentBranch = new ThreadLocal<String>();

@@ -68,14 +68,14 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
     private Resource createResource(ResourceSet rs, MemDBObject dbObject) {
         URI uri = memBDServer.createResourceURI(Stream.of(dbObject));
         Resource resource = rs.createResource(uri);
-        return loadResource(resource, dbObject);
+        loadResource(resource, dbObject);
+        return resource;
     }
 
-    private Resource loadResource(Resource resource, MemDBObject dbObject) {
+    private void loadResource(Resource resource, MemDBObject dbObject) {
         ByteArrayInputStream bais = new ByteArrayInputStream(dbObject.getImage());
         try {
             resource.load(bais, null);
-            return resource;
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Can't load %s[%s]", dbObject.getClassURI(), dbObject.getQName()));
         }
@@ -124,18 +124,22 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
             //TODO: copy eObject to dbObject
             Resource tempR = tempRS.createResource(memBDServer.createResourceURI(Stream.of(dbObject)));
             tempR.getContents().add(EcoreUtil.copy(eObject));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                tempR.save(baos, null);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            dbObject.setImage(baos.toByteArray());
+            saveResource(tempR, dbObject);
             dbObject.setVersion(dbObject.getVersion() + 1);
             mObjectMap.put(dbObject.getId(), dbObject);
         }
         memBDServer.getEvents().fireAfterSave(oldResource, resource);
         resource.setURI(memBDServer.createResourceURI(dbObjects.stream()));
+    }
+
+    private void saveResource(Resource resource, MemDBObject dbObject) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            resource.save(baos, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        dbObject.setImage(baos.toByteArray());
     }
 
     public void load(Resource resource) {
@@ -147,6 +151,28 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
     }
 
     public void delete(URI uri) {
+        ResourceSet rs = createResourceSet();
+        Resource oldResource = rs.createResource(uri);
+        List<String> ids = MemBDServer.getIds(uri).collect(Collectors.toList());
+        List<Integer> versions = MemBDServer.getVersions(uri).collect(Collectors.toList());
+        List<MemDBObject> dbObjects = new ArrayList<>();
+        for (int i = 0; i < ids.size(); ++i) {
+            String id = ids.get(i);
+            MemDBObject dbObject = get(id);
+            if (i >= versions.size() || versions.get(i) == null) {
+                throw new IllegalArgumentException(String.format("Version for deleted object %s not defined", id));
+            }
+            Integer version = versions.get(i);
+            if (!version.equals(dbObject.getVersion())) {
+                throw new IllegalArgumentException(String.format(
+                        "Version (%d) for deleted object %s is not equals to the version in the DB (%d)",
+                        version, id, dbObject.getVersion()));
+            }
+            dbObjects.add(dbObject);
+            loadResource(oldResource, dbObject);
+        }
+        memBDServer.getEvents().fireBeforeDelete(oldResource);
+        dbObjects.forEach(dbObject -> deleted.add(dbObject.getId()));
     }
 
     public void reset() {
