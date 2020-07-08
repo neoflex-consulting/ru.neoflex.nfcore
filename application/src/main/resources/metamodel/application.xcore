@@ -155,6 +155,7 @@ class GroovyCommand extends ViewElement, CommandElement, ContextWriter, DynamicA
     String gitStaticMethod
     GroovyCommandType commandType = "Eval"
     boolean executeOnStartup
+    boolean downloadFile
 }
 
 class ValueHolder extends ViewElement, ValueItem, DynamicActionElement {

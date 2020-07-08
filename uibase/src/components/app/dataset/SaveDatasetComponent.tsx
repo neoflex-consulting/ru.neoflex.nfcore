@@ -105,7 +105,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     };
 
     saveDatasetComponentOptions(): void {
-        let objectId = this.props.viewObject._id;
+        let objectId = this.props.viewObject.eURI();
         let params: any = {};
         this.props.context.changeUserProfile(objectId, params).then (()=> {
             let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
@@ -117,7 +117,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 currentDatasetComponent.get('audit').set('modified', null);
             }
             const userProfileValue = this.props.context.userProfile.get('params').array()
-                .filter( (p: any) => p.get('key') === currentDatasetComponent._id);
+                .filter( (p: any) => p.get('key') === currentDatasetComponent.eURI());
             if (userProfileValue.length !== 0) {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
@@ -128,7 +128,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
                 this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
-            this.props.context.changeUserProfile(currentDatasetComponent._id, undefined).then (()=> {
+            this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined).then (()=> {
                 const resource = currentDatasetComponent.eResource();
                 if (resource) {
                     if (!this.state.changeCurrent) {
@@ -137,7 +137,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                         resource.eContents()[0].set('name', `${this.state.componentName}`);
                         resource.set('uri', null);
                         resource.eContents()[0].set('serverFilters', `${this.state.componentName}`);
-                        this.props.context.changeUserProfile(this.props.viewObject._id, {name: this.state.componentName})
+                        this.props.context.changeUserProfile(this.props.viewObject.eURI(), {name: this.state.componentName})
                     }
                     this.saveDatasetComponent(resource);
                 }

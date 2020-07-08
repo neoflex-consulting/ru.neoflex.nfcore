@@ -196,7 +196,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                 <Row>
                     {this.props.action === "edit"
                         ?<Col span={6}><Button htmlType="submit">{this.props.t('edit')}</Button></Col>
-                        :<Col span={6}><Button htmlType="submit">{this.props.t('add')}</Button></Col>}
+                        :<Col span={6}><Button htmlType="submit">{this.props.t('create')}</Button></Col>}
                     <Col span={6}><Button onClick={this.resetFields}>{this.props.t('reset')}</Button></Col>
                 </Row>
                 {this.props.t('choose diagram type')}

@@ -3,10 +3,9 @@ package ru.neoflex.nfcore.application.impl
 import com.fasterxml.jackson.databind.node.ObjectNode
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import ru.neoflex.nfcore.application.ApplicationPackage
-import ru.neoflex.nfcore.application.Calendar
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
@@ -30,48 +29,44 @@ class CalendarExt extends CalendarImpl {
             return Context.current.store.inTransaction(false, new StoreSPI.TransactionalFunction() {
                 @Override
                 Object call(TransactionSPI tx) throws Exception {
-                    def resource = DocFinder.create(Context.current.store, ApplicationPackage.Literals.CALENDAR, [name: this.name])
+                    def jsonSlurper = new JsonSlurper()
+                    def notificationDTO = jsonSlurper.parseText(newNotification)
+                    def notification = NotificationFactory.eINSTANCE.createNotification()
+
+                    notification.name = notificationDTO.fullName
+                    notification.shortName = notificationDTO.shortName
+                    notification.weekendReporting = notificationDTO.weekendReporting
+                    notification.periodicity =
+                            notificationDTO.periodicity == 'Day' ? Periodicity.DAY :
+                                    notificationDTO.periodicity == 'Month' ? Periodicity.MONTH :
+                                            notificationDTO.periodicity == 'Quarter' ? Periodicity.QUARTER :
+                                                    Periodicity.YEAR
+
+                    def dateOn = NotificationFactory.eINSTANCE.createReportingDateOn()
+                    dateOn.name = notificationDTO.deadlineDay.toString()
+                    notification.reportingDateOn.add(dateOn)
+                    notification.deadlineDay = notificationDTO.deadlineDay.toString()
+                    notification.deadlineTime = notificationDTO.deadlineTime.toString()
+                    notification.calculationInterval =
+                            notificationDTO.periodicity == 'Day' ? CalculationInterval.PER_DAY :
+                                    notificationDTO.periodicity == 'Month' ? CalculationInterval.PER_MONTH :
+                                            notificationDTO.periodicity == 'Quarter' ? CalculationInterval.FOR_THE_QUARTER :
+                                                    CalculationInterval.FROM_THE_BEGINNING_OF_THE_YEAR
+
+                    notification.setDefaultStatus(CalendarExt.this.defaultStatus)
+
+                    def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: notification.name])
                             .execute().resourceSet
-                    if (!resource.resources.empty) {
-                        def calendar = resource.resources.get(0).contents.get(0) as Calendar
-                        def calendarRef = Context.current.store.getRef(resource.resources[0])
+                    if (rs.resources.empty) {
+                        Context.current.store.createEObject(notification)
+                        def savedNotification = Utils.findEObject(NotificationPackage.Literals.NOTIFICATION, notification.name)
+                        CalendarExt.this.notifications.add(savedNotification)
 
-                        def jsonSlurper = new JsonSlurper()
-                        def notificationDTO = jsonSlurper.parseText(newNotification)
-                        def notification = NotificationFactory.eINSTANCE.createNotification()
-
-                        notification.name = notificationDTO.fullName
-                        notification.shortName = notificationDTO.shortName
-                        notification.weekendReporting = notificationDTO.weekendReporting
-                        notification.periodicity =
-                                notificationDTO.periodicity == 'Day' ? Periodicity.DAY :
-                                        notificationDTO.periodicity == 'Month' ? Periodicity.MONTH :
-                                                notificationDTO.periodicity == 'Quarter' ? Periodicity.QUARTER :
-                                                        Periodicity.YEAR
-
-                        def dateOn = NotificationFactory.eINSTANCE.createReportingDateOn()
-                        dateOn.name = notificationDTO.deadlineDay.toString()
-                        notification.reportingDateOn.add(dateOn)
-                        notification.deadlineDay = notificationDTO.deadlineDay.toString()
-                        notification.deadlineTime = notificationDTO.deadlineTime.toString()
-                        notification.calculationInterval =
-                                notificationDTO.periodicity == 'Day' ? CalculationInterval.PER_DAY :
-                                        notificationDTO.periodicity == 'Month' ? CalculationInterval.PER_MONTH :
-                                                notificationDTO.periodicity == 'Quarter' ? CalculationInterval.FOR_THE_QUARTER :
-                                                        CalculationInterval.FROM_THE_BEGINNING_OF_THE_YEAR
-
-                        notification.setDefaultStatus(calendar.defaultStatus)
-
-                        def rs = DocFinder.create(Context.current.store, NotificationPackage.Literals.NOTIFICATION, [name: notification.name])
-                                .execute().resourceSet
-                        if (rs.resources.empty) {
-                            Context.current.store.createEObject(notification)
-                            def savedNotification = Utils.findEObject(NotificationPackage.Literals.NOTIFICATION, notification.name)
-                            calendar.notifications.add(savedNotification)
-                            Context.current.store.updateEObject(calendarRef, calendar)
-                        }
-                        return JsonOutput.toJson("Notification created")
+                        def appModule = EcoreUtil.getRootContainer(CalendarExt.this)
+                        def appModuleRef = Context.current.store.getRef(appModule.eResource())
+                        Context.current.store.updateEObject(appModuleRef, appModule)
                     }
+                    return JsonOutput.toJson("Notification created")
                 }
             })
         }
