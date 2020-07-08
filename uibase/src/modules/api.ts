@@ -229,6 +229,7 @@ export class API implements IErrorHandler {
     }
 
     static parseRef(ref: string): any {
+        if (!ref) return {}
         let id: string|undefined, query: string|undefined, resid: string|undefined, fragment: string|undefined;
         [resid, fragment] = ref.split('#', 2);
         if (!fragment) {
@@ -295,7 +296,7 @@ export class API implements IErrorHandler {
             }
         }
         let obj = resource.to()
-        API.fixReferences(obj, API.parseRef(resource.eURI()).id)
+        API.fixReferences(obj, API.parseRef(resource.get('uri')).id)
         return this.fetchJson(url, {
             method: "PUT",
             headers: {
