@@ -200,7 +200,7 @@ class Calendar extends React.Component<any, any> {
 
     createNotification = (newNotification: any) => {
         this.setState({spinnerVisible: true});
-        const ref: string = this.props.viewObject._id;
+        const ref: string = this.props.viewObject.eURI();
         const methodName: string = 'createNotification';
 
         return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {

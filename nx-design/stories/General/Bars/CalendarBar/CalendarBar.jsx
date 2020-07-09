@@ -65,15 +65,15 @@ export default class NXCalendarBar extends Component {
             </div>
 
             <div className="col col-start">
-                  <NXIcon xs margin='8px auto' icon={arrowLeft} />
+                  <NXIcon margin='8px auto' icon={arrowLeft} />
             </div>
             <div className="col-col-center">
                     <span className="col-text">Месяц</span>
             </div>
             <div className="col col-end" >
-                  <NXIcon xs margin='8px auto' rotate={100} icon={arrowLeft} />
+                  <NXIcon margin='8px auto' rotate={100} icon={arrowLeft} />
             </div>
-                <NXIcon sm margin='auto' icon={legend} />
+                <NXIcon big margin='auto' icon={legend} />
           </div>
         }
         {
@@ -91,9 +91,9 @@ export default class NXCalendarBar extends Component {
           </div>
         }
       <div className="verticalLine" />
-      <NXIcon sm icon={plus} fill='#5E6785' />
+      <NXIcon big icon={plus} fill='#5E6785' />
       <div className="verticalLine" />
-        <NXIcon xs icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
+        <NXIcon icon={calendar} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
         style={{
           border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78',
           background: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
@@ -101,7 +101,7 @@ export default class NXCalendarBar extends Component {
           marginRight: '8px'
         }}
         />
-      <NXIcon xs icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
+      <NXIcon icon={table} fill='#5E6785' className='handleCalendarVisible' onClick={this.handleCalendarVisible}
       style={{
         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66',
         background: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
@@ -109,7 +109,7 @@ export default class NXCalendarBar extends Component {
       }}
       />
       <div className="verticalLine" />
-      <NXIcon sm icon={print} fill='#5E6785' />
+      <NXIcon icon={print} big fill='#5E6785' />
       </div>
         </div>
     );

@@ -10,7 +10,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {CirclePicker, SketchPicker} from "react-color";
+import {ColorPicker, SketchColorPicker} from "./ColorPicker";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -42,32 +42,6 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
-    const circlePicker = () => {
-        return <CirclePicker
-            circleSize={24}
-            circleSpacing={3}
-            width='100%'
-            onChange={(e: any) => value.changeColor(e)}
-            color={ value.stateColor !== undefined ? value.stateColor['hex'] :
-                value.color !== undefined ? value.color : 'white' }
-            colors={['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3','#ffffff',
-                '#8b1a10', '#eb3223', '#f29d38', '#fffd54', '#75f94c', '#73fbfd', '#5687e1', '#0023f5', '#8b2ef5', '#ea3ff7',
-                '#dfbab1', '#eecdcd', '#f8e5d0', '#fdf2d0', '#dce9d5', '#d3e0e3', '#ccdaf5', '#d2e2f1', '#d8d3e7', '#e6d2dc',
-                '#d18270', '#df9d9b', '#f2cca2', '#fbe5a3', '#bdd5ac', '#a8c3c8', '#a9c2f0', '#a6c5e5', '#b2a8d3', '#cea8bc',
-                '#bd4b31', '#d16d6a', '#ecb476', '#f9d978', '#9dc284', '#80a4ae', '#769ee5', '#7ba8d7', '#8b7ebe', '#b87f9e',
-                '#992a15', '#bc261a', '#db944b', '#eac251', '#78a55a', '#53808c', '#4979d1', '#4e85c1', '#6252a2', '#9b5377',
-                '#7b2817', '#8c1a11', '#a96324', '#b89130', '#48742c', '#254e5a', '#2358c5', '#22538f', '#312170', '#6b2346',
-                '#531607', '#5d0e07', '#714116', '#7b601d', '#314c1c', '#18333c', '#254683', '#153760', '#1d154a', '#46162f']}
-        />
-    }
-    const sketchPicker = () => {
-        return <SketchPicker
-            disableAlpha={true}
-            onChange={(e: any) => value.changeColor(e)}
-            color={ value.stateColor !== undefined ? value.stateColor['hex'] :
-                value.color !== undefined ? value.color : 'white' }
-        />
-    }
     return <div className="SortableItemHighlight">
         <Row gutter={[8, 0]}>
             <Col span={1}>
@@ -81,7 +55,8 @@ const SortableItem = SortableElement(({value}: any) => {
                             rules: [{
                                 required:
                                     value.operation ||
-                                    value.value,
+                                    value.value ||
+                                    value.highlightType,
                                 message: ' '
                             }]
                         })(
@@ -100,7 +75,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     index: value.index,
                                     columnName: 'datasetColumn',
                                     value: undefined
-                                })
+                                });
                                 value.handleChange(event)
                             }}
                         >
@@ -133,8 +108,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.t(value.operation) || undefined,
                             rules: [{
                                 required:
-                                    value.datasetColumn ||
-                                    value.value,
+                                    (value.datasetColumn && value.highlightType !== 'Column') ||
+                                    (value.value && value.highlightType !== 'Column')||
+                                    (value.highlightType && value.highlightType !== 'Column'),
                                 message: ' '
                             }]
                         })(
@@ -182,8 +158,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.value,
                             rules: [{
                                 required:
-                                    value.datasetColumn ||
-                                    value.operation,
+                                    (value.datasetColumn && value.highlightType !== 'Column') ||
+                                    (value.operation && value.highlightType !== 'Column')||
+                                    (value.highlightType && value.highlightType !== 'Column'),
                                 message: ' '
                             }]
                         })(
@@ -271,8 +248,7 @@ const SortableItem = SortableElement(({value}: any) => {
             </Col>
                 <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('background')}</div>
-                <div
-                    onClick={() => value.handleColorMenu('background', value.index)}
+                <div onClick={() => value.handleColorMenu('background', value.index)}
                     style={{
                     backgroundColor: value.backgroundColor, height: '18px', width: '38px',
                     display: 'inline-block', verticalAlign: '-0.2em', marginLeft:'13px',
@@ -286,13 +262,26 @@ const SortableItem = SortableElement(({value}: any) => {
                     onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
                     mask={false}
-                    onOk={() => {
-                        return value.handleChange(JSON.stringify({
-                            index: value.index,
-                            columnName: 'backgroundColor',
-                            value: value.stateColor !== undefined ? value.stateColor['hex'] : value.backgroundColor
-                        }))
-                    }}>
+                    footer={[<Form onSubmit={value.handleSubmit}>
+                        <Button key="back" onClick={() => value.handleColorMenu('background', value.index)}>
+                            Отменить
+                        </Button>
+                        <Button
+                            title="run query"
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                            type="primary"
+                            onClick={() => {
+                                return value.handleChange(JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'backgroundColor',
+                                    value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
+                                }))
+                            }}>
+                            ОК
+                        </Button></Form>,
+                    ]}>
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                         <Radio.Button
                             style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
@@ -303,10 +292,10 @@ const SortableItem = SortableElement(({value}: any) => {
                             checked={!value.solidPicker}>Расширенный</Radio.Button>
                     </Radio.Group>
                     {value.solidPicker && (
-                        circlePicker()
+                        <ColorPicker value={value} type={'background'}/>
                     )}
                     {!value.solidPicker && (
-                        sketchPicker()
+                        <SketchColorPicker value={value} type={'background'} />
                     )}
                 </Modal>
             </Col>
@@ -327,11 +316,24 @@ const SortableItem = SortableElement(({value}: any) => {
                     onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
                     mask={false}
-                    onOk={() => value.handleChange(JSON.stringify({
-                        index: value.index,
-                        columnName: 'color',
-                        value: value.stateColor !== undefined ? value.stateColor['hex'] : value.color
-                    }))}
+                    footer={[<Form onSubmit={value.handleSubmit}>
+                        <Button key="back" onClick={() => value.handleColorMenu('text', value.index)}>
+                            Отменить
+                        </Button>
+                        <Button
+                            title="run query"
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                            type="primary"
+                            onClick={() => value.handleChange(JSON.stringify({
+                            index: value.index,
+                            columnName: 'color',
+                            value: value.stateColor !== undefined ? value.stateColor : value.color
+                        }))}>
+                            ОК
+                        </Button></Form>,
+                    ]}
                 >
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                     <Radio.Button
@@ -343,16 +345,18 @@ const SortableItem = SortableElement(({value}: any) => {
                         checked={!value.solidPicker}>Расширенный</Radio.Button>
                 </Radio.Group>
                     {value.solidPicker && (
-                        circlePicker()
+                        <ColorPicker value={value} type={'text'} />
                     )}
                     {!value.solidPicker && (
-                        sketchPicker()
+                        <SketchColorPicker value={value} type={'text'} />
                     )}
                 </Modal>
             </Col>
         </Row>
     </div>
 });
+
+
 
 class Highlight extends DrawerParameterComponent<Props, State> {
 
@@ -389,7 +393,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
         }
     };
 
-    private changeColor(e: any) {
+    private changeColor(e: any, index: any) {
         this.setState({color: e})
     }
 

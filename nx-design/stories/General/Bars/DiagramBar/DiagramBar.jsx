@@ -8,15 +8,15 @@ export default class NXDiagramBar extends Component {
             <div className='functionalBar__header'>
                 <div className='block'>
                     <a>
-                    <NXIcon icon={arrowLong} margin='0 12px 0 0' sm fill='#5E6785' />
+                    <NXIcon icon={arrowLong} margin='0 12px 0 0' fill='#5E6785' />
                     <span>Вернуться к таблице</span>
                     </a>
                     <div className='verticalLine' />
-                    <NXIcon icon={plus} sm fill='#5E6785' />
-                    <NXIcon icon={edit} sm fill='#5E6785' />
+                    <NXIcon big icon={plus} fill='#5E6785' />
+                    <NXIcon big icon={edit} fill='#5E6785' />
                     <div className='verticalLine' />
-                    <NXIcon icon={mark} sm fill='#5E6785' />
-                    <NXIcon icon={rubbish} sm fill='#5E6785' />
+                    <NXIcon big icon={mark} fill='#5E6785' />
+                    <NXIcon big icon={rubbish} fill='#5E6785' />
                     <div className='verticalLine' />
                 </div>
 
@@ -28,9 +28,9 @@ export default class NXDiagramBar extends Component {
                         </NXOption>
                     </NXSelect>
                     <div className='verticalLine' />
-                    <NXIcon icon={download} sm fill='#5E6785' />
-                    <NXIcon icon={print} sm fill='#5E6785' />
-                    <NXIcon icon={fullScreen} sm fill='#5E6785' />
+                    <NXIcon big icon={download} fill='#5E6785' />
+                    <NXIcon big icon={print} fill='#5E6785' />
+                    <NXIcon big icon={fullScreen} fill='#5E6785' />
                 </div>
             </div>
         );

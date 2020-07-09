@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {NXButton} from '../../../index'
+import {PropsTab} from "../../../utils/helpers";
 
 export default class ButtonPage extends Component {
   render() {
@@ -63,6 +64,18 @@ export default class ButtonPage extends Component {
 <NXButton disabled> Disabled </NXButton>`}
                 </SyntaxHighlighter>
         </section>
+        <PropsTab Props={
+            [
+                {name:'primary', default:'-', description:'Кнопка для первичного призыва к действию (Primary)'},
+                {name:'secondary', default:'-', description:'Кнопка вторичного призыва к действию (Secondary)'},
+                {name:'disabled', default:'-', description:'Кнопка, запрещающая выполнение действия'},
+                {name:'padding', default:'9px 32px', description:'Внутренний отступ'},
+                {name:'margin', default:'-', description:'Внешний отступ'},
+                {name:'height', default:'32px', description:'Высота'},
+                {name:'width', default:'0', description:'Ширина'},
+                {name:'isIcon', default:'-', description:'Применяется, если кнопка содержит в себе иконку'}
+            ]
+        }/>
       </Fragment>
     );
   }
