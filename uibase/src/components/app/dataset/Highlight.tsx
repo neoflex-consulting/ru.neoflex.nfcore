@@ -258,13 +258,26 @@ const SortableItem = SortableElement(({value}: any) => {
                     onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
                     mask={false}
-                    onOk={() => {
-                        return value.handleChange(JSON.stringify({
-                            index: value.index,
-                            columnName: 'backgroundColor',
-                            value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
-                        }))
-                    }}>
+                    footer={[<Form onSubmit={value.handleSubmit}>
+                        <Button key="back" onClick={() => value.handleColorMenu('background', value.index)}>
+                            Отменить
+                        </Button>
+                        <Button
+                            title="run query"
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                            type="primary"
+                            onClick={() => {
+                                return value.handleChange(JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'backgroundColor',
+                                    value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
+                                }))
+                            }}>
+                            ОК
+                        </Button></Form>,
+                    ]}>
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                         <Radio.Button
                             style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
@@ -299,11 +312,24 @@ const SortableItem = SortableElement(({value}: any) => {
                     onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
                     mask={false}
-                    onOk={() => value.handleChange(JSON.stringify({
-                        index: value.index,
-                        columnName: 'color',
-                        value: value.stateColor !== undefined ? value.stateColor : value.color
-                    }))}
+                    footer={[<Form onSubmit={value.handleSubmit}>
+                        <Button key="back" onClick={() => value.handleColorMenu('text', value.index)}>
+                            Отменить
+                        </Button>
+                        <Button
+                            title="run query"
+                            key={'runQueryButton'}
+                            value={'runQueryButton'}
+                            htmlType="submit"
+                            type="primary"
+                            onClick={() => value.handleChange(JSON.stringify({
+                            index: value.index,
+                            columnName: 'color',
+                            value: value.stateColor !== undefined ? value.stateColor : value.color
+                        }))}>
+                            ОК
+                        </Button></Form>,
+                    ]}
                 >
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                     <Radio.Button
