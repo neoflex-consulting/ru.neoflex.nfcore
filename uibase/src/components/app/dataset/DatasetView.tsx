@@ -10,7 +10,7 @@ import ServerGroupBy from "./ServerGroupBy";
 import ServerAggregate from './ServerAggregate';
 import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
-import Calculator from "./Calculator";
+import Calculator, {encode, hash} from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParams} from "../../../utils/namedParamsUtils";
 import DrawerDiagram from "./DrawerDiagram";
@@ -20,7 +20,7 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType, eventType, grantType} from "../../../utils/consts";
+import {actionType, calculatorFunctionTranslator, eventType, grantType} from "../../../utils/consts";
 
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -482,6 +482,21 @@ class DatasetView extends React.Component<any, State> {
                 this.getAllDatasetComponents(false)
             }
         }
+        if (prevProps.t !== this.props.t && this.state.serverCalculatedExpression) {
+            this.setState({serverCalculatedExpression: this.state.serverCalculatedExpression.map(expr => {
+                    let translatedOperation = expr.operation;
+                    calculatorFunctionTranslator.forEach(translation => {
+                        let regex = new RegExp( translation.key, "i");
+                        if (regex.test(translatedOperation!)) {
+                            translatedOperation = translatedOperation?.replace(new RegExp(translation.key, 'gi'), this.props.t(translation.value));
+                        }
+                    });
+                    return {
+                        ...expr,
+                        operation: translatedOperation
+                    }
+                })})
+        }
     }
 
     getColumnDefGroupBy = (rowDataShow: any) => {
@@ -557,24 +572,32 @@ class DatasetView extends React.Component<any, State> {
     };
 
     translateExpression(calculatedExpression: IServerQueryParam[]) {
-        let sortMap = this.state.columnDefs.map(colDef => {
+        let sortMap = this.state.columnDefs
+            .filter((def:any) => !def.get("hide"))
+            .map((colDef, index) => {
             return {
                 fieldName : colDef.get("field"),
-                fieldHeader : colDef.get("headerName")
+                fieldHeader : colDef.get("headerName"),
+                fieldCode: encode(index),
+                fieldHash: hash(encode(index))
             }
-        }).sort((a, b) => {
-            if (a.fieldHeader > b.fieldHeader) {
-                return 1
-            } else if (a.fieldHeader === b.fieldHeader){
-                return 0
-            }
-            return -1
-        });
+        }).reverse();
         return calculatedExpression.map(expr => {
             let translatedOperation = expr.operation;
+            calculatorFunctionTranslator.forEach(translation => {
+                let regex = new RegExp( translation.key, "i");
+                if (regex.test(translatedOperation!)) {
+                    translatedOperation = translatedOperation?.replace(new RegExp(translation.key, 'gi'), translation.value);
+                }
+            });
             sortMap.forEach(colDef => {
-                if (translatedOperation?.includes(colDef.fieldHeader)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHeader, 'g'), colDef.fieldName);
+                if (translatedOperation?.includes(colDef.fieldCode)) {
+                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldCode, 'g'), colDef.fieldHash);
+                }
+            });
+            sortMap.forEach(colDef => {
+                if (translatedOperation?.includes(colDef.fieldHash)) {
+                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), colDef.fieldName);
                 }
             });
             return {
