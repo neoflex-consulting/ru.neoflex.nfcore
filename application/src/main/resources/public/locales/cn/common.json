@@ -150,6 +150,9 @@
         "bottom-right": "右下",
 
         "space": "空间",
+        "columns": "专栏",
+        "keypad" : "计算器",
+        "functions/operators" : "功能/操作员",
 
         "abs(<column>)":"Abs(<列>)",
         "mod(<column1>,<column2>)":"余数(<列>,<表达式>)",
@@ -168,7 +171,7 @@
         "log10(<column>)":"Log10(<列>)",
         "ceiling(<column>)":"确定起来(<列>)",
         "floor(<column>)":"确定下来(<列>)",
-        "coalesce(<column1>,<column2> ... <columnN>)":"Coalesce(<列1>,<列2> ... <列N>)",
+        "coalesce(<column1>,<column2>,<columnN>)":"Coalesce(<列1>,<列2>,<列N>)",
         "concat(<column1>,<column2>)":"串联(<列1>,<列2>)",
         "curdate()":"CurrentDate()",
         "curtime()":"CurrentTime()",

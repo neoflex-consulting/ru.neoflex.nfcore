@@ -156,6 +156,9 @@
         "bottom-right": "Внизу-справа",
 
         "space": "Пробел",
+        "columns": "Столбцы",
+        "keypad" : "Калькулятор",
+        "functions/operators" : "Функции/Операторы",
 
         "abs(<column>)": "Abs(<столбец>)",
         "mod(<column1>,<column2>)": "Остат(<столбец>,<выражение>)",
@@ -174,7 +177,7 @@
         "log10(<column>)": "Log10(<столбец>)",
         "ceiling(<column>)": "ОкрВверх(<столбец>)",
         "floor(<column>)": "ОкрВниз(<столбец>)",
-        "coalesce(<column1>,<column2>...<columnN>)": "Coalesce(<столбец1>,<столбец2>...<столбецN>)",
+        "coalesce(<column1>,<column2>,<columnN>)": "Coalesce(<столбец1>,<столбец2>,<столбецN>)",
         "concat(<column1>,<column2>)": "Сцепить(<столбец1>,<столбец2>)",
         "curdate()": "ТекущДата()",
         "curtime()": "ТекущВремя()",

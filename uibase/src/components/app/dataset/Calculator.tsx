@@ -82,13 +82,13 @@ function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandle
 }
 
 function CreateFunctions({onButtonClick, functions,t}:FunctionsEventHandlerProps) {
-    return <Col key={"CreateFunctionsCol"}>
+    return (<Col key={"CreateFunctionsCol"}>
         {functions ? functions.map(func => {
             return <Row key={func.get("literal") + "row"}>
                 <Button key={func.get("literal")} style={{textAlign: "left"}} value={t(func.get("literal"))} onClick={onButtonClick}>{t(func.get("literal")).split("(")[0]}</Button>
             </Row>
         }) : null}
-    </Col>
+    </Col>)
 }
 
 interface ColumnButtonsProps {
@@ -104,14 +104,14 @@ export function encode(index: number) : string {
     }
 }
 
-export function hash(str: string) : string {
-    return crypto.createHash('sha1').update(str).digest('hex')
+export function hash(s: string) : string {
+    return crypto.createHash('sha1').update(s).digest('hex')
 }
 
 function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
     return <List>
                 {columnDefs?.map((element, index) =>{
-                    return <Button style={{marginRight: '2px', marginTop: '2px'}}
+                    return <Button style={{marginRight: '2px', marginTop: '2px', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left" }}
                                    key={"Button"+element.get("field")}
                                    onClick={onClick}
                                    value={encode(index)}
@@ -390,19 +390,28 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                     </Row>
                     <Row>
                         <Col span={8}>
-                            <div style={{ height: '500px', overflowY:"scroll" }}>
+                            <div style={{textAlign:"center"}}>
+                                {this.t("columns")}
+                            </div>
+                            <div style={{ height: '500px', overflowY:"scroll"}}>
                                 <CreateColumnButtons
                                     onClick={this.handleCalculate}
                                     columnDefs={this.props.defaultColumnDefs.filter((def:any) => !def.get('hide'))}/>
                             </div>
                         </Col>
                         <Col span={8}>
+                            <div style={{textAlign:"center"}}>
+                                {this.t("keypad")}
+                            </div>
                             <CreateCalculator
                                 onButtonClick={this.handleCalculate}
                                 onClearClick={this.handleClear}
                                 t={this.t}/>
                         </Col>
                         <Col span={8}>
+                            <div style={{textAlign:"center"}}>
+                                {this.t("functions/operators")}
+                            </div>
                             <div style={{ height: '500px', overflowY:"scroll" }}>
                                 <CreateFunctions
                                     onButtonClick={this.handleCalculate}

@@ -320,7 +320,7 @@ enum CalculatorFunction {
     log10 as "log10(<column>)"
     ceiling as "ceiling(<column>)"
     floor as "floor(<column>)"
-    coalesce as "coalesce(<column1>,<column2>...<columnN>)"
+    coalesce as "coalesce(<column1>,<column2>,<columnN>)"
     concat as "concat(<column1>,<column2>)"
     curdate as "curdate()"
     curtime as "curtime()"
