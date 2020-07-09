@@ -105,7 +105,9 @@ export function encode(index: number) : string {
 }
 
 export function hash(s: string) : string {
-    return crypto.createHash('sha1').update(s).digest('hex')
+    const hash = crypto.createHash('md5');
+    hash.update(s)
+    return hash.digest("hex")
 }
 
 function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
