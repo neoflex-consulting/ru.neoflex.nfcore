@@ -75,7 +75,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     index: value.index,
                                     columnName: 'datasetColumn',
                                     value: undefined
-                                })
+                                });
                                 value.handleChange(event)
                             }}
                         >
@@ -108,7 +108,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.t(value.operation) || undefined,
                             rules: [{
                                 required:
-                                    value.highlightType !== 'Column',
+                                    (value.datasetColumn && value.highlightType !== 'Column') ||
+                                    (value.value && value.highlightType !== 'Column')||
+                                    (value.highlightType && value.highlightType !== 'Column'),
                                 message: ' '
                             }]
                         })(
@@ -156,7 +158,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.value,
                             rules: [{
                                 required:
-                                    value.highlightType !== 'Column',
+                                    (value.datasetColumn && value.highlightType !== 'Column') ||
+                                    (value.operation && value.highlightType !== 'Column')||
+                                    (value.highlightType && value.highlightType !== 'Column'),
                                 message: ' '
                             }]
                         })(
