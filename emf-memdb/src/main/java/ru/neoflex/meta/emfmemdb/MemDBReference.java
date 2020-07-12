@@ -9,6 +9,7 @@ public class MemDBReference implements Serializable {
     private int index;
     private String outId;
     private String outFragment;
+    private String outClassURI;
 
     public String getInId() {
         return inId;
@@ -56,5 +57,13 @@ public class MemDBReference implements Serializable {
 
     public void setOutFragment(String outFragment) {
         this.outFragment = outFragment;
+    }
+
+    public String getOutClassURI() {
+        return outClassURI;
+    }
+
+    public void setOutClassURI(String outClassURI) {
+        this.outClassURI = outClassURI;
     }
 }
