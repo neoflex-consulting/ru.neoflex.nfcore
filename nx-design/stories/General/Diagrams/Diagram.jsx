@@ -29,7 +29,7 @@ render() {
                 width='700px'>
             <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px', border: '1px solid #F2F2F2'}}>
                 <h3 style={{margin:'0'}}>Диаграммы</h3>
-                <NXIcon icon={close} xs/>
+                <NXIcon icon={close}/>
             </div>
             <div style={{height:'106px', padding:'24px 40px'}}>
                 <NXRow><h3>Выберите тип диаграммы</h3></NXRow>
@@ -39,7 +39,7 @@ render() {
                         onClick={()=>{this.setState({diagramType:"Block"})}}
                         padding='0'
                         isIcon='24px'>
-                        <NXIcon icon={diagramBlock} xs/>
+                        <NXIcon icon={diagramBlock} fill='#424D78' />
                         </NXButton>
                         <h4>Гистограмма</h4>
                     </NXCol>
@@ -48,7 +48,7 @@ render() {
                         onClick={()=>{this.setState({diagramType:"Bar"})}}
                         padding='0'
                         isIcon='24px'>
-                            <NXIcon icon={barChart} xs/>
+                            <NXIcon icon={barChart} fill='#424D78' />
                         </NXButton>
                         <h4>Линейчатая</h4>
                     </NXCol>
@@ -57,7 +57,7 @@ render() {
                         onClick={()=>{this.setState({diagramType:"Pie"})}}
                         padding='0'
                         isIcon='24px'>
-                            <NXIcon icon={diagramCircle} xs/>
+                            <NXIcon icon={diagramCircle} fill='#424D78' />
                         </NXButton>
                         <h4>Круговая</h4>
                     </NXCol>
@@ -66,7 +66,7 @@ render() {
                         onClick={()=>{this.setState({diagramType:"Line"})}}
                         padding='0'
                         isIcon='24px'>
-                            <NXIcon icon={diagram} xs/>
+                            <NXIcon icon={diagram} fill='#424D78' />
                         </NXButton>
                         <h4>График</h4>
                     </NXCol>

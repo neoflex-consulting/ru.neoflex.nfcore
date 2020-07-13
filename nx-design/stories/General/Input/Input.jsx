@@ -15,6 +15,26 @@ const NXInput = styled(Input)`
     width: ${(props) => (props.width ? `${props.width}` : "100%")};
 `
 
+export class NXInputClear extends Component {
+
+    render() {
+  const StyledNXInputClear = styled(Input)`
+    background: #FFFFFF;
+    border: 1px solid #E6E6E6;
+    box-sizing: border-box;
+    border-radius: 4px;
+    height: 32px;
+    font-size: 12px;
+    line-height: 14px;
+    color: #333333;
+    width: ${(props) => (props.width ? `${props.width}` : "100%")};
+    
+  `
+      return <StyledNXInputClear allowClear {...this.props} />
+    }
+}
+
+
 export default class NXInputSearch extends Component {
   render() {
     return (

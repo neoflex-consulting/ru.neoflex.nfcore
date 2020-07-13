@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.base.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 import java.util.concurrent.Callable;
 
 @Service
+@DependsOn("ru.neoflex.nfcore.base.services.Workspace")
 public class Context {
     private static final Logger logger = LoggerFactory.getLogger(Context.class);
 

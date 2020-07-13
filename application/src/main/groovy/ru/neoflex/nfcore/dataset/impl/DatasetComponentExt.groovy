@@ -9,7 +9,7 @@ import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
-import ru.neoflex.nfcore.dataset.*
+import ru.neoflex.nfcore.dataset.impl.adapters.CalculatorAdapter
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import ru.neoflex.nfcore.dataset.*
 
@@ -124,8 +124,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         NamedParameterStatement p;
         ResultSet rs;
         def rowData = []
+        def jdbcDataset = dataset as JdbcDataset
 
-        Connection jdbcConnection = (dataset.connection as JdbcConnectionExt).connect()
+        Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
         try {
             /*Execute query*/
             def queryColumns = []
@@ -165,7 +166,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
 
-            def allColumns
+            List<String> allColumns
 
             if (groupByColumn) {
                 serverGroupByColumn = groupByColumn.datasetColumn
@@ -179,13 +180,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     }
                 }
             } else {
-                allColumns = column.name + (calculatedExpression ? calculatedExpression.datasetColumn : [])
+                def calcColumns =  (calculatedExpression ? calculatedExpression.datasetColumn : [])
+                allColumns = column.name  + calcColumns
             }
 
             //Filter
             if (filters) {
                 for (int i = 0; i <= filters.size() - 1; ++i) {
-                    if (allColumns.contains(filters[i].datasetColumn) && filters[i].enable == true) {
+                    if (allColumns.contains(filters[i].datasetColumn) && filters[i].enable) {
                         def currentColumn = column.find { column -> column.name.toLowerCase() == filters[i].datasetColumn.toLowerCase() }
                         def type;
                         //TODO добавить определение типа для вычисляемых полей
@@ -282,7 +284,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     def isExcluded = true;
                     //Итого и столбец под одним столбцом
                     for (int j = 0; j <= aggregations.size() - 1; ++j) {
-                        if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable == true) {
+                        if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
                             def map = [:]
                             map["column"] = aggregations[j].datasetColumn
                             def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
@@ -310,7 +312,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             isExcluded = false
                         }
                     }
-                    if (isExcluded == true) {
+                    if (isExcluded) {
                         def map = [:]
                         map["column"] = allColumns[i]
                         map["select"] = "NULL as \"${allColumns[i]}\""
@@ -324,7 +326,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             //Order by
             if (sorts) {
                 for (int i = 0; i <= sorts.size() - 1; ++i) {
-                    if (allColumns.contains(sorts[i].datasetColumn) && sorts[i].enable == true) {
+                    if (allColumns.contains(sorts[i].datasetColumn) && sorts[i].enable) {
                         def map = [:]
                         map["column"] = sorts[i].datasetColumn
                         def operator = getConvertSort(sorts[i].operation.toString().toLowerCase())
@@ -343,10 +345,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Calculated expressions
             if (calculatedExpression) {
+                def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
                 for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
                     def map = [:]
                     map["column"] = calculatedExpression[i].datasetColumn
-                    map["select"] = "${calculatedExpression[i].operation} as \"${calculatedExpression[i].datasetColumn}\""
+                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter)} as \"${calculatedExpression[i].datasetColumn}\""
                     if (!serverCalculatedExpression.contains(map)) {
                         serverCalculatedExpression.add(map)
                     }
@@ -355,9 +358,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             String currentQuery
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${dataset.query}) t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${dataset.schemaName}.${dataset.tableName}) t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.schemaName}.${jdbcDataset.tableName}) t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -460,6 +463,51 @@ class DatasetComponentExt extends DatasetComponentImpl {
     String getConvertSort(String sort) {
         if (sort == Sort.FROM_ATO_Z.toString().toLowerCase()) {return 'ASC'}
         else if (sort == Sort.FROM_ZTO_A.toString().toLowerCase()) {return 'DESC'}
+    }
+
+    String replaceCalculatorFunctions(String expression, CalculatorAdapter calculatorAdapter) {
+        def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,.]*\)/
+        List<String> result = (expression =~ pattern ).findAll()
+        if (result.size() > 0) {
+            for (func in result) {
+                List<String> args = (func =~ /[a-zA-Z0-9._]+/).findAll()
+                switch (args[0]) {
+                    case CalculatorFunction.SUBSTRING.getName():
+                        expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3])); break;
+                    case CalculatorFunction.UPPER.getName():
+                        expression = expression.replace(func, calculatorAdapter.upper(args[1])); break;
+                    case CalculatorFunction.LOWER.getName():
+                        expression = expression.replace(func, calculatorAdapter.lower(args[1])); break;
+                    case CalculatorFunction.LENGTH.getName():
+                        expression = expression.replace(func, calculatorAdapter.length(args[1])); break;
+                    case CalculatorFunction.PI.getName():
+                        expression = expression.replace(func, calculatorAdapter.pi()); break;
+                    case CalculatorFunction.LOG10.getName():
+                        expression = expression.replace(func, calculatorAdapter.log10(args[1])); break;
+                    case CalculatorFunction.CEILING.getName():
+                        expression = expression.replace(func, calculatorAdapter.ceiling(args[1])); break;
+                    case CalculatorFunction.CURDATE.getName():
+                        expression = expression.replace(func, calculatorAdapter.curdate()); break;
+                    case CalculatorFunction.CURTIME.getName():
+                        expression = expression.replace(func, calculatorAdapter.curtime()); break;
+                    case CalculatorFunction.YEAR.getName():
+                        expression = expression.replace(func, calculatorAdapter.year(args[1])); break;
+                    case CalculatorFunction.MONTH.getName():
+                        expression = expression.replace(func, calculatorAdapter.month(args[1])); break;
+                    case CalculatorFunction.DAY.getName():
+                        expression = expression.replace(func, calculatorAdapter.day(args[1])); break;
+                    case CalculatorFunction.HOUR.getName():
+                        expression = expression.replace(func, calculatorAdapter.hour(args[1])); break;
+                    case CalculatorFunction.MINUTE.getName():
+                        expression = expression.replace(func, calculatorAdapter.minute(args[1])); break;
+                    case CalculatorFunction.SECOND.getName():
+                        expression = expression.replace(func, calculatorAdapter.second(args[1])); break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return expression
     }
 
     private static final ClassLogger logger =
