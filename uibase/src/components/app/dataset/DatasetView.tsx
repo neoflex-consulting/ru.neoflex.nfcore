@@ -82,7 +82,6 @@ interface State {
     currentDiagram?: IDiagram;
     columnDefs: any[];
     defaultColumnDefs: any[];
-    gridData: any[];
     fullScreenOn: boolean;
     rowData: any[];
     highlights: IServerQueryParam[];
@@ -120,6 +119,7 @@ interface State {
     isReadOnly: boolean;
     IsGrid: boolean;
     isWithTable: boolean;
+    isDownloadFromDiagramPanel: boolean;
 }
 
 const defaultComponentValues = {
@@ -143,7 +143,6 @@ class DatasetView extends React.Component<any, State> {
             currentDiagram: undefined,
             columnDefs: [],
             defaultColumnDefs: [],
-            gridData: [],
             deleteMenuVisible: false,
             rowData: [],
             highlights: [],
@@ -181,6 +180,7 @@ class DatasetView extends React.Component<any, State> {
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
             IsGrid: false,
             isWithTable: false,
+            isDownloadFromDiagramPanel: false,
         }
     }
 
@@ -853,24 +853,14 @@ class DatasetView extends React.Component<any, State> {
     };
 
     onActionMenu(e : any) {
-        let Handlers: any[]
-        Handlers = this.props.context.getDocxHandlers()
-
-        if (this.state.isWithTable && this.state.gridData !== undefined){
-            for (let i = 0; i < this.state.gridData.length; i++){
-                if (this.state.gridData[i] === "DatasetDiagram"){
-                    Handlers.push(this.state.gridData[i])
-                }
-            }
-        }
         if (e.key === 'exportToDocx') {
-            handleExportDocx(Handlers).then(blob => {
+            handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
                 saveAs(new Blob([blob]), "example.docx");
                 console.log("Document created successfully");
             });
         }
         if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
+            handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
                     saveAs(new Blob([blob]), 'example.xlsx');
                     console.log("Document created successfully");
                 }
@@ -879,7 +869,9 @@ class DatasetView extends React.Component<any, State> {
 
     }
     GridData = () => {
-        this.setState({gridData: this.props.context.getDocxHandlers()})
+        this.props.context.addDocxHandler();
+        this.props.context.addExcelHandler()
+        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel})
         if (this.state.diagrams.length > 0)
             this.setState({currentDiagram: this.state.diagrams[0]})
         else
@@ -1080,8 +1072,10 @@ class DatasetView extends React.Component<any, State> {
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
-                        this.setState({currentDiagram:undefined})
+                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel })
                         this.getAllDatasetComponents(true)
+                        this.props.context.removeDocxHandler();
+                        this.props.context.removeExcelHandler();
                     }}
             >
                 Вернуться к таблице

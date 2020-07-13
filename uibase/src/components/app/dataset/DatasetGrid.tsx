@@ -104,6 +104,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             tableData.push(dataRow)
         }
         return  {
+            hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
             gridData:(tableData.length === 0) ? [[]] : tableData
         };
@@ -123,6 +124,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             tableData.push(dataRow)
         }
         return  {
+            hidden: this.props.hidden,
             excelComponentType : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),

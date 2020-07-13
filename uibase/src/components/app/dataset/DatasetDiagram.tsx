@@ -93,6 +93,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
         const height = (this.node) ? this.node.size.height : 400;
         if (this.node && this.node?.resizable !== null) {
             return {
+                hidden: this.props.hidden,
                 docxComponentType : docxElementExportType.diagram,
                 diagramData: {
                     blob: domtoimage.toBlob(this.node?.resizable,{
@@ -104,7 +105,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                 }
             };
         }
-        return {docxComponentType: docxElementExportType.diagram}
+        return {hidden: this.props.hidden, docxComponentType: docxElementExportType.diagram}
     }
 
     private getExcelData(): excelExportObject {
@@ -112,6 +113,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
         const height = (this.node) ? this.node.size.height : 400;
         if (this.node && this.node?.resizable !== null) {
             return {
+                hidden: this.props.hidden,
                 excelComponentType: excelElementExportType.diagram,
                 diagramData: {
                     blob: domtoimage.toBlob(this.node?.resizable, {
@@ -123,7 +125,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                 }
             };
         }
-        return {excelComponentType: excelElementExportType.diagram}
+        return {hidden: this.props.hidden, excelComponentType: excelElementExportType.diagram}
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
