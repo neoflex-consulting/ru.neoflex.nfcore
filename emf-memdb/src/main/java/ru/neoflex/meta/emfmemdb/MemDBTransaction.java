@@ -1,9 +1,8 @@
 package ru.neoflex.meta.emfmemdb;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
@@ -49,6 +48,10 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         return dbObject;
     }
 
+    public Stream<MemDBReference> allReferences() {
+        return allEntries().flatMap(entry -> entry.getValue().getOutRefs().stream());
+    }
+
     public Stream<MemDBObject> all() {
         return allEntries().map(entry -> entry.getValue());
     }
@@ -73,12 +76,38 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
     }
 
     private void loadResource(Resource resource, MemDBObject dbObject) {
+        List<String> ids = MemBDServer.getIds(resource.getURI()).collect(Collectors.toList());
         ByteArrayInputStream bais = new ByteArrayInputStream(dbObject.getImage());
         try {
             resource.load(bais, null);
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Can't load %s[%s]", dbObject.getClassURI(), dbObject.getQName()));
         }
+        dbObject.getOutRefs().forEach(reference -> {
+            int rootIndex = ids.indexOf(reference.getInId());
+            EObject eObject = resource.getContents().get(rootIndex);
+            EObject internalEObject = reference.getInFragment().length() == 0 ? eObject :
+                    EcoreUtil.getEObject(eObject, reference.getInFragment());
+            EStructuralFeature sf = internalEObject.eClass().getEStructuralFeature(reference.getFeature());
+            EObject crossReferencedEObject = null;
+            if (reference.getInId().equals(reference.getOutId())) {
+                crossReferencedEObject = reference.getOutFragment().length() == 0 ? eObject :
+                        EcoreUtil.getEObject(eObject, reference.getOutFragment());
+            }
+            else {
+                EClass eClass = (EClass) resource.getResourceSet().getEObject(URI.createURI(reference.getOutClassURI()), false);
+                crossReferencedEObject = EcoreUtil.create(eClass);
+                URI crURI = memBDServer.createResourceURI(Stream.of(get(reference.getOutId())))
+                        .appendFragment("/" + reference.getOutFragment());
+                ((InternalEObject) crossReferencedEObject).eSetProxyURI(crURI);
+            }
+            if (sf.isMany()) {
+                ((List) internalEObject.eGet(sf)).add(crossReferencedEObject);
+            }
+            else {
+                internalEObject.eSet(sf, crossReferencedEObject);
+            }
+        });
     }
 
     public Stream<MemDBObject> allOfClassAndQName(String classURI, String qName) {
@@ -121,18 +150,48 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         for (int i = 0; i < resource.getContents().size(); ++i) {
             EObject eObject = resource.getContents().get(i);
             MemDBObject dbObject = dbObjects.get(i);
-            //TODO: copy eObject to dbObject
             Resource tempR = tempRS.createResource(memBDServer.createResourceURI(Stream.of(dbObject)));
             tempR.getContents().add(EcoreUtil.copy(eObject));
             saveResource(tempR, dbObject);
             dbObject.setVersion(dbObject.getVersion() + 1);
             mObjectMap.put(dbObject.getId(), dbObject);
         }
-        memBDServer.getEvents().fireAfterSave(oldResource, resource);
         resource.setURI(memBDServer.createResourceURI(dbObjects.stream()));
+        memBDServer.getEvents().fireAfterSave(oldResource, resource);
     }
 
     private void saveResource(Resource resource, MemDBObject dbObject) {
+        new EcoreUtil.CrossReferencer(resource) {
+            {
+                crossReference();
+            }
+
+            protected void add(InternalEObject internalEObject, EReference eReference, EObject crossReferencedEObject) {
+                if (!eReference.isDerived() && !eReference.isTransient() && !eReference.isContainer() && internalEObject.eIsSet(eReference)) {
+                    EObject eObject = EcoreUtil.getRootContainer(internalEObject);
+                    String inId = MemBDServer.getIds(resource.getURI()).collect(Collectors.toList()).get(
+                            resource.getContents().indexOf(eObject));
+                    String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, internalEObject);
+                    String feature = eReference.getName();
+                    EObject crossReferencedRoot = EcoreUtil.getRootContainer(crossReferencedEObject);
+                    String toFragment = EcoreUtil.getRelativeURIFragmentPath(crossReferencedRoot, crossReferencedEObject);
+                    int index = !eReference.isMany() ? -1 : ((EList) internalEObject.eGet(eReference)).indexOf(crossReferencedEObject);
+                    String outId = MemBDServer.getIds(crossReferencedRoot.eResource().getURI())
+                            .collect(Collectors.toList()).get(
+                                    crossReferencedRoot.eResource().getContents().indexOf(crossReferencedRoot));
+                    MemDBReference reference = new MemDBReference();
+                    reference.setInId(inId);
+                    reference.setInFragment(fromFragment);
+                    reference.setFeature(feature);
+                    reference.setIndex(index);
+                    reference.setOutId(outId);
+                    reference.setOutFragment(toFragment);
+                    reference.setOutClassURI(EcoreUtil.getURI(crossReferencedEObject.eClass()).toString());
+                    dbObject.getOutRefs().add(reference);
+                }
+                super.add(internalEObject, eReference, crossReferencedEObject);
+            }
+        }.forEach((key, value) -> value.forEach(EStructuralFeature.Setting::unset));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             resource.save(baos, null);

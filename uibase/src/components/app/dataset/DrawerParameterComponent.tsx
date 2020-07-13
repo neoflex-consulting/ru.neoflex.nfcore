@@ -9,6 +9,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import arrayMove from "array-move";
+import {EObject} from "ecore";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -27,6 +28,7 @@ interface State {
     color?: any;
     currentIndex?: number;
     solidPicker?: boolean;
+    calculatorFunction?: EObject[];
 }
 
 export class DrawerParameterComponent<T extends Props, V extends State> extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {

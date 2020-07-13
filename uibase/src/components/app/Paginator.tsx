@@ -40,7 +40,7 @@ class Paginator extends React.Component<any, any> {
                     <Pagination
                         size="small"
                         current={this.props.currentPage}
-                        total={this.props.totalNumberOfPage*this.state.paginationPageSize}
+                        total={this.props.totalNumberOfPage*this.state.paginationPageSize || 0}
                         onChange={(e : any) => this.onSomePage(e)}
                         showSizeChanger
                         showQuickJumper

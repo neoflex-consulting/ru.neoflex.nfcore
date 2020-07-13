@@ -13,7 +13,6 @@ public class MemDBObject implements Serializable {
     private String qName;
     private byte[] image;
     private List<MemDBReference> outRefs = new ArrayList<>();
-    private List<MemDBReference> inRefs = new ArrayList<>();
 
     MemDBObject() {
         this.id = EcoreUtil.generateUUID();
@@ -54,14 +53,6 @@ public class MemDBObject implements Serializable {
 
     public void setOutRefs(List<MemDBReference> outRefs) {
         this.outRefs = outRefs;
-    }
-
-    public List<MemDBReference> getInRefs() {
-        return inRefs;
-    }
-
-    public void setInRefs(List<MemDBReference> inRefs) {
-        this.inRefs = inRefs;
     }
 
     public void setId(String id) {

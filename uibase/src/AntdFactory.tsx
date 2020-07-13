@@ -75,7 +75,7 @@ class Col_ extends ViewContainer {
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
-            <Col span={this.viewObject.get('span') || 24}
+            <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
                  hidden={this.state.isHidden}
                  style={{
@@ -623,6 +623,7 @@ class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
+        this.changeLocale()
         this.onChange(this.state.pickedDate.format(this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
@@ -646,6 +647,24 @@ class DatePicker_ extends ViewContainer {
         this.props.context.removeExcelHandler();
         this.props.context.removeEventAction();
         this.props.context.contextItemValues.delete(this.viewObject.eURI());
+    }
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (prevProps.t !== this.props.t) {
+            this.changeLocale()
+        }
+    }
+
+    changeLocale = () => {
+        moment.updateLocale('en', {
+            weekdaysMin : [ this.props.t("mon"), this.props.t("tue"), this.props.t("wed"), this.props.t("thu")
+                , this.props.t("fri"), this.props.t("sat"), this.props.t("sun")],
+            monthsShort : [ this.props.t("jan"), this.props.t("feb"), this.props.t("mar"), this.props.t("apr")
+                , this.props.t("may"), this.props.t("jun"), this.props.t("jul"), this.props.t("aug"), this.props.t("sep")
+                , this.props.t("oct"), this.props.t("nov"), this.props.t("dec")]
+        });
+        this.forceUpdate();
+
     }
 
     onChange = (currentValue: string) => {
@@ -678,6 +697,7 @@ class DatePicker_ extends ViewContainer {
                  style={{marginBottom: marginBottom}}>
                  <DatePicker
                     key={this.viewObject._id}
+                    showToday={false}
                     defaultValue={this.state.pickedDate}
                     value={moment(this.state.currentValue, this.viewObject.get('format') || "YYYY-MM-DD")}
                     disabled={isReadOnly}
