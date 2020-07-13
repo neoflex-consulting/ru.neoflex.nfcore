@@ -159,7 +159,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisXLegend,
             legendPosition: 'middle',
-            legendOffset: this.state.diagramParams.axisXPosition === "Top" ? -30 : 30,
+            legendOffset: 30,
         };
         const axisY : Axis = {
             tickSize: 5,
@@ -167,7 +167,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisYLegend,
             legendPosition: 'middle',
-            legendOffset: this.state.diagramParams.axisYPosition === "Left" ? -35 : 35,
+            legendOffset: -45,
         };
         return <div>
 
