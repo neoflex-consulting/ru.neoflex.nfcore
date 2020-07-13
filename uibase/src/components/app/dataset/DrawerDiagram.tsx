@@ -31,7 +31,10 @@ interface Props {
 
 interface State {
     diagramType?: string,
-    action?: string
+    action?: string,
+    Xposition?: string,
+    Yposition?: string,
+    LegenedPosition?: string,
 }
 
 class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
@@ -45,16 +48,33 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     handleSubmit = () => {
         this.props.form.validateFields((err: any) => {
             if (!err) {
+                let xPosition, yPosition, legenedPosition: any;
+                if (this.state.diagramType! === "Bar") {
+                    xPosition = "Bottom"
+                    yPosition = "Left"
+                    legenedPosition = "BottomRight"
+                }
+
+                else if (this.state.diagramType! === "Line"){
+                    xPosition = "Bottom"
+                    yPosition = "Left"
+                    legenedPosition = "BottomRight"
+                }
+                else{
+                    xPosition = undefined
+                    yPosition = undefined
+                    legenedPosition = "Bottom"
+                }
                 const diagramParam: IDiagram = {
                     id: this.props.id,
                     keyColumn: this.props.form.getFieldValue("axisXColumnName"),
                     valueColumn: this.props.form.getFieldValue("axisYColumnName"),
                     diagramName: this.props.form.getFieldValue("diagramName"),
                     diagramLegend: this.props.form.getFieldValue("diagramLegend"),
-                    legendAnchorPosition: this.props.form.getFieldValue("legendPosition"),
-                    axisXPosition: this.props.form.getFieldValue("axisXPosition"),
+                    legendAnchorPosition: legenedPosition,
+                    axisXPosition: xPosition,
                     axisXLegend: this.props.form.getFieldValue("axisXLabel"),
-                    axisYPosition: this.props.form.getFieldValue("axisYPosition"),
+                    axisYPosition: yPosition,
                     axisYLegend: this.props.form.getFieldValue("axisYLabel"),
                     diagramType: this.state.diagramType!,
                     colorSchema: "accent",
@@ -190,6 +210,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
         }
     }
 
+
     render() {
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
@@ -232,22 +253,13 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     <Col span={12}>
                         {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel",this.props.t("axis X label")):""}
                     </Col>
-                    <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisXPosition",this.props.t("axis X position"), this.props.allAxisXPosition):""}
-                    </Col>
                 </Row>
                 <Row>
                     <Col span={12}>
                         {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel",this.props.t("axis Y label")):""}
                     </Col>
-                    <Col span={12}>
-                        {(this.state.diagramType!=="Pie")?this.getEnumSelectOptions("axisYPosition",this.props.t("axis Y position"), this.props.allAxisYPosition):""}
-                    </Col>
                 </Row>
                 <Row>
-                    <Col span={12}>
-                        {this.getEnumSelectOptions("legendPosition",this.props.t("legend position"), this.props.allLegendPosition)}
-                    </Col>
                 </Row>
             </Form>
         )
