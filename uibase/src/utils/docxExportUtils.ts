@@ -18,11 +18,17 @@ export interface docxExportObject {
     textData?: string
 }
 
-async function handleExportDocx(handlers: any[]) {
+async function handleExportDocx(this: any, handlers: any[]) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
     for (let i = 0; i < handlers.length; i++) {
+       if(this.props.viewObject.values.hidden === false){
+
+       }
+
+
         const docxData: docxExportObject = handlers[i]();
+
         if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
             //Добавление диаграммы в png
             //cast to ArrayBuffer
@@ -36,7 +42,7 @@ async function handleExportDocx(handlers: any[]) {
             for (const row of docxData.gridData) {
                 let tableRow: TableCell[] = [];
                 for (const cell of row) {
-                    tableRow.push(new TableCell({children: [new Paragraph((cell === null)? "" : cell)]}));
+                    tableRow.push(new TableCell({children: [new Paragraph((cell === null) ? "" : cell)]}));
                 }
                 tableRows.push(new TableRow({
                     children: tableRow
@@ -61,12 +67,14 @@ async function handleExportDocx(handlers: any[]) {
                 new TextRun("")
             ]
         }))
-    }
-    doc.addSection({
-        properties: {},
-        children: paragraphs
-    });
-    return Packer.toBlob(doc)
+
+        }
+        doc.addSection({
+            properties: {},
+            children: paragraphs
+        });
+        return Packer.toBlob(doc)
+
 }
 
 export {handleExportDocx};
