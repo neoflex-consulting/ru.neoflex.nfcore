@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import {NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,arrowLeft,deleteIcon,plus,close,
   switchIcon,rubbish,fill,letter,diagram,diagramCircle,diagramBlock,gear,settings,filter,plusBlock,
   calculator,barChart,sort,add,update,mark,download,print,fullScreen,undo,list,more,table,tableUp,arrowLong,
-  edit,menuOpen,search,legend,tiles,alert,info,warning
+  edit,menuOpen,search,legend,tiles,success,info,warning
 } from "../../../index";
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -68,7 +68,7 @@ class IconPage extends Component {
     ]
 
     const alerts = [
-      alert,
+      success,
       info,
       warning
     ]
@@ -103,10 +103,27 @@ class IconPage extends Component {
             <SyntaxHighlighter language='jsx' style={okaidia} >
                 {`import { NXIcon, iconName } from "nx-design";`}
             </SyntaxHighlighter>
+          <h2 className="title">Размеры</h2>
+          <section className="icons ml20">
+              <div className="icon">
+                  <NXIcon big icon={notification} />
+                  <br/>
+                  <span>Big</span>
+              </div>
+              <div className="icon">
+                  <NXIcon icon={notification} />
+                  <br/>
+                  <span>Default</span>
+              </div>
+              <div className="icon">
+                  <NXIcon small icon={notification} />
+                  <br/>
+                  <span>Small</span>
+              </div>
+          </section>
         <p className="text">
           При нажатии на необходимую иконку, ее код будет скопирован в буффер.
         </p>
-
 
         <h3 className="title">Header</h3>
         <section className="icons ml20">
@@ -163,10 +180,13 @@ class IconPage extends Component {
         </section>
           <PropsTab Props={
               [
+                  {name:'icon', default:'-', description:'Имя иконки'},
                   {name:'small', default:'16px', description:'Размер иконки - 8px'},
                   {name:'big', default:'16px', description:'Размер иконки - 24px'},
                   {name:'margin', default:'auto 3px', description:'Внешний отступ'},
-                  {name:'fill', default:'-', description:'Цвет иконки'}
+                  {name:'fill', default:'-', description:'Цвет иконки'},
+                  {name:'noPoint', default:'pointer', description:'При наведении на иконку будет установлен cursor: default'}
+
               ]
           }/>
       </Fragment>

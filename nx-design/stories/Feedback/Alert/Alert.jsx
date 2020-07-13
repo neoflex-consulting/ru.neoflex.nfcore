@@ -1,7 +1,7 @@
 import React from "react";
 import {Alert} from "antd";
 import styled from 'styled-components';
-import alert from '../../../icons/alert/alert.svg';
+import success from '../../../icons/alert/success.svg';
 
 export const NXAlert = {
   small: styled(Alert)`
@@ -25,7 +25,7 @@ export const NXAlert = {
     font-size: 14px;
 
       ::before {
-      content: url(${alert});
+      content: url(${success});
       height: 24px;
       margin-right: 14px
       }

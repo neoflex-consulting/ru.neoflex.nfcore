@@ -11,14 +11,16 @@ import {
     NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,
     arrowLeft,deleteIcon,plus,close,switchIcon,rubbish,fill,letter,diagram,diagramCircle,diagramBlock,gear,
     settings,filter,plusBlock,calculator,barChart,sort,add,update,mark,download,print,fullScreen,undo,list,
-    more,table,tableUp,arrowLong,edit,menuOpen,search,legend,tiles,alert,info,warning
+    more,table,tableUp,arrowLong,edit,menuOpen,search,legend,tiles,success,info,warning
 } from './stories/General/Icon/Icon';
 
+import {NXModal} from "./stories/Feedback/Modal/Modal";
 import {NXTable} from "./stories/General/Form/Table/NXTable";
 import NXHint from "./stories/Other/Components/NXHint";
 /*---EXPORTS---*/
 
 export {
+    NXModal,
     NXHint,
     NXButton,
     NXForm,
@@ -31,6 +33,6 @@ export {
     NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,
     arrowLeft,deleteIcon,plus,close,switchIcon,rubbish,fill,letter,diagram,diagramCircle,diagramBlock,gear,
     settings,filter,plusBlock,calculator,barChart,sort,add,update,mark,download,print,fullScreen,undo,list,
-    more,table,tableUp,arrowLong,edit,menuOpen,search,legend,tiles,alert,info,warning
+    more,table,tableUp,arrowLong,edit,menuOpen,search,legend,tiles,success,info,warning
     /*----------*/
 }
