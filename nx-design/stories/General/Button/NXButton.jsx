@@ -21,7 +21,7 @@ export default class NXButton extends Component {
     margin: ${(props) => (props.margin ? `${props.margin}` : "")};
 
     height: ${(props) => (props.isIcon ? `${props.isIcon}` : "32px")};
-    width: ${(props) => (props.isIcon ? `${props.isIcon}` : "auto")};
+    width: ${(props) => (props.isIcon ? `${props.isIcon}` : props.width ? props.width : "auto")};
     text-align: center;
     align-items: center;
     border: ${(props) => (props.primary ? 'none'

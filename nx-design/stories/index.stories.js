@@ -16,6 +16,7 @@ import GridPage from "./General/Grid";
 import TypographyPageDoc from "./Documentation/Typography";
 import MainColorPageDoc from "./Documentation/ColorPallete/Main";
 import AccentColorPageDoc from "./Documentation/ColorPallete/Accent";
+import ModalPage from "./Feedback/Modal";
 
 /*Documentation*/
 storiesOf('Documentation|Description', module)
@@ -57,6 +58,9 @@ storiesOf('General|Grid', module)
 /*Feedback*/
 storiesOf('Feedback|Alerts', module)
     .add('Alerts', () => <AlertPage />)
+
+storiesOf('Feedback|Modal', module)
+    .add('Modal', () => <ModalPage />)
 
 /*Others*/
 storiesOf('Others|Components', module)

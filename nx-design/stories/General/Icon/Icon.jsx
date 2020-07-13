@@ -216,9 +216,9 @@ import styled from 'styled-components'
       <path d="M2 11.3846H7.88235V4H2V11.3846ZM2 20H7.88235V12.6154H2V20ZM9.05882 20H14.9412V12.6154H9.05882V20ZM16.1176 20H22V12.6154H16.1176V20ZM9.05882 11.3846H14.9412V4H9.05882V11.3846ZM16.1176 4V11.3846H22V4H16.1176Z" fill="#333333"/>
     </svg>
 
-    const alert = () => <svg viewBox="2 2 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#417A8A"/>
-      <path d="M11.2624 17.7895L6.21094 13.9359L7.64725 12.1309L10.7492 14.4973L15.8688 7.26318L17.7899 8.56635L11.2624 17.7895Z" fill="white"/>
+    const success = () => <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C21.9941 6.47962 17.5204 2.0059 12 2ZM12 20.5714C7.26612 20.5714 3.42856 16.7339 3.42856 12C3.42856 7.26612 7.26612 3.42856 12 3.42856C16.7339 3.42856 20.5714 7.26612 20.5714 12C20.5663 16.7318 16.7318 20.5663 12 20.5714Z" fill="#27677C"/>
+        <path d="M17.4869 7.92366C17.2101 7.65631 16.7712 7.65631 16.4945 7.92366L9.85658 14.5615L7.50441 12.2093C7.23036 11.9256 6.77814 11.9178 6.49442 12.1918C6.21066 12.4659 6.20284 12.9181 6.47689 13.2018C6.48262 13.2077 6.48848 13.2136 6.49442 13.2193L9.35158 16.0765C9.63049 16.3554 10.0827 16.3554 10.3616 16.0765L17.5045 8.93361C17.7785 8.64989 17.7706 8.19771 17.4869 7.92366Z" fill="#27677C"/>
     </svg>
 
     const info = () => <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -249,8 +249,8 @@ import styled from 'styled-components'
 const styledNXIcon = props => <Icon component={props.icon} className='NXIcon' {...props} />
 const NXIcon = styled(styledNXIcon)`
     height: auto;
-    width: ${(props) => (props.small ? "8px" : props.big ? "24px" : "16px")};
-    cursor: pointer;
+    width: ${(props) => (props.small ? "8px" : props.big ? "24px" : props.width ? props.width : "16px")};
+    cursor: ${(props) => (props.noPoint ? 'default' : 'pointer')};
     margin: ${(props) => (props.margin ? `${props.margin}` : "auto 3px")};
     
     svg path{
@@ -305,7 +305,7 @@ export {
   search,
   legend,
   tiles,
-  alert,
+  success,
   info,
   warning
 }
