@@ -34,6 +34,8 @@ import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
+import {NeoButton} from "ant-design-colors/lib";
+import 'ant-design-colors/dist/neoAntd.css';
 
 const backgroundColor = "#2a356c";
 
@@ -506,6 +508,14 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
+
+                        <Col span={8}>
+
+                            <NeoButton type={"primary"}>Hi</NeoButton>
+
+                            {/*<NeoButton size={"small"} type={"dashed"}>Hi hih hi</NeoButton>*/}
+                        </Col>
+
                         <Col span={14}
                                     style={{textAlign: 'center', height: 'inherit'}}>
                                     {
