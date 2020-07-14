@@ -29,7 +29,7 @@ public class TestBase {
         return new File(System.getProperty("user.home") + "/.memdb", MEMDB);
     }
 
-    public static MemBDServer refreshRatabase() throws Exception {
+    public static MemBDServer refreshDatabase() throws Exception {
         deleteDirectory(getDatabaseFile());
         return getDatabase();
     }

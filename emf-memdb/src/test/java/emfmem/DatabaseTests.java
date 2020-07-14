@@ -2,6 +2,7 @@ package emfmem;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,13 +11,19 @@ import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DatabaseTests extends TestBase {
     @Before
     public void startUp() throws Exception {
-        memBDServer = refreshRatabase();
+        memBDServer = getDatabase();
+    }
+
+    @After
+    public void shutDown() throws IOException {
+        memBDServer.close();
     }
 
     @Test

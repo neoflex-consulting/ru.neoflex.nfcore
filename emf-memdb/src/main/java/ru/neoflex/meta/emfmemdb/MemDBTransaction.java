@@ -83,31 +83,31 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Can't load %s[%s]", dbObject.getClassURI(), dbObject.getQName()));
         }
-        dbObject.getOutRefs().forEach(reference -> {
-            int rootIndex = ids.indexOf(reference.getInId());
-            EObject eObject = resource.getContents().get(rootIndex);
-            EObject internalEObject = reference.getInFragment().length() == 0 ? eObject :
-                    EcoreUtil.getEObject(eObject, reference.getInFragment());
-            EStructuralFeature sf = internalEObject.eClass().getEStructuralFeature(reference.getFeature());
-            EObject crossReferencedEObject = null;
-            if (reference.getInId().equals(reference.getOutId())) {
-                crossReferencedEObject = reference.getOutFragment().length() == 0 ? eObject :
-                        EcoreUtil.getEObject(eObject, reference.getOutFragment());
-            }
-            else {
-                EClass eClass = (EClass) resource.getResourceSet().getEObject(URI.createURI(reference.getOutClassURI()), false);
-                crossReferencedEObject = EcoreUtil.create(eClass);
-                URI crURI = memBDServer.createResourceURI(Stream.of(get(reference.getOutId())))
-                        .appendFragment("/" + reference.getOutFragment());
-                ((InternalEObject) crossReferencedEObject).eSetProxyURI(crURI);
-            }
-            if (sf.isMany()) {
-                ((List) internalEObject.eGet(sf)).add(crossReferencedEObject);
-            }
-            else {
-                internalEObject.eSet(sf, crossReferencedEObject);
-            }
-        });
+//        dbObject.getOutRefs().forEach(reference -> {
+//            int rootIndex = ids.indexOf(reference.getInId());
+//            EObject eObject = resource.getContents().get(rootIndex);
+//            EObject internalEObject = reference.getInFragment().length() == 0 ? eObject :
+//                    EcoreUtil.getEObject(eObject, reference.getInFragment());
+//            EStructuralFeature sf = internalEObject.eClass().getEStructuralFeature(reference.getFeature());
+//            EObject crossReferencedEObject = null;
+//            if (reference.getInId().equals(reference.getOutId())) {
+//                crossReferencedEObject = reference.getOutFragment().length() == 0 ? eObject :
+//                        EcoreUtil.getEObject(eObject, reference.getOutFragment());
+//            }
+//            else {
+//                EClass eClass = (EClass) resource.getResourceSet().getEObject(URI.createURI(reference.getOutClassURI()), false);
+//                crossReferencedEObject = EcoreUtil.create(eClass);
+//                URI crURI = memBDServer.createResourceURI(Stream.of(get(reference.getOutId())))
+//                        .appendFragment("/" + reference.getOutFragment());
+//                ((InternalEObject) crossReferencedEObject).eSetProxyURI(crURI);
+//            }
+//            if (sf.isMany()) {
+//                ((List) internalEObject.eGet(sf)).add(crossReferencedEObject);
+//            }
+//            else {
+//                internalEObject.eSet(sf, crossReferencedEObject);
+//            }
+//        });
     }
 
     public Stream<MemDBObject> allOfClassAndQName(String classURI, String qName) {
@@ -125,7 +125,6 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         List<Integer> versions = MemBDServer.getVersions(resource.getURI()).collect(Collectors.toList());
         List<MemDBObject> dbObjects = new ArrayList<>();
         for (int i = 0; i < resource.getContents().size(); ++i) {
-            EObject eObject = resource.getContents().get(i);
             String id = i < ids.size() ? ids.get(i) : null;
             if (i >= ids.size() || ids.get(i) == null) {
                 dbObjects.add(new MemDBObject());
@@ -150,9 +149,7 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         for (int i = 0; i < resource.getContents().size(); ++i) {
             EObject eObject = resource.getContents().get(i);
             MemDBObject dbObject = dbObjects.get(i);
-            Resource tempR = tempRS.createResource(memBDServer.createResourceURI(Stream.of(dbObject)));
-            tempR.getContents().add(EcoreUtil.copy(eObject));
-            saveResource(tempR, dbObject);
+            saveEObject(tempRS, eObject, dbObject);
             dbObject.setVersion(dbObject.getVersion() + 1);
             mObjectMap.put(dbObject.getId(), dbObject);
         }
@@ -160,17 +157,16 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         memBDServer.getEvents().fireAfterSave(oldResource, resource);
     }
 
-    private void saveResource(Resource resource, MemDBObject dbObject) {
-        new EcoreUtil.CrossReferencer(resource) {
+    private void saveEObject(ResourceSet tempRS, EObject eObject, MemDBObject dbObject) {
+        dbObject.getOutRefs().clear();
+        new EcoreUtil.ExternalCrossReferencer(eObject) {
             {
                 crossReference();
             }
-
             protected void add(InternalEObject internalEObject, EReference eReference, EObject crossReferencedEObject) {
                 if (!eReference.isDerived() && !eReference.isTransient() && !eReference.isContainer() && internalEObject.eIsSet(eReference)) {
                     EObject eObject = EcoreUtil.getRootContainer(internalEObject);
-                    String inId = MemBDServer.getIds(resource.getURI()).collect(Collectors.toList()).get(
-                            resource.getContents().indexOf(eObject));
+                    String inId = dbObject.getId();
                     String fromFragment = EcoreUtil.getRelativeURIFragmentPath(eObject, internalEObject);
                     String feature = eReference.getName();
                     EObject crossReferencedRoot = EcoreUtil.getRootContainer(crossReferencedEObject);
@@ -191,18 +187,25 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
                 }
                 super.add(internalEObject, eReference, crossReferencedEObject);
             }
-        }.forEach((key, value) -> value.forEach(EStructuralFeature.Setting::unset));
+        };
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            resource.save(baos, null);
+            Resource tempR = tempRS.createResource(memBDServer.createResourceURI(Stream.of(dbObject)));
+            tempR.getContents().add(EcoreUtil.copy(eObject));
+            tempR.save(baos, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         dbObject.setImage(baos.toByteArray());
+        dbObject.setClassURI(EcoreUtil.getURI(eObject.eClass()).toString());
+        EStructuralFeature sf = memBDServer.getQualifiedNameDelegate().apply(eObject.eClass());
+        if (sf != null && eObject.eIsSet(sf)) {
+            dbObject.setQName(eObject.eGet(sf).toString());
+        }
     }
 
     public void load(Resource resource) {
-        resource.getContents().clear();
+        resource.unload();
         List<MemDBObject> dbObjects = MemBDServer.getIds(resource.getURI()).map(id->get(id)).collect(Collectors.toList());
         dbObjects.forEach(dbObject -> loadResource(resource, dbObject));
         resource.setURI(memBDServer.createResourceURI(dbObjects.stream()));

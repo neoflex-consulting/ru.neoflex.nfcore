@@ -1,14 +1,14 @@
 package emfmem;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import ru.neoflex.meta.emfmemdb.MemBDServer;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
-import ru.neoflex.meta.test.TestPackage;
 import ru.neoflex.meta.test.User;
 
 import java.io.IOException;
@@ -16,53 +16,65 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class PerfTests extends TestBase {
-    Database database;
-    int nGroups = 5;
-    int nUsers = 10;
-    int nThreads = 1;
-    int nUpdates = 30;
+    int nGroups = 50;
+    int nUsers = 100;
+    int nThreads = 100;
+    int nUpdates = 3000;
     List<String> groupIds = new ArrayList<>();
     List<String> userIds = new ArrayList<>();
 
+    @Before
+    public void startUp() throws Exception {
+        memBDServer = refreshDatabase();
+    }
+
+    @After
+    public void shutDown() throws IOException {
+        memBDServer.close();
+    }
+
     @Test
-    public void fullTest() throws IOException, InterruptedException, GitAPIException {
-        database = refreshRatabase();
-        database.createBranch("users", "master");
+    public void fullTest() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < nGroups; ++i) {
-            try (Transaction tx = database.createTransaction("users")) {
+            int index = i;
+            memBDServer.inTransaction(false, tx -> {
                 Group group = TestFactory.eINSTANCE.createGroup();
-                String name = "group_" + i;
+                String name = "group_" + index;
                 group.setName(name);
-                ResourceSet resourceSet = database.createResourceSet(tx);
-                Resource groupResource = resourceSet.createResource(database.createURI(null, null));
+                ResourceSet resourceSet = tx.createResourceSet();
+                Resource groupResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.empty()));
                 groupResource.getContents().add(group);
                 groupResource.save(null);
-                String groupId = database.getId(groupResource.getURI());
-                tx.commit("Group " + name + " created", "orlov", "");
+                String groupId = MemBDServer.getIds(groupResource.getURI()).findFirst().get();
                 groupIds.add(groupId);
-            }
+                return null;
+            });
         }
         long created1 = System.currentTimeMillis();
         for (int i = 0; i < nUsers; ++i) {
-            try (Transaction tx = database.createTransaction("users")) {
+            int index = i;
+            memBDServer.inTransaction(false, tx -> {
                 Random rand = new Random();
                 String groupId = groupIds.get(rand.nextInt(groupIds.size()));
-                Resource groupResource = database.loadResource(groupId, tx);
+                ResourceSet resourceSet = tx.createResourceSet();
+                Resource groupResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(groupId)));
+                groupResource.load(null);
                 Group group = (Group) groupResource.getContents().get(0);
                 User user = TestFactory.eINSTANCE.createUser();
-                String name = "User_" + i;
+                String name = "User_" + index;
                 user.setName(name);
                 user.setGroup(group);
-                Resource userResource = database.createResource(tx, null, null);
+                Resource userResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.empty()));
                 userResource.getContents().add(user);
                 userResource.save(null);
-                tx.commit("User " + name + " created", "orlov", "");
-                String userId = database.getId(userResource.getURI());
+                String userId = MemBDServer.getIds(userResource.getURI()).findFirst().get();
                 userIds.add(userId);
-            }
+                return null;
+            });
         }
         long created2 = System.currentTimeMillis();
         List<Thread> threads = new ArrayList<>();
@@ -78,15 +90,17 @@ public class PerfTests extends TestBase {
                         String groupId = groupIds.get(rand.nextInt(groupIds.size()));
                         String userId = userIds.get(rand.nextInt(userIds.size()));
                         try {
-                            database.inTransaction("users", Transaction.LockType.WRITE, tx -> {
-                                Resource groupResource = database.loadResource(groupId, tx);
+                            memBDServer.inTransaction(false, tx -> {
+                                ResourceSet resourceSet = tx.createResourceSet();
+                                Resource groupResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(groupId)));
+                                groupResource.load(null);
                                 Group group = (Group) groupResource.getContents().get(0);
-                                Resource userResource = database.loadResource(userId, tx);
+                                Resource userResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(userId)));
+                                userResource.load(null);
                                 User user = (User) userResource.getContents().get(0);
                                 user.setName(name);
                                 user.setGroup(group);
                                 userResource.save(null);
-                                tx.commit("User " + name + " updated", "orlov", "");
                                 return null;
                             });
                         } catch (Throwable e) {
@@ -102,71 +116,11 @@ public class PerfTests extends TestBase {
         for (Thread thread: threads) {
             thread.join();
         }
-        database.close();
         long finish = System.currentTimeMillis();
         System.out.println("Created " + nGroups + " groups in " + (created1 - start)/1000 + " sec");
         System.out.println("Created " + nUsers + " users  in " + (created2 - created1)/1000 + " sec");
         System.out.println("Updated " + (nUpdates*nThreads) + " users in " + nThreads + " threads in " + (finish - created2)/1000 + " sec");
         System.out.println("Errors found: " + eCount.get());
         Assert.assertEquals(0, eCount.get());
-    }
-
-    public void updateTest() throws IOException, InterruptedException, GitAPIException {
-        database = new Database(MEMDB, new ArrayList<EPackage>(){{add(TestPackage.eINSTANCE);}});
-        readIds();
-        long start = System.currentTimeMillis();
-        List<Thread> threads = new ArrayList<>();
-        AtomicInteger eCount = new AtomicInteger(0);
-        for (int i = 0; i < nThreads; ++i) {
-            final int index = i;
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Random rand = new Random();
-                    for (int j = 1000; j < nUpdates+1000; ++j) {
-                        try (Transaction tx = database.createTransaction("users")) {
-                            String groupId = groupIds.get(rand.nextInt(groupIds.size()));
-                            Resource groupResource = database.loadResource(groupId, tx);
-                            Group group = (Group) groupResource.getContents().get(0);
-                            String userId = userIds.get(rand.nextInt(userIds.size()));
-                            Resource userResource = database.loadResource(userId, tx);
-                            User user = (User) userResource.getContents().get(0);
-                            String name = "User_" + index + "_" + j;
-                            user.setName(name);
-                            user.setGroup(group);
-                            userResource.save(null);
-                            tx.commit("User " + name + " updated", "orlov", "");
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                            eCount.incrementAndGet();
-                        }
-                    }
-                }
-            });
-            thread.start();
-            threads.add(thread);
-        }
-        for (Thread thread: threads) {
-            thread.join();
-        }
-        database.close();
-        long finish = System.currentTimeMillis();
-        System.out.println("Updated " + (nUpdates*nThreads) + " users in " + nThreads + " threads in " + (finish - start)/1000 + " sec");
-        System.out.println("Errors found: " + eCount.get());
-    }
-
-    private void readIds() throws IOException, GitAPIException {
-        groupIds.clear();
-        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
-            for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getGroup(), null, tx).getResources()) {
-                groupIds.add(database.getId(resource.getURI()));
-            }
-        }
-        userIds.clear();
-        try (Transaction tx = database.createTransaction("users", Transaction.LockType.READ)) {
-            for (Resource resource: database.findByEClass(TestPackage.eINSTANCE.getUser(), null, tx).getResources()) {
-                userIds.add(database.getId(resource.getURI()));
-            }
-        }
     }
 }

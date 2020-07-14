@@ -22,7 +22,7 @@ public class MemBDServer implements Closeable {
     private final List<EPackage> packages;
     private final String dbName;
     private final Events events = new Events();
-    private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
+    private Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> eClass.getEStructuralFeature("name");
 
     public MemBDServer(String prevalenceBase, String dbName, List<EPackage> packages) throws Exception {
         this.dbName = dbName;
@@ -32,6 +32,11 @@ public class MemBDServer implements Closeable {
 
     @Override
     public void close() throws IOException {
+        try {
+            prevayler.takeSnapshot();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         prevayler.close();
     }
 
@@ -80,14 +85,20 @@ public class MemBDServer implements Closeable {
         if (query == null || !query.contains("rev=")) {
             return Stream.empty();
         }
-        return Arrays.stream(query.split("rev=")[1].split(",")).map(Integer::valueOf);
+        return Arrays.stream(query.split("rev=", -1)[1].split(",")).filter(s->s.length() > 0).map(Integer::valueOf);
     }
 
-    public URI createResourceURI(Stream<? extends MemDBObject> dbObjects) {
-        String id = dbObjects.map(MemDBObject::getId).collect(Collectors.joining(","));
-        String rev = dbObjects.map(dbObject -> String.valueOf(dbObject.getVersion())).collect(Collectors.joining(","));
+    public URI createResourceURI(Stream<MemDBObject> dbObjects) {
+        List<MemDBObject> dbObjectsList = dbObjects.collect(Collectors.toList());
+        String id = dbObjectsList.stream().map(MemDBObject::getId).collect(Collectors.joining(","));
+        String rev = dbObjectsList.stream().map(dbObject -> String.valueOf(dbObject.getVersion())).collect(Collectors.joining(","));
         String ref = String.format("%s?rev=%s", id, rev);
         return URI.createURI(MemDBHandler.MEMDB + "://" + dbName + "/" + ref);
+    }
+
+    public URI createIdsURI(Stream<String> ids) {
+        String id = ids.collect(Collectors.joining(","));
+        return URI.createURI(MemDBHandler.MEMDB + "://" + dbName + "/" + id);
     }
 
 }
