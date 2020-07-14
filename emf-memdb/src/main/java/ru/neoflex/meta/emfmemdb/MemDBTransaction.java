@@ -35,7 +35,7 @@ public class MemDBTransaction implements Transaction<MemDBModel> {
         );
     }
 
-    MemDBObject get(String id) {
+    public MemDBObject get(String id) {
         MemDBObject dbObject = null;
         if (!deleted.contains(id)) {
             dbObject = mObjectMap.getOrDefault(id,
