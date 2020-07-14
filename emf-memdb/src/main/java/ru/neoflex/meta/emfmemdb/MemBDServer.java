@@ -51,8 +51,8 @@ public class MemBDServer implements Closeable {
         return events;
     }
 
-    public abstract class TxFunction<R> implements Serializable {
-        abstract R call(MemDBTransaction tx) throws Exception;
+    public interface TxFunction<R> extends Serializable {
+        R call(MemDBTransaction tx) throws Exception;
     }
 
     public <R> R inTransaction(boolean readOnly, TxFunction<R> f) throws Exception {
