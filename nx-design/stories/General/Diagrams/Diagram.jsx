@@ -43,7 +43,6 @@ render() {
                     <NXRadioGroup defaultValue={this.state.diagramType} style={{width: '100%'}} onChange={this.handleRadio}>
                         <NXCol span={7} content='flex-start'>
                             <NXRadioButton value={'diagramBlock'} margin='0 5px 0 0'
-                                           // onClick={()=>{this.setState({diagramType:"Block"})}}
                             isIcon='24px'>
                                     <NXIcon icon={diagramBlock} fill='#424D78' />
                             </NXRadioButton>
@@ -51,7 +50,6 @@ render() {
                         </NXCol>
                         <NXCol span={7} content='flex-start'>
                             <NXRadioButton value={'barChart'} margin='0 5px 0 0'
-                                           // onClick={()=>{this.setState({diagramType:"Bar"})}}
                             isIcon='24px'>
                                     <NXIcon icon={barChart} fill='#424D78' />
                             </NXRadioButton>
@@ -59,7 +57,6 @@ render() {
                         </NXCol>
                         <NXCol span={6} content='flex-start'>
                             <NXRadioButton value={'diagramCircle'} margin='0 5px 0 0'
-                                           // onClick={()=>{this.setState({diagramType:"Pie"})}}
                             isIcon='24px'>
                                 <NXIcon icon={diagramCircle} fill='#424D78' />
                             </NXRadioButton>
@@ -67,7 +64,6 @@ render() {
                         </NXCol>
                         <NXCol span={4} content='flex-start'>
                             <NXRadioButton value={'diagram'} margin='0 5px 0 0'
-                                           // onClick={()=>{this.setState({diagramType:"Line"})}}
                             isIcon='24px'>
                                 <NXIcon icon={diagram} fill='#424D78' />
                             </NXRadioButton>
