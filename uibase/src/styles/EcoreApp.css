@@ -28,6 +28,9 @@
 	padding: 0px 6px 8px 0px;
 	height: 420px;
 }
+.resource-container::-webkit-scrollbar{
+	width: 0;
+}
 
 .resource-container-item {
 	display: block; 
