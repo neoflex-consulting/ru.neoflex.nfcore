@@ -49,6 +49,7 @@
     "jqwidgets-scripts": "^9.0.0",
     "m-react-splitters": "^1.2.0",
     "moment": "2.24.0",
+    "neo-design": "^1.0.65",
     "re-resizable": "^6.2.0",
     "react": "^16.13.1",
     "react-ace": "^8.0.0",
