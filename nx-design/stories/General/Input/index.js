@@ -8,7 +8,7 @@ import NXInputSearch, {
   NXDatePicker,
   NXSelect,
   NXOption,
-  NXInputClear
+  NXInputClear, NXRadioButton
 } from './Input';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {okaidia} from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -75,9 +75,27 @@ class InputPage extends Component {
             {`import { NXRadio } from "nx-design";
 
 <NXRadio.Group defaultValue={1}>
-<NXRadio value={1}>Radio 1</NXRadio>
-<NXRadio value={2}>Radio 2</NXRadio>
-<NXRadio value={3}>Radio 3</NXRadio>
+  <NXRadio value={1}>Radio 1</NXRadio>
+  <NXRadio value={2}>Radio 2</NXRadio>
+  <NXRadio value={3}>Radio 3</NXRadio>
+</NXRadio.Group>`}
+          </SyntaxHighlighter>
+          <br/>
+          <div>
+            <h4>Radio button</h4>
+            <NXRadio.Group defaultValue={1}>
+              <NXRadioButton margin='2px' value={1}>Radio 1</NXRadioButton>
+              <NXRadioButton margin='2px' value={2}>Radio 2</NXRadioButton>
+              <NXRadioButton margin='2px' value={3}>Radio 3</NXRadioButton>
+            </NXRadio.Group>
+          </div>
+          <SyntaxHighlighter language='jsx' style={okaidia} >
+            {`import { NXRadio, NXRadioButton } from "nx-design";
+
+<NXRadio.Group defaultValue={1}>
+  <NXRadioButton margin='2px' value={1}>Radio 1</NXRadioButton>
+  <NXRadioButton margin='2px' value={2}>Radio 2</NXRadioButton>
+  <NXRadioButton margin='2px' value={3}>Radio 3</NXRadioButton>
 </NXRadio.Group>`}
           </SyntaxHighlighter>
         </section>
@@ -160,9 +178,9 @@ class InputPage extends Component {
             {`import { NXSelect, NXOption } from "nx-design";
 
 <NXSelect defaultValue="lucy">
-<NXOption value="lucy">Lucy</NXOption>
-<NXOption value="jack">Jack</NXOption>
-<NXOption value="john">John</NXOption>
+  <NXOption value="lucy">Lucy</NXOption>
+  <NXOption value="jack">Jack</NXOption>
+  <NXOption value="john">John</NXOption>
 </NXSelect>`}
           </SyntaxHighlighter>
           <br/><br/>
@@ -179,9 +197,9 @@ class InputPage extends Component {
             {`import { NXSelect, NXOption } from "nx-design";
 
 <NXSelect defaultValue="lucy" disabled>
-<NXOption value="lucy">Lucy</NXOption>
-<NXOption value="jack">Jack</NXOption>
-<NXOption value="john">John</NXOption>
+  <NXOption value="lucy">Lucy</NXOption>
+  <NXOption value="jack">Jack</NXOption>
+  <NXOption value="john">John</NXOption>
 </NXSelect>`}
           </SyntaxHighlighter>
           <br/><br/>
@@ -198,9 +216,9 @@ class InputPage extends Component {
             {`import { NXSelect, NXOption } from "nx-design";
 
 <NXSelect defaultValue="lucy">
-<NXOption value="lucy">Lucy</NXOption>
-<NXOption value="jack" disabled>Jack</NXOption>
-<NXOption value="john" disabled>John</NXOption>
+  <NXOption value="lucy">Lucy</NXOption>
+  <NXOption value="jack" disabled>Jack</NXOption>
+  <NXOption value="john" disabled>John</NXOption>
 </NXSelect>`}
           </SyntaxHighlighter>
           <br/><br/>
@@ -217,9 +235,9 @@ class InputPage extends Component {
             {`import { NXSelect, NXOption } from "nx-design";
 
 <NXSelect defaultValue="lucy" loading>
-<NXOption value="lucy">Lucy</NXOption>
-<NXOption value="jack" disabled>Jack</NXOption>
-<NXOption value="john" disabled>John</NXOption>
+  <NXOption value="lucy">Lucy</NXOption>
+  <NXOption value="jack" disabled>Jack</NXOption>
+  <NXOption value="john" disabled>John</NXOption>
 </NXSelect>`}
           </SyntaxHighlighter>
         </section>

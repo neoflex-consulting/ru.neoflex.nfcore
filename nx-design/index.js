@@ -5,7 +5,7 @@ import NXCol from './stories/General/Grid/Col/NXCol';
 import NXRow from './stories/General/Grid/Row/NXRow';
 import NXForm from "./stories/General/Form/Form/NXForm";
 
-import NXInputSearch, {NXInput, NXInputClear, NXRadio, NXCheckbox,NXTextArea, NXDatePicker, NXSelect, NXOption} from './stories/General/Input/Input';
+import NXInputSearch, {NXInput, NXInputClear, NXRadio, NXRadioGroup, NXRadioButton, NXCheckbox,NXTextArea, NXDatePicker, NXSelect, NXOption} from './stories/General/Input/Input';
 
 import {
     NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,
@@ -28,7 +28,7 @@ export {
     /*Grid*/
     NXCol, NXRow,
     /*Inputs*/
-    NXInputSearch, NXInput, NXInputClear, NXRadio, NXCheckbox,NXTextArea, NXDatePicker, NXSelect, NXOption,
+    NXInputSearch, NXInput, NXInputClear, NXRadio, NXRadioGroup, NXRadioButton, NXCheckbox,NXTextArea, NXDatePicker, NXSelect, NXOption,
     /*Icons*/
     NXIcon, notification,question,person,exit,calendar,arrowUp,arrowDown,
     arrowLeft,deleteIcon,plus,close,switchIcon,rubbish,fill,letter,diagram,diagramCircle,diagramBlock,gear,

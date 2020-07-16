@@ -17,6 +17,14 @@ export default class ModalPage extends Component {
                     Модальные окна нужны, чтобы предупредить пользователя о каком-то действии. Например, это может быть сообщение о завершении сценария.
                 </p>
 
+                <p className="text">
+                Отличие от компонента alert:
+                    <br/>
+                    Модальное окно блокирует работу с приложением до тех пор, пока его (модальное окно) не закроют.
+                У модального окна всегда есть кнопка действия.
+                </p>
+
+
                 <h2 className="title">Как использовать</h2>
                 <SyntaxHighlighter language='jsx' style={okaidia} >
                     {`import { NXModal } from "nx-design";`}

@@ -1,12 +1,18 @@
 import * as React from "react";
-import {NXIcon, diagramBlock, diagramCircle, barChart, diagram, NXButton, NXCol, NXRow, NXInput, NXSelect, NXOption, NXForm, close} from "../../../index.js";
+import {NXIcon, diagramBlock, diagramCircle, barChart, diagram, NXButton, NXCol, NXRow, NXInput, NXSelect, NXRadioGroup, NXRadioButton, NXOption, NXForm, close} from "../../../index.js";
 
 export default class NXDiagram extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            diagramType: "Block"
+            diagramType: 'diagramBlock'
         };
+    }
+
+    handleRadio = e => {
+            this.setState({
+                diagramType: e.target.value,
+            });
     }
 
     getColumnSelectOptions(id, placeHolder) {
@@ -33,50 +39,44 @@ render() {
             </div>
             <div style={{height:'106px', padding:'24px 40px'}}>
                 <NXRow><h3>Выберите тип диаграммы</h3></NXRow>
-                <NXRow margin='15px 0 0 0' content='space-between'>
-                    <NXCol span={5}>
-                        <NXButton
-                        onClick={()=>{this.setState({diagramType:"Block"})}}
-                        padding='0'
-                        isIcon='24px'>
-                        <NXIcon icon={diagramBlock} fill='#424D78' />
-                        </NXButton>
-                        <h4>Гистограмма</h4>
-                    </NXCol>
-                    <NXCol span={5}>
-                        <NXButton
-                        onClick={()=>{this.setState({diagramType:"Bar"})}}
-                        padding='0'
-                        isIcon='24px'>
-                            <NXIcon icon={barChart} fill='#424D78' />
-                        </NXButton>
-                        <h4>Линейчатая</h4>
-                    </NXCol>
-                    <NXCol span={4}>
-                        <NXButton
-                        onClick={()=>{this.setState({diagramType:"Pie"})}}
-                        padding='0'
-                        isIcon='24px'>
-                            <NXIcon icon={diagramCircle} fill='#424D78' />
-                        </NXButton>
-                        <h4>Круговая</h4>
-                    </NXCol>
-                    <NXCol span={4}>
-                        <NXButton
-                        onClick={()=>{this.setState({diagramType:"Line"})}}
-                        padding='0'
-                        isIcon='24px'>
-                            <NXIcon icon={diagram} fill='#424D78' />
-                        </NXButton>
-                        <h4>График</h4>
-                    </NXCol>
+                <NXRow margin='15px 0 0 0' width='100%' content='space-between'>
+                    <NXRadioGroup defaultValue={this.state.diagramType} style={{width: '100%'}} onChange={this.handleRadio}>
+                        <NXCol span={7} content='flex-start'>
+                            <NXRadioButton value={'diagramBlock'} margin='0 5px 0 0'
+                            isIcon='24px'>
+                                    <NXIcon icon={diagramBlock} fill='#424D78' />
+                            </NXRadioButton>
+                                    <h4>Гистограмма</h4>
+                        </NXCol>
+                        <NXCol span={7} content='flex-start'>
+                            <NXRadioButton value={'barChart'} margin='0 5px 0 0'
+                            isIcon='24px'>
+                                    <NXIcon icon={barChart} fill='#424D78' />
+                            </NXRadioButton>
+                                    <h4>Линейчатая</h4>
+                        </NXCol>
+                        <NXCol span={6} content='flex-start'>
+                            <NXRadioButton value={'diagramCircle'} margin='0 5px 0 0'
+                            isIcon='24px'>
+                                <NXIcon icon={diagramCircle} fill='#424D78' />
+                            </NXRadioButton>
+                                <h4>Круговая</h4>
+                        </NXCol>
+                        <NXCol span={4} content='flex-start'>
+                            <NXRadioButton value={'diagram'} margin='0 5px 0 0'
+                            isIcon='24px'>
+                                <NXIcon icon={diagram} fill='#424D78' />
+                            </NXRadioButton>
+                                <h4>График</h4>
+                        </NXCol>
+                    </NXRadioGroup>
                 </NXRow>
             </div>
-            <div style={{border: 'solid 1px #F2F2F2', maxHeight:'298px', padding:'12px 40px'}}>
+            <div style={{border: 'solid 1px #F2F2F2', padding:'12px 40px'}}>
             <NXRow margin='8px 0'>
                 <NXInput placeholder='Название диаграммы' />
             </NXRow>
-                {(this.state.diagramType==="Line")?
+                {(this.state.diagramType==="diagram")?
             <NXRow margin='16px 0'>
                     <NXInput placeholder='Легенда'/>
             </NXRow>
@@ -90,7 +90,7 @@ render() {
                 </NXCol>
             </NXRow>
                     {
-                        (this.state.diagramType!=="Pie")?
+                        (this.state.diagramType!=="diagramCircle")?
             <NXRow gutter={16} margin='16px 0'>
                 <NXCol span={12}>
                     {this.getInput("axisXLabel", "Подпись оси X")}
@@ -101,7 +101,7 @@ render() {
             </NXRow>
                         :""}
                     {
-                        (this.state.diagramType!=="Pie")?
+                        (this.state.diagramType!=="diagramCircle")?
             <NXRow gutter={16} margin='16px 0'>
                 <NXCol span={12}>
                     {this.getInput("axisYLabel", "Подпись оси Y")}
