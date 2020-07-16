@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import ru.neoflex.meta.emfmemdb.MemBDServer;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 public class PerfTests extends TestBase {
     int nGroups = 50;
@@ -28,12 +26,12 @@ public class PerfTests extends TestBase {
 
     @Before
     public void startUp() throws Exception {
-        memBDServer = refreshDatabase();
+        MemDBServer = refreshDatabase();
     }
 
     @After
     public void shutDown() throws IOException {
-        memBDServer.close();
+        MemDBServer.close();
     }
 
     @Test
@@ -41,15 +39,15 @@ public class PerfTests extends TestBase {
         long start = System.currentTimeMillis();
         for (int i = 0; i < nGroups; ++i) {
             int index = i;
-            memBDServer.inTransaction(false, tx -> {
+            MemDBServer.inTransaction(false, tx -> {
                 Group group = TestFactory.eINSTANCE.createGroup();
                 String name = "group_" + index;
                 group.setName(name);
                 ResourceSet resourceSet = tx.createResourceSet();
-                Resource groupResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.empty()));
+                Resource groupResource = resourceSet.createResource(MemDBServer.createURI(""));
                 groupResource.getContents().add(group);
                 groupResource.save(null);
-                String groupId = MemBDServer.getIds(groupResource.getURI()).findFirst().get();
+                String groupId = MemDBServer.getId(groupResource.getURI());
                 groupIds.add(groupId);
                 return null;
             });
@@ -57,21 +55,21 @@ public class PerfTests extends TestBase {
         long created1 = System.currentTimeMillis();
         for (int i = 0; i < nUsers; ++i) {
             int index = i;
-            memBDServer.inTransaction(false, tx -> {
+            MemDBServer.inTransaction(false, tx -> {
                 Random rand = new Random();
                 String groupId = groupIds.get(rand.nextInt(groupIds.size()));
                 ResourceSet resourceSet = tx.createResourceSet();
-                Resource groupResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(groupId)));
+                Resource groupResource = resourceSet.createResource(MemDBServer.createURI(groupId));
                 groupResource.load(null);
                 Group group = (Group) groupResource.getContents().get(0);
                 User user = TestFactory.eINSTANCE.createUser();
                 String name = "User_" + index;
                 user.setName(name);
                 user.setGroup(group);
-                Resource userResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.empty()));
+                Resource userResource = resourceSet.createResource(MemDBServer.createURI(""));
                 userResource.getContents().add(user);
                 userResource.save(null);
-                String userId = MemBDServer.getIds(userResource.getURI()).findFirst().get();
+                String userId = MemDBServer.getId(userResource.getURI());
                 userIds.add(userId);
                 return null;
             });
@@ -90,12 +88,12 @@ public class PerfTests extends TestBase {
                         String groupId = groupIds.get(rand.nextInt(groupIds.size()));
                         String userId = userIds.get(rand.nextInt(userIds.size()));
                         try {
-                            memBDServer.inTransaction(false, tx -> {
+                            MemDBServer.inTransaction(false, tx -> {
                                 ResourceSet resourceSet = tx.createResourceSet();
-                                Resource groupResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(groupId)));
+                                Resource groupResource = resourceSet.createResource(MemDBServer.createURI(groupId));
                                 groupResource.load(null);
                                 Group group = (Group) groupResource.getContents().get(0);
-                                Resource userResource = resourceSet.createResource(memBDServer.createIdsURI(Stream.of(userId)));
+                                Resource userResource = resourceSet.createResource(MemDBServer.createURI(userId));
                                 userResource.load(null);
                                 User user = (User) userResource.getContents().get(0);
                                 user.setName(name);

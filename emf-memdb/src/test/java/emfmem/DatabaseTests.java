@@ -6,61 +6,59 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import ru.neoflex.meta.emfmemdb.MemBDServer;
+import ru.neoflex.meta.emfmemdb.MemDBServer;
 import ru.neoflex.meta.test.Group;
 import ru.neoflex.meta.test.TestFactory;
 import ru.neoflex.meta.test.User;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DatabaseTests extends TestBase {
     @Before
     public void startUp() throws Exception {
-        memBDServer = getDatabase();
+        MemDBServer = getDatabase();
     }
 
     @After
     public void shutDown() throws IOException {
-        memBDServer.close();
+        MemDBServer.close();
     }
 
     @Test
     public void createEMFObject() throws Exception {
         Group group = TestFactory.eINSTANCE.createGroup();
-        String[] ids = memBDServer.inTransaction(false, (MemBDServer.TxFunction<String[]>) tx -> {
+        String[] ids = MemDBServer.inTransaction(false, (MemDBServer.TxFunction<String[]>) tx -> {
             group.setName("masters");
             ResourceSet resourceSet = tx.createResourceSet();
-            Resource groupResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.empty()));
+            Resource groupResource = resourceSet.createResource(MemDBServer.createURI(""));
             groupResource.getContents().add(group);
             groupResource.save(null);
-            String groupId = MemBDServer.getIds(groupResource.getURI()).collect(Collectors.joining(","));
+            String groupId = MemDBServer.getId(groupResource.getURI());
             User user = TestFactory.eINSTANCE.createUser();
             user.setName("Orlov");
             user.setGroup(group);
-            Resource userResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.empty()));
+            Resource userResource = resourceSet.createResource(MemDBServer.createURI(""));
             userResource.getContents().add(user);
             userResource.save(null);
-            String userId = MemBDServer.getIds(userResource.getURI()).collect(Collectors.joining(","));;
+            String userId = MemDBServer.getId(userResource.getURI());
             Assert.assertNotNull(userId);
             return new String[] {userId, groupId};
         });
-        memBDServer.inTransaction(false, (MemBDServer.TxFunction<Void>) tx -> {
+        MemDBServer.inTransaction(false, (MemDBServer.TxFunction<Void>) tx -> {
             ResourceSet resourceSet = tx.createResourceSet();
-            Resource userResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.of(tx.get(ids[0]))));
+            Resource userResource = resourceSet.createResource(MemDBServer.createURI(ids[0]));
             userResource.load(null);
             User user = (User) userResource.getContents().get(0);
             user.setName("Simanihin");
             userResource.save(null);
             return null;
         });
-        memBDServer.inTransaction(true, (MemBDServer.TxFunction<Void>) tx -> {
+        MemDBServer.inTransaction(true, (MemDBServer.TxFunction<Void>) tx -> {
             User user = TestFactory.eINSTANCE.createUser();
             user.setName("Orlov");
             user.setGroup(group);
             ResourceSet resourceSet = tx.createResourceSet();
-            Resource userResource = resourceSet.createResource(memBDServer.createResourceURI(Stream.empty()));
+            Resource userResource = resourceSet.createResource(MemDBServer.createURI(""));
             userResource.getContents().add(user);
             userResource.save(null);
             return null;
