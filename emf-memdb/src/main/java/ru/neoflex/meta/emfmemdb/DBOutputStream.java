@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
-public class MemDBOutputStream extends OutputStream implements URIConverter.Saveable {
-    private MemDBTransaction tx;
+public class DBOutputStream extends OutputStream implements URIConverter.Saveable {
+    private DBTransaction tx;
     private URI uri;
     private Map<?, ?> options;
 
-    public MemDBOutputStream(MemDBTransaction tx, URI uri, Map<?, ?> options) {
+    public DBOutputStream(DBTransaction tx, URI uri, Map<?, ?> options) {
         this.tx = tx;
         this.uri = uri;
         this.options = options;

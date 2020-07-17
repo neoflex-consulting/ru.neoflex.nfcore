@@ -1195,8 +1195,8 @@ class EventHandler_ extends ViewContainer {
             let isHandled = false;
             this.viewObject.get('eventActions').each((el: EObject) => {
                 const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
-                    return (el.get('triggerItem')
-                        && (action.itemId === el.get('triggerItem').eURI())
+                    return ((el.get('triggerItem')
+                        && action.itemId === el.get('triggerItem').eURI())
                         || el.get('action') === actionType.showMessage
                         || el.get('action') === actionType.redirect)
                 });
