@@ -125,6 +125,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         ResultSet rs;
         def rowData = []
         def jdbcDataset = dataset as JdbcDataset
+        def numberOfLines = 0;
 
         Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
         try {
@@ -280,47 +281,63 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Aggregation overall
             if (aggregations) {
-                for (int i = 0; i <= allColumns.size() - 1; ++i) {
-                    def isExcluded = true;
-                    //Итого и столбец под одним столбцом
-                    for (int j = 0; j <= aggregations.size() - 1; ++j) {
+                for (int i = 0; i < allColumns.size() - 1; i++) {
+                    def sameDatasetColumn = 0;
+                    for (int j = 0; j < aggregations.size(); j++) {
                         if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
+                            sameDatasetColumn++;
+                        }
+                    }
+                    if (numberOfLines < sameDatasetColumn) {
+                        numberOfLines = sameDatasetColumn
+                    }
+
+                }
+                for (int g = 0; g < numberOfLines; g++){
+                    for (int i = 0; i <= allColumns.size() - 1; ++i) {
+                        def isExcluded = true;
+                        //Итого и столбец под одним столбцом
+                        for (int j = 0; j <= aggregations.size() - 1; ++j) {
+                            if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
+                                aggregations[j].enable = false
+                                def map = [:]
+                                map["column"] = aggregations[j].datasetColumn
+                                def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
+                                if (operator == 'AVG') {
+                                    map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (operator == 'COUNT') {
+                                    map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (operator == 'COUNT_DISTINCT') {
+                                    map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (operator == 'MAX') {
+                                    map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (operator == 'MIN') {
+                                    map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (operator == 'SUM') {
+                                    map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                }
+                                if (!serverAggregations.contains(map)) {
+                                    serverAggregations.add(map)
+                                }
+                                isExcluded = false
+                                j = aggregations.size() + 1
+                            }
+                        }
+                        if (isExcluded) {
                             def map = [:]
-                            map["column"] = aggregations[j].datasetColumn
-                            def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
-                            if (operator == 'AVG') {
-                                map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (operator == 'COUNT') {
-                                map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (operator == 'COUNT_DISTINCT') {
-                                map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (operator == 'MAX') {
-                                map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (operator == 'MIN') {
-                                map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (operator == 'SUM') {
-                                map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                            }
-                            if (!serverAggregations.contains(map)) {
+                            map["column"] = allColumns[i]
+                            map["select"] = "NULL as \"${allColumns[i]}\""
+                            if (map) {
                                 serverAggregations.add(map)
                             }
-                            isExcluded = false
                         }
                     }
-                    if (isExcluded) {
-                        def map = [:]
-                        map["column"] = allColumns[i]
-                        map["select"] = "NULL as \"${allColumns[i]}\""
-                        if (!serverAggregations.contains(map) && map) {
-                            serverAggregations.add(map)
-                        }
-                    }
-                }
+            }
             }
 
             //Order by
@@ -356,6 +373,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             }
 
+
+
             String currentQuery
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
@@ -385,7 +404,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         "\n  FROM (${currentQuery}) t" +
                         "\n ORDER BY ${serverSorts.select.join(' , ')}"
             }
-            if (serverAggregations) {
+                if (serverAggregations){
                 currentQuery = " \nSELECT ${serverAggregations.select.join(' , ')}" +
                         "\n  FROM (${currentQuery}) t"
             }
@@ -414,6 +433,25 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 try {
                     rs = p.executeQuery();
                     def columnCount = rs.metaData.columnCount
+                    if (numberOfLines > 1){
+                        while (rs.next()) {
+                            for (int j = 0; j < numberOfLines; j++) {
+                                def map = [:]
+                                String key
+                                String value
+                                def object
+                                for (int i = 1; i <= allColumns.size(); ++i) {
+                                    int index = i + (j*allColumns.size())
+                                    object = rs.getObject(index)
+                                    value = (object == null ? null : object.toString())
+                                    key = "${rs.metaData.getColumnName(index)}"
+                                    map[key] = value
+                                }
+                                rowData.add(map)
+                            }
+                        }
+                    }
+                    else{
                     while (rs.next()) {
                         def map = [:]
                         for (int i = 1; i <= columnCount; ++i) {
@@ -421,7 +459,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
                         }
                         rowData.add(map)
-                    }
+                    }}
                 } finally {
                     (rs) ? rs.close() : null
                 }

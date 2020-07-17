@@ -619,6 +619,11 @@ class DatasetView extends React.Component<any, State> {
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
     ) {
+        if (this.state.rowData.length === 0){
+            for (let i = 0; i < aggregationParams.length; i++){
+                aggregationParams[i].enable = false
+            }
+        }
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
@@ -867,7 +872,7 @@ class DatasetView extends React.Component<any, State> {
         }
 
     }
-    GridData = () => {
+    DiagramButton = () => {
         this.props.context.addDocxHandler();
         this.props.context.addExcelHandler()
         this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel})
@@ -923,11 +928,7 @@ class DatasetView extends React.Component<any, State> {
             </Button>
             <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
-                        this.GridData()
-                       /* (this.state.diagrams.length > 0)
-                            ? this.setState({currentDiagram: this.state.diagrams[0]})
-                            : this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)*/
-
+                        this.DiagramButton()
                     }
                     }
             >
