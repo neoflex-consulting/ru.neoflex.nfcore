@@ -15,28 +15,24 @@ public class MemDBModel implements Serializable {
         return dbResourceMap;
     }
 
-    public void setDbResourceMap(Map<String, DBResource> dbResourceMap) {
-        this.dbResourceMap = dbResourceMap;
+    public DBResource get(String id) {
+        return dbResourceMap.get(id).clone();
     }
 
-    public DBResource getDBResource(String id) {
-        return dbResourceMap.get(id);
+    public Stream<DBResource> findAll() {
+        return dbResourceMap.values().stream().map(dbResource -> dbResource.clone());
     }
 
-    public Stream<DBResource> findAllDBResources() {
-        return dbResourceMap.values().stream();
-    }
-
-    public void insertDBResource(DBResource dbResource) {
+    public void insert(DBResource dbResource) {
         dbResourceMap.put(dbResource.getId(), dbResource);
     }
 
-    public void updateDBResource(DBResource dbResource) {
-        deleteDBResource(dbResource.getId());
-        insertDBResource(dbResource);
+    public void update(DBResource dbResource) {
+        delete(dbResource.getId());
+        insert(dbResource);
     }
 
-    public void deleteDBResource(String id) {
+    public void delete(String id) {
         dbResourceMap.remove(id);
     }
 
