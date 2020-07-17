@@ -1,17 +1,27 @@
 package ru.neoflex.meta.emfmemdb;
 
-import org.eclipse.emf.ecore.util.EcoreUtil;
-
 import java.io.Serializable;
 
-public class DBResource implements Serializable {
+public class DBResource implements Serializable, Cloneable {
     private String id;
     private int version;
     private byte[] image;
 
     DBResource() {
-        this.id = EcoreUtil.generateUUID();
+        this.id = null;
         this.version = 0;
+    }
+
+    public DBResource clone() {
+        try {
+            DBResource copy = (DBResource) super.clone();
+            if (image != null) {
+                copy.image = image.clone();
+            }
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getId() {

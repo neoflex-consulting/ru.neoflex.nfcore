@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.prevayler.Transaction;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,33 +15,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class DBTransaction implements Transaction<MemDBModel>, AutoCloseable {
+public abstract class DBTransaction implements AutoCloseable {
     private final transient boolean readOnly;
-    private final transient MemDBServer dbServer;
-    private Map<String, DBResource> dbResourceMap = new HashMap<>();
-    private Set<String> deleted = new HashSet<>();
+    protected final transient DBServer dbServer;
 
-    public Stream<Map.Entry<String, DBResource>> allEntries() {
-        Stream<Map.Entry<String, DBResource>> baseStream = dbServer.getPrevayler().prevalentSystem().getDbResourceMap().entrySet().stream()
-                .filter(entry -> !deleted.contains(entry.getKey()) && !dbResourceMap.containsKey(entry.getKey()));
-        Stream<Map.Entry<String, DBResource>> insertedStream = dbResourceMap.entrySet().stream();
-        return Stream.concat(
-                insertedStream,
-                baseStream
-        );
-    }
+    protected abstract DBResource get(String id);
+    protected abstract void insert(DBResource dbResource);
+    protected abstract void update(DBResource dbResource);
+    protected abstract void delete(DBResource dbResource);
+    public void begin() {}
+    public void commit() {}
+    public void rollback() {}
 
-    public DBResource get(String id) {
-        DBResource dbObject = null;
-        if (!deleted.contains(id)) {
-            dbObject = dbResourceMap.getOrDefault(id,dbServer.getPrevayler().prevalentSystem().getDbResourceMap().get(id)
-            );
-        }
-        if (dbObject == null) {
-            throw new IllegalArgumentException(String.format("Can't find object %s", id));
-        }
-        return dbObject;
-    }
 
     public ResourceSet getResourceSet(Stream<DBResource> dbResourceStream) {
         ResourceSet rs = createResourceSet();
@@ -67,14 +52,14 @@ public class DBTransaction implements Transaction<MemDBModel>, AutoCloseable {
         }
     }
 
-    public DBTransaction(MemDBServer dbServer, boolean readOnly) {
+    public DBTransaction(DBServer dbServer, boolean readOnly) {
         this.dbServer = dbServer;
         this.readOnly = readOnly;
     }
 
     public void save(Resource resource) {
-        String id = MemDBServer.getId(resource.getURI());
-        Integer version = MemDBServer.getVersion(resource.getURI());
+        String id = DBServer.getId(resource.getURI());
+        Integer version = DBServer.getVersion(resource.getURI());
         ResourceSet rs = createResourceSet();
         Resource oldResource = rs.createResource(resource.getURI());
         DBResource dbResource = null;
@@ -96,9 +81,19 @@ public class DBTransaction implements Transaction<MemDBModel>, AutoCloseable {
         dbServer.getEvents().fireBeforeSave(oldResource, resource);
         saveResource(resource, dbResource);
         dbResource.setVersion(dbResource.getVersion() + 1);
-        dbResourceMap.put(dbResource.getId(), dbResource);
+        if (dbResource.getId() != null) {
+            dbResource.setId(getNextId());
+            insert(dbResource);
+        }
+        else {
+            update(dbResource);
+        }
         resource.setURI(dbServer.createURI(dbResource.getId()));
         dbServer.getEvents().fireAfterSave(oldResource, resource);
+    }
+
+    protected String getNextId() {
+        return EcoreUtil.generateUUID();
     }
 
     private void saveResource(Resource resource, DBResource dbResource) {
@@ -139,12 +134,7 @@ public class DBTransaction implements Transaction<MemDBModel>, AutoCloseable {
         Resource oldResource = rs.createResource(uri);
         loadResource(oldResource, dbResource);
         dbServer.getEvents().fireBeforeDelete(oldResource);
-        deleted.add(dbResource.getId());
-    }
-
-    public void reset() {
-        dbResourceMap.clear();
-        deleted.clear();
+        delete(dbResource);
     }
 
     public ResourceSet createResourceSet() {
@@ -170,22 +160,15 @@ public class DBTransaction implements Transaction<MemDBModel>, AutoCloseable {
         return resourceSet;
     }
 
-    @Override
-    public void executeOn(MemDBModel prevalentSystem, Date executionTime) {
-        deleted.stream().forEach(id -> {
-            prevalentSystem.getDbResourceMap().remove(id);
-        });
-        dbResourceMap.entrySet().forEach(entry->{
-            prevalentSystem.getDbResourceMap().put(entry.getKey(), entry.getValue());
-        });
-        reset();
-    }
-
-    public MemDBServer getDbServer() {
+    public DBServer getDbServer() {
         return dbServer;
     }
 
     @Override
     public void close() throws Exception {
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
     }
 }

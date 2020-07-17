@@ -9,13 +9,18 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class DBServer implements AutoCloseable {
+    private static final Logger logger = LoggerFactory.getLogger(DBServer.class);
     protected final List<EPackage> packages;
     protected final String dbName;
     private final Events events = new Events();
@@ -100,17 +105,62 @@ public abstract class DBServer implements AutoCloseable {
         R call(DBTransaction tx) throws Exception;
     }
 
-    protected <R> R withTransaction(DBTransaction tx, TxFunction<R> f) throws Exception {
+    protected <R> R callWithTransaction(DBTransaction tx, TxFunction<R> f) throws Exception {
         return f.call(tx);
     }
 
     public <R> R inTransaction(boolean readOnly, TxFunction<R> f) throws Exception {
-        try (DBTransaction tx = createDBTransaction(readOnly)) {
-            R r = withTransaction(tx, f);
-            if (!readOnly) {
-                commit(tx);
+        return inTransaction(() -> createDBTransaction(readOnly), f);
+    }
+
+    public static class TxRetryStrategy {
+        public int delay = 1;
+        public int maxDelay = 1000;
+        public int maxAttempts = 10;
+        public List<Class<?>> retryClasses = new ArrayList<>();
+    }
+
+    protected TxRetryStrategy createTxRetryStrategy() {
+        return new TxRetryStrategy();
+    }
+
+    public <R> R inTransaction(Supplier<DBTransaction> txSupplier, TxFunction<R> f) throws Exception {
+        TxRetryStrategy retryStrategy = createTxRetryStrategy();
+        int attempt = 1;
+        int delay = retryStrategy.delay;
+        while (true) {
+            try (DBTransaction tx = txSupplier.get()) {
+                tx.begin();
+                try {
+                    return callWithTransaction(tx, f);
+                }
+                catch (Throwable e) {
+                    tx.rollback();
+                    throw e;
+                }
+                finally {
+                    tx.commit();
+                }
             }
-            return r;
+            catch (Throwable e) {
+                boolean retry = retryStrategy.retryClasses.stream().anyMatch(aClass -> aClass.isAssignableFrom(e.getClass()));
+                if (!retry) {
+                    throw e;
+                }
+                if (++attempt > retryStrategy.maxAttempts) {
+                    throw e;
+                }
+                String message = e.getClass().getSimpleName() + ": " + e.getMessage() + " attempt no " + attempt + " after " + delay + "ms";
+                logger.info(message);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ex) {
+                }
+                if (delay < retryStrategy.maxDelay) {
+                    delay *= 2;
+                }
+                continue;
+            }
         }
     }
 }
