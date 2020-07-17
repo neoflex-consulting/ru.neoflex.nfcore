@@ -282,14 +282,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             //Aggregation overall
             if (aggregations) {
                 for (int i = 0; i < allColumns.size() - 1; i++) {
-                    def samedatasetColumn = 0;
+                    def sameDatasetColumn = 0;
                     for (int j = 0; j < aggregations.size(); j++) {
                         if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
-                            samedatasetColumn++;
+                            sameDatasetColumn++;
                         }
                     }
-                    if (numberOfLines < samedatasetColumn) {
-                        numberOfLines = samedatasetColumn
+                    if (numberOfLines < sameDatasetColumn) {
+                        numberOfLines = sameDatasetColumn
                     }
 
                 }
@@ -435,21 +435,20 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     def columnCount = rs.metaData.columnCount
                     if (numberOfLines > 1){
                         while (rs.next()) {
-                            int columnCountt = columnCount/numberOfLines
-                            def map = [:]
-                            String key
-                            String value
-                            def object
-                    for (int j = 0; j < numberOfLines; j++) {
-                        for (int i = 1; i <= columnCountt; ++i) {
-                            int index = i + (j*columnCountt)
-                            object = rs.getObject(index)
-                            value = (object == null ? null : object.toString())
-                            key = "${rs.metaData.getColumnName(index)}"
-                            map[key] = value
-                        }
-                        rowData.add(map)
-                    }
+                            for (int j = 0; j < numberOfLines; j++) {
+                                def map = [:]
+                                String key
+                                String value
+                                def object
+                                for (int i = 1; i <= allColumns.size(); ++i) {
+                                    int index = i + (j*allColumns.size())
+                                    object = rs.getObject(index)
+                                    value = (object == null ? null : object.toString())
+                                    key = "${rs.metaData.getColumnName(index)}"
+                                    map[key] = value
+                                }
+                                rowData.add(map)
+                            }
                         }
                     }
                     else{
