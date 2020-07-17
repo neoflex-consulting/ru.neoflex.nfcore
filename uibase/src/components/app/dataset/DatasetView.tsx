@@ -620,6 +620,11 @@ class DatasetView extends React.Component<any, State> {
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
     ) {
+        if (this.state.rowData.length === 0){
+            for (let i = 0; i < aggregationParams.length; i++){
+                aggregationParams[i].enable = false
+            }
+        }
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
