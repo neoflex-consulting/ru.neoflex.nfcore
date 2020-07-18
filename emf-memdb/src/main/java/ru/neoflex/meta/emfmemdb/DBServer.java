@@ -31,14 +31,14 @@ public abstract class DBServer implements AutoCloseable {
         this.dbName = dbName;
     }
 
-    public static String getId(URI uri) {
+    public String getId(URI uri) {
         if (uri.segmentCount() >= 1) {
             return uri.segment(0);
         }
         return null;
     }
 
-    public static Integer getVersion(URI uri) {
+    public Integer getVersion(URI uri) {
         String query = uri.query();
         if (query == null || !query.contains("rev=")) {
             return null;
@@ -46,8 +46,6 @@ public abstract class DBServer implements AutoCloseable {
         String versionStr = query.split("rev=", -1)[1];
         return StringUtils.isEmpty(versionStr) ? null : Integer.valueOf(versionStr);
     }
-
-    public abstract void commit(DBTransaction tx);
 
     @Override
     public void close() throws IOException {

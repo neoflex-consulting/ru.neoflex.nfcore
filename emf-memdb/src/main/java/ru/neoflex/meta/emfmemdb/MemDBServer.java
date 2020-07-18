@@ -18,11 +18,6 @@ public class MemDBServer extends DBServer {
     }
 
     @Override
-    public void commit(DBTransaction tx) {
-        prevayler.execute((MemDBTransaction) tx);
-    }
-
-    @Override
     public void close() throws IOException {
         try {
             prevayler.takeSnapshot();
@@ -38,7 +33,10 @@ public class MemDBServer extends DBServer {
 
     @Override
     protected DBTransaction createDBTransaction(boolean readOnly) {
-        return new MemDBTransaction(this, readOnly);
+        DBTransaction tx = new MemDBTransaction();
+        tx.setDbServer(this);
+        tx.setReadOnly(readOnly);
+        return tx;
     }
 
     @Override
@@ -49,6 +47,7 @@ public class MemDBServer extends DBServer {
     @Override
     protected  <R> R callWithTransaction(DBTransaction tx, TxFunction<R> f) throws Exception {
         return prevayler.execute((Query<MemDBModel, R>) (prevalentSystem, executionTime) -> {
+            ((MemDBTransaction)tx).setMemDBModel(prevalentSystem);
             return f.call(tx);
         });
     }
