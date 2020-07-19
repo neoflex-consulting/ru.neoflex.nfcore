@@ -1,13 +1,12 @@
 package ru.neoflex.meta.emfmemdb;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
 public class MemDBResource implements Serializable, Cloneable {
     private String id;
     private int version;
-    private List<String> names;
+    private Set<String> names;
     private Set<String> references;
     private byte[] image;
 
@@ -60,11 +59,11 @@ public class MemDBResource implements Serializable, Cloneable {
         this.references = references;
     }
 
-    public List<String> getNames() {
+    public Set<String> getNames() {
         return names;
     }
 
-    public void setNames(List<String> names) {
+    public void setNames(Set<String> names) {
         this.names = names;
     }
 }

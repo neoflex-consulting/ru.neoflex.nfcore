@@ -1,6 +1,7 @@
 package ru.neoflex.meta.emfmemdb;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -28,6 +29,13 @@ public abstract class DBTransaction implements AutoCloseable {
     public void commit() {}
     public void rollback() {}
 
+    public Stream<Resource> findByClass(ResourceSet rs, EClass eClass) {
+        return findByClass(rs, EcoreUtil.getURI(eClass).toString());
+    }
+
+    public Stream<Resource> findByClassAndQName(ResourceSet rs, EClass eClass, String qName) {
+        return findByClassAndQName(rs, EcoreUtil.getURI(eClass).toString(), qName);
+    }
 
     public void save(Resource resource) {
         String id = dbServer.getId(resource.getURI());

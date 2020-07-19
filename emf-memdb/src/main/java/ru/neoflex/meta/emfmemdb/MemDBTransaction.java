@@ -92,9 +92,9 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
         Stream<MemDBResource> baseStream = memDBModel.findByClassAndQName(classUri, qName)
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
         Stream<MemDBResource> insertedStream = inserted.values().stream()
-                .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.equals(attributeValue)));
+                .filter(dbResource -> dbResource.getNames().contains(attributeValue));
         Stream<MemDBResource> updatedStream = updated.values().stream()
-                .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.equals(attributeValue)));
+                .filter(dbResource -> dbResource.getNames().contains(attributeValue));
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
@@ -108,9 +108,9 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
         Stream<MemDBResource> baseStream = memDBModel.findReferencedTo(id)
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
         Stream<MemDBResource> insertedStream = inserted.values().stream()
-                .filter(dbResource -> dbResource.getNames().contains(id));
+                .filter(dbResource -> dbResource.getReferences().contains(id));
         Stream<MemDBResource> updatedStream = updated.values().stream()
-                .filter(dbResource -> dbResource.getNames().contains(id));
+                .filter(dbResource -> dbResource.getReferences().contains(id));
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
@@ -146,9 +146,9 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
             throw new RuntimeException(e);
         }
         dbResource.setImage(outputStream.toByteArray());
-        List<String> names = resource.getContents().stream().map(eObject ->
+        Set<String> names = resource.getContents().stream().map(eObject ->
             EcoreUtil.getURI(eObject.eClass()).toString() + ":" + getMemDBServer().getQName(eObject)
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toSet());
         dbResource.setNames(names);
         Map<EObject, Collection<EStructuralFeature.Setting>> xrs = EcoreUtil.ExternalCrossReferencer.find(resource);
         Set<String> references = xrs.keySet().stream()
