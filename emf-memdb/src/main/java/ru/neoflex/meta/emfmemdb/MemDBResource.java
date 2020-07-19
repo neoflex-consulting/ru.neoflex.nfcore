@@ -4,21 +4,21 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
-public class DBResource implements Serializable, Cloneable {
+public class MemDBResource implements Serializable, Cloneable {
     private String id;
     private int version;
     private List<String> names;
     private Set<String> references;
     private byte[] image;
 
-    DBResource() {
+    MemDBResource() {
         this.id = null;
         this.version = 0;
     }
 
-    public DBResource clone() {
+    public MemDBResource clone() {
         try {
-            DBResource copy = (DBResource) super.clone();
+            MemDBResource copy = (MemDBResource) super.clone();
             if (image != null) {
                 copy.image = image.clone();
             }

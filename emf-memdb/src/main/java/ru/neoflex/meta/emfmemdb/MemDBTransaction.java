@@ -4,6 +4,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.prevayler.Transaction;
 
@@ -16,29 +17,39 @@ import java.util.stream.Stream;
 
 public class MemDBTransaction extends DBTransaction implements Transaction<MemDBModel> {
     private transient MemDBModel memDBModel;
-    private Map<String, DBResource> inserted = new HashMap<>();
-    private Map<String, DBResource> updated = new HashMap<>();
+    private Map<String, MemDBResource> inserted = new HashMap<>();
+    private Map<String, MemDBResource> updated = new HashMap<>();
     private Set<String> deleted = new HashSet<>();
 
     @Override
-    protected Resource load(Resource resource, String id) {
-        DBResource dbResource = get(id);
+    protected void load(String id, Resource resource) {
+        MemDBResource dbResource = get(id);
+        load(dbResource, resource);
+        URI uri = getMemDBServer().createURI(id, String.valueOf(dbResource.getVersion()));
+        resource.setURI(uri);
+    }
+
+    private void load(MemDBResource dbResource, Resource resource) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(dbResource.getImage());
         try {
             resource.load(inputStream, null);
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Can't load %s", dbResource.getId()));
         }
-        URI uri = getMemDBServer().createURI(id, dbResource.getVersion());
-        resource.setURI(uri);
+    }
+
+    private Resource createResource(ResourceSet rs, MemDBResource dbResource) {
+        URI uri = getMemDBServer().createURI(dbResource.getId(), String.valueOf(dbResource.getVersion()));
+        Resource resource = rs.createResource(uri);
+        load(dbResource, resource);
         return resource;
     }
 
-    private DBResource get(String id) {
+    private MemDBResource get(String id) {
         if (deleted.contains(id)) {
             throw new IllegalArgumentException(String.format("Can't find object %s", id));
         }
-        DBResource dbObject = updated.get(id);
+        MemDBResource dbObject = updated.get(id);
         if (dbObject == null) {
             dbObject = inserted.get(id);
         }
@@ -48,56 +59,62 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
         return dbObject;
     }
 
-    public Stream<DBResource> findAll() {
-        Stream<DBResource> baseStream = memDBModel.findAll()
+    @Override
+    public Stream<Resource> findAll(ResourceSet rs) {
+        Stream<MemDBResource> baseStream = memDBModel.findAll()
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
-        Stream<DBResource> insertedStream = inserted.values().stream();
-        Stream<DBResource> updatedStream = updated.values().stream();
+        Stream<MemDBResource> insertedStream = inserted.values().stream();
+        Stream<MemDBResource> updatedStream = updated.values().stream();
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
-        );
+        ).map(dbResource -> createResource(rs, dbResource));
     }
 
-    public Stream<DBResource> findByClass(String classUri) {
+    @Override
+    public Stream<Resource> findByClass(ResourceSet rs, String classUri) {
         String attributeValue = classUri + ":";
-        Stream<DBResource> baseStream = memDBModel.findByClass(classUri)
+        Stream<MemDBResource> baseStream = memDBModel.findByClass(classUri)
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
-        Stream<DBResource> insertedStream = inserted.values().stream()
+        Stream<MemDBResource> insertedStream = inserted.values().stream()
                 .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.startsWith(attributeValue)));
-        Stream<DBResource> updatedStream = updated.values().stream()
+        Stream<MemDBResource> updatedStream = updated.values().stream()
                 .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.startsWith(attributeValue)));
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
-        );
+        ).map(dbResource -> createResource(rs, dbResource));
     }
 
-    public Stream<DBResource> findByClassAndQName(String classUri, String qName) {
+    @Override
+    public Stream<Resource> findByClassAndQName(ResourceSet rs, String classUri, String qName) {
         String attributeValue = classUri + ":" + qName;
-        Stream<DBResource> baseStream = memDBModel.findByClassAndQName(classUri, qName)
+        Stream<MemDBResource> baseStream = memDBModel.findByClassAndQName(classUri, qName)
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
-        Stream<DBResource> insertedStream = inserted.values().stream()
+        Stream<MemDBResource> insertedStream = inserted.values().stream()
                 .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.equals(attributeValue)));
-        Stream<DBResource> updatedStream = updated.values().stream()
+        Stream<MemDBResource> updatedStream = updated.values().stream()
                 .filter(dbResource -> dbResource.getNames().stream().anyMatch(s -> s.equals(attributeValue)));
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
-        );
+        ).map(dbResource -> createResource(rs, dbResource));
     }
 
-    public Stream<DBResource> findReferencedTo(String id) {
-        Stream<DBResource> baseStream = memDBModel.findReferencedTo(id)
+    @Override
+    public Stream<Resource> findReferencedTo(Resource resource) {
+        ResourceSet rs = resource.getResourceSet();
+        String id = getMemDBServer().getId(resource.getURI());
+        Stream<MemDBResource> baseStream = memDBModel.findReferencedTo(id)
                 .filter(dbResource -> !deleted.contains(dbResource.getId()) && !updated.containsKey(dbResource.getId()));
-        Stream<DBResource> insertedStream = inserted.values().stream()
+        Stream<MemDBResource> insertedStream = inserted.values().stream()
                 .filter(dbResource -> dbResource.getNames().contains(id));
-        Stream<DBResource> updatedStream = updated.values().stream()
+        Stream<MemDBResource> updatedStream = updated.values().stream()
                 .filter(dbResource -> dbResource.getNames().contains(id));
         return Stream.concat(
                 Stream.concat(insertedStream, updatedStream),
                 baseStream
-        );
+        ).map(dbResource -> createResource(rs, dbResource));
     }
 
     @Override
@@ -118,8 +135,8 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
         return (MemDBServer) getDbServer();
     }
 
-    private DBResource createDBResource(Resource resource, String id, Integer version) {
-        DBResource dbResource = new DBResource();
+    private MemDBResource createDBResource(Resource resource, String id, Integer version) {
+        MemDBResource dbResource = new MemDBResource();
         dbResource.setId(id);
         dbResource.setVersion(version);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -135,22 +152,23 @@ public class MemDBTransaction extends DBTransaction implements Transaction<MemDB
         dbResource.setNames(names);
         Map<EObject, Collection<EStructuralFeature.Setting>> xrs = EcoreUtil.ExternalCrossReferencer.find(resource);
         Set<String> references = xrs.keySet().stream()
-                .map(eObject -> getMemDBServer().getId(eObject.eResource().getURI())).collect(Collectors.toSet());
+                .map(eObject -> getMemDBServer().getId(EcoreUtil.getURI(eObject))).collect(Collectors.toSet());
         dbResource.setReferences(references);
         return dbResource;
     }
 
     @Override
     protected void insert(Resource resource) {
-        DBResource dbResource = createDBResource(resource, getNextId(), 0);
-        resource.setURI(getMemDBServer().createURI(dbResource.getId(), dbResource.getVersion()));
+        MemDBResource dbResource = createDBResource(resource, getNextId(), 0);
+        resource.setURI(getMemDBServer().createURI(dbResource.getId(), String.valueOf(dbResource.getVersion())));
         inserted.put(dbResource.getId(), dbResource);
     }
 
     @Override
-    protected void update(String id, Resource resource, Integer version) {
-        DBResource dbResource = createDBResource(resource, id, version);
-        resource.setURI(getMemDBServer().createURI(dbResource.getId(), dbResource.getVersion()));
+    protected void update(String id, Resource resource) {
+        Integer version = Integer.valueOf(getMemDBServer().getVersion(resource.getURI()));
+        MemDBResource dbResource = createDBResource(resource, id, version + 1);
+        resource.setURI(getMemDBServer().createURI(dbResource.getId(), String.valueOf(dbResource.getVersion())));
         updated.put(id, dbResource);
     }
 

@@ -38,13 +38,13 @@ public abstract class DBServer implements AutoCloseable {
         return null;
     }
 
-    public Integer getVersion(URI uri) {
+    public String getVersion(URI uri) {
         String query = uri.query();
         if (query == null || !query.contains("rev=")) {
             return null;
         }
         String versionStr = query.split("rev=", -1)[1];
-        return StringUtils.isEmpty(versionStr) ? null : Integer.valueOf(versionStr);
+        return StringUtils.isEmpty(versionStr) ? null : versionStr;
     }
 
     @Override
@@ -73,10 +73,6 @@ public abstract class DBServer implements AutoCloseable {
 
     protected abstract DBTransaction createDBTransaction(boolean readOnly);
 
-    public URI createURI(DBResource dbResource) {
-        return createURI(dbResource.getId(), dbResource.getVersion());
-    }
-
     private String createURIString(String id) {
         return getScheme() + "://" + dbName + "/" + (id != null ? id : "");
     }
@@ -85,8 +81,8 @@ public abstract class DBServer implements AutoCloseable {
         return URI.createURI(createURIString(id));
     }
 
-    public URI createURI(String id, Integer version) {
-        return URI.createURI(String.format("%s?rev=%s", createURIString(id), String.valueOf(version)));
+    public URI createURI(String id, String version) {
+        return URI.createURI(String.format("%s?rev=%s", createURIString(id), version));
     }
 
     public String getQName(EObject eObject) {

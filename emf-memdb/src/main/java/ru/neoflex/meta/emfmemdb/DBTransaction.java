@@ -10,14 +10,19 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public abstract class DBTransaction implements AutoCloseable {
     private transient boolean readOnly;
     private transient DBServer dbServer;
 
-    protected abstract Resource load(Resource resource, String id);
+    protected abstract void load(String id, Resource resource);
+    public abstract Stream<Resource> findAll(ResourceSet rs);
+    public abstract Stream<Resource> findByClass(ResourceSet rs, String classUri);
+    public abstract Stream<Resource> findByClassAndQName(ResourceSet rs, String classUri, String qName);
+    public abstract Stream<Resource> findReferencedTo(Resource resource);
     protected abstract void insert(Resource resource);
-    protected abstract void update(String id, Resource resource, Integer version);
+    protected abstract void update(String id, Resource resource);
     protected abstract void delete(String id);
     public void begin() {}
     public void commit() {}
@@ -26,27 +31,27 @@ public abstract class DBTransaction implements AutoCloseable {
 
     public void save(Resource resource) {
         String id = dbServer.getId(resource.getURI());
-        Integer version = dbServer.getVersion(resource.getURI());
+        String version = dbServer.getVersion(resource.getURI());
         ResourceSet rs = createResourceSet();
         Resource oldResource = rs.createResource(resource.getURI());
         if (id != null) {
             if (version == null) {
                 throw new IllegalArgumentException(String.format("Version for updated resource %s not defined", id));
             }
-            Integer oldVersion = dbServer.getVersion(oldResource.getURI());
+            load(id, oldResource);
+            String oldVersion = dbServer.getVersion(oldResource.getURI());
             if (!version.equals(oldVersion)) {
                 throw new IllegalArgumentException(String.format(
                         "Version (%d) for updated resource %s is not equals to the version in the DB (%d)",
                         version, id, oldVersion));
             }
-            load(oldResource, id);
         }
         dbServer.getEvents().fireBeforeSave(oldResource, resource);
         if (id == null) {
             insert(resource);
         }
         else {
-            update(id, resource, version + 1);
+            update(id, resource);
         }
         dbServer.getEvents().fireAfterSave(oldResource, resource);
     }
@@ -58,7 +63,7 @@ public abstract class DBTransaction implements AutoCloseable {
     public void load(Resource resource) {
         resource.unload();
         String id = dbServer.getId(resource.getURI());
-        load(resource, id);
+        load(id, resource);
         dbServer.getEvents().fireAfterLoad(resource);
     }
 
@@ -67,14 +72,14 @@ public abstract class DBTransaction implements AutoCloseable {
         if (id == null) {
             throw new IllegalArgumentException("Id for deleted object not defined");
         }
-        Integer version = dbServer.getVersion(uri);
+        String version = dbServer.getVersion(uri);
         if (version == null) {
             throw new IllegalArgumentException(String.format("Version for deleted object %s not defined", id));
         }
         ResourceSet rs = createResourceSet();
         Resource oldResource = rs.createResource(uri);
-        load(oldResource, id);
-        Integer oldVersion = dbServer.getVersion(oldResource.getURI());
+        load(id, oldResource);
+        String oldVersion = dbServer.getVersion(oldResource.getURI());
         if (!version.equals(oldVersion)) {
             throw new IllegalArgumentException(String.format(
                     "Version (%d) for deleted object %s is not equals to the version in the DB (%d)",

@@ -17,48 +17,48 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MemDBModel implements Externalizable {
-    private IndexedCollection<DBResource> indexedCollection;
-    public static final Attribute<DBResource, String> ID = QueryFactory.attribute("id", DBResource::getId);
-    public static final Attribute<DBResource, String> NAMES = QueryFactory.attribute(String.class, "classUri", DBResource::getNames);
-    public static final Attribute<DBResource, String> REFERENCES = QueryFactory.attribute(String.class,"references", DBResource::getReferences);
+    private IndexedCollection<MemDBResource> indexedCollection;
+    public static final Attribute<MemDBResource, String> ID = QueryFactory.attribute("id", MemDBResource::getId);
+    public static final Attribute<MemDBResource, String> NAMES = QueryFactory.attribute(String.class, "classUri", MemDBResource::getNames);
+    public static final Attribute<MemDBResource, String> REFERENCES = QueryFactory.attribute(String.class,"references", MemDBResource::getReferences);
 
-    public DBResource get(String id) {
+    public MemDBResource get(String id) {
         return getIndexedCollection().retrieve(QueryFactory.equal(ID, id)).uniqueResult();
     }
 
-    public Stream<DBResource> findAll() {
-        return getIndexedCollection().retrieve(QueryFactory.all(DBResource.class)).stream();
+    public Stream<MemDBResource> findAll() {
+        return getIndexedCollection().retrieve(QueryFactory.all(MemDBResource.class)).stream();
     }
 
-    public Stream<DBResource> findByClass(String classUri) {
+    public Stream<MemDBResource> findByClass(String classUri) {
         String attributeValue = classUri + ":";
         return getIndexedCollection().retrieve(QueryFactory.startsWith(NAMES, attributeValue)).stream();
     }
 
-    public Stream<DBResource> findByClassAndQName(String classUri, String qName) {
+    public Stream<MemDBResource> findByClassAndQName(String classUri, String qName) {
         String attributeValue = classUri + ":" + qName;
         return getIndexedCollection().retrieve(QueryFactory.equal(NAMES, attributeValue)).stream();
     }
 
-    public Stream<DBResource> findReferencedTo(String id) {
+    public Stream<MemDBResource> findReferencedTo(String id) {
         return getIndexedCollection().retrieve(QueryFactory.equal(REFERENCES, id)).stream();
     }
 
-    public void insert(DBResource dbResource) {
+    public void insert(MemDBResource dbResource) {
         getIndexedCollection().add(dbResource);
     }
 
-    public void update(DBResource dbResource) {
+    public void update(MemDBResource dbResource) {
         delete(dbResource.getId());
         insert(dbResource);
     }
 
     public void delete(String id) {
-        DBResource dbResource = get(id);
+        MemDBResource dbResource = get(id);
         getIndexedCollection().remove(dbResource);
     }
 
-    public IndexedCollection<DBResource> getIndexedCollection() {
+    public IndexedCollection<MemDBResource> getIndexedCollection() {
         if (indexedCollection == null) {
             indexedCollection = new ConcurrentIndexedCollection<>();
             indexedCollection.addIndex(UniqueIndex.onAttribute(ID));
@@ -70,13 +70,13 @@ public class MemDBModel implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        List<DBResource> dbResources = findAll().collect(Collectors.toList());
+        List<MemDBResource> dbResources = findAll().collect(Collectors.toList());
         out.writeObject(dbResources);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        List<DBResource> dbResources = (List<DBResource>) in.readObject();
+        List<MemDBResource> dbResources = (List<MemDBResource>) in.readObject();
         getIndexedCollection().addAll(dbResources);
     }
 }
