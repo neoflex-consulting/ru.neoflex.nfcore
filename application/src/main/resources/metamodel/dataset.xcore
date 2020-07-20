@@ -100,7 +100,17 @@ class DatasetComponent {
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
-     refers DataModifier dataModifier
+     contains DMLQuery insertQuery
+     contains DMLQuery updateQuery
+     contains DMLQuery deleteQuery
+     op void executeInsert(QueryParameter[] parameters)
+     op void executeUpdate(QueryParameter[] parameters)
+     op void executeDelete(QueryParameter[] parameters)
+}
+
+class DMLQuery {
+    String queryText
+    boolean generateFromModel
 }
 
 class DatasetColumn {
@@ -120,12 +130,12 @@ abstract class DatasetColumnView {
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
-    boolean isPrimaryKey
     boolean editable
     boolean checkboxSelection
     boolean sortable
     boolean suppressMenu
     boolean resizable
+    boolean isPrimaryKey
     contains GridComponent component
 }
 
@@ -204,26 +214,6 @@ class Highlight {
     boolean enable
     String backgroundColor
     String color
-}
-
-class ColumnDTO {
-    String columnName
-    String columnDataType
-    String columnValue
-}
-
-class PrimaryKeyDTO {
-    contains ColumnDTO[] keyColumns
-}
-
-class DataModifier {
-    QName name
-    refers JdbcConnection connection
-    String schemaName
-    String tableName
-    op void insert(ColumnDTO[] values)
-    op void update(PrimaryKeyDTO primaryKey, ColumnDTO[] values)
-    op void delete(PrimaryKeyDTO primaryKey)
 }
 
 enum QueryType {

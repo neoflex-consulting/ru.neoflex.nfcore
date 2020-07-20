@@ -9,7 +9,6 @@ package ru.neoflex.nfcore.application
 import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
-import ru.neoflex.nfcore.dataset.DataModifier
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
@@ -83,7 +82,6 @@ abstract class Icon extends ViewElement {
 
 class MasterdataView extends ViewElement {
     refers EntityType entityType
-    refers DataModifier dataModifier
 }
 
 class Calendar extends ViewElement {
