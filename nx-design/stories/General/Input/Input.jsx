@@ -56,6 +56,41 @@ const NXRadio = styled(Radio)`
   height: 20px;
 }
 `
+const NXRadioGroup = styled(Radio.Group)`
+display: flex;
+justify-content: ${(props) => (props.content ? `${props.content}` : "")}
+`
+
+const NXRadioButton = styled(Radio.Button)`
+    background: #FFFFFF;
+    color: #424D78;
+    font-size: 12px !important;
+    line-height: ${(props) => (props.isIcon ? `${props.isIcon}` : "32px")};
+    text-align: center !important;
+    align-items: center !important;
+    border: 1px solid #424D78;
+    border-radius: 4px !important;
+    padding: ${(props) => (props.isIcon? '0' : props.padding ? `${props.padding}` : "0 32px")};
+    margin: ${(props) => (props.margin ? `${props.margin}` : "")};
+    height: ${(props) => (props.isIcon ? `${props.isIcon}` : "32px")};
+    width: ${(props) => (props.isIcon ? `${props.isIcon}` : props.width ? props.width : "auto")};
+    
+    :first-child{
+    border: 1px solid #424D78;
+    }
+    
+    ::before{
+    display: none !important;
+    }
+    
+    :hover {
+    background: #FFFFFF;
+    color: #171D45;
+    border: 1px solid #171D45;
+    box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);
+    }
+   
+`
 
 const NXCheckbox = styled(Checkbox)`
  .ant-checkbox-inner{
@@ -117,4 +152,4 @@ const NXOption = styled(Option)`
 
 `
 
-export {NXInput, NXCheckbox, NXTextArea, NXRadio, NXDatePicker, NXSelect, NXOption}
+export {NXInput, NXCheckbox, NXTextArea, NXRadio, NXRadioGroup, NXRadioButton, NXDatePicker, NXSelect, NXOption}

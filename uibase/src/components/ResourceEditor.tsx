@@ -2,7 +2,7 @@ import * as React from "react";
 import {
     Tree, Icon, Table, Modal,
     Button, Select, Row, Col,
-    Menu, Layout
+    Menu, Layout, Input
 } from 'antd';
 import Ecore, {EObject} from "ecore";
 import { withTranslation, WithTranslation } from "react-i18next";
@@ -48,6 +48,7 @@ interface State {
     classes: Ecore.EObject[],
     selectedKeys: Array<string>,
     selectedRefUries: Array<string>,
+    searchResources: String,
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -79,7 +80,8 @@ class ResourceEditor extends React.Component<any, State> {
         addRefPossibleTypes: [],
         classes: [],
         selectedKeys: [],
-        selectedRefUries: []
+        selectedRefUries: [],
+        searchResources: '',
     }
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -668,38 +670,51 @@ class ResourceEditor extends React.Component<any, State> {
                     >
                         <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
                             <Row>
-                                <Col span={21}>
+                                <Col span={19}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </Col>
-                                <Col span={3} style={{ position: 'sticky', top: '0' }}>
+                                <Col span={5} style={{ position: 'sticky', top: '0' }}>
                                     <Button title={t('additem')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
+                                        <Input
+                                            style={{ width: '99%'}}
+                                            onChange={(e)=>{
+                                                this.setState({searchResources: `${e.target.value}`})
+                                                }}
+                                            placeholder="Search">
+                                        </Input>
+
                                     <div className="resource-container">
                                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
-                                        this.state.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }) =>
+                                        this.state.mainEObject.eResource().eContainer.get('resources')
+                                            .filter((res: { [key: string]: any }) => res.eContents()[0].get('name').toLowerCase().includes(this.state.searchResources.toLowerCase())||
+                                                res.eContents()[0].eClass.get('name').toLowerCase().includes(this.state.searchResources.toLowerCase()))
+                                            .map((res: { [key: string]: any }) =>
                                             <div
                                                 className="resource-container-item"
                                                 key={res.eURI()}
                                             >
-                                                <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
-                                                        <span
-                                                            title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
-                                                            className="item-title"
-                                                        >
-                                                            {`${res.eContents()[0].get('name')}`}
-                                                            &nbsp;
-                                                            {<b>
-                                                                {`${res.eContents()[0].eClass.get('name')}`}
-                                                            </b>}
-                                                            &nbsp;
-
-                                                            </span>
-                                                </a>
-                                                <Button
-                                                    className="item-close-button"
-                                                    shape="circle"
-                                                    icon="close"
-                                                    onClick={(e: any) => this.handleDeleteResource(res)}
-                                                />
+                                                <div style={{width:'85%'}}>
+                                                    <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                            <span
+                                                                title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
+                                                                className="item-title"
+                                                            >
+                                                                {`${res.eContents()[0].get('name')}`}
+                                                                &nbsp;
+                                                                {<b>
+                                                                    {`${res.eContents()[0].eClass.get('name')}`}
+                                                                </b>}
+                                                                </span>
+                                                    </a>
+                                                </div>
+                                                <div style={{margin:'auto'}}>
+                                                    <Button
+                                                        className="item-close-button"
+                                                        shape="circle"
+                                                        icon="close"
+                                                        onClick={(e: any) => this.handleDeleteResource(res)}
+                                                    />
+                                                </div>
                                             </div>
                                         )
                                         }

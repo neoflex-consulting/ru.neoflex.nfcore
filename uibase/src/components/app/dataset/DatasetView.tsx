@@ -2,7 +2,7 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Modal, Select, Menu, Dropdown} from 'antd';
+import {Button, Drawer, Modal, Select, Menu, Dropdown, Checkbox} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -35,7 +35,6 @@ import flagIcon from "../../../icons/flagIcon.svg";
 import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
-import questionMarkIcon from "../../../icons/questionMarkIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
@@ -67,9 +66,9 @@ export interface IDiagram {
     diagramName: string,
     diagramLegend: string,
     legendAnchorPosition: string,
-    axisXPosition: string,
+    axisXPosition: string|undefined,
     axisXLegend: string,
-    axisYPosition: string,
+    axisYPosition: string|undefined,
     axisYLegend: string,
     diagramType: string,
     colorSchema: string
@@ -118,6 +117,8 @@ interface State {
     isDisabled: boolean;
     isReadOnly: boolean;
     IsGrid: boolean;
+    isWithTable: boolean;
+    isDownloadFromDiagramPanel: boolean;
 }
 
 const defaultComponentValues = {
@@ -177,6 +178,8 @@ class DatasetView extends React.Component<any, State> {
             isDisabled: this.props.disabled,
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
             IsGrid: false,
+            isWithTable: false,
+            isDownloadFromDiagramPanel: false,
         }
     }
 
@@ -616,6 +619,11 @@ class DatasetView extends React.Component<any, State> {
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
     ) {
+        if (this.state.rowData.length === 0){
+            for (let i = 0; i < aggregationParams.length; i++){
+                aggregationParams[i].enable = false
+            }
+        }
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
@@ -806,7 +814,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-        handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+            handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
         let newDiagrams:IDiagram[] = [];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
@@ -850,18 +858,34 @@ class DatasetView extends React.Component<any, State> {
 
     onActionMenu(e : any) {
         if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context.getDocxHandlers()).then(blob => {
+            handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
                 saveAs(new Blob([blob]), "example.docx");
                 console.log("Document created successfully");
             });
         }
         if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context.getExcelHandlers()).then((blob) => {
+            handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
                     saveAs(new Blob([blob]), 'example.xlsx');
                     console.log("Document created successfully");
                 }
             );
         }
+
+    }
+    DiagramButton = () => {
+        this.props.context.addDocxHandler();
+        this.props.context.addExcelHandler()
+        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel})
+        if (this.state.diagrams.length > 0)
+            this.setState({currentDiagram: this.state.diagrams[0]})
+        else
+            this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
+
+    }
+
+    withTable(e: any) {
+        let ee: any = e.target.checked
+        this.setState({isWithTable: ee})
     }
 
     getGridPanel = () => {
@@ -904,9 +928,8 @@ class DatasetView extends React.Component<any, State> {
             </Button>
             <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
-                        (this.state.diagrams.length > 0)
-                            ? this.setState({currentDiagram: this.state.diagrams[0]})
-                            : this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}
+                        this.DiagramButton()
+                    }
                     }
             >
                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
@@ -1049,8 +1072,10 @@ class DatasetView extends React.Component<any, State> {
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
-                        this.setState({currentDiagram:undefined})
+                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel })
                         this.getAllDatasetComponents(true)
+                        this.props.context.removeDocxHandler();
+                        this.props.context.removeExcelHandler();
                     }}
             >
                 Вернуться к таблице
@@ -1075,11 +1100,7 @@ class DatasetView extends React.Component<any, State> {
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('flag')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
-            </Button>
+
             <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
             >
@@ -1121,6 +1142,7 @@ class DatasetView extends React.Component<any, State> {
                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
                 </Button>
             </Dropdown>
+            <Checkbox onChange={this.withTable.bind(this)}>Download with table</Checkbox>
 
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
@@ -1149,8 +1171,10 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleSaveMenu = () => {
-        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
+        this.setState({saveMenuVisible:!this.state.saveMenuVisible, IsGrid:!this.state.IsGrid})
     };
+
+
 
     handleDeleteMenu = () => {
        this.handleDeleteMenuForCancel()
@@ -1171,7 +1195,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDeleteMenuForCancel = () => {
-        this.state.deleteMenuVisible ? this.setState({ deleteMenuVisible: false }) : this.setState({ deleteMenuVisible: true })
+        this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
 
     };
 

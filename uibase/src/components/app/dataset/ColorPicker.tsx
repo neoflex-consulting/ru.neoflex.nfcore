@@ -5,8 +5,8 @@ export class ColorPicker extends React.Component<any, any>{
     constructor(props: any) {
         super(props);
         this.state = {
-            color: this.props.type=='background' ? this.props.value.backgroundColor :
-            this.props.type=='text' && this.props.value.color ? this.props.value.color : '#ffffff'
+            color: this.props.type === 'background' ? this.props.value.backgroundColor :
+            this.props.type === 'text' && this.props.value.color ? this.props.value.color : '#ffffff'
         }
     }
     changeColor(e: any) {
@@ -36,8 +36,8 @@ export class SketchColorPicker extends React.Component<any, any>{
     constructor(props: any) {
         super(props);
         this.state = {
-            color: this.props.type=='background' ? this.props.value.backgroundColor :
-                this.props.type=='text' && this.props.value.color ? this.props.value.color : '#ffffff'
+            color: this.props.type === 'background' ? this.props.value.backgroundColor :
+                this.props.type === 'text' && this.props.value.color ? this.props.value.color : '#ffffff'
         }
     }
     changeColor(e: any) {

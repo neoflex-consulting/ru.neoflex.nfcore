@@ -37,6 +37,17 @@
             <artifactId>prevayler-factory</artifactId>
             <version>2.6</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.10</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.cqengine</groupId>
+            <artifactId>cqengine</artifactId>
+            <version>3.5.0</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>

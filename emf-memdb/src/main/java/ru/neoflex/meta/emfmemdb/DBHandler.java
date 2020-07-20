@@ -8,27 +8,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-public class MemDBHandler extends URIHandlerImpl {
-    public static final String MEMDB = "memdb";
-    private MemDBTransaction tx;
+public class DBHandler extends URIHandlerImpl {
+    private DBTransaction tx;
 
-    MemDBHandler(MemDBTransaction tx) {
+    DBHandler(DBTransaction tx) {
         this.tx = tx;
     }
 
     @Override
     public boolean canHandle(URI uri) {
-        return MEMDB.equals(uri.scheme());
+        return tx.getDbServer().getScheme().equals(uri.scheme());
     }
 
     @Override
     public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
-        return new MemDBOutputStream(tx, uri, options);
+        return new DBOutputStream(tx, uri, options);
     }
 
     @Override
     public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
-        return new MemDBInputStream(tx, uri, options);
+        return new DBInputStream(tx, uri, options);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class MemDBHandler extends URIHandlerImpl {
         tx.delete(uri);
     }
 
-    public MemDBTransaction getTx() {
+    public DBTransaction getTx() {
         return tx;
     }
 }

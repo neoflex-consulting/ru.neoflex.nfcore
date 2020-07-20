@@ -93,6 +93,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
         const height = (this.node) ? this.node.size.height : 400;
         if (this.node && this.node?.resizable !== null) {
             return {
+                hidden: this.props.hidden,
                 docxComponentType : docxElementExportType.diagram,
                 diagramData: {
                     blob: domtoimage.toBlob(this.node?.resizable,{
@@ -104,7 +105,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                 }
             };
         }
-        return {docxComponentType: docxElementExportType.diagram}
+        return {hidden: this.props.hidden, docxComponentType: docxElementExportType.diagram}
     }
 
     private getExcelData(): excelExportObject {
@@ -112,6 +113,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
         const height = (this.node) ? this.node.size.height : 400;
         if (this.node && this.node?.resizable !== null) {
             return {
+                hidden: this.props.hidden,
                 excelComponentType: excelElementExportType.diagram,
                 diagramData: {
                     blob: domtoimage.toBlob(this.node?.resizable, {
@@ -123,7 +125,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                 }
             };
         }
-        return {excelComponentType: excelElementExportType.diagram}
+        return {hidden: this.props.hidden, excelComponentType: excelElementExportType.diagram}
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -157,7 +159,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisXLegend,
             legendPosition: 'middle',
-            legendOffset: this.state.diagramParams.axisXPosition === "Top" ? -30 : 30,
+            legendOffset: 30,
         };
         const axisY : Axis = {
             tickSize: 5,
@@ -165,7 +167,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisYLegend,
             legendPosition: 'middle',
-            legendOffset: this.state.diagramParams.axisYPosition === "Left" ? -35 : 35,
+            legendOffset: -45,
         };
         return <div>
 
@@ -252,7 +254,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisXLegend,
             legendPosition: 'middle',
-            legendOffset: 0
+            legendOffset: 30,
         };
         const axisY : AxisProps = {
             tickSize: 5,
@@ -260,7 +262,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             tickRotation: 0,
             legend: this.state.diagramParams.axisYLegend,
             legendPosition: 'middle',
-            legendOffset: 0
+            legendOffset: -45,
         };
         return <div>
             {/*Ссылка для выгрузки диаграммы в png*/}

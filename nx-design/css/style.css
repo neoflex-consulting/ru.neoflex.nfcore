@@ -196,6 +196,13 @@ table {
 
 /*Components*/
 
+/*Inputs*/
+.ant-radio-button-wrapper-checked{
+  background: #FFF8E0 !important;
+  color: #090B1F !important;
+  border: 1px solid #FFCC66 !important;
+}
+
 /*Hint*/
 .ant-tooltip-inner, .ant-tooltip-arrow-content {
   background-color: #2A356C !important;
@@ -339,3 +346,4 @@ table {
   color: black;
 }
 /*----------*/
+

@@ -389,14 +389,16 @@ class Select_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.selected
+            textData: this.selected,
+            hidden: this.viewObject.get('hidden')
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.selected
+            textData: this.selected,
+            hidden: this.viewObject.get('hidden')
         };
     }
 
@@ -468,6 +470,7 @@ class Select_ extends ViewContainer {
                 {actionType: actionType.setValue, callback: this.onChange.bind(this)},
             ]
         });
+
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
             itemId:this.viewObject.eURI()
@@ -611,14 +614,17 @@ class DatePicker_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format)
+            textData: this.state.pickedDate.format(this.state.format),
+            hidden: this.viewObject.get('hidden')
+
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format)
+            textData: this.state.pickedDate.format(this.state.format),
+            hidden: this.viewObject.get('hidden')
         };
     }
 
@@ -1099,14 +1105,16 @@ class Typography_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.viewObject.get('name')
+            textData: this.viewObject.get('name'),
+            hidden: this.viewObject.get('hidden')
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.viewObject.get('name')
+            textData: this.viewObject.get('name'),
+            hidden: this.viewObject.get('hidden')
         };
     }
 
@@ -1187,8 +1195,8 @@ class EventHandler_ extends ViewContainer {
             let isHandled = false;
             this.viewObject.get('eventActions').each((el: EObject) => {
                 const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
-                    return (el.get('triggerItem')
-                        && (action.itemId === el.get('triggerItem').eURI())
+                    return ((el.get('triggerItem')
+                        && action.itemId === el.get('triggerItem').eURI())
                         || el.get('action') === actionType.showMessage
                         || el.get('action') === actionType.redirect)
                 });
