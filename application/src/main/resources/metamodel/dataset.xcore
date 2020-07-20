@@ -100,9 +100,6 @@ class DatasetComponent {
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
-     contains DMLQuery insertQuery
-     contains DMLQuery updateQuery
-     contains DMLQuery deleteQuery
 }
 
 class DatasetColumn {
@@ -136,12 +133,6 @@ class RdbmsColumn extends DatasetColumnView {
 
 class CustomColumn extends DatasetColumnView {
     String customColumnExpression //выражение в вычисляемом столбце
-}
-
-class DMLQuery {
-    op void executeDML(QueryParameter[] parameters)
-    String queryText
-    boolean generateFromModel
 }
 
 class FormatMask {
