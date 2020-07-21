@@ -415,20 +415,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
                 if (parameters) {
-                    for (int i = 0; i <= parameters.size() - 1; ++i) {
-                        if (!parameters[i].parameterValue) {
-                            p.setString(parameters[i].parameterName, null)
-                        }
-                        if (parameters[i].parameterDataType == "Date") {
-                            p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                        } else if (parameters[i].parameterDataType == "Timestamp") {
-                            p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                        } else if (parameters[i].parameterDataType == "Int") {
-                            p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-                        } else {
-                            p.setString(parameters[i].parameterName, parameters[i].parameterValue)
-                        }
-                    }
+                    p = getNamedParameterStatement(parameters, p)
                 }
                 try {
                     rs = p.executeQuery();
@@ -470,6 +457,107 @@ class DatasetComponentExt extends DatasetComponentImpl {
             (jdbcConnection) ? jdbcConnection.close() : null
         }
         return rowData
+    }
+
+    @Override
+    void executeInsert(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.INSERT, this.insertQuery)
+    }
+
+    @Override
+    void executeUpdate(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.UPDATE, this.updateQuery)
+    }
+
+    @Override
+    void executeDelete(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.DELETE, this.deleteQuery)
+    }
+
+    void executeDML(EList<QueryParameter> parameters, DMLQueryType queryType, DMLQuery dmlQuery) {
+        logger.info("execute${queryType}", "execute${queryType} parameters = " + parameters)
+        String query;
+        def jdbcDataset = this.dataset as JdbcDataset
+        if (dmlQuery && dmlQuery.generateFromModel) {
+            if (jdbcDataset.schemaName == "" || !jdbcDataset.schemaName)
+                throw new IllegalArgumentException("jdbcDataset schema is not specified")
+            if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
+                throw new IllegalArgumentException("jdbcDataset table is not specified")
+
+            String primaryKey = parameters.findAll{ qp -> qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName} = ${qp.parameterValue}"}.join(" and \n")
+            if (primaryKey == "" || !primaryKey)
+                throw new IllegalArgumentException("primaryKey column is not specified")
+            String values = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName} = ${qp.parameterValue}"}.join(" and \n")
+            if (values == "" || !values)
+                throw new IllegalArgumentException("values is empty")
+
+            switch (queryType) {
+                case DMLQueryType.UPDATE:
+                    query = """
+                    update ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                       set ${values}
+                     where ${primaryKey}
+                    """; break;
+                case DMLQueryType.DELETE:
+                    query = """
+                    delete
+                      from ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                     where ${primaryKey}
+                    """; break;
+                case DMLQueryType.INSERT:
+                    values = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return " ${qp.parameterValue}"}.join(", ")
+                    String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
+                    query = """
+                    insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
+                    values (${values})
+                    """; break;
+                default:
+                    query = ""; break;
+            }
+
+        } else if (dmlQuery && !dmlQuery.generateFromModel) {
+            if (dmlQuery.queryText == "" || !dmlQuery.queryText)
+                throw new IllegalArgumentException("${queryType} query is not specified")
+            query = dmlQuery.queryText
+            parameters = parameters.findAll{ qp -> !qp.isPrimaryKey } as EList<QueryParameter>
+        } else {
+            throw new NoSuchMethodException("${queryType} is not supported")
+        }
+        Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
+        try {
+            NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, query);
+            logger.info("execute${queryType}", "execute${queryType} = " + query)
+            if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
+                for (int i = 0; i <= parameters.size() - 1; ++i) {
+                    p = getNamedParameterStatement(parameters, p)
+                }
+            }
+            try {
+                p.execute()
+            } finally {
+                (p) ? p.close() : null
+            }
+        } finally {
+            (jdbcConnection) ? jdbcConnection.close() : null
+        }
+    }
+
+    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p) {
+        for (int i = 0; i <= parameters.size() - 1; ++i) {
+            if (!parameters[i].parameterValue) {
+                p.setString(parameters[i].parameterName, null)
+            }
+            if (parameters[i].parameterDataType == "Date") {
+                p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+            } else if (parameters[i].parameterDataType == "Timestamp") {
+                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+            } else if (parameters[i].parameterDataType == "Integer") {
+                p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
+            } else {
+                p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            }
+        }
+        return p
     }
 
     String getConvertOperator(String operator) {

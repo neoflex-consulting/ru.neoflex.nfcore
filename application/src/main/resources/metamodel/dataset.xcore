@@ -157,6 +157,7 @@ class QueryParameter {
     String parameterValue
     String parameterDataType = "String"
     String parameterDateFormat = "yyyy-MM-dd"
+    boolean isPrimaryKey
 }
 
 class QueryFilter {
@@ -365,4 +366,10 @@ enum CalculatorFunction {
     lesser as "<"
     greaterEqual as ">="
     lesserEqual as "<="
+}
+
+enum DMLQueryType {
+    Insert,
+    Update,
+    Delete
 }
