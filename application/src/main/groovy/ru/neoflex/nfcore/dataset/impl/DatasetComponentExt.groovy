@@ -490,8 +490,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
             String values = parameters
                     .findAll{ qp -> !qp.isPrimaryKey }
                     .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
-                            ? "${qp.parameterName} = to_date('${qp.parameterValue}','${qp.parameterDateFormat}')"
-                            : qp.parameterDataType == DataType.STRING.getName() ? "${qp.parameterName} = '${qp.parameterValue}'"
+                            ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(1,10)}','${qp.parameterDateFormat}')"
+                            : qp.parameterDataType == DataType.STRING.getName()
+                            ? "${qp.parameterName} = '${qp.parameterValue}'"
                             : "${qp.parameterName} = ${qp.parameterValue}"}.join(", \n")
             if (values == "" || !values)
                 throw new IllegalArgumentException("values is empty")
@@ -512,8 +513,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 case DMLQueryType.INSERT:
                     values = parameters.findAll{ qp -> !qp.isPrimaryKey }
                             .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
-                                    ? "to_date('${qp.parameterValue}','${qp.parameterDateFormat}')"
-                                    : qp.parameterDataType == DataType.STRING.getName() ? "'${qp.parameterValue}'"
+                                    ? "to_date('${qp.parameterValue.substring(1,10)}','${qp.parameterDateFormat}')"
+                                    : qp.parameterDataType == DataType.STRING.getName()
+                                    ? "'${qp.parameterValue}'"
                                     : "${qp.parameterValue}"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """

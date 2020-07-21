@@ -587,7 +587,7 @@ class Select_ extends ViewContainer {
         }
 }
 
-class DatePicker_ extends ViewContainer {
+export class DatePicker_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         let value;
@@ -670,8 +670,7 @@ class DatePicker_ extends ViewContainer {
                 , this.props.t("oct"), this.props.t("nov"), this.props.t("dec")]
         });
         this.forceUpdate();
-
-    }
+    };
 
     onChange = (currentValue: string) => {
         let contextItemValues = this.props.context.contextItemValues;

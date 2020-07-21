@@ -14,6 +14,9 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
+import {agGridColumnTypes} from "../../../utils/consts";
+import DateEditor from "./DateEditor";
+import moment from "moment";
 
 const backgroundColor = "#fdfdfd";
 
@@ -57,6 +60,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 frameworkComponents: {
                     buttonComponent: Button_,
                     hrefComponent: Href_,
+                    DateEditor: DateEditor,
                 },
                 defaultColDef: {
                     resizable: true,
@@ -157,6 +161,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
         if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)) {
             this.setState({columnDefs: this.props.columnDefs})
+        }
+        if (prevProps.t !== this.props.t) {
+            this.changeLocale()
         }
     }
 
@@ -412,6 +419,18 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return 'none'
     };
 
+
+    changeLocale = () => {
+        moment.updateLocale('en', {
+            weekdaysMin : [ this.props.t("mon"), this.props.t("tue"), this.props.t("wed"), this.props.t("thu")
+                , this.props.t("fri"), this.props.t("sat"), this.props.t("sun")],
+            monthsShort : [ this.props.t("jan"), this.props.t("feb"), this.props.t("mar"), this.props.t("apr")
+                , this.props.t("may"), this.props.t("jun"), this.props.t("jul"), this.props.t("aug"), this.props.t("sep")
+                , this.props.t("oct"), this.props.t("nov"), this.props.t("dec")]
+        });
+        this.forceUpdate();
+    };
+
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
@@ -422,6 +441,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             >
                 <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
+                        columnTypes={agGridColumnTypes}
                         ref={this.grid}
                         rowData={this.state.rowData}
                         modules={AllCommunityModules}
@@ -443,6 +463,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     >
                         {this.state.columnDefs.map((col: any) =>
                             <AgGridColumn
+                                onCellValueChanged={col.get('updateCallback')}
+                                type={col.get('type')}
                                 key={col.get('field')}
                                 field={col.get('field')}
                                 headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
@@ -467,6 +489,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         return params.value;
                                     }
                                 }
+                                cellEditor = {col.get('type') === 'Date' ? 'DateEditor' : undefined }
+                                cellEditorParams = {col.get('type') === 'Date' ? {...this.props} : undefined}
                             />
                         )}
                     </AgGridReact>
