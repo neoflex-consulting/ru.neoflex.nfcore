@@ -17,6 +17,8 @@ import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -420,6 +422,13 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 try {
                     rs = p.executeQuery();
                     def columnCount = rs.metaData.columnCount
+                    Map<String,String> formats = [:]
+                    for (int i = 1; i <= columnCount; ++i) {
+                        def col = this.column.find { col -> return col.name == rs.metaData.getColumnName(i)}
+                        if (col.formatMask && col.formatMask.value) {
+                            formats[rs.metaData.getColumnName(i)] = col.formatMask.value
+                        }
+                    }
                     if (numberOfLines > 1){
                         while (rs.next()) {
                             for (int j = 0; j < numberOfLines; j++) {
@@ -430,7 +439,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 for (int i = 1; i <= allColumns.size(); ++i) {
                                     int index = i + (j*allColumns.size())
                                     object = rs.getObject(index)
-                                    value = (object == null ? null : object.toString())
+                                    value = (object == null ? null
+                                            : formats[rs.metaData.getColumnName(i)]
+                                            ? formatObject(object, formats[rs.metaData.getColumnName(i)])
+                                            : object.toString())
                                     key = "${rs.metaData.getColumnName(index)}"
                                     map[key] = value
                                 }
@@ -443,7 +455,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         def map = [:]
                         for (int i = 1; i <= columnCount; ++i) {
                             def object = rs.getObject(i)
-                            map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+                            map["${rs.metaData.getColumnName(i)}"] = (object == null ? null
+                                    : formats[rs.metaData.getColumnName(i)]
+                                    ? formatObject(object, formats[rs.metaData.getColumnName(i)])
+                                    : object.toString())
                         }
                         rowData.add(map)
                     }}
@@ -457,6 +472,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             (jdbcConnection) ? jdbcConnection.close() : null
         }
         return rowData
+    }
+
+    String formatObject(Object object, String format) {
+        if (object instanceof Timestamp)
+            return new SimpleDateFormat(format).format(object)
+        if (object instanceof BigDecimal)
+            return new DecimalFormat(format).format(object)
+        return object
     }
 
     @Override
