@@ -194,4 +194,20 @@ const calculatorFunctionTranslator = [
     {key:"Or",value:"or"},
 ]
 
-export {positionMap, positionEnum, colorScheme, diagramAnchorMap, actionType, eventType, grantType, calculatorFunctionTranslator}
+enum dmlOperation {
+    insert="executeInsert",
+    update="executeUpdate",
+    delete="executeDelete"
+}
+
+const agGridColumnTypes = {
+    'Integer':{},
+    'Decimal':{},
+    'String':{},
+    'Date':{},
+    'Boolean':{},
+    'Timestamp':{},
+    'Undefined':{}
+};
+
+export {positionMap, positionEnum, colorScheme, diagramAnchorMap, actionType, eventType, grantType, calculatorFunctionTranslator, dmlOperation, agGridColumnTypes}
