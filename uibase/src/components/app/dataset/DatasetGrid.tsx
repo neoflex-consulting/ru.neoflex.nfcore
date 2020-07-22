@@ -480,8 +480,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         return params.valueFormatted? params.valueFormatted : params.value;
                                     }
                                 }
-                                cellEditor = {col.get('type') === 'Date' ? 'DateEditor' : undefined }
-                                cellEditorParams = {col.get('type') === 'Date' ? {...this.props, mask: col.get('mask')} : undefined}
+                                cellEditor = {['Date','Timestamp'].includes(col.get('type')) ? 'DateEditor' : undefined }
+                                cellEditorParams = {['Date','Timestamp'].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
                                 valueFormatter = {col.get('valueFormatter')}
                             />
                         )}

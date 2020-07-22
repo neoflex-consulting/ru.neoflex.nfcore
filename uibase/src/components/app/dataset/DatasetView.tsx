@@ -247,7 +247,7 @@ class DatasetView extends React.Component<any, State> {
             let mask:string|undefined = undefined;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
             if (c.get('formatMask'))
-                mask = c.get('formatMask').get('value')
+                mask = c.get('formatMask').get('value');
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -267,6 +267,8 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('valueFormatter', (params:any) => {
                 return type === 'Date' && mask
                     ? moment(params.value, 'YYYY-MM-DD').format(mask)
+                    : type === 'Timestamp' && mask
+                    ? moment(params.value, 'YYYY-MM-DD HH:mm:ss').format(mask)
                     : ['Integer','Decimal'].includes(type) && mask
                     ? format(mask, params.value)
                     : undefined

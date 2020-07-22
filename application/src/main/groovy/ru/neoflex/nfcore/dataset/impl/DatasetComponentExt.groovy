@@ -491,6 +491,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     .findAll{ qp -> !qp.isPrimaryKey }
                     .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
                             ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
+                            : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                            ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
                             : qp.parameterDataType == DataType.STRING.getName()
                             ? "${qp.parameterName} = '${qp.parameterValue}'"
                             : "${qp.parameterName} = ${qp.parameterValue}"}.join(", \n")
@@ -514,6 +516,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     values = parameters.findAll{ qp -> !qp.isPrimaryKey }
                             .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
                                     ? "to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
+                                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                                    ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
                                     : qp.parameterDataType == DataType.STRING.getName()
                                     ? "'${qp.parameterValue}'"
                                     : "${qp.parameterValue}"}.join(", ")

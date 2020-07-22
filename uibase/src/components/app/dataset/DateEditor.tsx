@@ -1,26 +1,33 @@
 import React from 'react';
-import moment, {Moment} from "moment";
+import moment, {defaultFormat, Moment} from "moment";
 import {DatePicker} from "antd";
 
 interface Props {
     value: string,
-    mask: string
+    mask: string,
+    type: string
 }
 
 interface State {
     pickedDate: Moment,
-    defaultValue: Moment,
-    currentValue: string
+    //defaultValue: Moment,
+    currentValue: string,
+    format: string
 }
+
+const defaultDateFormat = 'YYYY-MM-DD';
+const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
 
 export default class DateEditor extends React.Component<Props, State> {
     constructor(props:any) {
         super(props);
-        const formatedValue = this.props.mask ? moment(this.props.value, 'YYYY-MM-DD').format(this.props.mask) : undefined
+        const format = (this.props.type === 'Timestamp') ? defaultTimestampFormat : defaultDateFormat;
+        const formatedValue = this.props.mask ? moment(this.props.value, format).format(this.props.mask) : undefined
         this.state = {
-            pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, 'YYYY-MM-DD'),
+            pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, format),
             currentValue: formatedValue ? formatedValue : this.props.value,
-            defaultValue: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, 'YYYY-MM-DD'),
+            format: format
+            //defaultValue: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, defaultDateFormat),
         };
     }
 
@@ -30,14 +37,15 @@ export default class DateEditor extends React.Component<Props, State> {
 
     getValue() {
         //Возвращаем в формате по умолчаню
-        return moment(this.state.currentValue, this.props.mask).format('YYYY-MM-DD');
+        return moment(this.state.currentValue, this.props.mask).format(this.state.format);
     }
 
     render() {
         return (
                 <DatePicker
-                    defaultValue={this.state.defaultValue}
+                    defaultValue={this.state.pickedDate}
                     showToday={false}
+                    showTime={this.props.type === 'Timestamp'}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}
