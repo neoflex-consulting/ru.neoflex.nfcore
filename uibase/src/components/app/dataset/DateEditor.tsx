@@ -1,5 +1,5 @@
 import React from 'react';
-import moment, {defaultFormat, Moment} from "moment";
+import moment, {Moment} from "moment";
 import {DatePicker} from "antd";
 
 interface Props {
@@ -10,7 +10,6 @@ interface Props {
 
 interface State {
     pickedDate: Moment,
-    //defaultValue: Moment,
     currentValue: string,
     format: string
 }
@@ -27,7 +26,6 @@ export default class DateEditor extends React.Component<Props, State> {
             pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, format),
             currentValue: formatedValue ? formatedValue : this.props.value,
             format: format
-            //defaultValue: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, defaultDateFormat),
         };
     }
 
