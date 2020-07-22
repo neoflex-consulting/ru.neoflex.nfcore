@@ -1,7 +1,21 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EObject} from 'ecore';
 import * as React from 'react';
-import {Button, Col, DatePicker, Drawer, Form, Input, InputNumber, Row, Select, Tabs, Typography, Collapse} from 'antd';
+import {
+    Button,
+    Col,
+    DatePicker,
+    Drawer,
+    Form,
+    Input,
+    InputNumber,
+    Row,
+    Select,
+    Tabs,
+    Typography,
+    Collapse,
+    ConfigProvider
+} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
@@ -17,6 +31,7 @@ import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {actionType, eventType, grantType, positionEnum} from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
+import {switchAntdLocale} from "./utils/antdLocalization";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -601,7 +616,8 @@ export class DatePicker_ extends ViewContainer {
             currentValue: value,
             format: this.viewObject.get('format') || "YYYY-MM-DD",
             isHidden: this.viewObject.get('hidden') || false,
-            isDisabled: this.viewObject.get('disabled') || false
+            isDisabled: this.viewObject.get('disabled') || false,
+            locale: switchAntdLocale(this.props.i18n.language, this.props.t)
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -629,7 +645,6 @@ export class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.changeLocale()
         this.onChange(this.state.pickedDate.format(this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
@@ -657,20 +672,9 @@ export class DatePicker_ extends ViewContainer {
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (prevProps.t !== this.props.t) {
-            this.changeLocale()
+            this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)},()=>{this.forceUpdate()})
         }
     }
-
-    changeLocale = () => {
-        moment.updateLocale('en', {
-            weekdaysMin : [ this.props.t("mon"), this.props.t("tue"), this.props.t("wed"), this.props.t("thu")
-                , this.props.t("fri"), this.props.t("sat"), this.props.t("sun")],
-            monthsShort : [ this.props.t("jan"), this.props.t("feb"), this.props.t("mar"), this.props.t("apr")
-                , this.props.t("may"), this.props.t("jun"), this.props.t("jul"), this.props.t("aug"), this.props.t("sep")
-                , this.props.t("oct"), this.props.t("nov"), this.props.t("dec")]
-        });
-        this.forceUpdate();
-    };
 
     onChange = (currentValue: string) => {
         let contextItemValues = this.props.context.contextItemValues;
@@ -700,6 +704,7 @@ export class DatePicker_ extends ViewContainer {
         return (
             <div hidden={this.state.isHidden}
                  style={{marginBottom: marginBottom}}>
+                <ConfigProvider locale={this.state.locale}>
                  <DatePicker
                     key={this.viewObject._id}
                     showToday={false}
@@ -712,6 +717,7 @@ export class DatePicker_ extends ViewContainer {
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
+                </ConfigProvider>
             </div>
         )
     }

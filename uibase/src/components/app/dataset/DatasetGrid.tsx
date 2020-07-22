@@ -3,7 +3,7 @@ import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import { Modal } from 'antd';
+import {ConfigProvider, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
@@ -16,7 +16,7 @@ import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
 import {agGridColumnTypes} from "../../../utils/consts";
 import DateEditor from "./DateEditor";
-import moment from "moment";
+import {switchAntdLocale} from "../../../utils/antdLocalization";
 
 const backgroundColor = "#fdfdfd";
 
@@ -56,6 +56,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             rowData: [],
             highlights: [],
             saveMenuVisible: false,
+            locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
                     buttonComponent: Button_,
@@ -163,7 +164,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.setState({columnDefs: this.props.columnDefs})
         }
         if (prevProps.t !== this.props.t) {
-            this.changeLocale()
+            this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
         }
     }
 
@@ -419,18 +420,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return 'none'
     };
 
-
-    changeLocale = () => {
-        moment.updateLocale('en', {
-            weekdaysMin : [ this.props.t("mon"), this.props.t("tue"), this.props.t("wed"), this.props.t("thu")
-                , this.props.t("fri"), this.props.t("sat"), this.props.t("sun")],
-            monthsShort : [ this.props.t("jan"), this.props.t("feb"), this.props.t("mar"), this.props.t("apr")
-                , this.props.t("may"), this.props.t("jun"), this.props.t("jul"), this.props.t("aug"), this.props.t("sep")
-                , this.props.t("oct"), this.props.t("nov"), this.props.t("dec")]
-        });
-        this.forceUpdate();
-    };
-
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
@@ -440,7 +429,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 className={'ag-theme-material'}
             >
                 <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
-                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
+                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
+                    <ConfigProvider locale={this.state.locale}>
+                    <AgGridReact
                         columnTypes={agGridColumnTypes}
                         ref={this.grid}
                         rowData={this.state.rowData}
@@ -495,6 +486,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             />
                         )}
                     </AgGridReact>
+                    </ConfigProvider>
                     }
                     <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
                         <Paginator

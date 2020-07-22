@@ -300,6 +300,10 @@ class DatasetView extends React.Component<any, State> {
                             this.refresh()
                         }
                     }
+                ).catch(()=>{
+                    //Восстанавливаем значение в случае ошибки
+                    this.refresh()
+                    }
                 )
             });
             columnDefs.push(rowData);

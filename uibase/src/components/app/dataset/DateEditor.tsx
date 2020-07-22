@@ -4,7 +4,6 @@ import {DatePicker} from "antd";
 
 interface Props {
     value: string,
-    t: any,
     mask: string
 }
 
@@ -21,10 +20,9 @@ export default class DateEditor extends React.Component<Props, State> {
         this.state = {
             pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, 'YYYY-MM-DD'),
             currentValue: formatedValue ? formatedValue : this.props.value,
-            defaultValue: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, 'YYYY-MM-DD')
+            defaultValue: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, 'YYYY-MM-DD'),
         };
     }
-
 
     onChange = (currentValue: string) => {
         this.setState({currentValue:currentValue});
@@ -37,14 +35,14 @@ export default class DateEditor extends React.Component<Props, State> {
 
     render() {
         return (
-            <DatePicker
-                defaultValue={this.state.defaultValue}
-                showToday={false}
-                onChange={(date, dateString) => {
-                    this.onChange(dateString)
-                }}
-                format={this.props.mask}
-            />
+                <DatePicker
+                    defaultValue={this.state.defaultValue}
+                    showToday={false}
+                    onChange={(date, dateString) => {
+                        this.onChange(dateString)
+                    }}
+                    format={this.props.mask}
+                />
         );
     }
 }
