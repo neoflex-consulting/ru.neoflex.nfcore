@@ -490,7 +490,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             String values = parameters
                     .findAll{ qp -> !qp.isPrimaryKey }
                     .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
-                            ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(1,10)}','${qp.parameterDateFormat}')"
+                            ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
                             : qp.parameterDataType == DataType.STRING.getName()
                             ? "${qp.parameterName} = '${qp.parameterValue}'"
                             : "${qp.parameterName} = ${qp.parameterValue}"}.join(", \n")
@@ -513,7 +513,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 case DMLQueryType.INSERT:
                     values = parameters.findAll{ qp -> !qp.isPrimaryKey }
                             .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
-                                    ? "to_date('${qp.parameterValue.substring(1,10)}','${qp.parameterDateFormat}')"
+                                    ? "to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
                                     : qp.parameterDataType == DataType.STRING.getName()
                                     ? "'${qp.parameterValue}'"
                                     : "${qp.parameterValue}"}.join(", ")

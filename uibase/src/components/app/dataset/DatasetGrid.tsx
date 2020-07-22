@@ -486,11 +486,12 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 } : undefined}
                                 cellRenderer = {
                                     (col.get('component')) ? this.getComponent(col.get('component').eClass._id) : function (params: any) {
-                                        return params.value;
+                                        return params.valueFormatted? params.valueFormatted : params.value;
                                     }
                                 }
                                 cellEditor = {col.get('type') === 'Date' ? 'DateEditor' : undefined }
-                                cellEditorParams = {col.get('type') === 'Date' ? {...this.props} : undefined}
+                                cellEditorParams = {col.get('type') === 'Date' ? {...this.props, mask: col.get('mask')} : undefined}
+                                valueFormatter = {col.get('valueFormatter')}
                             />
                         )}
                     </AgGridReact>

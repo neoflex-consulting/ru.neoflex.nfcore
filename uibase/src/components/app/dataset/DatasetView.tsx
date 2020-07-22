@@ -38,6 +38,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js"
 
 
 
@@ -242,6 +244,10 @@ class DatasetView extends React.Component<any, State> {
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
+            let mask:string|undefined = undefined;
+            const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
+            if (c.get('formatMask'))
+                mask = c.get('formatMask').get('value')
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -255,8 +261,16 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
             rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-            rowData.set('type', c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null);
+            rowData.set('type', type);
             rowData.set('component', c.get('component'));
+            rowData.set('mask', mask);
+            rowData.set('valueFormatter', (params:any) => {
+                return type === 'Date' && mask
+                    ? moment(params.value, 'YYYY-MM-DD').format(mask)
+                    : ['Integer','Decimal'].includes(type) && mask
+                    ? format(mask, params.value)
+                    : undefined
+            });
             rowData.set('updateCallback', (agevent:any)=>{
                 const primaryKey = this.state.columnDefs
                     .filter(c => c.get('isPrimaryKey'))
