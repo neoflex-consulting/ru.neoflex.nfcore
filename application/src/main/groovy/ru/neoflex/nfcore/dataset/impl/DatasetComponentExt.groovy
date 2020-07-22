@@ -379,7 +379,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.schemaName}.${jdbcDataset.tableName}) t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName} t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
