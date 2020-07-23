@@ -156,8 +156,10 @@ class QueryParameter {
     String parameterName
     String parameterValue
     String parameterDataType = "String"
-    String parameterDateFormat = "YYYY-MM-DD"
-    String parameterTimestampFormat = "YYYY-MM-DD HH24:MI:SS"
+    //LocalDate format
+    String parameterDateFormat = "yyyy-MM-dd"
+    //LocalDateTime format
+    String parameterTimestampFormat = "yyyy-MM-dd HH:mm:ss"
     boolean isPrimaryKey
 }
 

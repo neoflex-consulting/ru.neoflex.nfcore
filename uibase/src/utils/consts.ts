@@ -210,4 +210,20 @@ const agGridColumnTypes = {
     'Undefined':{}
 };
 
-export {positionMap, positionEnum, colorScheme, diagramAnchorMap, actionType, eventType, grantType, calculatorFunctionTranslator, dmlOperation, agGridColumnTypes}
+const defaultDateFormat = 'YYYY-MM-DD';
+const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
+
+export {
+    positionMap,
+    positionEnum,
+    colorScheme,
+    diagramAnchorMap,
+    actionType,
+    eventType,
+    grantType,
+    calculatorFunctionTranslator,
+    dmlOperation,
+    agGridColumnTypes,
+    defaultDateFormat,
+    defaultTimestampFormat
+}

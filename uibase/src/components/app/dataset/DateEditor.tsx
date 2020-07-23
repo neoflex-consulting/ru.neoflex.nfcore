@@ -1,6 +1,7 @@
 import React from 'react';
 import moment, {Moment} from "moment";
 import {DatePicker} from "antd";
+import {defaultDateFormat, defaultTimestampFormat} from "../../../utils/consts";
 
 interface Props {
     value: string,
@@ -14,14 +15,11 @@ interface State {
     format: string
 }
 
-const defaultDateFormat = 'YYYY-MM-DD';
-const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
-
 export default class DateEditor extends React.Component<Props, State> {
     constructor(props:any) {
         super(props);
         const format = (this.props.type === 'Timestamp') ? defaultTimestampFormat : defaultDateFormat;
-        const formatedValue = this.props.mask ? moment(this.props.value, format).format(this.props.mask) : undefined
+        const formatedValue = this.props.mask ? moment(this.props.value, format).format(this.props.mask) : undefined;
         this.state = {
             pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, format),
             currentValue: formatedValue ? formatedValue : this.props.value,
@@ -42,7 +40,6 @@ export default class DateEditor extends React.Component<Props, State> {
         return (
                 <DatePicker
                     defaultValue={this.state.pickedDate}
-                    showToday={false}
                     showTime={this.props.type === 'Timestamp'}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)

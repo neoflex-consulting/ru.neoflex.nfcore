@@ -21,7 +21,6 @@ export interface IServerNamedParam {
     parameterName: string,
     parameterValue: string,
     parameterDataType?: string,
-    parameterDateFormat?: string,
     isPrimaryKey?: boolean
 }
 
