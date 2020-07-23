@@ -264,6 +264,44 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('type', type);
             rowData.set('component', c.get('component'));
             rowData.set('mask', mask);
+            rowData.set('onCellDoubleClicked', (params:any)=>{
+                if (params.colDef.editable) {
+                    let restrictEdit = false;
+                    if (!this.props.viewObject.get('datasetComponent').get('updateQuery')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('update query is not specified') ,"error")
+                    }
+                    if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('primary key column is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('dataset').get('schemaName')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset schema is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('dataset').get('tableName')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset table is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('queryText')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('querytext is not specified') ,"error")
+                    }
+                    if (!restrictEdit) {
+                        const startEditingParams = {
+                            rowIndex: params.rowIndex,
+                            colKey: params.column.getId(),
+                        };
+                        params.api.startEditingCell(startEditingParams);
+                    }
+                }
+            });
             rowData.set('valueFormatter', (params:any) => {
                 return type === 'Date' && mask
                     ? moment(params.value, 'YYYY-MM-DD').format(mask)

@@ -450,11 +450,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         /*domLayout='autoHeight'*/
                         paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
+                        suppressClickEdit={true}
+                        stopEditingWhenGridLosesFocus={true}
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>
                             <AgGridColumn
                                 onCellValueChanged={col.get('updateCallback')}
+                                onCellDoubleClicked={col.get('onCellDoubleClicked')}
                                 type={col.get('type')}
                                 key={col.get('field')}
                                 field={col.get('field')}

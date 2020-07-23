@@ -263,5 +263,12 @@
         "sep": "Sep",
         "oct": "Oct",
         "nov": "Nov",
-        "dec": "Dec"
+        "dec": "Dec",
+
+        "celleditorvalidation": "Cell editor validation",
+        "update query is not specified": "DatasetComponent updateQuery is not specified",
+        "primary key column is not specified": "Primary key column is not specified",
+        "jdbcdataset schema is not specified": "JdbcDataset schema query is not specified",
+        "jdbcdataset table is not specified": "JdbcDataset table is not specified",
+        "querytext is not specified": "queryText is not specified"
 }

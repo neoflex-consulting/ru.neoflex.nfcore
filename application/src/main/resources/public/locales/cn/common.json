@@ -256,5 +256,12 @@
         "sep": "九月",
         "oct": "十月",
         "nov": "十一月",
-        "dec": "十二月"
+        "dec": "十二月",
+
+        "celleditorvalidation": "行编辑验证",
+        "update query is not specified": "未在DatasetComponent中指定的UpdateQuery字段",
+        "primary key column is not specified": "未在DatasetComponent中指定的UpdateQuery字段",
+        "jdbcdataset schema is not specified": "未在JdbcDataset中指定架构",
+        "jdbcdataset table is not specified": "在JdbcDataset中未指定表",
+        "querytext is not specified": "未指定queryText字段"
 }
