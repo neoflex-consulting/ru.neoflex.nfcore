@@ -619,11 +619,6 @@ class DatasetView extends React.Component<any, State> {
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
     ) {
-        if (this.state.rowData.length === 0){
-            for (let i = 0; i < aggregationParams.length; i++){
-                aggregationParams[i].enable = false
-            }
-        }
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
         const calculatedExpression = this.translateExpression(calculatedExpressions);
@@ -648,7 +643,7 @@ class DatasetView extends React.Component<any, State> {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
                 }
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0) {
+                if (aggregationParams.length !== 0 && this.state.rowData.length > 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -667,7 +662,6 @@ class DatasetView extends React.Component<any, State> {
                 }
             }
         )
-
     }
 
     refresh(): void {
@@ -1208,6 +1202,8 @@ class DatasetView extends React.Component<any, State> {
         }
     };
 
+
+
     render() {
         const { t } = this.props;
         return (
@@ -1228,6 +1224,7 @@ class DatasetView extends React.Component<any, State> {
                     <DatasetGrid
                         {...this.props}
                         isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
+                        serverAggregates = {this.state.serverAggregates}
                         highlights = {this.state.highlights}
                         currentDatasetComponent = {this.state.currentDatasetComponent}
                         rowData = {this.state.rowData}
@@ -1240,7 +1237,6 @@ class DatasetView extends React.Component<any, State> {
                 }
                 <div id="filterButton">
                 <Drawer
-
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
@@ -1251,6 +1247,7 @@ class DatasetView extends React.Component<any, State> {
                     maskClosable={false}
                 >
                     {
+
                         this.state.serverFilters
                             ?
                             <ServerFilter

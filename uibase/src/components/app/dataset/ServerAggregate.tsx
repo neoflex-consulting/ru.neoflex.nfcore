@@ -36,9 +36,23 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
+function getColumnType(columnDef: any[], columnName: string) : string | undefined{
+    if (columnDef.length !== 0)
+    {
+        for (let i = 0; i < columnDef.length; i++) {
+            if (columnDef[i].get("field") === columnName) {
+                return columnDef[i].get("type")
+            }
+        }
+        return undefined
+    }
+}
+
+
 const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableTotalItem">
         <Row gutter={[8, 0]}>
+            <Form>
             <Col span={1}>
                 {value.index}
             </Col>
@@ -103,46 +117,102 @@ const SortableItem = SortableElement(({value}: any) => {
                                         >
                                             {c.get('headerName')}
                                         </Select.Option>)
+
                             }
                         </Select>
                     )}
                 </Form.Item>
             </Col>
             <Col span={9}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    {value.getFieldDecorator(`${value.idOperation}`,
-                        {
-                            initialValue: value.t(value.operation) || undefined,
-                            rules: [{
-                                required:
-                                value.datasetColumn,
-                                message: ' '
-                            }]
-                        })(
-                        <Select
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('operation')}
-                            style={{ width: '219px', marginRight: '10px' }}
-                            allowClear={true}
-                            onChange={(e: any) => {
-                                const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
-                                value.handleChange(event)
-                            }}
-                        >
+                {
+                    <Form.Item style={{display: 'inline-block'}}>
+                        {value.getFieldDecorator(`${value.idOperation}`,
                             {
-                                value.allAggregates!
-                                    .map((o: any) =>
-                                        <Select.Option
-                                            key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                            value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
-                                        >
-                                            {value.t(o.get('name'))}
-                                        </Select.Option>)
-                            }
-                        </Select>
+                                initialValue: value.t(value.operation) || undefined,
+                                rules: [{
+                                    required:
+                                    value.datasetColumn,
+                                    message: ' '
+                                }]
+                            })(
+                            <Select
+                                getPopupContainer={() => document.getElementById('aggregationButton') as HTMLElement}
+                                placeholder={value.t('operation')}
+                                style={{width: '219px', marginRight: '10px'}}
+                                allowClear={true}
+                                onChange={(e: any) => {
+                                    const event = e ? e : JSON.stringify({
+                                        index: value.index,
+                                        columnName: 'operation',
+                                        value: undefined
+                                    })
+                                    value.handleChange(event)
+                                }}
+                            >
+                                {  value.parametersArray[value.index - 1].datasetColumn === undefined || getColumnType(value.columnDefs, value.parametersArray[value.index-1].datasetColumn) === ("Decimal") || getColumnType(value.columnDefs, value.parametersArray[value.index-1].datasetColumn) === ("Integer")?
+                                    value.allAggregates!
+                                        .map((o: any) =>
 
-                    )}
-                </Form.Item>
+                                            <Select.Option
+                                                key={JSON.stringify({
+                                                    index: value.index,
+                                                    columnName: 'operation',
+                                                    value: o.get('name')
+                                                })}
+                                                value={JSON.stringify({
+                                                    index: value.index,
+                                                    columnName: 'operation',
+                                                    value: o.get('name')
+                                                })}
+                                            >
+                                                {value.t(o.get('name'))}
+                                            </Select.Option>)
+                                    :
+                                    getColumnType(value.columnDefs, value.parametersArray[value.index-1].datasetColumn)=== "String" ?
+                                    value.allAggregates!.filter((a: any) => a.get('name') === "Count" || a.get('name') === "CountDistinct")
+                                        .map((o: any) =>
+
+                                            <Select.Option
+                                                key={JSON.stringify({
+                                                    index: value.index,
+                                                    columnName: 'operation',
+                                                    value: o.get('name')
+                                                })}
+                                                value={JSON.stringify({
+                                                    index: value.index,
+                                                    columnName: 'operation',
+                                                    value: o.get('name')
+                                                })}
+                                            >
+                                                {value.t(o.get('name'))}
+                                            </Select.Option>)
+                                        :
+
+                                        value.allAggregates!.filter((a: any) => a.get('name') === "Count" || a.get('name') === "CountDistinct" || a.get('name') === "Maximum" || a.get('name') === "Minimum")
+                                            .map((o: any) =>
+
+                                                <Select.Option
+                                                    key={JSON.stringify({
+                                                        index: value.index,
+                                                        columnName: 'operation',
+                                                        value: o.get('name')
+                                                    })}
+                                                    value={JSON.stringify({
+                                                        index: value.index,
+                                                        columnName: 'operation',
+                                                        value: o.get('name')
+                                                    })}
+                                                >
+                                                    {value.t(o.get('name'))}
+                                                </Select.Option>)
+
+
+                                }
+                            </Select>
+                        )}
+                    </Form.Item>
+
+                }
             </Col>
             <Col  span={2}>
                 <Form.Item style={{ display: 'inline-block' }}>
@@ -167,6 +237,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     </Button>
                 </Form.Item>
             </Col>
+                </Form>
         </Row>
     </div>
 });

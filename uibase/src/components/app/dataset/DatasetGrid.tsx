@@ -33,7 +33,9 @@ interface Props {
     isGridReady: boolean,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
+    isAnyAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
+    serverAggregates: any[]
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -49,6 +51,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             showUniqRow: this.props.showUniqRow,
             paginationPageSize: 10,
             isGridReady: false,
+            isAnyAggregations: true,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -63,7 +66,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     sortable: true,
                 }
             },
-            cellStyle: {}
+            cellStyle: {},
         };
         this.grid = React.createRef();
     }
@@ -72,6 +75,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.grid.current !== null) {
             this.grid.current.api = params.api;
             this.grid.current.columnApi = params.columnApi;
+            this.highlightAggregate();
         }
     };
 
@@ -161,20 +165,36 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     private highlightAggregate() {
-        if (this.grid.current) {
-            if (this.props.isAggregatesHighlighted) {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
-                    if (params.node.lastChild) {
-                        return 'aggregate-highlight';
+        let numberOfLinesInAggregations = 0
+            for (let i = 0; i < this.state.columnDefs.length; i++) {
+                let sameDatasetColumn = 0;
+                for (let j = 0; j < this.props.serverAggregates.length; j++) {
+                    if (this.state.columnDefs[i].get("field") == this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
+                        sameDatasetColumn++;
                     }
                 }
+                if (numberOfLinesInAggregations < sameDatasetColumn) {
+                    numberOfLinesInAggregations = sameDatasetColumn
+                }
+
             }
-            else {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            if (this.grid.current) {
+                if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
+                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function (params: any) {
+                        if (lastLines < params.node.childIndex) {
+                            return 'aggregate-highlight';
+                        }
+                    }
+                } else {
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+                }
+                this.grid.current.api.refreshCells();
             }
-            this.grid.current.api.refreshCells();
-        }
+
     }
+
+
 
     private changeHighlight() {
         const {gridOptions} = this.state;
