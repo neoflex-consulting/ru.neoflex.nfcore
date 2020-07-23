@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { withTranslation } from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Modal, Select, Menu, Dropdown, Checkbox} from 'antd';
+import {Button, Checkbox, Drawer, Dropdown, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
@@ -20,11 +20,10 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType, calculatorFunctionTranslator, eventType, grantType} from "../../../utils/consts";
-
+import {actionType, calculatorFunctionTranslator, dmlOperation, eventType, grantType} from "../../../utils/consts";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
-import {faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCompressArrowsAlt, faExpandArrowsAlt} from "@fortawesome/free-solid-svg-icons";
 import groupIcon from "../../../icons/groupIcon.svg";
 import orderIcon from "../../../icons/orderIcon.svg";
 import calculatorIcon from "../../../icons/calculatorIcon.svg";
@@ -39,6 +38,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js"
 
 
 
@@ -245,6 +246,10 @@ class DatasetView extends React.Component<any, State> {
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
+            let mask:string|undefined = undefined;
+            const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
+            if (c.get('formatMask'))
+                mask = c.get('formatMask').get('value');
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -257,9 +262,54 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('sortable', false);
             rowData.set('suppressMenu', c.get('suppressMenu'));
             rowData.set('resizable', c.get('resizable'));
-            rowData.set('type',
-                c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null);
+            rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+            rowData.set('type', type);
             rowData.set('component', c.get('component'));
+            rowData.set('mask', mask);
+            rowData.set('valueFormatter', (params:any) => {
+                return type === 'Date' && mask
+                    ? moment(params.value, 'YYYY-MM-DD').format(mask)
+                    : type === 'Timestamp' && mask
+                    ? moment(params.value, 'YYYY-MM-DD HH:mm:ss').format(mask)
+                    : ['Integer','Decimal'].includes(type) && mask
+                    ? format(mask, params.value)
+                    : undefined
+            });
+            rowData.set('updateCallback', (agevent:any)=>{
+                const primaryKey = this.state.columnDefs
+                    .filter(c => c.get('isPrimaryKey'))
+                    .map(c => {
+                            return {
+                                parameterName: c.get('field'),
+                                parameterValue: agevent.data[c.get('field')],
+                                parameterDataType: c.get('type'),
+                                isPrimaryKey: true
+                            }
+                    });
+                const values = this.state.columnDefs
+                    .filter(c => c.get('editable'))
+                    .map(c => {
+                            return {
+                                parameterName: c.get('field'),
+                                parameterValue: agevent.data[c.get('field')],
+                                parameterDataType: c.get('type'),
+                                isPrimaryKey: c.get('isPrimaryKey')
+                            }
+                    });
+                const params = primaryKey.concat(values);
+                this.props.context.executeDMLOperation(resource, dmlOperation.update, params).then(()=>{
+                        if (this.state.currentDatasetComponent.eContents()[0].get('updateQuery') &&
+                            !this.state.currentDatasetComponent.eContents()[0].get('updateQuery').get('generateFromModel')) {
+                            //если указан параметризованный запрос
+                            this.refresh()
+                        }
+                    }
+                ).catch(()=>{
+                    //Восстанавливаем значение в случае ошибки
+                    this.refresh()
+                    }
+                )
+            });
             columnDefs.push(rowData);
         });
         this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs});
@@ -525,6 +575,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
                 rowData.set('component', c.get('component'));
+                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -542,6 +593,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
                 rowData.set('component', c.get('component'));
+                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
             }
         });

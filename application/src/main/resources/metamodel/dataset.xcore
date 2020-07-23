@@ -100,6 +100,17 @@ class DatasetComponent {
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
+     contains DMLQuery insertQuery
+     contains DMLQuery updateQuery
+     contains DMLQuery deleteQuery
+     op void executeInsert(QueryParameter[] parameters)
+     op void executeUpdate(QueryParameter[] parameters)
+     op void executeDelete(QueryParameter[] parameters)
+}
+
+class DMLQuery {
+    String queryText
+    boolean generateFromModel
 }
 
 class DatasetColumn {
@@ -124,6 +135,7 @@ abstract class DatasetColumnView {
     boolean sortable
     boolean suppressMenu
     boolean resizable
+    boolean isPrimaryKey
     contains GridComponent component
 }
 
@@ -144,7 +156,9 @@ class QueryParameter {
     String parameterName
     String parameterValue
     String parameterDataType = "String"
-    String parameterDateFormat = "yyyy-MM-dd"
+    String parameterDateFormat = "YYYY-MM-DD"
+    String parameterTimestampFormat = "YYYY-MM-DD HH24:MI:SS"
+    boolean isPrimaryKey
 }
 
 class QueryFilter {
@@ -353,4 +367,10 @@ enum CalculatorFunction {
     lesser as "<"
     greaterEqual as ">="
     lesserEqual as "<="
+}
+
+enum DMLQueryType {
+    Insert,
+    Update,
+    Delete
 }

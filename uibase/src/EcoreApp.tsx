@@ -33,7 +33,7 @@ import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
-import {grantType} from "./utils/consts";
+import {dmlOperation, grantType} from "./utils/consts";
 import {NeoButton} from "neo-design/lib";
 import 'neo-design/dist/neoDesign.css';
 
@@ -73,6 +73,7 @@ class EcoreApp extends React.Component<any, State> {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             runQuery: this.runQuery,
+            executeDMLOperation: this.executeDMLOperation,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
             addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
@@ -244,7 +245,8 @@ class EcoreApp extends React.Component<any, State> {
                                 parameterName: p['parameterName'],
                                 parameterValue: p['parameterValue'],
                                 parameterDataType: p['parameterDataType']||"String",
-                                parameterDateFormat: parseFormatClientToServer(p['parameterDateFormat'])||"yyyy-MM-dd"
+                                parameterDateFormat: parseFormatClientToServer(p['parameterDateFormat'])||"yyyy-MM-dd",
+                                isPrimaryKey: p['isPrimaryKey']
                             } as IServerNamedParam)
                         )
                     });
@@ -322,6 +324,21 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
             this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
+    };
+
+    executeDMLOperation = (
+        resource_: Ecore.Resource,
+        operation: dmlOperation,
+        queryParams: IServerNamedParam[] = []
+    ) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = operation;
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().voidCall(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+            ]
+        )
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {

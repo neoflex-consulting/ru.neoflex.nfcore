@@ -47,6 +47,7 @@
     "immer": "^6.0.5",
     "immutability-helper": "^3.0.1",
     "jqwidgets-scripts": "^9.0.0",
+    "number-format.js": "2.0.9",
     "m-react-splitters": "^1.2.0",
     "moment": "2.24.0",
     "neo-design": "^1.0.65",

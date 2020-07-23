@@ -64,7 +64,7 @@ class Application extends AppModule {
 
 /* Views */
 @Ecore(constraints="IsValid")
-abstract class ViewElement {
+abstract class ViewElement extends DynamicActionElement {
 	String name
 	container ViewContainer parent opposite children
 	boolean checkRights
@@ -93,7 +93,7 @@ class Calendar extends ViewElement {
     op JSON createNotification(JSON newNotification)
 }
 
-class Collapse extends ViewContainer, DynamicActionElement{
+class Collapse extends ViewContainer{
 
 }
 
@@ -127,7 +127,7 @@ class FAIcon extends Icon {
 	String iconCode
 }
 
-class Form extends ViewContainer, DynamicActionElement {
+class Form extends ViewContainer {
 }
 
 abstract class ValueItem {
@@ -139,7 +139,7 @@ abstract class CommandElement {
     refers ValueItem[] valueItems
 }
 
-class DatasetView extends ViewElement, CommandElement, DynamicActionElement {
+class DatasetView extends ViewElement, CommandElement {
     refers Dataset dataset
     refers DatasetComponent datasetComponent
 }
@@ -148,7 +148,7 @@ abstract class ContextWriter {
 
 }
 
-class GroovyCommand extends ViewElement, CommandElement, ContextWriter, DynamicActionElement {
+class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
     Text command
     String gitResourcePath
     String gitStaticClass
@@ -158,7 +158,7 @@ class GroovyCommand extends ViewElement, CommandElement, ContextWriter, DynamicA
     boolean downloadFile
 }
 
-class ValueHolder extends ViewElement, ValueItem, DynamicActionElement {
+class ValueHolder extends ViewElement, ValueItem {
     refers ContextWriter contextWriter
     String groovyCommandResultColumnName
 }
@@ -188,7 +188,7 @@ class Row extends ViewContainer {
     String height
 }
 
-class Typography extends ViewElement, DynamicActionElement {
+class Typography extends ViewElement {
     refers TypographyStyle typographyStyle
     TextAlign textAlign
     boolean buttonCopyable
@@ -220,7 +220,7 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElement {
+class Select extends ViewElement, ValueItem, CommandElement {
     String placeholder
     SelectMode mode = "Default"
     String width = "200"
@@ -231,7 +231,7 @@ class Select extends ViewElement, ValueItem, CommandElement, DynamicActionElemen
     String valueColumn //TODO
 }
 
-class DatePicker extends ViewElement, ValueItem, DynamicActionElement {
+class DatePicker extends ViewElement, ValueItem {
     boolean allowClear
     String width = "200"
     String format = "YYYY-MM-DD"
@@ -243,7 +243,7 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement, ValueItem, DynamicActionElement {
+class Input extends ViewElement, ValueItem {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
@@ -252,7 +252,7 @@ class Input extends ViewElement, ValueItem, DynamicActionElement {
     String width = "200"
 }
 
-class Button extends ViewElement, DynamicActionElement, GridComponent {
+class Button extends ViewElement, GridComponent {
     refers ButtonStyle buttonStyle
     boolean buttonCancel
     boolean buttonSave
@@ -329,11 +329,11 @@ class EventHandler extends ViewElement {
     contains EventAction[] eventActions
 }
 
-class Drawer extends ViewContainer, DynamicActionElement {
+class Drawer extends ViewContainer {
     TabPosition position
 }
 
-class Href extends ViewElement, GridComponent, DynamicActionElement {
+class Href extends ViewElement, GridComponent {
     String label
     String ref
 }
