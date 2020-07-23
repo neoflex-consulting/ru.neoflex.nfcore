@@ -255,7 +255,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
-            rowData.set('editable', c.get('editable'));
+            rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
             rowData.set('checkboxSelection', c.get('checkboxSelection'));
             rowData.set('sortable', false);
             rowData.set('suppressMenu', c.get('suppressMenu'));
@@ -566,7 +566,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
-                rowData.set('editable', c.get('editable'));
+                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
                 rowData.set('sortable', c.get('sortable'));
                 rowData.set('suppressMenu', c.get('suppressMenu'));
@@ -584,7 +584,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
-                rowData.set('editable', c.get('editable'));
+                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
                 rowData.set('sortable', c.get('sortable'));
                 rowData.set('suppressMenu', c.get('suppressMenu'));
