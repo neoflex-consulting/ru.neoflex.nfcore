@@ -186,21 +186,71 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.setState({parametersArray})
     };
 
+
     reset = () => {
         this.props.onChangeParameters!(undefined, this.props.componentType);
         this.setState({parametersArray:[]});
     };
 
+    isValid(parameterArray : any) : boolean | undefined{
+        let answer = 0;
+        for (let i = 0; i < parameterArray.length; i++) {
+            if (this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === undefined){
+                answer++
+            }
+            else if (this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === "Integer"
+                || this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === "Decimal"){
+                if ((parameterArray[i].operation === "Count" || parameterArray[i].operation === "CountDistinct"
+                    || parameterArray[i].operation === "Maximum" || parameterArray[i].operation === "Minimum"
+                    || parameterArray[i].operation === "Sum" || parameterArray[i].operation === "Average")) {
+                    answer++
+                }
+            } else if (this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === "String") {
+                if (parameterArray[i].operation === "Count" || parameterArray[i].operation === "CountDistinct") {
+                    answer++
+                }
+            } else if (this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === "Date") {
+                if (parameterArray[i].operation === "Count" || parameterArray[i].operation === "CountDistinct"
+                    || parameterArray[i].operation === "Maximum" || parameterArray[i].operation === "Minimum") {
+                    answer++
+                }
+            }
+        }
+        return answer === parameterArray.length;
+    };
+
+    getColumnType(columnDef: any[], columnName: string) : string | undefined{
+        if (columnDef.length !== 0)
+        {
+            for (let i = 0; i < columnDef.length; i++) {
+                if (columnDef[i].get("field") === columnName) {
+                    return columnDef[i].get("type")
+                }
+            }
+            return undefined
+        }
+    }
+
     refresh = () => {
-       /* this.props.form.validateFields((err: any, values: any) => {
+        if (this.props.componentType === paramType.aggregate){
+            if (!this.isValid(this.state.parametersArray!)){
+                this.props.context.notification('Aggregate notification','Please, correct the mistakes', 'error')
+            }
+            else{
+                        this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+            }
+        }
+        else{
+                this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+            }
+
+        /*this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
             }
             else {
                 this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
-            }
-        });*/
-        this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+            }*/
     };
 
     SortableItem = SortableElement(({value}: any) => {

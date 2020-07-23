@@ -138,6 +138,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverGroupByColumn = []
             def serverSorts = []
             def serverCalculatedExpression = []
+            def namesOfOperationsInServerAggregations = []
 
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
@@ -281,7 +282,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Aggregation overall
             if (aggregations) {
-                for (int i = 0; i < allColumns.size() - 1; i++) {
+                for (int i = 0; i < allColumns.size(); i++) {
                     def sameDatasetColumn = 0;
                     for (int j = 0; j < aggregations.size(); j++) {
                         if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
@@ -305,21 +306,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Среднее:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Счетчик:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Максимум:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Минимум:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Сумма:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)
@@ -422,6 +429,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     def columnCount = rs.metaData.columnCount
                     if (numberOfLines > 1){
                         while (rs.next()) {
+                            int g = 0;
                             for (int j = 0; j < numberOfLines; j++) {
                                 def map = [:]
                                 String key
@@ -431,6 +439,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     int index = i + (j*allColumns.size())
                                     object = rs.getObject(index)
                                     value = (object == null ? null : object.toString())
+                                    if (value != null){
+                                        value = namesOfOperationsInServerAggregations[g] + value
+                                        g++
+                                    }
                                     key = "${rs.metaData.getColumnName(index)}"
                                     map[key] = value
                                 }
@@ -439,11 +451,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                     }
                     else{
+                        int g = 0;
                     while (rs.next()) {
                         def map = [:]
+                        String key
+                        String value
+                        def object
                         for (int i = 1; i <= columnCount; ++i) {
-                            def object = rs.getObject(i)
-                            map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+                            object = rs.getObject(i)
+                            value = (object == null ? null : object.toString())
+                            if (value != null && numberOfLines > 0){
+                                value = namesOfOperationsInServerAggregations[g] + value
+                                g++
+                            }
+                            key = "${rs.metaData.getColumnName(i)}"
+                            map[key] = value
                         }
                         rowData.add(map)
                     }}

@@ -36,7 +36,10 @@ interface Props {
     isGridReady: boolean,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
+    isAnyAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
+    serverAggregates: any[],
+    numberOfNewLines: number
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -50,8 +53,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             themes: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
+            numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: 10,
             isGridReady: false,
+            isAnyAggregations: true,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -68,7 +73,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     sortable: true,
                 }
             },
-            cellStyle: {}
+            cellStyle: {},
         };
         this.grid = React.createRef();
     }
@@ -77,6 +82,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.grid.current !== null) {
             this.grid.current.api = params.api;
             this.grid.current.columnApi = params.columnApi;
+            this.highlightAggregate(this.state.numberOfNewLines);
         }
     };
 
@@ -152,7 +158,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        this.highlightAggregate();
+        if (this.state.numberOfNewLines !== this.props.numberOfNewLines) {
+            this.setState({numberOfNewLines: this.props.numberOfNewLines})
+            this.highlightAggregate(this.props.numberOfNewLines);
+        }
         if (!_.isEqual(this.state.highlights, this.props.highlights)
             && this.props.isHighlightsUpdated) {
             this.changeHighlight();
@@ -168,21 +177,25 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    private highlightAggregate() {
-        if (this.grid.current) {
-            if (this.props.isAggregatesHighlighted) {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
-                    if (params.node.lastChild) {
-                        return 'aggregate-highlight';
+    private highlightAggregate(numberOfLines : any) {
+
+            if (this.grid.current) {
+                if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
+                    let lastLines = this.props.rowData.length - numberOfLines - 1
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function (params: any) {
+                        if (lastLines < params.node.childIndex) {
+                            return 'aggregate-highlight';
+                        }
                     }
+                } else {
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
                 }
+                this.grid.current.api.refreshCells();
             }
-            else {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
-            }
-            this.grid.current.api.refreshCells();
-        }
+
     }
+
+
 
     private changeHighlight() {
         const {gridOptions} = this.state;
