@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Layout, Menu, notification, Dropdown, Col, Row} from "antd/lib";
+import {Button, Col, Dropdown, Layout, Menu, notification, Row} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -16,26 +16,20 @@ import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faTools, faEquals,} from "@fortawesome/free-solid-svg-icons";
-import {faBellSlash, faBell} from "@fortawesome/free-regular-svg-icons";
-import {
-    IMainContext,
-    MainContext,
-    IServerQueryParam,
-    IServerNamedParam,
-    IEventAction
-} from "./MainContext";
+import {faEquals, faTools,} from "@fortawesome/free-solid-svg-icons";
+import {faBell, faBellSlash} from "@fortawesome/free-regular-svg-icons";
+import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
-import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
-import {NeoButton} from "neo-design/lib";
+import {NeoButton, NeoIcon} from "neo-design/lib";
 import 'neo-design/dist/neoDesign.css';
+import {SvgName} from "neo-design/lib/icon";
 
 const backgroundColor = "#2a356c";
 
@@ -494,6 +488,7 @@ class EcoreApp extends React.Component<any, State> {
                 </Menu.Item>
             )}
         </Menu>;
+
         return (
             <Layout style={{height: '100vh'}}>
                 <FetchSpinner/>
@@ -508,33 +503,29 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
-
                         <Col span={8}>
+                            {/*<NeoButton type={"disabled"} size={"medium"}>Рш РШ </NeoButton>*/}
+                            {/*<NeoIcon icon={"calendar"}/>*/}
+                            {/*<NeoIcon icon={} />*/}
 
-                            {/*<NeoButton type={"primary"}>Hi_primary</NeoButton>*/}
-                            {/*<NeoButton type={"disabled"} className={'btn'}>Hi_def</NeoButton>*/}
-
-                            {/*<NeoButton>Def_button</NeoButton>*/}
-                            {/*<NeoButton type={"secondary"}>Def_but</NeoButton>*/}
-                            {/*<NeoButton size={"large"} type={"disabled"}>Hi hih hi</NeoButton>*/}
+                            {/*<NeoIcon icon={}/>*/}
                         </Col>
+                        {/*<Col span={14}*/}
+                        {/*            style={{textAlign: 'center', height: 'inherit'}}>*/}
+                        {/*            {*/}
+                        {/*                this.props.location.pathname.includes('/app/') &&*/}
 
-                        <Col span={14}
-                                    style={{textAlign: 'center', height: 'inherit'}}>
-                                    {
-                                        this.props.location.pathname.includes('/app/') &&
-
-                                        <MainContext.Consumer>
-                                            {(context: any) => {
-                                                return <HeaderMenu
-                                                    {...props}
-                                                    applications={this.state.applications}
-                                                    context={context}
-                                                />
-                                            }}
-                                        </MainContext.Consumer>
-                                    }
-                        </Col>
+                        {/*                <MainContext.Consumer>*/}
+                        {/*                    {(context: any) => {*/}
+                        {/*                        return <HeaderMenu*/}
+                        {/*                            {...props}*/}
+                        {/*                            applications={this.state.applications}*/}
+                        {/*                            context={context}*/}
+                        {/*                        />*/}
+                        {/*                    }}*/}
+                        {/*                </MainContext.Consumer>*/}
+                        {/*            }*/}
+                        {/*</Col>*/}
                         <Col span={5}
                              style={{
                                     height: 'inherit'
