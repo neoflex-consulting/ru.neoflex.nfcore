@@ -620,7 +620,11 @@ export class DatePicker_ extends ViewContainer {
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
-        value = value ? value : this.viewObject.get('value');
+        value = value
+            ? value
+            : this.viewObject.get('value')
+            ? this.viewObject.get('value')
+            : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
 
         this.state = {
