@@ -263,5 +263,17 @@
         "primary key column is not specified": "未在DatasetComponent中指定的UpdateQuery字段",
         "jdbcdataset schema is not specified": "未在JdbcDataset中指定架构",
         "jdbcdataset table is not specified": "在JdbcDataset中未指定表",
-        "querytext is not specified": "未指定queryText字段"
+        "querytext is not specified": "未指定queryText字段",
+
+        "Integer": "整个",
+        "Decimal": "小数",
+        "String": "线",
+        "Date": "日期",
+        "Boolean": "逻辑上",
+        "Timestamp": "时间和日期",
+
+        "integerMask": "###0",
+        "decimalMask": "###0.00",
+        "dateMask": "dd.mm.yyyy",
+        "dateTimeMask": "dd.mm.yyyy hh:mm:ss"
 }

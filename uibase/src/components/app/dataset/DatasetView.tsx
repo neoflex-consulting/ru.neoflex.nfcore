@@ -20,7 +20,14 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType, calculatorFunctionTranslator, dmlOperation, eventType, grantType} from "../../../utils/consts";
+import {
+    actionType,
+    calculatorFunctionTranslator,
+    defaultDecimalFormat,
+    dmlOperation,
+    eventType,
+    grantType
+} from "../../../utils/consts";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
 import {faCompressArrowsAlt, faExpandArrowsAlt} from "@fortawesome/free-solid-svg-icons";
@@ -38,10 +45,6 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
-import moment from "moment";
-import format from "number-format.js"
-
-
 
 const { Option, OptGroup } = Select;
 
@@ -121,6 +124,7 @@ interface State {
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
     numberOfNewLines: number;
+    formatMasks: {key:string,value:string}[];
 }
 
 const defaultComponentValues = {
@@ -183,7 +187,25 @@ class DatasetView extends React.Component<any, State> {
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
             numberOfNewLines: 0,
+            formatMasks: []
         }
+    }
+
+    getAllFormatMasks() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//FormatMask');
+            if (temp !== undefined) {
+                API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}).then((result: Ecore.Resource[]) => {
+                    this.setState({formatMasks:result.map(eObject => {
+                            return {
+                                key: eObject.eContents()[0].get('name'),
+                                value: eObject.eContents()[0].get('value')
+                            }
+                    })})
+                })
+            }
+        });
+
     }
 
     //TODO нужна оптимизация
@@ -304,15 +326,6 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }
             });
-            rowData.set('valueFormatter', (params:any) => {
-                return type === 'Date' && mask
-                    ? moment(params.value, 'YYYY-MM-DD').format(mask)
-                    : type === 'Timestamp' && mask
-                    ? moment(params.value, 'YYYY-MM-DD HH:mm:ss').format(mask)
-                    : ['Integer','Decimal'].includes(type) && mask
-                    ? format(mask, params.value)
-                    : undefined
-            });
             rowData.set('updateCallback', (agevent:any)=>{
                 const primaryKey = this.state.columnDefs
                     .filter(c => c.get('isPrimaryKey'))
@@ -383,7 +396,8 @@ class DatasetView extends React.Component<any, State> {
                                 type: f.type,
                                 highlightType: (f.highlightType !== null ? f.highlightType : 'Cell'),
                                 backgroundColor: f.backgroundColor,
-                                color: f.color
+                                color: f.color,
+                                mask: f.mask
                             })
                         }
                     }
@@ -612,6 +626,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', c.get('suppressMenu'));
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
+                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
+                rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
@@ -630,6 +646,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', c.get('suppressMenu'));
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
+                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
+                rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
@@ -655,7 +673,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('sortable', true);
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
-                rowData.set('type', "String");
+                rowData.set('type', element.type);
+                rowData.set('mask', element.mask);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
@@ -702,7 +721,7 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    private prepParamsAndRun(
+    prepParamsAndRun(
         resource: Ecore.Resource,
         filterParams: IServerQueryParam[],
         aggregationParams: IServerQueryParam[],
@@ -752,6 +771,17 @@ class DatasetView extends React.Component<any, State> {
                     this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: 0});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
+                const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
+                this.props.context.changeUserProfile(datasetComponentId, {
+                    serverFilters: filter(filterParams),
+                    serverAggregates: filter(aggregationParams),
+                    serverSorts:  filter(sortParams),
+                    serverGroupBy: filter(groupByParams),
+                    groupByColumn: filter(groupByColumnParams),
+                    serverCalculatedExpression: filter(calculatedExpression),
+                    highlights: filter(this.state.highlights),
+                    diagrams: this.state.diagrams,
+                })
             }
         )
     }
@@ -778,7 +808,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisXPosition.length === 0) {this.getAllEnumValues("dataset","AxisXPositionType", "allAxisXPosition")}
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
-
+        if (this.state.formatMasks.length === 0) this.getAllFormatMasks()
         this.props.context.addEventAction({
             itemId:this.props.viewObject.eURI(),
             actions: [
@@ -861,7 +891,6 @@ class DatasetView extends React.Component<any, State> {
     }
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
-
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
@@ -874,7 +903,6 @@ class DatasetView extends React.Component<any, State> {
 
         if (newServerParam !== undefined) {
             const serverParam = filterParam(newServerParam);
-            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
@@ -887,7 +915,6 @@ class DatasetView extends React.Component<any, State> {
                     (paramName === paramType.groupByColumn)? serverParam: groupByColumn,
                 );
             }
-            this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
         }
         else {
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
@@ -1504,6 +1531,7 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.calculations}
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
                                 defaultColumnDefs={this.state.defaultColumnDefs}
+                                formatMasks={this.state.formatMasks}
                             />
                             :
                             <Calculator/>

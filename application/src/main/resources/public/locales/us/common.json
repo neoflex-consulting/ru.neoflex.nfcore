@@ -270,5 +270,16 @@
         "primary key column is not specified": "Primary key column is not specified",
         "jdbcdataset schema is not specified": "JdbcDataset schema query is not specified",
         "jdbcdataset table is not specified": "JdbcDataset table is not specified",
-        "querytext is not specified": "queryText is not specified"
+        "querytext is not specified": "queryText is not specified",
+
+        "Integer": "Integer",
+        "Decimal": "Decimal",
+        "String": "String",
+        "Date": "Date",
+        "Boolean": "Boolean",
+
+        "integerMask": "###0",
+        "decimalMask": "###0.00",
+        "dateMask": "dd.mm.yyyy",
+        "dateTimeMask": "dd.mm.yyyy hh:mm:ss"
 }

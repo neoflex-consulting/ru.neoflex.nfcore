@@ -12,8 +12,11 @@ import {API} from "../../../modules/api";
 import {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
 import * as crypto from "crypto"
+import {appTypes} from "../../../utils/consts";
 
 const inputOperationKey: string = "_inputOperationKey";
+const selectTypeKey: string = "_selectTypeKey";
+const selectMaskKey: string = "_selectMaskKey";
 const inputFieldKey: string = "_inputFieldKey";
 const inputSelectKey: string = "_inputSelectKey";
 
@@ -26,6 +29,7 @@ interface Props {
     componentType?: paramType;
     onChangeColumnDefs?: (columnDefs: any, rowData: any, datasetComponentName: string) => void;
     defaultColumnDefs?: Array<any>;
+    formatMasks?: {key:string,value:string}[]
 }
 
 interface State {
@@ -106,7 +110,7 @@ export function encode(index: number) : string {
 
 export function hash(s: string) : string {
     const hash = crypto.createHash('md5');
-    hash.update(s)
+    hash.update(s);
     return hash.digest("hex")
 }
 
@@ -156,7 +160,9 @@ class Calculator extends DrawerParameterComponent<Props, State> {
             || JSON.stringify(prevState.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
             this.setFieldsValue({
                 [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
-                [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!
+                [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
+                [selectTypeKey]: this.state.parametersArray![this.state.currentIndex!].type!,
+                [selectMaskKey]: this.state.parametersArray![this.state.currentIndex!].mask!
             });
         }
         if (JSON.stringify(prevProps.parametersArray) !== JSON.stringify(this.props.parametersArray)) {
@@ -215,7 +221,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                     datasetColumn: undefined,
                     operation: undefined,
                     enable: true,
-                    type: undefined});
+                    type: this.getFieldValue(selectTypeKey),
+                    mask: this.getFieldValue(selectMaskKey)});
             let currentIndex = parametersArray.length - 1;
             this.setState({parametersArray, currentIndex});
         } else {
@@ -263,7 +270,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             datasetColumn: this.getFieldValue(inputFieldKey),
                             operation: this.getFieldValue(inputOperationKey),
                             enable: true,
-                            type: undefined
+                            type: this.getFieldValue(selectTypeKey),
+                            mask: this.getFieldValue(selectMaskKey)
                         }
                     } else {
                         return element
@@ -369,6 +377,42 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                     </Col>
                     <Col span={8}/>
                 </Form.Item>
+                <Row>
+                <Form.Item>
+                <Col span={8}>
+                    {
+                        this.getFieldDecorator(selectTypeKey,{
+                            rules: [{
+                            }]
+                        })(
+                            <Select placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true}>
+                                {Object.keys(appTypes).map(type => <Select.Option key={type} value={type}>
+                                    {this.t(type)}
+                                </Select.Option>)}
+                            </Select>
+                        )
+                    }
+                </Col>
+                </Form.Item>
+                <Form.Item>
+                <Col span={8}>
+                    {
+                        this.getFieldDecorator(selectMaskKey,{
+                            rules: [{
+                            }]
+                        })(
+                            <Select placeholder={this.t('format')} key={selectMaskKey} allowClear={true}>
+                                {this.props.formatMasks.map((mask:{key:string,value:string}) => <Select.Option
+                                    key={mask.key}
+                                    value={mask.value}>
+                                    {this.t(mask.key)}
+                                </Select.Option>)}
+                            </Select>
+                        )
+                    }
+                </Col>
+                </Form.Item>
+                </Row>
                 <Form.Item>
                     <Row>
                         <Col span={24}>

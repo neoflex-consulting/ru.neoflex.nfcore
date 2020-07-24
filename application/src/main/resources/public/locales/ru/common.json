@@ -269,7 +269,19 @@
         "primary key column is not specified": "Не указан первичный ключ",
         "jdbcdataset schema is not specified": "Не указана схема в JdbcDataset",
         "jdbcdataset table is not specified": "Не указана таблица в JdbcDataset",
-        "querytext is not specified": "Не указано поле queryText"
+        "querytext is not specified": "Не указано поле queryText",
+
+        "Integer": "Целое",
+        "Decimal": "Дробное",
+        "String": "Строка",
+        "Date": "Дата",
+        "Boolean": "Логическое",
+        "Timestamp": "Дата и время",
+
+        "integerMask": "###0",
+        "decimalMask": "###0.00",
+        "dateMask": "дд.мм.гггг",
+        "dateTimeMask": "дд.мм.гггг чч:мм:cc"
 }
 
 
