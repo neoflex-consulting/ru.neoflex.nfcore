@@ -61,7 +61,7 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         this.loadData();
         if (this.props.context) {
             this.props.context.addEventAction({
-                itemId:this.props.viewObject.eURI(),
+                itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
                 actions: [
                     {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                     {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
@@ -71,7 +71,7 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
             });
             this.props.context.notifyAllEventHandlers({
                 type:eventType.componentLoad,
-                itemId:this.props.viewObject.eURI()
+                itemId:this.props.viewObject.get('name')+this.props.viewObject._id
             });
         }
     }

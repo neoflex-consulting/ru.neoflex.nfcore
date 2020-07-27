@@ -812,7 +812,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
         if (this.state.formatMasks.length === 0) this.getAllFormatMasks()
         this.props.context.addEventAction({
-            itemId:this.props.viewObject.eURI(),
+            itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
             actions: [
                 {actionType: actionType.execute,callback: this.refresh.bind(this)},
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
@@ -823,7 +823,7 @@ class DatasetView extends React.Component<any, State> {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemId:this.props.viewObject.eURI()
+            itemId:this.props.viewObject.get('name')+this.props.viewObject._id
         });
     }
 
