@@ -77,7 +77,9 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
     }
 
     componentWillUnmount() {
-        this.props.context.removeEventAction()
+        if (this.props.context) {
+            this.props.context.removeEventAction()
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {
