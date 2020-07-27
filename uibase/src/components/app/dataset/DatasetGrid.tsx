@@ -166,7 +166,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.state.numberOfNewLines !== this.props.numberOfNewLines) {
+        if (this.state.numberOfNewLines !== this.props.numberOfNewLines && this.state.rowData.length !== 0) {
             this.setState({numberOfNewLines: this.props.numberOfNewLines})
             this.highlightAggregate();
         }
