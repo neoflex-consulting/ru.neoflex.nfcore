@@ -123,7 +123,7 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    numberOfNewLines: number;
+    numberOfNewLines: boolean;
     formatMasks: {key:string,value:string}[];
 }
 
@@ -186,7 +186,7 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            numberOfNewLines: 0,
+            numberOfNewLines: false,
             formatMasks: []
         }
     }
@@ -756,7 +756,7 @@ class DatasetView extends React.Component<any, State> {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
                 }
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0 && this.state.rowData.length > 0) {
+                if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -767,10 +767,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: JSON.parse(aggJson).length});
+                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: 0});
+                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
                 const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
@@ -810,7 +810,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisXPosition.length === 0) {this.getAllEnumValues("dataset","AxisXPositionType", "allAxisXPosition")}
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
-        if (this.state.formatMasks.length === 0) this.getAllFormatMasks()
+
         this.props.context.addEventAction({
             itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
             actions: [
@@ -893,6 +893,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     //Меняем фильтры, выполняем запрос и пишем в userProfile
+
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
@@ -905,6 +906,7 @@ class DatasetView extends React.Component<any, State> {
 
         if (newServerParam !== undefined) {
             const serverParam = filterParam(newServerParam);
+            const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
             this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
@@ -917,6 +919,7 @@ class DatasetView extends React.Component<any, State> {
                     (paramName === paramType.groupByColumn)? serverParam: groupByColumn,
                 );
             }
+            this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
         }
         else {
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
@@ -1533,7 +1536,6 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.calculations}
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
                                 defaultColumnDefs={this.state.defaultColumnDefs}
-                                formatMasks={this.state.formatMasks}
                             />
                             :
                             <Calculator/>

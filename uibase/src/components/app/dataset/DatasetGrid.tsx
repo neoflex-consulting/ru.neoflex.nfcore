@@ -47,7 +47,7 @@ interface Props {
     isAnyAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
     serverAggregates: any[],
-    numberOfNewLines: number
+    numberOfNewLines: boolean
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -90,7 +90,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.grid.current !== null) {
             this.grid.current.api = params.api;
             this.grid.current.columnApi = params.columnApi;
-            this.highlightAggregate(this.state.numberOfNewLines);
+            this.highlightAggregate();
         }
     };
 
@@ -166,9 +166,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.state.numberOfNewLines !== this.props.numberOfNewLines) {
+        if (this.state.numberOfNewLines !== this.props.numberOfNewLines && this.state.rowData.length !== 0) {
             this.setState({numberOfNewLines: this.props.numberOfNewLines})
-            this.highlightAggregate(this.props.numberOfNewLines);
+            this.highlightAggregate();
         }
         if (!_.isEqual(this.state.highlights, this.props.highlights)
             && this.props.isHighlightsUpdated) {
@@ -185,11 +185,23 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    private highlightAggregate(numberOfLines : any) {
+    private highlightAggregate() {
+        let numberOfLinesInAggregations = 0
+            for (let i = 0; i < this.state.columnDefs.length; i++) {
+                let sameDatasetColumn = 0;
+                for (let j = 0; j < this.props.serverAggregates.length; j++) {
+                    if (this.state.columnDefs[i].get("field") == this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
+                        sameDatasetColumn++;
+                    }
+                }
+                if (numberOfLinesInAggregations < sameDatasetColumn) {
+                    numberOfLinesInAggregations = sameDatasetColumn
+                }
 
+            }
             if (this.grid.current) {
                 if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
-                    let lastLines = this.props.rowData.length - numberOfLines - 1
+                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
                     this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function (params: any) {
                         if (lastLines < params.node.childIndex) {
                             return 'aggregate-highlight';

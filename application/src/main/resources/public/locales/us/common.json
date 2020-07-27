@@ -38,6 +38,7 @@
         "diagram name": "Diagram name",
         "diagram legend": "Diagram legend",
         "dynamiccomponent": " component cannot be downloaded from path ",
+        "duplicateRow": "Duplicate row",
         "edit": "Edit",
         "enable": "Enable",
         "eClass": "EClass",
@@ -86,6 +87,7 @@
         "text": "Text",
         "tools": "Tools",
         "more": "More",
+        "wrongOperation": "Wrong operation",
 
         "EqualTo": "equals",
         "NotEqual": "does not equal",
