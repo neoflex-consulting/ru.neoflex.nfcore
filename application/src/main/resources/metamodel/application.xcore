@@ -9,6 +9,7 @@ package ru.neoflex.nfcore.application
 import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.dataset.FormatMask
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
@@ -234,7 +235,8 @@ class Select extends ViewElement, ValueItem, CommandElement {
 class DatePicker extends ViewElement, ValueItem {
     boolean allowClear
     String width = "200"
-    String format = "YYYY-MM-DD"
+    refers FormatMask formatMask
+    boolean showTime
 }
 
 class HtmlContent extends ViewElement, CommandElement {

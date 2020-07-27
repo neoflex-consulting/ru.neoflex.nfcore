@@ -10,7 +10,8 @@ export interface IServerQueryParam {
     operation?: string,
     value?: string,
     enable?: boolean,
-    type?: string
+    type?: string,
+    mask?: string,
     highlightType?: string,
     backgroundColor?: string,
     color?: string
@@ -21,7 +22,6 @@ export interface IServerNamedParam {
     parameterName: string,
     parameterValue: string,
     parameterDataType?: string,
-    parameterDateFormat?: string,
     isPrimaryKey?: boolean
 }
 

@@ -434,8 +434,7 @@ class Calendar extends React.Component<any, any> {
         let params: Object[] = [{
             parameterName: 'reportDate',
             parameterValue: notification.contents[0]['notificationDateOn'],
-            parameterDataType: "Date",
-            parameterDateFormat: this.props.viewObject.get('format') || "YYYY-MM-DD"
+            parameterDataType: "Date"
         }];
         if (notification.contents[0]['AppModuleName'] !== null) {
             context.changeURL(

@@ -192,7 +192,7 @@ const calculatorFunctionTranslator = [
     {key:"And",value:"and"},
     {key:"Pi",value:"pi"},
     {key:"Or",value:"or"},
-]
+];
 
 enum dmlOperation {
     insert="executeInsert",
@@ -210,4 +210,34 @@ const agGridColumnTypes = {
     'Undefined':{}
 };
 
-export {positionMap, positionEnum, colorScheme, diagramAnchorMap, actionType, eventType, grantType, calculatorFunctionTranslator, dmlOperation, agGridColumnTypes}
+enum appTypes {
+    Integer='Integer',
+    Decimal='Decimal',
+    String='String',
+    Date='Date',
+    Boolean='Boolean',
+    Timestamp='Timestamp'
+}
+
+const defaultIntegerFormat = '#0';
+const defaultDecimalFormat = '#0.00';
+const defaultDateFormat = 'YYYY-MM-DD';
+const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
+
+export {
+    positionMap,
+    positionEnum,
+    colorScheme,
+    diagramAnchorMap,
+    actionType,
+    eventType,
+    grantType,
+    calculatorFunctionTranslator,
+    dmlOperation,
+    agGridColumnTypes,
+    defaultDateFormat,
+    defaultTimestampFormat,
+    defaultDecimalFormat,
+    defaultIntegerFormat,
+    appTypes
+}

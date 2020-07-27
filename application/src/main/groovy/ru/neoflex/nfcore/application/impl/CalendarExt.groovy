@@ -112,7 +112,8 @@ class CalendarExt extends CalendarImpl {
 
                             def dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-                            def d1 = new Date(dateFrom)
+                            //Только время и дата
+                            def d1 = new Date(dateFrom.split(' ')[0..3].join(' '))
                             def yearDateFrom = d1.toYear().toString()
                             def monthDateFrom = d1.toMonth().ordinal() + 1
                             def monthDateFromFull = monthDateFrom < 10 ? '0' + monthDateFrom : monthDateFrom
@@ -122,7 +123,7 @@ class CalendarExt extends CalendarImpl {
                             if (notification.periodicity == Periodicity.MONTH || notification.periodicity == Periodicity.DAY) {
                                 if (notification.weekendReporting) {
                                     def deadlineDayFull = notification.deadlineDay.toInteger() < 10 ? '0' + notification.deadlineDay : notification.deadlineDay
-                                    def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlineTimeFull + ":00:00"
+                                    def newDate = yearDateFrom + "-" + monthDateFromFull + "-" + deadlineDayFull + "T" + deadlnieTimeFull + ":00:00"
                                     notificationInstance.calendarDate = dateFormat.parse(newDate) as java.util.Date
                                     notificationInstance.name = notification.name + "." + newDate
 

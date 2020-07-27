@@ -5,7 +5,6 @@ import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import {ConfigProvider, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
-import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
@@ -14,9 +13,18 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {agGridColumnTypes} from "../../../utils/consts";
+import {
+    agGridColumnTypes, appTypes,
+    defaultDateFormat,
+    defaultDecimalFormat,
+    defaultIntegerFormat,
+    defaultTimestampFormat
+} from "../../../utils/consts";
 import DateEditor from "./DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
+import moment from "moment";
+import format from "number-format.js";
+import './../../../styles/RichGrid.css';
 
 const backgroundColor = "#fdfdfd";
 
@@ -214,6 +222,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.setState({highlights: this.props.highlights});
         this.props.saveChanges(false, "isHighlightsUpdated");
         const newCellStyle = (params: any) => {
+            let returnObject = {textAlign: [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? "right": undefined};
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
                 const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
@@ -231,67 +240,67 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     if (h['datasetColumn'] === params.colDef.field) {
 
 
-                    if (type === 'Integer' || type === 'Decimal') {
+                    if (type === appTypes.Integer || type === appTypes.Decimal) {
                         columnValue = Number(params.value);
                         filterValue = Number(value)
-                    } else if (type === 'Date' || type === 'Timestamp') {
+                    } else if (type === appTypes.Date || type === appTypes.Timestamp) {
                         columnValue = new Date(params.value);
                         filterValue = new Date(value)
-                    } else if (type === 'String' || type === 'Boolean') {
+                    } else if (type === appTypes.String || type === appTypes.Boolean) {
                         columnValue = params.value;
                         filterValue = value
                     }
 
                     if (operation === 'EqualTo') {
                         if (columnValue === filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     } else if (operation === 'NotEqual') {
                         if (columnValue !== filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, backgroundColor, color: color}
                         }
                     } else if (operation === 'LessThan') {
                         if (columnValue < filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, backgroundColor, color: color}
                         }
                     } else if (operation === 'LessThenOrEqualTo') {
                         if (columnValue <= filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     } else if (operation === 'GreaterThan') {
                         if (columnValue > filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     } else if (operation === 'GreaterThanOrEqualTo') {
                         if (columnValue >= filterValue) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     } else if (params.data[columnName] !== null) {
                         if (operation === 'IsNotEmpty') {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         } else if (operation === 'IncludeIn') {
                             if (params.data[columnName].includes(value)) {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         } else if (operation === 'NotIncludeIn') {
                             if (!params.data[columnName].includes(value)) {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         } else if (operation === 'StartWith') {
                             if (params.data[columnName].split(value)[0] === "") {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         } else if (operation === 'NotStartWith') {
                             if (params.data[columnName].split(value)[0] !== "") {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         } else if (operation === 'EndOn') {
                             if (params.data[columnName].split(value)[1] === "") {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         } else if (operation === 'NotEndOn') {
                             if (params.data[columnName].split(value)[1] !== "") {
-                                return {background: backgroundColor, color: color}
+                                return {...returnObject, background: backgroundColor, color: color}
                             }
                         }
                     } else if (params.data[columnName] === null) {
@@ -299,13 +308,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             operation === 'NotIncludeIn' ||
                             operation === 'NotEndOn' ||
                             operation === 'NotStartWith') {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     }
                 }
                 });
                 if (temp !== undefined) {
-                    return {background: temp['backgroundColor'], color: temp['color']}
+                    return {...returnObject, background: temp['backgroundColor'], color: temp['color']}
                 }
                 else {
                     const columnHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Column');
@@ -314,17 +323,15 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         const backgroundColor = h['backgroundColor'];
                         const color = h['color'];
                         if (params.data[columnName] === params.value) {
-                            return {background: backgroundColor, color: color}
+                            return {...returnObject, background: backgroundColor, color: color}
                         }
                     });
                     if (temp !== undefined) {
-                        return {background: temp['backgroundColor'], color: temp['color']}
+                        return {...returnObject, background: temp['backgroundColor'], color: temp['color']}
                     }
                 }
             }
-            else {
-                return {background: undefined, color: undefined}
-            }
+            return returnObject
         };
         const rowStyle = (params: any) => {
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
@@ -341,15 +348,15 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
                     let columnValue;
                     let filterValue;
-                    if (type === 'Integer' || type === 'Decimal') {
+                    if (type === appTypes.Integer || type === appTypes.Decimal) {
                         columnValue = Number(params.data[columnName]);
                         filterValue = Number(value)
                     }
-                    else if (type === 'Date' || type === 'Timestamp') {
+                    else if (type === appTypes.Date || type === appTypes.Timestamp) {
                         columnValue = new Date(params.data[columnName]);
                         filterValue = new Date(value)
                     }
-                    else if (type === 'String' || type === 'Boolean') {
+                    else if (type === appTypes.String || type === appTypes.Boolean) {
                         columnValue = params.data[columnName];
                         filterValue = value
                     }
@@ -475,11 +482,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         /*domLayout='autoHeight'*/
                         paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
+                        suppressClickEdit={true}
+                        stopEditingWhenGridLosesFocus={true}
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>
                             <AgGridColumn
                                 onCellValueChanged={col.get('updateCallback')}
+                                onCellDoubleClicked={col.get('onCellDoubleClicked')}
                                 type={col.get('type')}
                                 key={col.get('field')}
                                 field={col.get('field')}
@@ -505,9 +515,21 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         return params.valueFormatted? params.valueFormatted : params.value;
                                     }
                                 }
-                                cellEditor = {['Date','Timestamp'].includes(col.get('type')) ? 'DateEditor' : undefined }
-                                cellEditorParams = {['Date','Timestamp'].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
-                                valueFormatter = {col.get('valueFormatter')}
+                                cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
+                                cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
+                                valueFormatter = {(params) : string => {
+                                    return params.colDef.type === appTypes.Date && col.get('mask')
+                                        ? moment(params.value, defaultDateFormat).format(col.get('mask'))
+                                        : params.colDef.type === appTypes.Timestamp && col.get('mask')
+                                            ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
+                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask')
+                                                ? format(col.get('mask'), params.value)
+                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                                                    ? format(defaultDecimalFormat, params.value)
+                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                                        ? format(defaultIntegerFormat, params.value)
+                                                        : params.value
+                                }}
                             />
                         )}
                     </AgGridReact>
