@@ -29,18 +29,12 @@ function getNamedParams(valueItems: any, contextItemValues: any, params: any[] =
             } else {
                 namedParams.push({
                     parameterName: item.get('name'),
-                    parameterValue: item.get('value')
+                    //Проверка параметров в url'ах
+                    parameterValue: item.get('value') ? item.get('value') : getUrlParam(params, item.get('name'))
                 })
             }
         });
     }
-    //Проверка параметров в url'ах
-    namedParams = namedParams.map(param => {
-        return {
-            ...param,
-            parameterValue: param.parameterValue ? param.parameterValue : getUrlParam(params, param.parameterName)
-        }
-    });
     return namedParams
 }
 
