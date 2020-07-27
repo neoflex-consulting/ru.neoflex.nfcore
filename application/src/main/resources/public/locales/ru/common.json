@@ -38,6 +38,7 @@
         "diagram name": "Название диаграммы",
         "diagram legend": "Легенда",
         "dynamiccomponent": " компонента не может быть загружена из ",
+        "duplicateRow": "Повторение строки",
         "edit": "Редактировать",
         "enable": "Включить",
         "eClass": "EClass",
@@ -100,6 +101,7 @@
         "NotStartWith": "не начинается с",
         "EndOn": "заканчивается на",
         "NotEndOn": "не заканчивается на",
+        "wrongOperation": "Неправельнная операция",
 
         "Average": "среднее",
         "Count": "счётчик",
