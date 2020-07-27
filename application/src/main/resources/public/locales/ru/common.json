@@ -278,6 +278,7 @@
         "Boolean": "Логическое",
         "Timestamp": "Дата и время",
 
+        "format": "Маска",
         "integerMask": "###0",
         "decimalMask": "###0.00",
         "dateMask": "дд.мм.гггг",

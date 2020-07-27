@@ -453,7 +453,8 @@ class DatasetView extends React.Component<any, State> {
                             operation: f.get('operation') || defaultComponentValues[componentName],
                             value: f.get('value'),
                             enable: (f.get('enable') !== null ? f.get('enable') : false),
-                            type: getColumnType(columnDefs, f.get('datasetColumn')),
+                            type: getColumnType(columnDefs, f.get('datasetColumn')) || f.get('dataType') || undefined,
+                            mask: f.get('mask') || undefined,
                             highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
                             backgroundColor: f.get('backgroundColor'),
                             color: f.get('color')
@@ -552,6 +553,7 @@ class DatasetView extends React.Component<any, State> {
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
             groupByColumn = getParamsFromComponent(resource, 'groupByColumn');
             highlights = getParamsFromComponent(resource, 'highlight');
+            serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
@@ -778,7 +780,7 @@ class DatasetView extends React.Component<any, State> {
                     serverSorts:  filter(sortParams),
                     serverGroupBy: filter(groupByParams),
                     groupByColumn: filter(groupByColumnParams),
-                    serverCalculatedExpression: filter(calculatedExpression),
+                    serverCalculatedExpression: filter(calculatedExpressions),
                     highlights: filter(this.state.highlights),
                     diagrams: this.state.diagrams,
                 })
