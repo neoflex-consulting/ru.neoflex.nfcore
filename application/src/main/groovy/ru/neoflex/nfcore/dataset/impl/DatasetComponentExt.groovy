@@ -138,6 +138,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverGroupByColumn = []
             def serverSorts = []
             def serverCalculatedExpression = []
+            def namesOfOperationsInServerAggregations = []
 
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
@@ -281,7 +282,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Aggregation overall
             if (aggregations) {
-                for (int i = 0; i < allColumns.size() - 1; i++) {
+                for (int i = 0; i < allColumns.size(); i++) {
                     def sameDatasetColumn = 0;
                     for (int j = 0; j < aggregations.size(); j++) {
                         if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
@@ -305,21 +306,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Среднее:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Счетчик:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Максимум:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Минимум:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    namesOfOperationsInServerAggregations.add("Сумма:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)
@@ -379,7 +386,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.schemaName}.${jdbcDataset.tableName}) t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName} t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -415,26 +422,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
                 if (parameters) {
-                    for (int i = 0; i <= parameters.size() - 1; ++i) {
-                        if (!parameters[i].parameterValue) {
-                            p.setString(parameters[i].parameterName, null)
-                        }
-                        if (parameters[i].parameterDataType == "Date") {
-                            p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                        } else if (parameters[i].parameterDataType == "Timestamp") {
-                            p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                        } else if (parameters[i].parameterDataType == "Int") {
-                            p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-                        } else {
-                            p.setString(parameters[i].parameterName, parameters[i].parameterValue)
-                        }
-                    }
+                    p = getNamedParameterStatement(parameters, p)
                 }
                 try {
                     rs = p.executeQuery();
                     def columnCount = rs.metaData.columnCount
                     if (numberOfLines > 1){
                         while (rs.next()) {
+                            int g = 0;
                             for (int j = 0; j < numberOfLines; j++) {
                                 def map = [:]
                                 String key
@@ -444,6 +439,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     int index = i + (j*allColumns.size())
                                     object = rs.getObject(index)
                                     value = (object == null ? null : object.toString())
+                                    if (value != null){
+                                        value = namesOfOperationsInServerAggregations[g] + value
+                                        g++
+                                    }
                                     key = "${rs.metaData.getColumnName(index)}"
                                     map[key] = value
                                 }
@@ -452,11 +451,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                     }
                     else{
+                        int g = 0;
                     while (rs.next()) {
                         def map = [:]
+                        String key
+                        String value
+                        def object
                         for (int i = 1; i <= columnCount; ++i) {
-                            def object = rs.getObject(i)
-                            map["${rs.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
+                            object = rs.getObject(i)
+                            value = (object == null ? null : object.toString())
+                            if (value != null && numberOfLines > 0){
+                                value = namesOfOperationsInServerAggregations[g] + value
+                                g++
+                            }
+                            key = "${rs.metaData.getColumnName(i)}"
+                            map[key] = value
                         }
                         rowData.add(map)
                     }}
@@ -470,6 +479,122 @@ class DatasetComponentExt extends DatasetComponentImpl {
             (jdbcConnection) ? jdbcConnection.close() : null
         }
         return rowData
+    }
+
+    @Override
+    void executeInsert(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.INSERT, this.insertQuery)
+    }
+
+    @Override
+    void executeUpdate(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.UPDATE, this.updateQuery)
+    }
+
+    @Override
+    void executeDelete(EList<QueryParameter> parameters) {
+        executeDML(parameters, DMLQueryType.DELETE, this.deleteQuery)
+    }
+
+    void executeDML(EList<QueryParameter> parameters, DMLQueryType queryType, DMLQuery dmlQuery) {
+        logger.info("execute${queryType}", "execute${queryType} parameters = " + parameters)
+        String query;
+        def jdbcDataset = this.dataset as JdbcDataset
+        if (dmlQuery && dmlQuery.generateFromModel) {
+            if (jdbcDataset.schemaName == "" || !jdbcDataset.schemaName)
+                throw new IllegalArgumentException("jdbcDataset schema is not specified")
+            if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
+                throw new IllegalArgumentException("jdbcDataset table is not specified")
+
+            String primaryKey = parameters.findAll{ qp -> qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName} = ${qp.parameterValue}"}.join(" and \n")
+            if (primaryKey == "" || !primaryKey)
+                throw new IllegalArgumentException("primaryKey column is not specified")
+            String values = parameters
+                    .findAll{ qp -> !qp.isPrimaryKey }
+                    .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
+                            ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
+                            : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                            ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
+                            : qp.parameterDataType == DataType.STRING.getName()
+                            ? "${qp.parameterName} = '${qp.parameterValue}'"
+                            : "${qp.parameterName} = ${qp.parameterValue}"}.join(", \n")
+            if (values == "" || !values)
+                throw new IllegalArgumentException("values is empty")
+
+            switch (queryType) {
+                case DMLQueryType.UPDATE:
+                    query = """
+                    update ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                       set ${values}
+                     where ${primaryKey}
+                    """; break;
+                case DMLQueryType.DELETE:
+                    query = """
+                    delete
+                      from ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                     where ${primaryKey}
+                    """; break;
+                case DMLQueryType.INSERT:
+                    values = parameters.findAll{ qp -> !qp.isPrimaryKey }
+                            .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
+                                    ? "to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
+                                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                                    ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
+                                    : qp.parameterDataType == DataType.STRING.getName()
+                                    ? "'${qp.parameterValue}'"
+                                    : "${qp.parameterValue}"}.join(", ")
+                    String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
+                    query = """
+                    insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
+                    values (${values})
+                    """; break;
+                default:
+                    query = ""; break;
+            }
+
+        } else if (dmlQuery && !dmlQuery.generateFromModel) {
+            if (dmlQuery.queryText == "" || !dmlQuery.queryText)
+                throw new IllegalArgumentException("${queryType} query is not specified")
+            query = dmlQuery.queryText
+            parameters = parameters.findAll{ qp -> !qp.isPrimaryKey } as EList<QueryParameter>
+        } else {
+            throw new NoSuchMethodException("${queryType} is not supported")
+        }
+        Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
+        try {
+            NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, query);
+            logger.info("execute${queryType}", "execute${queryType} = " + query)
+            if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
+                for (int i = 0; i <= parameters.size() - 1; ++i) {
+                    p = getNamedParameterStatement(parameters, p)
+                }
+            }
+            try {
+                p.execute()
+            } finally {
+                (p) ? p.close() : null
+            }
+        } finally {
+            (jdbcConnection) ? jdbcConnection.close() : null
+        }
+    }
+
+    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p) {
+        for (int i = 0; i <= parameters.size() - 1; ++i) {
+            if (!parameters[i].parameterValue) {
+                p.setString(parameters[i].parameterName, null)
+            }
+            if (parameters[i].parameterDataType == "Date") {
+                p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+            } else if (parameters[i].parameterDataType == "Timestamp") {
+                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+            } else if (parameters[i].parameterDataType == "Integer") {
+                p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
+            } else {
+                p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            }
+        }
+        return p
     }
 
     String getConvertOperator(String operator) {

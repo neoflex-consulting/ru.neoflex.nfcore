@@ -26,10 +26,10 @@ import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
-import {grantType} from "./utils/consts";
-import {NeoButton, NeoIcon} from "neo-design/lib";
-import 'neo-design/dist/neoDesign.css';
-import {SvgName} from "neo-design/lib/icon";
+import {dmlOperation, grantType} from "./utils/consts";
+// import 'neo-design/dist/neoDesign.css';
+// import {NeoButton, NeoIcon} from "neo-design/lib";
+import HeaderMenu from "./components/HeaderMenu";
 
 const backgroundColor = "#2a356c";
 
@@ -67,6 +67,7 @@ class EcoreApp extends React.Component<any, State> {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             runQuery: this.runQuery,
+            executeDMLOperation: this.executeDMLOperation,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
             addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
@@ -238,7 +239,8 @@ class EcoreApp extends React.Component<any, State> {
                                 parameterName: p['parameterName'],
                                 parameterValue: p['parameterValue'],
                                 parameterDataType: p['parameterDataType']||"String",
-                                parameterDateFormat: parseFormatClientToServer(p['parameterDateFormat'])||"yyyy-MM-dd"
+                                parameterDateFormat: parseFormatClientToServer(p['parameterDateFormat'])||"yyyy-MM-dd",
+                                isPrimaryKey: p['isPrimaryKey']
                             } as IServerNamedParam)
                         )
                     });
@@ -316,6 +318,21 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
             this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
+    };
+
+    executeDMLOperation = (
+        resource_: Ecore.Resource,
+        operation: dmlOperation,
+        queryParams: IServerNamedParam[] = []
+    ) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = operation;
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().voidCall(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+            ]
+        )
     };
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
@@ -503,29 +520,26 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
-                        <Col span={8}>
-                            {/*<NeoButton type={"disabled"} size={"medium"}>Рш РШ </NeoButton>*/}
-                            {/*<NeoIcon icon={"calendar"}/>*/}
-                            {/*<NeoIcon icon={} />*/}
-
-                            {/*<NeoIcon icon={}/>*/}
-                        </Col>
-                        {/*<Col span={14}*/}
-                        {/*            style={{textAlign: 'center', height: 'inherit'}}>*/}
-                        {/*            {*/}
-                        {/*                this.props.location.pathname.includes('/app/') &&*/}
-
-                        {/*                <MainContext.Consumer>*/}
-                        {/*                    {(context: any) => {*/}
-                        {/*                        return <HeaderMenu*/}
-                        {/*                            {...props}*/}
-                        {/*                            applications={this.state.applications}*/}
-                        {/*                            context={context}*/}
-                        {/*                        />*/}
-                        {/*                    }}*/}
-                        {/*                </MainContext.Consumer>*/}
-                        {/*            }*/}
+                        {/*<Col span={8}>*/}
+                        {/*    <NeoButton type={"disabled"}>Hi</NeoButton>*/}
+                        {/*    <NeoIcon icon={"calendar"}></NeoIcon>*/}
                         {/*</Col>*/}
+                        <Col span={14}
+                                    style={{textAlign: 'center', height: 'inherit'}}>
+                                    {
+                                        this.props.location.pathname.includes('/app/') &&
+
+                                        <MainContext.Consumer>
+                                            {(context: any) => {
+                                                return <HeaderMenu
+                                                    {...props}
+                                                    applications={this.state.applications}
+                                                    context={context}
+                                                />
+                                            }}
+                                        </MainContext.Consumer>
+                                    }
+                        </Col>
                         <Col span={5}
                              style={{
                                     height: 'inherit'

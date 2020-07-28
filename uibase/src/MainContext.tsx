@@ -1,6 +1,6 @@
 import * as React from "react";
 import Ecore from "ecore"
-import {actionType, eventType} from "./utils/consts";
+import {actionType, dmlOperation, eventType} from "./utils/consts";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 
@@ -21,7 +21,8 @@ export interface IServerNamedParam {
     parameterName: string,
     parameterValue: string,
     parameterDataType?: string,
-    parameterDateFormat?: string
+    parameterDateFormat?: string,
+    isPrimaryKey?: boolean
 }
 
 export interface IEvent {
@@ -60,6 +61,11 @@ export interface IMainContext {
         calculatedExpression: IServerQueryParam[],
         groupByColumns: IServerQueryParam[]
         ) => Promise<string>;
+    executeDMLOperation?: (
+        resource: Ecore.Resource,
+        operation: dmlOperation,
+        queryParams: IServerNamedParam[],
+    ) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfile?: Ecore.EObject;

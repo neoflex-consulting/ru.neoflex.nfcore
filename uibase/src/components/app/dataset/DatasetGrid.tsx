@@ -3,7 +3,7 @@ import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import { Modal } from 'antd';
+import {ConfigProvider, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import './../../../styles/RichGrid.css';
 import Ecore from 'ecore';
@@ -14,6 +14,9 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
+import {agGridColumnTypes} from "../../../utils/consts";
+import DateEditor from "./DateEditor";
+import {switchAntdLocale} from "../../../utils/antdLocalization";
 
 const backgroundColor = "#fdfdfd";
 
@@ -33,7 +36,10 @@ interface Props {
     isGridReady: boolean,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
+    isAnyAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
+    serverAggregates: any[],
+    numberOfNewLines: number
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -47,23 +53,27 @@ class DatasetGrid extends React.Component<Props & any, any> {
             themes: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
+            numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: 10,
             isGridReady: false,
+            isAnyAggregations: true,
             columnDefs: [],
             rowData: [],
             highlights: [],
             saveMenuVisible: false,
+            locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
                     buttonComponent: Button_,
                     hrefComponent: Href_,
+                    DateEditor: DateEditor,
                 },
                 defaultColDef: {
                     resizable: true,
                     sortable: true,
                 }
             },
-            cellStyle: {}
+            cellStyle: {},
         };
         this.grid = React.createRef();
     }
@@ -72,6 +82,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.grid.current !== null) {
             this.grid.current.api = params.api;
             this.grid.current.columnApi = params.columnApi;
+            this.highlightAggregate(this.state.numberOfNewLines);
         }
     };
 
@@ -147,7 +158,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        this.highlightAggregate();
+        if (this.state.numberOfNewLines !== this.props.numberOfNewLines) {
+            this.setState({numberOfNewLines: this.props.numberOfNewLines})
+            this.highlightAggregate(this.props.numberOfNewLines);
+        }
         if (!_.isEqual(this.state.highlights, this.props.highlights)
             && this.props.isHighlightsUpdated) {
             this.changeHighlight();
@@ -158,23 +172,30 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)) {
             this.setState({columnDefs: this.props.columnDefs})
         }
-    }
-
-    private highlightAggregate() {
-        if (this.grid.current) {
-            if (this.props.isAggregatesHighlighted) {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function(params: any) {
-                    if (params.node.lastChild) {
-                        return 'aggregate-highlight';
-                    }
-                }
-            }
-            else {
-                this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
-            }
-            this.grid.current.api.refreshCells();
+        if (prevProps.t !== this.props.t) {
+            this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
         }
     }
+
+    private highlightAggregate(numberOfLines : any) {
+
+            if (this.grid.current) {
+                if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
+                    let lastLines = this.props.rowData.length - numberOfLines - 1
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function (params: any) {
+                        if (lastLines < params.node.childIndex) {
+                            return 'aggregate-highlight';
+                        }
+                    }
+                } else {
+                    this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+                }
+                this.grid.current.api.refreshCells();
+            }
+
+    }
+
+
 
     private changeHighlight() {
         const {gridOptions} = this.state;
@@ -421,7 +442,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 className={'ag-theme-material'}
             >
                 <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
-                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 && <AgGridReact
+                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
+                    <ConfigProvider locale={this.state.locale}>
+                    <AgGridReact
+                        columnTypes={agGridColumnTypes}
                         ref={this.grid}
                         rowData={this.state.rowData}
                         modules={AllCommunityModules}
@@ -443,6 +467,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     >
                         {this.state.columnDefs.map((col: any) =>
                             <AgGridColumn
+                                onCellValueChanged={col.get('updateCallback')}
+                                type={col.get('type')}
                                 key={col.get('field')}
                                 field={col.get('field')}
                                 headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
@@ -464,12 +490,16 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 } : undefined}
                                 cellRenderer = {
                                     (col.get('component')) ? this.getComponent(col.get('component').eClass._id) : function (params: any) {
-                                        return params.value;
+                                        return params.valueFormatted? params.valueFormatted : params.value;
                                     }
                                 }
+                                cellEditor = {['Date','Timestamp'].includes(col.get('type')) ? 'DateEditor' : undefined }
+                                cellEditorParams = {['Date','Timestamp'].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
+                                valueFormatter = {col.get('valueFormatter')}
                             />
                         )}
                     </AgGridReact>
+                    </ConfigProvider>
                     }
                     <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
                         <Paginator

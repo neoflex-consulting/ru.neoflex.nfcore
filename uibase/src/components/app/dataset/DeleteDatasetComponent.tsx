@@ -22,7 +22,7 @@ class DeleteDatasetComponent extends React.Component<any, any> {
             this.props.closeModalGrid();
         }
         else {
-            const name = this.props.currentDatasetComponent.eContents()[0].get('name')
+            const name = this.props.currentDatasetComponent.eContents()[0].get('name');
             this.props.closeModal!();
             const ref: string = `${this.props.currentDatasetComponent.get('uri')}?rev=${this.props.currentDatasetComponent.rev}`;
             API.instance().deleteResource(ref).then((response: any) => {
