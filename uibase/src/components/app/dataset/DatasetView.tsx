@@ -810,6 +810,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisXPosition.length === 0) {this.getAllEnumValues("dataset","AxisXPositionType", "allAxisXPosition")}
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
+        if (this.state.formatMasks.length === 0) {this.getAllFormatMasks()}
 
         this.props.context.addEventAction({
             itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
@@ -1536,6 +1537,7 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.calculations}
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
                                 defaultColumnDefs={this.state.defaultColumnDefs}
+                                formatMasks={this.state.formatMasks}
                             />
                             :
                             <Calculator/>

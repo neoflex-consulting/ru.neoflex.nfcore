@@ -528,7 +528,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                                     ? format(defaultDecimalFormat, params.value)
                                                     : [appTypes.Integer].includes(params.colDef.type as appTypes)
                                                         ? format(defaultIntegerFormat, params.value)
-                                                        : params.value
+                                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                                                : params.value
                                 }}
                             />
                         )}
