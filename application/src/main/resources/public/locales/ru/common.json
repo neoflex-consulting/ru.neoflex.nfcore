@@ -284,7 +284,9 @@
         "integerMask": "###0",
         "decimalMask": "###0.00",
         "dateMask": "дд.мм.гггг",
-        "dateTimeMask": "дд.мм.гггг чч:мм:cc"
+        "dateTimeMask": "дд.мм.гггг чч:мм:cc",
+
+        "exception while evaluating": "Ошибка во время вычисления выражения"
 }
 
 

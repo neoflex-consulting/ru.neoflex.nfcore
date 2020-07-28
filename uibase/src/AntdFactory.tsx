@@ -293,6 +293,7 @@ export class Href_ extends ViewContainer {
     }
 
     render = () => {
+        let componentRenderCondition;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         let value : string;
         const returnValueType = this.viewObject.get('returnValueType') || 'string';
@@ -303,7 +304,15 @@ export class Href_ extends ViewContainer {
         if (returnValueType === 'string') {
             value = this.props.getValue ? this.props.getValue() : this.viewObject.get('label')
         }
-        return <a
+        //componentRenderCondition ag-grid props
+        try {
+            componentRenderCondition = eval(this.props.componentRenderCondition)
+        } catch (e) {
+            this.props.context.notification("componentRenderCondition",
+                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
+                "warning")
+        }
+        return componentRenderCondition || this.props.componentRenderCondition === undefined ? <a
             hidden={this.state.isHidden}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
@@ -321,7 +330,7 @@ export class Href_ extends ViewContainer {
             { this.viewObject.get('label')
                 ? this.viewObject.get('label')
                 : (this.props.getValue ? this.props.getValue() : undefined) }
-        </a>
+        </a> : <div> {this.props.getValue()} </div>
     }
 }
 
@@ -351,6 +360,7 @@ export class Button_ extends ViewContainer {
     }
 
     render = () => {
+        let componentRenderCondition = false;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
         const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
@@ -364,7 +374,15 @@ export class Button_ extends ViewContainer {
         if (returnValueType === 'string') {
             value = this.props.getValue ? this.props.getValue() : this.viewObject.get('ref')
         }
-        return <div
+        //componentRenderCondition ag-grid props
+        try {
+            componentRenderCondition = eval(this.props.componentRenderCondition)
+        } catch (e) {
+            this.props.context.notification("componentRenderCondition",
+                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
+                "warning")
+        }
+        return componentRenderCondition || this.props.componentRenderCondition === undefined ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
@@ -376,7 +394,7 @@ export class Button_ extends ViewContainer {
                                 }}>
                 {(label)? label: t('submit')}
             </Button>
-        </div>
+        </div> : <div> {this.props.getValue()} </div>
     }
 }
 

@@ -21,7 +21,7 @@ import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
 import {
-    actionType,
+    actionType, appTypes,
     calculatorFunctionTranslator,
     defaultDecimalFormat,
     dmlOperation,
@@ -270,6 +270,16 @@ class DatasetView extends React.Component<any, State> {
             let rowData = new Map();
             let mask:string|undefined = undefined;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
+            let componentRenderCondition = c.get('componentRenderCondition');
+            if (componentRenderCondition)
+                resource.eContents()[0].get('column')._internal.forEach( (cn: Ecore.Resource) => {
+                    const regxType = cn.get('datasetColumn') !== null ? cn.get('datasetColumn').get('convertDataType') : null;
+                    componentRenderCondition = (regxType === appTypes.Integer)
+                        ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseInt(this.props.data.${cn.get('name')})`)
+                        : (regxType === appTypes.Decimal)
+                            ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
+                            : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
+                });
             if (c.get('formatMask'))
                 mask = c.get('formatMask').get('value');
             rowData.set('field', c.get('name'));
@@ -287,6 +297,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
             rowData.set('type', type);
             rowData.set('component', c.get('component'));
+            rowData.set('componentRenderCondition', componentRenderCondition);
             rowData.set('mask', mask);
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
@@ -631,6 +642,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
+                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
             } else {
@@ -651,6 +663,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
+                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
             }

@@ -276,5 +276,7 @@
         "integerMask": "###0",
         "decimalMask": "###0.00",
         "dateMask": "dd.mm.yyyy",
-        "dateTimeMask": "dd.mm.yyyy hh:mm:ss"
+        "dateTimeMask": "dd.mm.yyyy hh:mm:ss",
+
+        "exception while evaluating": "評估表達式時出錯"
 }
