@@ -24,12 +24,14 @@ export class MainApp extends React.Component<any, State> {
     private refSplitterRef: React.RefObject<any> = React.createRef();
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
+    private appModuleMap:Map<string,string>;
 
     constructor(props: any) {
         super(props);
+        this.appModuleMap = new Map<string,string>();
         this.state = {
             pathBreadcrumb: [],
-            hideReferences: true,
+            hideReferences: true
         }
     }
 
@@ -222,7 +224,7 @@ export class MainApp extends React.Component<any, State> {
             if (cb) cb();
         };
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') /*currentAppModule.tree[currentAppModule.tree.length - 1]*/ : undefined;
+        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') /*currentAppModule.tree[currentAppModule.tree.length - 1]*/ : this.appModuleMap.get(currentAppModule.appModule);
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
                 <Tree.DirectoryTree selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined} defaultExpandAll onSelect={onSelect}>
@@ -249,7 +251,8 @@ export class MainApp extends React.Component<any, State> {
                 if (eObject.get('AppModule')) {
                     this.setURL(eObject, key);
                 }
-            })
+            });
+            this.appModuleMap.set(eObject.get('AppModule').get('name'), key);
         }
         else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {

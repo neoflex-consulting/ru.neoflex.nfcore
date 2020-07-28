@@ -36,6 +36,31 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
+function isValid(parametersArray : any, index: any, columndef: any) : boolean{
+        if (getColumnType(columndef, parametersArray[index].datasetColumn) === undefined){
+            return false
+        }
+        else if (getColumnType(columndef, parametersArray[index].datasetColumn) === "Integer"
+            || getColumnType(columndef, parametersArray[index].datasetColumn) === "Decimal"){
+            if ((parametersArray[index].operation === "Count" || parametersArray[index].operation === "CountDistinct"
+                || parametersArray[index].operation === "Maximum" || parametersArray[index].operation === "Minimum"
+                || parametersArray[index].operation === "Sum" || parametersArray[index].operation === "Average" || parametersArray[index].operation === undefined)) {
+                return false
+            }
+        } else if (getColumnType(columndef, parametersArray[index].datasetColumn) === "String") {
+            if (parametersArray[index].operation === "Count" || parametersArray[index].operation === "CountDistinct" || parametersArray[index].operation === undefined) {
+                return false
+            }
+        } else if (getColumnType(columndef, parametersArray[index].datasetColumn) === "Date") {
+            if (parametersArray[index].operation === "Count" || parametersArray[index].operation === "CountDistinct"
+                || parametersArray[index].operation === "Maximum" || parametersArray[index].operation === "Minimum" || parametersArray[index].operation === undefined) {
+                return false
+            }
+        }
+
+    return true;
+};
+
 function getColumnType(columnDef: any[], columnName: string) : string | undefined{
     if (columnDef.length !== 0)
     {
@@ -48,6 +73,17 @@ function getColumnType(columnDef: any[], columnName: string) : string | undefine
     }
 }
 
+function isDublicatee(parametersArray :any, index: number) : boolean{
+    for (let i = 0; i < parametersArray.length; i++){
+        if (i !== index){
+            if (parametersArray[i].datasetColumn === parametersArray[index].datasetColumn &&
+                parametersArray[i].operation === parametersArray[index].operation){
+                return true
+            }
+        }
+    }
+    return false
+}
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableTotalItem">
@@ -66,35 +102,16 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.operation,
                                 message: ' '
                             },{
-                                validator: (rule: any, value: any, callback: any) => {
+                                validator: (rule: any, values: any, callback: any) => {
                                     let isDuplicate: boolean = false;
-                                    if (value.parametersArray !== undefined) {
-                                        const valueArr = value.parametersArray
-                                            .filter((currentObject: IServerQueryParam) => {
-                                                let currentField: string;
-                                                try {
-                                                    //Либо объект при валидации отдельного поля
-                                                    currentField = JSON.parse(rule.value).value
-                                                } catch (e) {
-                                                    //Либо значение этого поля при валидации перед запуском
-                                                    currentField = value
-                                                }
-                                                return (currentField)? currentObject.datasetColumn === currentField: false
-                                            })
-                                            .map(function (currentObject: IServerQueryParam) {
-                                                return currentObject.datasetColumn
-                                            });
-                                        isDuplicate = valueArr.some(function (item: any, idx: number) {
-                                            return valueArr.indexOf(item) !== idx
-                                        });
-                                    }
+                                    isDuplicate = isDublicatee(value.parametersArray, value.index - 1)
                                     if (isDuplicate) {
                                         callback('Error message');
                                         return;
                                     }
                                     callback();
                                 },
-                                message: 'duplicate row',
+                                message: value.t('duplicateRow'),
                             }]
                         })(
                         <Select
@@ -133,7 +150,20 @@ const SortableItem = SortableElement(({value}: any) => {
                                     required:
                                     value.datasetColumn,
                                     message: ' '
-                                }]
+                                }
+                                ,{
+
+                            validator: (rule: any, values: any, callback: any) => {
+                                let isDuplicate: boolean = false;
+                                isDuplicate = isValid(value.parametersArray, value.index - 1, value.columnDefs)
+                                if (isDuplicate) {
+                                    callback('Error message');
+                                    return;
+                                    }
+                            callback();
+                        },
+                            message: value.t('wrongOperation'),
+                        }]
                             })(
                             <Select
                                 getPopupContainer={() => document.getElementById('aggregationButton') as HTMLElement}

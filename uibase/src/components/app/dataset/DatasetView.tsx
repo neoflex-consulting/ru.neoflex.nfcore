@@ -20,7 +20,14 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import {actionType, calculatorFunctionTranslator, dmlOperation, eventType, grantType} from "../../../utils/consts";
+import {
+    actionType,
+    calculatorFunctionTranslator,
+    defaultDecimalFormat,
+    dmlOperation,
+    eventType,
+    grantType
+} from "../../../utils/consts";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
 import {faCompressArrowsAlt, faExpandArrowsAlt} from "@fortawesome/free-solid-svg-icons";
@@ -38,10 +45,6 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
-import moment from "moment";
-import format from "number-format.js"
-
-
 
 const { Option, OptGroup } = Select;
 
@@ -120,7 +123,8 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    numberOfNewLines: number;
+    numberOfNewLines: boolean;
+    formatMasks: {key:string,value:string}[];
 }
 
 const defaultComponentValues = {
@@ -182,8 +186,26 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            numberOfNewLines: 0,
+            numberOfNewLines: false,
+            formatMasks: []
         }
+    }
+
+    getAllFormatMasks() {
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//FormatMask');
+            if (temp !== undefined) {
+                API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}).then((result: Ecore.Resource[]) => {
+                    this.setState({formatMasks:result.map(eObject => {
+                            return {
+                                key: eObject.eContents()[0].get('name'),
+                                value: eObject.eContents()[0].get('value')
+                            }
+                    })})
+                })
+            }
+        });
+
     }
 
     //TODO нужна оптимизация
@@ -257,7 +279,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
-            rowData.set('editable', c.get('editable'));
+            rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
             rowData.set('checkboxSelection', c.get('checkboxSelection'));
             rowData.set('sortable', false);
             rowData.set('suppressMenu', c.get('suppressMenu'));
@@ -266,14 +288,43 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('type', type);
             rowData.set('component', c.get('component'));
             rowData.set('mask', mask);
-            rowData.set('valueFormatter', (params:any) => {
-                return type === 'Date' && mask
-                    ? moment(params.value, 'YYYY-MM-DD').format(mask)
-                    : type === 'Timestamp' && mask
-                    ? moment(params.value, 'YYYY-MM-DD HH:mm:ss').format(mask)
-                    : ['Integer','Decimal'].includes(type) && mask
-                    ? format(mask, params.value)
-                    : undefined
+            rowData.set('onCellDoubleClicked', (params:any)=>{
+                if (params.colDef.editable) {
+                    let restrictEdit = false;
+                    if (!this.props.viewObject.get('datasetComponent').get('updateQuery')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('update query is not specified') ,"error")
+                    }
+                    if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('primary key column is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('dataset').get('schemaName')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset schema is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('dataset').get('tableName')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset table is not specified') ,"error")
+                    }
+                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
+                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
+                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('queryText')) {
+                        restrictEdit = true;
+                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('querytext is not specified') ,"error")
+                    }
+                    if (!restrictEdit) {
+                        const startEditingParams = {
+                            rowIndex: params.rowIndex,
+                            colKey: params.column.getId(),
+                        };
+                        params.api.startEditingCell(startEditingParams);
+                    }
+                }
             });
             rowData.set('updateCallback', (agevent:any)=>{
                 const primaryKey = this.state.columnDefs
@@ -345,7 +396,8 @@ class DatasetView extends React.Component<any, State> {
                                 type: f.type,
                                 highlightType: (f.highlightType !== null ? f.highlightType : 'Cell'),
                                 backgroundColor: f.backgroundColor,
-                                color: f.color
+                                color: f.color,
+                                mask: f.mask
                             })
                         }
                     }
@@ -401,7 +453,8 @@ class DatasetView extends React.Component<any, State> {
                             operation: f.get('operation') || defaultComponentValues[componentName],
                             value: f.get('value'),
                             enable: (f.get('enable') !== null ? f.get('enable') : false),
-                            type: getColumnType(columnDefs, f.get('datasetColumn')),
+                            type: getColumnType(columnDefs, f.get('datasetColumn')) || f.get('dataType') || undefined,
+                            mask: f.get('mask') || undefined,
                             highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
                             backgroundColor: f.get('backgroundColor'),
                             color: f.get('color')
@@ -500,6 +553,7 @@ class DatasetView extends React.Component<any, State> {
             serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
             groupByColumn = getParamsFromComponent(resource, 'groupByColumn');
             highlights = getParamsFromComponent(resource, 'highlight');
+            serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
@@ -568,12 +622,14 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
-                rowData.set('editable', c.get('editable'));
+                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
                 rowData.set('sortable', c.get('sortable'));
                 rowData.set('suppressMenu', c.get('suppressMenu'));
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
+                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
+                rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
@@ -586,12 +642,14 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
-                rowData.set('editable', c.get('editable'));
+                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
                 rowData.set('sortable', c.get('sortable'));
                 rowData.set('suppressMenu', c.get('suppressMenu'));
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('type', c.get('type'));
+                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
+                rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 columnDefs.push(rowData);
@@ -617,7 +675,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('sortable', true);
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
-                rowData.set('type', "String");
+                rowData.set('type', element.type);
+                rowData.set('mask', element.mask);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
@@ -664,7 +723,7 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
-    private prepParamsAndRun(
+    prepParamsAndRun(
         resource: Ecore.Resource,
         filterParams: IServerQueryParam[],
         aggregationParams: IServerQueryParam[],
@@ -697,7 +756,7 @@ class DatasetView extends React.Component<any, State> {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
                 }
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0 && this.state.rowData.length > 0) {
+                if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -708,12 +767,23 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: JSON.parse(aggJson).length});
+                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: 0});
+                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
+                const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
+                this.props.context.changeUserProfile(datasetComponentId, {
+                    serverFilters: filter(filterParams),
+                    serverAggregates: filter(aggregationParams),
+                    serverSorts:  filter(sortParams),
+                    serverGroupBy: filter(groupByParams),
+                    groupByColumn: filter(groupByColumnParams),
+                    serverCalculatedExpression: filter(calculatedExpressions),
+                    highlights: filter(this.state.highlights),
+                    diagrams: this.state.diagrams,
+                })
             }
         )
     }
@@ -742,7 +812,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
 
         this.props.context.addEventAction({
-            itemId:this.props.viewObject.eURI(),
+            itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
             actions: [
                 {actionType: actionType.execute,callback: this.refresh.bind(this)},
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
@@ -753,7 +823,7 @@ class DatasetView extends React.Component<any, State> {
         });
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
-            itemId:this.props.viewObject.eURI()
+            itemId:this.props.viewObject.get('name')+this.props.viewObject._id
         });
     }
 

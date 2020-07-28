@@ -59,23 +59,27 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         //     this.getAllThemes()
         // }
         this.loadData();
-        this.props.context.addEventAction({
-            itemId:this.props.viewObject.eURI(),
-            actions: [
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.props.viewObject.eURI()
-        });
+        if (this.props.context) {
+            this.props.context.addEventAction({
+                itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
+                actions: [
+                    {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                    {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                    {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                    {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                ]
+            });
+            this.props.context.notifyAllEventHandlers({
+                type:eventType.componentLoad,
+                itemId:this.props.viewObject.get('name')+this.props.viewObject._id
+            });
+        }
     }
 
     componentWillUnmount() {
-        this.props.context.removeEventAction()
+        if (this.props.context) {
+            this.props.context.removeEventAction()
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {

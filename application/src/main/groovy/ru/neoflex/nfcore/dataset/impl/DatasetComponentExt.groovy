@@ -587,7 +587,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (parameters[i].parameterDataType == "Date") {
                 p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
             } else if (parameters[i].parameterDataType == "Timestamp") {
-                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
             } else if (parameters[i].parameterDataType == "Integer") {
                 p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
             } else {

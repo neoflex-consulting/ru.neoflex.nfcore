@@ -73,7 +73,8 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     operation: f['operation'],
                     value: f['value'],
                     enable: f['enable'],
-                    type: f['type'],
+                    dataType: f['type'],
+                    mask: f['mask'],
                     highlightType: f['highlightType'],
                     backgroundColor: f['backgroundColor'],
                     color: f['color']

@@ -24,23 +24,17 @@ function getNamedParams(valueItems: any, contextItemValues: any, params: any[] =
     let namedParams: IServerNamedParam[] = [];
     if (valueItems) {
         valueItems.each((item: EObject) => {
-            if (contextItemValues.get(item.eURI())) {
-                namedParams.push(contextItemValues.get(item.eURI()))
+            if (contextItemValues.get(item.get('name')+item._id)) {
+                namedParams.push(contextItemValues.get(item.get('name')+item._id))
             } else {
                 namedParams.push({
                     parameterName: item.get('name'),
-                    parameterValue: item.get('value')
+                    //Проверка параметров в url'ах
+                    parameterValue: item.get('value') ? item.get('value') : getUrlParam(params, item.get('name'))
                 })
             }
         });
     }
-    //Проверка параметров в url'ах
-    namedParams = namedParams.map(param => {
-        return {
-            ...param,
-            parameterValue: param.parameterValue ? param.parameterValue : getUrlParam(params, param.parameterName)
-        }
-    });
     return namedParams
 }
 
