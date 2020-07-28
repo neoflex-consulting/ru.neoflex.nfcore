@@ -306,13 +306,15 @@ export class Href_ extends ViewContainer {
         }
         //componentRenderCondition ag-grid props
         try {
-            componentRenderCondition = eval(this.props.componentRenderCondition)
+            componentRenderCondition = this.props.componentRenderCondition === undefined
+                || this.props.componentRenderCondition === ""
+                || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
-        return componentRenderCondition || this.props.componentRenderCondition === undefined ? <a
+        return componentRenderCondition ? <a
             hidden={this.state.isHidden}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
@@ -376,13 +378,15 @@ export class Button_ extends ViewContainer {
         }
         //componentRenderCondition ag-grid props
         try {
-            componentRenderCondition = eval(this.props.componentRenderCondition)
+            componentRenderCondition = this.props.componentRenderCondition === undefined
+                || this.props.componentRenderCondition === ""
+                || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
-        return componentRenderCondition || this.props.componentRenderCondition === undefined ? <div
+        return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
