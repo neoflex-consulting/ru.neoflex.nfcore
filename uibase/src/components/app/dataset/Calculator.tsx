@@ -402,11 +402,11 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             }]
                         })(
                             <Select placeholder={this.t('format')} key={selectMaskKey} allowClear={true}>
-                                {this.props.formatMasks.map((mask:{key:string,value:string}) => <Select.Option
+                                {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <Select.Option
                                     key={mask.key}
                                     value={mask.value}>
                                     {this.t(mask.key)}
-                                </Select.Option>)}
+                                </Select.Option>) : undefined}
                             </Select>
                         )
                     }
