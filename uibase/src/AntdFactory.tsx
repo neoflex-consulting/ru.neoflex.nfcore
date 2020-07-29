@@ -306,8 +306,7 @@ export class Href_ extends ViewContainer {
         }
         //componentRenderCondition ag-grid props
         try {
-            componentRenderCondition = this.props.componentRenderCondition === undefined
-                || this.props.componentRenderCondition === ""
+            componentRenderCondition = !this.props.componentRenderCondition
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("componentRenderCondition",
@@ -378,8 +377,7 @@ export class Button_ extends ViewContainer {
         }
         //componentRenderCondition ag-grid props
         try {
-            componentRenderCondition = this.props.componentRenderCondition === undefined
-                || this.props.componentRenderCondition === ""
+            componentRenderCondition = !this.props.componentRenderCondition
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("componentRenderCondition",
