@@ -21,6 +21,7 @@ import {faBell, faBellSlash} from "@fortawesome/free-regular-svg-icons";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
+import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
@@ -29,7 +30,6 @@ import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 // import 'neo-design/dist/neoDesign.css';
 // import {NeoButton, NeoIcon} from "neo-design/lib";
-import HeaderMenu from "./components/HeaderMenu";
 
 const backgroundColor = "#2a356c";
 
