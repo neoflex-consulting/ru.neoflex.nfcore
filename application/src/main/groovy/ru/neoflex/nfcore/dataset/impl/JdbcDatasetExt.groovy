@@ -117,7 +117,8 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
             }
             else if (queryType == QueryType.USE_QUERY) {
-                currentQuery = "SELECT * FROM (${query}) t"
+                //Replace namedParameters
+                currentQuery = "SELECT * FROM (${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")}) t"
             }
         }
         logger.info(currentQuery)

@@ -44,8 +44,8 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
             <div>
                 {
                     this.state.notificationStatus!
-                        .map((c: any) =>
-                            <Row style={{marginBottom: '15px'}}>
+                        .map((c: any, index:number) =>
+                            <Row style={{marginBottom: '15px'}} key={`statusLegendRow-${index}`}>
                                 <Col span={2}>
                                     <Checkbox
                                         defaultChecked={c['enable']}

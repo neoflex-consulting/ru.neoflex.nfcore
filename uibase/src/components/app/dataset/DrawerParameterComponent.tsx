@@ -192,7 +192,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         this.setState({parametersArray:[]});
     };
 
-    isValid(parameterArray : any) : boolean | undefined{
+    isValid(parameterArray : any) : boolean | undefined {
         let answer = 0;
         for (let i = 0; i < parameterArray.length; i++) {
             if (this.getColumnType(this.props.columnDefs, parameterArray[i].datasetColumn) === undefined){
@@ -232,25 +232,25 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
     }
 
     refresh = () => {
-        if (this.props.componentType === paramType.aggregate){
-            if (!this.isValid(this.state.parametersArray!)){
-                this.props.context.notification('Aggregate notification','Please, correct the mistakes', 'error')
-            }
-            else{
-                        this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-            }
-        }
-        else{
-                this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-            }
-
-        /*this.props.form.validateFields((err: any, values: any) => {
+        // if (this.props.componentType === paramType.aggregate){
+        //     if (!this.isValid(this.state.parametersArray!)){
+        //         this.props.context.notification('Aggregate notification','Please, correct the mistakes', 'error')
+        //     }
+        //     else {
+        //         this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+        //     }
+        // }
+        // else{
+        //         this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+        //     }
+        // this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+        this.props.form.validateFields((err: any, values: any) => {
             if (!err) {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
+            } else {
+                this.props.context.notification('Sort notification', 'Please, correct the mistakes', 'error')
             }
-            else {
-                this.props.context.notification('Sort notification','Please, correct the mistakes', 'error')
-            }*/
+        })
     };
 
     SortableItem = SortableElement(({value}: any) => {

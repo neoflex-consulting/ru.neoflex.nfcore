@@ -509,6 +509,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 cellRendererParams = {(col.get('component')) ? {
                                     ...this.props,
                                     viewObject: col.get('component'),
+                                    componentRenderCondition: col.get('componentRenderCondition')
                                 } : undefined}
                                 cellRenderer = {
                                     (col.get('component')) ? this.getComponent(col.get('component').eClass._id) : function (params: any) {
@@ -528,7 +529,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                                     ? format(defaultDecimalFormat, params.value)
                                                     : [appTypes.Integer].includes(params.colDef.type as appTypes)
                                                         ? format(defaultIntegerFormat, params.value)
-                                                        : params.value
+                                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                                                : params.value
                                 }}
                             />
                         )}

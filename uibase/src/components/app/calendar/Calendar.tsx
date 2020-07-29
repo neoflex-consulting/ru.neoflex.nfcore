@@ -653,7 +653,7 @@ class Calendar extends React.Component<any, any> {
     renderLegend() {
         const {t} = this.props;
         return (
-            <div id="legendIconInFullScreen">
+            <div id="legendIconInFullScreen" key={"legendDrawer"}>
             <Drawer
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
@@ -1032,13 +1032,13 @@ class Calendar extends React.Component<any, any> {
                         <div className="notification-block">
                             {content.length !== 0
                                 ?
-                                content.map( (r: any) =>
-                                    <div className="notification-btn"
+                                content.map( (r: any, index: number) =>
+                                    <div className="notification-btn" key={`btn-div-${index}`}
                                     style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
                                     <Button
                                         onClick={ () => this.openNotification(r, context)}
-                                        key={`${r.contents[0]._id}`}
+                                        key={`${index}`}
                                         size="small"
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
