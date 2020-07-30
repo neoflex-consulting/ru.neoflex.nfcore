@@ -25,7 +25,8 @@ import printIcon from '../../../icons/printIcon.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
-import {actionType, eventType, grantType} from "../../../utils/consts";
+import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
+import moment from "moment";
 
 const myNote = 'Личная заметка';
 
@@ -142,8 +143,8 @@ class Calendar extends React.Component<any, any> {
         if (this.props.viewObject.get('yearBook') !== null) {
             const monthStart = dateFns.startOfMonth(currentMonth);
             const monthEnd = dateFns.endOfMonth(monthStart);
-            const dateFrom = monthStart.toString();
-            const dateTo = monthEnd.toString();
+            const dateFrom = moment(monthStart).format(defaultTimestampFormat);
+            const dateTo = moment(monthEnd).format(defaultTimestampFormat);
             const ref: string = this.props.viewObject.eURI();
             const methodName: string = 'getNotificationInstances';
 
