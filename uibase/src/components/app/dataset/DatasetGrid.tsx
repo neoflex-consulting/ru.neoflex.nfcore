@@ -519,21 +519,24 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
                                 cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
                                 valueFormatter = {(params) : string => {
-                                    return params.colDef.type === appTypes.Date && col.get('mask')
-                                        ? moment(params.value, defaultDateFormat).format(col.get('mask'))
-                                        : params.colDef.type === appTypes.Timestamp && col.get('mask')
-                                            ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
-                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask')
-                                                ? format(col.get('mask'), params.value)
-                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes)
-                                                    ? format(defaultDecimalFormat, params.value)
-                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes)
-                                                        ? format(defaultIntegerFormat, params.value)
-                                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
-                                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
-                                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
-                                                                : params.value
+                                    if (params.value)
+                                        return params.colDef.type === appTypes.Date && col.get('mask')
+                                            ? moment(params.value, defaultDateFormat).format(col.get('mask'))
+                                            : params.colDef.type === appTypes.Timestamp && col.get('mask')
+                                                ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
+                                                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask')
+                                                    ? format(col.get('mask'), params.value)
+                                                    : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                                                        ? format(defaultDecimalFormat, params.value)
+                                                        : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                                            ? format(defaultIntegerFormat, params.value)
+                                                            : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                                                ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                                                : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                                                    ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                                                    : params.value
+                                    else
+                                        return params.value
                                 }}
                             />
                         )}
