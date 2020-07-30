@@ -483,7 +483,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
                         suppressClickEdit={true}
-                        stopEditingWhenGridLosesFocus={true}
+                        /*stopEditingWhenGridLosesFocus={true}*/
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>

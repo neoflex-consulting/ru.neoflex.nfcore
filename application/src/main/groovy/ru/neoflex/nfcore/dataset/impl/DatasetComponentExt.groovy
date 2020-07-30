@@ -556,7 +556,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (dmlQuery.queryText == "" || !dmlQuery.queryText)
                 throw new IllegalArgumentException("${queryType} query is not specified")
             query = dmlQuery.queryText
-            parameters = parameters.findAll{ qp -> !qp.isPrimaryKey } as EList<QueryParameter>
+            parameters = parameters.each{qp -> return qp.setParameterValue(
+                      qp.parameterDataType == DataType.DATE.getName()
+                    ? qp.parameterValue.substring(0,10)
+                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                    ? qp.parameterValue.substring(0,19)
+                    : qp.parameterValue)} as EList<QueryParameter>
         } else {
             throw new NoSuchMethodException("${queryType} is not supported")
         }
@@ -584,7 +589,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (!parameters[i].parameterValue) {
                 p.setString(parameters[i].parameterName, null)
             }
-            if (parameters[i].parameterDataType == "Date") {
+            if (parameters[i].parameterValue == null) {
+                p.setObject(parameters[i].parameterName, null)
+            } else if (parameters[i].parameterDataType == "Date") {
                 p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
             } else if (parameters[i].parameterDataType == "Timestamp") {
                 p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
