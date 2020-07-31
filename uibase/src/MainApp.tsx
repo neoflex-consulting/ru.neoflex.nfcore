@@ -252,7 +252,8 @@ export class MainApp extends React.Component<any, State> {
                     this.setURL(eObject, key);
                 }
             });
-            this.appModuleMap.set(eObject.get('AppModule').get('name'), key);
+            if (eObject.get('AppModule'))
+                this.appModuleMap.set(eObject.get('AppModule').get('name'), key);
         }
         else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {

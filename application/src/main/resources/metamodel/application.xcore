@@ -329,6 +329,8 @@ class EventHandler extends ViewElement {
     Event event
     refers DynamicActionElement listenItem
     contains EventAction[] eventActions
+    String condition
+    refers DynamicActionElement[] conditionItems
 }
 
 class Drawer extends ViewContainer {

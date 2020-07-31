@@ -556,7 +556,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (dmlQuery.queryText == "" || !dmlQuery.queryText)
                 throw new IllegalArgumentException("${queryType} query is not specified")
             query = dmlQuery.queryText
-            parameters = parameters.findAll{ qp -> !qp.isPrimaryKey } as EList<QueryParameter>
+            parameters = parameters.each{qp -> return qp.setParameterValue(
+                      qp.parameterDataType == DataType.DATE.getName()
+                    ? qp.parameterValue.substring(0,10)
+                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                    ? qp.parameterValue.substring(0,19)
+                    : qp.parameterValue)} as EList<QueryParameter>
         } else {
             throw new NoSuchMethodException("${queryType} is not supported")
         }
@@ -584,7 +589,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (!parameters[i].parameterValue) {
                 p.setString(parameters[i].parameterName, null)
             }
-            if (parameters[i].parameterDataType == "Date") {
+            if (parameters[i].parameterValue == null) {
+                p.setObject(parameters[i].parameterName, null)
+            } else if (parameters[i].parameterDataType == "Date") {
                 p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
             } else if (parameters[i].parameterDataType == "Timestamp") {
                 p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
@@ -629,11 +636,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     String replaceCalculatorFunctions(String expression, CalculatorAdapter calculatorAdapter) {
-        def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,.]*\)/
+        def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,."']*\)/
         List<String> result = (expression =~ pattern ).findAll()
         if (result.size() > 0) {
             for (func in result) {
-                List<String> args = (func =~ /[a-zA-Z0-9._]+/).findAll()
+                List<String> args = (func =~ /[a-zA-Z0-9._"']+/).findAll()
                 switch (args[0]) {
                     case CalculatorFunction.SUBSTRING.getName():
                         expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3])); break;

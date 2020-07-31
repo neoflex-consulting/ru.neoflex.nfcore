@@ -216,6 +216,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
 
+
     private changeHighlight() {
         const {gridOptions} = this.state;
         this.setState({highlights: this.props.highlights});
@@ -451,7 +452,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return 'none'
     };
 
-
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
@@ -518,7 +518,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 }
                                 cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
                                 cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
-                                valueFormatter = {(params) : string => {
+                                valueFormatter = {col.get('valueFormatter') ? col.get('valueFormatter') : (params) : string => {
                                     let numberOfLinesInAggregations = 0
                                     for (let i = 0; i < this.state.columnDefs.length; i++) {
                                         let sameDatasetColumn = 0;
@@ -533,6 +533,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
                                     }
                                     let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
+                                    if (params.value)
                                     return params.colDef.type === appTypes.Date && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
                                         ? moment(params.value, defaultDateFormat).format(col.get('mask'))
                                         : params.colDef.type === appTypes.Timestamp && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
@@ -548,6 +549,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                                             : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
                                                                 ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
                                                                 : params.value
+                                    else
+                                        return params.value
                                 }}
                             />
                         )}

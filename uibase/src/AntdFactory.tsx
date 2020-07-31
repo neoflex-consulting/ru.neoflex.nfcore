@@ -88,6 +88,10 @@ class Col_ extends ViewContainer {
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
         });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        });
     }
 
     componentWillUnmount(): void {
@@ -130,6 +134,10 @@ class Form_ extends ViewContainer {
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
         });
     }
 
@@ -230,6 +238,10 @@ class Row_ extends ViewContainer {
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
             ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
         });
     }
 
@@ -1235,6 +1247,7 @@ class EventHandler_ extends ViewContainer {
     handleEvent(value:any) {
         if (!this.state.isDisabled) {
             let isHandled = false;
+            let componentCondition = true;
             this.viewObject.get('eventActions').each((el: EObject) => {
                 const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                     return ((el.get('triggerItem')
@@ -1242,50 +1255,67 @@ class EventHandler_ extends ViewContainer {
                         || el.get('action') === actionType.showMessage
                         || el.get('action') === actionType.redirect)
                 });
-                //ViewObject handler
-                if (eventAction) {
-                    eventAction.actions.forEach((action) => {
-                        if (action.actionType === (el.get('action') || actionType.execute)
-                            && action.actionType !== actionType.showMessage
-                            && action.actionType !== actionType.redirect) {
-                            if (el.get('valueObjectKey') && value === Object(value)) {
-                                (value[el.get('valueObjectKey')])
-                                    ? action.callback(value[el.get('valueObjectKey')])
-                                    : this.props.context.notification("Event handler warning",
-                                    `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                    "warning")
-                                isHandled = true;
-                            } else if (value === Object(value) && action.actionType === actionType.setValue) {
-                                this.props.context.notification("Event handler warning",
-                                    `Object Key is not specified in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                    "warning")
-                                isHandled = true;
-                            } else {
-                                action.callback(value);
-                                isHandled = true;
-                            }
+                if (this.viewObject.get('condition')) {
+                    const params = getNamedParams(this.viewObject.get('conditionItems'), this.props.context.contextItemValues).map(obj => {
+                        return {
+                            ...obj,
+                            parameterValue: obj.parameterValue ? obj.parameterValue : ""
                         }
                     });
+                    try {
+                        componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
+                    } catch (e) {
+                        this.props.context.notification("condition",
+                            this.props.t("exception while evaluating") + ` ${replaceNamedParam(this.viewObject.get('condition'), params)}`,
+                            "warning")
+                    }
                 }
-                //Other events
-                if (el.get('action') === actionType.showMessage
-                    && el.get('triggerItem')
-                    && el.get('triggerItem').get('message')) {
-                    this.props.context.notification(el.get('triggerItem').get('header'),
-                        el.get('triggerItem').get('message'),
-                        el.get('triggerItem').get('messageType') || "success")
-                    isHandled = true;
-                }
-                if (el.get('action') === actionType.redirect) {
-                    const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
-                    const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
-                    this.props.context.changeURL(redirectTo, true, undefined, params);
-                    isHandled = true;
-                }
-                if (!isHandled) {
-                    this.props.context.notification("Event handler warning",
-                        `Action ${el.get('action') || actionType.execute} is not supported for ${this.viewObject.get('name')}`,
-                        "warning")
+                if (componentCondition) {
+                    //ViewObject handler
+                    if (eventAction) {
+                        eventAction.actions.forEach((action) => {
+                            if (action.actionType === (el.get('action') || actionType.execute)
+                                && action.actionType !== actionType.showMessage
+                                && action.actionType !== actionType.redirect) {
+                                if (el.get('valueObjectKey') && value === Object(value)) {
+                                    (value[el.get('valueObjectKey')])
+                                        ? action.callback(value[el.get('valueObjectKey')])
+                                        : this.props.context.notification("Event handler warning",
+                                        `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
+                                        "warning")
+                                    isHandled = true;
+                                } else if (value === Object(value) && action.actionType === actionType.setValue) {
+                                    this.props.context.notification("Event handler warning",
+                                        `Object Key is not specified in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
+                                        "warning")
+                                    isHandled = true;
+                                } else {
+                                    action.callback(value);
+                                    isHandled = true;
+                                }
+                            }
+                        });
+                    }
+                    //Other events
+                    if (el.get('action') === actionType.showMessage
+                        && el.get('triggerItem')
+                        && el.get('triggerItem').get('message')) {
+                        this.props.context.notification(el.get('triggerItem').get('header'),
+                            el.get('triggerItem').get('message'),
+                            el.get('triggerItem').get('messageType') || "success")
+                        isHandled = true;
+                    }
+                    if (el.get('action') === actionType.redirect) {
+                        const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
+                        const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
+                        this.props.context.changeURL(redirectTo, true, undefined, params);
+                        isHandled = true;
+                    }
+                    if (!isHandled) {
+                        this.props.context.notification("Event handler warning",
+                            `Action ${el.get('action') || actionType.execute} is not supported for ${this.viewObject.get('name')}`,
+                            "warning")
+                    }
                 }
             })
         }
@@ -1299,6 +1329,10 @@ class EventHandler_ extends ViewContainer {
                 callback: this.handleEvent.bind(this)
             })
         }
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        });
     }
 
     componentWillUnmount(): void {
