@@ -1,5 +1,5 @@
 import {IServerNamedParam} from "../MainContext";
-import {EObject} from "ecore";
+import {EList, EObject} from "ecore";
 import {getUrlParam} from "./urlUtils";
 
 function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) {
@@ -20,12 +20,12 @@ function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) 
     return replacedCommand
 }
 
-function getNamedParams(valueItems: any, contextItemValues: any, params: any[] = []) {
+function getNamedParams(valueItems: EList, contextItemValues: Map<String,IServerNamedParam>, params: IServerNamedParam[] = []) {
     let namedParams: IServerNamedParam[] = [];
     if (valueItems) {
         valueItems.each((item: EObject) => {
             if (contextItemValues.get(item.get('name')+item._id)) {
-                namedParams.push(contextItemValues.get(item.get('name')+item._id))
+                namedParams.push(contextItemValues.get(item.get('name')+item._id)!)
             } else {
                 namedParams.push({
                     parameterName: item.get('name'),
@@ -38,5 +38,16 @@ function getNamedParams(valueItems: any, contextItemValues: any, params: any[] =
     return namedParams
 }
 
+function getNamedParamByName(parameterName: string, contextItemValues: Map<String,IServerNamedParam>, params: IServerNamedParam[] = []) : IServerNamedParam {
+    let parameter : IServerNamedParam|undefined = undefined;
+    contextItemValues.forEach(param => {
+       if (param.parameterName === parameterName)
+           parameter = param
+    });
+    return parameter ? parameter : {
+        parameterName: parameterName,
+        parameterValue: getUrlParam(params, parameterName)!
+    }
+}
 
-export {replaceNamedParam, getNamedParams}
+export {replaceNamedParam, getNamedParams, getNamedParamByName}

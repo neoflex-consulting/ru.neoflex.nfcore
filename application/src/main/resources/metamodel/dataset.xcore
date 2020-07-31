@@ -150,7 +150,8 @@ class CustomColumn extends DatasetColumnView {
 
 class FormatMask {
     QName name
-    String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
+    String value
+    boolean isDynamic
 }
 
 class QueryParameter {

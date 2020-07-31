@@ -12,7 +12,7 @@ import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 import Calculator, {encode, hash} from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
-import {getNamedParams} from "../../../utils/namedParamsUtils";
+import {getNamedParamByName, getNamedParams, replaceNamedParam} from "../../../utils/namedParamsUtils";
 import DrawerDiagram from "./DrawerDiagram";
 import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
@@ -282,13 +282,28 @@ class DatasetView extends React.Component<any, State> {
                             ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
                             : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
                 });
-            if (c.get('formatMask'))
-                mask = c.get('formatMask').get('value');
+            if (c.get('formatMask')) {
+                if (c.get('formatMask').get('isDynamic')) {
+                    const paramNames:string[] = c.get('formatMask').get('value').match(/:[_а-яa-z0-9]+/gi);
+                    const namedParams = paramNames.map(paramName => {
+                        return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
+                    });
+                    try{
+                        mask = eval(replaceNamedParam(c.get('formatMask').get('value'),namedParams))
+                    } catch (e) {
+                        this.props.context.notification("FormatMask.value",
+                            this.props.t("exception while evaluating") + ` ${replaceNamedParam(c.get('formatMask').get('value'),namedParams)}`,
+                            "warning")
+                    }
+                } else {
+                    mask = c.get('formatMask').get('value');
+                }
+            }
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-                rowData.set('pinned', c.get('pinned'));
+            rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
@@ -646,6 +661,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -667,6 +683,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);
             }
         });
