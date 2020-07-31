@@ -190,7 +190,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             for (let i = 0; i < this.state.columnDefs.length; i++) {
                 let sameDatasetColumn = 0;
                 for (let j = 0; j < this.props.serverAggregates.length; j++) {
-                    if (this.state.columnDefs[i].get("field") == this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
+                    if (this.state.columnDefs[i].get("field") === this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
                         sameDatasetColumn++;
                     }
                 }
@@ -214,7 +214,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             }
 
     }
-
 
 
     private changeHighlight() {
@@ -452,6 +451,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return 'none'
     };
 
+
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
@@ -519,19 +519,33 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
                                 cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
                                 valueFormatter = {(params) : string => {
-                                    return params.colDef.type === appTypes.Date && col.get('mask')
+                                    let numberOfLinesInAggregations = 0
+                                    for (let i = 0; i < this.state.columnDefs.length; i++) {
+                                        let sameDatasetColumn = 0;
+                                        for (let j = 0; j < this.props.serverAggregates.length; j++) {
+                                            if (this.state.columnDefs[i].get("field") === this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
+                                                sameDatasetColumn++;
+                                            }
+                                        }
+                                        if (numberOfLinesInAggregations < sameDatasetColumn) {
+                                            numberOfLinesInAggregations = sameDatasetColumn
+                                        }
+
+                                    }
+                                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
+                                    return params.colDef.type === appTypes.Date && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
                                         ? moment(params.value, defaultDateFormat).format(col.get('mask'))
-                                        : params.colDef.type === appTypes.Timestamp && col.get('mask')
+                                        : params.colDef.type === appTypes.Timestamp && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
                                             ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
-                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask')
+                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
                                                 ? format(col.get('mask'), params.value)
-                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
                                                     ? format(defaultDecimalFormat, params.value)
-                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
                                                         ? format(defaultIntegerFormat, params.value)
-                                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                                        : [appTypes.Date].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
                                                             ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
                                                                 ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
                                                                 : params.value
                                 }}

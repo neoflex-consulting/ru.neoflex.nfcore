@@ -28,8 +28,8 @@ import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
-// import 'neo-design/dist/neoDesign.css';
-// import {NeoButton, NeoIcon} from "neo-design/lib";
+import 'neo-design/dist/neoDesign.css';
+import {NeoButton, NeoIcon, NeoAlert} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
 
@@ -514,10 +514,12 @@ class EcoreApp extends React.Component<any, State> {
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
                         </Col>
-                        {/*<Col span={8}>*/}
-                        {/*    <NeoButton type={"disabled"}>Hi</NeoButton>*/}
-                        {/*    <NeoIcon icon={"calendar"}></NeoIcon>*/}
-                        {/*</Col>*/}
+                        {/*<Col span={8}>
+                            <NeoAlert type={"info"} message={"tererer"} closable></NeoAlert>
+
+                            <NeoButton type={"disabled"}>Hi</NeoButton>
+                            <NeoIcon icon={"calendar"}></NeoIcon>
+                        </Col>*/}
                         <Col span={14}
                                     style={{textAlign: 'center', height: 'inherit'}}>
                                     {
