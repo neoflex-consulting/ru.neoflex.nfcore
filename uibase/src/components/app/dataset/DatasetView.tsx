@@ -746,7 +746,7 @@ class DatasetView extends React.Component<any, State> {
             });
             sortMap.forEach(colDef => {
                 if (translatedOperation?.includes(colDef.fieldHash)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), colDef.fieldName);
+                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
                 }
             });
             return {
@@ -955,7 +955,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-            handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+    handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
         let newDiagrams:IDiagram[] = [];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
@@ -1022,7 +1022,7 @@ class DatasetView extends React.Component<any, State> {
         else
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
 
-    }
+    };
 
     withTable(e: any) {
         let ee: any = e.target.checked
