@@ -786,17 +786,6 @@ class DatasetView extends React.Component<any, State> {
                     this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
-                const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
-                this.props.context.changeUserProfile(datasetComponentId, {
-                    serverFilters: filter(filterParams),
-                    serverAggregates: filter(aggregationParams),
-                    serverSorts:  filter(sortParams),
-                    serverGroupBy: filter(groupByParams),
-                    groupByColumn: filter(groupByColumnParams),
-                    serverCalculatedExpression: filter(calculatedExpressions),
-                    highlights: filter(this.state.highlights),
-                    diagrams: this.state.diagrams,
-                })
             }
         )
     }
