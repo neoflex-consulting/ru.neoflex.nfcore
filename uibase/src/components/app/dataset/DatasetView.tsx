@@ -22,8 +22,8 @@ import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
 import {
     actionType, appTypes,
-    calculatorFunctionTranslator,
-    defaultDecimalFormat,
+    calculatorFunctionTranslator, defaultDateFormat,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
     dmlOperation,
     eventType,
     grantType
@@ -45,6 +45,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js";
 
 const { Option, OptGroup } = Select;
 
@@ -690,6 +692,24 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
                 rowData.set('mask', element.mask);
+                //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
+                //ag-grid не видит изменений и не форматирует
+                const valueFormatter = element.type === appTypes.Date && element.mask
+                    ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(element.mask)}
+                    : element.type === appTypes.Timestamp && element.mask
+                        ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(element.mask)}
+                        : [appTypes.Integer,appTypes.Decimal].includes(element.type as appTypes) && element.mask
+                            ? (params:any):string=>{return format(element.mask!, params.value)}
+                            : [appTypes.Decimal].includes(element.type as appTypes)
+                                ? (params:any):string=>{return format(defaultDecimalFormat, params.value)}
+                                : [appTypes.Integer].includes(element.type as appTypes)
+                                    ? (params:any):string=>{return format(defaultIntegerFormat, params.value)}
+                                    : [appTypes.Date].includes(element.type as appTypes)
+                                        ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(defaultDateFormat)}
+                                        : [appTypes.Timestamp].includes(element.type as appTypes)
+                                            ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)}
+                                            : (params:any):string=>{return params.value}
+                rowData.set('valueFormatter',valueFormatter);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
