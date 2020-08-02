@@ -106,6 +106,12 @@
             <version>${ecore-xcore-lib-version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+            <version>${emf-common-version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
