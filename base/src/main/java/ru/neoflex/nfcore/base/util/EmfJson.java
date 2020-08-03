@@ -9,7 +9,9 @@ import org.eclipse.emf.common.util.*;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.impl.XMLResourceImpl;
 import org.emfjson.jackson.annotations.EcoreIdentityInfo;
 import org.emfjson.jackson.annotations.EcoreTypeInfo;
 import org.emfjson.jackson.databind.EMFContext;
@@ -22,6 +24,8 @@ import ru.neoflex.meta.emforientdb.OrientDBResource;
 import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +36,9 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 public class EmfJson {
     public static Resource treeToResource(ResourceSet resourceSet, URI uri, JsonNode contents) throws IOException {
         Resource resource = resourceSet.createResource(uri);
+        Map<URI, Resource> map = new HashMap<>();
+        map.put(uri.trimQuery(), resource);
+        ((ResourceSetImpl)resourceSet).setURIResourceMap(map);
         return treeToResource(contents, resource);
     }
 
@@ -67,7 +74,7 @@ public class EmfJson {
 
     public static Resource treeToResource(JsonNode contents, Resource resource) throws JsonProcessingException {
         ObjectMapper mapper = createMapper();
-        JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI());
+        JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI().trimQuery());
         ContextAttributes attributes = ContextAttributes
                 .getEmpty()
                 .withSharedAttribute("resourceSet", jsonResource.getResourceSet())
@@ -76,14 +83,15 @@ public class EmfJson {
                 .with(attributes)
                 .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
-//        if (resource instanceof OrientDBResource) {
-//            OrientDBResource orientDBResource = (OrientDBResource) resource;
-//            for (Iterator<EObject> it = jsonResource.getAllContents();it.hasNext();) {
+//        if (resource instanceof XMLResourceImpl) {
+//            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
+//            for (Iterator<EObject> it = jsonResource.getAllContents(); it.hasNext();) {
 //                EObject eObject = it.next();
-//                orientDBResource.setID(eObject, jsonResource.getID(eObject));
+//                xmlResource.setID(eObject, jsonResource.getID(eObject));
 //            }
 //        }
-        resource.getContents().addAll(jsonResource.getContents());
+//        EcoreUtil.resolveAll(jsonResource);
+        resource.getContents().addAll(EcoreUtil.copyAll(jsonResource.getContents()));
         return resource;
     }
 
