@@ -89,7 +89,9 @@ public class Store implements EventsRegistration {
                 throw new RuntimeException(message);
             }
             if (diagnostic.getSeverity() == Diagnostic.WARNING) {
-                logger.warn(getDiagnosticMessage(diagnostic));
+                String message = getDiagnosticMessage(diagnostic);
+                throw new RuntimeException(message);
+//                logger.warn(getDiagnosticMessage(diagnostic));
             }
         }
         return provider.saveResource(resource);
