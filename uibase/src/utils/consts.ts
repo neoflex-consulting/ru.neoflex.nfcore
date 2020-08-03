@@ -18,12 +18,19 @@ const positionMap = {
     "Bottom": "bottom",
 };
 
+const textAlignMap = {
+    "Undefined":undefined,
+    "Left":"left",
+    "Right":"right",
+    "Center":"center"
+};
+
 enum positionEnum {
     Top = "top",
     Left = "left",
     Right = "right",
     Bottom = "bottom",
-};
+}
 
 const colorScheme = [
     // "#8056CD",
@@ -239,5 +246,6 @@ export {
     defaultTimestampFormat,
     defaultDecimalFormat,
     defaultIntegerFormat,
-    appTypes
+    appTypes,
+    textAlignMap
 }

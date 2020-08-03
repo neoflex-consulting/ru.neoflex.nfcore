@@ -23,10 +23,10 @@ import Fullscreen from "react-full-screen";
 import {
     actionType, appTypes,
     calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat, diagramAnchorMap,
     dmlOperation,
     eventType,
-    grantType
+    grantType, textAlignMap
 } from "../../../utils/consts";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
@@ -49,6 +49,7 @@ import moment from "moment";
 import format from "number-format.js";
 
 const { Option, OptGroup } = Select;
+const textAlignMap_: any = textAlignMap;
 
 export enum paramType {
     filter="serverFilters",
@@ -198,7 +199,9 @@ class DatasetView extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//FormatMask');
             if (temp !== undefined) {
                 API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}).then((result: Ecore.Resource[]) => {
-                    this.setState({formatMasks:result.map(eObject => {
+                    this.setState({formatMasks:result
+                            .filter(eObject => !eObject.eContents()[0].get('isDynamic'))
+                            .map(eObject => {
                             return {
                                 key: eObject.eContents()[0].get('name'),
                                 value: eObject.eContents()[0].get('value')
@@ -316,6 +319,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('component', c.get('component'));
             rowData.set('componentRenderCondition', componentRenderCondition);
             rowData.set('mask', mask);
+            rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
                     let restrictEdit = false;
@@ -660,6 +664,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
+                rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);
@@ -682,6 +687,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
+                rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);

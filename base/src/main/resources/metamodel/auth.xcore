@@ -110,7 +110,8 @@ class Group extends Authority {
 
 // User Profile (to save ui settings)
 class UserProfile {
-    QName userName
+    QName name
+    String userName
     contains Parameter[] params
 }
 

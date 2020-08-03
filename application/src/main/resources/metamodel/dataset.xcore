@@ -136,6 +136,7 @@ abstract class DatasetColumnView {
     boolean suppressMenu
     boolean resizable
     boolean isPrimaryKey
+    TextAlign textAlign = "Undefined"
     String componentRenderCondition
     contains GridComponent component
 }
@@ -276,6 +277,13 @@ enum Pinned {
     Undefined
     Left
     Right
+}
+
+enum TextAlign {
+    Undefined
+    Left
+    Right
+    Center
 }
 
 enum DataType {
