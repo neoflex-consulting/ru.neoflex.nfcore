@@ -754,7 +754,7 @@ class EcoreApp extends React.Component<any, State> {
    private createUserProfile(userName: string) {
        let resourceSet = Ecore.ResourceSet.create()
        let resourceParameters = resourceSet.create({ uri: '/params' });
-       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({userName: userName})
+       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName})
        resourceParameters.add(newUserProfilePattern)
        API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {

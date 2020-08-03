@@ -196,8 +196,6 @@ export class MainApp extends React.Component<any, State> {
                     justifyContent: "center",
                     alignContent: "center"
                 }}>
-                    {this.renderToolButton("log", "Log", "ellipsis-v")}
-                    {this.renderToolButton("search", "Search", "search")}
                 </div>
             </div>
         )
