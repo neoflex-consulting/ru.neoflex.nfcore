@@ -1012,6 +1012,7 @@ class ValueHolder_ extends ViewContainer {
 }
 
 class Input_ extends ViewContainer {
+    private timer : number;
     constructor(props: any) {
         super(props);
         let value;
@@ -1054,7 +1055,24 @@ class Input_ extends ViewContainer {
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }
 
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if(prevState.currentValue !== this.state.currentValue) {
+            this.handleOnChange(this.state.currentValue);
+        }
+    }
+
     onChange = (currentValue: string) => {
+        this.setState({currentValue:currentValue});
+    };
+
+    handleOnChange = (currentValue: string) => {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            this.onChangeDebounced(currentValue);
+        }, 500);
+    };
+
+    onChangeDebounced = (currentValue: string) => {
         let contextItemValues = this.props.context.contextItemValues;
         let globalValues = this.props.context.globalValues;
         const parameterObj = {
@@ -1065,14 +1083,12 @@ class Input_ extends ViewContainer {
         if (this.viewObject.get('isGlobal')) {
             globalValues.set(this.viewObject.get('name'), parameterObj)
         }
-        this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
+        this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
                     itemId:this.viewObject.get('name')+this.viewObject._id,
                     value:currentValue
-                }))
-        );
+                }));
     };
 
     render = () => {
