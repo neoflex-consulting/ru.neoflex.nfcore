@@ -199,7 +199,9 @@ class DatasetView extends React.Component<any, State> {
             const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//FormatMask');
             if (temp !== undefined) {
                 API.instance().findByKind(temp, {contents: {eClass: temp.eURI()}}).then((result: Ecore.Resource[]) => {
-                    this.setState({formatMasks:result.map(eObject => {
+                    this.setState({formatMasks:result
+                            .filter(eObject => !eObject.eContents()[0].get('isDynamic'))
+                            .map(eObject => {
                             return {
                                 key: eObject.eContents()[0].get('name'),
                                 value: eObject.eContents()[0].get('value')
