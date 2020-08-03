@@ -636,11 +636,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     String replaceCalculatorFunctions(String expression, CalculatorAdapter calculatorAdapter) {
-        def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,.]*\)/
+        def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,."']*\)/
         List<String> result = (expression =~ pattern ).findAll()
         if (result.size() > 0) {
             for (func in result) {
-                List<String> args = (func =~ /[a-zA-Z0-9._]+/).findAll()
+                List<String> args = (func =~ /[a-zA-Z0-9._"']+/).findAll()
                 switch (args[0]) {
                     case CalculatorFunction.SUBSTRING.getName():
                         expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3])); break;

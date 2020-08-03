@@ -321,7 +321,7 @@ export class Href_ extends ViewContainer {
             componentRenderCondition = !this.props.componentRenderCondition
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
-            this.props.context.notification("componentRenderCondition",
+            this.props.context.notification("Href.componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
@@ -392,7 +392,7 @@ export class Button_ extends ViewContainer {
             componentRenderCondition = !this.props.componentRenderCondition
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
-            this.props.context.notification("componentRenderCondition",
+            this.props.context.notification("Button.componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
@@ -414,7 +414,7 @@ export class Button_ extends ViewContainer {
 
 class Select_ extends ViewContainer {
     private selected = "";
-    private urlCurrentValue = "";
+    private urlCurrentValue:string|undefined = "";
 
     constructor(props: any) {
         super(props);
@@ -1265,7 +1265,7 @@ class EventHandler_ extends ViewContainer {
                     try {
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
-                        this.props.context.notification("condition",
+                        this.props.context.notification("EventHandler.condition",
                             this.props.t("exception while evaluating") + ` ${replaceNamedParam(this.viewObject.get('condition'), params)}`,
                             "warning")
                     }

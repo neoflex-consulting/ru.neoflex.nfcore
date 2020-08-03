@@ -219,8 +219,8 @@ enum appTypes {
     Timestamp='Timestamp'
 }
 
-const defaultIntegerFormat = '#0';
-const defaultDecimalFormat = '#0.00';
+const defaultIntegerFormat = '### ##0.';
+const defaultDecimalFormat = '### ##0.00';
 const defaultDateFormat = 'YYYY-MM-DD';
 const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
 

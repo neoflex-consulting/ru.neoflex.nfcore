@@ -255,8 +255,13 @@ export class API implements IErrorHandler {
         let ref = object.$ref;
         if (ref) {
             if (!ref.includes("#")) {
-//                object.$ref = rootId + '#' + ref;
-                object.$ref = rootId === "/" ? ref :  rootId + '#' + ref;
+               object.$ref = rootId + '#' + ref;
+            }
+        }
+        let id = object._id;
+        if (id) {
+            if (!id.includes("#")) {
+                object._id = rootId + '#' + id;
             }
         }
         for (var i in object) {

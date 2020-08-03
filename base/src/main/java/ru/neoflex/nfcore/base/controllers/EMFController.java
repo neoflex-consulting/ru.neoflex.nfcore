@@ -77,8 +77,7 @@ public class EMFController {
     @PutMapping("/resource")
     JsonNode putObject(@RequestParam(required = false) String ref, @RequestBody JsonNode contents) throws Exception {
         Resource created = store.inTransaction(false, tx -> {
-            URI uri = store.getUriByRef(ref);
-            Resource resource = EmfJson.treeToResource(store.createResourceSet(), uri, contents);
+            Resource resource = store.treeToResource(ref, contents);
             store.saveResource(resource);
             store.commit("Put " + ref);
             return resource;

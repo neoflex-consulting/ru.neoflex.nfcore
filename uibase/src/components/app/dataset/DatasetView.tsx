@@ -12,7 +12,7 @@ import ServerSort from './ServerSort';
 import Highlight from "./Highlight";
 import Calculator, {encode, hash} from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
-import {getNamedParams} from "../../../utils/namedParamsUtils";
+import {getNamedParamByName, getNamedParams, replaceNamedParam} from "../../../utils/namedParamsUtils";
 import DrawerDiagram from "./DrawerDiagram";
 import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
@@ -22,8 +22,8 @@ import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
 import {
     actionType, appTypes,
-    calculatorFunctionTranslator,
-    defaultDecimalFormat,
+    calculatorFunctionTranslator, defaultDateFormat,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
     dmlOperation,
     eventType,
     grantType
@@ -45,6 +45,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js";
 
 const { Option, OptGroup } = Select;
 
@@ -280,13 +282,28 @@ class DatasetView extends React.Component<any, State> {
                             ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
                             : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
                 });
-            if (c.get('formatMask'))
-                mask = c.get('formatMask').get('value');
+            if (c.get('formatMask')) {
+                if (c.get('formatMask').get('isDynamic')) {
+                    const paramNames:string[] = c.get('formatMask').get('value').match(/:[_а-яa-z0-9]+/gi);
+                    const namedParams = paramNames.map(paramName => {
+                        return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
+                    });
+                    try{
+                        mask = eval(replaceNamedParam(c.get('formatMask').get('value'),namedParams))
+                    } catch (e) {
+                        this.props.context.notification("FormatMask.value",
+                            this.props.t("exception while evaluating") + ` ${replaceNamedParam(c.get('formatMask').get('value'),namedParams)}`,
+                            "warning")
+                    }
+                } else {
+                    mask = c.get('formatMask').get('value');
+                }
+            }
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
             rowData.set('hide', c.get('hide'));
-                rowData.set('pinned', c.get('pinned'));
+            rowData.set('pinned', c.get('pinned'));
             rowData.set('filter', c.get('filter'));
             rowData.set('sort', c.get('sort'));
             rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
@@ -644,6 +661,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -665,6 +683,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('component', c.get('component'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('mask', c.get('mask'));
                 columnDefs.push(rowData);
             }
         });
@@ -690,6 +709,24 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
                 rowData.set('mask', element.mask);
+                //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
+                //ag-grid не видит изменений и не форматирует
+                const valueFormatter = element.type === appTypes.Date && element.mask
+                    ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(element.mask)}
+                    : element.type === appTypes.Timestamp && element.mask
+                        ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(element.mask)}
+                        : [appTypes.Integer,appTypes.Decimal].includes(element.type as appTypes) && element.mask
+                            ? (params:any):string=>{return format(element.mask!, params.value)}
+                            : [appTypes.Decimal].includes(element.type as appTypes)
+                                ? (params:any):string=>{return format(defaultDecimalFormat, params.value)}
+                                : [appTypes.Integer].includes(element.type as appTypes)
+                                    ? (params:any):string=>{return format(defaultIntegerFormat, params.value)}
+                                    : [appTypes.Date].includes(element.type as appTypes)
+                                        ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(defaultDateFormat)}
+                                        : [appTypes.Timestamp].includes(element.type as appTypes)
+                                            ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)}
+                                            : (params:any):string=>{return params.value}
+                rowData.set('valueFormatter',valueFormatter);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
@@ -726,7 +763,7 @@ class DatasetView extends React.Component<any, State> {
             });
             sortMap.forEach(colDef => {
                 if (translatedOperation?.includes(colDef.fieldHash)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), colDef.fieldName);
+                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
                 }
             });
             return {
@@ -935,7 +972,7 @@ class DatasetView extends React.Component<any, State> {
         this.setState<never>({[paramName]: newParam});
     };
 
-            handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
+    handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
         let newDiagrams:IDiagram[] = [];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
@@ -1002,7 +1039,7 @@ class DatasetView extends React.Component<any, State> {
         else
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
 
-    }
+    };
 
     withTable(e: any) {
         let ee: any = e.target.checked
