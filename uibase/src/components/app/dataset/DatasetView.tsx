@@ -325,6 +325,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('componentRenderCondition', componentRenderCondition);
             rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
             rowData.set('formatMask', c.get('formatMask'));
+            rowData.set('mask', this.evalMask(c.get('formatMask')));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
                     let restrictEdit = false;
@@ -399,7 +400,7 @@ class DatasetView extends React.Component<any, State> {
                 )
             });
             rowData.set('valueFormatter',(params:any) : string => {
-                const mask = this.evalMask(this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('formatMask'));
+                const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
                 if (params.value)
                     return params.colDef.type === appTypes.Date && mask
                         ? moment(params.value, defaultDateFormat).format(mask)
@@ -692,7 +693,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('formatMask',c.get('formatMask'));
+                rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('mask', this.evalMask(c.get('formatMask')));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
             } else {
@@ -716,6 +718,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('mask', this.evalMask(c.get('formatMask')));
                 rowData.set('formatMask',c.get('formatMask'));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
@@ -725,7 +729,14 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map((e:any)=> e);
+        let columnDefs = this.state.defaultColumnDefs.map((e)=> e).map(c => {
+            const rowData = new Map();
+            const mask = this.evalMask(c.get('formatMask'));
+            c.forEach((value, key) => {
+                key === 'mask' ? rowData.set(key, mask) : rowData.set(key,value)
+            });
+            return rowData
+        });
         parametersArray.forEach(element => {
             if (element.enable && element.datasetColumn) {
                 let rowData = new Map();
