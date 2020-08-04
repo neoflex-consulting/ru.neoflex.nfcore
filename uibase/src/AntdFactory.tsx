@@ -1,5 +1,5 @@
 import {View, ViewFactory} from './View'
-import Ecore, {EObject} from 'ecore';
+import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
     Button,
@@ -319,6 +319,7 @@ export class Href_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Href.componentRenderCondition",
@@ -390,6 +391,7 @@ export class Button_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Button.componentRenderCondition",
@@ -1279,6 +1281,7 @@ class EventHandler_ extends ViewContainer {
                         }
                     });
                     try {
+                        // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
                         this.props.context.notification("EventHandler.condition",
@@ -1339,11 +1342,13 @@ class EventHandler_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.addEventHandler({
-                itemId: this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id,
-                eventType: this.viewObject.get('event') || "click",
-                callback: this.handleEvent.bind(this)
-            })
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.addEventHandler({
+                    itemId: eObject.get('name')+eObject._id,
+                    eventType: eObject.get('event') || "click",
+                    callback: this.handleEvent.bind(this)
+                })
+            });
         }
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
@@ -1353,7 +1358,9 @@ class EventHandler_ extends ViewContainer {
 
     componentWillUnmount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.removeEventHandler(this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id)
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
+            });
         }
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }

@@ -23,7 +23,7 @@ import Fullscreen from "react-full-screen";
 import {
     actionType, appTypes,
     calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat, diagramAnchorMap,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
     dmlOperation,
     eventType,
     grantType, textAlignMap
@@ -86,8 +86,8 @@ interface State {
     allDatasetComponents: any[];
     currentDatasetComponent: Ecore.Resource;
     currentDiagram?: IDiagram;
-    columnDefs: any[];
-    defaultColumnDefs: any[];
+    columnDefs: Map<String,any>[];
+    defaultColumnDefs: Map<String,any>[];
     fullScreenOn: boolean;
     rowData: any[];
     highlights: IServerQueryParam[];
@@ -269,11 +269,33 @@ class DatasetView extends React.Component<any, State> {
             })
     };
 
+    evalMask(formatMask:EObject) {
+        let mask:string|undefined;
+        if (formatMask) {
+            if (formatMask.get('isDynamic')) {
+                const paramNames:string[] = formatMask.get('value').match(/:[_а-яa-z0-9]+/gi);
+                const namedParams = paramNames.map(paramName => {
+                    return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
+                });
+                try{
+                    // eslint-disable-next-line
+                    mask = eval(replaceNamedParam(formatMask.get('value'),namedParams))
+                } catch (e) {
+                    this.props.context.notification("FormatMask.value",
+                        this.props.t("exception while evaluating") + ` ${replaceNamedParam(formatMask.get('value'),namedParams)}`,
+                        "warning")
+                }
+            } else {
+                mask = formatMask.get('value');
+            }
+        }
+        return mask;
+    }
+
     findColumnDefs(resource: Ecore.Resource){
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
-            let mask:string|undefined = undefined;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
             let componentRenderCondition = c.get('componentRenderCondition');
             if (componentRenderCondition)
@@ -285,23 +307,6 @@ class DatasetView extends React.Component<any, State> {
                             ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
                             : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
                 });
-            if (c.get('formatMask')) {
-                if (c.get('formatMask').get('isDynamic')) {
-                    const paramNames:string[] = c.get('formatMask').get('value').match(/:[_а-яa-z0-9]+/gi);
-                    const namedParams = paramNames.map(paramName => {
-                        return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
-                    });
-                    try{
-                        mask = eval(replaceNamedParam(c.get('formatMask').get('value'),namedParams))
-                    } catch (e) {
-                        this.props.context.notification("FormatMask.value",
-                            this.props.t("exception while evaluating") + ` ${replaceNamedParam(c.get('formatMask').get('value'),namedParams)}`,
-                            "warning")
-                    }
-                } else {
-                    mask = c.get('formatMask').get('value');
-                }
-            }
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -318,8 +323,8 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('type', type);
             rowData.set('component', c.get('component'));
             rowData.set('componentRenderCondition', componentRenderCondition);
-            rowData.set('mask', mask);
             rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
+            rowData.set('formatMask', c.get('formatMask'));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
                     let restrictEdit = false;
@@ -392,6 +397,27 @@ class DatasetView extends React.Component<any, State> {
                     this.refresh()
                     }
                 )
+            });
+            rowData.set('valueFormatter',(params:any) : string => {
+                const mask = this.evalMask(this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('formatMask'));
+                if (params.value)
+                    return params.colDef.type === appTypes.Date && mask
+                        ? moment(params.value, defaultDateFormat).format(mask)
+                        : params.colDef.type === appTypes.Timestamp && mask
+                            ? moment(params.value, defaultTimestampFormat).format(mask)
+                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
+                                ? format(mask, params.value)
+                                : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                                    ? format(defaultDecimalFormat, params.value)
+                                    : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                        ? format(defaultIntegerFormat, params.value)
+                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                                : params.value
+                else
+                    return params.value
             });
             columnDefs.push(rowData);
         });
@@ -666,7 +692,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask', c.get('mask'));
+                rowData.set('formatMask',c.get('formatMask'));
+                rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -689,7 +716,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask', c.get('mask'));
+                rowData.set('formatMask',c.get('formatMask'));
+                rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
             }
         });
@@ -714,7 +742,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
-                rowData.set('mask', element.mask);
                 //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
                 //ag-grid не видит изменений и не форматирует
                 const valueFormatter = element.type === appTypes.Date && element.mask

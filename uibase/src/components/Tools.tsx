@@ -11,6 +11,7 @@ import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
+import {Helmet} from "react-helmet";
 
 const {Column} = Table;
 const ButtonGroup = Button.Group
@@ -200,6 +201,10 @@ class Tools extends React.Component<any, State> {
 
         return (
             <Row>
+                <Helmet>
+                    <title>{this.props.t('tools')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <Col span={3}/>
                 <Col span={18}>
                     <Table pagination={false} size="small" dataSource={branches}>
