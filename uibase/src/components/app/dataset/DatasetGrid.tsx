@@ -224,7 +224,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const newCellStyle = (params: any) => {
             const columnDef = this.props.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
             let returnObject = {
-                textAlign: columnDef.get('textAlign')
+                textAlign: columnDef && columnDef.get('textAlign')
                     ? columnDef.get('textAlign')
                     : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
                         ? "right"

@@ -292,6 +292,7 @@ class DatasetView extends React.Component<any, State> {
                         return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
                     });
                     try{
+                        // eslint-disable-next-line
                         mask = eval(replaceNamedParam(c.get('formatMask').get('value'),namedParams))
                     } catch (e) {
                         this.props.context.notification("FormatMask.value",

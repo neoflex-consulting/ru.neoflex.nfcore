@@ -319,6 +319,7 @@ export class Href_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Href.componentRenderCondition",
@@ -390,6 +391,7 @@ export class Button_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Button.componentRenderCondition",
@@ -1279,6 +1281,7 @@ class EventHandler_ extends ViewContainer {
                         }
                     });
                     try {
+                        // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
                         this.props.context.notification("EventHandler.condition",
