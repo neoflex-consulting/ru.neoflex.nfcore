@@ -5,6 +5,7 @@ import FilesystemTree from "./FilesystemTree";
 import FilesystemGroovyEditor from "./FilesystemGroovyEditor";
 import FilesystemTextEditor from "./FilesystemTextEditor";
 import FetchSpinner from "../../FetchSpinner";
+import {Helmet} from "react-helmet";
 
 const backgroundColor = "#fdfdfd";
 
@@ -18,6 +19,10 @@ class FilesystemBrowser extends React.Component<any & WithTranslation, any> {
     render() {
         return (
             <div style={{flexGrow: 1, height: '100%'}}>
+                <Helmet>
+                    <title>{this.props.t('filesystem')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Splitter
                     minimalizedPrimaryPane={false}

@@ -190,7 +190,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             for (let i = 0; i < this.state.columnDefs.length; i++) {
                 let sameDatasetColumn = 0;
                 for (let j = 0; j < this.props.serverAggregates.length; j++) {
-                    if (this.state.columnDefs[i].get("field") == this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
+                    if (this.state.columnDefs[i].get("field") === this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
                         sameDatasetColumn++;
                     }
                 }

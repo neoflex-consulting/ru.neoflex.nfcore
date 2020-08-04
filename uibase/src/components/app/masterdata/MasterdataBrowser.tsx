@@ -4,6 +4,7 @@ import {Col, Row, Select} from "antd";
 import {EObject} from "ecore";
 import {API} from "../../../modules/api";
 import MasterdataEditor from "./MasterdataEditor";
+import {Helmet} from "react-helmet";
 
 class MetadataBrowser extends React.Component<any & WithTranslation, any> {
     state = {
@@ -31,6 +32,10 @@ class MetadataBrowser extends React.Component<any & WithTranslation, any> {
         const {entityTypes} = this.state
         return (
             <Row style={{marginTop: 15}}>
+                <Helmet>
+                    <title>{this.props.t('masterdata')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <Col span={1}/>
                 <Col span={22}>
                     <Select

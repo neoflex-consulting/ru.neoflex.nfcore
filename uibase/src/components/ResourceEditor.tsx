@@ -18,6 +18,7 @@ import FormComponentMapper from './FormComponentMapper';
 import Operations from './Operations';
 import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
+import {Helmet} from "react-helmet";
 
 export interface Props {
 }
@@ -637,6 +638,10 @@ class ResourceEditor extends React.Component<any, State> {
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+                <Helmet>
+                    <title>{this.state.mainEObject && this.state.mainEObject.eResource ? (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()[0].get('name') : undefined}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
                     {this.state.isSaving ?

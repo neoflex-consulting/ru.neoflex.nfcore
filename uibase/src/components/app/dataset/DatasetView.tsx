@@ -23,7 +23,7 @@ import Fullscreen from "react-full-screen";
 import {
     actionType, appTypes,
     calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat, diagramAnchorMap,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
     dmlOperation,
     eventType,
     grantType, textAlignMap
