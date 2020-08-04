@@ -22,11 +22,11 @@
         <module>base</module>
         <module>application</module>
         <module>uibase</module>
-        <module>uireport</module>
+<!--        <module>uireport</module>-->
 <!--        <module>emf-orientdb</module>-->
         <module>emf-orientdb2</module>
         <module>masterdata</module>
-        <module>nx-design</module>
+<!--        <module>nx-design</module>-->
     </modules>
 
 </project>
