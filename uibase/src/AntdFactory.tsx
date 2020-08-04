@@ -1355,7 +1355,9 @@ class EventHandler_ extends ViewContainer {
 
     componentWillUnmount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.removeEventHandler(this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id)
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
+            });
         }
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }
