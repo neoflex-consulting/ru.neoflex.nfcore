@@ -696,7 +696,7 @@ class EcoreApp extends React.Component<any, State> {
                             context={context}
                             pathFull={this.state.pathFull}
                             appModuleName={this.state.appModuleName}
-                            showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)}
+                            showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
                         />
                 }}
             </MainContext.Consumer>
