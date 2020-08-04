@@ -307,7 +307,6 @@ class DatasetView extends React.Component<any, State> {
                             ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
                             : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
                 });
-            const mask = this.evalMask(c.get('formatMask'));
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -325,7 +324,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('component', c.get('component'));
             rowData.set('componentRenderCondition', componentRenderCondition);
             rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
-            rowData.set('mask',mask);
+            rowData.set('formatMask', c.get('formatMask'));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
                     let restrictEdit = false;
@@ -400,7 +399,7 @@ class DatasetView extends React.Component<any, State> {
                 )
             });
             rowData.set('valueFormatter',(params:any) : string => {
-                const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
+                const mask = this.evalMask(this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('formatMask'));
                 if (params.value)
                     return params.colDef.type === appTypes.Date && mask
                         ? moment(params.value, defaultDateFormat).format(mask)
@@ -693,7 +692,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask',c.get('mask'));
+                rowData.set('formatMask',c.get('formatMask'));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
             } else {
@@ -717,7 +716,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask',c.get('mask'));
+                rowData.set('formatMask',c.get('formatMask'));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
                 columnDefs.push(rowData);
             }
@@ -743,7 +742,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
-                rowData.set('mask', element.mask);
                 //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
                 //ag-grid не видит изменений и не форматирует
                 const valueFormatter = element.type === appTypes.Date && element.mask
