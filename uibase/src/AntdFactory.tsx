@@ -1345,7 +1345,7 @@ class EventHandler_ extends ViewContainer {
             (this.viewObject.get('listenItem') as EList).each(eObject => {
                 this.props.context.addEventHandler({
                     itemId: eObject.get('name')+eObject._id,
-                    eventType: eObject.get('event') || "click",
+                    eventType: this.viewObject.get('event') || "click",
                     callback: this.handleEvent.bind(this)
                 })
             });
