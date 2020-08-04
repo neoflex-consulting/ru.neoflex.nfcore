@@ -11,8 +11,10 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import ru.neoflex.nfcore.base.components.SpringContext;
 import ru.neoflex.nfcore.base.scheduler.*;
 import ru.neoflex.nfcore.base.services.Context;
+import ru.neoflex.nfcore.base.services.Scheduler;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -25,17 +27,17 @@ public class SchedulerFactoryExt extends SchedulerFactoryImpl {
         return new ScheduledTaskImpl() {
             @Override
             public Object refreshScheduler() throws Exception {
-                return Context.getCurrent().getScheduler().refreshScheduler();
+                return SpringContext.getBean(Scheduler.class).refreshScheduler();
             }
 
             @Override
             public Object debugRescheduleAll() throws Exception {
-                return Context.getCurrent().getScheduler().debugRescheduleAll();
+                return SpringContext.getBean(Scheduler.class).debugRescheduleAll();
             }
 
             @Override
             public Object debugExecute() throws Exception {
-                return Context.getCurrent().getScheduler().execute(this.eResource().getURI());
+                return SpringContext.getBean(Scheduler.class).execute(this.eResource().getURI());
             }
 
         };

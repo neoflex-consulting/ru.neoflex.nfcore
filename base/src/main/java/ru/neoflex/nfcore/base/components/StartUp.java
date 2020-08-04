@@ -18,22 +18,21 @@ import java.util.Collections;
 import java.util.List;
 
 @Component("ru.neoflex.nfcore.base.components.StartUp")
-@DependsOn({"ru.neoflex.nfcore.base.components.PackageRegistry"})
+@DependsOn({
+        "ru.neoflex.nfcore.base.services.Context"
+})
 public class StartUp {
     private static final Logger logger = LoggerFactory.getLogger(StartUp.class);
-    @Autowired
-    Context context;
-    @Autowired
-    Workspace workspace;
-    @Autowired
-    Store store;
-    @Autowired
-    PackageRegistry registry;
+    private final Context context;
+
+    public StartUp(Context context) {
+        this.context = context;
+    }
 
     @PostConstruct
     void init() throws Exception {
         context.transact("StartUp", () -> {
-            List<EPackage> packages = new ArrayList<>(registry.getEPackages());
+            List<EPackage> packages = new ArrayList<>(context.getRegistry().getEPackages());
             Collections.reverse(packages);
             for (EPackage ePackage: packages) {
                 String nsURI = ePackage.getNsURI();
@@ -50,7 +49,7 @@ public class StartUp {
 //                    printLongerTrace(e);
                 }
             }
-            List<EClassifier> classifiers = new ArrayList<>(registry.getEClassifiers());
+            List<EClassifier> classifiers = new ArrayList<>(context.getRegistry().getEClassifiers());
             Collections.reverse(classifiers);
             for (EClassifier eClassifier: classifiers) {
                 String nsURI = eClassifier.getEPackage().getNsURI();
