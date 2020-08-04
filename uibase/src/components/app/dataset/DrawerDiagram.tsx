@@ -18,7 +18,7 @@ const diagramAnchorMap_: any = diagramAnchorMap;
 interface Props {
     id?: number,
     action?: string;
-    columnDefs?: Array<EObject>;
+    columnDefs?: Map<String,any>[];
     allAxisXPosition?: Array<EObject>;
     allAxisYPosition?: Array<EObject>;
     allLegendPosition?: Array<EObject>;
