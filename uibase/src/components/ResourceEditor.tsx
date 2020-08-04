@@ -639,7 +639,7 @@ class ResourceEditor extends React.Component<any, State> {
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
                 <Helmet>
-                    <title>{this.state.mainEObject && this.state.mainEObject.eResource ? (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()[0].get('name') : undefined}</title>
+                    <title>{this.state.resource && this.state.resource.eContents ? this.state.resource.eContents()[0].get('name') : undefined}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
                 <FetchSpinner/>
