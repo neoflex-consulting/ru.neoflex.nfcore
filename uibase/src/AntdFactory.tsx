@@ -1,5 +1,5 @@
 import {View, ViewFactory} from './View'
-import Ecore, {EObject} from 'ecore';
+import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
     Button,
@@ -1339,11 +1339,13 @@ class EventHandler_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.addEventHandler({
-                itemId: this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id,
-                eventType: this.viewObject.get('event') || "click",
-                callback: this.handleEvent.bind(this)
-            })
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.addEventHandler({
+                    itemId: eObject.get('name')+eObject._id,
+                    eventType: eObject.get('event') || "click",
+                    callback: this.handleEvent.bind(this)
+                })
+            });
         }
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,

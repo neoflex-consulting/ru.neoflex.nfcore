@@ -327,7 +327,7 @@ class EventAction {
 
 class EventHandler extends ViewElement {
     Event event
-    refers DynamicActionElement listenItem
+    refers DynamicActionElement[] listenItem
     contains EventAction[] eventActions
     String condition
     refers DynamicActionElement[] conditionItems
