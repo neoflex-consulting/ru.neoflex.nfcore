@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:8-alpine
 COPY extLib/* /opt/nrstudio/extLib/
 COPY deploy/* /opt/nrstudio/deploy/
 COPY target/application-0.0.1-SNAPSHOT.jar /opt/nrstudio/
