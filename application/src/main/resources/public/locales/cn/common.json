@@ -278,5 +278,7 @@
         "dateMask": "dd.mm.yyyy",
         "dateTimeMask": "dd.mm.yyyy hh:mm:ss",
 
-        "exception while evaluating": "評估表達式時出錯"
+        "exception while evaluating": "評估表達式時出錯",
+        "hiddencolumns": "隱藏欄",
+        "delete row": "刪除行"
 }

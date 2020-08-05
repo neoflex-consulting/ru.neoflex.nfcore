@@ -49,6 +49,8 @@ public class Scheduler {
     Store store;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    Workspace workspace;
 
     @PostConstruct
     void init() {
@@ -105,7 +107,7 @@ public class Scheduler {
             URI uri = resource.getURI();
             if (task.isEnabled()) {
                 String branch = StringUtils.isNotEmpty(task.getBranch()) ?
-                        task.getBranch() : context.getWorkspace().getCurrentBranch();
+                        task.getBranch() : workspace.getCurrentBranch();
                 ScheduledFuture scheduledFuture = scheduledTasks.get(id);
                 if (scheduledFuture == null) {
                     SchedulingPolicy schedulingPolicy = task.getSchedulingPolicy();
@@ -125,7 +127,7 @@ public class Scheduler {
                             retryTemplate.setRetryPolicy(retryPolicyFactory.createPolicy());
                             retryTemplate.execute((RetryCallback<Void, RuntimeException>) ctx -> {
                                 try {
-                                    context.getWorkspace().setCurrentBranch(branch);
+                                    workspace.setCurrentBranch(branch);
                                     execute(uri);
                                 } catch (Exception e) {
                                     logger.error(task.getName(), e);

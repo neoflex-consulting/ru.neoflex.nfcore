@@ -8,6 +8,7 @@ import 'brace/mode/json';
 import 'brace/theme/tomorrow';
 import Splitter from './CustomSplitter'
 import {withTranslation, WithTranslation} from "react-i18next";
+import {Helmet} from "react-helmet";
 
 export interface Props {
 }
@@ -65,6 +66,10 @@ class QueryRunner extends React.Component<any, State> {
         const {t} = this.props as Props & WithTranslation;
         return (
             <div style={{display: 'flex', flexFlow: 'column', height: '100%'}}>
+                <Helmet>
+                    <title>{this.props.t('query')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <Form layout={"inline"}>
                     <Form.Item wrapperCol={{span: 2, push: 14}}>
                         <Tooltip placement="top" title={t('run')}>

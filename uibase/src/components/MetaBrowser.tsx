@@ -3,6 +3,7 @@ import {Col, Row, Table} from 'antd';
 import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
+import {Helmet} from "react-helmet";
 
 export interface Props {
 }
@@ -137,6 +138,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         const {t} = this.props as Props & WithTranslation;
         return (
             <Row style={{ marginTop: 15 }}>
+                <Helmet>
+                    <title>{this.props.t('metadata')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <Col span={1}/>
                 <Col span={22}>
                     <Table dataSource={data} pagination={false}>

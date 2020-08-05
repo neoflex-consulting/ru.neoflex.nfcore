@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
+import {paramType} from "./DatasetView";
 
 interface Props {
     closeModal?: () => void;
@@ -21,6 +22,7 @@ interface State {
     queryGroupByPattern?: EObject;
     queryGroupByColumnPattern?: EObject;
     queryCalculatedExpressionPattern?: EObject;
+    hiddenColumnPattern?: EObject;
     diagramPatter?: EObject;
     highlightPattern?: EObject;
     user?: EObject;
@@ -66,7 +68,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     addComponentServerParam(currentDatasetComponent: Ecore.EObject, pattern: Ecore.EObject, userProfileValue: Ecore.EObject[], paramName: string, componentName: string): void {
         currentDatasetComponent.get(componentName).clear();
         JSON.parse(userProfileValue[0].get('value'))[paramName].forEach((f: any) => {
-            if (f['operation'] !== undefined || (componentName === 'groupByColumn' && f['datasetColumn'] !== undefined)) {
+            if (f['operation'] !== undefined || (componentName === 'groupByColumn' && f['datasetColumn'] !== undefined) || paramName === paramType.hiddenColumns) {
                 let params;
                 params = pattern.create({
                     datasetColumn: f['datasetColumn'],
@@ -127,6 +129,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
                 this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
                 this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
+                this.addComponentServerParam(currentDatasetComponent, this.state.hiddenColumnPattern!, userProfileValue, 'hiddenColumns', 'hiddenColumn');
                 this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
             this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined).then (()=> {
@@ -181,6 +184,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.highlightPattern) this.getPattern('Highlight', 'highlightPattern');
         if (!this.state.queryGroupByColumnPattern) this.getPattern('QueryGroupByColumn', 'queryGroupByColumnPattern');
         if (!this.state.diagramPatter) this.getPattern('Diagram', 'diagramPatter');
+        if (!this.state.hiddenColumnPattern) this.getPattern('HiddenColumn','hiddenColumnPattern');
         if (!this.state.user) this.getUser();
     }
 
