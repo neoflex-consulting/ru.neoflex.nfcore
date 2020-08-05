@@ -909,6 +909,7 @@ class DatasetView extends React.Component<any, State> {
         ).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[];
+                //TODO не работает одновременно
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
                     newColumnDef = this.getColumnDefGroupBy(result)
                 } else {

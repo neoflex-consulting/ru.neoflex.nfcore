@@ -380,13 +380,17 @@ class EcoreApp extends React.Component<any, State> {
                     urlElement.params = urlElement.params!.concat(obj)
                 });
 
-                const nextPath = path[path.length - 1];
+                /*const nextPath = path[path.length - 1];
                 if (
                     nextPath &&
                     nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
                     path.length !== 1
                 ) {
                     path.pop()
+                }*/
+                //Ограничить переходы
+                if (path.length >= 50) {
+                    path.shift()
                 }
                 path.push(urlElement)
             } else {
