@@ -20,6 +20,11 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
+import ServerGroupByColumn from "./ServerGroupByColumn";
+import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js";
+import HiddenColumn from "./HiddenColumn";
 import {
     actionType, appTypes,
     calculatorFunctionTranslator, defaultDateFormat,
@@ -42,11 +47,8 @@ import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
+import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import ServerGroupByColumn from "./ServerGroupByColumn";
-import DeleteDatasetComponent from "./DeleteDatasetComponent";
-import moment from "moment";
-import format from "number-format.js";
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;
@@ -60,7 +62,8 @@ export enum paramType {
     highlights="highlights",
     calculations="serverCalculatedExpression",
     diagrams="diagrams",
-    diagramsAdd="diagramsAdd"
+    diagramsAdd="diagramsAdd",
+    hiddenColumns="hiddenColumns"
 }
 
 interface Props {
@@ -91,7 +94,6 @@ interface State {
     fullScreenOn: boolean;
     rowData: any[];
     highlights: IServerQueryParam[];
-    calculations: any[];
     diagrams: IDiagram[];
     serverFilters: IServerQueryParam[];
     serverAggregates: IServerQueryParam[];
@@ -99,6 +101,7 @@ interface State {
     serverGroupBy: IServerQueryParam[];
     groupByColumn: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
+    hiddenColumns: IServerQueryParam[];
     queryParams: IServerNamedParam[]
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
@@ -110,6 +113,7 @@ interface State {
     diagramEditMenuVisible: boolean;
     saveMenuVisible: boolean;
     deleteMenuVisible: boolean;
+    hiddenColumnsMenuVisible: boolean;
     allOperations: Array<EObject>;
     allAggregates: Array<EObject>;
     allSorts: Array<EObject>;
@@ -137,7 +141,8 @@ const defaultComponentValues = {
     serverGroupBy: "Average",
     serverSort: "FromAtoZ",
     serverCalculatedExpression: "",
-    groupByColumn: ""
+    groupByColumn: "",
+    hiddenColumn: ""
 };
 
 
@@ -152,9 +157,9 @@ class DatasetView extends React.Component<any, State> {
             columnDefs: [],
             defaultColumnDefs: [],
             deleteMenuVisible: false,
+            hiddenColumnsMenuVisible: false,
             rowData: [],
             highlights: [],
-            calculations: [],
             diagrams: [],
             serverFilters: [],
             serverAggregates: [],
@@ -163,6 +168,7 @@ class DatasetView extends React.Component<any, State> {
             groupByColumn: [],
             serverCalculatedExpression: [],
             queryParams: [],
+            hiddenColumns: [],
             useServerFilter: false,
             filtersMenuVisible: false,
             fullScreenOn: false,
@@ -428,7 +434,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     //Поиск сохранённых фильтров по id компоненты
-    findParams(resource: Ecore.Resource, columnDefs: Object[]){
+    findParams(resource: Ecore.Resource, columnDefs: Map<String,any>[]){
         function addEmpty(params: IServerQueryParam[]) {
             params.push(
                 {index: params.length + 1,
@@ -523,7 +529,7 @@ class DatasetView extends React.Component<any, State> {
             }
             return serverParam
         }
-        function getColumnType (columnDefs: Object[], datasetColumn: string): string | undefined {
+        function getColumnType (columnDefs: Map<String,any>[], datasetColumn: string): string | undefined {
             if (columnDefs.length !== 0) {
                 const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn)
                 if (column !== null) {
@@ -560,7 +566,7 @@ class DatasetView extends React.Component<any, State> {
             }
             return diagrams
         }
-        function getParamsFromURL (params: any[], columnDefs: any[]): IServerQueryParam[] {
+        function getParamsFromURL (params: any[], columnDefs: Map<String,any>[]): IServerQueryParam[] {
             let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
                 params.forEach((f: any) => {
@@ -592,6 +598,7 @@ class DatasetView extends React.Component<any, State> {
         let groupByColumn: IServerQueryParam[] = [];
         let highlights: IServerQueryParam[] = [];
         let serverCalculatedExpression: IServerQueryParam[] = [];
+        let hiddenColumns: IServerQueryParam[] = [];
         let diagrams: IDiagram[] = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0].eURI());
@@ -604,6 +611,7 @@ class DatasetView extends React.Component<any, State> {
             highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
             serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
             diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
+            hiddenColumns = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).hiddenColumns);
         }
         else if (resource !== undefined) {
             serverFilters = getParamsFromComponent(resource, 'serverFilter');
@@ -614,6 +622,7 @@ class DatasetView extends React.Component<any, State> {
             highlights = getParamsFromComponent(resource, 'highlight');
             serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
+            hiddenColumns = getParamsFromComponent(resource, 'hiddenColumn');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
@@ -625,7 +634,19 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(groupByColumn);
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
-        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, groupByColumn, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
+            return {
+                datasetColumn: c.get('field'),
+                enable: true
+            } as IServerQueryParam
+        }).concat(serverCalculatedExpression).map((c,index)=>{
+            return {
+                index: index + 1,
+                datasetColumn: c.datasetColumn,
+                enable: c.enable
+            }
+        });
+        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, groupByColumn, highlights, serverCalculatedExpression, diagrams, hiddenColumns, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
         this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression, groupByColumn);
     }
 
@@ -664,6 +685,21 @@ class DatasetView extends React.Component<any, State> {
                         operation: translatedOperation
                     }
                 })})
+        }
+        if (JSON.stringify(prevState.hiddenColumns) !== JSON.stringify(this.state.hiddenColumns)
+            && this.state.hiddenColumns.length > 0) {
+            let columnDefs = this.state.columnDefs.map(c => {
+                const rowData = new Map();
+                c.forEach((value, key) => {
+                    rowData.set(key,value)
+                });
+                return rowData
+            });
+            columnDefs.forEach(c=>{
+                const hiddenColumn = this.state.hiddenColumns.find(hc => hc.datasetColumn === c.get('field'))
+                c.set('hide', hiddenColumn ? !hiddenColumn.enable : c.get('hide'))
+            });
+            this.setState({columnDefs: columnDefs})
         }
     }
 
@@ -729,7 +765,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map((e)=> e).map(c => {
+        let columnDefs = this.state.defaultColumnDefs.map(c => {
             const rowData = new Map();
             const mask = this.evalMask(c.get('formatMask'));
             c.forEach((value, key) => {
@@ -783,7 +819,6 @@ class DatasetView extends React.Component<any, State> {
 
     translateExpression(calculatedExpression: IServerQueryParam[]) {
         let sortMap = this.state.columnDefs
-            .filter((def:any) => !def.get("hide"))
             .map((colDef, index) => {
             return {
                 fieldName : colDef.get("field"),
@@ -817,6 +852,36 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
+    getNewHiddenColumns(newColumnDef: Map<String, any>[]) {
+        newColumnDef = newColumnDef.filter(c => !c.get('hide'));
+        let newHiddenColumns = this.state.hiddenColumns.map((e)=> e);
+        //Удаляем
+        this.state.hiddenColumns.forEach(c => {
+            const isFound = newColumnDef.find(cd => cd.get('field') === c.datasetColumn)
+            if (!isFound) {
+                newHiddenColumns = newHiddenColumns.filter(cd => cd.datasetColumn !== c.datasetColumn)
+            }
+        });
+        //Добавляем
+        newColumnDef.forEach(c => {
+            const isFound = newHiddenColumns.find(cd => cd.datasetColumn === c.get('field'))
+            if (!isFound) {
+                newHiddenColumns.push({
+                    index: 0,
+                    datasetColumn: c.get('field'),
+                    enable: true
+                })
+            }
+        });
+        newHiddenColumns = newHiddenColumns.map((value, index) => {
+            return {
+                ...value,
+                index: index + 1
+            }
+        });
+        return newHiddenColumns
+    }
+
     prepParamsAndRun(
         resource: Ecore.Resource,
         filterParams: IServerQueryParam[],
@@ -849,6 +914,13 @@ class DatasetView extends React.Component<any, State> {
                 } else {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
                 }
+                const hiddenColumns = this.getNewHiddenColumns(newColumnDef);
+                //Восстанавливем признак скрытой если она отмечена в hiddenColumns
+                newColumnDef.forEach(c =>{
+                    const column = hiddenColumns.find(hc => c.get('field') === hc.datasetColumn);
+                    if (column)
+                        c.set('hide', !column.enable)
+                });
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0) {
                     this.props.context.runQuery(resource
@@ -861,10 +933,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true});
+                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true, hiddenColumns: hiddenColumns});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
+                    this.setState({rowData: result, columnDefs: newColumnDef , numberOfNewLines: false, hiddenColumns: hiddenColumns});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
@@ -959,7 +1031,8 @@ class DatasetView extends React.Component<any, State> {
             , sortsMenuVisible: (p === paramType.sort) ? v : false
             , calculationsMenuVisible: (p === paramType.calculations) ? v : false
             , diagramAddMenuVisible: (p === paramType.diagramsAdd) ? v : false
-            , diagramEditMenuVisible: (p === paramType.diagrams) ? v : false});
+            , diagramEditMenuVisible: (p === paramType.diagrams) ? v : false
+            , hiddenColumnsMenuVisible: (p === paramType.hiddenColumns) ? v : false});
     };
 
     datasetViewChangeUserProfile(datasetComponentId: string, paramName: paramType, param: any): any {
@@ -973,6 +1046,7 @@ class DatasetView extends React.Component<any, State> {
             highlights: (paramName === paramType.highlights)? param: filterParam(this.state.highlights),
             serverCalculatedExpression: (paramName === paramType.calculations)? param: filterParam(this.state.serverCalculatedExpression),
             diagrams: (paramName === paramType.diagrams)? param: this.state.diagrams,
+            hiddenColumns: (paramName === paramType.hiddenColumns)? param: this.state.hiddenColumns,
         });
     }
 
@@ -1141,8 +1215,11 @@ class DatasetView extends React.Component<any, State> {
             >
                 <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
             </Button>
-
-
+            <Button title={t('hiddencolumns')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={hiddenColumnIcon} alt="hiddenColumns" />
+            </Button>
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
@@ -1521,7 +1598,7 @@ class DatasetView extends React.Component<any, State> {
                             <ServerAggregate/>
                     }
                 </Drawer>
-                    </div>
+                </div>
                 <div id="aggregationGroupsButton">
                     <Drawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
@@ -1595,6 +1672,34 @@ class DatasetView extends React.Component<any, State> {
                             <ServerSort/>
                     }
                 </Drawer>
+                </div>
+                <div id="hiddenColumnsButton">
+                    <Drawer
+                        getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
+                        placement='right'
+                        title={t('hiddencolumns')}
+                        width={'700px'}
+                        visible={this.state.hiddenColumnsMenuVisible}
+                        onClose={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
+                        mask={false}
+                        maskClosable={false}
+                    >
+                        {
+                            this.state.hiddenColumns
+                                ?
+                                <HiddenColumn
+                                    {...this.props}
+                                    parametersArray={this.state.hiddenColumns}
+                                    columnDefs={this.state.columnDefs}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.hiddenColumnsMenuVisible}
+                                    componentType={paramType.hiddenColumns}
+                                />
+                                :
+                                <HiddenColumn/>
+                        }
+                    </Drawer>
                 </div>
                 <div id="calculatableexpressionsButton">
                 <Drawer

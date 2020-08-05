@@ -286,5 +286,7 @@
         "dateMask": "dd.mm.yyyy",
         "dateTimeMask": "dd.mm.yyyy hh:mm:ss",
 
-        "exception while evaluating": "Exception while evaluating"
+        "exception while evaluating": "Exception while evaluating",
+        "hiddencolumns": "Hide columns",
+        "delete row": "Delete row"
 }

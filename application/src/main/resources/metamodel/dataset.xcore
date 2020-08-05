@@ -100,6 +100,7 @@ class DatasetComponent {
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
+     contains HiddenColumn[] hiddenColumn
      contains DMLQuery insertQuery
      contains DMLQuery updateQuery
      contains DMLQuery deleteQuery
@@ -202,6 +203,11 @@ class QueryCalculatedExpression {
     String operation
     String dataType
     String mask
+    boolean enable
+}
+
+class HiddenColumn {
+    String datasetColumn
     boolean enable
 }
 
