@@ -41,14 +41,14 @@ public class Epsilon {
     public static final String EPSILON_TEMPLATE_ROOT = "org/eclipse/epsilon";
 
     @Autowired
-    Context context;
+    Store store;
 
     @PostConstruct
     void init() throws Exception {
     }
 
     public EmfModel createModel(String name, URI uri) throws EolModelLoadingException, IOException {
-        return createModel(name, uri, context.getStore().createResourceSet());
+        return createModel(name, uri, store.createResourceSet());
     }
 
     public EmfModel createModel(String name, Resource resource) throws EolModelLoadingException {
@@ -94,7 +94,7 @@ public class Epsilon {
         model.setName(name);
         model.setStoredOnDisposal(false);
         EcoreUtil.resolveAll(resourceSet);
-        model.setResource(context.getStore().createEmptyResource(resourceSet));
+        model.setResource(store.createEmptyResource(resourceSet));
         return model;
     }
 
@@ -196,7 +196,7 @@ public class Epsilon {
 
     public ResourceSet transform(String scriptPath, Map<String, Object> params, EObject eObject) throws Exception {
         IModel source = createModel("S", eObject);
-        Resource resource = context.getStore().createEmptyResource();
+        Resource resource = store.createEmptyResource();
         EmfModel target = createModel("T", resource);
         List<IModel> models = new ArrayList<IModel>(){{
             add(source);
@@ -204,12 +204,12 @@ public class Epsilon {
         }};
         EtlModule module = new EtlModule();
         ececuteScript(scriptPath, params, models, module);
-        ResourceSet resourceSet = context.getStore().createResourceSet();
+        ResourceSet resourceSet = store.createResourceSet();
         while (resource.getContents().size() > 0) {
-            Resource newResource = context.getStore().createEmptyResource(resourceSet);
+            Resource newResource = store.createEmptyResource(resourceSet);
             EObject newObject = resource.getContents().get(0);
             newResource.getContents().add(newObject);
-            context.getStore().saveResource(newResource);
+            store.saveResource(newResource);
         }
         return resourceSet;
     }
