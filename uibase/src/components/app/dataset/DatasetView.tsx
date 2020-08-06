@@ -617,7 +617,7 @@ class DatasetView extends React.Component<any, State> {
         hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
             return {
                 datasetColumn: c.get('field'),
-                enable: true
+                enable: c.get('hide') ? !c.get('hide') : true
             } as IServerQueryParam
         }).concat(serverCalculatedExpression).map((c,index)=>{
             return {
