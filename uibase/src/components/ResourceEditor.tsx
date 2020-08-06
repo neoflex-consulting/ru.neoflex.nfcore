@@ -768,13 +768,18 @@ class ResourceEditor extends React.Component<any, State> {
                         }}
                         filterOption={(input, option) => {
                             function toString(el: any): string {
-                                if (typeof el === "string") return el
-                                if (Array.isArray(el)) return el.map((c:any)=>toString(c)).join(" ")
-                                if (el.children) return toString(el.children)
-                                if (el.props) return toString(el.props)
-                                return ""
+                                let result: string = "";
+                                if (typeof el === "string") result = el
+                                else if (Array.isArray(el)) result = el.map((c:any)=>toString(c)).join(" ")
+                                else if (el.children) result = toString(el.children)
+                                else if (el.props) result = toString(el.props)
+                                return result
                             }
-                            return toString(option.props).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            const value = toString(option.props).toLowerCase();
+                            const test = input.toLowerCase().split(/[,]+/).every(inputAnd=>
+                                inputAnd.trim().split(/[ ]+/).some(inputOr=>
+                                    value.indexOf(inputOr) >= 0));
+                            return test;
                         }}
                     >
                         {
@@ -792,7 +797,8 @@ class ResourceEditor extends React.Component<any, State> {
                                             {`${eObject.get('name')}`}
                                         </Select.Option>
                                         :
-                                        possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
+                                        possibleTypes.includes(eObject.eClass.get('name')) &&
+                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
