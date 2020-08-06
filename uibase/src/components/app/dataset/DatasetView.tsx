@@ -703,9 +703,9 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    getColumnDefGroupBy = (rowDataShow: any) => {
-        let columnDefs: any[] = [];
-        this.state.defaultColumnDefs.forEach((c:any) => {
+    getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
+        let newColumnDefs: any[] = [];
+        columnDefs.forEach((c:any) => {
             if (rowDataShow[0][c.get('field')] !== undefined) {
                 let rowData = new Map();
                 let newHeaderName = this.state.serverGroupBy
@@ -732,7 +732,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('formatMask', c.get('formatMask'));
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
-                columnDefs.push(rowData);
+                newColumnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 rowData.set('field', c.get('field'));
@@ -758,10 +758,10 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
                 rowData.set('formatMask',c.get('formatMask'));
                 rowData.set('valueFormatter', c.get('valueFormatter'));
-                columnDefs.push(rowData);
+                newColumnDefs.push(rowData);
             }
         });
-        return columnDefs
+        return newColumnDefs
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
@@ -909,11 +909,9 @@ class DatasetView extends React.Component<any, State> {
         ).then((json: string) => {
                 let result: Object[] = JSON.parse(json);
                 let newColumnDef: any[];
-                //TODO не работает одновременно
+                newColumnDef = this.getNewColumnDef(calculatedExpression);
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result)
-                } else {
-                    newColumnDef = this.getNewColumnDef(calculatedExpression);
+                    newColumnDef = this.getColumnDefGroupBy(result, newColumnDef)
                 }
                 const hiddenColumns = this.getNewHiddenColumns(newColumnDef);
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
