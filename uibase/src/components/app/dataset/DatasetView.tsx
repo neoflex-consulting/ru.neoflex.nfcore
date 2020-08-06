@@ -820,7 +820,8 @@ class DatasetView extends React.Component<any, State> {
     };
 
     translateExpression(calculatedExpression: IServerQueryParam[]) {
-        let sortMap = this.state.columnDefs
+        let sortMap = this.state.defaultColumnDefs
+            .filter((def:any) => !def.get("hide"))
             .map((colDef, index) => {
             return {
                 fieldName : colDef.get("field"),
