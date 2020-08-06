@@ -3,10 +3,7 @@ package ru.neoflex.nfcore.application.impl;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EObject;
-import ru.neoflex.nfcore.application.DatasetView;
-import ru.neoflex.nfcore.application.TreeNode;
-import ru.neoflex.nfcore.application.UserComponent;
-import ru.neoflex.nfcore.application.ViewElement;
+import ru.neoflex.nfcore.application.*;
 import ru.neoflex.nfcore.application.util.ApplicationValidator;
 
 import java.util.Map;
@@ -17,6 +14,26 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     public boolean validateUserComponent_IsValid(UserComponent userComponent, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (userComponent.getComponentClassName() == null) {
             return validate(userComponent, diagnostics, context, "componentClassName - must be set");
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateAppModule_IsValid(AppModule appModule, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (appModule.isUseParentReferenceTree() && appModule.getReferenceTree() != null) {
+            return validate(appModule, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateApplication_IsValid(Application application, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (application.isUseParentReferenceTree() && application.getReferenceTree() != null) {
+            return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
         }
         else {
             return false;
