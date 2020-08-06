@@ -1281,7 +1281,7 @@ class EventHandler_ extends ViewContainer {
                             , this.props.pathFull[this.props.pathFull.length - 1].params).map(obj => {
                             return {
                                 ...obj,
-                                parameterValue: obj.parameterValue ? obj.parameterValue : ""
+                                parameterValue: obj.parameterValue !== undefined && obj.parameterValue !== null ? obj.parameterValue : ""
                             }
                         });
                     } else {
