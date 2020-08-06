@@ -49,6 +49,7 @@ class GlobalSettings {
     refers AppModule dashboard
 }
 
+@Ecore(constraints="IsValid")
 class AppModule {
     QName name
     contains ViewElement view
@@ -57,8 +58,8 @@ class AppModule {
     boolean useParentReferenceTree
 }
 
+@Ecore(constraints="IsValid")
 class Application extends AppModule {
-    IconName iconName = "faUser"
 	boolean checkRights
     GrantType grantType = "Write"
 }
@@ -381,19 +382,6 @@ enum Colors {
     Blue
     Orange
     Red
-}
-
-enum IconName {
-    faUser
-    faCogs
-    faWrench
-    faLaravel
-    faShieldAlt
-    faSpa
-    faFile
-    faCoins
-    faCubes
-    faEye
 }
 
 enum GroovyCommandType {
