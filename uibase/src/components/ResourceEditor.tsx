@@ -282,9 +282,15 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
-        const preparedData: Array<Object> = []
+        const preparedData: Array<Object> = [];
+        let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
-            const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+        }
+        else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
+            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures')
+        }
+        if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'))
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
