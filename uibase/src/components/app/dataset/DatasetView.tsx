@@ -405,27 +405,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 )
             });
-            rowData.set('valueFormatter',(params:any) : string => {
-                const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
-                if (params.value)
-                    return params.colDef.type === appTypes.Date && mask
-                        ? moment(params.value, defaultDateFormat).format(mask)
-                        : params.colDef.type === appTypes.Timestamp && mask
-                            ? moment(params.value, defaultTimestampFormat).format(mask)
-                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
-                                ? format(mask, params.value)
-                                : [appTypes.Decimal].includes(params.colDef.type as appTypes)
-                                    ? format(defaultDecimalFormat, params.value)
-                                    : [appTypes.Integer].includes(params.colDef.type as appTypes)
-                                        ? format(defaultIntegerFormat, params.value)
-                                        : [appTypes.Date].includes(params.colDef.type as appTypes)
-                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
-                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
-                                                : params.value
-                else
-                    return params.value
-            });
+            rowData.set('valueFormatter', this.valueFormatter);
             columnDefs.push(rowData);
         });
         this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs});
@@ -778,7 +758,9 @@ class DatasetView extends React.Component<any, State> {
                 let rowData = new Map();
                 rowData.set('field', element.datasetColumn);
                 rowData.set('headerName', element.datasetColumn);
-                rowData.set('headerTooltip', "type : String");
+                //workaround иначе при смене маски (без смены типа)
+                //ag-grid не видит изменений и не форматирует
+                rowData.set('headerTooltip', `type : String, mask :${element.mask}`);
                 rowData.set('hide', false);
                 rowData.set('pinned', false);
                 rowData.set('filter', true);
@@ -789,24 +771,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
-                //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
-                //ag-grid не видит изменений и не форматирует
-                const valueFormatter = element.type === appTypes.Date && element.mask
-                    ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(element.mask)}
-                    : element.type === appTypes.Timestamp && element.mask
-                        ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(element.mask)}
-                        : [appTypes.Integer,appTypes.Decimal].includes(element.type as appTypes) && element.mask
-                            ? (params:any):string=>{return format(element.mask!, params.value)}
-                            : [appTypes.Decimal].includes(element.type as appTypes)
-                                ? (params:any):string=>{return format(defaultDecimalFormat, params.value)}
-                                : [appTypes.Integer].includes(element.type as appTypes)
-                                    ? (params:any):string=>{return format(defaultIntegerFormat, params.value)}
-                                    : [appTypes.Date].includes(element.type as appTypes)
-                                        ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(defaultDateFormat)}
-                                        : [appTypes.Timestamp].includes(element.type as appTypes)
-                                            ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)}
-                                            : (params:any):string=>{return params.value}
-                rowData.set('valueFormatter',valueFormatter);
+                rowData.set('valueFormatter',this.valueFormatter);
+                rowData.set('mask', element.mask);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
@@ -817,8 +783,45 @@ class DatasetView extends React.Component<any, State> {
         return columnDefs
     };
 
+    valueFormatter = (params:any) => {
+        const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
+        let formattedParam, splitted;
+        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+            && params.value
+            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            splitted = params.value.split(":");
+            params.value = splitted[1]
+        }
+        if (params.value)
+            formattedParam = params.colDef.type === appTypes.Date && mask
+                ? moment(params.value, defaultDateFormat).format(mask)
+                : params.colDef.type === appTypes.Timestamp && mask
+                    ? moment(params.value, defaultTimestampFormat).format(mask)
+                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
+                        ? format(mask, params.value)
+                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                            ? format(defaultDecimalFormat, params.value)
+                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                ? format(defaultIntegerFormat, params.value)
+                                : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                    ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                        ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                        : params.value;
+        else
+            formattedParam = params.value;
+        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+            && params.value
+            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            splitted[1] = formattedParam;
+            formattedParam = splitted.join(":")
+        }
+        return formattedParam
+    };
+
     translateExpression(calculatedExpression: IServerQueryParam[]) {
-        let sortMap = this.state.columnDefs
+        let sortMap = this.state.defaultColumnDefs
+            .filter((def:any) => !def.get("hide"))
             .map((colDef, index) => {
             return {
                 fieldName : colDef.get("field"),
