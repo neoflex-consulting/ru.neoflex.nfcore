@@ -27,7 +27,7 @@ import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
     actionType,
     defaultDateFormat,
@@ -1274,12 +1274,24 @@ class EventHandler_ extends ViewContainer {
                         || el.get('action') === actionType.redirect)
                 });
                 if (this.viewObject.get('condition')) {
-                    const params = getNamedParams(this.viewObject.get('conditionItems'), this.props.context.contextItemValues).map(obj => {
-                        return {
-                            ...obj,
-                            parameterValue: obj.parameterValue ? obj.parameterValue : ""
-                        }
-                    });
+                    let params = [];
+                    if (this.viewObject.get('conditionItems').size() > 0) {
+                        params = getNamedParams(this.viewObject.get('conditionItems')
+                            , this.props.context.contextItemValues
+                            , this.props.pathFull[this.props.pathFull.length - 1].params).map(obj => {
+                            return {
+                                ...obj,
+                                parameterValue: obj.parameterValue ? obj.parameterValue : ""
+                            }
+                        });
+                    } else {
+                        const paramNames:string[] = this.viewObject.get('condition').match(/:[_а-яa-z0-9]+/gi);
+                        params = paramNames.map(paramName => {
+                            return getNamedParamByName(paramName.replace(":","")
+                                , this.props.context.contextItemValues
+                                , this.props.pathFull[this.props.pathFull.length - 1].params)
+                        });
+                    }
                     try {
                         // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
@@ -1328,6 +1340,14 @@ class EventHandler_ extends ViewContainer {
                         const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
                         const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
                         this.props.context.changeURL(redirectTo, true, undefined, params);
+                        isHandled = true;
+                    }
+                    if (el.get('action') === actionType.backToLastPage) {
+                        if (this.props.pathFull.length > 2) {
+                            const appModule = this.props.pathFull[this.props.pathFull.length - 2];
+                            let params: Object[] = appModule.params;
+                            this.props.context.changeURL!(appModule.appModule, true, undefined, params);
+                        }
                         isHandled = true;
                     }
                     if (!isHandled) {

@@ -412,6 +412,7 @@ enum Action {
     setValue
     showMessage
     redirect
+    backToLastPage
 }
 
 enum Event {
