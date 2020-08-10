@@ -339,7 +339,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                     </Col>
                     <Col span={8}>
                         <Button
-                            title="add row"
+                            title={this.t("add row")}
                             style={{width: '40px', marginLeft: '10px', marginRight: '10px'}}
                             key={'createNewRowButton'}
                             value={'createNewRowButton'}
@@ -348,7 +348,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="run query"
+                            title={this.t("run query")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'runQueryButton'}
                             value={'runQueryButton'}
@@ -357,7 +357,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="delete"
+                            title={this.t("delete")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'deleteButton'}
                             value={'deleteButton'}
@@ -366,7 +366,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="reset"
+                            title={this.t("reset")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'resetButton'}
                             value={'resetButton'}

@@ -1174,10 +1174,10 @@ class DatasetView extends React.Component<any, State> {
             style={{width: '150px'}}
         >
             <Menu.Item key='exportToDocx'>
-                exportToDocx
+                {t("export to docx")}
             </Menu.Item>
             <Menu.Item key='exportToExcel'>
-                exportToExcel
+                {t("export to excel")}
             </Menu.Item>
         </Menu>)
         return <div>
@@ -1342,10 +1342,10 @@ class DatasetView extends React.Component<any, State> {
             style={{width: '150px'}}
         >
             <Menu.Item key='exportToDocx'>
-                exportToDocx
+                {t("export to docx")}
             </Menu.Item>
             <Menu.Item key='exportToExcel'>
-                exportToExcel
+                {t("export to excel")}
             </Menu.Item>
         </Menu>)
         return <div id="selectInGetDiagramPanel">

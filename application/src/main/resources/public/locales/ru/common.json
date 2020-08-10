@@ -288,7 +288,12 @@
 
         "exception while evaluating": "Ошибка во время вычисления выражения",
         "hiddencolumns": "Скрыть столбцы",
-        "delete row": "Удалить строку"
+        "delete row": "Удалить строку",
+        "add row": "Добавить строку",
+        "run query": "Применить",
+        "print": "Печать",
+        "export to docx" : "Выгрузка в docx",
+        "export to excel" : "Выгрузка в excel"
 }
 
 
