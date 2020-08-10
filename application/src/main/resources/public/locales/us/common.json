@@ -286,5 +286,12 @@
         "dateMask": "dd.mm.yyyy",
         "dateTimeMask": "dd.mm.yyyy hh:mm:ss",
 
-        "exception while evaluating": "Exception while evaluating"
+        "exception while evaluating": "Exception while evaluating",
+        "hiddencolumns": "Hide columns",
+        "delete row": "Delete row",
+        "add row": "Delete row",
+        "run query": "Run query",
+        "print": "Print",
+        "export to docx" : "Export to docx",
+        "export to excel" : "Export to excel"
 }

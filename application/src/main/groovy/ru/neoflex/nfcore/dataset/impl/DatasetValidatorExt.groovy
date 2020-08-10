@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.JdbcConnection
 import ru.neoflex.nfcore.dataset.JdbcDataset
 import ru.neoflex.nfcore.dataset.JdbcDriver
+import ru.neoflex.nfcore.dataset.QueryType
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
 
 class DatasetValidatorExt extends DatasetValidator {
@@ -37,10 +38,17 @@ class DatasetValidatorExt extends DatasetValidator {
 
     @Override
     boolean validateJdbcDataset_IsValid(JdbcDataset jdbcDataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
-//        if (jdbcDataset.query == null || jdbcDataset.query.length() == 0) {
-//            return validate(jdbcDataset, diagnostics, context, "query - must be set")
-//        }
+        if (jdbcDataset.queryType == QueryType.USE_QUERY && (jdbcDataset.query == null || jdbcDataset.query.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "query - must be set")
+        }
+        if (jdbcDataset.queryType == QueryType.USE_TABLE_NAME && (jdbcDataset.schemaName == null || jdbcDataset.schemaName.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "schemaName - must be set")
+        }
+        if (jdbcDataset.queryType == QueryType.USE_TABLE_NAME && (jdbcDataset.tableName == null || jdbcDataset.tableName.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "tableName - must be set")
+        }
     }
+
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {
         if (diagnostics != null) {

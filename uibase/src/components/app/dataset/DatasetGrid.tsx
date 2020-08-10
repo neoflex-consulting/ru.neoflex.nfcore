@@ -14,16 +14,10 @@ import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
 import {
-    agGridColumnTypes, appTypes,
-    defaultDateFormat,
-    defaultDecimalFormat,
-    defaultIntegerFormat,
-    defaultTimestampFormat
+    agGridColumnTypes, appTypes
 } from "../../../utils/consts";
 import DateEditor from "./DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
-import moment from "moment";
-import format from "number-format.js";
 import './../../../styles/RichGrid.css';
 
 const backgroundColor = "#fdfdfd";
@@ -165,6 +159,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if (this.state.numberOfNewLines !== this.props.numberOfNewLines && this.state.rowData.length !== 0) {
+            this.setState({numberOfNewLines: this.props.numberOfNewLines})
+            this.highlightAggregate();
+        }
         if (!_.isEqual(this.state.highlights, this.props.highlights)
             && this.props.isHighlightsUpdated) {
             this.changeHighlight();
@@ -247,12 +245,20 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
 
+
     private changeHighlight() {
         const {gridOptions} = this.state;
         this.setState({highlights: this.props.highlights});
         this.props.saveChanges(false, "isHighlightsUpdated");
         const newCellStyle = (params: any) => {
-            let returnObject = {textAlign: [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? "right": undefined};
+            const columnDef = this.props.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
+            let returnObject = {
+                textAlign: columnDef && columnDef.get('textAlign')
+                    ? columnDef.get('textAlign')
+                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
+                        ? "right"
+                        : undefined
+            };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
                 const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
@@ -515,7 +521,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         paginationPageSize={this.state.paginationPageSize}
                         onPaginationChanged={this.onPaginationChanged.bind(this)}
                         suppressClickEdit={true}
-                        stopEditingWhenGridLosesFocus={true}
+                        /*stopEditingWhenGridLosesFocus={true}*/
                         {...gridOptions}
                     >
                         {this.state.columnDefs.map((col: any) =>
@@ -550,46 +556,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 }
                                 cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
                                 cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
-                                valueFormatter = {col.get('valueFormatter') ? col.get('valueFormatter') : (params) : string => {
-                                    let datasetOperations = []
-                                    for (let g = 0; g < this.props.serverAggregates.length; g++){
-                                        if (this.props.serverAggregates[g].enable === true) {
-                                            let isInArray = false
-                                            if (datasetOperations.length == 0) {
-                                                datasetOperations.push(this.props.serverAggregates[g].operation)
-                                            } else {
-                                                for (let i = 0; i < datasetOperations.length; i++) {
-                                                    if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
-                                                        isInArray = true
-                                                    }
-                                                }
-                                                if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
-                                                    datasetOperations.push(this.props.serverAggregates[g].operation)
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                    let lastLines = this.props.rowData.length - datasetOperations.length - 1
-                                    if (params.value)
-                                    return params.colDef.type === appTypes.Date && col.get('mask') && params.node.childIndex < lastLines
-                                        ? moment(params.value, defaultDateFormat).format(col.get('mask'))
-                                        : params.colDef.type === appTypes.Timestamp && col.get('mask') && params.node.childIndex < lastLines
-                                            ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
-                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask') && params.node.childIndex < lastLines
-                                                ? format(col.get('mask'), params.value)
-                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
-                                                    ? format(defaultDecimalFormat, params.value)
-                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
-                                                        ? format(defaultIntegerFormat, params.value)
-                                                        : [appTypes.Date].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
-                                                            ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
-                                                                ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
-                                                                : params.value
-                                    else
-                                        return params.value
-                                }}
+                                valueFormatter = {col.get('valueFormatter')}
                             />
                         )
                         }

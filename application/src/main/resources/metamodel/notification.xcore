@@ -20,7 +20,6 @@ class Notification {
 	String shortName
 	refers AppModule AppModule
 	refers NotificationStatus defaultStatus
-	boolean archive
 	boolean weekendReporting
 	Periodicity periodicity
 	contains ReportingDateOn[] reportingDateOn

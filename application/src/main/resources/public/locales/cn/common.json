@@ -278,5 +278,12 @@
         "dateMask": "dd.mm.yyyy",
         "dateTimeMask": "dd.mm.yyyy hh:mm:ss",
 
-        "exception while evaluating": "評估表達式時出錯"
+        "exception while evaluating": "評估表達式時出錯",
+        "hiddencolumns": "隱藏欄",
+        "delete row": "刪除行",
+        "add row": "添加行",
+        "run query": "應用",
+        "print": "列印",
+        "export to docx" : "卸貨中docx",
+        "export to excel" : "卸貨中excel"
 }

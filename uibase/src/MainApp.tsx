@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Helmet } from 'react-helmet';
 import Splitter from './components/CustomSplitter'
 import {Layout, Tooltip} from "antd";
 import {Icon as IconFA} from 'react-fa';
@@ -196,8 +197,6 @@ export class MainApp extends React.Component<any, State> {
                     justifyContent: "center",
                     alignContent: "center"
                 }}>
-                    {this.renderToolButton("log", "Log", "ellipsis-v")}
-                    {this.renderToolButton("search", "Search", "search")}
                 </div>
             </div>
         )
@@ -291,6 +290,10 @@ export class MainApp extends React.Component<any, State> {
     render = () => {
         return (
             <div style={{flexGrow: 1}}>
+                <Helmet>
+                    <title>{this.props.showTabTitle ? this.props.appModuleName : undefined}</title>
+                    <link rel="shortcut icon" type="image/png" href="/application.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Splitter
                     minimalizedPrimaryPane={this.state.hideReferences}

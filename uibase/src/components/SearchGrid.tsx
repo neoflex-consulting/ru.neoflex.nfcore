@@ -8,6 +8,7 @@ import {FormComponentProps} from "antd/lib/form";
 import DataSearch from "./DataSearch";
 import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
+import {Helmet} from "react-helmet";
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -224,6 +225,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             const columnsWidth = columnsT.length * 315;
             return (
              <div style={{padding: '20px'}}>
+                 <Helmet>
+                     <title>{this.props.t('data')}</title>
+                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                 </Helmet>
                  <div>
                      <DataSearch
                         onSearch={this.handleSearch}

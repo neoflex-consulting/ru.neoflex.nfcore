@@ -18,6 +18,7 @@ import FormComponentMapper from './FormComponentMapper';
 import Operations from './Operations';
 import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
+import {Helmet} from "react-helmet";
 
 export interface Props {
 }
@@ -281,9 +282,15 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
-        const preparedData: Array<Object> = []
+        const preparedData: Array<Object> = [];
+        let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
-            const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+        }
+        else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
+            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures')
+        }
+        if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'))
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
@@ -637,6 +644,10 @@ class ResourceEditor extends React.Component<any, State> {
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+                <Helmet>
+                    <title>{this.state.resource && this.state.resource.eContents ? this.state.resource.eContents()[0].get('name') : undefined}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
                     {this.state.isSaving ?
@@ -763,13 +774,18 @@ class ResourceEditor extends React.Component<any, State> {
                         }}
                         filterOption={(input, option) => {
                             function toString(el: any): string {
-                                if (typeof el === "string") return el
-                                if (Array.isArray(el)) return el.map((c:any)=>toString(c)).join(" ")
-                                if (el.children) return toString(el.children)
-                                if (el.props) return toString(el.props)
-                                return ""
+                                let result: string = "";
+                                if (typeof el === "string") result = el
+                                else if (Array.isArray(el)) result = el.map((c:any)=>toString(c)).join(" ")
+                                else if (el.children) result = toString(el.children)
+                                else if (el.props) result = toString(el.props)
+                                return result
                             }
-                            return toString(option.props).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            const value = toString(option.props).toLowerCase();
+                            const test = input.toLowerCase().split(/[,]+/).every(inputAnd=>
+                                inputAnd.trim().split(/[ ]+/).some(inputOr=>
+                                    value.indexOf(inputOr) >= 0));
+                            return test;
                         }}
                     >
                         {
@@ -787,7 +803,8 @@ class ResourceEditor extends React.Component<any, State> {
                                             {`${eObject.get('name')}`}
                                         </Select.Option>
                                         :
-                                        possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
+                                        possibleTypes.includes(eObject.eClass.get('name')) &&
+                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}

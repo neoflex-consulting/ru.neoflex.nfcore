@@ -21,16 +21,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         if (datasetColumn) {
             Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
             ResultSet resultSet = getResultSet(jdbcConnection, false)
-            def columnCount = resultSet.metaData.columnCount
-            def rowData = []
-            while (resultSet.next()) {
-                def map = [:]
-                for (int i = 1; i <= columnCount; ++i) {
-                    def object = resultSet.getObject(i)
-                    map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
-                }
-                rowData.add(map)
-            }
+            def rowData = JdbcConnectionExt.readResultSet(resultSet)
             return JsonOutput.toJson(rowData)
         } else {
             return JsonOutput.toJson("Please, run operation loadAllColumns in this object")
@@ -93,16 +84,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
     String showAllTables() {
         Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
         ResultSet resultSet = getResultSet(jdbcConnection, true)
-        def columnCount = resultSet.metaData.columnCount
-        def rowData = []
-        while (resultSet.next()) {
-            def map = [:]
-            for (int i = 1; i <= columnCount; ++i) {
-                def object = resultSet.getObject(i)
-                map["${resultSet.metaData.getColumnName(i)}"] = (object == null ? null : object.toString())
-            }
-            rowData.add(map)
-        }
+        def rowData = JdbcConnectionExt.readResultSet(resultSet)
         return JsonOutput.toJson(rowData)
     }
 

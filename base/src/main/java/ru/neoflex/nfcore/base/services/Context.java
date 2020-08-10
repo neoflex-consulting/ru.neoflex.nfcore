@@ -13,27 +13,27 @@ import ru.neoflex.nfcore.base.services.providers.GitDBStoreProvider;
 
 import java.util.concurrent.Callable;
 
-@Service
-@DependsOn("ru.neoflex.nfcore.base.services.Workspace")
+@Service("ru.neoflex.nfcore.base.services.Context")
 public class Context {
     private static final Logger logger = LoggerFactory.getLogger(Context.class);
 
-    @Autowired
-    private Store store;
-    @Autowired
-    private Groovy groovy;
-    @Autowired
-    private Workspace workspace;
-    @Autowired
-    private Epsilon epsilon;
-    @Autowired
-    private PackageRegistry registry;
-    @Autowired
-    private Scheduler scheduler;
-    @Autowired
-    private Authorization authorization;
+    private final Store store;
+    private final Groovy groovy;
+    private final Workspace workspace;
+    private final Epsilon epsilon;
+    private final PackageRegistry registry;
+    private final Authorization authorization;
 
     private static final ThreadLocal<Context> tlContext = new ThreadLocal<Context>();
+
+    public Context(Store store, Groovy groovy, Workspace workspace, Epsilon epsilon, PackageRegistry registry, Authorization authorization) {
+        this.store = store;
+        this.groovy = groovy;
+        this.workspace = workspace;
+        this.epsilon = epsilon;
+        this.registry = registry;
+        this.authorization = authorization;
+    }
 
     public static Context getCurrent() {
         return tlContext.get();
@@ -105,10 +105,6 @@ public class Context {
                                     }
                                     return result;
                                 })));
-    }
-
-    public Scheduler getScheduler() {
-        return scheduler;
     }
 
     public Authorization getAuthorization() {

@@ -100,6 +100,7 @@ class DatasetComponent {
      contains Highlight[] highlight
      contains Pivot[] pivot
      contains Diagram[] diagram
+     contains HiddenColumn[] hiddenColumn
      contains DMLQuery insertQuery
      contains DMLQuery updateQuery
      contains DMLQuery deleteQuery
@@ -136,6 +137,7 @@ abstract class DatasetColumnView {
     boolean suppressMenu
     boolean resizable
     boolean isPrimaryKey
+    TextAlign textAlign = "Undefined"
     String componentRenderCondition
     contains GridComponent component
 }
@@ -150,7 +152,8 @@ class CustomColumn extends DatasetColumnView {
 
 class FormatMask {
     QName name
-    String value // ( p.5 234.10 || 5 234.10 || 5 234.1000 || 5 234)
+    String value
+    boolean isDynamic
 }
 
 class QueryParameter {
@@ -200,6 +203,11 @@ class QueryCalculatedExpression {
     String operation
     String dataType
     String mask
+    boolean enable
+}
+
+class HiddenColumn {
+    String datasetColumn
     boolean enable
 }
 
@@ -275,6 +283,13 @@ enum Pinned {
     Undefined
     Left
     Right
+}
+
+enum TextAlign {
+    Undefined
+    Left
+    Right
+    Center
 }
 
 enum DataType {

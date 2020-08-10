@@ -1,5 +1,5 @@
 import {View, ViewFactory} from './View'
-import Ecore, {EObject} from 'ecore';
+import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
     Button,
@@ -27,7 +27,7 @@ import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
     actionType,
     defaultDateFormat,
@@ -319,9 +319,10 @@ export class Href_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
-            this.props.context.notification("componentRenderCondition",
+            this.props.context.notification("Href.componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
@@ -390,9 +391,10 @@ export class Button_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
-            this.props.context.notification("componentRenderCondition",
+            this.props.context.notification("Button.componentRenderCondition",
                 this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
                 "warning")
         }
@@ -414,7 +416,7 @@ export class Button_ extends ViewContainer {
 
 class Select_ extends ViewContainer {
     private selected = "";
-    private urlCurrentValue = "";
+    private urlCurrentValue:string|undefined = "";
 
     constructor(props: any) {
         super(props);
@@ -444,7 +446,7 @@ class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -452,7 +454,7 @@ class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -660,7 +662,7 @@ export class DatePicker_ extends ViewContainer {
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
 
         this.state = {
-            pickedDate: mask ? moment(formatedValue, mask) : moment(value, format),
+            defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
             currentValue: formatedValue,
             format: format,
             mask: mask,
@@ -679,21 +681,21 @@ export class DatePicker_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     componentDidMount(): void {
-        this.onChange(this.state.pickedDate.format(this.state.mask ? this.state.mask : this.state.format));
+        this.onChange(this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
@@ -757,7 +759,7 @@ export class DatePicker_ extends ViewContainer {
                  <DatePicker
                     key={this.viewObject._id}
                     showTime={this.viewObject.get('showTime')}
-                    defaultValue={this.state.pickedDate}
+                    defaultValue={this.state.defaultDate}
                     value={moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format)}
                     disabled={isReadOnly}
                     allowClear={this.viewObject.get('allowClear') || false}
@@ -1012,6 +1014,7 @@ class ValueHolder_ extends ViewContainer {
 }
 
 class Input_ extends ViewContainer {
+    private timer : number;
     constructor(props: any) {
         super(props);
         let value;
@@ -1054,7 +1057,24 @@ class Input_ extends ViewContainer {
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }
 
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        if(prevState.currentValue !== this.state.currentValue) {
+            this.handleOnChange(this.state.currentValue);
+        }
+    }
+
     onChange = (currentValue: string) => {
+        this.setState({currentValue:currentValue});
+    };
+
+    handleOnChange = (currentValue: string) => {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            this.onChangeDebounced(currentValue);
+        }, 500);
+    };
+
+    onChangeDebounced = (currentValue: string) => {
         let contextItemValues = this.props.context.contextItemValues;
         let globalValues = this.props.context.globalValues;
         const parameterObj = {
@@ -1065,14 +1085,12 @@ class Input_ extends ViewContainer {
         if (this.viewObject.get('isGlobal')) {
             globalValues.set(this.viewObject.get('name'), parameterObj)
         }
-        this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
+        this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
                 ()=>this.props.context.notifyAllEventHandlers({
                     type:eventType.change,
                     itemId:this.viewObject.get('name')+this.viewObject._id,
                     value:currentValue
-                }))
-        );
+                }));
     };
 
     render = () => {
@@ -1160,7 +1178,7 @@ class Typography_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -1168,7 +1186,7 @@ class Typography_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -1256,16 +1274,29 @@ class EventHandler_ extends ViewContainer {
                         || el.get('action') === actionType.redirect)
                 });
                 if (this.viewObject.get('condition')) {
-                    const params = getNamedParams(this.viewObject.get('conditionItems'), this.props.context.contextItemValues).map(obj => {
-                        return {
-                            ...obj,
-                            parameterValue: obj.parameterValue ? obj.parameterValue : ""
-                        }
-                    });
+                    let params = [];
+                    if (this.viewObject.get('conditionItems').size() > 0) {
+                        params = getNamedParams(this.viewObject.get('conditionItems')
+                            , this.props.context.contextItemValues
+                            , this.props.pathFull[this.props.pathFull.length - 1].params).map(obj => {
+                            return {
+                                ...obj,
+                                parameterValue: obj.parameterValue !== undefined && obj.parameterValue !== null ? obj.parameterValue : ""
+                            }
+                        });
+                    } else {
+                        const paramNames:string[] = this.viewObject.get('condition').match(/:[_а-яa-z0-9]+/gi);
+                        params = paramNames.map(paramName => {
+                            return getNamedParamByName(paramName.replace(":","")
+                                , this.props.context.contextItemValues
+                                , this.props.pathFull[this.props.pathFull.length - 1].params)
+                        });
+                    }
                     try {
+                        // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
-                        this.props.context.notification("condition",
+                        this.props.context.notification("EventHandler.condition",
                             this.props.t("exception while evaluating") + ` ${replaceNamedParam(this.viewObject.get('condition'), params)}`,
                             "warning")
                     }
@@ -1311,6 +1342,14 @@ class EventHandler_ extends ViewContainer {
                         this.props.context.changeURL(redirectTo, true, undefined, params);
                         isHandled = true;
                     }
+                    if (el.get('action') === actionType.backToLastPage) {
+                        if (this.props.pathFull.length > 2) {
+                            const appModule = this.props.pathFull[this.props.pathFull.length - 2];
+                            let params: Object[] = appModule.params;
+                            this.props.context.changeURL!(appModule.appModule, true, undefined, params);
+                        }
+                        isHandled = true;
+                    }
                     if (!isHandled) {
                         this.props.context.notification("Event handler warning",
                             `Action ${el.get('action') || actionType.execute} is not supported for ${this.viewObject.get('name')}`,
@@ -1323,11 +1362,13 @@ class EventHandler_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.addEventHandler({
-                itemId: this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id,
-                eventType: this.viewObject.get('event') || "click",
-                callback: this.handleEvent.bind(this)
-            })
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.addEventHandler({
+                    itemId: eObject.get('name')+eObject._id,
+                    eventType: this.viewObject.get('event') || "click",
+                    callback: this.handleEvent.bind(this)
+                })
+            });
         }
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
@@ -1337,7 +1378,9 @@ class EventHandler_ extends ViewContainer {
 
     componentWillUnmount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.removeEventHandler(this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id)
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
+            });
         }
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }

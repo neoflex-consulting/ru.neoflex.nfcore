@@ -196,7 +196,7 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={2}>
                 <Form.Item style={{ display: 'inline-block', marginLeft: '6px' }}>
                     <Button
-                        title="delete row"
+                        title={value.t("delete row")}
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
@@ -208,43 +208,49 @@ const SortableItem = SortableElement(({value}: any) => {
         </Row>
         <Row gutter={[8, 0]}>
             <Col span={4} style={{marginLeft: '17px', marginTop: '-17px'}}>
-                {value.getFieldDecorator(`${value.idHighlightType}`,
-                    {
-                        initialValue: value.t(value.highlightType)
-                    })(
-                    <Select
-                        getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
-                        allowClear={true}
-                        style={{width: '100px', marginLeft: '21px'}}
-                        onChange={(e: any) => {
-                            const event = e ? e : JSON.stringify({
-                                index: value.index,
-                                columnName: 'highlightType',
-                                value: undefined
-                            })
-                            value.handleChange(event)
-                        }}
-                    >
+                <Form.Item style={{display: 'inline-block'}}>
+                    {value.getFieldDecorator(`${value.idHighlightType}`,
                         {
-                            value.allHighlightType!
-                                .map((o: any) =>
-                                    <Select.Option
-                                        key={JSON.stringify({
-                                            index: value.index,
-                                            columnName: 'highlightType',
-                                            value: o.get('name')
-                                        })}
-                                        value={JSON.stringify({
-                                            index: value.index,
-                                            columnName: 'highlightType',
-                                            value: o.get('name')
-                                        })}
-                                    >
-                                        {value.t(o.get('name'))}
-                                    </Select.Option>)
-                        }
-                    </Select>
-                )}
+                            initialValue: value.t(value.highlightType),
+                            rules: [{
+                                required: value.datasetColumn && value.highlightType !== 'Column',
+                                message: ' '
+                            }]
+                        })(
+                        <Select
+                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                            allowClear={true}
+                            style={{width: '100px', marginLeft: '21px'}}
+                            onChange={(e: any) => {
+                                const event = e ? e : JSON.stringify({
+                                    index: value.index,
+                                    columnName: 'highlightType',
+                                    value: undefined
+                                })
+                                value.handleChange(event)
+                            }}
+                        >
+                            {
+                                value.allHighlightType!
+                                    .map((o: any) =>
+                                        <Select.Option
+                                            key={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'highlightType',
+                                                value: o.get('name')
+                                            })}
+                                            value={JSON.stringify({
+                                                index: value.index,
+                                                columnName: 'highlightType',
+                                                value: o.get('name')
+                                            })}
+                                        >
+                                            {value.t(o.get('name'))}
+                                        </Select.Option>)
+                            }
+                        </Select>
+                    )}
+                </Form.Item>
             </Col>
                 <Col span={8} style={{marginRight: '20px', marginLeft: '20px', textAlign: 'center', marginTop: '-17px'}}>
                 <div style={{display: "inline-block", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{value.t('background')}</div>
@@ -459,7 +465,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button
-                            title="reset"
+                            title={t("reset")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'resetButton'}
                             value={'resetButton'}
@@ -468,7 +474,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="add row"
+                            title={t("add row")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'createNewRowButton'}
                             value={'createNewRowButton'}
@@ -477,7 +483,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="run query"
+                            title={t("run query")}
                             style={{width: '40px'}}
                             key={'runQueryButton'}
                             value={'runQueryButton'}

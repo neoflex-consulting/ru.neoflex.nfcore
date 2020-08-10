@@ -49,12 +49,12 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
 
     @Override
     public URI getUriByIdAndRev(String id, String rev) {
-        return server.createURI(id + "?rev=" + rev).appendFragment("/");
+        return server.createURI(id + "?rev=" + rev);
     }
 
     @Override
     public URI getUriByRef(String ref) {
-        return server.createURI(ref).appendFragment("/");
+        return server.createURI(ref);
     }
 
     @Override

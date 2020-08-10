@@ -380,13 +380,17 @@ class EcoreApp extends React.Component<any, State> {
                     urlElement.params = urlElement.params!.concat(obj)
                 });
 
-                const nextPath = path[path.length - 1];
+                /*const nextPath = path[path.length - 1];
                 if (
                     nextPath &&
                     nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
                     path.length !== 1
                 ) {
                     path.pop()
+                }*/
+                //Ограничить переходы
+                if (path.length >= 50) {
+                    path.shift()
                 }
                 path.push(urlElement)
             } else {
@@ -699,6 +703,7 @@ class EcoreApp extends React.Component<any, State> {
                             context={context}
                             pathFull={this.state.pathFull}
                             appModuleName={this.state.appModuleName}
+                            showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
                         />
                 }}
             </MainContext.Consumer>
@@ -757,7 +762,7 @@ class EcoreApp extends React.Component<any, State> {
    private createUserProfile(userName: string) {
        let resourceSet = Ecore.ResourceSet.create()
        let resourceParameters = resourceSet.create({ uri: '/params' });
-       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({userName: userName})
+       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName})
        resourceParameters.add(newUserProfilePattern)
        API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {

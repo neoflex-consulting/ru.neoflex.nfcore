@@ -20,7 +20,7 @@
         "cancel": "Отмена",
         "choose diagram type": "Выберите тип диаграммы",
         "clear": "Очистить",
-        "columnname": "Наименование колонки",
+        "columnname": "Наименование столбца",
         "clone": "Скопировать",
         "closeall": "Закрыть все",
         "create": "Создать",
@@ -79,7 +79,7 @@
         "submit": "Выполнить",
         "sysfilters": "Системные фильтры",
         "text": "Текст",
-        "total": "Выберите колонки, для объединения",
+        "total": "Выберите столбцы для объединения",
         "today": "Сегодня",
         "theme": "Тема",
         "true": "истина",
@@ -286,7 +286,14 @@
         "dateMask": "дд.мм.гггг",
         "dateTimeMask": "дд.мм.гггг чч:мм:cc",
 
-        "exception while evaluating": "Ошибка во время вычисления выражения"
+        "exception while evaluating": "Ошибка во время вычисления выражения",
+        "hiddencolumns": "Скрыть столбцы",
+        "delete row": "Удалить строку",
+        "add row": "Добавить строку",
+        "run query": "Применить",
+        "print": "Печать",
+        "export to docx" : "Выгрузка в docx",
+        "export to excel" : "Выгрузка в excel"
 }
 
 

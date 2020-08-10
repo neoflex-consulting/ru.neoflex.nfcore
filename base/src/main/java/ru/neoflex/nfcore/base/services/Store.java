@@ -29,7 +29,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Service("ru.neoflex.nfcore.base.services.Store")
-@DependsOn({"ru.neoflex.nfcore.base.components.StartUp"})
 public class Store implements EventsRegistration {
     private final static Log logger = LogFactory.getLog(Store.class);
     @Autowired
@@ -89,7 +88,9 @@ public class Store implements EventsRegistration {
                 throw new RuntimeException(message);
             }
             if (diagnostic.getSeverity() == Diagnostic.WARNING) {
-                logger.warn(getDiagnosticMessage(diagnostic));
+                String message = getDiagnosticMessage(diagnostic);
+                throw new RuntimeException(message);
+//                logger.warn(getDiagnosticMessage(diagnostic));
             }
         }
         return provider.saveResource(resource);

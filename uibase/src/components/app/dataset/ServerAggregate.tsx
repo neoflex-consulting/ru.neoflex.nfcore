@@ -258,7 +258,7 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={2}>
                 <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                     <Button
-                        title="delete row"
+                        title={value.t("delete row")}
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
@@ -294,7 +294,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button
-                            title="reset"
+                            title={t("reset")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'resetButton'}
                             value={'resetButton'}
@@ -303,7 +303,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="add row"
+                            title={t("add row")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'createNewRowButton'}
                             value={'createNewRowButton'}
@@ -312,7 +312,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="run query"
+                            title={t("run query")}
                             style={{width: '40px'}}
                             key={'runQueryButton'}
                             value={'runQueryButton'}
