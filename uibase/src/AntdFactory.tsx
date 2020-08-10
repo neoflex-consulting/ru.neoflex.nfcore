@@ -446,7 +446,7 @@ class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -454,7 +454,7 @@ class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -662,7 +662,7 @@ export class DatePicker_ extends ViewContainer {
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
 
         this.state = {
-            pickedDate: mask ? moment(formatedValue, mask) : moment(value, format),
+            defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
             currentValue: formatedValue,
             format: format,
             mask: mask,
@@ -681,21 +681,21 @@ export class DatePicker_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     componentDidMount(): void {
-        this.onChange(this.state.pickedDate.format(this.state.mask ? this.state.mask : this.state.format));
+        this.onChange(this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
@@ -759,7 +759,7 @@ export class DatePicker_ extends ViewContainer {
                  <DatePicker
                     key={this.viewObject._id}
                     showTime={this.viewObject.get('showTime')}
-                    defaultValue={this.state.pickedDate}
+                    defaultValue={this.state.defaultDate}
                     value={moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format)}
                     disabled={isReadOnly}
                     allowClear={this.viewObject.get('allowClear') || false}
@@ -1178,7 +1178,7 @@ class Typography_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -1186,7 +1186,7 @@ class Typography_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
