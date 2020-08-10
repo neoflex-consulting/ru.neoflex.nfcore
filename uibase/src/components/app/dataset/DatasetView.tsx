@@ -130,7 +130,7 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    isAggregations: boolean;
+    numberOfNewLines: boolean;
     formatMasks: {key:string,value:string}[];
 }
 
@@ -160,7 +160,6 @@ class DatasetView extends React.Component<any, State> {
             hiddenColumnsMenuVisible: false,
             rowData: [],
             highlights: [],
-            calculations: [],
             diagrams: [],
             serverFilters: [],
             serverAggregates: [],
@@ -196,7 +195,7 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            isAggregations: false,
+            numberOfNewLines: false,
             formatMasks: []
         }
     }
@@ -952,10 +951,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns});
-                        this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
+                            this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true, hiddenColumns: hiddenColumns});
+                            this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns});
+                    this.setState({rowData: result, columnDefs: newColumnDef , numberOfNewLines: false, hiddenColumns: hiddenColumns});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
