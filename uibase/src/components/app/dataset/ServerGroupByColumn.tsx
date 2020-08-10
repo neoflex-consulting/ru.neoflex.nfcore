@@ -47,7 +47,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
-                            initialValue: value.datasetColumn
+                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined
                         })(
                         <Select
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
