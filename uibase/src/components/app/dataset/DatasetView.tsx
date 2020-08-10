@@ -130,7 +130,7 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    numberOfNewLines: boolean;
+    isAggregations: boolean;
     formatMasks: {key:string,value:string}[];
 }
 
@@ -195,7 +195,7 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            numberOfNewLines: false,
+            isAggregations: false,
             formatMasks: []
         }
     }
@@ -808,40 +808,21 @@ class DatasetView extends React.Component<any, State> {
             splitted = params.value.split(":");
             params.value = splitted[1]
         }
-        let datasetOperations = []
-        for (let g = 0; g < this.props.serverAggregates.length; g++){
-            if (this.props.serverAggregates[g].enable === true) {
-                let isInArray = false
-                if (datasetOperations.length == 0) {
-                    datasetOperations.push(this.props.serverAggregates[g].operation)
-                } else {
-                    for (let i = 0; i < datasetOperations.length; i++) {
-                        if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
-                            isInArray = true
-                        }
-                    }
-                    if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
-                        datasetOperations.push(this.props.serverAggregates[g].operation)
-                    }
 
-                }
-            }
-        }
-        let lastLines = this.props.rowData.length - datasetOperations.length - 1
         if (params.value)
-            formattedParam = params.colDef.type === appTypes.Date && mask && params.node.childIndex < lastLines
+            formattedParam = params.colDef.type === appTypes.Date && mask
                 ? moment(params.value, defaultDateFormat).format(mask)
-                : params.colDef.type === appTypes.Timestamp && mask && params.node.childIndex < lastLines&& params.node.childIndex < lastLines
+                : params.colDef.type === appTypes.Timestamp && mask
                     ? moment(params.value, defaultTimestampFormat).format(mask)
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask && params.node.childIndex < lastLines
+                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
                         ? format(mask, params.value)
-                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)  && params.node.childIndex < lastLines
+                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
                             ? format(defaultDecimalFormat, params.value)
-                            : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
+                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
                                 ? format(defaultIntegerFormat, params.value)
-                                : [appTypes.Date].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
+                                : [appTypes.Date].includes(params.colDef.type as appTypes)
                                     ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
+                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
                                         ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
                                         : params.value;
         else
@@ -971,10 +952,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                            this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true, hiddenColumns: hiddenColumns});
+                            this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns});
                             this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , numberOfNewLines: false, hiddenColumns: hiddenColumns});
+                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
@@ -1548,6 +1529,7 @@ class DatasetView extends React.Component<any, State> {
                         {...this.props}
                         isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
                         serverAggregates = {this.state.serverAggregates}
+                        isAggregations = {this.state.isAggregations}
                         highlights = {this.state.highlights}
                         currentDatasetComponent = {this.state.currentDatasetComponent}
                         rowData = {this.state.rowData}
