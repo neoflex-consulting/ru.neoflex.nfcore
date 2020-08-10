@@ -415,7 +415,7 @@ class DatasetView extends React.Component<any, State> {
     }
 
     //Поиск сохранённых фильтров по id компоненты
-    findParams(resource: Ecore.Resource, columnDefs: Map<String,any>[]){
+    findParams(resource: Ecore.Resource, columnDefs: Map<String,any>[], parameterName: paramType|undefined = undefined){
         function addEmpty(params: IServerQueryParam[]) {
             params.push(
                 {index: params.length + 1,
@@ -627,8 +627,24 @@ class DatasetView extends React.Component<any, State> {
                 enable: c.enable
             }
         });
-        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, groupByColumn, highlights, serverCalculatedExpression, diagrams, hiddenColumns, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression, groupByColumn);
+        this.setState({
+            serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
+            serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
+            serverSorts: (parameterName === paramType.sort || parameterName === undefined) ? serverSorts : this.state.serverSorts,
+            serverGroupBy: (parameterName === paramType.group || parameterName === undefined) ? serverGroupBy : this.state.serverGroupBy,
+            groupByColumn: (parameterName === paramType.groupByColumn || parameterName === undefined) ? groupByColumn : this.state.groupByColumn,
+            highlights: (parameterName === paramType.highlights || parameterName === undefined) ? highlights : this.state.highlights,
+            serverCalculatedExpression: (parameterName === paramType.calculations || parameterName === undefined) ? serverCalculatedExpression : this.state.serverCalculatedExpression,
+            diagrams,
+            hiddenColumns,
+            useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        this.prepParamsAndRun(resource,
+            serverFilters,
+            serverAggregates,
+            serverSorts,
+            serverGroupBy,
+            serverCalculatedExpression,
+            groupByColumn);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -1084,7 +1100,7 @@ class DatasetView extends React.Component<any, State> {
         }
         else {
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
-                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs)
+                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs, paramName)
             )
         }
     };
