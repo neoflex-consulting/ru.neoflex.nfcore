@@ -160,7 +160,6 @@ class DatasetView extends React.Component<any, State> {
             hiddenColumnsMenuVisible: false,
             rowData: [],
             highlights: [],
-            calculations: [],
             diagrams: [],
             serverFilters: [],
             serverAggregates: [],
@@ -809,20 +808,40 @@ class DatasetView extends React.Component<any, State> {
             splitted = params.value.split(":");
             params.value = splitted[1]
         }
+        let datasetOperations = []
+        for (let g = 0; g < this.props.serverAggregates.length; g++){
+            if (this.props.serverAggregates[g].enable === true) {
+                let isInArray = false
+                if (datasetOperations.length == 0) {
+                    datasetOperations.push(this.props.serverAggregates[g].operation)
+                } else {
+                    for (let i = 0; i < datasetOperations.length; i++) {
+                        if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
+                            isInArray = true
+                        }
+                    }
+                    if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
+                        datasetOperations.push(this.props.serverAggregates[g].operation)
+                    }
+
+                }
+            }
+        }
+        let lastLines = this.props.rowData.length - datasetOperations.length - 1
         if (params.value)
-            formattedParam = params.colDef.type === appTypes.Date && mask
+            formattedParam = params.colDef.type === appTypes.Date && mask && params.node.childIndex < lastLines
                 ? moment(params.value, defaultDateFormat).format(mask)
-                : params.colDef.type === appTypes.Timestamp && mask
+                : params.colDef.type === appTypes.Timestamp && mask && params.node.childIndex < lastLines&& params.node.childIndex < lastLines
                     ? moment(params.value, defaultTimestampFormat).format(mask)
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
+                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask && params.node.childIndex < lastLines
                         ? format(mask, params.value)
-                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)  && params.node.childIndex < lastLines
                             ? format(defaultDecimalFormat, params.value)
-                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                            : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                 ? format(defaultIntegerFormat, params.value)
-                                : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                : [appTypes.Date].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                     ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                         ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
                                         : params.value;
         else
@@ -941,7 +960,7 @@ class DatasetView extends React.Component<any, State> {
                         c.set('hide', !column.enable)
                 });
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0) {
+                if (aggregationParams.length !== 0 && this.state.columnDefs.length > 0 && result.length !== 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -1529,7 +1548,6 @@ class DatasetView extends React.Component<any, State> {
                         {...this.props}
                         isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
                         serverAggregates = {this.state.serverAggregates}
-                        numberOfNewLines = {this.state.numberOfNewLines}
                         highlights = {this.state.highlights}
                         currentDatasetComponent = {this.state.currentDatasetComponent}
                         rowData = {this.state.rowData}
