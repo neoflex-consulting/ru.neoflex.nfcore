@@ -44,10 +44,9 @@ interface Props {
     isGridReady: boolean,
     showUniqRow: boolean,
     isHighlightsUpdated: boolean,
-    isAnyAggregations: boolean;
+    isAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
     serverAggregates: any[],
-    numberOfNewLines: boolean
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -61,10 +60,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             themes: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
-            numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: 10,
             isGridReady: false,
-            isAnyAggregations: true,
+            isAggregations: this.props.isAggregations,
+            isAggregatesHighlighted: this.props.isAggregatesHighlighted,
             columnDefs: [],
             rowData: [],
             highlights: [],
@@ -166,10 +165,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.state.numberOfNewLines !== this.props.numberOfNewLines && this.state.rowData.length !== 0) {
-            this.setState({numberOfNewLines: this.props.numberOfNewLines})
-            this.highlightAggregate();
-        }
         if (!_.isEqual(this.state.highlights, this.props.highlights)
             && this.props.isHighlightsUpdated) {
             this.changeHighlight();
@@ -183,22 +178,58 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (prevProps.t !== this.props.t) {
             this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
         }
+        if(this.state.isAggregatesHighlighted){
+            this.highlightAggregate();
+        }
+    }
+
+    private highlightAggregateAfterChangingPage() {
+            let datasetOperations = []
+            for (let g = 0; g < this.props.serverAggregates.length; g++) {
+                if (this.props.serverAggregates[g].enable === true) {
+                    let isInArray = false
+                    if (datasetOperations.length == 0) {
+                        datasetOperations.push(this.props.serverAggregates[g].operation)
+                    } else {
+                        for (let i = 0; i < datasetOperations.length; i++) {
+                            if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
+                                isInArray = true
+                            }
+                        }
+                        if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
+                            datasetOperations.push(this.props.serverAggregates[g].operation)
+                        }
+
+                    }
+                }
+            }
+            if (this.state.rowData.length !== datasetOperations.length)   {
+                this.highlightAggregate();
+            }
     }
 
     private highlightAggregate() {
-        let numberOfLinesInAggregations = 0
-            for (let i = 0; i < this.state.columnDefs.length; i++) {
-                let sameDatasetColumn = 0;
-                for (let j = 0; j < this.props.serverAggregates.length; j++) {
-                    if (this.state.columnDefs[i].get("field") === this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
-                        sameDatasetColumn++;
+        let datasetOperations = []
+        for (let g = 0; g < this.props.serverAggregates.length; g++){
+            if (this.props.serverAggregates[g].enable === true) {
+                let isInArray = false
+                if (datasetOperations.length == 0) {
+                    datasetOperations.push(this.props.serverAggregates[g].operation)
+                } else {
+                    for (let i = 0; i < datasetOperations.length; i++) {
+                        if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
+                            isInArray = true
+                        }
                     }
-                }
-                if (numberOfLinesInAggregations < sameDatasetColumn) {
-                    numberOfLinesInAggregations = sameDatasetColumn
-                }
+                    if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
+                        datasetOperations.push(this.props.serverAggregates[g].operation)
+                    }
 
+                }
             }
+        }
+        if (this.state.rowData.length !== datasetOperations.length) {
+            let numberOfLinesInAggregations = datasetOperations.length
             if (this.grid.current) {
                 if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
                     let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
@@ -212,9 +243,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 }
                 this.grid.current.api.refreshCells();
             }
-
+        }
     }
-
 
 
     private changeHighlight() {
@@ -461,7 +491,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 className={'ag-theme-material'}
             >
                 <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
-                    {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
+                    {
+
+                        this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                     <AgGridReact
                         columnTypes={agGridColumnTypes}
@@ -519,43 +551,54 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
                                 cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
                                 valueFormatter = {col.get('valueFormatter') ? col.get('valueFormatter') : (params) : string => {
-                                    let numberOfLinesInAggregations = 0
-                                    for (let i = 0; i < this.state.columnDefs.length; i++) {
-                                        let sameDatasetColumn = 0;
-                                        for (let j = 0; j < this.props.serverAggregates.length; j++) {
-                                            if (this.state.columnDefs[i].get("field") === this.props.serverAggregates[j].datasetColumn && this.props.serverAggregates[j].enable) {
-                                                sameDatasetColumn++;
+                                    let datasetOperations = []
+                                    for (let g = 0; g < this.props.serverAggregates.length; g++){
+                                        if (this.props.serverAggregates[g].enable === true) {
+                                            let isInArray = false
+                                            if (datasetOperations.length == 0) {
+                                                datasetOperations.push(this.props.serverAggregates[g].operation)
+                                            } else {
+                                                for (let i = 0; i < datasetOperations.length; i++) {
+                                                    if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
+                                                        isInArray = true
+                                                    }
+                                                }
+                                                if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
+                                                    datasetOperations.push(this.props.serverAggregates[g].operation)
+                                                }
+
                                             }
                                         }
-                                        if (numberOfLinesInAggregations < sameDatasetColumn) {
-                                            numberOfLinesInAggregations = sameDatasetColumn
-                                        }
-
                                     }
-                                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
+                                    let lastLines = this.props.rowData.length - datasetOperations.length - 1
                                     if (params.value)
-                                    return params.colDef.type === appTypes.Date && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
+                                    return params.colDef.type === appTypes.Date && col.get('mask') && params.node.childIndex < lastLines
                                         ? moment(params.value, defaultDateFormat).format(col.get('mask'))
-                                        : params.colDef.type === appTypes.Timestamp && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
+                                        : params.colDef.type === appTypes.Timestamp && col.get('mask') && params.node.childIndex < lastLines
                                             ? moment(params.value, defaultTimestampFormat).format(col.get('mask'))
-                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask') && params.value !== null && params.node.childIndex < lastLines
+                                            : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && col.get('mask') && params.node.childIndex < lastLines
                                                 ? format(col.get('mask'), params.value)
-                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
+                                                : [appTypes.Decimal].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                                     ? format(defaultDecimalFormat, params.value)
-                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
+                                                    : [appTypes.Integer].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                                         ? format(defaultIntegerFormat, params.value)
-                                                        : [appTypes.Date].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
+                                                        : [appTypes.Date].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                                             ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.value !== null && params.node.childIndex < lastLines
+                                                            : [appTypes.Timestamp].includes(params.colDef.type as appTypes) && params.node.childIndex < lastLines
                                                                 ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
                                                                 : params.value
                                     else
                                         return params.value
                                 }}
                             />
-                        )}
+                        )
+                        }
                     </AgGridReact>
                     </ConfigProvider>
+                    }
+                    {
+                        this.highlightAggregateAfterChangingPage()
+                    }
                     }
                     <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
                         <Paginator

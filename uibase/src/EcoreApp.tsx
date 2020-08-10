@@ -29,7 +29,7 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoIcon, NeoAlert} from "neo-design/lib";
+import {NeoButton, NeoIcon, NeoAlert, NeoInput} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
 
@@ -515,10 +515,11 @@ class EcoreApp extends React.Component<any, State> {
                             </div>
                         </Col>
                         {/*<Col span={8}>
-                            <NeoAlert type={"info"} message={"tererer"} closable></NeoAlert>
+                            <NeoAlert typee={"error"} message={"test"} width={"200px"} closable={true}></NeoAlert>
 
-                            <NeoButton type={"disabled"}>Hi</NeoButton>
+                            <NeoInput type={"default"}></NeoInput>
                             <NeoIcon icon={"calendar"}></NeoIcon>
+
                         </Col>*/}
                         <Col span={14}
                                     style={{textAlign: 'center', height: 'inherit'}}>

@@ -125,7 +125,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         ResultSet rs;
         def rowData = []
         def jdbcDataset = dataset as JdbcDataset
-        def numberOfLines = 0;
 
         Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
         try {
@@ -139,6 +138,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverSorts = []
             def serverCalculatedExpression = []
             def namesOfOperationsInServerAggregations = []
+            def datasetOperations = []
 
             if (column != []) {
                 for (int i = 0; i <= column.size() - 1; ++i) {
@@ -282,24 +282,29 @@ class DatasetComponentExt extends DatasetComponentImpl {
 
             //Aggregation overall
             if (aggregations) {
-                for (int i = 0; i < allColumns.size(); i++) {
-                    def sameDatasetColumn = 0;
-                    for (int j = 0; j < aggregations.size(); j++) {
-                        if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
-                            sameDatasetColumn++;
+                    for (int g = 0; g < aggregations.size(); g++){
+                        def isInArray = false
+                        if (datasetOperations.size() == 0){
+                            datasetOperations.add(aggregations[g].operation)
+                        }
+                        else{
+                            for (int i = 0; i < datasetOperations.size(); i++){
+                                if (datasetOperations[i] == aggregations[g].operation){
+                                    isInArray = true
+                                }
+                            }
+                            if(!isInArray){
+                                datasetOperations.add(aggregations[g].operation)
+                            }
+
                         }
                     }
-                    if (numberOfLines < sameDatasetColumn) {
-                        numberOfLines = sameDatasetColumn
-                    }
-
-                }
-                for (int g = 0; g < numberOfLines; g++){
+                for (int g = 0; g < datasetOperations.size(); g++) {
                     for (int i = 0; i <= allColumns.size() - 1; ++i) {
                         def isExcluded = true;
                         //Итого и столбец под одним столбцом
                         for (int j = 0; j <= aggregations.size() - 1; ++j) {
-                            if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].enable) {
+                            if (allColumns[i] == aggregations[j].datasetColumn && aggregations[j].operation == datasetOperations[g] && aggregations[j].enable) {
                                 aggregations[j].enable = false
                                 def map = [:]
                                 map["column"] = aggregations[j].datasetColumn
@@ -343,8 +348,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 serverAggregations.add(map)
                             }
                         }
+
                     }
-            }
+                }
             }
 
             //Order by
@@ -427,10 +433,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 try {
                     rs = p.executeQuery();
                     def columnCount = rs.metaData.columnCount
-                    if (numberOfLines > 1){
+                    if (datasetOperations.size() > 1){
                         while (rs.next()) {
                             int g = 0;
-                            for (int j = 0; j < numberOfLines; j++) {
+                            for (int j = 0; j < datasetOperations.size(); j++) {
                                 def map = [:]
                                 String key
                                 String value
@@ -460,7 +466,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         for (int i = 1; i <= columnCount; ++i) {
                             object = rs.getObject(i)
                             value = (object == null ? null : object.toString())
-                            if (value != null && numberOfLines > 0){
+                            if (value != null && datasetOperations.size() > 0){
                                 value = namesOfOperationsInServerAggregations[g] + value
                                 g++
                             }

@@ -125,7 +125,7 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    numberOfNewLines: boolean;
+    isAggregations: boolean;
     formatMasks: {key:string,value:string}[];
 }
 
@@ -188,7 +188,7 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            numberOfNewLines: false,
+            isAggregations: false,
             formatMasks: []
         }
     }
@@ -789,7 +789,7 @@ class DatasetView extends React.Component<any, State> {
                     newColumnDef = this.getNewColumnDef(calculatedExpression);
                 }
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0) {
+                if (aggregationParams.length !== 0 && this.state.columnDefs.length > 0 && result.length !== 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -800,10 +800,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true});
+                        this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true});
                         this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
+                    this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: false});
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
@@ -1372,7 +1372,7 @@ class DatasetView extends React.Component<any, State> {
                         {...this.props}
                         isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
                         serverAggregates = {this.state.serverAggregates}
-                        numberOfNewLines = {this.state.numberOfNewLines}
+                        isAggregations = {this.state.isAggregations}
                         highlights = {this.state.highlights}
                         currentDatasetComponent = {this.state.currentDatasetComponent}
                         rowData = {this.state.rowData}
