@@ -1,7 +1,7 @@
 import React from 'react';
 import moment, {Moment} from "moment";
 import {DatePicker} from "antd";
-import {defaultDateFormat, defaultTimestampFormat} from "../../../utils/consts";
+import {defaultDateFormat, defaultTimestampFormat} from "../../../../utils/consts";
 
 interface Props {
     value: string,

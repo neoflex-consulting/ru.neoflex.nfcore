@@ -576,9 +576,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, query);
             logger.info("execute${queryType}", "execute${queryType} = " + query)
             if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
-                for (int i = 0; i <= parameters.size() - 1; ++i) {
-                    p = getNamedParameterStatement(parameters, p)
-                }
+                p = getNamedParameterStatement(parameters, p, query)
             }
             try {
                 p.execute()
@@ -590,21 +588,23 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p) {
+    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p, String query = "") {
         for (int i = 0; i <= parameters.size() - 1; ++i) {
-            if (!parameters[i].parameterValue) {
-                p.setString(parameters[i].parameterName, null)
-            }
-            if (parameters[i].parameterValue == null) {
-                p.setObject(parameters[i].parameterName, null)
-            } else if (parameters[i].parameterDataType == "Date") {
-                p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-            } else if (parameters[i].parameterDataType == "Timestamp") {
-                p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
-            } else if (parameters[i].parameterDataType == "Integer") {
-                p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-            } else {
-                p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+            if (query.find(":${parameters[i].parameterName}") || query == "") {
+                if (!parameters[i].parameterValue) {
+                    p.setString(parameters[i].parameterName, null)
+                }
+                if (parameters[i].parameterValue == null) {
+                    p.setObject(parameters[i].parameterName, null)
+                } else if (parameters[i].parameterDataType == "Date") {
+                    p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
+                } else if (parameters[i].parameterDataType == "Timestamp") {
+                    p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
+                } else if (parameters[i].parameterDataType == "Integer") {
+                    p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
+                } else {
+                    p.setString(parameters[i].parameterName, parameters[i].parameterValue)
+                }
             }
         }
         return p

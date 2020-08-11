@@ -1,24 +1,25 @@
 import React from 'react';
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
-import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import {ConfigProvider, Modal} from 'antd';
 import {withTranslation} from 'react-i18next';
 import Ecore from 'ecore';
 import SaveDatasetComponent from "./SaveDatasetComponent";
-import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
-import {excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
+import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
+import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Href_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {
-    agGridColumnTypes, appTypes
-} from "../../../utils/consts";
-import DateEditor from "./DateEditor";
+import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
+import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
+import GridMenu from "./gridComponents/Menu";
+import DeleteButton from "./gridComponents/DeleteButton";
+//CSS
 import './../../../styles/RichGrid.css';
+import '@ag-grid-community/core/dist/styles/ag-grid.css';
+import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
 const backgroundColor = "#fdfdfd";
 
@@ -41,13 +42,20 @@ interface Props {
     isAggregations: boolean;
     saveChanges?: (newParam: any, paramName: string) => void;
     serverAggregates: any[],
-    numberOfNewLines: boolean
+    numberOfNewLines: boolean,
+    onApplyEditChanges: (buffer: any[]) => void;
+}
+
+function isFirstColumn (params:any) {
+    let displayedColumns = params.columnApi.getAllDisplayedColumns();
+    return displayedColumns[0].colId === params.column.colId;
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
 
     private grid: React.RefObject<any>;
-
+    private buffer: any[];
+    
     constructor(props: any) {
         super(props);
 
@@ -69,15 +77,18 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     buttonComponent: Button_,
                     hrefComponent: Href_,
                     DateEditor: DateEditor,
+                    deleteButton: DeleteButton,
+                    menu: GridMenu,
                 },
                 defaultColDef: {
                     resizable: true,
                     sortable: true,
                 }
             },
-            cellStyle: {},
+            cellStyle: {}
         };
         this.grid = React.createRef();
+        this.buffer = [];
     }
 
     onGridReady = (params: any) => {
@@ -88,8 +99,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
-
-
     onPaginationChanged = () => {
         if(this.grid.current !== null) {
             this.setState({
@@ -98,9 +107,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 isGridReady: true
             });
         }
-    }
-
-
+    };
 
     private getDocxData() : docxExportObject {
         let header = [];
@@ -147,8 +154,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         };
     }
 
-
-
     componentDidMount(): void {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
@@ -167,7 +172,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
             this.setState({rowData: this.props.rowData})
         }
-        if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)) {
+        if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)
+            && !this.props.isEditMode) {
             this.setState({columnDefs: this.props.columnDefs})
         }
         if (prevProps.t !== this.props.t) {
@@ -179,10 +185,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     private highlightAggregateAfterChangingPage() {
-        let datasetOperations = []
+        let datasetOperations = [];
         for (let g = 0; g < this.props.serverAggregates.length; g++) {
             if (this.props.serverAggregates[g].enable === true) {
-                let isInArray = false
+                let isInArray = false;
                 if (datasetOperations.length == 0) {
                     datasetOperations.push(this.props.serverAggregates[g].operation)
                 } else {
@@ -204,10 +210,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     private highlightAggregate() {
-        let datasetOperations = []
+        let datasetOperations = [];
         for (let g = 0; g < this.props.serverAggregates.length; g++){
             if (this.props.serverAggregates[g].enable === true) {
-                let isInArray = false
+                let isInArray = false;
                 if (datasetOperations.length == 0) {
                     datasetOperations.push(this.props.serverAggregates[g].operation)
                 } else {
@@ -224,16 +230,16 @@ class DatasetGrid extends React.Component<Props & any, any> {
             }
         }
         if (this.state.rowData.length !== datasetOperations.length) {
-            let numberOfLinesInAggregations = datasetOperations.length
-            if (this.grid.current) {
+            let numberOfLinesInAggregations = datasetOperations.length;
+            if (this.grid.current && !this.props.isEditMode) {
                 if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
-                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1
+                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1;
                     this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = function (params: any) {
                         if (lastLines < params.node.childIndex) {
                             return 'aggregate-highlight';
                         }
                     }
-                } else {
+                } else if (this.props.isEditMode) {
                     this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
                 }
                 this.grid.current.api.refreshCells();
@@ -252,7 +258,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     ? columnDef.get('textAlign')
                     : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
                         ? "right"
-                        : undefined
+                        : undefined,
             };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
@@ -479,8 +485,121 @@ class DatasetGrid extends React.Component<Props & any, any> {
             return 'hrefComponent'
         } else if (className === "//Button") {
             return 'buttonComponent'
+        } else {
+            return className
         }
-        return 'none'
+    };
+
+    getBuffer = () => {
+        return this.buffer
+    };
+
+    onEdit = () => {
+        if (this.props.isEditMode) {
+            this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = (params: any) => {
+                if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.delete)
+                    return 'line-through'
+            };
+            let newColumnDefs:any = [];
+            let rowData;
+            newColumnDefs = newColumnDefs.concat(this.state.columnDefs);
+            rowData = new Map();
+            rowData.set('field', this.props.t('delete row'));
+            rowData.set('headerName', this.props.t('delete row'));
+            rowData.set('headerTooltip', 'type : String');
+            rowData.set('component','deleteButton');
+            rowData.set('textAlign','center');
+            newColumnDefs.push(rowData);
+            //TODO пока не понятно что писать в меню
+            /*rowData = new Map();
+            rowData.set('field', 'dataMenu');
+            rowData.set('headerName', 'dataMenu');
+            rowData.set('headerTooltip', 'type : String');
+            rowData.set('component','menu');
+            newColumnDefs.push(rowData);*/
+            this.setState({columnDefs : newColumnDefs},()=>{
+                /*this.grid.current.columnApi.moveColumn("dataMenu",1);*/
+                this.grid.current.api.redrawRows();
+            });
+        } else {
+            let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== 'dataMenu' && c.get('field') !== 'deleteRow');
+            this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            this.setState({columnDefs : newColumnDefs},()=>{
+                this.grid.current.api.redrawRows();
+            })
+        }
+    };
+
+    onApplyChanges = () => {
+        this.grid.current.api.applyTransaction({ remove: this.buffer
+                .filter((el:any) => el.operationMark__ === dmlOperation.delete ) });
+        this.props.onApplyEditChanges(this.buffer);
+    };
+
+    onQuickFilterChanged = () => {
+        //@ts-ignore
+        this.grid.current.api.setQuickFilter(document.getElementById('quickFilter')!.value);
+    };
+
+    onDeleteSelected = () => {
+        let selected = this.grid.current.api.getSelectedNodes().map((sn:any) => sn.data);
+        this.onDelete(selected)
+    };
+
+    markDeleted = (data: any, buffer: any[]) => {
+        //Если до этого была обновлена
+        if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete && data.prevOperationMark__ === dmlOperation.update) {
+            this.buffer.forEach((el:any)=>{
+                if (Object.is(el, data)) {
+                    data.operationMark__ = dmlOperation.update;
+                    data.prevOperationMark__ = undefined;
+                }
+            })
+        //Если отмечена как удалённая
+        } else if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete) {
+            this.buffer = this.buffer.filter((el:any) => !Object.is(el, data));
+            data.operationMark__ = undefined;
+        //Если новая вставленная запись удаляем
+        } else if (data.operationMark__ === dmlOperation.insert) {
+            this.buffer = this.buffer.filter((el:any) => !Object.is(el, data));
+            this.grid.current.api.applyTransaction({remove: [data]})
+        //Если это существующая запись которая была обновлена и её нет в буфере
+        } else if (data.operationMark__ === dmlOperation.update) {
+            data.operationMark__ = dmlOperation.delete;
+            data.prevOperationMark__ = dmlOperation.update;
+            //Если это существующая запись но не отмечена как удалённая
+        } else {
+            data.operationMark__ = dmlOperation.delete;
+            this.buffer.push(data)
+        }
+    };
+
+    onDelete = (data:any|any[]) => {
+        if (Array.isArray(data)) {
+            data.forEach(d => {
+                this.markDeleted(d, this.buffer)
+            });
+        } else {
+            this.markDeleted(data, this.buffer)
+        }
+        this.grid.current.api.redrawRows(this.buffer);
+    };
+
+    onInsert = () => {
+        this.buffer = this.buffer.map((el:any) => el).concat(
+            this.grid.current.api.applyTransaction({ addIndex: 0, add: [{operationMark__:dmlOperation.insert}] })
+            .add
+            .map((a:any)=>{
+                return a.data
+            }))
+    };
+
+    onUpdate = (params:any) => {
+        let foundObject = this.buffer.find((el:any)=> Object.is(el, params.data));
+        if (!foundObject && params.data.operationMark__ !== dmlOperation.insert) {
+            params.data.operationMark__ = dmlOperation.update;
+            this.buffer.push(params.data)
+        }
     };
 
     render() {
@@ -498,6 +617,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             columnTypes={agGridColumnTypes}
                             ref={this.grid}
                             rowData={this.state.rowData}
+                            editType={'fullRow'}
                             modules={AllCommunityModules}
                             rowSelection='multiple' //выделение строки
                             onGridReady={this.onGridReady} //инициализация грида
@@ -519,7 +639,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         >
                             {this.state.columnDefs.map((col: any) =>
                                 <AgGridColumn
-                                    onCellValueChanged={col.get('updateCallback')}
+                                    onCellValueChanged={this.props.isEditMode ? this.onUpdate : col.get('updateCallback')}
                                     onCellDoubleClicked={col.get('onCellDoubleClicked')}
                                     type={col.get('type')}
                                     key={col.get('field')}
@@ -532,7 +652,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                     // filter={col.get('filter') === 'NumberColumnFilter'
                                     //     ? 'agNumberColumnFilter' : col.get('filter') === 'DateColumnFilter' ?
                                     //         'agDateColumnFilter' : 'agTextColumnFilter'}
-                                    checkboxSelection={col.get('checkboxSelection') || false}
+                                    checkboxSelection={this.props.isEditMode ? isFirstColumn : false}
+                                    headerCheckboxSelection={this.props.isEditMode ? isFirstColumn : false}
+                                    headerCheckboxSelectionFilteredOnly={this.state.manual}
                                     resizable={col.get('resizable') || false}
                                     sortable={col.get('sortable') || false}
                                     suppressMenu={col.get('suppressMenu') || false}
@@ -540,10 +662,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                     cellRendererParams = {(col.get('component')) ? {
                                         ...this.props,
                                         viewObject: col.get('component'),
-                                        componentRenderCondition: col.get('componentRenderCondition')
+                                        componentRenderCondition: col.get('componentRenderCondition'),
+                                        onDelete: this.onDelete
                                     } : undefined}
                                     cellRenderer = {
-                                        (col.get('component')) ? this.getComponent(col.get('component').eClass._id) : function (params: any) {
+                                        (col.get('component')) ? this.getComponent(col.get('component').eClass ? col.get('component').eClass._id : col.get('component')) : function (params: any) {
                                             return params.valueFormatted? params.valueFormatted : params.value;
                                         }
                                     }
@@ -585,4 +708,4 @@ class DatasetGrid extends React.Component<Props & any, any> {
         )
     }
 }
-export default withTranslation()(DatasetGrid)
+export default withTranslation('common', { withRef: true })(DatasetGrid)

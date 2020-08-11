@@ -259,8 +259,8 @@
         "dec": "十二月",
 
         "celleditorvalidation": "行编辑验证",
-        "update query is not specified": "未在DatasetComponent中指定的UpdateQuery字段",
-        "primary key column is not specified": "未在DatasetComponent中指定的UpdateQuery字段",
+        "query is not specified": "未在DatasetComponent中指定的字段",
+        "primary key column is not specified": "未在DatasetComponent中指定的字段",
         "jdbcdataset schema is not specified": "未在JdbcDataset中指定架构",
         "jdbcdataset table is not specified": "在JdbcDataset中未指定表",
         "querytext is not specified": "未指定queryText字段",
@@ -284,6 +284,14 @@
         "add row": "添加行",
         "run query": "應用",
         "print": "列印",
-        "export to docx" : "卸貨中docx",
-        "export to excel" : "卸貨中excel"
+        "export to docx": "卸貨中docx",
+        "export to excel": "卸貨中excel",
+
+        "delete selected": "刪除所選內容",
+        "apply changes": "應用更改",
+        "edit buffer": "編輯緩衝區",
+        "apply changes and exit edit?": "應用更改並退出編輯？",
+        "yes": "是的",
+        "no": "不",
+        "quick filter": "快速搜索"
 }

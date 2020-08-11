@@ -268,7 +268,7 @@
         "dec": "Dec",
 
         "celleditorvalidation": "Cell editor validation",
-        "update query is not specified": "DatasetComponent updateQuery is not specified",
+        "query is not specified": "DatasetComponent is not specified",
         "primary key column is not specified": "Primary key column is not specified",
         "jdbcdataset schema is not specified": "JdbcDataset schema query is not specified",
         "jdbcdataset table is not specified": "JdbcDataset table is not specified",
@@ -292,6 +292,14 @@
         "add row": "Delete row",
         "run query": "Run query",
         "print": "Print",
-        "export to docx" : "Export to docx",
-        "export to excel" : "Export to excel"
+        "export to docx": "Export to docx",
+        "export to excel": "Export to excel",
+
+        "delete selected": "Delete selected",
+        "apply changes": "Apply changes",
+        "edit buffer": "Edit buffer",
+        "apply changes and exit edit?": "Apply changes and exit edit?",
+        "yes": "Yes",
+        "no": "No",
+        "quick filter": "Quick filter"
 }

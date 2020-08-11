@@ -267,7 +267,7 @@
         "dec": "Декабрь",
 
         "celleditorvalidation": "Валидация редактирования строки",
-        "update query is not specified": "Не указано поле updateQuery в DatasetComponent",
+        "query is not specified": "Не указано поле в DatasetComponent",
         "primary key column is not specified": "Не указан первичный ключ",
         "jdbcdataset schema is not specified": "Не указана схема в JdbcDataset",
         "jdbcdataset table is not specified": "Не указана таблица в JdbcDataset",
@@ -292,8 +292,16 @@
         "add row": "Добавить строку",
         "run query": "Применить",
         "print": "Печать",
-        "export to docx" : "Выгрузка в docx",
-        "export to excel" : "Выгрузка в excel"
+        "export to docx": "Выгрузка в docx",
+        "export to excel": "Выгрузка в excel",
+
+        "delete selected": "Удалить выбранные",
+        "apply changes": "Применить изменения",
+        "edit buffer": "Буфер редактирования",
+        "apply changes and exit edit?": "Применить изменения и выйти?",
+        "yes": "Да",
+        "no": "Нет",
+        "quick filter": "Быстрый поиск"
 }
 
 
