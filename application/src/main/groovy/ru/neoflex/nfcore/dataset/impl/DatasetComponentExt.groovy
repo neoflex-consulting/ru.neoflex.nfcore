@@ -542,13 +542,15 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     """; break;
                 case DMLQueryType.INSERT:
                     values = parameters.findAll{ qp -> !qp.isPrimaryKey }
-                            .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
+                            .collect{qp -> return qp.parameterDataType == DataType.DATE.getName() && qp.parameterValue
                                     ? "to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
-                                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                                    : qp.parameterDataType == DataType.TIMESTAMP.getName() && qp.parameterValue
                                     ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
-                                    : qp.parameterDataType == DataType.STRING.getName()
+                                    : qp.parameterDataType == DataType.STRING.getName() && qp.parameterValue
                                     ? "'${qp.parameterValue}'"
-                                    : "${qp.parameterValue}"}.join(", ")
+                                    : qp.parameterValue
+                                    ? "${qp.parameterValue}"
+                                    : "NULL"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """
                     insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
@@ -563,9 +565,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 throw new IllegalArgumentException("${queryType} query is not specified")
             query = dmlQuery.queryText
             parameters = parameters.each{qp -> return qp.setParameterValue(
-                      qp.parameterDataType == DataType.DATE.getName()
+                      (qp.parameterDataType == DataType.DATE.getName() && qp.parameterValue)
                     ? qp.parameterValue.substring(0,10)
-                    : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                    : (qp.parameterDataType == DataType.TIMESTAMP.getName() && qp.parameterValue)
                     ? qp.parameterValue.substring(0,19)
                     : qp.parameterValue)} as EList<QueryParameter>
         } else {

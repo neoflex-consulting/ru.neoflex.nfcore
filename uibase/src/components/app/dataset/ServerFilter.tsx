@@ -13,7 +13,7 @@ import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
+    columnDefs?:  Map<String,any>[];
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
@@ -228,7 +228,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                                     idValue : `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
-                                    columnDefs: this.props.columnDefs,
+                                    columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allOperations: this.props.allOperations,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,

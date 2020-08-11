@@ -119,7 +119,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
             )(
                 <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
-                    {this.props.columnDefs!.map((c: any) =>
+                    {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
                         <Select.Option
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
                             value={c.get('field')}

@@ -20,6 +20,7 @@ import DeleteButton from "./gridComponents/DeleteButton";
 import './../../../styles/RichGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
+import './../../../styles/AgCellWrapper.css';
 
 const backgroundColor = "#fdfdfd";
 
@@ -252,13 +253,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.setState({highlights: this.props.highlights});
         this.props.saveChanges(false, "isHighlightsUpdated");
         const newCellStyle = (params: any) => {
-            const columnDef = this.props.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
+            const columnDef = this.state.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
             let returnObject = {
                 textAlign: columnDef && columnDef.get('textAlign')
                     ? columnDef.get('textAlign')
                     : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
                         ? "right"
-                        : undefined,
+                        : undefined
             };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
@@ -494,6 +495,12 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return this.buffer
     };
 
+    resetBuffer = (callback: ()=>any) => {
+        this.disableSelection();
+        this.buffer = [];
+        callback();
+    };
+
     onEdit = () => {
         if (this.props.isEditMode) {
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = (params: any) => {
@@ -530,10 +537,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
-    onApplyChanges = () => {
+    removeRowsFromGrid = () => {
         this.grid.current.api.applyTransaction({ remove: this.buffer
                 .filter((el:any) => el.operationMark__ === dmlOperation.delete ) });
-        this.props.onApplyEditChanges(this.buffer);
     };
 
     onQuickFilterChanged = () => {
@@ -544,6 +550,12 @@ class DatasetGrid extends React.Component<Props & any, any> {
     onDeleteSelected = () => {
         let selected = this.grid.current.api.getSelectedNodes().map((sn:any) => sn.data);
         this.onDelete(selected)
+    };
+
+    disableSelection = () => {
+        this.grid.current.api.getSelectedNodes().forEach((n:any) => {
+            n.setSelected(false)
+        })
     };
 
     markDeleted = (data: any, buffer: any[]) => {
@@ -654,7 +666,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                     //         'agDateColumnFilter' : 'agTextColumnFilter'}
                                     checkboxSelection={this.props.isEditMode ? isFirstColumn : false}
                                     headerCheckboxSelection={this.props.isEditMode ? isFirstColumn : false}
-                                    headerCheckboxSelectionFilteredOnly={this.state.manual}
+                                    headerCheckboxSelectionFilteredOnly={this.props.isEditMode}
                                     resizable={col.get('resizable') || false}
                                     sortable={col.get('sortable') || false}
                                     suppressMenu={col.get('suppressMenu') || false}

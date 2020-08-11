@@ -298,9 +298,10 @@
         "delete selected": "Удалить выбранные",
         "apply changes": "Применить изменения",
         "edit buffer": "Буфер редактирования",
-        "apply changes and exit edit?": "Применить изменения и выйти?",
-        "yes": "Да",
-        "no": "Нет",
+        "unresolved changes left": "Остались не применённые изменения",
+        "apply and quit": "Применить и выйти",
+        "back to edit": "Назад к редактированию",
+        "reset changes": "Сбросить изменения и выйти",
         "quick filter": "Быстрый поиск"
 }
 

@@ -298,8 +298,9 @@
         "delete selected": "Delete selected",
         "apply changes": "Apply changes",
         "edit buffer": "Edit buffer",
-        "apply changes and exit edit?": "Apply changes and exit edit?",
-        "yes": "Yes",
-        "no": "No",
+        "unresolved changes left": "Unresolved changes left",
+        "apply and quit": "Apply and quit",
+        "back to edit": "Back to edit",
+        "reset changes": "Reset changes",
         "quick filter": "Quick filter"
 }

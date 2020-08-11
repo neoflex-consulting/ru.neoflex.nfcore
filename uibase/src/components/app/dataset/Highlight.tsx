@@ -14,7 +14,7 @@ import {ColorPicker, SketchColorPicker} from "./ColorPicker";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
+    columnDefs?:  Map<String,any>[];
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
@@ -505,7 +505,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                                     idHighlightType : `${JSON.stringify({index: highlights.index, columnName: 'highlightType', value: highlights.highlightType})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
-                                    columnDefs: this.props.columnDefs,
+                                    columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allOperations: this.props.allOperations,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
