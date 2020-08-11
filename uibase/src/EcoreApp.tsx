@@ -28,7 +28,7 @@ import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
-import 'neo-design/dist/neoDesign.css';
+//import 'neo-design/dist/neoDesign.css';
 import {NeoButton, NeoIcon, NeoAlert, NeoInput} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
