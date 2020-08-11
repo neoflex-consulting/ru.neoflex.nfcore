@@ -20,7 +20,8 @@ import DeleteButton from "./gridComponents/DeleteButton";
 import './../../../styles/RichGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import './../../../styles/AgCellWrapper.css';
+import './../../../styles/AggregateHighlight.css';
+import './../../../styles/GridEdit.css';
 
 const backgroundColor = "#fdfdfd";
 
@@ -505,7 +506,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.props.isEditMode) {
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = (params: any) => {
                 if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.delete)
-                    return 'line-through'
+                    return 'line-through';
+                if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.insert)
+                    return 'grid-insert-highlight';
+                if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.update)
+                    return 'grid-update-highlight';
             };
             let newColumnDefs:any = [];
             let rowData;
@@ -604,6 +609,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             .map((a:any)=>{
                 return a.data
             }))
+        this.grid.current.api.redrawRows(this.buffer);
     };
 
     onUpdate = (params:any) => {
@@ -612,6 +618,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             params.data.operationMark__ = dmlOperation.update;
             this.buffer.push(params.data)
         }
+        this.grid.current.api.redrawRows(this.buffer);
     };
 
     render() {

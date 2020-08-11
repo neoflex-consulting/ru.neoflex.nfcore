@@ -48,9 +48,6 @@ import printIcon from "../../../icons/printIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-//CSS
-import '../../../styles/AggregateHighlight.css';
-import '../../../styles/LineThrough.css';
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;

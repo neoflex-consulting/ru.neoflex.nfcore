@@ -1,8 +1,0 @@
-.line-through:before {
-    content: " ";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    border-bottom: 1px solid #000000;
-    width: 100%;
-}

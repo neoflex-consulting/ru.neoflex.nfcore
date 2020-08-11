@@ -1,0 +1,21 @@
+.line-through:before {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    border-bottom: 1px solid #000000;
+    width: 100%;
+}
+
+.ag-cell-wrapper {
+    text-align: inherit;
+    display: inline-flex;
+}
+
+.grid-update-highlight {
+    background-color: rgba(93, 218, 46, 0.5) !important;
+}
+
+.grid-insert-highlight {
+    background-color: rgba(57, 195, 218, 0.5) !important;
+}
