@@ -944,10 +944,10 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                            this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns, isClearReady: true},callback);
+                            this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns},callback);
                             this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns, isClearReady: true},callback);
+                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns},callback);
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
