@@ -496,10 +496,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return this.buffer
     };
 
-    resetBuffer = (callback: ()=>any) => {
+    resetBuffer = () => {
+        this.grid.current.api.applyTransaction({ remove: this.buffer
+                .filter((el:any) => el.operationMark__ === dmlOperation.insert ) });
         this.disableSelection();
         this.buffer = [];
-        callback();
     };
 
     onEdit = () => {

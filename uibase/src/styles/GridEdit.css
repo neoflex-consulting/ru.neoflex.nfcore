@@ -7,6 +7,10 @@
     width: 100%;
 }
 
+.line-through {
+    background-color: rgba(218, 0, 20, 0.2) !important;
+}
+
 .ag-cell-wrapper {
     text-align: inherit;
     display: inline-flex;

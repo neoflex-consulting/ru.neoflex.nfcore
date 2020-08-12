@@ -2062,11 +2062,11 @@ class DatasetView extends React.Component<any, State> {
                                 </Button>
                                 <Button
                                     onClick={()=>{
-                                        this.gridRef.resetBuffer(()=>{
-                                            this.setState({isEditMode:false
-                                                , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                                                this.gridRef.onEdit()
-                                            })
+                                        this.gridRef.resetBuffer();
+                                        this.setState({isEditMode:false
+                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                                            this.gridRef.onEdit();
+                                            this.refresh()
                                         })
                                     }}
                                 >
