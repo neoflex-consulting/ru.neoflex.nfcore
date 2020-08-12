@@ -304,5 +304,7 @@
         "reset changes": "Reset changes",
         "quick filter": "Quick filter",
         "copy selected": "Copy selected",
-        "edit is prohibited" : "Edit is prohibited"
+        "edit is prohibited" : "Edit is prohibited",
+        "undo changes": "Undo changes",
+        "copy": "Copy"
 }

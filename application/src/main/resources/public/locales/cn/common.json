@@ -296,5 +296,8 @@
         "reset changes": "重置更改並退出",
         "quick filter": "快速搜索",
         "copy selected": "複製所選",
-        "edit is prohibited" : "禁止編輯記錄"
+        "edit is prohibited" : "禁止編輯記錄",
+        "data menu": "選項菜單",
+        "undo changes": "取消變更",
+        "copy": "複製"
 }

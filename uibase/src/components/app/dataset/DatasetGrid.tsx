@@ -516,8 +516,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     return 'grid-update-highlight';
             };
             let rowData;
+            let newColumnDefs:any[] = [].concat(this.state.columnDefs);
+            rowData = new Map();
+            rowData.set('field', this.props.t('data menu'));
+            rowData.set('headerName', this.props.t('data menu'));
+            rowData.set('headerTooltip', 'type : String');
+            rowData.set('component','menu');
+            newColumnDefs.push(rowData);
             if (this.props.showEditDeleteButton) {
-                let newColumnDefs:any[] = [].concat(this.state.columnDefs);
                 rowData = new Map();
                 rowData.set('field', this.props.t('delete row'));
                 rowData.set('headerName', this.props.t('delete row'));
@@ -525,22 +531,16 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 rowData.set('component','deleteButton');
                 rowData.set('textAlign','center');
                 newColumnDefs.push(rowData);
-                //TODO пока не понятно что писать в меню
-                /*rowData = new Map();
-                rowData.set('field', 'dataMenu');
-                rowData.set('headerName', 'dataMenu');
-                rowData.set('headerTooltip', 'type : String');
-                rowData.set('component','menu');
-                newColumnDefs.push(rowData);*/
-                this.setState({columnDefs : newColumnDefs},()=>{
-                    /*this.grid.current.columnApi.moveColumn("dataMenu",1);*/
-                    this.grid.current.api.redrawRows();
-                });
             }
+            this.setState({columnDefs : newColumnDefs},()=>{
+                this.grid.current.columnApi.moveColumn(this.props.t('data menu'),1);
+                this.grid.current.api.redrawRows();
+            });
         } else {
-            let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== 'dataMenu' && c.get('field') !== 'deleteRow');
+            let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== this.props.t('data menu') && c.get('field') !== this.props.t('delete row'));
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
             this.grid.current.api.setQuickFilter(undefined);
+            this.disableSelection();
             this.setState({columnDefs : newColumnDefs},()=>{
                 this.grid.current.api.redrawRows();
             })
@@ -636,6 +636,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
+    copy = (data: any[], position: number = 0) => {
+        this.onInsert(data, position);
+    };
+
     copySelected = () => {
         let position = 0;
         const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
@@ -645,7 +649,25 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 operationMark__ : dmlOperation.insert
             }
         });
-        this.onInsert(selected, position);
+        this.copy(selected, position);
+    };
+
+    undoChanges = (data: any) => {
+        if (data.operationMark__ === dmlOperation.insert) {
+            this.onDelete(data)
+        } else if (data.operationMark__ === dmlOperation.delete) {
+            this.onDelete(data)
+        } else if (data.operationMark__ === dmlOperation.update) {
+            for (const [old_key, old_value] of Object.entries(data)) {
+                for (const [new_key, new_value] of Object.entries(data)) {
+                    if (old_key == `${new_key}__` && old_key !== new_key && old_key !== "operationMark__")
+                        data[new_key] = old_value
+                }
+            }
+            data.operationMark__ = undefined;
+            this.buffer = this.buffer.filter(d => !Object.is(d,data));
+            this.grid.current.api.redrawRows(data)
+        }
     };
 
     render() {
@@ -709,7 +731,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         ...this.props,
                                         viewObject: col.get('component'),
                                         componentRenderCondition: col.get('componentRenderCondition'),
-                                        onDelete: this.onDelete
+                                        onDelete: this.onDelete,
+                                        editGrid: this
                                     } : undefined}
                                     cellRenderer = {
                                         (col.get('component')) ? this.getComponent(col.get('component').eClass ? col.get('component').eClass._id : col.get('component')) : function (params: any) {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Dropdown, Menu} from "antd";
+import {dmlOperation} from "../../../../utils/consts";
 
 interface Props {
     value: string,
@@ -7,31 +8,43 @@ interface Props {
     type: string,
     api: any,
     node: any,
-    onDelete: any
+    onDelete: any,
+    t: any,
+    editGrid: any,
+    data: any,
+    rowIndex: number
 }
 
 interface State {
 }
-const menu = (
-    <Menu>
-        <Menu.Item key="0">
-            <a>1st menu item</a>
-        </Menu.Item>
-        <Menu.Item key="1">
-            <a>2nd menu item</a>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.Item key="3">3rd menu item</Menu.Item>
-    </Menu>
-);
+
 
 export default class GridMenu extends React.Component<Props, State> {
 
+    menu = (
+        <Menu>
+            <Menu.Item
+                key="0"
+                onClick={()=>{
+                    this.props.editGrid.undoChanges(this.props.data)
+                }}>
+                <a>{this.props.t("undo changes")}</a>
+            </Menu.Item>
+            <Menu.Item
+                key="1"
+                onClick={()=>{
+                    this.props.editGrid.copy([{...this.props.data, operationMark__ : dmlOperation.insert}], this.props.rowIndex + 1)
+                }}>
+                <a>{this.props.t("copy")}</a>
+            </Menu.Item>
+        </Menu>
+    );
+
     render() {
         return (
-            <Dropdown overlay={menu} trigger={['click']}>
+            <Dropdown overlay={this.menu} trigger={['click']}>
                 <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-                    Click me
+                    {this.props.t("action")}
                 </a>
             </Dropdown>
 
