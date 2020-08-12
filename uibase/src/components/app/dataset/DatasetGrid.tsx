@@ -34,7 +34,7 @@ interface Props {
     currentDatasetComponent: Ecore.Resource,
     isAggregatesHighlighted: boolean,
     rowData: any[],
-    columnDefs: any[],
+    columnDefs: Map<String,any>[],
     paginationCurrentPage: number,
     paginationTotalPage: number,
     paginationPageSize: number,
@@ -46,6 +46,7 @@ interface Props {
     serverAggregates: any[],
     numberOfNewLines: boolean,
     onApplyEditChanges: (buffer: any[]) => void;
+    showEditDeleteButton: boolean;
 }
 
 function isFirstColumn (params:any) {
@@ -513,27 +514,29 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.update)
                     return 'grid-update-highlight';
             };
-            let newColumnDefs:any = [];
             let rowData;
-            newColumnDefs = newColumnDefs.concat(this.state.columnDefs);
-            rowData = new Map();
-            rowData.set('field', this.props.t('delete row'));
-            rowData.set('headerName', this.props.t('delete row'));
-            rowData.set('headerTooltip', 'type : String');
-            rowData.set('component','deleteButton');
-            rowData.set('textAlign','center');
-            newColumnDefs.push(rowData);
-            //TODO пока не понятно что писать в меню
-            /*rowData = new Map();
-            rowData.set('field', 'dataMenu');
-            rowData.set('headerName', 'dataMenu');
-            rowData.set('headerTooltip', 'type : String');
-            rowData.set('component','menu');
-            newColumnDefs.push(rowData);*/
-            this.setState({columnDefs : newColumnDefs},()=>{
-                /*this.grid.current.columnApi.moveColumn("dataMenu",1);*/
-                this.grid.current.api.redrawRows();
-            });
+            if (this.props.showEditDeleteButton) {
+                let newColumnDefs:any[] = [];
+                newColumnDefs = [].concat(this.state.columnDefs);
+                rowData = new Map();
+                rowData.set('field', this.props.t('delete row'));
+                rowData.set('headerName', this.props.t('delete row'));
+                rowData.set('headerTooltip', 'type : String');
+                rowData.set('component','deleteButton');
+                rowData.set('textAlign','center');
+                newColumnDefs.push(rowData);
+                //TODO пока не понятно что писать в меню
+                /*rowData = new Map();
+                rowData.set('field', 'dataMenu');
+                rowData.set('headerName', 'dataMenu');
+                rowData.set('headerTooltip', 'type : String');
+                rowData.set('component','menu');
+                newColumnDefs.push(rowData);*/
+                this.setState({columnDefs : newColumnDefs},()=>{
+                    /*this.grid.current.columnApi.moveColumn("dataMenu",1);*/
+                    this.grid.current.api.redrawRows();
+                });
+            }
         } else {
             let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== 'dataMenu' && c.get('field') !== 'deleteRow');
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;

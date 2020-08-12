@@ -295,5 +295,6 @@
         "back to edit": "返回編輯",
         "reset changes": "重置更改並退出",
         "quick filter": "快速搜索",
-        "copy selected": "複製所選"
+        "copy selected": "複製所選",
+        "edit is prohibited" : "禁止編輯記錄"
 }

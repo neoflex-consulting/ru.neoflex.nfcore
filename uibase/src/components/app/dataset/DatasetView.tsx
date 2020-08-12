@@ -343,7 +343,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('mask', this.evalMask(c.get('formatMask')));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
-                    if (!this.validateEditOptions('updateQuery') || params.data.operationMark__ === dmlOperation.insert) {
+                    if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
                         const startEditingParams = {
                             rowIndex: params.rowIndex,
                             colKey: params.column.getId(),
@@ -1160,7 +1160,11 @@ class DatasetView extends React.Component<any, State> {
         let restrictOperation = false;
         if (!this.props.viewObject.get('datasetComponent').get(operationType)) {
             restrictOperation = true;
-            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('query is not specified') ,"error")
+            if (operationType === "updateQuery") {
+                this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('edit is prohibited'), "error")
+            } else {
+                this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('query is not specified'), "error")
+            }
         }
         if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
             restrictOperation = true;
@@ -1515,7 +1519,7 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
             </Button>
             <Button
-                hidden={!this.state.isEditMode && !this.state.isInsertAllowed}
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("add row")}
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => this.gridRef.onInsert()}
@@ -1523,7 +1527,7 @@ class DatasetView extends React.Component<any, State> {
                 <FontAwesomeIcon icon={faPlus} size='lg' color="#7b7979"/>
             </Button>
             <Button
-                hidden={!this.state.isEditMode && !this.state.isDeleteAllowed}
+                hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
                 title={t("delete selected")}
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => this.gridRef.onDeleteSelected()}
@@ -1542,7 +1546,7 @@ class DatasetView extends React.Component<any, State> {
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
             </Button>
             <Button
-                hidden={!this.state.isEditMode}
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("copy selected")}
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => {
@@ -1686,6 +1690,7 @@ class DatasetView extends React.Component<any, State> {
                         saveChanges = {this.changeDatasetViewState}
                         onApplyEditChanges = {this.onApplyEditChanges}
                         isEditMode = {this.state.isEditMode}
+                        showEditDeleteButton = {this.state.isDeleteAllowed}
                         {...this.props}
                     />
                 }
