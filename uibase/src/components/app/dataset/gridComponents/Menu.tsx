@@ -3,15 +3,9 @@ import { Dropdown, Menu} from "antd";
 import {dmlOperation} from "../../../../utils/consts";
 
 interface Props {
-    value: string,
-    mask: string,
-    type: string,
-    api: any,
-    node: any,
-    onDelete: any,
     t: any,
     editGrid: any,
-    data: any,
+    data: {[key: string]: unknown},
     rowIndex: number
 }
 

@@ -48,6 +48,7 @@ import printIcon from "../../../icons/printIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {ValueFormatterParams, ValueGetterParams} from "ag-grid-community";
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;
@@ -752,12 +753,13 @@ class DatasetView extends React.Component<any, State> {
         return columnDefs
     };
 
-    valueFormatter = (params:any) => {
+    valueFormatter = (params: ValueFormatterParams) => {
+        const gridOptions = this.gridRef.getGridOptions();
         const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
         let formattedParam, splitted;
-        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+        if (gridOptions.getRowClass
             && params.value
-            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && gridOptions.getRowClass(params) === "aggregate-highlight") {
             splitted = params.value.split(":");
             params.value = splitted[1]
         }
@@ -780,9 +782,9 @@ class DatasetView extends React.Component<any, State> {
                                         : params.value;
         else
             formattedParam = params.value;
-        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+        if (gridOptions.getRowClass
             && params.value
-            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && gridOptions.getRowClass(params) === "aggregate-highlight") {
             splitted[1] = formattedParam;
             formattedParam = splitted.join(":")
         }

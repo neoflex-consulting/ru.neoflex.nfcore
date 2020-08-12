@@ -5,7 +5,7 @@ import {Button} from "antd";
 
 interface Props {
     node: any,
-    onDelete: any
+    editGrid: any,
 }
 
 interface State {
@@ -13,7 +13,7 @@ interface State {
 
 export default class DeleteButton extends React.Component<Props, State> {
     onButtonClick = (event:any) => {
-        this.props.onDelete(this.props.node.data);
+        this.props.editGrid.onDelete(this.props.node.data);
     };
 
     render() {
