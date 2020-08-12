@@ -792,7 +792,6 @@ class DatasetView extends React.Component<any, State> {
             formattedParam = splitted.join(":")
         }
         return formattedParam
-        /*return params.value*/
     };
 
     translateExpression(calculatedExpression: IServerQueryParam[]) {
@@ -1654,8 +1653,9 @@ class DatasetView extends React.Component<any, State> {
                 d.operationMark__ = undefined;
                 d.prevOperationMark__ = undefined;
                 buffer.shift();
-                if (buffer.length === 0)
+                if (buffer.length === 0) {
                     this.refresh(true)
+                }
             })
         });
     };

@@ -186,7 +186,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (prevProps.t !== this.props.t) {
             this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
         }
-        if(this.state.isAggregatesHighlighted){
+        if (this.state.isAggregatesHighlighted){
             this.highlightAggregate();
         }
     }
@@ -526,13 +526,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 return ""
             };
             let rowData;
-            let newColumnDefs:any[] = [].concat(this.state.columnDefs);
+            let newColumnDefs:any[] = []
             rowData = new Map();
             rowData.set('field', this.props.t('data menu'));
             rowData.set('headerName', this.props.t('data menu'));
             rowData.set('headerTooltip', 'type : String');
             rowData.set('component','menu');
             newColumnDefs.push(rowData);
+            newColumnDefs = newColumnDefs.concat(this.state.columnDefs);
             if (this.props.showEditDeleteButton) {
                 rowData = new Map();
                 rowData.set('field', this.props.t('delete row'));
@@ -543,7 +544,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 newColumnDefs.push(rowData);
             }
             this.setState({columnDefs : newColumnDefs},()=>{
-                this.grid.current.columnApi.moveColumn(this.props.t('data menu'),1);
                 this.grid.current.api.redrawRows();
             });
         } else {
