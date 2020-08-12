@@ -294,5 +294,6 @@
         "apply and quit": "未應用的更改仍然存在",
         "back to edit": "返回編輯",
         "reset changes": "重置更改並退出",
-        "quick filter": "快速搜索"
+        "quick filter": "快速搜索",
+        "copy selected": "複製所選"
 }

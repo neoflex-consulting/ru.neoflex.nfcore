@@ -554,7 +554,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     onDeleteSelected = () => {
-        let selected = this.grid.current.api.getSelectedNodes().map((sn:any) => sn.data);
+        const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => sn.data);
         this.onDelete(selected)
     };
 
@@ -564,7 +564,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         })
     };
 
-    markDeleted = (data: any, buffer: any[]) => {
+    markDeleted = (data: any) => {
         //Если до этого была обновлена
         if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete && data.prevOperationMark__ === dmlOperation.update) {
             this.buffer.forEach((el:any)=>{
@@ -595,31 +595,49 @@ class DatasetGrid extends React.Component<Props & any, any> {
     onDelete = (data:any|any[]) => {
         if (Array.isArray(data)) {
             data.forEach(d => {
-                this.markDeleted(d, this.buffer)
+                this.markDeleted(d)
             });
         } else {
-            this.markDeleted(data, this.buffer)
+            this.markDeleted(data)
         }
         this.grid.current.api.redrawRows(this.buffer);
     };
 
-    onInsert = () => {
+    onInsert = (data:any[] = [], position = 0) => {
         this.buffer = this.buffer.map((el:any) => el).concat(
-            this.grid.current.api.applyTransaction({ addIndex: 0, add: [{operationMark__:dmlOperation.insert}] })
-            .add
-            .map((a:any)=>{
-                return a.data
-            }))
+            this.grid.current.api
+                .applyTransaction({ addIndex: position, add: data.length > 0 ? data : [{operationMark__:dmlOperation.insert}] })
+                .add
+                .map((a:any)=>{
+                    return a.data
+                }));
         this.grid.current.api.redrawRows(this.buffer);
     };
 
     onUpdate = (params:any) => {
         let foundObject = this.buffer.find((el:any)=> Object.is(el, params.data));
         if (!foundObject && params.data.operationMark__ !== dmlOperation.insert) {
+            if (params.data.operationMark__ === undefined) {
+                for (const [key, value] of Object.entries(params.data)) {
+                    params.data[`${key}__`] = params.colDef.field === key ? params.oldValue : value
+                }
+            }
             params.data.operationMark__ = dmlOperation.update;
             this.buffer.push(params.data)
         }
         this.grid.current.api.redrawRows(this.buffer);
+    };
+
+    copySelected = () => {
+        let position = 0;
+        const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
+            position = sn.childIndex + 1
+            return {
+                ...sn.data,
+                operationMark__ : dmlOperation.insert
+            }
+        });
+        this.onInsert(selected, position);
     };
 
     render() {
@@ -659,8 +677,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         >
                             {this.state.columnDefs.map((col: any) =>
                                 <AgGridColumn
-                                    onCellValueChanged={this.props.isEditMode ? this.onUpdate : col.get('updateCallback')}
-                                    onCellDoubleClicked={col.get('onCellDoubleClicked')}
+                                    onCellValueChanged={this.props.isEditMode ? this.onUpdate : undefined}
+                                    onCellDoubleClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
                                     type={col.get('type')}
                                     key={col.get('field')}
                                     field={col.get('field')}

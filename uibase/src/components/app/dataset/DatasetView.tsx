@@ -352,41 +352,6 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }
             });
-            rowData.set('updateCallback', (agevent:any)=>{
-                const primaryKey = this.state.columnDefs
-                    .filter(c => c.get('isPrimaryKey'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: true
-                            }
-                    });
-                const values = this.state.columnDefs
-                    .filter(c => c.get('editable'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: c.get('isPrimaryKey')
-                            }
-                    });
-                const params = primaryKey.concat(values);
-                this.props.context.executeDMLOperation(resource, dmlOperation.update, params).then(()=>{
-                        if (this.state.currentDatasetComponent.eContents()[0].get('updateQuery') &&
-                            !this.state.currentDatasetComponent.eContents()[0].get('updateQuery').get('generateFromModel')) {
-                            //если указан параметризованный запрос
-                            this.refresh(true)
-                        }
-                    }
-                ).catch(()=>{
-                    //Восстанавливаем значение в случае ошибки
-                    this.refresh()
-                    }
-                )
-            });
             rowData.set('valueFormatter', this.valueFormatter);
             columnDefs.push(rowData);
         });
@@ -1575,6 +1540,16 @@ class DatasetView extends React.Component<any, State> {
                 }}
             >
                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode}
+                title={t("copy selected")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    this.gridRef.copySelected();
+                }}
+            >
+                {t("copy selected")}
             </Button>
             <Input
                 hidden={!this.state.isEditMode}
