@@ -1539,7 +1539,8 @@ class DatasetView extends React.Component<any, State> {
                 title={t("apply changes")}
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => {
-                    this.gridRef.removeRowsFromGrid();
+                    //Убрал т.к. есть подсветки
+                    /*this.gridRef.removeRowsFromGrid();*/
                     this.onApplyEditChanges(this.gridRef.getBuffer());
                 }}
             >

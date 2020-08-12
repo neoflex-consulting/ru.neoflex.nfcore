@@ -548,9 +548,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
                                     : qp.parameterDataType == DataType.STRING.getName() && qp.parameterValue
                                     ? "'${qp.parameterValue}'"
+                                    : qp.parameterValue == "" && qp.parameterDataType != DataType.STRING.getName()
+                                    ? "NULL"
                                     : qp.parameterValue
                                     ? "${qp.parameterValue}"
-                                    : "NULL"}.join(", ")
+                                    : "''"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """
                     insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
@@ -569,6 +571,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     ? qp.parameterValue.substring(0,10)
                     : (qp.parameterDataType == DataType.TIMESTAMP.getName() && qp.parameterValue)
                     ? qp.parameterValue.substring(0,19)
+                    : qp.parameterValue == "" && qp.parameterDataType != DataType.STRING.getName()
+                    ? null
                     : qp.parameterValue)} as EList<QueryParameter>
         } else {
             throw new NoSuchMethodException("${queryType} is not supported")
