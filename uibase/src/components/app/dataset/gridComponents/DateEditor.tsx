@@ -12,7 +12,8 @@ interface Props {
 interface State {
     pickedDate: Moment,
     currentValue: string,
-    format: string
+    format: string,
+    defaultValue: string
 }
 
 export default class DateEditor extends React.Component<Props, State> {
@@ -23,7 +24,8 @@ export default class DateEditor extends React.Component<Props, State> {
         this.state = {
             pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, format),
             currentValue: formatedValue ? formatedValue : this.props.value,
-            format: format
+            format: format,
+            defaultValue: formatedValue ? formatedValue : this.props.value
         };
     }
 
@@ -33,7 +35,9 @@ export default class DateEditor extends React.Component<Props, State> {
 
     getValue() {
         //Возвращаем в формате по умолчаню
-        return moment(this.state.currentValue, this.props.mask).format(this.state.format);
+        return this.state.currentValue !== this.state.defaultValue
+                    ? moment(this.state.currentValue, this.props.mask).format(this.state.format)
+                    : this.state.defaultValue;
     }
 
     render() {

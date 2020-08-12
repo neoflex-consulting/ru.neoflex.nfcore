@@ -615,17 +615,21 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     onUpdate = (params:any) => {
-        let foundObject = this.buffer.find((el:any)=> Object.is(el, params.data));
-        if (!foundObject && params.data.operationMark__ !== dmlOperation.insert) {
-            if (params.data.operationMark__ === undefined) {
-                for (const [key, value] of Object.entries(params.data)) {
-                    params.data[`${key}__`] = params.colDef.field === key ? params.oldValue : value
+        if (params.oldValue !== params.newValue
+            //Частный случай когда ячейка не заполнена
+            && !(params.newValue === undefined && params.oldValue === null)) {
+            let foundObject = this.buffer.find((el:any)=> Object.is(el, params.data));
+            if (!foundObject && params.data.operationMark__ !== dmlOperation.insert) {
+                if (params.data.operationMark__ === undefined) {
+                    for (const [key, value] of Object.entries(params.data)) {
+                        params.data[`${key}__`] = params.colDef.field === key ? params.oldValue : value
+                    }
                 }
+                params.data.operationMark__ = dmlOperation.update;
+                this.buffer.push(params.data)
             }
-            params.data.operationMark__ = dmlOperation.update;
-            this.buffer.push(params.data)
+            this.grid.current.api.redrawRows(this.buffer);
         }
-        this.grid.current.api.redrawRows(this.buffer);
     };
 
     copySelected = () => {
@@ -678,7 +682,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             {this.state.columnDefs.map((col: any) =>
                                 <AgGridColumn
                                     onCellValueChanged={this.props.isEditMode ? this.onUpdate : undefined}
-                                    onCellDoubleClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
+                                    onCellClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
                                     type={col.get('type')}
                                     key={col.get('field')}
                                     field={col.get('field')}
