@@ -501,6 +501,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.grid.current.api.applyTransaction({ remove: this.buffer
                 .filter((el:any) => el.operationMark__ === dmlOperation.insert ) });
         this.disableSelection();
+        this.grid.current.api.setQuickFilter(undefined);
         this.buffer = [];
     };
 
@@ -516,8 +517,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             };
             let rowData;
             if (this.props.showEditDeleteButton) {
-                let newColumnDefs:any[] = [];
-                newColumnDefs = [].concat(this.state.columnDefs);
+                let newColumnDefs:any[] = [].concat(this.state.columnDefs);
                 rowData = new Map();
                 rowData.set('field', this.props.t('delete row'));
                 rowData.set('headerName', this.props.t('delete row'));
@@ -540,6 +540,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         } else {
             let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== 'dataMenu' && c.get('field') !== 'deleteRow');
             this.grid.current.api.gridOptionsWrapper.gridOptions.getRowClass = null;
+            this.grid.current.api.setQuickFilter(undefined);
             this.setState({columnDefs : newColumnDefs},()=>{
                 this.grid.current.api.redrawRows();
             })
@@ -638,7 +639,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     copySelected = () => {
         let position = 0;
         const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
-            position = sn.childIndex + 1
+            position = sn.childIndex + 1;
             return {
                 ...sn.data,
                 operationMark__ : dmlOperation.insert
