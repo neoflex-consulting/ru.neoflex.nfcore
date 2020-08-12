@@ -299,5 +299,8 @@
         "edit is prohibited" : "禁止編輯記錄",
         "data menu": "選項菜單",
         "undo changes": "取消變更",
-        "copy": "複製"
+        "copy": "複製",
+        "download with table": "與表格一起下載",
+        "back to table": "返回表"
+
 }

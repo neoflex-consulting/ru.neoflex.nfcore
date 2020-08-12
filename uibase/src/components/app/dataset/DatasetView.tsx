@@ -1143,14 +1143,11 @@ class DatasetView extends React.Component<any, State> {
 
     }
     DiagramButton = () => {
-        this.props.context.addDocxHandler();
-        this.props.context.addExcelHandler();
         this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel});
         if (this.state.diagrams.length > 0)
             this.setState({currentDiagram: this.state.diagrams[0]});
         else
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
-
     };
 
     withTable(e: any) {
@@ -1395,7 +1392,7 @@ class DatasetView extends React.Component<any, State> {
             </Menu.Item>
         </Menu>);
         return <div id="selectInGetDiagramPanel">
-            <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t("back to table")} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
@@ -1405,7 +1402,7 @@ class DatasetView extends React.Component<any, State> {
                         this.props.context.removeExcelHandler();
                     }}
             >
-                Вернуться к таблице
+                {t("back to table")}
             </Button>
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -1469,7 +1466,7 @@ class DatasetView extends React.Component<any, State> {
                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
                 </Button>
             </Dropdown>
-            <Checkbox onChange={this.withTable.bind(this)}>Download with table</Checkbox>
+            <Checkbox onChange={this.withTable.bind(this)}>{t("download with table")}</Checkbox>
 
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}

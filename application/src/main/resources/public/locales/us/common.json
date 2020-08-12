@@ -306,5 +306,7 @@
         "copy selected": "Copy selected",
         "edit is prohibited" : "Edit is prohibited",
         "undo changes": "Undo changes",
-        "copy": "Copy"
+        "copy": "Copy",
+        "download with table": "Download with table",
+        "back to table": "Back to table"
 }
