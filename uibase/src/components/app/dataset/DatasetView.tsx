@@ -1616,7 +1616,7 @@ class DatasetView extends React.Component<any, State> {
                 .map(c => {
                     return {
                         parameterName: c.get('field'),
-                        parameterValue: d[c.get('field')],
+                        parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
                     }
