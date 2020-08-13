@@ -191,31 +191,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    private highlightAggregateAfterChangingPage() {
-        let datasetOperations = [];
-        for (let g = 0; g < this.props.serverAggregates.length; g++) {
-            if (this.props.serverAggregates[g].enable === true) {
-                let isInArray = false;
-                if (datasetOperations.length == 0) {
-                    datasetOperations.push(this.props.serverAggregates[g].operation)
-                } else {
-                    for (let i = 0; i < datasetOperations.length; i++) {
-                        if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
-                            isInArray = true
-                        }
-                    }
-                    if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
-                        datasetOperations.push(this.props.serverAggregates[g].operation)
-                    }
-
-                }
-            }
-        }
-        if (this.state.rowData.length !== datasetOperations.length)   {
-            this.highlightAggregate();
-        }
-    }
-
     highlightAggregate() {
         if (this.props.aggregatedRows.length > 0) {
             this.gridOptions.getRowClass = (params: any) => {
@@ -224,7 +199,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 }
                 return ""
             };
-        } else if (this.props.isEditMode) {
+        } else if (!this.props.isEditMode) {
             this.gridOptions.getRowClass = undefined;
         }
 
@@ -733,9 +708,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             )}
                         </AgGridReact>
                     </ConfigProvider>
-                    }
-                    {
-                        this.highlightAggregateAfterChangingPage()
                     }
                     <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
                         <Paginator
