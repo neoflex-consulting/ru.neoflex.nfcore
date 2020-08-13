@@ -754,7 +754,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const gridOptions = this.gridRef && params.colDef.hide !== false ? this.gridRef.getGridOptions() : undefined;
+        const gridOptions = this.gridRef && !params.colDef.hide ? this.gridRef.getGridOptions() : undefined;
         const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
         const mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
