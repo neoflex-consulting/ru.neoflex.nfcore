@@ -34,8 +34,7 @@ interface Props {
     onHeaderSelection?: Function,
     activeReportDateField: boolean,
     currentDatasetComponent: Ecore.Resource,
-    isAggregatesHighlighted: boolean,
-    rowData: any[],
+    rowData: {[key: string]: unknown}[],
     columnDefs: Map<String,any>[],
     paginationCurrentPage: number,
     paginationTotalPage: number,
@@ -49,6 +48,7 @@ interface Props {
     numberOfNewLines: boolean,
     onApplyEditChanges: (buffer: any[]) => void;
     showEditDeleteButton: boolean;
+    aggregatedRows: {[key: string]: unknown}[]
 }
 
 function isFirstColumn (params:ValueGetterParams) {
@@ -186,7 +186,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (prevProps.t !== this.props.t) {
             this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
         }
-        if (this.state.isAggregatesHighlighted){
+        if (this.props.aggregatedRows.length > 0){
             this.highlightAggregate();
         }
     }
@@ -216,43 +216,18 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    private highlightAggregate() {
-        let datasetOperations = [];
-        for (let g = 0; g < this.props.serverAggregates.length; g++){
-            if (this.props.serverAggregates[g].enable === true) {
-                let isInArray = false;
-                if (datasetOperations.length == 0) {
-                    datasetOperations.push(this.props.serverAggregates[g].operation)
-                } else {
-                    for (let i = 0; i < datasetOperations.length; i++) {
-                        if (datasetOperations[i] == this.props.serverAggregates[g].operation) {
-                            isInArray = true
-                        }
-                    }
-                    if (!isInArray && this.props.serverAggregates[g].datasetColumn !== undefined) {
-                        datasetOperations.push(this.props.serverAggregates[g].operation)
-                    }
+    highlightAggregate() {
+        if (this.props.aggregatedRows.length > 0) {
+            this.gridOptions.getRowClass = (params: any) => {
+                if (this.props.aggregatedRows.find((a:{[key: string]: unknown}) => Object.is(a,params.data))) {
+                    return 'aggregate-highlight';
+                }
+                return ""
+            };
+        } else if (this.props.isEditMode) {
+            this.gridOptions.getRowClass = undefined;
+        }
 
-                }
-            }
-        }
-        if (this.state.rowData.length !== datasetOperations.length) {
-            let numberOfLinesInAggregations = datasetOperations.length;
-            if (this.grid.current && !this.props.isEditMode) {
-                if (this.props.isAggregatesHighlighted && this.state.rowData.length > 0) {
-                    let lastLines = this.props.rowData.length - numberOfLinesInAggregations - 1;
-                    this.gridOptions.getRowClass = function (params: any):string {
-                        if (lastLines < params.node.childIndex) {
-                            return 'aggregate-highlight';
-                        }
-                        return ""
-                    }
-                } else if (this.props.isEditMode) {
-                    this.gridOptions.getRowClass = undefined;
-                }
-                this.grid.current.api.refreshCells();
-            }
-        }
     }
 
     private changeHighlight() {
@@ -526,7 +501,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 return ""
             };
             let rowData;
-            let newColumnDefs:any[] = []
+            let newColumnDefs:any[] = [];
             rowData = new Map();
             rowData.set('field', this.props.t('data menu'));
             rowData.set('headerName', this.props.t('data menu'));
