@@ -791,6 +791,9 @@ class HtmlContent_ extends ViewContainer {
         };
     }
 
+    onChange = (value:string) => {
+        this.setState({htmlContent:value})
+    };
 
     componentDidMount(): void {
         this.props.context.addEventAction({
@@ -800,6 +803,7 @@ class HtmlContent_ extends ViewContainer {
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
             ]
         });
     }

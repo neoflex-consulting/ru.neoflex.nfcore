@@ -49,6 +49,7 @@ interface Props {
     numberOfNewLines: boolean,
     onApplyEditChanges: (buffer: any[]) => void;
     showEditDeleteButton: boolean;
+    showMenuCopyButton: boolean;
     aggregatedRows: {[key: string]: unknown}[]
 }
 
@@ -454,9 +455,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return this.buffer
     };
 
-    getGridOptions = () => {
+    /*getGridOptions = () => {
         return this.gridOptions
-    };
+    };*/
 
     resetBuffer = () => {
         this.grid.current.api.applyTransaction({ remove: this.buffer
@@ -622,7 +623,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.onDelete(data)
         } else if (data.operationMark__ === dmlOperation.update) {
             for (const [old_key, old_value] of Object.entries(data)) {
-                for (const [new_key, new_value] of Object.entries(data)) {
+                for (const [new_key] of Object.entries(data)) {
                     if (old_key == `${new_key}__` && old_key !== new_key && old_key !== "operationMark__")
                         data[new_key] = old_value
                 }
@@ -697,7 +698,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         viewObject: col.get('component'),
                                         componentRenderCondition: col.get('componentRenderCondition'),
                                         onDelete: this.onDelete,
-                                        editGrid: this
+                                        editGrid: this,
+                                        showMenuCopyButton: this.props.showMenuCopyButton
                                     } : undefined}
                                     cellRenderer = {
                                         (col.get('component')) ? this.getComponent(col.get('component').eClass ? col.get('component').eClass._id : col.get('component')) : function (params: any) {
