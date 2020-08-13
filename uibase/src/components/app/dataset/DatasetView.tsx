@@ -33,6 +33,7 @@ import {
     grantType, textAlignMap
 } from "../../../utils/consts";
 import {ValueFormatterParams} from "ag-grid-community";
+import _ from "lodash";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
 import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
@@ -89,7 +90,7 @@ interface State {
     columnDefs: Map<String,any>[];
     defaultColumnDefs: Map<String,any>[];
     fullScreenOn: boolean;
-    rowData: any[];
+    rowData: {[key: string]: unknown}[];
     highlights: IServerQueryParam[];
     diagrams: IDiagram[];
     serverFilters: IServerQueryParam[];
@@ -134,6 +135,7 @@ interface State {
     isDeleteAllowed: boolean;
     isUpdateAllowed: boolean;
     isCheckEditBufferVisible: boolean;
+    aggregatedRows: {[key: string]: unknown}[];
 }
 
 const defaultComponentValues = {
@@ -205,8 +207,9 @@ class DatasetView extends React.Component<any, State> {
             isInsertAllowed: false,
             isUpdateAllowed: false,
             isDeleteAllowed: false,
-            isCheckEditBufferVisible: false
-        };
+            isCheckEditBufferVisible: false,
+            aggregatedRows: []
+        }
         this.gridRef = React.createRef();
     }
 
@@ -754,16 +757,14 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const gridOptions = this.gridRef && !params.colDef.hide ? this.gridRef.getGridOptions() : undefined;
         const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
         const mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
-        if (gridOptions
-            &&gridOptions.getRowClass
+        if (this.state.aggregatedRows.length > 0
             && params.value
-            && gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
             splitted = params.value.split(":");
-            params.value = splitted[1]
+            params.value = splitted[1];
         }
 
         if (params.value)
@@ -784,10 +785,9 @@ class DatasetView extends React.Component<any, State> {
                                         : params.value;
         else
             formattedParam = params.value;
-        if (gridOptions
-            && gridOptions.getRowClass
+        if (this.state.aggregatedRows.length > 0
             && params.value
-            && gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
             splitted[1] = formattedParam;
             formattedParam = splitted.join(":")
         }
@@ -886,7 +886,7 @@ class DatasetView extends React.Component<any, State> {
             , filter(calculatedExpression)
             , filter(groupByColumnParams)
         ).then((json: string) => {
-                let result: Object[] = JSON.parse(json);
+                let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
@@ -911,14 +911,29 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                            this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns},callback);
+                            this.setState({
+                                rowData: result,
+                                columnDefs: newColumnDef,
+                                isAggregations: true,
+                                //Если не проверять то при одинаковых данных, ag-grid не подставляет новые в грид
+                                //Поэтому проверка ссылки на новые записи при выполнении valueFormatter будет давать false
+                                aggregatedRows: _.isEqual(result,this.state.rowData) ? this.state.aggregatedRows : this.getAggregatedRows(aggregationParams, result),
+                                hiddenColumns: hiddenColumns},callback);
                             this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns},callback);
+                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, aggregatedRows: [], hiddenColumns: hiddenColumns},callback);
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
         )
+    }
+
+    getAggregatedRows(aggregationParams: IServerQueryParam[], rowData: {[key: string]: unknown}[]) {
+        const numAggRows = _(aggregationParams)
+            .countBy('operation')
+            .map((count, name) => ({ name, count }))
+            .value().length;
+        return rowData.slice(rowData.length - numAggRows, rowData.length)
     }
 
     refresh(resetGrouping:boolean = false): void {
@@ -1400,9 +1415,6 @@ class DatasetView extends React.Component<any, State> {
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
-                        this.getAllDatasetComponents(true);
-                        this.props.context.removeDocxHandler();
-                        this.props.context.removeExcelHandler();
                     }}
             >
                 {t("back to table")}
@@ -1669,35 +1681,33 @@ class DatasetView extends React.Component<any, State> {
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
                 {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
-                {(this.state.currentDiagram)
-                    ?
-                    <DatasetDiagram
-                        {...this.props}
-                        rowData={this.state.rowData}
-                        diagramParams={this.state.currentDiagram}
-                    />
-                    :
-                    <DatasetGrid
-                        ref={(g:any) => {
-                            this.gridRef = g
-                        }}
-                        isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
-                        serverAggregates = {this.state.serverAggregates}
-                        isAggregations = {this.state.isAggregations}
-                        highlights = {this.state.highlights}
-                        currentDatasetComponent = {this.state.currentDatasetComponent}
-                        rowData = {this.state.rowData}
-                        columnDefs = {this.state.columnDefs}
-                        currentTheme = {this.state.currentTheme}
-                        showUniqRow = {this.state.showUniqRow}
-                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                        saveChanges = {this.changeDatasetViewState}
-                        onApplyEditChanges = {this.onApplyEditChanges}
-                        isEditMode = {this.state.isEditMode}
-                        showEditDeleteButton = {this.state.isDeleteAllowed}
-                        {...this.props}
-                    />
-                }
+                <DatasetDiagram
+                    {...this.props}
+                    hide={!this.state.currentDiagram}
+                    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
+                    diagramParams={this.state.currentDiagram}
+                />
+                <DatasetGrid
+                    hide={!!this.state.currentDiagram}
+                    ref={(g:any) => {
+                        this.gridRef = g
+                    }}
+                    serverAggregates = {this.state.serverAggregates}
+                    isAggregations = {this.state.isAggregations}
+                    highlights = {this.state.highlights}
+                    currentDatasetComponent = {this.state.currentDatasetComponent}
+                    rowData = {this.state.rowData}
+                    columnDefs = {this.state.columnDefs}
+                    currentTheme = {this.state.currentTheme}
+                    showUniqRow = {this.state.showUniqRow}
+                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                    saveChanges = {this.changeDatasetViewState}
+                    onApplyEditChanges = {this.onApplyEditChanges}
+                    isEditMode = {this.state.isEditMode}
+                    showEditDeleteButton = {this.state.isDeleteAllowed}
+                    aggregatedRows = {this.state.aggregatedRows}
+                    {...this.props}
+                />
                 <div id="filterButton">
                 <Drawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
