@@ -28,6 +28,7 @@ import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 const backgroundColor = "#fdfdfd";
 
 interface Props {
+    hide: boolean,
     onCtrlA?: Function,
     onCtrlShiftA?: Function,
     headerSelection?: boolean,
@@ -66,6 +67,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         super(props);
 
         this.state = {
+            hidden: false,
             themes: [],
             operations: [],
             showUniqRow: this.props.showUniqRow,
@@ -636,6 +638,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const {gridOptions} = this.state;
         return (
             <div id="menuButton"
+                 hidden={this.props.hide}
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >

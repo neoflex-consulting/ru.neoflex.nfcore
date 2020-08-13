@@ -1415,9 +1415,6 @@ class DatasetView extends React.Component<any, State> {
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
-                        this.getAllDatasetComponents(true);
-                        this.props.context.removeDocxHandler();
-                        this.props.context.removeExcelHandler();
                     }}
             >
                 {t("back to table")}
@@ -1684,35 +1681,33 @@ class DatasetView extends React.Component<any, State> {
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
                 {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
-                {(this.state.currentDiagram)
-                    ?
-                    <DatasetDiagram
-                        {...this.props}
-                        rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
-                        diagramParams={this.state.currentDiagram}
-                    />
-                    :
-                    <DatasetGrid
-                        ref={(g:any) => {
-                            this.gridRef = g
-                        }}
-                        serverAggregates = {this.state.serverAggregates}
-                        isAggregations = {this.state.isAggregations}
-                        highlights = {this.state.highlights}
-                        currentDatasetComponent = {this.state.currentDatasetComponent}
-                        rowData = {this.state.rowData}
-                        columnDefs = {this.state.columnDefs}
-                        currentTheme = {this.state.currentTheme}
-                        showUniqRow = {this.state.showUniqRow}
-                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                        saveChanges = {this.changeDatasetViewState}
-                        onApplyEditChanges = {this.onApplyEditChanges}
-                        isEditMode = {this.state.isEditMode}
-                        showEditDeleteButton = {this.state.isDeleteAllowed}
-                        aggregatedRows = {this.state.aggregatedRows}
-                        {...this.props}
-                    />
-                }
+                <DatasetDiagram
+                    {...this.props}
+                    hide={!this.state.currentDiagram}
+                    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
+                    diagramParams={this.state.currentDiagram}
+                />
+                <DatasetGrid
+                    hide={!!this.state.currentDiagram}
+                    ref={(g:any) => {
+                        this.gridRef = g
+                    }}
+                    serverAggregates = {this.state.serverAggregates}
+                    isAggregations = {this.state.isAggregations}
+                    highlights = {this.state.highlights}
+                    currentDatasetComponent = {this.state.currentDatasetComponent}
+                    rowData = {this.state.rowData}
+                    columnDefs = {this.state.columnDefs}
+                    currentTheme = {this.state.currentTheme}
+                    showUniqRow = {this.state.showUniqRow}
+                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                    saveChanges = {this.changeDatasetViewState}
+                    onApplyEditChanges = {this.onApplyEditChanges}
+                    isEditMode = {this.state.isEditMode}
+                    showEditDeleteButton = {this.state.isDeleteAllowed}
+                    aggregatedRows = {this.state.aggregatedRows}
+                    {...this.props}
+                />
                 <div id="filterButton">
                 <Drawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
