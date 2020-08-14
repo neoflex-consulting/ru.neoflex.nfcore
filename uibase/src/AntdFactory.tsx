@@ -487,7 +487,7 @@ class Select_ extends ViewContainer {
                         selectData: JSON.parse(result).map((el: any)=>{
                             return {
                                 key: el[this.viewObject.get('datasetKeyColumn').get('name')],
-                                value: el[this.viewObject.get('datasetKeyColumn').get('name')]
+                                value: el[this.viewObject.get('datasetValueColumn').get('name')]
                             }
                         }),
                         currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
