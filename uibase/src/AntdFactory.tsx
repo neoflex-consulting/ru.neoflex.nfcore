@@ -588,7 +588,7 @@ class Select_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = '200px';
             return (
                 <div
                     hidden={this.state.isHidden}
@@ -751,7 +751,7 @@ export class DatePicker_ extends ViewContainer {
                     disabled={isReadOnly}
                     allowClear={this.viewObject.get('allowClear') || false}
                     format={this.state.mask}
-                    style={{width: this.viewObject.get('width') || "200px", display: (this.state.isHidden) ? 'none' : undefined}}
+                    style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -1071,7 +1071,7 @@ class Input_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div

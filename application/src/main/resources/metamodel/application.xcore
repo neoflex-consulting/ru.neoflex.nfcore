@@ -53,7 +53,6 @@ class GlobalSettings {
 class AppModule {
     QName name
     contains ViewElement view
-    contains ToolPanel toolPanel
     contains CatalogNode referenceTree
     boolean useParentReferenceTree
 }
@@ -157,15 +156,6 @@ class ValueHolder extends ViewElement, ValueItem {
 
 class TabsViewReport extends ViewContainer {
     TabPosition tabPosition = "Top"
-}
-
-class Tool {
-    String name
-	contains Icon icon
-}
-
-class ToolPanel {
-    contains Tool[] tools
 }
 
 class Row extends ViewContainer {
