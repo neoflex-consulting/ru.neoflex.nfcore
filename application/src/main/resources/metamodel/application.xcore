@@ -137,7 +137,6 @@ abstract class CommandElement {
 }
 
 class DatasetView extends ViewElement, CommandElement {
-    refers Dataset dataset
     refers DatasetComponent datasetComponent
 }
 
