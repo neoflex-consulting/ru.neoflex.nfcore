@@ -206,7 +206,6 @@ class GradientStyle extends Style {
 class Select extends ViewElement, ValueItem, CommandElement {
     String placeholder
     SelectMode mode = "Default"
-    String width = "200"
     boolean isDynamic
     String staticValues
     refers DatasetComponent datasetComponent
@@ -216,7 +215,6 @@ class Select extends ViewElement, ValueItem, CommandElement {
 
 class DatePicker extends ViewElement, ValueItem {
     boolean allowClear
-    String width = "200"
     refers FormatMask formatMask
     boolean showTime
 }
@@ -233,7 +231,6 @@ class Input extends ViewElement, ValueItem {
     String maxValue = "99"
     String step = "1"
     String placeholder
-    String width = "200"
 }
 
 class Button extends ViewElement, GridComponent {
