@@ -10,38 +10,13 @@ import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
+import ru.neoflex.nfcore.utils.JdbcUtils
 
 import java.sql.Connection
-import java.sql.Date
 import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class JdbcDatasetExt extends JdbcDatasetImpl {
     private static final Logger logger = LoggerFactory.getLogger(JdbcDatasetExt.class);
-
-    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p, String query = "") {
-        for (int i = 0; i <= parameters.size() - 1; ++i) {
-            if (query.find(":${parameters[i].parameterName}") || query == "") {
-                if (!parameters[i].parameterValue) {
-                    p.setString(parameters[i].parameterName, null)
-                }
-                if (parameters[i].parameterValue == null) {
-                    p.setObject(parameters[i].parameterName, null)
-                } else if (parameters[i].parameterDataType == DataType.DATE.getName()) {
-                    p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                } else if (parameters[i].parameterDataType == DataType.TIMESTAMP.getName()) {
-                    p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
-                } else if (parameters[i].parameterDataType == DataType.INTEGER.getName()) {
-                    p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-                } else {
-                    p.setString(parameters[i].parameterName, parameters[i].parameterValue)
-                }
-            }
-        }
-        return p
-    }
 
     @Override
     String runQueryDataset(EList<QueryParameter> parameters) {
@@ -183,7 +158,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         ResultSet resultSet = null;
         ps = new NamedParameterStatement(jdbcConnection, currentQuery);
         if (parameters && parameters.size() > 0 && currentQuery) {
-            ps = getNamedParameterStatement(parameters, ps, currentQuery)
+            ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQuery)
         }
         resultSet = ps.executeQuery()
         return resultSet
