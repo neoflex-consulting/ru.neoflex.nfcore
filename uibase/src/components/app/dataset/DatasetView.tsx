@@ -1017,7 +1017,7 @@ class DatasetView extends React.Component<any, State> {
             datasetComponents[datasetComponentName] = {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
                 rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : [],
-                getBuffer: this.gridRef.getBuffer,
+                getBuffer: this.gridRef ? this.gridRef.getBuffer : () => {return []},
                 showModal: () => {this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})}
             };
             this.props.context.updateContext({datasetComponents: datasetComponents})

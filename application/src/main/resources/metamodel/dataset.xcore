@@ -84,7 +84,6 @@ class DatasetComponent {
      Access access //Публичный, закрытый доступ
      op JSON createAllColumns()
      op JSON deleteAllColumns()
-     boolean firstCheckBoxColumn //есть ли в первом столбце в гриде столбец с чекбоксами или его нет
      refers Dataset dataset
      contains DatasetColumnView[] column
      op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
@@ -130,9 +129,7 @@ abstract class DatasetColumnView {
     Filter filter = "TextColumnFilter"
     Sort sort //тип клиентской сортировки
     String defaultValue //Если пришло значение null, то что отображать в ячейке
-    Aggregate aggregate //Посчитать столбец (сумму, количество, вычислить максимальное значение)
     boolean editable
-    boolean checkboxSelection
     boolean sortable
     boolean suppressMenu
     boolean resizable

@@ -872,7 +872,8 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.updateContext!({contextItemValues: contextItemValues},
             ()=>this.props.context.notifyAllEventHandlers({
                 type:eventType.change,
-                itemId:this.viewObject.get('name')+this.viewObject._id
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: result
             }));
     };
 

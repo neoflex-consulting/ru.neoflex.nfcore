@@ -146,11 +146,7 @@ class DatasetView extends ViewElement, CommandElement {
     refers DatasetComponent datasetComponent
 }
 
-abstract class ContextWriter {
-
-}
-
-class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
+class GroovyCommand extends ViewElement, CommandElement {
     Text command
     String gitResourcePath
     String gitStaticClass
@@ -161,8 +157,6 @@ class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
 }
 
 class ValueHolder extends ViewElement, ValueItem {
-    refers ContextWriter contextWriter
-    String groovyCommandResultColumnName
 }
 
 class TabsViewReport extends ViewContainer {
@@ -257,11 +251,6 @@ class Input extends ViewElement, ValueItem {
 
 class Button extends ViewElement, GridComponent {
     refers ButtonStyle buttonStyle
-    boolean buttonCancel
-    boolean buttonSave
-    boolean buttonSubmit
-    boolean backStartPage
-    String span = "0"
     String label
 }
 
