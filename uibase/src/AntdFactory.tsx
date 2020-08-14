@@ -104,12 +104,7 @@ class Col_ extends ViewContainer {
             <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
                  hidden={this.state.isHidden}
-                 style={{
-                borderRight: this.viewObject.get('borderRight') ? '1px solid #eeeff0' : 'none',
-                borderBottom: this.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
-                borderTop: this.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
-                borderLeft: this.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
-            }}>
+                 style={{}}>
                 {this.renderChildren(isReadOnly)}
             </Col>
         )
@@ -261,15 +256,7 @@ class Row_ extends ViewContainer {
             <Row
                 key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{
-                    textAlign: this.viewObject.get('textAlign') || 'left',
-                    marginRight: marginRight,
-                    marginBottom: marginBottom,
-                    marginTop: marginTop,
-                    marginLeft: marginLeft,
-                    borderBottom: borderBottom,
-                    height: height,
-                }}
+                style={{}}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly)}
@@ -993,22 +980,6 @@ class ValueHolder_ extends ViewContainer {
     componentWillUnmount(): void {
         this.props.context.removeEventAction();
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
-    }
-
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.viewObject.get('contextWriter')) {
-            const contextItem = this.props.context.contextItemValues.get(this.viewObject.get('contextWriter').get('name')+this.viewObject.get('contextWriter')._id);
-            const columnName = this.viewObject.get('groovyCommandResultColumnName');
-            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-            if (contextItem
-                && contextItem.parameterValue.length >= 1
-                && columnName) {
-                const value = contextItem.parameterValue[0][columnName];
-                if (value !== (currentContextValue ? currentContextValue.parameterValue: undefined)) {
-                    this.onChange(value);
-                }
-            }
-        }
     }
 
     render = () => {

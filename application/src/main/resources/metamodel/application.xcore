@@ -115,10 +115,6 @@ class Day {
 @GenModel(documentation="max span value = 24 in one row")
 class Column extends ViewContainer {
     String span = "24"
-    boolean borderRight
-    boolean borderBottom
-    boolean borderTop
-    boolean borderLeft
 }
 
 class ComponentElement extends ViewElement {
@@ -173,15 +169,6 @@ class ToolPanel {
 }
 
 class Row extends ViewContainer {
-    String horizontalGutter = "0"
-    String verticalGutter = "0"
-    TextAlign textAlign
-    String marginRight = "0px"
-    String marginBottom = "0px"
-    String marginTop = "0px"
-    String marginLeft = "0px"
-    boolean borderBottom
-    String height
 }
 
 class Typography extends ViewElement {
