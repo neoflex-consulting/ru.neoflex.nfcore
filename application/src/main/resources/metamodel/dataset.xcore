@@ -50,11 +50,12 @@ class JdbcDataset extends Dataset {
     Text tableName
     op JSON showAllTables()
     op JSON loadAllColumns()
-    op JSON runQueryDataset()
+    op JSON runQueryDataset(QueryParameter[] parameters)
 }
 
 class GroovyDataset extends Dataset {
     op JSON loadAllColumns()
+    op JSON runQueryDataset(QueryParameter[] parameters)
     String runQueryGroovyCode
     String loadAllColumnGroovyCode
 }

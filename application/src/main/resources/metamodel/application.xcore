@@ -9,6 +9,7 @@ package ru.neoflex.nfcore.application
 import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.FormatMask
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
@@ -197,9 +198,9 @@ class Select extends ViewElement, ValueItem, CommandElement {
     SelectMode mode = "Default"
     boolean isDynamic
     String staticValues
-    refers DatasetComponent datasetComponent
-    String keyColumn //TODO выбор из списка
-    String valueColumn //TODO
+    refers Dataset dataset
+    refers DatasetColumn datasetKeyColumn
+    refers DatasetColumn datasetValueColumn
 }
 
 class DatePicker extends ViewElement, ValueItem {

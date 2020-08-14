@@ -417,7 +417,7 @@ class Select_ extends ViewContainer {
             selectData: [],
             params: [],
             currentValue: undefined,
-            datasetComponent: undefined,
+            dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
         };
@@ -479,15 +479,15 @@ class Select_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('isDynamic')
-            && this.viewObject.get('datasetComponent')) {
-            this.setState({datasetComponent:this.viewObject.get('datasetComponent').eContainer});
+            && this.viewObject.get('dataset')) {
+            this.setState({dataset:this.viewObject.get('dataset').eContainer});
             if (this.viewObject.get('valueItems').size() === 0) {
-                this.props.context.runQuery(this.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
                     this.setState({
                         selectData: JSON.parse(result).map((el: any)=>{
                             return {
-                                key: el[this.viewObject.get('keyColumn')],
-                                value: el[this.viewObject.get('valueColumn')]
+                                key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                                value: el[this.viewObject.get('datasetKeyColumn').get('name')]
                             }
                         }),
                         currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
@@ -530,14 +530,14 @@ class Select_ extends ViewContainer {
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const newParams = getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues);
         if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
-            && this.state.datasetComponent
+            && this.state.dataset
             && this.viewObject.get('valueItems')) {
             this.setState({params: newParams});
-            this.props.context.runQuery(this.state.datasetComponent, newParams).then((result: string) => {
+            this.props.context.runQueryDataset(this.state.dataset, newParams).then((result: string) => {
                 const resArr = JSON.parse(result).map((el: any)=>{
                     return {
-                        key: el[this.viewObject.get('keyColumn')],
-                        value: el[this.viewObject.get('valueColumn')]
+                        key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                        value: el[this.viewObject.get('datasetValueColumn').get('name')]
                     }
                 });
                 let currentValue: string;

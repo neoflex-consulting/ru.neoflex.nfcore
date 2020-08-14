@@ -577,8 +577,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         } else {
             throw new NoSuchMethodException("${queryType} is not supported")
         }
-        Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
+        Connection jdbcConnection = null;
         try {
+            jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
             NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, query);
             logger.info("execute${queryType}", "execute${queryType} = " + query)
             if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
@@ -602,11 +603,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
                 if (parameters[i].parameterValue == null) {
                     p.setObject(parameters[i].parameterName, null)
-                } else if (parameters[i].parameterDataType == "Date") {
+                } else if (parameters[i].parameterDataType == DataType.DATE.getName()) {
                     p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                } else if (parameters[i].parameterDataType == "Timestamp") {
+                } else if (parameters[i].parameterDataType == DataType.TIMESTAMP.getName()) {
                     p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
-                } else if (parameters[i].parameterDataType == "Integer") {
+                } else if (parameters[i].parameterDataType == DataType.INTEGER.getName()) {
                     p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
                 } else {
                     p.setString(parameters[i].parameterName, parameters[i].parameterValue)

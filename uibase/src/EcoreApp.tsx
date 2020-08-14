@@ -67,6 +67,7 @@ class EcoreApp extends React.Component<any, State> {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             runQuery: this.runQuery,
+            runQueryDataset: this.runQueryDataset,
             executeDMLOperation: this.executeDMLOperation,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
@@ -327,6 +328,16 @@ class EcoreApp extends React.Component<any, State> {
             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
             ]
         )
+    };
+
+    runQueryDataset = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = []) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'runQueryDataset';
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().call(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+        ])
     };
 
     isDatasetComponentsBufferEmpty = () => {
