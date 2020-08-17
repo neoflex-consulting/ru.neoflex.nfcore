@@ -77,6 +77,7 @@ class Diagram {
 }
 
 /*View*/
+@Ecore(constraints="IsValid")
 class DatasetComponent {
      QName name //default сделать по умолчанию (не редактируемый)
      refers User owner
