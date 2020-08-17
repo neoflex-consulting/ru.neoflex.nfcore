@@ -308,5 +308,8 @@
         "undo changes": "Undo changes",
         "copy": "Copy",
         "download with table": "Download with table",
-        "back to table": "Back to table"
+        "back to table": "Back to table",
+
+        "hide": "Hide",
+        "show": "Show"
 }

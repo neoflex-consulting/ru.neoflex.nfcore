@@ -301,6 +301,9 @@
         "undo changes": "取消變更",
         "copy": "複製",
         "download with table": "與表格一起下載",
-        "back to table": "返回表"
+        "back to table": "返回表",
+
+        "hide": "隱藏",
+        "show": "顯示"
 
 }

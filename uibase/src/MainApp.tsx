@@ -186,7 +186,7 @@ export class MainApp extends React.Component<any, State> {
     renderFooter = () => {
         return (
             <div>
-                <Tooltip title={this.state.hideReferences ? "Show" : "Hide"}>
+                <Tooltip title={this.state.hideReferences ? this.props.t("show") : this.props.t("hide")}>
                     <span className="references-button" onClick={() => {
                         this.setState({hideReferences: !this.state.hideReferences})
                     }}><IconFA name="bars"></IconFA></span>
