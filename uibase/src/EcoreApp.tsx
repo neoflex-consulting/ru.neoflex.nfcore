@@ -343,7 +343,8 @@ class EcoreApp extends React.Component<any, State> {
     isDatasetComponentsBufferEmpty = () => {
         if (this.state.context.datasetComponents) {
             for (const [key, value] of Object.entries(this.state.context.datasetComponents)) {
-                if (this.state.context.datasetComponents[key].getBuffer().length > 0) {
+                if (this.state.context.datasetComponents[key].getBuffer
+                    && this.state.context.datasetComponents[key].getBuffer().length > 0) {
                     this.state.context.datasetComponents[key].showModal();
                     return false
                 }
