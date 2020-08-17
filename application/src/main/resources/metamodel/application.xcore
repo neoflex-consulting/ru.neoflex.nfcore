@@ -137,6 +137,7 @@ abstract class CommandElement {
     refers ValueItem[] valueItems
 }
 
+@Ecore(constraints="IsValid")
 class DatasetView extends ViewElement, CommandElement {
     refers DatasetComponent datasetComponent
 }
