@@ -52,12 +52,7 @@ public class ApplicationValidatorExt extends ApplicationValidator {
 
     @Override
     public boolean validateDatasetView(DatasetView datasetView, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (datasetView.getDataset() == null) {
-            return validate(datasetView, diagnostics, context, "datasetGrid - must be set");
-        }
-        else {
-            return false;
-        }
+        return false;
     }
 
     @Override

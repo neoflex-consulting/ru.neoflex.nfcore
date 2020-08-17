@@ -12,13 +12,10 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.impl.adapters.CalculatorAdapter
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import ru.neoflex.nfcore.dataset.*
+import ru.neoflex.nfcore.utils.JdbcUtils
 
 import java.sql.Connection
-import java.sql.Date
 import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class DatasetComponentExt extends DatasetComponentImpl {
 
@@ -428,7 +425,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
                 if (parameters) {
-                    p = getNamedParameterStatement(parameters, p)
+                    p = JdbcUtils.getNamedParameterStatement(parameters, p)
                 }
                 try {
                     rs = p.executeQuery();
@@ -577,12 +574,13 @@ class DatasetComponentExt extends DatasetComponentImpl {
         } else {
             throw new NoSuchMethodException("${queryType} is not supported")
         }
-        Connection jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
+        Connection jdbcConnection = null;
         try {
+            jdbcConnection = (jdbcDataset.connection as JdbcConnectionExt).connect()
             NamedParameterStatement p = new NamedParameterStatement(jdbcConnection, query);
             logger.info("execute${queryType}", "execute${queryType} = " + query)
             if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
-                p = getNamedParameterStatement(parameters, p, query)
+                p = JdbcUtils.getNamedParameterStatement(parameters, p, query)
             }
             try {
                 p.execute()
@@ -592,28 +590,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         } finally {
             (jdbcConnection) ? jdbcConnection.close() : null
         }
-    }
-
-    NamedParameterStatement getNamedParameterStatement(EList<QueryParameter> parameters, NamedParameterStatement p, String query = "") {
-        for (int i = 0; i <= parameters.size() - 1; ++i) {
-            if (query.find(":${parameters[i].parameterName}") || query == "") {
-                if (!parameters[i].parameterValue) {
-                    p.setString(parameters[i].parameterName, null)
-                }
-                if (parameters[i].parameterValue == null) {
-                    p.setObject(parameters[i].parameterName, null)
-                } else if (parameters[i].parameterDataType == "Date") {
-                    p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))
-                } else if (parameters[i].parameterDataType == "Timestamp") {
-                    p.setTimestamp(parameters[i].parameterName, Timestamp.valueOf(LocalDateTime.parse(parameters[i].parameterValue, parameters[i].parameterTimestampFormat)))
-                } else if (parameters[i].parameterDataType == "Integer") {
-                    p.setInt(parameters[i].parameterName, parameters[i].parameterValue.toInteger())
-                } else {
-                    p.setString(parameters[i].parameterName, parameters[i].parameterValue)
-                }
-            }
-        }
-        return p
     }
 
     String getConvertOperator(String operator) {

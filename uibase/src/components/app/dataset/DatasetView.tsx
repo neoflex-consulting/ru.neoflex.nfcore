@@ -254,21 +254,7 @@ class DatasetView extends React.Component<any, State> {
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                         }
                         result.forEach( (d: Ecore.Resource) => {
-                            if (d.eContents()[0].get('dataset')) {
-                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    allDatasetComponents.push(d);
-                                    //TODO тут выдаются права на видимость ПРиватных и публичным DatasetComponent пользователям
-                                    // if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                }
-                            }
+                            allDatasetComponents.push(d);
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
@@ -1016,7 +1002,9 @@ class DatasetView extends React.Component<any, State> {
             let datasetComponents = this.props.context.datasetComponents;
             datasetComponents[datasetComponentName] = {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
-                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : []
+                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : [],
+                getBuffer: this.gridRef ? this.gridRef.getBuffer : () => {return []},
+                showModal: () => {this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})}
             };
             this.props.context.updateContext({datasetComponents: datasetComponents})
 
@@ -1705,6 +1693,7 @@ class DatasetView extends React.Component<any, State> {
                     onApplyEditChanges = {this.onApplyEditChanges}
                     isEditMode = {this.state.isEditMode}
                     showEditDeleteButton = {this.state.isDeleteAllowed}
+                    showMenuCopyButton = {this.state.isInsertAllowed}
                     aggregatedRows = {this.state.aggregatedRows}
                     {...this.props}
                 />
