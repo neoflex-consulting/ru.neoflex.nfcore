@@ -340,5 +340,6 @@
         "add files": "Add Files",
         "select files": "Select files",
         "addresource": "Add resource",
-        "no rows to show": "No rows to show"
+        "no rows to show": "No rows to show",
+        "apply and run": "Apply and run"
 }

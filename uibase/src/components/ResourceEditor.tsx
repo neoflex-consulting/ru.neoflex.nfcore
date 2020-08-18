@@ -19,6 +19,7 @@ import Operations from './Operations';
 import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
+import _ from "lodash";
 
 export interface Props {
 }
@@ -50,6 +51,8 @@ interface State {
     selectedKeys: Array<string>,
     selectedRefUries: Array<string>,
     searchResources: String,
+    isModified: boolean,
+    modalApplyChangesVisible: Boolean,
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -83,6 +86,8 @@ class ResourceEditor extends React.Component<any, State> {
         selectedKeys: [],
         selectedRefUries: [],
         searchResources: '',
+        isModified: false,
+        modalApplyChangesVisible: false
     };
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -351,6 +356,10 @@ class ResourceEditor extends React.Component<any, State> {
         this.setState({ modalResourceVisible: false })
     };
 
+    handleApplyChangesModalCancel = () => {
+        this.setState({ modalApplyChangesVisible: false })
+    };
+
     hideRightClickMenu = (e: any) => {
         this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
     };
@@ -591,30 +600,53 @@ class ResourceEditor extends React.Component<any, State> {
         }
     };
 
-    save = () => {
+    save = (redirectAfterSave:boolean = false) => {
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
             this.setState({ isSaving: true });
             API.instance().saveResource(resource, 99999).then((resource: any) => {
-                const nestedJSON = nestUpdaters(resource.eResource().to(), null);
-                const updatedTargetObject = findObjectById(nestedJSON, resource.get('uri'));
+                const updatedTargetObject = findObjectById(this.state.resourceJSON, resource.get('uri'));
                 this.setState({
                     isSaving: false,
+                    isModified: false,
+                    modalApplyChangesVisible: false,
                     mainEObject: resource.eResource().eContents()[0],
-                    resourceJSON: nestedJSON,
                     targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
                     resource: resource
                 });
-                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
+                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                if (redirectAfterSave)
+                    this.redirect()
             }).catch(() => {
-                this.setState({ isSaving: false })
+                this.setState({ isSaving: false, isModified: true })
             })
         }
     };
 
-    execute = () => {
-        alert(this.state)
+    redirect = () => {
+        const win = window.open(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        [{
+                            appModule: this.state.mainEObject.get('name'),
+                            tree: [],
+                            useParentReferenceTree: this.state.mainEObject.get('useParentReferenceTree')
+                        }]
+                    )
+                )
+            )
+        }`, '_blank');
+        win!.focus();
+    };
+
+    run = () => {
+        if (this.state.isModified) {
+            this.setState({modalApplyChangesVisible: true})
+        } else {
+            this.redirect()
+        }
     };
 
     componentWillUnmount() {
@@ -623,11 +655,13 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
-        //if true that means resourceJSON was edited and updated
-        if (this.state.targetObject !== undefined && this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
+        //if true that means resourceJSON was edited
+        if (this.state.targetObject !== undefined
+            && this.state.resourceJSON !== prevState.resourceJSON
+            && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
-            this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
+            this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
         }
     }
 
@@ -643,7 +677,7 @@ class ResourceEditor extends React.Component<any, State> {
             event.preventDefault();
         }
     };
-    
+
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
@@ -657,7 +691,7 @@ class ResourceEditor extends React.Component<any, State> {
                     {
                         this.state.isSaving
                         ? <Icon className="panel-icon" type="loading"/>
-                        : <Button className="panel-button" icon="save" onClick={this.save} title={this.props.t("save")}/>
+                        : <Button className="panel-button" icon="save" onClick={()=>this.save(false)} title={this.props.t("save")}/>
                     }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
@@ -672,19 +706,7 @@ class ResourceEditor extends React.Component<any, State> {
                     && this.state.mainEObject.eClass
                     && ["AppModule", "Application"].includes(this.state.mainEObject.eClass.get('name'))
                     ?
-                        <Button className="panel-button" icon="play-circle" title={this.props.t("preview")} href={`/app/${
-                            btoa(
-                                encodeURIComponent(
-                                    JSON.stringify(
-                                        [{
-                                            appModule: this.state.mainEObject.get('name'),
-                                            tree: [],
-                                            useParentReferenceTree: this.state.mainEObject.get('useParentReferenceTree')
-                                        }]
-                                    )
-                                )
-                            )
-                        }`}/>
+                        <Button className="panel-button" icon="play-circle" title={this.props.t("preview")} onClick={this.run}/>
                     : null
                     }
                 </Layout.Header>
@@ -848,6 +870,28 @@ class ResourceEditor extends React.Component<any, State> {
                 >
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
 
+                </Modal>}
+                {this.state.modalApplyChangesVisible && <Modal
+                    key="apply_changes_modal"
+                    width={'1000px'}
+                    title={t('apply changes')}
+                    visible={this.state.modalApplyChangesVisible}
+                    footer={null}
+                    onCancel={this.handleApplyChangesModalCancel}
+                >
+                    <div style={{textAlign:"center"}}>
+                        <b>{t("unresolved changes left")}</b>
+                        <br/>
+                        <br/>
+                        <div>
+                            <Button onClick={()=>this.save(true)}>
+                                {t("apply and run")}
+                            </Button>
+                            <Button onClick={this.handleApplyChangesModalCancel}>
+                                {t("back to edit")}
+                            </Button>
+                        </div>
+                    </div>
                 </Modal>}
                 <EClassSelection
                     key="eclass_selection"

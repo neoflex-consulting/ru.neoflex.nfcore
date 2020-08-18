@@ -332,6 +332,7 @@
         "add files": "新增檔案",
         "select files": "選擇文件",
         "addresource": "添加資源",
-        "no rows to show": "缺少要顯示的數據"
+        "no rows to show": "缺少要顯示的數據",
+        "apply and run": "應用並運行"
 
 }
