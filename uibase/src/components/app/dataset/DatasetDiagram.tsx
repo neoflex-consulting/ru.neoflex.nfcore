@@ -14,6 +14,7 @@ import {diagramAnchorMap} from "../../../utils/consts";
 const diagramAnchorMap_: any = diagramAnchorMap;
 
 interface Props {
+    hide: boolean;
     rowData: any[],
     diagramParams: {
         keyColumn: string,
@@ -169,7 +170,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             legendPosition: 'middle',
             legendOffset: -45,
         };
-        return <div>
+        return <div hidden={this.props.hide}>
 
             <Resizable ref={(n) => { this.node = n}}
                        style={resizeStyle}
@@ -264,7 +265,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             legendPosition: 'middle',
             legendOffset: -45,
         };
-        return <div>
+        return <div hidden={this.props.hide}>
             {/*Ссылка для выгрузки диаграммы в png*/}
             <Resizable ref={(n) => { this.node = n}}
                        style={resizeStyle}
@@ -340,7 +341,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             }
             return dataForChart
         }
-        return <div>
+        return <div hidden={this.props.hide}>
             <Resizable ref={(n) => { this.node = n}}
                        style={resizeStyle}
                        defaultSize={{
@@ -397,15 +398,19 @@ class DatasetDiagram extends React.Component<Props & any, State> {
     }
 
     render() {
-        switch (this.state.diagramParams.diagramType) {
-            case "Line":
-                return this.drawLine();
-            case "Bar":
-                return this.drawBar();
-            case "Pie":
-                return this.drawPie();
-            default:
-                return <div>default</div>
+        if (this.state.diagramParams) {
+            switch (this.state.diagramParams.diagramType) {
+                case "Line":
+                    return this.drawLine();
+                case "Bar":
+                    return this.drawBar();
+                case "Pie":
+                    return this.drawPie();
+                default:
+                    return <div>default</div>
+            }
+        } else {
+            return null
         }
     }
 }

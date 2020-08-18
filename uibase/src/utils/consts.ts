@@ -81,7 +81,8 @@ enum actionType {
     clear="clear",
     setValue="setValue",
     showMessage="showMessage",
-    redirect="redirect"
+    redirect="redirect",
+    backToLastPage="backToLastPage"
 }
 
 enum eventType {

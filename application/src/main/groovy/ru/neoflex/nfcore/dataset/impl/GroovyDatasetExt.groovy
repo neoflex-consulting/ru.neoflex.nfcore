@@ -1,14 +1,40 @@
 package ru.neoflex.nfcore.dataset.impl
 
 import groovy.json.JsonOutput
+import org.eclipse.emf.common.util.EList
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
+import ru.neoflex.nfcore.dataset.DataType
 import ru.neoflex.nfcore.dataset.DatasetPackage
 import ru.neoflex.nfcore.dataset.GroovyDataset
+import ru.neoflex.nfcore.dataset.QueryParameter
 
 class GroovyDatasetExt extends GroovyDatasetImpl {
+
+    @Override
+    String runQueryDataset(EList<QueryParameter> parameters) {
+        Object[] rowData = []
+        if (datasetColumn) {
+            def code = this.getRunQueryGroovyCode()
+            for (param in parameters) {
+                def paramValue;
+                if (param.parameterDataType == DataType.DATE.getName()) {
+                    paramValue = param.parameterValue.substring(0,10)
+                } else if (param.parameterDataType == DataType.TIMESTAMP.getName()) {
+                    paramValue = param.parameterValue.substring(0,19)
+                } else {
+                    paramValue = param.parameterValue
+                }
+                code = code.replace(":${param.parameterName}","${paramValue}")
+            }
+            rowData = Context.current.groovy.eval(this.getRunQueryGroovyCode(), [:])
+            return JsonOutput.toJson(rowData)
+        } else {
+            return JsonOutput.toJson("Please, run operation loadAllColumns in this object")
+        }
+    }
 
     @Override
     String loadAllColumns() {

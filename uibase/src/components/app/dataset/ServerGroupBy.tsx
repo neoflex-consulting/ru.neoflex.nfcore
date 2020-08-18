@@ -14,7 +14,7 @@ import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
+    columnDefs?:  Map<String,any>[];
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
@@ -159,7 +159,7 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={2}>
                 <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                     <Button
-                        title="delete row"
+                        title={value.t("delete row")}
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
@@ -231,7 +231,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                                     idValue: `${JSON.stringify({index: serverGroupBy.index, columnName: 'value', value: serverGroupBy.value})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
-                                    columnDefs: this.props.columnDefs,
+                                    columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
@@ -241,7 +241,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                     }
                 </Form.Item>
                 <Button
-                    title="add row"
+                    title={this.t("add row")}
                     style={{width: '40px', marginRight: '10px'}}
                     key={'createNewRowButton'}
                     value={'createNewRowButton'}

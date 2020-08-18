@@ -22,14 +22,14 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
     render() {
         const {onCheck, checked} = this.props
         return <React.Fragment>
-            <Modal title={"Select files"}
+            <Modal title={this.props.t("select files")}
                    onCancel={() => this.setState({showDialog: false})}
                    visible={this.state.showDialog}
                    footer={null}
             >
                 <FilesystemTree checked={checked} onCheck={onCheck}/>
             </Modal>
-            <Tooltip title={"Add Files"}>
+            <Tooltip title={this.props.t("add files")}>
                 <Button type="dashed" size={'small'}
                         onClick={(event) => {
                             this.setState({showDialog: true})

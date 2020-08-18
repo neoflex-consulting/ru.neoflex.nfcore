@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Helmet } from 'react-helmet';
 import Splitter from './components/CustomSplitter'
 import {Layout, Tooltip} from "antd";
 import {Icon as IconFA} from 'react-fa';
@@ -185,7 +186,7 @@ export class MainApp extends React.Component<any, State> {
     renderFooter = () => {
         return (
             <div>
-                <Tooltip title={this.state.hideReferences ? "Show" : "Hide"}>
+                <Tooltip title={this.state.hideReferences ? this.props.t("show") : this.props.t("hide")}>
                     <span className="references-button" onClick={() => {
                         this.setState({hideReferences: !this.state.hideReferences})
                     }}><IconFA name="bars"></IconFA></span>
@@ -289,6 +290,10 @@ export class MainApp extends React.Component<any, State> {
     render = () => {
         return (
             <div style={{flexGrow: 1}}>
+                <Helmet>
+                    <title>{this.props.showTabTitle ? this.props.appModuleName : undefined}</title>
+                    <link rel="shortcut icon" type="image/png" href="/application.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Splitter
                     minimalizedPrimaryPane={this.state.hideReferences}

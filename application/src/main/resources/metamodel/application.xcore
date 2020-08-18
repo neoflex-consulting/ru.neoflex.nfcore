@@ -9,6 +9,7 @@ package ru.neoflex.nfcore.application
 import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
+import ru.neoflex.nfcore.dataset.DatasetColumn
 import ru.neoflex.nfcore.dataset.FormatMask
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
@@ -49,16 +50,16 @@ class GlobalSettings {
     refers AppModule dashboard
 }
 
+@Ecore(constraints="IsValid")
 class AppModule {
     QName name
     contains ViewElement view
-    contains ToolPanel toolPanel
     contains CatalogNode referenceTree
     boolean useParentReferenceTree
 }
 
+@Ecore(constraints="IsValid")
 class Application extends AppModule {
-    IconName iconName = "faUser"
 	boolean checkRights
     GrantType grantType = "Write"
 }
@@ -114,10 +115,6 @@ class Day {
 @GenModel(documentation="max span value = 24 in one row")
 class Column extends ViewContainer {
     String span = "24"
-    boolean borderRight
-    boolean borderBottom
-    boolean borderTop
-    boolean borderLeft
 }
 
 class ComponentElement extends ViewElement {
@@ -140,16 +137,12 @@ abstract class CommandElement {
     refers ValueItem[] valueItems
 }
 
+@Ecore(constraints="IsValid")
 class DatasetView extends ViewElement, CommandElement {
-    refers Dataset dataset
     refers DatasetComponent datasetComponent
 }
 
-abstract class ContextWriter {
-
-}
-
-class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
+class GroovyCommand extends ViewElement, CommandElement {
     Text command
     String gitResourcePath
     String gitStaticClass
@@ -160,33 +153,13 @@ class GroovyCommand extends ViewElement, CommandElement, ContextWriter {
 }
 
 class ValueHolder extends ViewElement, ValueItem {
-    refers ContextWriter contextWriter
-    String groovyCommandResultColumnName
 }
 
 class TabsViewReport extends ViewContainer {
     TabPosition tabPosition = "Top"
 }
 
-class Tool {
-    String name
-	contains Icon icon
-}
-
-class ToolPanel {
-    contains Tool[] tools
-}
-
 class Row extends ViewContainer {
-    String horizontalGutter = "0"
-    String verticalGutter = "0"
-    TextAlign textAlign
-    String marginRight = "0px"
-    String marginBottom = "0px"
-    String marginTop = "0px"
-    String marginLeft = "0px"
-    boolean borderBottom
-    String height
 }
 
 class Typography extends ViewElement {
@@ -224,17 +197,15 @@ class GradientStyle extends Style {
 class Select extends ViewElement, ValueItem, CommandElement {
     String placeholder
     SelectMode mode = "Default"
-    String width = "200"
     boolean isDynamic
     String staticValues
-    refers DatasetComponent datasetComponent
-    String keyColumn //TODO выбор из списка
-    String valueColumn //TODO
+    refers Dataset dataset
+    refers DatasetColumn datasetKeyColumn
+    refers DatasetColumn datasetValueColumn
 }
 
 class DatePicker extends ViewElement, ValueItem {
     boolean allowClear
-    String width = "200"
     refers FormatMask formatMask
     boolean showTime
 }
@@ -251,16 +222,10 @@ class Input extends ViewElement, ValueItem {
     String maxValue = "99"
     String step = "1"
     String placeholder
-    String width = "200"
 }
 
 class Button extends ViewElement, GridComponent {
     refers ButtonStyle buttonStyle
-    boolean buttonCancel
-    boolean buttonSave
-    boolean buttonSubmit
-    boolean backStartPage
-    String span = "0"
     String label
 }
 
@@ -327,7 +292,7 @@ class EventAction {
 
 class EventHandler extends ViewElement {
     Event event
-    refers DynamicActionElement listenItem
+    refers DynamicActionElement[] listenItem
     contains EventAction[] eventActions
     String condition
     refers DynamicActionElement[] conditionItems
@@ -383,19 +348,6 @@ enum Colors {
     Red
 }
 
-enum IconName {
-    faUser
-    faCogs
-    faWrench
-    faLaravel
-    faShieldAlt
-    faSpa
-    faFile
-    faCoins
-    faCubes
-    faEye
-}
-
 enum GroovyCommandType {
     Eval,
     Static,
@@ -412,6 +364,7 @@ enum Action {
     setValue
     showMessage
     redirect
+    backToLastPage
 }
 
 enum Event {

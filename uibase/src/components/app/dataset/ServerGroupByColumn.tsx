@@ -13,7 +13,7 @@ import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
+    columnDefs?:  Map<String,any>[];
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
@@ -47,7 +47,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
-                            initialValue: value.datasetColumn
+                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined
                         })(
                         <Select
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
@@ -88,7 +88,7 @@ const SortableItem = SortableElement(({value}: any) => {
             <Col span={2}>
                 <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                     <Button
-                        title="delete row"
+                        title={value.t("delete row")}
                         key={'deleteRowButton'}
                         value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
@@ -119,7 +119,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={24} style={{textAlign: "left"}}>
                         <Button
-                            title="reset"
+                            title={this.t("reset")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'resetButton'}
                             value={'resetButton'}
@@ -128,7 +128,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="run query"
+                            title={this.t("run query")}
                             style={{width: '40px'}}
                             key={'runQueryButton'}
                             value={'runQueryButton'}
@@ -147,7 +147,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupByColumn.index, columnName: 'datasetColumn', value: serverGroupByColumn.datasetColumn})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
-                                    columnDefs: this.props.columnDefs,
+                                    columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,

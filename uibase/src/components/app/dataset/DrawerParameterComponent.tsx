@@ -68,6 +68,9 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
             case paramType.groupByColumn:
                 this.paramNotification = "Group by column notification";
                 break;
+            case paramType.hiddenColumns:
+                this.paramNotification = "Hidden column notification";
+                break;
             default:
                 this.paramNotification = "Param notification"
         }
@@ -100,7 +103,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         }
     }
 
-        handleChange(e: any) {
+    handleChange(e: any, saveParameter: boolean = false) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map( (f: any) => {
             if (f.index.toString() === target['index'].toString()) {
@@ -117,7 +120,9 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
                 return f
             }
         });
-        this.setState({parametersArray})
+        this.setState({parametersArray});
+        if (saveParameter)
+            this.props.onChangeParameters!(parametersArray, this.props.componentType);
     };
 
     translate = (field: string) => {

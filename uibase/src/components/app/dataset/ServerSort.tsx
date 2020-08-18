@@ -13,7 +13,7 @@ import {DrawerParameterComponent} from './DrawerParameterComponent';
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
+    columnDefs?:  Map<String,any>[];
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
@@ -156,7 +156,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                 <Col span={2}>
                     <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
                         <Button
-                            title="delete row"
+                            title={value.t("delete row")}
                             key={'deleteRowButton'}
                             value={'deleteRowButton'}
                             onClick={(e: any) => {value.deleteRow({index: value.index})}}
@@ -190,7 +190,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button
-                            title="reset"
+                            title={t("reset")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'resetButton'}
                             value={'resetButton'}
@@ -199,7 +199,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="add row"
+                            title={t("add row")}
                             style={{width: '40px', marginRight: '10px'}}
                             key={'createNewRowButton'}
                             value={'createNewRowButton'}
@@ -208,7 +208,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                             <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
                         </Button>
                         <Button
-                            title="run query"
+                            title={t("run query")}
                             style={{width: '40px'}}
                             key={'runQueryButton'}
                             value={'runQueryButton'}
@@ -228,7 +228,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                     idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
                                     t : this.t,
                                     getFieldDecorator: this.getFieldDecorator,
-                                    columnDefs: this.props.columnDefs,
+                                    columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allSorts: this.props.allSorts,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,

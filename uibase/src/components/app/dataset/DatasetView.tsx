@@ -2,9 +2,8 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Checkbox, Drawer, Dropdown, Menu, Modal, Select} from 'antd';
+import {Button, Checkbox, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
-import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
 import ServerAggregate from './ServerAggregate';
@@ -20,17 +19,24 @@ import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
+import ServerGroupByColumn from "./ServerGroupByColumn";
+import DeleteDatasetComponent from "./DeleteDatasetComponent";
+import moment from "moment";
+import format from "number-format.js";
+import HiddenColumn from "./HiddenColumn";
 import {
     actionType, appTypes,
     calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat, diagramAnchorMap,
+    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
     dmlOperation,
     eventType,
     grantType, textAlignMap
 } from "../../../utils/consts";
+import {ValueFormatterParams} from "ag-grid-community";
+import _ from "lodash";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
-import {faCompressArrowsAlt, faExpandArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import groupIcon from "../../../icons/groupIcon.svg";
 import orderIcon from "../../../icons/orderIcon.svg";
 import calculatorIcon from "../../../icons/calculatorIcon.svg";
@@ -42,11 +48,9 @@ import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
 import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
+import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import ServerGroupByColumn from "./ServerGroupByColumn";
-import DeleteDatasetComponent from "./DeleteDatasetComponent";
-import moment from "moment";
-import format from "number-format.js";
+
 import {NeoIcon, NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
 
 const { Option, OptGroup } = Select;
@@ -61,10 +65,8 @@ export enum paramType {
     highlights="highlights",
     calculations="serverCalculatedExpression",
     diagrams="diagrams",
-    diagramsAdd="diagramsAdd"
-}
-
-interface Props {
+    diagramsAdd="diagramsAdd",
+    hiddenColumns="hiddenColumns"
 }
 
 export interface IDiagram {
@@ -87,12 +89,11 @@ interface State {
     allDatasetComponents: any[];
     currentDatasetComponent: Ecore.Resource;
     currentDiagram?: IDiagram;
-    columnDefs: any[];
-    defaultColumnDefs: any[];
+    columnDefs: Map<String,any>[];
+    defaultColumnDefs: Map<String,any>[];
     fullScreenOn: boolean;
-    rowData: any[];
+    rowData: {[key: string]: unknown}[];
     highlights: IServerQueryParam[];
-    calculations: any[];
     diagrams: IDiagram[];
     serverFilters: IServerQueryParam[];
     serverAggregates: IServerQueryParam[];
@@ -100,6 +101,7 @@ interface State {
     serverGroupBy: IServerQueryParam[];
     groupByColumn: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
+    hiddenColumns: IServerQueryParam[];
     queryParams: IServerNamedParam[]
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
@@ -111,6 +113,7 @@ interface State {
     diagramEditMenuVisible: boolean;
     saveMenuVisible: boolean;
     deleteMenuVisible: boolean;
+    hiddenColumnsMenuVisible: boolean;
     allOperations: Array<EObject>;
     allAggregates: Array<EObject>;
     allSorts: Array<EObject>;
@@ -127,8 +130,14 @@ interface State {
     IsGrid: boolean;
     isWithTable: boolean;
     isDownloadFromDiagramPanel: boolean;
-    numberOfNewLines: boolean;
+    isAggregations: boolean;
     formatMasks: {key:string,value:string}[];
+    isEditMode: boolean;
+    isInsertAllowed: boolean;
+    isDeleteAllowed: boolean;
+    isUpdateAllowed: boolean;
+    isCheckEditBufferVisible: boolean;
+    aggregatedRows: {[key: string]: unknown}[];
 }
 
 const defaultComponentValues = {
@@ -138,11 +147,14 @@ const defaultComponentValues = {
     serverGroupBy: "Average",
     serverSort: "FromAtoZ",
     serverCalculatedExpression: "",
-    groupByColumn: ""
+    groupByColumn: "",
+    hiddenColumn: ""
 };
 
 
 class DatasetView extends React.Component<any, State> {
+
+    gridRef:any;
 
     constructor(props: any) {
         super(props);
@@ -153,9 +165,9 @@ class DatasetView extends React.Component<any, State> {
             columnDefs: [],
             defaultColumnDefs: [],
             deleteMenuVisible: false,
+            hiddenColumnsMenuVisible: false,
             rowData: [],
             highlights: [],
-            calculations: [],
             diagrams: [],
             serverFilters: [],
             serverAggregates: [],
@@ -164,6 +176,7 @@ class DatasetView extends React.Component<any, State> {
             groupByColumn: [],
             serverCalculatedExpression: [],
             queryParams: [],
+            hiddenColumns: [],
             useServerFilter: false,
             filtersMenuVisible: false,
             fullScreenOn: false,
@@ -190,9 +203,16 @@ class DatasetView extends React.Component<any, State> {
             IsGrid: false,
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
-            numberOfNewLines: false,
-            formatMasks: []
+            isAggregations: false,
+            formatMasks: [],
+            isEditMode: false,
+            isInsertAllowed: false,
+            isUpdateAllowed: false,
+            isDeleteAllowed: false,
+            isCheckEditBufferVisible: false,
+            aggregatedRows: []
         }
+        this.gridRef = React.createRef();
     }
 
     getAllFormatMasks() {
@@ -236,21 +256,7 @@ class DatasetView extends React.Component<any, State> {
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                         }
                         result.forEach( (d: Ecore.Resource) => {
-                            if (d.eContents()[0].get('dataset')) {
-                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    allDatasetComponents.push(d);
-                                    //TODO тут выдаются права на видимость ПРиватных и публичным DatasetComponent пользователям
-                                    // if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                }
-                            }
+                            allDatasetComponents.push(d);
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
@@ -270,11 +276,33 @@ class DatasetView extends React.Component<any, State> {
             })
     };
 
+    evalMask(formatMask:EObject) {
+        let mask:string|undefined;
+        if (formatMask) {
+            if (formatMask.get('isDynamic')) {
+                const paramNames:string[] = formatMask.get('value').match(/:[_а-яa-z0-9]+/gi);
+                const namedParams = paramNames.map(paramName => {
+                    return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
+                });
+                try{
+                    // eslint-disable-next-line
+                    mask = eval(replaceNamedParam(formatMask.get('value'),namedParams))
+                } catch (e) {
+                    this.props.context.notification("FormatMask.value",
+                        this.props.t("exception while evaluating") + ` ${replaceNamedParam(formatMask.get('value'),namedParams)}`,
+                        "warning")
+                }
+            } else {
+                mask = formatMask.get('value');
+            }
+        }
+        return mask;
+    }
+
     findColumnDefs(resource: Ecore.Resource){
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
-            let mask:string|undefined = undefined;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
             let componentRenderCondition = c.get('componentRenderCondition');
             if (componentRenderCondition)
@@ -286,23 +314,6 @@ class DatasetView extends React.Component<any, State> {
                             ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
                             : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
                 });
-            if (c.get('formatMask')) {
-                if (c.get('formatMask').get('isDynamic')) {
-                    const paramNames:string[] = c.get('formatMask').get('value').match(/:[_а-яa-z0-9]+/gi);
-                    const namedParams = paramNames.map(paramName => {
-                        return getNamedParamByName(paramName.replace(":",""),this.props.context.contextItemValues)
-                    });
-                    try{
-                        mask = eval(replaceNamedParam(c.get('formatMask').get('value'),namedParams))
-                    } catch (e) {
-                        this.props.context.notification("FormatMask.value",
-                            this.props.t("exception while evaluating") + ` ${replaceNamedParam(c.get('formatMask').get('value'),namedParams)}`,
-                            "warning")
-                    }
-                } else {
-                    mask = c.get('formatMask').get('value');
-                }
-            }
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -319,38 +330,12 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('type', type);
             rowData.set('component', c.get('component'));
             rowData.set('componentRenderCondition', componentRenderCondition);
-            rowData.set('mask', mask);
             rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
+            rowData.set('formatMask', c.get('formatMask'));
+            rowData.set('mask', this.evalMask(c.get('formatMask')));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
-                    let restrictEdit = false;
-                    if (!this.props.viewObject.get('datasetComponent').get('updateQuery')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('update query is not specified') ,"error")
-                    }
-                    if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('primary key column is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('dataset').get('schemaName')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset schema is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('dataset').get('tableName')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset table is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('queryText')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('querytext is not specified') ,"error")
-                    }
-                    if (!restrictEdit) {
+                    if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
                         const startEditingParams = {
                             rowIndex: params.rowIndex,
                             colKey: params.column.getId(),
@@ -359,50 +344,22 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }
             });
-            rowData.set('updateCallback', (agevent:any)=>{
-                const primaryKey = this.state.columnDefs
-                    .filter(c => c.get('isPrimaryKey'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: true
-                            }
-                    });
-                const values = this.state.columnDefs
-                    .filter(c => c.get('editable'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: c.get('isPrimaryKey')
-                            }
-                    });
-                const params = primaryKey.concat(values);
-                this.props.context.executeDMLOperation(resource, dmlOperation.update, params).then(()=>{
-                        if (this.state.currentDatasetComponent.eContents()[0].get('updateQuery') &&
-                            !this.state.currentDatasetComponent.eContents()[0].get('updateQuery').get('generateFromModel')) {
-                            //если указан параметризованный запрос
-                            this.refresh()
-                        }
-                    }
-                ).catch(()=>{
-                    //Восстанавливаем значение в случае ошибки
-                    this.refresh()
-                    }
-                )
-            });
+            rowData.set('valueFormatter', this.valueFormatter);
             columnDefs.push(rowData);
         });
-        this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs});
+        this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs},()=>{
+            this.setState({
+                isUpdateAllowed: this.props.viewObject.get('datasetComponent').get('updateQuery') ? !this.validateEditOptions('updateQuery') : false,
+                isInsertAllowed: this.props.viewObject.get('datasetComponent').get('insertQuery') ? !this.validateEditOptions('insertQuery') : false,
+                isDeleteAllowed: this.props.viewObject.get('datasetComponent').get('deleteQuery') ? !this.validateEditOptions('deleteQuery') : false,
+            });
+        });
         this.findParams(resource as Ecore.Resource, columnDefs);
         this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
     //Поиск сохранённых фильтров по id компоненты
-    findParams(resource: Ecore.Resource, columnDefs: Object[]){
+    findParams(resource: Ecore.Resource, columnDefs: Map<String,any>[], parameterName: paramType|undefined = undefined){
         function addEmpty(params: IServerQueryParam[]) {
             params.push(
                 {index: params.length + 1,
@@ -497,11 +454,11 @@ class DatasetView extends React.Component<any, State> {
             }
             return serverParam
         }
-        function getColumnType (columnDefs: Object[], datasetColumn: string): string | undefined {
+        function getColumnType (columnDefs: Map<String,any>[], datasetColumn: string): string | undefined {
             if (columnDefs.length !== 0) {
-                const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn)
+                const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn);
                 if (column !== null) {
-                    const type = column.map((column:any) => column.get('type'))
+                    const type = column.map((column:any) => column.get('type'));
                     if (type.length !== 0) {
                         return type[0]
                     }
@@ -534,7 +491,7 @@ class DatasetView extends React.Component<any, State> {
             }
             return diagrams
         }
-        function getParamsFromURL (params: any[], columnDefs: any[]): IServerQueryParam[] {
+        function getParamsFromURL (params: any[], columnDefs: Map<String,any>[]): IServerQueryParam[] {
             let serverParam: IServerQueryParam[] = [];
             if (params !== undefined && params.length !== 0) {
                 params.forEach((f: any) => {
@@ -566,6 +523,7 @@ class DatasetView extends React.Component<any, State> {
         let groupByColumn: IServerQueryParam[] = [];
         let highlights: IServerQueryParam[] = [];
         let serverCalculatedExpression: IServerQueryParam[] = [];
+        let hiddenColumns: IServerQueryParam[] = [];
         let diagrams: IDiagram[] = [];
         const userProfileValue = this.props.context.userProfile.get('params').array()
             .filter( (p: any) => p.get('key') === resource.eContents()[0].eURI());
@@ -578,6 +536,7 @@ class DatasetView extends React.Component<any, State> {
             highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
             serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
             diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
+            hiddenColumns = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).hiddenColumns);
         }
         else if (resource !== undefined) {
             serverFilters = getParamsFromComponent(resource, 'serverFilter');
@@ -588,6 +547,7 @@ class DatasetView extends React.Component<any, State> {
             highlights = getParamsFromComponent(resource, 'highlight');
             serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
             diagrams = getDiagramsFromComponent(resource, 'diagram');
+            hiddenColumns = getParamsFromComponent(resource, 'hiddenColumn');
         }
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
@@ -599,8 +559,36 @@ class DatasetView extends React.Component<any, State> {
         addEmpty(groupByColumn);
         addEmpty(highlights);
         addEmpty(serverCalculatedExpression);
-        this.setState({ serverFilters, serverAggregates, serverSorts, serverGroupBy, groupByColumn, highlights, serverCalculatedExpression, diagrams, useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.prepParamsAndRun(resource, serverFilters, serverAggregates, serverSorts, serverGroupBy, serverCalculatedExpression, groupByColumn);
+        hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
+            return {
+                datasetColumn: c.get('field'),
+                enable: c.get('hide') ? !c.get('hide') : true
+            } as IServerQueryParam
+        }).concat(serverCalculatedExpression).map((c,index)=>{
+            return {
+                index: index + 1,
+                datasetColumn: c.datasetColumn,
+                enable: c.enable
+            }
+        });
+        this.setState({
+            serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
+            serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
+            serverSorts: (parameterName === paramType.sort || parameterName === undefined) ? serverSorts : this.state.serverSorts,
+            serverGroupBy: (parameterName === paramType.group || parameterName === undefined) ? serverGroupBy : this.state.serverGroupBy,
+            groupByColumn: (parameterName === paramType.groupByColumn || parameterName === undefined) ? groupByColumn : this.state.groupByColumn,
+            highlights: (parameterName === paramType.highlights || parameterName === undefined) ? highlights : this.state.highlights,
+            serverCalculatedExpression: (parameterName === paramType.calculations || parameterName === undefined) ? serverCalculatedExpression : this.state.serverCalculatedExpression,
+            diagrams,
+            hiddenColumns,
+            useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+        this.prepParamsAndRun(resource,
+            serverFilters,
+            serverAggregates,
+            serverSorts,
+            serverGroupBy,
+            serverCalculatedExpression,
+            groupByColumn);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -639,15 +627,30 @@ class DatasetView extends React.Component<any, State> {
                     }
                 })})
         }
+        if (JSON.stringify(prevState.hiddenColumns) !== JSON.stringify(this.state.hiddenColumns)
+            && this.state.hiddenColumns.length > 0) {
+            let columnDefs = this.state.columnDefs.map(c => {
+                const rowData = new Map();
+                c.forEach((value, key) => {
+                    rowData.set(key,value)
+                });
+                return rowData
+            });
+            columnDefs.forEach(c=>{
+                const hiddenColumn = this.state.hiddenColumns.find(hc => hc.datasetColumn === c.get('field'));
+                c.set('hide', hiddenColumn ? !hiddenColumn.enable : c.get('hide'))
+            });
+            this.setState({columnDefs: columnDefs})
+        }
     }
 
-    getColumnDefGroupBy = (rowDataShow: any) => {
-        let columnDefs: any[] = [];
-        this.state.defaultColumnDefs.forEach((c:any) => {
+    getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
+        let newColumnDefs: any[] = [];
+        columnDefs.forEach((c:any) => {
             if (rowDataShow[0][c.get('field')] !== undefined) {
                 let rowData = new Map();
                 let newHeaderName = this.state.serverGroupBy
-                    .find((s: any) => s['datasetColumn'] === c.get('field'))
+                    .find((s: any) => s['datasetColumn'] === c.get('field'));
                 rowData.set('field', c.get('field'));
                 rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -667,8 +670,10 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask', c.get('mask'));
-                columnDefs.push(rowData);
+                rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('valueFormatter', c.get('valueFormatter'));
+                newColumnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 rowData.set('field', c.get('field'));
@@ -690,21 +695,33 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('mask', c.get('mask'));
-                columnDefs.push(rowData);
+                rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('formatMask',c.get('formatMask'));
+                rowData.set('valueFormatter', c.get('valueFormatter'));
+                newColumnDefs.push(rowData);
             }
         });
-        return columnDefs
+        return newColumnDefs
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map((e:any)=> e);
+        let columnDefs = this.state.defaultColumnDefs.map(c => {
+            const rowData = new Map();
+            const mask = this.evalMask(c.get('formatMask'));
+            c.forEach((value, key) => {
+                key === 'mask' ? rowData.set(key, mask) : rowData.set(key,value)
+            });
+            return rowData
+        });
         parametersArray.forEach(element => {
             if (element.enable && element.datasetColumn) {
                 let rowData = new Map();
                 rowData.set('field', element.datasetColumn);
                 rowData.set('headerName', element.datasetColumn);
-                rowData.set('headerTooltip', "type : String");
+                //workaround иначе при смене маски (без смены типа)
+                //ag-grid не видит изменений и не форматирует
+                rowData.set('headerTooltip', `type : String, mask :${element.mask}`);
                 rowData.set('hide', false);
                 rowData.set('pinned', false);
                 rowData.set('filter', true);
@@ -715,25 +732,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
+                rowData.set('valueFormatter',this.valueFormatter);
                 rowData.set('mask', element.mask);
-                //Приходится выносить в отдельные функции, иначе при смене маски (без смены типа)
-                //ag-grid не видит изменений и не форматирует
-                const valueFormatter = element.type === appTypes.Date && element.mask
-                    ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(element.mask)}
-                    : element.type === appTypes.Timestamp && element.mask
-                        ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(element.mask)}
-                        : [appTypes.Integer,appTypes.Decimal].includes(element.type as appTypes) && element.mask
-                            ? (params:any):string=>{return format(element.mask!, params.value)}
-                            : [appTypes.Decimal].includes(element.type as appTypes)
-                                ? (params:any):string=>{return format(defaultDecimalFormat, params.value)}
-                                : [appTypes.Integer].includes(element.type as appTypes)
-                                    ? (params:any):string=>{return format(defaultIntegerFormat, params.value)}
-                                    : [appTypes.Date].includes(element.type as appTypes)
-                                        ? (params:any):string=>{return moment(params.value, defaultDateFormat).format(defaultDateFormat)}
-                                        : [appTypes.Timestamp].includes(element.type as appTypes)
-                                            ? (params:any):string=>{return moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)}
-                                            : (params:any):string=>{return params.value}
-                rowData.set('valueFormatter',valueFormatter);
                 if (!columnDefs.some((col: any) => {
                     return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
                 })) {
@@ -744,8 +744,46 @@ class DatasetView extends React.Component<any, State> {
         return columnDefs
     };
 
+    valueFormatter = (params: ValueFormatterParams) => {
+        const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
+        const mask = found ? found.get('mask') : undefined;
+        let formattedParam, splitted;
+        if (this.state.aggregatedRows.length > 0
+            && params.value
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
+            splitted = params.value.split(":");
+            params.value = splitted[1];
+        }
+
+        if (params.value)
+            formattedParam = params.colDef.type === appTypes.Date && mask
+                ? moment(params.value, defaultDateFormat).format(mask)
+                : params.colDef.type === appTypes.Timestamp && mask
+                    ? moment(params.value, defaultTimestampFormat).format(mask)
+                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
+                        ? format(mask, params.value)
+                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
+                            ? format(defaultDecimalFormat, params.value)
+                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
+                                ? format(defaultIntegerFormat, params.value)
+                                : [appTypes.Date].includes(params.colDef.type as appTypes)
+                                    ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
+                                        ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                                        : params.value;
+        else
+            formattedParam = params.value;
+        if (this.state.aggregatedRows.length > 0
+            && params.value
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
+            splitted[1] = formattedParam;
+            formattedParam = splitted.join(":")
+        }
+        return formattedParam
+    };
+
     translateExpression(calculatedExpression: IServerQueryParam[]) {
-        let sortMap = this.state.columnDefs
+        let sortMap = this.state.defaultColumnDefs
             .filter((def:any) => !def.get("hide"))
             .map((colDef, index) => {
             return {
@@ -780,6 +818,36 @@ class DatasetView extends React.Component<any, State> {
         })
     };
 
+    getNewHiddenColumns(newColumnDef: Map<String, any>[]) {
+        newColumnDef = newColumnDef.filter(c => !c.get('hide'));
+        let newHiddenColumns = this.state.hiddenColumns.map((e)=> e);
+        //Удаляем
+        this.state.hiddenColumns.forEach(c => {
+            const isFound = newColumnDef.find(cd => cd.get('field') === c.datasetColumn);
+            if (!isFound) {
+                newHiddenColumns = newHiddenColumns.filter(cd => cd.datasetColumn !== c.datasetColumn)
+            }
+        });
+        //Добавляем
+        newColumnDef.forEach(c => {
+            const isFound = newHiddenColumns.find(cd => cd.datasetColumn === c.get('field'));
+            if (!isFound) {
+                newHiddenColumns.push({
+                    index: 0,
+                    datasetColumn: c.get('field'),
+                    enable: true
+                })
+            }
+        });
+        newHiddenColumns = newHiddenColumns.map((value, index) => {
+            return {
+                ...value,
+                index: index + 1
+            }
+        });
+        return newHiddenColumns
+    }
+
     prepParamsAndRun(
         resource: Ecore.Resource,
         filterParams: IServerQueryParam[],
@@ -788,6 +856,7 @@ class DatasetView extends React.Component<any, State> {
         groupByParams: IServerQueryParam[],
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
+        callback: ()=>void = ()=>{}
     ) {
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
@@ -805,15 +874,21 @@ class DatasetView extends React.Component<any, State> {
             , filter(calculatedExpression)
             , filter(groupByColumnParams)
         ).then((json: string) => {
-                let result: Object[] = JSON.parse(json);
+                let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
+                newColumnDef = this.getNewColumnDef(calculatedExpression);
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result)
-                } else {
-                    newColumnDef = this.getNewColumnDef(calculatedExpression);
+                    newColumnDef = this.getColumnDefGroupBy(result, newColumnDef)
                 }
+                const hiddenColumns = this.getNewHiddenColumns(newColumnDef);
+                //Восстанавливем признак скрытой если она отмечена в hiddenColumns
+                newColumnDef.forEach(c =>{
+                    const column = hiddenColumns.find(hc => c.get('field') === hc.datasetColumn);
+                    if (column)
+                        c.set('hide', !column.enable)
+                });
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
-                if (aggregationParams.length !== 0) {
+                if (aggregationParams.length !== 0 && this.state.columnDefs.length > 0 && result.length !== 0) {
                     this.props.context.runQuery(resource
                         , newQueryParams
                         , filter(filterParams)
@@ -824,26 +899,61 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                        this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: true});
-                        this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
+                            this.setState({
+                                rowData: result,
+                                columnDefs: newColumnDef,
+                                isAggregations: true,
+                                //Если не проверять то при одинаковых данных, ag-grid не подставляет новые в грид
+                                //Поэтому проверка ссылки на новые записи при выполнении valueFormatter будет давать false
+                                aggregatedRows: _.isEqual(result,this.state.rowData) ? this.state.aggregatedRows : this.getAggregatedRows(aggregationParams, result),
+                                hiddenColumns: hiddenColumns},callback);
+                            this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef, numberOfNewLines: false});
+                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, aggregatedRows: [], hiddenColumns: hiddenColumns},callback);
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
         )
     }
 
-    refresh(): void {
-        if (this.state.currentDatasetComponent.eResource) {
+    getAggregatedRows(aggregationParams: IServerQueryParam[], rowData: {[key: string]: unknown}[]) {
+        const numAggRows = _(aggregationParams)
+            .countBy('operation')
+            .map((count, name) => ({ name, count }))
+            .value().length;
+        return rowData.slice(rowData.length - numAggRows, rowData.length)
+    }
+
+    refresh(resetGrouping:boolean = false): void {
+        if (this.state.currentDatasetComponent.eResource && !resetGrouping) {
             this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
                 this.state.serverFilters,
                 this.state.serverAggregates,
                 this.state.serverSorts,
                 this.state.serverGroupBy,
                 this.state.serverCalculatedExpression,
-                this.state.groupByColumn
+                this.state.groupByColumn,
+                ()=>{
+                    if (this.state.isEditMode)
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                }
             );
+        } else if (this.state.currentDatasetComponent.eResource) {
+            this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
+                this.state.serverFilters,
+                [],
+                this.state.serverSorts,
+                [],
+                [],
+                [],
+                ()=>{
+                    if (!this.state.isEditMode)
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                })
         }
     }
 
@@ -857,11 +967,10 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
         if (this.state.formatMasks.length === 0) {this.getAllFormatMasks()}
-
         this.props.context.addEventAction({
             itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
             actions: [
-                {actionType: actionType.execute,callback: this.refresh.bind(this)},
+                {actionType: actionType.execute,callback: ()=>this.refresh()},
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
@@ -895,7 +1004,9 @@ class DatasetView extends React.Component<any, State> {
             let datasetComponents = this.props.context.datasetComponents;
             datasetComponents[datasetComponentName] = {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
-                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : []
+                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : [],
+                getBuffer: this.gridRef ? this.gridRef.getBuffer : () => {return []},
+                showModal: () => {this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})}
             };
             this.props.context.updateContext({datasetComponents: datasetComponents})
 
@@ -922,7 +1033,8 @@ class DatasetView extends React.Component<any, State> {
             , sortsMenuVisible: (p === paramType.sort) ? v : false
             , calculationsMenuVisible: (p === paramType.calculations) ? v : false
             , diagramAddMenuVisible: (p === paramType.diagramsAdd) ? v : false
-            , diagramEditMenuVisible: (p === paramType.diagrams) ? v : false});
+            , diagramEditMenuVisible: (p === paramType.diagrams) ? v : false
+            , hiddenColumnsMenuVisible: (p === paramType.hiddenColumns) ? v : false});
     };
 
     datasetViewChangeUserProfile(datasetComponentId: string, paramName: paramType, param: any): any {
@@ -936,6 +1048,7 @@ class DatasetView extends React.Component<any, State> {
             highlights: (paramName === paramType.highlights)? param: filterParam(this.state.highlights),
             serverCalculatedExpression: (paramName === paramType.calculations)? param: filterParam(this.state.serverCalculatedExpression),
             diagrams: (paramName === paramType.diagrams)? param: this.state.diagrams,
+            hiddenColumns: (paramName === paramType.hiddenColumns)? param: this.state.hiddenColumns,
         });
     }
 
@@ -970,7 +1083,7 @@ class DatasetView extends React.Component<any, State> {
         }
         else {
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
-                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs)
+                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs, paramName)
             )
         }
     };
@@ -980,7 +1093,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
-        let newDiagrams:IDiagram[] = [];
+        let newDiagrams:IDiagram[];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
             this.setState({
@@ -1038,20 +1151,52 @@ class DatasetView extends React.Component<any, State> {
 
     }
     DiagramButton = () => {
-        this.props.context.addDocxHandler();
-        this.props.context.addExcelHandler()
-        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel})
+        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel});
         if (this.state.diagrams.length > 0)
-            this.setState({currentDiagram: this.state.diagrams[0]})
+            this.setState({currentDiagram: this.state.diagrams[0]});
         else
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
-
     };
 
     withTable(e: any) {
-        let ee: any = e.target.checked
+        let ee: any = e.target.checked;
         this.setState({isWithTable: ee})
     }
+
+    validateEditOptions = (operationType:"updateQuery"|"insertQuery"|"deleteQuery") => {
+        let restrictOperation = false;
+        if (!this.props.viewObject.get('datasetComponent').get(operationType)) {
+            restrictOperation = true;
+            if (operationType === "updateQuery") {
+                this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('edit is prohibited'), "error")
+            } else {
+                this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('query is not specified'), "error")
+            }
+        }
+        if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('primary key column is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('dataset').get('schemaName')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('dataset').get('tableName')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && !this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('datasetComponent').get(operationType).get('queryText')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('querytext is not specified') ,"error")
+        }
+        return restrictOperation
+    };
 
     getGridPanel = () => {
         const { t } = this.props;
@@ -1061,122 +1206,74 @@ class DatasetView extends React.Component<any, State> {
             style={{width: '150px'}}
         >
             <Menu.Item key='exportToDocx'>
-                exportToDocx
+                {t("export to docx")}
             </Menu.Item>
             <Menu.Item key='exportToExcel'>
-                exportToExcel
+                {t("export to excel")}
             </Menu.Item>
-        </Menu>)
+        </Menu>);
         return <div>
-            {/*<div className='functionalBar__header'>*/}
-            {/*<div className='block'>*/}
-            {/*        <NeoInput width='192px' type={'search'} />*/}
-            {/*    <div className='verticalLine' />*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('filters')}*/}
-            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>*/}
-            {/*            <NeoIcon icon={'filter'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('sorts')}*/}
-            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>*/}
-            {/*            <NeoIcon icon={'sort'} />*/}
-            {/*        </NeoButton>*/}
-            {/*    <div className='verticalLine' />*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('calculator')}*/}
-            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>*/}
-            {/*            <NeoIcon icon={'calculator'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('aggregations')}*/}
-            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>*/}
-            {/*            <NeoIcon icon={'plusBlock'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('diagram')}*/}
-            {/*                   onClick={()=>{this.DiagramButton()}}>*/}
-            {/*            <NeoIcon icon={'barChart'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('grouping')}*/}
-            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>*/}
-            {/*            <NeoIcon icon={'add'}/>*/}
-            {/*        </NeoButton>*/}
-            {/*    <div className='verticalLine' />*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   title={t('save')}*/}
-            {/*                   onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>*/}
-            {/*            <NeoIcon icon={'mark'} />*/}
-            {/*        </NeoButton>*/}
-            {/*    <div className='verticalLine' />*/}
-            {/*</div>*/}
-
-            {/*<div className='block'>*/}
-            {/*    <span className='caption'>Версия</span>*/}
-            {/*    <NeoSelect width='250px' defaultValue='default'*/}
-            {/*               getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}*/}
-            {/*                 value={this.state.currentDatasetComponent.eContents()[0].get('name')}*/}
-            {/*                 onChange={(e: any) => {*/}
-            {/*                     this.handleChange(e)*/}
-            {/*                 }}>*/}
-            {/*        <option value='default'>*/}
-            {/*            По умолчанию*/}
-            {/*        </option>*/}
-            {/*    </NeoSelect>*/}
-            {/*    <div className='verticalLine' />*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   onClick={()=>{}}>*/}
-            {/*            <NeoIcon icon={'download'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   onClick={()=>{}}>*/}
-            {/*            <NeoIcon icon={'print'} />*/}
-            {/*        </NeoButton>*/}
-            {/*        <NeoButton type={'link'}*/}
-            {/*                   onClick={this.onFullScreen}>*/}
-            {/*            <NeoIcon icon={'fullScreen'} />*/}
-            {/*        </NeoButton>*/}
-            {/*</div>*/}
-             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
-             >
-                 <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
-             </Button>
-             <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
-             >
-                 <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
-             </Button>
-             <div style={{display: 'inline-block', height: '30px',
-                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-             <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
-             >
-                 <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
-             </Button>
-             <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
-             >
-                 <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
-             </Button>
-             <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{
-                         this.DiagramButton()
-                     }
-                     }
-             >
-                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
-             </Button>
-             <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
-                     onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
-             >
-                 <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
-             </Button>
-
-
-             <div style={{display: 'inline-block', height: '30px',
+            <Button
+                hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
+                title={t('edit')}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
+                        this.refresh(true);
+                    } else {
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                    }
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+            </Button>
+            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
+            </Button>
+            <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
+                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+            <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
+            </Button>
+            <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
+            </Button>
+            <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{
+                        this.DiagramButton()
+                    }
+                    }
+            >
+                <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
+            </Button>
+            <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
+            </Button>
+            <Button title={t('hiddencolumns')} style={{color: 'rgb(151, 151, 151)'}}
+                    onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
+            >
+                <img style={{width: '24px', height: '24px'}} src={hiddenColumnIcon} alt="hiddenColumns" />
+            </Button>
+            <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                  borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
 
@@ -1296,24 +1393,21 @@ class DatasetView extends React.Component<any, State> {
             style={{width: '150px'}}
         >
             <Menu.Item key='exportToDocx'>
-                exportToDocx
+                {t("export to docx")}
             </Menu.Item>
             <Menu.Item key='exportToExcel'>
-                exportToExcel
+                {t("export to excel")}
             </Menu.Item>
-        </Menu>)
+        </Menu>);
         return <div id="selectInGetDiagramPanel">
-            <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t("back to table")} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
-                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel })
-                        this.getAllDatasetComponents(true)
-                        this.props.context.removeDocxHandler();
-                        this.props.context.removeExcelHandler();
+                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
             >
-                Вернуться к таблице
+                {t("back to table")}
             </Button>
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -1377,7 +1471,7 @@ class DatasetView extends React.Component<any, State> {
                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
                 </Button>
             </Dropdown>
-            <Checkbox onChange={this.withTable.bind(this)}>Download with table</Checkbox>
+            <Checkbox onChange={this.withTable.bind(this)}>{t("download with table")}</Checkbox>
 
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
@@ -1405,18 +1499,88 @@ class DatasetView extends React.Component<any, State> {
         </div>
     };
 
+    getEditPanel = () => {
+        const { t } = this.props;
+        return <div id="editPanel">
+            <Button
+                title={t('edit')}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    if (this.state.isEditMode && this.gridRef.getBuffer().length > 0) {
+                        this.setState({isCheckEditBufferVisible: true})
+                    } else if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
+                        this.refresh()
+                    } else {
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                    }
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
+                title={t("add row")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => this.gridRef.onInsert()}
+            >
+                <FontAwesomeIcon icon={faPlus} size='lg' color="#7b7979"/>
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
+                title={t("delete selected")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => this.gridRef.onDeleteSelected()}
+            >
+                <FontAwesomeIcon icon={faTrash} size='lg' color="#7b7979"/>
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode}
+                title={t("apply changes")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    //Убрал т.к. есть подсветки
+                    /*this.gridRef.removeRowsFromGrid();*/
+                    this.onApplyEditChanges(this.gridRef.getBuffer());
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
+                title={t("copy selected")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    this.gridRef.copySelected();
+                }}
+            >
+                {t("copy selected")}
+            </Button>
+            <Input
+                hidden={!this.state.isEditMode}
+                style={{width:'250px'}}
+                type="text"
+                onInput={() => this.gridRef.onQuickFilterChanged()}
+                id={"quickFilter"}
+                placeholder={t("quick filter")}
+            />
+        </div>
+    };
+
     handleSaveMenu = () => {
         this.setState({saveMenuVisible:!this.state.saveMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
-
-
     handleDeleteMenu = () => {
-       this.handleDeleteMenuForCancel()
+       this.handleDeleteMenuForCancel();
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
-                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'))
+                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'));
                     this.getAllDatasetComponents(true)
 
                 }
@@ -1425,7 +1589,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDeleteGridMenu = () => {
-        this.handleDiagramChange("delete")
+        this.handleDiagramChange("delete");
         this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
@@ -1443,7 +1607,60 @@ class DatasetView extends React.Component<any, State> {
         }
     };
 
+    onApplyEditChanges = (buffer:any[]) => {
+        buffer.sort(function compare(a:any,b:any) {
+            if (a.operationMark__ === dmlOperation.delete && b.operationMark__ !== dmlOperation.delete)
+                return -1;
+            if (a.operationMark__ === dmlOperation.insert && b.operationMark__ !== dmlOperation.insert)
+                return 1;
+            if (a.operationMark__ === dmlOperation.update && b.operationMark__ === dmlOperation.insert)
+                return -1;
+            if (a.operationMark__ === dmlOperation.update && b.operationMark__ === dmlOperation.delete)
+                return 1;
+            return 0
+        });
+        buffer.forEach(d => {
+            const primaryKey = this.state.columnDefs
+                .filter(c => c.get('isPrimaryKey'))
+                .map(c => {
+                    return {
+                        parameterName: c.get('field'),
+                        parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
+                        parameterDataType: c.get('type'),
+                        isPrimaryKey: true
+                    }
+                });
+            const values = this.state.columnDefs
+                .filter(c => c.get('editable'))
+                .map(c => {
+                    return {
+                        parameterName: c.get('field'),
+                        parameterValue: d[c.get('field')],
+                        parameterDataType: c.get('type'),
+                        isPrimaryKey: c.get('isPrimaryKey')
+                    }
+                });
+            const params = primaryKey.concat(values);
+            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).then(()=>{
 
+                }
+            ).catch(()=>{
+                    //Выходим из редактора, что на ловить ошибки ag-grid
+                    this.setState({isEditMode:false},() => {
+                        //Восстанавливаем значение в случае ошибки
+                        this.refresh()
+                    });
+                }
+            ).finally(()=>{
+                d.operationMark__ = undefined;
+                d.prevOperationMark__ = undefined;
+                buffer.shift();
+                if (buffer.length === 0) {
+                    this.refresh(true)
+                }
+            })
+        });
+    };
 
     render() {
         const { t } = this.props;
@@ -1453,30 +1670,35 @@ class DatasetView extends React.Component<any, State> {
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
-                {(this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
-                {(this.state.currentDiagram)
-                    ?
-                    <DatasetDiagram
-                        {...this.props}
-                        rowData={this.state.rowData}
-                        diagramParams={this.state.currentDiagram}
-                    />
-                    :
-                    <DatasetGrid
-                        {...this.props}
-                        isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
-                        serverAggregates = {this.state.serverAggregates}
-                        numberOfNewLines = {this.state.numberOfNewLines}
-                        highlights = {this.state.highlights}
-                        currentDatasetComponent = {this.state.currentDatasetComponent}
-                        rowData = {this.state.rowData}
-                        columnDefs = {this.state.columnDefs}
-                        currentTheme = {this.state.currentTheme}
-                        showUniqRow = {this.state.showUniqRow}
-                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                        saveChanges = {this.changeDatasetViewState}
-                    />
-                }
+                {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
+                <DatasetDiagram
+                    {...this.props}
+                    hide={!this.state.currentDiagram}
+                    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
+                    diagramParams={this.state.currentDiagram}
+                />
+                <DatasetGrid
+                    hide={!!this.state.currentDiagram}
+                    ref={(g:any) => {
+                        this.gridRef = g
+                    }}
+                    serverAggregates = {this.state.serverAggregates}
+                    isAggregations = {this.state.isAggregations}
+                    highlights = {this.state.highlights}
+                    currentDatasetComponent = {this.state.currentDatasetComponent}
+                    rowData = {this.state.rowData}
+                    columnDefs = {this.state.columnDefs}
+                    currentTheme = {this.state.currentTheme}
+                    showUniqRow = {this.state.showUniqRow}
+                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                    saveChanges = {this.changeDatasetViewState}
+                    onApplyEditChanges = {this.onApplyEditChanges}
+                    isEditMode = {this.state.isEditMode}
+                    showEditDeleteButton = {this.state.isDeleteAllowed}
+                    showMenuCopyButton = {this.state.isInsertAllowed}
+                    aggregatedRows = {this.state.aggregatedRows}
+                    {...this.props}
+                />
                 <div id="filterButton">
                 <Drawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
@@ -1629,6 +1851,34 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </Drawer>
                 </div>
+                <div id="hiddenColumnsButton">
+                    <Drawer
+                        getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
+                        placement='right'
+                        title={t('hiddencolumns')}
+                        width={'700px'}
+                        visible={this.state.hiddenColumnsMenuVisible}
+                        onClose={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
+                        mask={false}
+                        maskClosable={false}
+                    >
+                        {
+                            this.state.hiddenColumns
+                                ?
+                                <HiddenColumn
+                                    {...this.props}
+                                    parametersArray={this.state.hiddenColumns}
+                                    columnDefs={this.state.columnDefs}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.hiddenColumnsMenuVisible}
+                                    componentType={paramType.hiddenColumns}
+                                />
+                                :
+                                <HiddenColumn/>
+                        }
+                    </Drawer>
+                </div>
                 <div id="calculatableexpressionsButton">
                 <Drawer
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
@@ -1753,6 +2003,62 @@ class DatasetView extends React.Component<any, State> {
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             closeModal={this.handleSaveMenu}
                         />
+                    </Modal>
+                </div>
+                <div id="edit_applyChangesButton">
+                    <Modal
+                        getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
+                        key="check_edit_buffer"
+                        width={'500px'}
+                        title={t('edit buffer')}
+                        visible={this.state.isCheckEditBufferVisible}
+                        footer={null}
+                        onCancel={()=>{
+                            this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})
+                        }}
+                    >
+                        <div style={{textAlign:"center"}}>
+                            <b>{t("unresolved changes left")}</b>
+                            <br/>
+                            <br/>
+                            <div>
+                                <Button
+                                    onClick={()=>{
+                                        this.gridRef.removeRowsFromGrid();
+                                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                                        this.setState({
+                                            isEditMode:!this.state.isEditMode,
+                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                            },()=>{
+                                            this.gridRef.onEdit();
+                                        })
+                                    }}
+                                >
+                                    {t("apply and quit")}
+                                </Button>
+                                <Button
+                                    onClick={()=>{
+                                        this.setState({
+                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                        })
+                                    }}
+                                >
+                                    {t("back to edit")}
+                                </Button>
+                                <Button
+                                    onClick={()=>{
+                                        this.gridRef.resetBuffer();
+                                        this.setState({isEditMode:false
+                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                                            this.gridRef.onEdit();
+                                            this.refresh()
+                                        })
+                                    }}
+                                >
+                                    {t("reset changes")}
+                                </Button>
+                            </div>
+                        </div>
                     </Modal>
                 </div>
             </div>

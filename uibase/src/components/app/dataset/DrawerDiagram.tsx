@@ -18,7 +18,7 @@ const diagramAnchorMap_: any = diagramAnchorMap;
 interface Props {
     id?: number,
     action?: string;
-    columnDefs?: Array<EObject>;
+    columnDefs?: Map<String,any>[];
     allAxisXPosition?: Array<EObject>;
     allAxisYPosition?: Array<EObject>;
     allLegendPosition?: Array<EObject>;
@@ -119,7 +119,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
             )(
                 <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
-                    {this.props.columnDefs!.map((c: any) =>
+                    {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
                         <Select.Option
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
                             value={c.get('field')}
@@ -213,11 +213,11 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form style={{ marginTop: '30px' }} >
                 <Row>
                     {this.props.action === "edit"
-                        ?<Col span={6}><Button htmlType="submit">{this.props.t('edit')}</Button></Col>
-                        :<Col span={6}><Button htmlType="submit">{this.props.t('create')}</Button></Col>}
+                        ?<Col span={6}><Button onClick={this.handleSubmit}>{this.props.t('edit')}</Button></Col>
+                        :<Col span={6}><Button onClick={this.handleSubmit}>{this.props.t('create')}</Button></Col>}
                     <Col span={6}><Button onClick={this.resetFields}>{this.props.t('reset')}</Button></Col>
                 </Row>
                 {this.props.t('choose diagram type')}

@@ -22,9 +22,6 @@ import java.util.Map;
 public class Groovy {
     private static final Logger logger = LoggerFactory.getLogger(Groovy.class);
 
-    @Autowired
-    Context context;
-
     public Object eval(String fullClassName, String method, List args) throws Exception {
         Class scriptClass = Thread.currentThread().getContextClassLoader().loadClass(fullClassName);
         return eval(scriptClass, method, args);

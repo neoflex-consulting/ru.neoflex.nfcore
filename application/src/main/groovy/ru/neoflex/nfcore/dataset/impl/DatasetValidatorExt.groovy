@@ -3,10 +3,9 @@ package ru.neoflex.nfcore.dataset.impl
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.DiagnosticChain
 import org.eclipse.emf.ecore.EObject
-import ru.neoflex.nfcore.dataset.JdbcConnection
-import ru.neoflex.nfcore.dataset.JdbcDataset
-import ru.neoflex.nfcore.dataset.JdbcDriver
+import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.dataset.util.DatasetValidator
+import ru.neoflex.nfcore.utils.Utils
 
 class DatasetValidatorExt extends DatasetValidator {
     @Override
@@ -37,9 +36,53 @@ class DatasetValidatorExt extends DatasetValidator {
 
     @Override
     boolean validateJdbcDataset_IsValid(JdbcDataset jdbcDataset, DiagnosticChain diagnostics, Map<Object, Object> context) {
-//        if (jdbcDataset.query == null || jdbcDataset.query.length() == 0) {
-//            return validate(jdbcDataset, diagnostics, context, "query - must be set")
-//        }
+        if (jdbcDataset.queryType == QueryType.USE_QUERY && (jdbcDataset.query == null || jdbcDataset.query.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "query - must be set")
+        }
+        if (jdbcDataset.queryType == QueryType.USE_TABLE_NAME && (jdbcDataset.schemaName == null || jdbcDataset.schemaName.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "schemaName - must be set")
+        }
+        if (jdbcDataset.queryType == QueryType.USE_TABLE_NAME && (jdbcDataset.tableName == null || jdbcDataset.tableName.length() == 0)) {
+            return validate(jdbcDataset, diagnostics, context, "tableName - must be set")
+        }
+    }
+
+    @Override
+    boolean validateDatasetComponent_IsValid(DatasetComponent datasetComponent, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (datasetComponent.dataset != null && datasetComponent.access != Access.DEFAULT) {
+            def allDatasetComponent = Utils.findAllEClass(DatasetPackage.Literals.DATASET_COMPONENT);
+            if (allDatasetComponent != null && allDatasetComponent.size() != 0) {
+                def currentDatasetComponent = []
+                try {
+                    for (int i = 0; i < allDatasetComponent.size(); i++) {
+                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1 && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
+                            currentDatasetComponent.add(allDatasetComponent[i])
+                        }
+                    }
+                }
+                catch (Throwable e) {}
+                if (currentDatasetComponent.size() == 0 || currentDatasetComponent.size() == 1) {
+                    return validate(datasetComponent, diagnostics, context, "access - must be set 'Default' ")
+                }
+            }
+        }
+        else if (datasetComponent.dataset != null && datasetComponent.access == Access.DEFAULT) {
+            def allDatasetComponent = Utils.findAllEClass(DatasetPackage.Literals.DATASET_COMPONENT);
+            if (allDatasetComponent != null && allDatasetComponent.size() != 0) {
+                def currentDatasetComponent = []
+                try {
+                    for (int i = 0; i < allDatasetComponent.size(); i++) {
+                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1 && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
+                            currentDatasetComponent.add(allDatasetComponent[i])
+                        }
+                    }
+                }
+                catch (Throwable e) {}
+                if (currentDatasetComponent.size() > 1) {
+                    return validate(datasetComponent, diagnostics, context, "access - must be set not 'Default' ")
+                }
+            }
+        }
     }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {

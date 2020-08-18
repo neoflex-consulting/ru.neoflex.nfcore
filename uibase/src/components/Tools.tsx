@@ -11,6 +11,7 @@ import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
+import {Helmet} from "react-helmet";
 
 const {Column} = Table;
 const ButtonGroup = Button.Group
@@ -147,7 +148,7 @@ class Tools extends React.Component<any, State> {
             isCurrent: branch === this.state.branchInfo.current,
             isDefault: branch === this.state.branchInfo.default
         }))
-        const fileInput = <Tooltip title={"Import"}>
+        const fileInput = <Tooltip title={this.props.t("import")}>
             <label>
                 <FontAwesomeIcon icon={faCloudUploadAlt}/>
                 <Input type="file" style={{display: "none"}}
@@ -164,7 +165,7 @@ class Tools extends React.Component<any, State> {
             </label>
         </Tooltip>
 
-        const mdInput = <Tooltip title={"Import MD"}>
+        const mdInput = <Tooltip title={this.props.t("import")}>
             <label>
                 <FontAwesomeIcon icon={faCloudUploadAlt}/>
                 <Input type="file" style={{display: "none"}}
@@ -181,7 +182,7 @@ class Tools extends React.Component<any, State> {
             </label>
         </Tooltip>
 
-        const fileDeploy = <Tooltip title={"Import"}>
+        const fileDeploy = <Tooltip title={this.props.t("import")}>
             <label>
                 <FontAwesomeIcon icon={faCloudUploadAlt}/>
                 <Input type="file" style={{display: "none"}}
@@ -200,25 +201,29 @@ class Tools extends React.Component<any, State> {
 
         return (
             <Row>
+                <Helmet>
+                    <title>{this.props.t('tools')}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <Col span={3}/>
                 <Col span={18}>
                     <Table pagination={false} size="small" dataSource={branches}>
-                        <Column title={"Branch"}
+                        <Column title={this.props.t("branch")}
                                 dataIndex={"branch"} key={"branch"}
                         />
                         <Column
-                            title={"Is Current"}
+                            title={this.props.t("is current")}
                             dataIndex={"isCurrent"} key={"isCurrent"}
                             render={(text) => <Checkbox disabled={true} checked={text === true}/>}
                         />
-                        <Column title={"Is Default"}
+                        <Column title={this.props.t("is default")}
                                 dataIndex={"isDefault"} key={"isDefault"}
                                 render={(text) => <Checkbox disabled={true} checked={text === true}/>}
                         />
                         <Column dataIndex={"branch"} key={"command"}
                                 render={branch => (
                                     <ButtonGroup className="pull-right">
-                                        <Tooltip title={"Set Current"}>
+                                        <Tooltip title={this.props.t("set current")}>
                                             <Button type="dashed" size="small" onClick={() => {
                                                 this.setCurrentBranch(branch)
                                             }}>
@@ -229,15 +234,15 @@ class Tools extends React.Component<any, State> {
                                 )}
                         />
                     </Table>
-                    <Divider orientation="left">Export All Objects</Divider>
-                    <Tooltip title={"Export"}>
+                    <Divider orientation="left">{this.props.t("export all objects")}</Divider>
+                    <Tooltip title={this.props.t("export")}>
                         <Button type="dashed" size="small" onClick={() => {
                             this.downloadAll();
                         }}>
                             <FontAwesomeIcon icon={faCloudDownloadAlt}/>
                         </Button>
                     </Tooltip>
-                    <Divider orientation="left">Export Selected Files&Objects</Divider>
+                    <Divider orientation="left">{this.props.t("export selected files objects")}</Divider>
                     <div>
                         <FilesystemLookup checked={this.state.checkedFiles}
                                           onCheck={paths => this.setState({checkedFiles: paths})}/>
@@ -253,7 +258,7 @@ class Tools extends React.Component<any, State> {
                                     specialEClass={undefined}/>
                     </Modal>}
                     <div>
-                        <Tooltip title={"Add Objects"}>
+                        <Tooltip title={this.props.t("add objects")}>
                             <Button type="dashed" size="small" onClick={() => {
                                 this.setState({modalResourceVisible: true})
                             }}>
@@ -273,22 +278,22 @@ class Tools extends React.Component<any, State> {
                     </div>
                     <Form layout={"inline"}>
                         <Form.Item>
-                            <Tooltip title={"Export with all referenced objects"}>
+                            <Tooltip title={this.props.t("export with all referenced objects")}>
                                 <Checkbox checked={this.state.withReferences}
-                                          onChange={(e) => this.setState({withReferences: e.target.checked})}>With
-                                    References</Checkbox>
+                                          onChange={(e) => this.setState({withReferences: e.target.checked})}>
+                                    {this.props.t("with references")}</Checkbox>
                             </Tooltip>
-                            <Tooltip title={"Export with dependent objects"}>
+                            <Tooltip title={this.props.t("export with dependent objects")}>
                                 <Checkbox checked={this.state.withDependents}
-                                          onChange={(e) => this.setState({withDependents: e.target.checked})}>With
-                                    Dependents</Checkbox>
+                                          onChange={(e) => this.setState({withDependents: e.target.checked})}>
+                                    {this.props.t("with dependents")}</Checkbox>
                             </Tooltip>
-                            <Tooltip title={"Collect dependent objects recursively"}>
+                            <Tooltip title={this.props.t("collect dependent objects recursively")}>
                                 <Checkbox checked={this.state.recursiveDependents}
-                                          onChange={(e) => this.setState({recursiveDependents: e.target.checked})}>Recursive
-                                    Dependents</Checkbox>
+                                          onChange={(e) => this.setState({recursiveDependents: e.target.checked})}>
+                                    {this.props.t("recursive dependents")}</Checkbox>
                             </Tooltip>
-                            <Tooltip title={"Export Selected"}>
+                            <Tooltip title={this.props.t("export selected")}>
                                 <Button type="dashed" size="small"
                                         disabled={this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0}
                                         onClick={() => {
@@ -299,25 +304,25 @@ class Tools extends React.Component<any, State> {
                             </Tooltip>
                         </Form.Item>
                     </Form>
-                    <Divider orientation="left">Import Objects</Divider>
+                    <Divider orientation="left">{this.props.t("import objects")}</Divider>
                     <Form layout={"inline"}>
                         <Form.Item>
                             <Input addonBefore={fileInput} value={this.state!.fileName} readOnly={true}/>
                         </Form.Item>
                     </Form>
-                    <Divider orientation="left">Deploy supply</Divider>
+                    <Divider orientation="left">{this.props.t("deploy supply")}</Divider>
                     <Form layout={"inline"}>
                         <Form.Item>
                             <Input addonBefore={fileDeploy} value={this.state!.deployName} readOnly={true}/>
                         </Form.Item>
                     </Form>
-                    <Divider orientation="left">Export Master Data</Divider>
+                    <Divider orientation="left">{this.props.t("export master data")}</Divider>
                     <Form layout={"inline"}>
-                        <Tooltip title={"Query data to export"}>
+                        <Tooltip title={this.props.t("query data to export")}>
                             <Input.TextArea placeholder="SQL" value={this.state.sql}
                                             onChange={(e) => this.setState({sql: e.target.value})}></Input.TextArea>
                         </Tooltip>
-                        <Tooltip title={"Export Selected"}>
+                        <Tooltip title={this.props.t("export selected")}>
                             <Button type="dashed" size="small" disabled={!this.state.sql} onClick={() => {
                                 this.downloadSQL()
                             }}>
@@ -325,7 +330,7 @@ class Tools extends React.Component<any, State> {
                             </Button>
                         </Tooltip>
                     </Form>
-                    <Divider orientation="left">Import Master Data</Divider>
+                    <Divider orientation="left">{this.props.t("import master data")}</Divider>
                     <Form layout={"inline"}>
                         <Form.Item>
                             <Input addonBefore={mdInput} value={this.state!.mdFileName} readOnly={true}/>

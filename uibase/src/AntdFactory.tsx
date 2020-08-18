@@ -1,5 +1,5 @@
 import {View, ViewFactory} from './View'
-import Ecore, {EObject} from 'ecore';
+import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
     Button,
@@ -27,7 +27,7 @@ import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
     actionType,
     defaultDateFormat,
@@ -104,12 +104,7 @@ class Col_ extends ViewContainer {
             <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
                  hidden={this.state.isHidden}
-                 style={{
-                borderRight: this.viewObject.get('borderRight') ? '1px solid #eeeff0' : 'none',
-                borderBottom: this.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
-                borderTop: this.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
-                borderLeft: this.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
-            }}>
+                 style={{}}>
                 {this.renderChildren(isReadOnly)}
             </Col>
         )
@@ -261,15 +256,7 @@ class Row_ extends ViewContainer {
             <Row
                 key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{
-                    textAlign: this.viewObject.get('textAlign') || 'left',
-                    marginRight: marginRight,
-                    marginBottom: marginBottom,
-                    marginTop: marginTop,
-                    marginLeft: marginLeft,
-                    borderBottom: borderBottom,
-                    height: height,
-                }}
+                style={{}}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly)}
@@ -319,6 +306,7 @@ export class Href_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Href.componentRenderCondition",
@@ -390,6 +378,7 @@ export class Button_ extends ViewContainer {
         //componentRenderCondition ag-grid props
         try {
             componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
                 || eval(this.props.componentRenderCondition)
         } catch (e) {
             this.props.context.notification("Button.componentRenderCondition",
@@ -428,7 +417,7 @@ class Select_ extends ViewContainer {
             selectData: [],
             params: [],
             currentValue: undefined,
-            datasetComponent: undefined,
+            dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
         };
@@ -444,7 +433,7 @@ class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -452,7 +441,7 @@ class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -490,15 +479,15 @@ class Select_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('isDynamic')
-            && this.viewObject.get('datasetComponent')) {
-            this.setState({datasetComponent:this.viewObject.get('datasetComponent').eContainer});
+            && this.viewObject.get('dataset')) {
+            this.setState({dataset:this.viewObject.get('dataset').eContainer});
             if (this.viewObject.get('valueItems').size() === 0) {
-                this.props.context.runQuery(this.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
                     this.setState({
                         selectData: JSON.parse(result).map((el: any)=>{
                             return {
-                                key: el[this.viewObject.get('keyColumn')],
-                                value: el[this.viewObject.get('valueColumn')]
+                                key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                                value: el[this.viewObject.get('datasetValueColumn').get('name')]
                             }
                         }),
                         currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
@@ -541,14 +530,14 @@ class Select_ extends ViewContainer {
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const newParams = getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues);
         if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
-            && this.state.datasetComponent
+            && this.state.dataset
             && this.viewObject.get('valueItems')) {
             this.setState({params: newParams});
-            this.props.context.runQuery(this.state.datasetComponent, newParams).then((result: string) => {
+            this.props.context.runQueryDataset(this.state.dataset, newParams).then((result: string) => {
                 const resArr = JSON.parse(result).map((el: any)=>{
                     return {
-                        key: el[this.viewObject.get('keyColumn')],
-                        value: el[this.viewObject.get('valueColumn')]
+                        key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                        value: el[this.viewObject.get('datasetValueColumn').get('name')]
                     }
                 });
                 let currentValue: string;
@@ -599,7 +588,7 @@ class Select_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = '200px';
             return (
                 <div
                     hidden={this.state.isHidden}
@@ -660,7 +649,7 @@ export class DatePicker_ extends ViewContainer {
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
 
         this.state = {
-            pickedDate: mask ? moment(formatedValue, mask) : moment(value, format),
+            defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
             currentValue: formatedValue,
             format: format,
             mask: mask,
@@ -679,21 +668,21 @@ export class DatePicker_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.state.pickedDate.format(this.state.format),
-            hidden: this.viewObject.get('hidden')
+            textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
+            hidden: this.state.isHidden
         };
     }
 
     componentDidMount(): void {
-        this.onChange(this.state.pickedDate.format(this.state.mask ? this.state.mask : this.state.format));
+        this.onChange(this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format));
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
         this.props.context.addExcelHandler(this.getExcelData.bind(this));
         this.props.context.addEventAction({
@@ -757,12 +746,12 @@ export class DatePicker_ extends ViewContainer {
                  <DatePicker
                     key={this.viewObject._id}
                     showTime={this.viewObject.get('showTime')}
-                    defaultValue={this.state.pickedDate}
+                    defaultValue={this.state.defaultDate}
                     value={moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format)}
                     disabled={isReadOnly}
                     allowClear={this.viewObject.get('allowClear') || false}
                     format={this.state.mask}
-                    style={{width: this.viewObject.get('width') || "200px", display: (this.state.isHidden) ? 'none' : undefined}}
+                    style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -789,6 +778,9 @@ class HtmlContent_ extends ViewContainer {
         };
     }
 
+    onChange = (value:string) => {
+        this.setState({htmlContent:value})
+    };
 
     componentDidMount(): void {
         this.props.context.addEventAction({
@@ -798,6 +790,7 @@ class HtmlContent_ extends ViewContainer {
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
             ]
         });
     }
@@ -866,7 +859,8 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.updateContext!({contextItemValues: contextItemValues},
             ()=>this.props.context.notifyAllEventHandlers({
                 type:eventType.change,
-                itemId:this.viewObject.get('name')+this.viewObject._id
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: result
             }));
     };
 
@@ -988,22 +982,6 @@ class ValueHolder_ extends ViewContainer {
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }
 
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.viewObject.get('contextWriter')) {
-            const contextItem = this.props.context.contextItemValues.get(this.viewObject.get('contextWriter').get('name')+this.viewObject.get('contextWriter')._id);
-            const columnName = this.viewObject.get('groovyCommandResultColumnName');
-            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-            if (contextItem
-                && contextItem.parameterValue.length >= 1
-                && columnName) {
-                const value = contextItem.parameterValue[0][columnName];
-                if (value !== (currentContextValue ? currentContextValue.parameterValue: undefined)) {
-                    this.onChange(value);
-                }
-            }
-        }
-    }
-
     render = () => {
         return (
             <div/>
@@ -1093,7 +1071,7 @@ class Input_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div
@@ -1176,7 +1154,7 @@ class Typography_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -1184,7 +1162,7 @@ class Typography_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.viewObject.get('hidden')
+            hidden: this.state.isHidden
         };
     }
 
@@ -1272,13 +1250,26 @@ class EventHandler_ extends ViewContainer {
                         || el.get('action') === actionType.redirect)
                 });
                 if (this.viewObject.get('condition')) {
-                    const params = getNamedParams(this.viewObject.get('conditionItems'), this.props.context.contextItemValues).map(obj => {
-                        return {
-                            ...obj,
-                            parameterValue: obj.parameterValue ? obj.parameterValue : ""
-                        }
-                    });
+                    let params = [];
+                    if (this.viewObject.get('conditionItems').size() > 0) {
+                        params = getNamedParams(this.viewObject.get('conditionItems')
+                            , this.props.context.contextItemValues
+                            , this.props.pathFull[this.props.pathFull.length - 1].params).map(obj => {
+                            return {
+                                ...obj,
+                                parameterValue: obj.parameterValue !== undefined && obj.parameterValue !== null ? obj.parameterValue : ""
+                            }
+                        });
+                    } else {
+                        const paramNames:string[] = this.viewObject.get('condition').match(/:[_а-яa-z0-9]+/gi);
+                        params = paramNames.map(paramName => {
+                            return getNamedParamByName(paramName.replace(":","")
+                                , this.props.context.contextItemValues
+                                , this.props.pathFull[this.props.pathFull.length - 1].params)
+                        });
+                    }
                     try {
+                        // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
                         this.props.context.notification("EventHandler.condition",
@@ -1327,6 +1318,14 @@ class EventHandler_ extends ViewContainer {
                         this.props.context.changeURL(redirectTo, true, undefined, params);
                         isHandled = true;
                     }
+                    if (el.get('action') === actionType.backToLastPage) {
+                        if (this.props.pathFull.length > 2) {
+                            const appModule = this.props.pathFull[this.props.pathFull.length - 2];
+                            let params: Object[] = appModule.params;
+                            this.props.context.changeURL!(appModule.appModule, true, undefined, params);
+                        }
+                        isHandled = true;
+                    }
                     if (!isHandled) {
                         this.props.context.notification("Event handler warning",
                             `Action ${el.get('action') || actionType.execute} is not supported for ${this.viewObject.get('name')}`,
@@ -1339,11 +1338,13 @@ class EventHandler_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.addEventHandler({
-                itemId: this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id,
-                eventType: this.viewObject.get('event') || "click",
-                callback: this.handleEvent.bind(this)
-            })
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.addEventHandler({
+                    itemId: eObject.get('name')+eObject._id,
+                    eventType: this.viewObject.get('event') || "click",
+                    callback: this.handleEvent.bind(this)
+                })
+            });
         }
         this.props.context.notifyAllEventHandlers({
             type:eventType.componentLoad,
@@ -1353,7 +1354,9 @@ class EventHandler_ extends ViewContainer {
 
     componentWillUnmount(): void {
         if (this.viewObject.get('listenItem')) {
-            this.props.context.removeEventHandler(this.viewObject.get('listenItem').get('name')+this.viewObject.get('listenItem')._id)
+            (this.viewObject.get('listenItem') as EList).each(eObject => {
+                this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
+            });
         }
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }

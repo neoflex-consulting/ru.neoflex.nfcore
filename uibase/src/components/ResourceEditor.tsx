@@ -18,6 +18,8 @@ import FormComponentMapper from './FormComponentMapper';
 import Operations from './Operations';
 import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
+import {Helmet} from "react-helmet";
+import _ from "lodash";
 
 export interface Props {
 }
@@ -49,6 +51,8 @@ interface State {
     selectedKeys: Array<string>,
     selectedRefUries: Array<string>,
     searchResources: String,
+    isModified: boolean,
+    modalApplyChangesVisible: Boolean,
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -82,7 +86,9 @@ class ResourceEditor extends React.Component<any, State> {
         selectedKeys: [],
         selectedRefUries: [],
         searchResources: '',
-    }
+        isModified: false,
+        modalApplyChangesVisible: false
+    };
 
     //      = (resources : Ecore.Resource[]): void => {
 
@@ -90,31 +96,31 @@ class ResourceEditor extends React.Component<any, State> {
         if (refresh) {
             this.getEObject()
         }
-    }
+    };
 
     delete = (): void => {
         const ref: string = `${this.state.resource.get('uri')}?rev=${this.state.resource.rev}`;
         API.instance().deleteResource(ref).then(() => {
             this.props.history.push('/developer/data')
         })
-    }
+    };
 
     generateEObject(): void {
-        const { selectedEClass, name } = this.props.location.state
-        const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => `${eclass.eContainer.get('name')}.${eclass.get('name')}` === selectedEClass)
-        const resourceSet = Ecore.ResourceSet.create()
-        const newResourceJSON: { [key: string]: any } = {}
+        const { selectedEClass, name } = this.props.location.state;
+        const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => `${eclass.eContainer.get('name')}.${eclass.get('name')}` === selectedEClass);
+        const resourceSet = Ecore.ResourceSet.create();
+        const newResourceJSON: { [key: string]: any } = {};
 
-        newResourceJSON.eClass = targetEClass && targetEClass!.eURI()
-        newResourceJSON.name = name
+        newResourceJSON.eClass = targetEClass && targetEClass!.eURI();
+        newResourceJSON.name = name;
 
-        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject)
+        const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject);
 
-        resource.set('uri', null)
+        resource.set('uri', null);
 
-        const mainEObject = resource.eResource().eContents()[0]
-        const json = mainEObject.eResource().to()
-        const nestedJSON = nestUpdaters(json, null)
+        const mainEObject = resource.eResource().eContents()[0];
+        const json = mainEObject.eResource().to();
+        const nestedJSON = nestUpdaters(json, null);
 
         this.setState({
             mainEObject: mainEObject,
@@ -128,8 +134,8 @@ class ResourceEditor extends React.Component<any, State> {
         const resourceSet = Ecore.ResourceSet.create();
         this.props.match.params.id !== 'new' ?
             API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
-                const mainEObject = resource.eResource().eContents()[0]
-                const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null)
+                const mainEObject = resource.eResource().eContents()[0];
+                const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
                 this.setState((state, props) => ({
                     mainEObject: mainEObject,
                     resourceJSON: nestedJSON,
@@ -148,8 +154,8 @@ class ResourceEditor extends React.Component<any, State> {
 
     getEClasses(): void {
         API.instance().fetchAllClasses(false).then(classes => {
-            const filtered = classes.filter((c: Ecore.EObject) => !c.get('interface'))
-            this.setState({ classes: filtered })
+            const filtered = classes.filter((c: Ecore.EObject) => !c.get('interface'));
+            this.setState({ classes: filtered });
             this.getEObject()
         })
     }
@@ -157,25 +163,25 @@ class ResourceEditor extends React.Component<any, State> {
     createTree() {
         const getTitle = (object: { [key: string]: any }) => {
             const possibleTitles: Array<string> = ["name", "qname", "createdBy", "code", "rdbmsFieldName", "fieldName", "title"];
-            let result = null
+            let result = null;
             for (let title of possibleTitles) {
                 if (object[title]) {
-                    result = object[title]
+                    result = object[title];
                     break
                 }
             }
             return result
-        }
+        };
 
         const generateNodes = (eClass: Ecore.EObject, json: { [key: string]: any }, parentId?: String): Array<any> => {
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
                     const isContainment = Boolean(feature.get('containment'));
-                    const upperBound = feature.get('upperBound')
+                    const upperBound = feature.get('upperBound');
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
                             :
-                            json[feature.get('name')] ? [json[feature.get('name')]] : []
+                            json[feature.get('name')] ? [json[feature.get('name')]] : [];
                         return <Tree.TreeNode
                             parentUpdater={json.updater}
                             upperBound={upperBound}
@@ -189,9 +195,9 @@ class ResourceEditor extends React.Component<any, State> {
                             title={feature.get('name')}
                         >
                             {targetObject.map((object: { [key: string]: any }) => {
-                                const res = Ecore.ResourceSet.create()
-                                const eClass = res.getEObject(object.eClass)
-                                const title = getTitle(object)
+                                const res = Ecore.ResourceSet.create();
+                                const eClass = res.getEObject(object.eClass);
+                                const title = getTitle(object);
                                 return <Tree.TreeNode
                                     key={object._id}
                                     featureUpperBound={upperBound}
@@ -231,8 +237,8 @@ class ResourceEditor extends React.Component<any, State> {
 
     onTreeSelect = (selectedKeys: Array<string>, e: any, imitateClick: boolean = false) => {
         if (selectedKeys[0] && e.node.props.targetObject.eClass) {
-            const targetObject = e.node.props.targetObject
-            const uniqKey = e.node.props.eventKey
+            const targetObject = e.node.props.targetObject;
+            const uniqKey = e.node.props.eventKey;
             this.setState({
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, uniqKey),
                 targetObject: targetObject,
@@ -248,7 +254,7 @@ class ResourceEditor extends React.Component<any, State> {
                 selectedKeys: selectedKeys
             })
         }
-    }
+    };
 
     onTreeRightClick = (e: any) => {
         this.setState({
@@ -256,37 +262,43 @@ class ResourceEditor extends React.Component<any, State> {
             rightMenuPosition: { x: e.event.clientX, y: e.event.clientY },
             treeRightClickNode: e.node.props
         })
-    }
+    };
 
     onTablePropertyChange = (newValue: any, componentName: string, targetObject: any, EObject: Ecore.EObject): void => {
         if (componentName === 'SelectComponent') {
-            const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue })
-            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
+            const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
+            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
         } else if (componentName === 'DatePickerComponent') {
-            const value = { [EObject.get('name')]: newValue ? moment(newValue).format() : '' }
+            const value = { [EObject.get('name')]: newValue ? moment(newValue).format() : '' };
             const updatedJSON = targetObject.updater(value);
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
         } else if (componentName === 'BooleanSelect') {
-            const updatedJSON = targetObject.updater({ [EObject.get('name')]: getPrimitiveType(newValue) })
-            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
+            const updatedJSON = targetObject.updater({ [EObject.get('name')]: getPrimitiveType(newValue) });
+            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
         } else {
             //EditableTextArea
-            const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue })
-            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
+            const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
+            const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
             this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
         }
-    }
+    };
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
-        const preparedData: Array<Object> = []
+        const preparedData: Array<Object> = [];
+        let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
-            const featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
+        }
+        else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
+            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures')
+        }
+        if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
-                const isContainment = Boolean(feature.get('containment'))
-                const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false
+                const isContainment = Boolean(feature.get('containment'));
+                const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
                 if (!isContainment && !isContainer) preparedData.push({
                     property: feature.get('name'),
                     value: FormComponentMapper.getComponent({
@@ -306,7 +318,7 @@ class ResourceEditor extends React.Component<any, State> {
                     }),
                     key: feature.get('name') + idx
                 })
-            })
+            });
             return preparedData
         }
         return preparedData
@@ -314,7 +326,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     onEClassBrowse = (EObject: Ecore.EObject) => {
         this.setState({ modalSelectEClassVisible: true, addRefPropertyName: EObject.get('name') })
-    }
+    };
 
     onBrowse = (EObject: Ecore.EObject) => {
         const addRefPossibleTypes = [];
@@ -324,29 +336,33 @@ class ResourceEditor extends React.Component<any, State> {
         resourceSet.elements('EClass').filter((c:any)=>c.get('name')===EObject.get('eType').get('name')).map((c:any)=>c.get('eAllSubTypes')).flat().forEach((subType: Ecore.EObject) =>
             //EObject.get('eType').get('eAllSubTypes').forEach((subType: Ecore.EObject) =>
             addRefPossibleTypes.push(subType.get('name'))
-        )
+        );
         this.setState({
             modalRefVisible: true,
             addRefPropertyName: EObject.get('name'),
             addRefPossibleTypes: addRefPossibleTypes
         })
-    }
+    };
 
     setSelectEClassVisible = (visible: boolean) => {
         this.setState({ modalSelectEClassVisible: visible })
-    }
+    };
 
     handleRefModalCancel = () => {
         this.setState({ modalRefVisible: false })
-    }
+    };
 
     handleResourceModalCancel = () => {
         this.setState({ modalResourceVisible: false })
-    }
+    };
+
+    handleApplyChangesModalCancel = () => {
+        this.setState({ modalApplyChangesVisible: false })
+    };
 
     hideRightClickMenu = (e: any) => {
         this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
-    }
+    };
 
     sortEClasses = (a: any, b: any): number => {
         if (a.eContainer.get('name') + a._id < b.eContainer.get('name') + b._id) return -1;
@@ -356,7 +372,7 @@ class ResourceEditor extends React.Component<any, State> {
 
     renderRightMenu(): any {
         const node: { [key: string]: any } = this.state.treeRightClickNode;
-        const eClass = node.eClass
+        const eClass = node.eClass;
         const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
         const allSubTypes = eClassObject.get('eAllSubTypes');
         node.isArray && eClassObject && allSubTypes.push(eClassObject);
@@ -405,22 +421,22 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     handleRightMenuSelect = (e: any) => {
-        const targetObject: { [key: string]: any } = this.state.targetObject
-        const node: { [key: string]: any } = this.state.treeRightClickNode
+        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const node: { [key: string]: any } = this.state.treeRightClickNode;
 
         if (e.keyPath[e.keyPath.length - 1] === "add") {
-            const subTypeName = e.item.props.children
-            const eClass = node.eClass
-            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass)
-            const allSubTypes = eClassObject.get('eAllSubTypes')
-            node.isArray && eClassObject && allSubTypes.push(eClassObject)
-            const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName)
-            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`
+            const subTypeName = e.item.props.children;
+            const eClass = node.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+            node.isArray && eClassObject && allSubTypes.push(eClassObject);
+            const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName);
+            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id
             };
-            let updatedJSON
+            let updatedJSON;
             if (node.upperBound === -1) {
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
             } else {
@@ -428,7 +444,7 @@ class ResourceEditor extends React.Component<any, State> {
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject)
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
@@ -479,34 +495,34 @@ class ResourceEditor extends React.Component<any, State> {
                 selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey)
             }))
         }
-    }
+    };
 
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
-        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources')
-        resourceList.addAll(resources)
+        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources');
+        resourceList.addAll(resources);
         this.setState({ modalResourceVisible: false })
-    }
+    };
 
     handleDeleteResource = (resource: { [key: string]: any }): void => {
-        this.state.mainEObject.eResource().eContainer.get('resources').remove(resource)
+        this.state.mainEObject.eResource().eContainer.get('resources').remove(resource);
         this.forceUpdate()
-    }
+    };
 
     addRef = (eObjects: Ecore.EObject[]): void => {
-        const targetObject: { [key: string]: any } = this.state.targetObject
-        const { addRefPropertyName } = this.state
-        let updatedJSON: Object = {}
-        let refsArray: Array<Object>
+        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const { addRefPropertyName } = this.state;
+        let updatedJSON: Object = {};
+        let refsArray: Array<Object>;
         let upperBound;
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
         contents(this.state.mainEObject).forEach(eObject => {
-            const feature = eObject.eClass.get('eAllStructuralFeatures').find((f: any)=> f.get('name') === addRefPropertyName)
+            const feature = eObject.eClass.get('eAllStructuralFeatures').find((f: any)=> f.get('name') === addRefPropertyName);
             if (feature !== undefined) {
                 upperBound = feature.get('upperBound')
             }
         });
         if (upperBound === -1) {
-            refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : []
+            refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : [];
             eObjects.forEach((eObject) => {
                 refsArray.push({
                     $ref: eObject.eURI(),
@@ -515,7 +531,7 @@ class ResourceEditor extends React.Component<any, State> {
             });
             updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
         } else {
-            const firstEObject = eObjects.find((eObject: Ecore.EObject) => eObject.eURI() === this.state.selectedRefUries[0])
+            const firstEObject = eObjects.find((eObject: Ecore.EObject) => eObject.eURI() === this.state.selectedRefUries[0]);
             //if a user choose several resources for the adding, but upperBound === 1, we put only first resource
             if (firstEObject !== undefined) {
                 updatedJSON = targetObject.updater({
@@ -533,46 +549,46 @@ class ResourceEditor extends React.Component<any, State> {
             targetObject: updatedTargetObject,
             selectedRefUries: []
         })
-    }
+    };
 
     handleAddNewRef = () => {
         let eObjects: Ecore.EObject[] = [];
         (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements().forEach((eObject: Ecore.EObject) => {
-            const isFound = this.state.selectedRefUries.indexOf(eObject.eURI() as never)
+            const isFound = this.state.selectedRefUries.indexOf(eObject.eURI() as never);
             isFound !== -1 && eObjects.push(eObject)
-        })
+        });
         this.addRef(eObjects)
-    }
+    };
 
     handleDeleteRef = (deletedObject: any, addRefPropertyName: string) => {
-        const targetObject: { [key: string]: any } = this.state.targetObject
-        const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : []
-        const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"])
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray })
-        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
+        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : [];
+        const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"]);
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray });
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
-    }
+    };
 
     handleDeleteSingleRef = (deletedObject: any, addRefPropertyName: string) => {
-        const targetObject: { [key: string]: any } = this.state.targetObject
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null })
-        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id)
-        delete updatedTargetObject[addRefPropertyName]
+        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null });
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
+        delete updatedTargetObject[addRefPropertyName];
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
-    }
+    };
 
     cloneResource = () => {
-        this.state.mainEObject.eResource().clear()
-        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
-        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)]
-        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null})
-        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`)
-        resource.set('uri', null)
+        this.state.mainEObject.eResource().clear();
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
+        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
+        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+        resource.set('uri', null);
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
-                const targetObject: { [key: string]: any } = this.state.targetObject
-                const nestedJSON = nestUpdaters(resource.eResource().to(), null)
-                const updatedTargetObject = findObjectById(nestedJSON, targetObject._id)
+                const targetObject: { [key: string]: any } = this.state.targetObject;
+                const nestedJSON = nestUpdaters(resource.eResource().to(), null);
+                const updatedTargetObject = findObjectById(nestedJSON, targetObject._id);
                 this.setState({
                     mainEObject: resource.eResource().eContents()[0],
                     resourceJSON: nestedJSON,
@@ -582,27 +598,54 @@ class ResourceEditor extends React.Component<any, State> {
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
             })
         }
-    }
+    };
 
-    save = () => {
-        this.state.mainEObject.eResource().clear()
-        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject)
+    save = (redirectAfterSave:boolean = false) => {
+        this.state.mainEObject.eResource().clear();
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            this.setState({ isSaving: true })
+            this.setState({ isSaving: true });
             API.instance().saveResource(resource, 99999).then((resource: any) => {
-                const nestedJSON = nestUpdaters(resource.eResource().to(), null)
-                const updatedTargetObject = findObjectById(nestedJSON, resource.get('uri'))
+                const updatedTargetObject = findObjectById(this.state.resourceJSON, resource.get('uri'));
                 this.setState({
                     isSaving: false,
+                    isModified: false,
+                    modalApplyChangesVisible: false,
                     mainEObject: resource.eResource().eContents()[0],
-                    resourceJSON: nestedJSON,
                     targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
                     resource: resource
                 });
-                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
+                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                if (redirectAfterSave)
+                    this.redirect()
             }).catch(() => {
-                this.setState({ isSaving: false })
+                this.setState({ isSaving: false, isModified: true })
             })
+        }
+    };
+
+    redirect = () => {
+        const win = window.open(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        [{
+                            appModule: this.state.mainEObject.get('name'),
+                            tree: [],
+                            useParentReferenceTree: this.state.mainEObject.get('useParentReferenceTree')
+                        }]
+                    )
+                )
+            )
+        }`, '_blank');
+        win!.focus();
+    };
+
+    run = () => {
+        if (this.state.isModified) {
+            this.setState({modalApplyChangesVisible: true})
+        } else {
+            this.redirect()
         }
     };
 
@@ -612,16 +655,18 @@ class ResourceEditor extends React.Component<any, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
-        //if true that means resourceJSON was edited and updated
-        if (this.state.targetObject !== undefined && this.state.resourceJSON !== prevState.resourceJSON && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
+        //if true that means resourceJSON was edited
+        if (this.state.targetObject !== undefined
+            && this.state.resourceJSON !== prevState.resourceJSON
+            && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
-            this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
+            this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
         }
     }
 
     componentDidMount(): void {
-        this.getEClasses()
+        this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS)
     }
@@ -632,26 +677,38 @@ class ResourceEditor extends React.Component<any, State> {
             event.preventDefault();
         }
     };
-    
+
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+                <Helmet>
+                    <title>{this.state.resource && this.state.resource.eContents ? this.state.resource.eContents()[0].get('name') : undefined}</title>
+                    <link rel="shortcut icon" type="image/png" href="/developer.ico" />
+                </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
-                    {this.state.isSaving ?
-                        <Icon type="loading" style={{ fontSize: '20px', margin: '6px 10px', color: '#61dafb' }} />
-                        :
-                        <Button className="panel-button" icon="save" onClick={this.save} title={"Save"}/>}
-                    <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={"Refresh"} />
+                    {
+                        this.state.isSaving
+                        ? <Icon className="panel-icon" type="loading"/>
+                        : <Button className="panel-button" icon="save" onClick={()=>this.save(false)} title={this.props.t("save")}/>
+                    }
+                    <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
                     <Operations
                         translate={t}
                         mainEObject={this.state.mainEObject}
                         refresh={this.refresh}
                     />}
-                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={"Copy"} />
-                    <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={"Delete"} />
+                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={this.props.t("copy")} />
+                    <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={this.props.t("delete")} />
+                    {this.state.mainEObject
+                    && this.state.mainEObject.eClass
+                    && ["AppModule", "Application"].includes(this.state.mainEObject.eClass.get('name'))
+                    ?
+                        <Button className="panel-button" icon="play-circle" title={this.props.t("preview")} onClick={this.run}/>
+                    : null
+                    }
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
                     {this.state.rightClickMenuVisible && this.renderRightMenu()}
@@ -664,7 +721,7 @@ class ResourceEditor extends React.Component<any, State> {
                         dispatchResize={true}
                         postPoned={false}
                         onDragFinished={() => {
-                            const size: string = this.splitterRef.current!.panePrimary.props.style.height
+                            const size: string = this.splitterRef.current!.panePrimary.props.style.height;
                             localStorage.setItem('resource_splitter_pos', size)
                         }}
                     >
@@ -680,7 +737,7 @@ class ResourceEditor extends React.Component<any, State> {
                                             onChange={(e)=>{
                                                 this.setState({searchResources: `${e.target.value}`})
                                                 }}
-                                            placeholder="Search">
+                                            placeholder={this.props.t("search")}>
                                         </Input>
 
                                     <div className="resource-container">
@@ -763,21 +820,26 @@ class ResourceEditor extends React.Component<any, State> {
                         }}
                         filterOption={(input, option) => {
                             function toString(el: any): string {
-                                if (typeof el === "string") return el
-                                if (Array.isArray(el)) return el.map((c:any)=>toString(c)).join(" ")
-                                if (el.children) return toString(el.children)
-                                if (el.props) return toString(el.props)
-                                return ""
+                                let result: string = "";
+                                if (typeof el === "string") result = el;
+                                else if (Array.isArray(el)) result = el.map((c:any)=>toString(c)).join(" ");
+                                else if (el.children) result = toString(el.children);
+                                else if (el.props) result = toString(el.props);
+                                return result
                             }
-                            return toString(option.props).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            const value = toString(option.props).toLowerCase();
+                            const test = input.toLowerCase().split(/[,]+/).every(inputAnd=>
+                                inputAnd.trim().split(/[ ]+/).some(inputOr=>
+                                    value.indexOf(inputOr) >= 0));
+                            return test;
                         }}
                     >
                         {
                             this.state.mainEObject.eClass &&
                             (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
                                 .map((eObject: Ecore.EObject, index: number) => {
-                                    const possibleTypes: Array<string> = this.state.addRefPossibleTypes
-                                    const isEObjectType: boolean = possibleTypes[0] === 'EObject'
+                                    const possibleTypes: Array<string> = this.state.addRefPossibleTypes;
+                                    const isEObjectType: boolean = possibleTypes[0] === 'EObject';
                                     return isEObjectType ?
                                         <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
@@ -787,7 +849,8 @@ class ResourceEditor extends React.Component<any, State> {
                                             {`${eObject.get('name')}`}
                                         </Select.Option>
                                         :
-                                        possibleTypes.includes(eObject.eClass.get('name')) && <Select.Option key={eObject.eURI()} value={eObject.get('name')}>
+                                        possibleTypes.includes(eObject.eClass.get('name')) &&
+                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
@@ -808,6 +871,28 @@ class ResourceEditor extends React.Component<any, State> {
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
 
                 </Modal>}
+                {this.state.modalApplyChangesVisible && <Modal
+                    key="apply_changes_modal"
+                    width={'1000px'}
+                    title={t('apply changes')}
+                    visible={this.state.modalApplyChangesVisible}
+                    footer={null}
+                    onCancel={this.handleApplyChangesModalCancel}
+                >
+                    <div style={{textAlign:"center"}}>
+                        <b>{t("unresolved changes left")}</b>
+                        <br/>
+                        <br/>
+                        <div>
+                            <Button onClick={()=>this.save(true)}>
+                                {t("apply and run")}
+                            </Button>
+                            <Button onClick={this.handleApplyChangesModalCancel}>
+                                {t("back to edit")}
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>}
                 <EClassSelection
                     key="eclass_selection"
                     translate={t}
@@ -820,7 +905,7 @@ class ResourceEditor extends React.Component<any, State> {
                                 $ref: EClassObject.eURI(),
                                 eClass: EClassObject.eClass.eURI()
                             }
-                        })
+                        });
                         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
                         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
                     }}
