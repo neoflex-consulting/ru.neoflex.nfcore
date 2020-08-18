@@ -1,4 +1,5 @@
 .app-logo {
+  margin: auto auto auto 30px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
@@ -273,6 +274,19 @@
 }
 
 /*Antd styles*/
+
+/*Select*/
+
+.ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+  background-color: #fff8e0 !important;
+}
+
+.ant-select-dropdown-menu {
+  overflow: hidden !important;
+}
+
+
+
 .ant-menu-submenu-title {
   color: black;
 }
@@ -335,3 +349,4 @@
   border-radius: 4px;
   box-shadow: none !important;
 }
+

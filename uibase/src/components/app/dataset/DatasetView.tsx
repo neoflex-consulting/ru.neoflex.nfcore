@@ -47,6 +47,7 @@ import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
 import moment from "moment";
 import format from "number-format.js";
+import {NeoIcon, NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;
@@ -1067,153 +1068,223 @@ class DatasetView extends React.Component<any, State> {
             </Menu.Item>
         </Menu>)
         return <div>
-            <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
-            </Button>
-            <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
+            {/*<div className='functionalBar__header'>*/}
+            {/*<div className='block'>*/}
+            {/*        <NeoInput width='192px' type={'search'} />*/}
+            {/*    <div className='verticalLine' />*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('filters')}*/}
+            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>*/}
+            {/*            <NeoIcon icon={'filter'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('sorts')}*/}
+            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>*/}
+            {/*            <NeoIcon icon={'sort'} />*/}
+            {/*        </NeoButton>*/}
+            {/*    <div className='verticalLine' />*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('calculator')}*/}
+            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>*/}
+            {/*            <NeoIcon icon={'calculator'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('aggregations')}*/}
+            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>*/}
+            {/*            <NeoIcon icon={'plusBlock'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('diagram')}*/}
+            {/*                   onClick={()=>{this.DiagramButton()}}>*/}
+            {/*            <NeoIcon icon={'barChart'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('grouping')}*/}
+            {/*                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>*/}
+            {/*            <NeoIcon icon={'add'}/>*/}
+            {/*        </NeoButton>*/}
+            {/*    <div className='verticalLine' />*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   title={t('save')}*/}
+            {/*                   onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>*/}
+            {/*            <NeoIcon icon={'mark'} />*/}
+            {/*        </NeoButton>*/}
+            {/*    <div className='verticalLine' />*/}
+            {/*</div>*/}
+
+            {/*<div className='block'>*/}
+            {/*    <span className='caption'>Версия</span>*/}
+            {/*    <NeoSelect width='250px' defaultValue='default'*/}
+            {/*               getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}*/}
+            {/*                 value={this.state.currentDatasetComponent.eContents()[0].get('name')}*/}
+            {/*                 onChange={(e: any) => {*/}
+            {/*                     this.handleChange(e)*/}
+            {/*                 }}>*/}
+            {/*        <option value='default'>*/}
+            {/*            По умолчанию*/}
+            {/*        </option>*/}
+            {/*    </NeoSelect>*/}
+            {/*    <div className='verticalLine' />*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   onClick={()=>{}}>*/}
+            {/*            <NeoIcon icon={'download'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   onClick={()=>{}}>*/}
+            {/*            <NeoIcon icon={'print'} />*/}
+            {/*        </NeoButton>*/}
+            {/*        <NeoButton type={'link'}*/}
+            {/*                   onClick={this.onFullScreen}>*/}
+            {/*            <NeoIcon icon={'fullScreen'} />*/}
+            {/*        </NeoButton>*/}
+            {/*</div>*/}
+             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />
+             </Button>
+             <Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />
+             </Button>
+             <div style={{display: 'inline-block', height: '30px',
+                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+             <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
+             </Button>
+             <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
+             </Button>
+             <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{
+                         this.DiagramButton()
+                     }
+                     }
+             >
+                 <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
+             </Button>
+             <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
+             </Button>
+
+
+             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />
-            </Button>
-            <Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />
-            </Button>
-            <Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{
-                        this.DiagramButton()
-                    }
-                    }
-            >
-                <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />
-            </Button>
-            <Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />
-            </Button>
+                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
 
-
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-
-            <Button title={t('save')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
-            </Button>
+             <Button title={t('save')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+             </Button>
 
             {
-                 this.state.currentDatasetComponent.rev !== undefined &&
-                 this.state.currentDatasetComponent.eContents()[0].get( 'access') !== 'Default' &&
-                <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
-                >
-                    <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon"
-                         onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}/>
-                </Button>
-            }
+                  this.state.currentDatasetComponent.rev !== undefined &&
+                  this.state.currentDatasetComponent.eContents()[0].get( 'access') !== 'Default' &&
+                 <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
+                 >
+                     <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon"
+                          onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}/>
+                 </Button>
+             }
 
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            {this.state.allDatasetComponents.length !== 0
-            && this.state.currentDatasetComponent !== undefined
-            &&
-            <div id="selectsInFullScreen" style={{display: 'inline-block'}}>
-                <Select
-                    getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
-                    style={{ width: '250px'}}
-                    showSearch={true}
-                    value={this.state.currentDatasetComponent.eContents()[0].get('name')}
-                    onChange={(e: any) => {
-                        this.handleChange(e)
-                    }}
-                >
-                    <OptGroup
-                        label='Default'>
-                        {
-                            this.state.allDatasetComponents
-                                .filter((c: any) => c.eContents()[0].get('access') === 'Default')
-                                .map( (c: any) =>
-                                    <Option
-                                        key={c.eContents()[0].get('name')}
-                                        value={c.eContents()[0].get('name')}>
-                                        {c.eContents()[0].get('name')}
-                                    </Option>)
-                        }
-                    </OptGroup>
-                    <OptGroup label='Private'>
-                        {
-                            this.state.allDatasetComponents
-                                .filter((c: any) => c.eContents()[0].get('access') === 'Private')
-                                .map( (c: any) =>
-                                    <Option
-                                        key={c.eContents()[0].get('name')}
-                                        value={c.eContents()[0].get('name')}>
-                                        {c.eContents()[0].get('name')}
-                                    </Option>)
-                        }
-                    </OptGroup>
-                    <OptGroup label='Public'>
-                        {
-                            this.state.allDatasetComponents
-                                .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
-                                .map( (c: any) =>
-                                    <Option
-                                        key={c.eContents()[0].get('name')}
-                                        value={c.eContents()[0].get('name')}>
-                                        {c.eContents()[0].get('name')}
-                                    </Option>)
-                        }
-                    </OptGroup>
-                </Select>
-            </div>
-            }
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+             <div style={{display: 'inline-block', height: '30px',
+                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+             {this.state.allDatasetComponents.length !== 0
+             && this.state.currentDatasetComponent !== undefined
+             &&
+             <div id="selectsInFullScreen" style={{display: 'inline-block'}}>
+                 <Select
+                     getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
+                     style={{ width: '250px'}}
+                     showSearch={true}
+                     value={this.state.currentDatasetComponent.eContents()[0].get('name')}
+                     onChange={(e: any) => {
+                         this.handleChange(e)
+                     }}
+                 >
+                     <OptGroup
+                         label='Default'>
+                         {
+                             this.state.allDatasetComponents
+                                 .filter((c: any) => c.eContents()[0].get('access') === 'Default')
+                                 .map( (c: any) =>
+                                     <Option
+                                         key={c.eContents()[0].get('name')}
+                                         value={c.eContents()[0].get('name')}>
+                                         {c.eContents()[0].get('name')}
+                                     </Option>)
+                         }
+                     </OptGroup>
+                     <OptGroup label='Private'>
+                         {
+                             this.state.allDatasetComponents
+                                 .filter((c: any) => c.eContents()[0].get('access') === 'Private')
+                                 .map( (c: any) =>
+                                     <Option
+                                         key={c.eContents()[0].get('name')}
+                                         value={c.eContents()[0].get('name')}>
+                                         {c.eContents()[0].get('name')}
+                                     </Option>)
+                         }
+                     </OptGroup>
+                     <OptGroup label='Public'>
+                         {
+                             this.state.allDatasetComponents
+                                 .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
+                                 .map( (c: any) =>
+                                     <Option
+                                         key={c.eContents()[0].get('name')}
+                                         value={c.eContents()[0].get('name')}>
+                                         {c.eContents()[0].get('name')}
+                                     </Option>)
+                         }
+                     </OptGroup>
+                 </Select>
+             </div>
+             }
+             <div style={{display: 'inline-block', height: '30px',
+                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
+                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft">
-                <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
-                    <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-                </Button>
-            </Dropdown>
+             <Dropdown overlay={menu} placement="bottomLeft">
+                 <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
+                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
+                 </Button>
+             </Dropdown>
 
 
-            <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
-                    onClick={()=>{}}
-            >
-                <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
-            </Button>
-            <Button
-                className="buttonFullScreen"
-                type="link"
-                ghost
-                style={{
-                    marginRight: '10px',
-                    width: '32px',
-                    height: '32px',
-                    color: 'rgb(151, 151, 151)'
-                }}
-                onClick={this.onFullScreen}
-            >
-                {this.state.fullScreenOn  ?
-                    <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
-                    :
-                    <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
-            </Button>
+             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
+                     onClick={()=>{}}
+             >
+                 <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
+             </Button>
+             <Button
+                 className="buttonFullScreen"
+                 type="link"
+                 ghost
+                 style={{
+                     marginRight: '10px',
+                     width: '32px',
+                     height: '32px',
+                     color: 'rgb(151, 151, 151)'
+                 }}
+                 onClick={this.onFullScreen}
+             >
+                 {this.state.fullScreenOn  ?
+                     <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+                     :
+                     <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
+             </Button>
         </div>
     };
 
