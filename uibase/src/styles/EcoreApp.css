@@ -7,6 +7,7 @@
 	height: 40px !important;
 	display: inline-flex;
 	align-items: baseline;
+	/*justify-content: center;*/
 	box-shadow: 1px 1px 10px #e1e1e1;
 	margin-bottom: 2px;
 	background-color: #fdfdfd;
@@ -17,6 +18,13 @@
 	border: 0;
 	box-shadow: none;
 	background-color: #fbfbfb;
+}
+
+.panel-icon {
+	width: 32px;
+	height: 32px;
+	margin-left: 13px;
+	color: #61dafb
 }
 
 .view-box{

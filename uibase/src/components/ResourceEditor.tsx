@@ -654,7 +654,11 @@ class ResourceEditor extends React.Component<any, State> {
                 </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
-                    <Button className="panel-button" icon={this.state.isSaving ? "loading" : "save"} disabled={this.state.isSaving} onClick={this.save} title={"Save"}/>
+                    {
+                        this.state.isSaving
+                        ? <Icon className="panel-icon" type="loading"/>
+                        : <Button className="panel-button" icon="save" onClick={this.save} title={"Save"}/>
+                    }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={"Refresh"} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
                     <Operations
