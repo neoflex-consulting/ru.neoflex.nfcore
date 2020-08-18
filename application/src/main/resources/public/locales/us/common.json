@@ -339,5 +339,6 @@
         "query data to export": "Query data to export",
         "add files": "Add Files",
         "select files": "Select files",
-        "addresource": "Add resource"
+        "addresource": "Add resource",
+        "no rows to show": "No rows to show"
 }

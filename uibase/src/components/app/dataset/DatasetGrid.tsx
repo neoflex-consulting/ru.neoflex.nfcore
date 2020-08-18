@@ -669,6 +669,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             suppressClickEdit={true}
                             gridOptions={this.gridOptions}
                             /*stopEditingWhenGridLosesFocus={true}*/
+                            overlayNoRowsTemplate={`<span>${t("no rows to show")}</span>`}
                             {...gridOptions}
                         >
                             {this.state.columnDefs.map((col: any) =>

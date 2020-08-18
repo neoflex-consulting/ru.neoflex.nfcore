@@ -331,6 +331,7 @@
         "query data to export": "出口要求",
         "add files": "新增檔案",
         "select files": "選擇文件",
-        "addresource": "添加資源"
+        "addresource": "添加資源",
+        "no rows to show": "缺少要顯示的數據"
 
 }

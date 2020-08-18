@@ -340,7 +340,8 @@
         "query data to export": "Запрос для экспорта",
         "add files": "Добавить Файлы",
         "select files": "Выбрать файлы",
-        "addresource": "Добавить ресурс"
+        "addresource": "Добавить ресурс",
+        "no rows to show": "Отсутствуют данные для отображения"
 
 }
 
