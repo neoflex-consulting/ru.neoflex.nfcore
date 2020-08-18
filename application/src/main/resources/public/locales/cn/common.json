@@ -304,6 +304,33 @@
         "back to table": "返回表",
 
         "hide": "隱藏",
-        "show": "顯示"
+        "show": "顯示",
+
+        "data search": "資料搜尋",
+        "json search": "JSON搜索",
+        "preview": "預習",
+        "branch": "Git分支",
+        "is current": "當前",
+        "is default": "默認",
+        "export selected files objects": "導出選定的文件和對象",
+        "import objects": "導入對象",
+        "deploy supply": "下載交付",
+        "export master data": "出口目錄",
+        "import master data": "導入目錄",
+        "export": "出口",
+        "import": "導入",
+        "add objects": "添加對象",
+        "export with all referenced objects": "導出參考對象",
+        "export with dependent objects": "導出對象取決於上載的對象",
+        "collect dependent objects recursively": "遞歸收集依賴對象",
+        "export selected": "導出已選擇",
+        "set current": "使電流",
+        "with references": "連同鏈接",
+        "with dependents": "和成癮者在一起",
+        "recursive dependents": "遞歸依賴",
+        "query data to export": "出口要求",
+        "add files": "新增檔案",
+        "select files": "選擇文件",
+        "addresource": "添加資源"
 
 }

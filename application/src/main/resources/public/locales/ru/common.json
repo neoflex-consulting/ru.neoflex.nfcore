@@ -312,7 +312,36 @@
         "back to table": "Вернуться к таблице",
 
         "hide": "Спрятать",
-        "show": "Показать"
+        "show": "Показать",
+
+        "data search": "Поиск Данных",
+        "json search": "JSON Поиск",
+        "preview": "Предпросмотр",
+        "branch": "Ветка git",
+        "is current": "Текущая",
+        "is default": "По умолчанию",
+        "export all objects": "Выгрузить Все Объекты",
+        "export selected files objects": "Экспорт Выбранных Файлов&Объектов",
+        "import objects": "Импортировать Объекты",
+        "deploy supply": "Загрузить Поставку",
+        "export master data": "Экспортировать Справочники",
+        "import master data": "Импортировать Справочники",
+        "export": "Экспорт",
+        "import": "Импорт",
+        "add objects": "Добавить Объекты",
+        "export with all referenced objects": "Экспортировать вместе с объектами на которые есть ссылки",
+        "export with dependent objects": "Экспортировать с объектами, зависимыми от выгружаемого объекта",
+        "collect dependent objects recursively": "Собрать зависимые объекты рекурсивно",
+        "export selected": "Экспортировать Выбранные",
+        "set current": "Сделать Текущей",
+        "with references": "Вместе с ссылкам",
+        "with dependents": "Вместе с зависимыми",
+        "recursive dependents": "Рекурсивные зависимости",
+        "query data to export": "Запрос для экспорта",
+        "add files": "Добавить Файлы",
+        "select files": "Выбрать файлы",
+        "addresource": "Добавить ресурс"
+
 }
 
 

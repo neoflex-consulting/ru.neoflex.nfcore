@@ -657,22 +657,22 @@ class ResourceEditor extends React.Component<any, State> {
                     {
                         this.state.isSaving
                         ? <Icon className="panel-icon" type="loading"/>
-                        : <Button className="panel-button" icon="save" onClick={this.save} title={"Save"}/>
+                        : <Button className="panel-button" icon="save" onClick={this.save} title={this.props.t("save")}/>
                     }
-                    <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={"Refresh"} />
+                    <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
                     <Operations
                         translate={t}
                         mainEObject={this.state.mainEObject}
                         refresh={this.refresh}
                     />}
-                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={"Copy"} />
-                    <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={"Delete"} />
+                    <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={this.props.t("copy")} />
+                    <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={this.props.t("delete")} />
                     {this.state.mainEObject
                     && this.state.mainEObject.eClass
                     && ["AppModule", "Application"].includes(this.state.mainEObject.eClass.get('name'))
                     ?
-                        <Button className="panel-button" icon="play-circle" href={`/app/${
+                        <Button className="panel-button" icon="play-circle" title={this.props.t("preview")} href={`/app/${
                             btoa(
                                 encodeURIComponent(
                                     JSON.stringify(
@@ -715,7 +715,7 @@ class ResourceEditor extends React.Component<any, State> {
                                             onChange={(e)=>{
                                                 this.setState({searchResources: `${e.target.value}`})
                                                 }}
-                                            placeholder="Search">
+                                            placeholder={this.props.t("search")}>
                                         </Input>
 
                                     <div className="resource-container">
