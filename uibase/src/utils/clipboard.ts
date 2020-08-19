@@ -5,8 +5,19 @@ async function copyToClipboard(stringToCopy: string) {
 
 async function getClipboardContents() {
     let json = "";
-    json = await navigator.clipboard.readText();
-    console.log('Pasted content: ', json);
+    if (navigator.clipboard) {
+        json = await navigator.clipboard.readText();
+        console.log('Pasted content: ', json);
+    } else {
+        navigator.permissions.query({
+            name: "clipboard"
+        }).then((permissionStatus:any) => {
+            console.log(permissionStatus.state);
+            permissionStatus.onchange = () => {
+                console.log(permissionStatus.state);
+            };
+        });
+    }
     return json
 }
 
