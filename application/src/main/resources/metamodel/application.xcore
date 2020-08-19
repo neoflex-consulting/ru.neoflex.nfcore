@@ -162,6 +162,9 @@ class TabsViewReport extends ViewContainer {
 class Row extends ViewContainer {
 }
 
+class Region extends ViewContainer {
+}
+
 class Typography extends ViewElement {
     refers TypographyStyle typographyStyle
     TextAlign textAlign
