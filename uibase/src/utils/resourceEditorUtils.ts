@@ -126,8 +126,19 @@ function findObjectById(data: any, id: String): any {
     }
 }
 
+function traverseEObject(obj: any, func: (obj: any)=>void) {
+    for (let k in obj) {
+        if (obj.hasOwnProperty(k) && obj[k] && typeof obj[k] === 'object') {
+            traverseEObject(obj[k], func)
+        } else {
+            // Do something with obj
+            func(obj);
+        }
+    }
+}
+
 const boolSelectionOption: { [key: string]: any } = { "false": false, "undefined": false, "null": false, "true": true }
 const getPrimitiveType = (value: string): any => boolSelectionOption[value]
 const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
-export { nestUpdaters, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString };
+export { nestUpdaters, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString, traverseEObject };

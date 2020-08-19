@@ -10,7 +10,7 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { API } from "../modules/api";
 import Splitter from './CustomSplitter'
 import {
-    nestUpdaters, findObjectById, getPrimitiveType
+    nestUpdaters, findObjectById, getPrimitiveType, traverseEObject
 } from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
@@ -19,7 +19,12 @@ import Operations from './Operations';
 import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
-import _ from "lodash";
+import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
+
+interface ITargetObject {
+    eClass: string,
+    [key: string]: any
+}
 
 export interface Props {
 }
@@ -32,10 +37,7 @@ interface State {
         [key: string]: any
     },
     tableData: Array<any>,
-    targetObject: {
-        eClass: string,
-        [key: string]: any
-    },
+    targetObject: ITargetObject,
     selectedKey: String,
     modalRefVisible: Boolean,
     modalResourceVisible: Boolean,
@@ -53,6 +55,7 @@ interface State {
     searchResources: String,
     isModified: boolean,
     modalApplyChangesVisible: Boolean,
+    clipboardObject: ITargetObject
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -87,7 +90,9 @@ class ResourceEditor extends React.Component<any, State> {
         selectedRefUries: [],
         searchResources: '',
         isModified: false,
-        modalApplyChangesVisible: false
+        modalApplyChangesVisible: false,
+        isClipboardValidObject: false,
+        clipboardObject: { eClass: "" }
     };
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -257,11 +262,23 @@ class ResourceEditor extends React.Component<any, State> {
     };
 
     onTreeRightClick = (e: any) => {
-        this.setState({
-            rightClickMenuVisible: true,
-            rightMenuPosition: { x: e.event.clientX, y: e.event.clientY },
-            treeRightClickNode: e.node.props
-        })
+        const posX = e.event.clientX;
+        const posY = e.event.clientY;
+        const nodeProps = e.node.props;
+        getClipboardContents().then(json => {
+            let eObject = {eClass: ""} as ITargetObject;
+            try {
+                eObject = JSON.parse(json);
+            } catch (err) {
+                //Do nothing
+            }
+            this.setState({
+                rightClickMenuVisible: true,
+                rightMenuPosition: { x: posX, y: posY },
+                treeRightClickNode: nodeProps,
+                clipboardObject: eObject
+            })
+        });
     };
 
     onTablePropertyChange = (newValue: any, componentName: string, targetObject: any, EObject: Ecore.EObject): void => {
@@ -396,7 +413,7 @@ class ResourceEditor extends React.Component<any, State> {
             <Menu onClick={this.handleRightMenuSelect} style={{ width: 150, border: "none" }} mode="vertical">
                 {allSubTypes.length > 0 && (node.upperBound === 1 && node.arrayLength > 0 ? false : true) && <Menu.SubMenu
                     key="add"
-                    title="Add child"
+                    title={this.props.t("add child")}
                 >
                     {allSubTypes
                         .sort((a: any, b: any) => this.sortEClasses(a, b))
@@ -408,14 +425,22 @@ class ResourceEditor extends React.Component<any, State> {
                                     {type.get('name')}
                                 </Menu.Item>)}
                 </Menu.SubMenu>}
+
+                {allSubTypes.length > 0
+                && (node.upperBound === 1 && node.arrayLength > 0 ? false : true)
+                && allSubTypes.find((el: any) => el.get('name') === this.state.clipboardObject.eClass.split("//")[1])
+                && <Menu.Item key="paste">{this.props.t("paste")}</Menu.Item>}
+
                 {Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== 0 &&
-                !node.isArray && !node.headline && <Menu.Item key="moveUp">Move Up</Menu.Item>}
+                !node.isArray && !node.headline && <Menu.Item key="moveUp">{this.props.t("move up")}</Menu.Item>}
 
                 {(allParentChildren ? allParentChildren.length !== 1 : false) &&
                 Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== allParentChildren.length - 1 &&
-                !node.isArray && !node.headline && <Menu.Item key="moveDown">Move Down</Menu.Item>}
+                !node.isArray && !node.headline && <Menu.Item key="moveDown">{this.props.t("move down")}</Menu.Item>}
 
-                {!node.isArray && !node.headline && <Menu.Item key="delete">Delete</Menu.Item>}
+                {!node.isArray && !node.headline && <Menu.Item key="delete">{this.props.t("delete")}</Menu.Item>}
+
+                {!node.isArray && !node.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
             </Menu>
         </div>
     }
@@ -448,7 +473,8 @@ class ResourceEditor extends React.Component<any, State> {
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0]
+                mainEObject: resource.eContents()[0],
+                isModified: true
             })
         }
 
@@ -472,7 +498,8 @@ class ResourceEditor extends React.Component<any, State> {
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey)
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                isModified: true
             }))
         }
 
@@ -492,7 +519,59 @@ class ResourceEditor extends React.Component<any, State> {
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey)
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                isModified: true
+            }))
+        }
+
+        if (e.key === "copy") {
+            const json = JSON.stringify(node.targetObject);
+            copyToClipboard(json).catch((err:any) => {
+                console.error('Failed to copy: ', err);
+            })
+        }
+
+        if (e.key === "paste") {
+            let updatedJSON;
+            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const newObject = {
+                ...this.state.clipboardObject,
+                _id: id
+            };
+            let added:any[] = [];
+            traverseEObject(newObject,  (obj:any)=>{
+                //Add missing external refs
+                if (obj["$ref"] && obj["$ref"] !== "/" && !obj["$ref"].startsWith('//') && !obj["$ref"].startsWith(id)) {
+                    if (!added.includes( API.parseRef(obj["$ref"]).id)) {
+                        added.push(API.parseRef(obj["$ref"]).id)
+                        const resourceSet = Ecore.ResourceSet.create();
+                        API.instance().fetchResource(obj["$ref"], 1, resourceSet, {}).then((resource: Ecore.Resource) => {
+                            this.handleAddNewResource([resource])
+                        });
+                    }
+                }
+                //Change inner _id
+                if (obj["_id"]) {
+                    obj["_id"] = (obj["_id"] as string).replace(new RegExp('^//@[a-zA-Z]+', 'g'),id)
+                }
+                //Change same page ref
+                if (obj["$ref"] && obj["$ref"] !== "/" && obj["$ref"].startsWith('//')) {
+                    obj["$ref"] = (obj["$ref"] as string).replace(new RegExp('^//@[a-zA-Z]+', 'g'),id)
+                }
+            });
+            if (node.upperBound === -1) {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            } else {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject,
+                mainEObject: resource.eContents()[0],
+                isModified: true
             }))
         }
     };

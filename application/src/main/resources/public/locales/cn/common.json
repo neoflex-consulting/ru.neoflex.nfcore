@@ -333,6 +333,11 @@
         "select files": "選擇文件",
         "addresource": "添加資源",
         "no rows to show": "缺少要顯示的數據",
-        "apply and run": "應用並運行"
+        "apply and run": "應用並運行",
+
+        "move up": "向上移動",
+        "move down": "向下移動",
+        "paste": "從",
+        "add child": "添加"
 
 }

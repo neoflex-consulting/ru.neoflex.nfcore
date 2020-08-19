@@ -1,15 +1,13 @@
-function copyIntoClipboard(text: string){
-    let copied: boolean = false
-    const modifyCopy = (e: any) => {
-        e.clipboardData.setData('text/plain', String(text));
-        copied = true;
-        e.preventDefault();
-        if(copied){
-            document.removeEventListener('copy', modifyCopy);
-        }
-    };
-    document.addEventListener('copy', modifyCopy);
-    document.execCommand('copy')
+async function copyToClipboard(stringToCopy: string) {
+    await navigator.clipboard.writeText(stringToCopy);
+    console.log('Content copied to clipboard');
 }
 
-export {copyIntoClipboard}
+async function getClipboardContents() {
+    let json = "";
+    json = await navigator.clipboard.readText();
+    console.log('Pasted content: ', json);
+    return json
+}
+
+export {copyToClipboard, getClipboardContents}
