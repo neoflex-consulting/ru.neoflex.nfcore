@@ -46,6 +46,7 @@ async function getClipboardContents() {
             json = await navigator.clipboard.readText();
             console.log('Pasted content: ', json);
         } else {
+            //TODO document.execCommand(‘cut’/‘copy’) was denied because it was not called from inside a short running user-generated event handler
             document.addEventListener('copy', function(event){
                 json = event.clipboardData!.getData('text/plain');
                 event.preventDefault(); // default behaviour is to copy any selected text
