@@ -95,6 +95,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 }
             },
             cellStyle: {},
+            overlayNoRowsTemplate: `<span>${this.props.t("no rows to show")}</span>`
         };
         this.grid = React.createRef();
         this.buffer = [];
@@ -187,7 +188,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.setState({columnDefs: this.props.columnDefs})
         }
         if (prevProps.t !== this.props.t) {
-            this.setState({locale:switchAntdLocale(this.props.i18n.language, this.props.t)})
+            this.setState({
+                locale:switchAntdLocale(this.props.i18n.language, this.props.t),
+                overlayNoRowsTemplate: `<span>${this.props.t("no rows to show")}</span>`
+            },()=> !this.state.rowData || this.state.rowData.length === 0 ? this.grid.current.api.showNoRowsOverlay() : undefined
+            )
         }
         if (this.props.aggregatedRows.length > 0){
             this.highlightAggregate();
@@ -669,6 +674,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             suppressClickEdit={true}
                             gridOptions={this.gridOptions}
                             /*stopEditingWhenGridLosesFocus={true}*/
+                            overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
                             {...gridOptions}
                         >
                             {this.state.columnDefs.map((col: any) =>
