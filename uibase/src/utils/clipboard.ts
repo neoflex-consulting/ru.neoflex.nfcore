@@ -1,18 +1,25 @@
 async function checkPermissions() {
-    let isReadAllowed, isWriteAllowed = false;
+    let isReadAllowed = false, isWriteAllowed = false;
+    //chrome type script issue
     //https://github.com/microsoft/TypeScript/issues/33923
-    // @ts-ignore
-    await navigator.permissions.query({name: 'clipboard-read'}).then((permissionStatus:any) => {
-        console.log(permissionStatus.state);
-        if (permissionStatus.state !== "denied")
-            isReadAllowed = true
-    });
-    // @ts-ignore
-    await navigator.permissions.query({name: 'clipboard-write'}).then((permissionStatus:any) => {
-        console.log(permissionStatus.state);
-        if (permissionStatus.state !== "denied")
-            isWriteAllowed = true
-    });
+    try {
+        // @ts-ignore
+        await navigator.permissions.query({name: 'clipboard-read'}).then((permissionStatus:any) => {
+            console.log(permissionStatus.state);
+            if (permissionStatus.state !== "denied")
+                isReadAllowed = true
+        });
+        // @ts-ignore
+        await navigator.permissions.query({name: 'clipboard-write'}).then((permissionStatus:any) => {
+            console.log(permissionStatus.state);
+            if (permissionStatus.state !== "denied")
+                isWriteAllowed = true
+        });
+    //mozilla doesn't support
+    //https://bugzilla.mozilla.org/show_bug.cgi?id=1560373
+    } catch (e) {
+        console.log(e);
+    }
     return isReadAllowed && isWriteAllowed;
 }
 
