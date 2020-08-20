@@ -63,7 +63,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     private grid: React.RefObject<any>;
     private gridOptions: GridOptions;
     private buffer: {[key: string]: unknown}[];
-    
+
     constructor(props: any) {
         super(props);
 
@@ -720,7 +720,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         </AgGridReact>
                     </ConfigProvider>
                     }
-                    <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                    <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}

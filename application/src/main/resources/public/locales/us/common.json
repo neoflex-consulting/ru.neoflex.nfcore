@@ -341,5 +341,10 @@
         "select files": "Select files",
         "addresource": "Add resource",
         "no rows to show": "No rows to show",
-        "apply and run": "Apply and run"
+        "apply and run": "Apply and run",
+
+        "move up": "Move Up",
+        "move down": "Move Down",
+        "paste": "Paste",
+        "add child": "Add child"
 }
