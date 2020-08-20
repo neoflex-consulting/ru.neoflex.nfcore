@@ -586,11 +586,27 @@ class Select_ extends ViewContainer {
         }))
     }
 
+    //ag-grid
+    getValue() {
+        return this.state.currentValue;
+    }
+
     render = () => {
+        let componentRenderCondition = false;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = '200px';
+        //componentRenderCondition ag-grid props
+        try {
+            componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
+                || eval(this.props.componentRenderCondition)
+        } catch (e) {
+            this.props.context.notification("Select.componentRenderCondition",
+                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
+                "warning")
+        }
             return (
-                <div
+                componentRenderCondition ? <div
                     hidden={this.state.isHidden}
                     style={{marginBottom: marginBottom}}>
                     <Select
@@ -625,7 +641,7 @@ class Select_ extends ViewContainer {
                             </Select.Option>
                         }
                     </Select>
-                </div>
+                </div> : <div>{this.props.getValue()}</div>
             )
         }
 }
