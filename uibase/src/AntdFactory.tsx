@@ -104,12 +104,7 @@ class Col_ extends ViewContainer {
             <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
                  hidden={this.state.isHidden}
-                 style={{
-                borderRight: this.viewObject.get('borderRight') ? '1px solid #eeeff0' : 'none',
-                borderBottom: this.viewObject.get('borderBottom') ? '1px solid #eeeff0' : 'none',
-                borderTop: this.viewObject.get('borderTop') ? '1px solid #eeeff0' : 'none',
-                borderLeft: this.viewObject.get('borderLeft') ? '1px solid #eeeff0' : 'none'
-            }}>
+                 style={{}}>
                 {this.renderChildren(isReadOnly)}
             </Col>
         )
@@ -261,15 +256,7 @@ class Row_ extends ViewContainer {
             <Row
                 key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{
-                    textAlign: this.viewObject.get('textAlign') || 'left',
-                    marginRight: marginRight,
-                    marginBottom: marginBottom,
-                    marginTop: marginTop,
-                    marginLeft: marginLeft,
-                    borderBottom: borderBottom,
-                    height: height,
-                }}
+                style={{}}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly)}
@@ -430,7 +417,7 @@ class Select_ extends ViewContainer {
             selectData: [],
             params: [],
             currentValue: undefined,
-            datasetComponent: undefined,
+            dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
         };
@@ -492,15 +479,15 @@ class Select_ extends ViewContainer {
 
     componentDidMount(): void {
         if (this.viewObject.get('isDynamic')
-            && this.viewObject.get('datasetComponent')) {
-            this.setState({datasetComponent:this.viewObject.get('datasetComponent').eContainer});
+            && this.viewObject.get('dataset')) {
+            this.setState({dataset:this.viewObject.get('dataset').eContainer});
             if (this.viewObject.get('valueItems').size() === 0) {
-                this.props.context.runQuery(this.viewObject.get('datasetComponent').eContainer).then((result: string) => {
+                this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
                     this.setState({
                         selectData: JSON.parse(result).map((el: any)=>{
                             return {
-                                key: el[this.viewObject.get('keyColumn')],
-                                value: el[this.viewObject.get('valueColumn')]
+                                key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                                value: el[this.viewObject.get('datasetValueColumn').get('name')]
                             }
                         }),
                         currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
@@ -543,14 +530,14 @@ class Select_ extends ViewContainer {
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         const newParams = getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues);
         if (JSON.stringify(this.state.params) !== JSON.stringify(newParams)
-            && this.state.datasetComponent
+            && this.state.dataset
             && this.viewObject.get('valueItems')) {
             this.setState({params: newParams});
-            this.props.context.runQuery(this.state.datasetComponent, newParams).then((result: string) => {
+            this.props.context.runQueryDataset(this.state.dataset, newParams).then((result: string) => {
                 const resArr = JSON.parse(result).map((el: any)=>{
                     return {
-                        key: el[this.viewObject.get('keyColumn')],
-                        value: el[this.viewObject.get('valueColumn')]
+                        key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                        value: el[this.viewObject.get('datasetValueColumn').get('name')]
                     }
                 });
                 let currentValue: string;
@@ -601,7 +588,7 @@ class Select_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = '200px';
             return (
                 <div
                     hidden={this.state.isHidden}
@@ -764,7 +751,7 @@ export class DatePicker_ extends ViewContainer {
                     disabled={isReadOnly}
                     allowClear={this.viewObject.get('allowClear') || false}
                     format={this.state.mask}
-                    style={{width: this.viewObject.get('width') || "200px", display: (this.state.isHidden) ? 'none' : undefined}}
+                    style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
                     onChange={(date, dateString) => {
                         this.onChange(dateString)
                     }}/>
@@ -791,6 +778,9 @@ class HtmlContent_ extends ViewContainer {
         };
     }
 
+    onChange = (value:string) => {
+        this.setState({htmlContent:value})
+    };
 
     componentDidMount(): void {
         this.props.context.addEventAction({
@@ -800,6 +790,7 @@ class HtmlContent_ extends ViewContainer {
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
                 {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
             ]
         });
     }
@@ -868,7 +859,8 @@ class GroovyCommand_ extends ViewContainer {
         this.props.context.updateContext!({contextItemValues: contextItemValues},
             ()=>this.props.context.notifyAllEventHandlers({
                 type:eventType.change,
-                itemId:this.viewObject.get('name')+this.viewObject._id
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: result
             }));
     };
 
@@ -990,22 +982,6 @@ class ValueHolder_ extends ViewContainer {
         this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
     }
 
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (this.viewObject.get('contextWriter')) {
-            const contextItem = this.props.context.contextItemValues.get(this.viewObject.get('contextWriter').get('name')+this.viewObject.get('contextWriter')._id);
-            const columnName = this.viewObject.get('groovyCommandResultColumnName');
-            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-            if (contextItem
-                && contextItem.parameterValue.length >= 1
-                && columnName) {
-                const value = contextItem.parameterValue[0][columnName];
-                if (value !== (currentContextValue ? currentContextValue.parameterValue: undefined)) {
-                    this.onChange(value);
-                }
-            }
-        }
-    }
-
     render = () => {
         return (
             <div/>
@@ -1095,7 +1071,7 @@ class Input_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = this.viewObject.get('width') === null ? '200px' : `${this.viewObject.get('width')}px`;
+        const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div

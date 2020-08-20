@@ -2,9 +2,8 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Checkbox, Drawer, Dropdown, Menu, Modal, Select} from 'antd';
+import {Button, Checkbox, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
-import '../../../styles/AggregateHighlight.css';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
 import ServerAggregate from './ServerAggregate';
@@ -33,9 +32,11 @@ import {
     eventType,
     grantType, textAlignMap
 } from "../../../utils/consts";
+import {ValueFormatterParams} from "ag-grid-community";
+import _ from "lodash";
 //icons
 import filterIcon from "../../../icons/filterIcon.svg";
-import {faCompressArrowsAlt, faExpandArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import groupIcon from "../../../icons/groupIcon.svg";
 import orderIcon from "../../../icons/orderIcon.svg";
 import calculatorIcon from "../../../icons/calculatorIcon.svg";
@@ -66,9 +67,6 @@ export enum paramType {
     hiddenColumns="hiddenColumns"
 }
 
-interface Props {
-}
-
 export interface IDiagram {
     id: number,
     keyColumn: string,
@@ -92,7 +90,7 @@ interface State {
     columnDefs: Map<String,any>[];
     defaultColumnDefs: Map<String,any>[];
     fullScreenOn: boolean;
-    rowData: any[];
+    rowData: {[key: string]: unknown}[];
     highlights: IServerQueryParam[];
     diagrams: IDiagram[];
     serverFilters: IServerQueryParam[];
@@ -132,6 +130,12 @@ interface State {
     isDownloadFromDiagramPanel: boolean;
     isAggregations: boolean;
     formatMasks: {key:string,value:string}[];
+    isEditMode: boolean;
+    isInsertAllowed: boolean;
+    isDeleteAllowed: boolean;
+    isUpdateAllowed: boolean;
+    isCheckEditBufferVisible: boolean;
+    aggregatedRows: {[key: string]: unknown}[];
 }
 
 const defaultComponentValues = {
@@ -147,6 +151,8 @@ const defaultComponentValues = {
 
 
 class DatasetView extends React.Component<any, State> {
+
+    gridRef:any;
 
     constructor(props: any) {
         super(props);
@@ -196,8 +202,15 @@ class DatasetView extends React.Component<any, State> {
             isWithTable: false,
             isDownloadFromDiagramPanel: false,
             isAggregations: false,
-            formatMasks: []
+            formatMasks: [],
+            isEditMode: false,
+            isInsertAllowed: false,
+            isUpdateAllowed: false,
+            isDeleteAllowed: false,
+            isCheckEditBufferVisible: false,
+            aggregatedRows: []
         }
+        this.gridRef = React.createRef();
     }
 
     getAllFormatMasks() {
@@ -241,21 +254,7 @@ class DatasetView extends React.Component<any, State> {
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                         }
                         result.forEach( (d: Ecore.Resource) => {
-                            if (d.eContents()[0].get('dataset')) {
-                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('dataset').get('name')) {
-                                    allDatasetComponents.push(d);
-                                    //TODO тут выдаются права на видимость ПРиватных и публичным DatasetComponent пользователям
-                                    // if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === 'admin' || this.props.context.userProfile.get('userName') === 'anna') {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.context.userProfile !== null && this.props.context.userProfile.get('userName') === this.props.viewObject.get('datasetComponent').get('owner').get('name')) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                    // else if (this.props.viewObject.get('datasetComponent').get('access') === 'Default' || this.props.viewObject.get('datasetComponent').get('access') === null) {
-                                    //     allDatasetComponents.push(d)
-                                    // }
-                                }
-                            }
+                            allDatasetComponents.push(d);
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
@@ -334,34 +333,7 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('mask', this.evalMask(c.get('formatMask')));
             rowData.set('onCellDoubleClicked', (params:any)=>{
                 if (params.colDef.editable) {
-                    let restrictEdit = false;
-                    if (!this.props.viewObject.get('datasetComponent').get('updateQuery')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('update query is not specified') ,"error")
-                    }
-                    if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('primary key column is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('dataset').get('schemaName')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset schema is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('dataset').get('tableName')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('jdbcdataset table is not specified') ,"error")
-                    }
-                    if (this.props.viewObject.get('datasetComponent').get('updateQuery')
-                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('generateFromModel')
-                        && !this.props.viewObject.get('datasetComponent').get('updateQuery').get('queryText')) {
-                        restrictEdit = true;
-                        this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('querytext is not specified') ,"error")
-                    }
-                    if (!restrictEdit) {
+                    if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
                         const startEditingParams = {
                             rowIndex: params.rowIndex,
                             colKey: params.column.getId(),
@@ -370,45 +342,16 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }
             });
-            rowData.set('updateCallback', (agevent:any)=>{
-                const primaryKey = this.state.columnDefs
-                    .filter(c => c.get('isPrimaryKey'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: true
-                            }
-                    });
-                const values = this.state.columnDefs
-                    .filter(c => c.get('editable'))
-                    .map(c => {
-                            return {
-                                parameterName: c.get('field'),
-                                parameterValue: agevent.data[c.get('field')],
-                                parameterDataType: c.get('type'),
-                                isPrimaryKey: c.get('isPrimaryKey')
-                            }
-                    });
-                const params = primaryKey.concat(values);
-                this.props.context.executeDMLOperation(resource, dmlOperation.update, params).then(()=>{
-                        if (this.state.currentDatasetComponent.eContents()[0].get('updateQuery') &&
-                            !this.state.currentDatasetComponent.eContents()[0].get('updateQuery').get('generateFromModel')) {
-                            //если указан параметризованный запрос
-                            this.refresh()
-                        }
-                    }
-                ).catch(()=>{
-                    //Восстанавливаем значение в случае ошибки
-                    this.refresh()
-                    }
-                )
-            });
             rowData.set('valueFormatter', this.valueFormatter);
             columnDefs.push(rowData);
         });
-        this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs});
+        this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs},()=>{
+            this.setState({
+                isUpdateAllowed: this.props.viewObject.get('datasetComponent').get('updateQuery') ? !this.validateEditOptions('updateQuery') : false,
+                isInsertAllowed: this.props.viewObject.get('datasetComponent').get('insertQuery') ? !this.validateEditOptions('insertQuery') : false,
+                isDeleteAllowed: this.props.viewObject.get('datasetComponent').get('deleteQuery') ? !this.validateEditOptions('deleteQuery') : false,
+            });
+        });
         this.findParams(resource as Ecore.Resource, columnDefs);
         this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
@@ -511,9 +454,9 @@ class DatasetView extends React.Component<any, State> {
         }
         function getColumnType (columnDefs: Map<String,any>[], datasetColumn: string): string | undefined {
             if (columnDefs.length !== 0) {
-                const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn)
+                const column = columnDefs.filter((column:any) => column.get("field") === datasetColumn);
                 if (column !== null) {
-                    const type = column.map((column:any) => column.get('type'))
+                    const type = column.map((column:any) => column.get('type'));
                     if (type.length !== 0) {
                         return type[0]
                     }
@@ -692,7 +635,7 @@ class DatasetView extends React.Component<any, State> {
                 return rowData
             });
             columnDefs.forEach(c=>{
-                const hiddenColumn = this.state.hiddenColumns.find(hc => hc.datasetColumn === c.get('field'))
+                const hiddenColumn = this.state.hiddenColumns.find(hc => hc.datasetColumn === c.get('field'));
                 c.set('hide', hiddenColumn ? !hiddenColumn.enable : c.get('hide'))
             });
             this.setState({columnDefs: columnDefs})
@@ -705,7 +648,7 @@ class DatasetView extends React.Component<any, State> {
             if (rowDataShow[0][c.get('field')] !== undefined) {
                 let rowData = new Map();
                 let newHeaderName = this.state.serverGroupBy
-                    .find((s: any) => s['datasetColumn'] === c.get('field'))
+                    .find((s: any) => s['datasetColumn'] === c.get('field'));
                 rowData.set('field', c.get('field'));
                 rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -799,14 +742,15 @@ class DatasetView extends React.Component<any, State> {
         return columnDefs
     };
 
-    valueFormatter = (params:any) => {
-        const mask = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'))!.get('mask');
+    valueFormatter = (params: ValueFormatterParams) => {
+        const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
+        const mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
-        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+        if (this.state.aggregatedRows.length > 0
             && params.value
-            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
             splitted = params.value.split(":");
-            params.value = splitted[1]
+            params.value = splitted[1];
         }
 
         if (params.value)
@@ -827,9 +771,9 @@ class DatasetView extends React.Component<any, State> {
                                         : params.value;
         else
             formattedParam = params.value;
-        if (params.column.gridOptionsWrapper.gridOptions.getRowClass
+        if (this.state.aggregatedRows.length > 0
             && params.value
-            && params.column.gridOptionsWrapper.gridOptions.getRowClass(params) === "aggregate-highlight") {
+            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
             splitted[1] = formattedParam;
             formattedParam = splitted.join(":")
         }
@@ -877,14 +821,14 @@ class DatasetView extends React.Component<any, State> {
         let newHiddenColumns = this.state.hiddenColumns.map((e)=> e);
         //Удаляем
         this.state.hiddenColumns.forEach(c => {
-            const isFound = newColumnDef.find(cd => cd.get('field') === c.datasetColumn)
+            const isFound = newColumnDef.find(cd => cd.get('field') === c.datasetColumn);
             if (!isFound) {
                 newHiddenColumns = newHiddenColumns.filter(cd => cd.datasetColumn !== c.datasetColumn)
             }
         });
         //Добавляем
         newColumnDef.forEach(c => {
-            const isFound = newHiddenColumns.find(cd => cd.datasetColumn === c.get('field'))
+            const isFound = newHiddenColumns.find(cd => cd.datasetColumn === c.get('field'));
             if (!isFound) {
                 newHiddenColumns.push({
                     index: 0,
@@ -910,6 +854,7 @@ class DatasetView extends React.Component<any, State> {
         groupByParams: IServerQueryParam[],
         calculatedExpressions: IServerQueryParam[],
         groupByColumnParams: IServerQueryParam[],
+        callback: ()=>void = ()=>{}
     ) {
         const filter = (arr:any[]) => arr.filter(f => f.enable && f.datasetColumn);
         const datasetComponentName = resource.eContents()[0].get('name');
@@ -927,7 +872,7 @@ class DatasetView extends React.Component<any, State> {
             , filter(calculatedExpression)
             , filter(groupByColumnParams)
         ).then((json: string) => {
-                let result: Object[] = JSON.parse(json);
+                let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
@@ -952,26 +897,61 @@ class DatasetView extends React.Component<any, State> {
                         , filter(groupByColumnParams))
                         .then((aggJson: string) => {
                         result = result.concat(JSON.parse(aggJson));
-                            this.setState({rowData: result, columnDefs: newColumnDef, isAggregations: true, hiddenColumns: hiddenColumns});
+                            this.setState({
+                                rowData: result,
+                                columnDefs: newColumnDef,
+                                isAggregations: true,
+                                //Если не проверять то при одинаковых данных, ag-grid не подставляет новые в грид
+                                //Поэтому проверка ссылки на новые записи при выполнении valueFormatter будет давать false
+                                aggregatedRows: _.isEqual(result,this.state.rowData) ? this.state.aggregatedRows : this.getAggregatedRows(aggregationParams, result),
+                                hiddenColumns: hiddenColumns},callback);
                             this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, hiddenColumns: hiddenColumns});
+                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, aggregatedRows: [], hiddenColumns: hiddenColumns},callback);
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
                 }
             }
         )
     }
 
-    refresh(): void {
-        if (this.state.currentDatasetComponent.eResource) {
+    getAggregatedRows(aggregationParams: IServerQueryParam[], rowData: {[key: string]: unknown}[]) {
+        const numAggRows = _(aggregationParams)
+            .countBy('operation')
+            .map((count, name) => ({ name, count }))
+            .value().length;
+        return rowData.slice(rowData.length - numAggRows, rowData.length)
+    }
+
+    refresh(resetGrouping:boolean = false): void {
+        if (this.state.currentDatasetComponent.eResource && !resetGrouping) {
             this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
                 this.state.serverFilters,
                 this.state.serverAggregates,
                 this.state.serverSorts,
                 this.state.serverGroupBy,
                 this.state.serverCalculatedExpression,
-                this.state.groupByColumn
+                this.state.groupByColumn,
+                ()=>{
+                    if (this.state.isEditMode)
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                }
             );
+        } else if (this.state.currentDatasetComponent.eResource) {
+            this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
+                this.state.serverFilters,
+                [],
+                this.state.serverSorts,
+                [],
+                [],
+                [],
+                ()=>{
+                    if (!this.state.isEditMode)
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                })
         }
     }
 
@@ -985,11 +965,10 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.allAxisYPosition.length === 0) {this.getAllEnumValues("dataset","AxisYPositionType", "allAxisYPosition")}
         if (this.state.allLegendPosition.length === 0) {this.getAllEnumValues("dataset","LegendAnchorPositionType", "allLegendPosition")}
         if (this.state.formatMasks.length === 0) {this.getAllFormatMasks()}
-
         this.props.context.addEventAction({
             itemId:this.props.viewObject.get('name')+this.props.viewObject._id,
             actions: [
-                {actionType: actionType.execute,callback: this.refresh.bind(this)},
+                {actionType: actionType.execute,callback: ()=>this.refresh()},
                 {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
                 {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
                 {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
@@ -1023,7 +1002,9 @@ class DatasetView extends React.Component<any, State> {
             let datasetComponents = this.props.context.datasetComponents;
             datasetComponents[datasetComponentName] = {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
-                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : []
+                rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : [],
+                getBuffer: this.gridRef ? this.gridRef.getBuffer : () => {return []},
+                showModal: () => {this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})}
             };
             this.props.context.updateContext({datasetComponents: datasetComponents})
 
@@ -1110,7 +1091,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDiagramChange = (action: string, newDiagram?: IDiagram): void => {
-        let newDiagrams:IDiagram[] = [];
+        let newDiagrams:IDiagram[];
         if (action === "add" && newDiagram) {
             newDiagrams = this.state.diagrams.concat(newDiagram);
             this.setState({
@@ -1168,20 +1149,52 @@ class DatasetView extends React.Component<any, State> {
 
     }
     DiagramButton = () => {
-        this.props.context.addDocxHandler();
-        this.props.context.addExcelHandler()
-        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel})
+        this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel});
         if (this.state.diagrams.length > 0)
-            this.setState({currentDiagram: this.state.diagrams[0]})
+            this.setState({currentDiagram: this.state.diagrams[0]});
         else
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
-
     };
 
     withTable(e: any) {
-        let ee: any = e.target.checked
+        let ee: any = e.target.checked;
         this.setState({isWithTable: ee})
     }
+
+    validateEditOptions = (operationType:"updateQuery"|"insertQuery"|"deleteQuery") => {
+        let restrictOperation = false;
+        if (!this.props.viewObject.get('datasetComponent').get(operationType)) {
+            restrictOperation = true;
+            if (operationType === "updateQuery") {
+                this.props.context.notification(this.props.t('celleditorvalidation'), this.props.t('edit is prohibited'), "error")
+            } else {
+                this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('query is not specified'), "error")
+            }
+        }
+        if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('primary key column is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('dataset').get('schemaName')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('dataset').get('tableName')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
+        }
+        if (this.props.viewObject.get('datasetComponent').get(operationType)
+            && !this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
+            && !this.props.viewObject.get('datasetComponent').get(operationType).get('queryText')) {
+            restrictOperation = true;
+            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('querytext is not specified') ,"error")
+        }
+        return restrictOperation
+    };
 
     getGridPanel = () => {
         const { t } = this.props;
@@ -1196,8 +1209,27 @@ class DatasetView extends React.Component<any, State> {
             <Menu.Item key='exportToExcel'>
                 {t("export to excel")}
             </Menu.Item>
-        </Menu>)
+        </Menu>);
         return <div>
+            <Button
+                hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
+                title={t('edit')}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
+                        this.refresh(true);
+                    } else {
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                    }
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+            </Button>
             <Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
             >
@@ -1364,19 +1396,16 @@ class DatasetView extends React.Component<any, State> {
             <Menu.Item key='exportToExcel'>
                 {t("export to excel")}
             </Menu.Item>
-        </Menu>)
+        </Menu>);
         return <div id="selectInGetDiagramPanel">
-            <Button title={t('back')} style={{color: 'rgb(151, 151, 151)'}}
+            <Button title={t("back to table")} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
-                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel })
-                        this.getAllDatasetComponents(true)
-                        this.props.context.removeDocxHandler();
-                        this.props.context.removeExcelHandler();
+                        this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
             >
-                Вернуться к таблице
+                {t("back to table")}
             </Button>
             <div style={{display: 'inline-block', height: '30px',
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
@@ -1440,7 +1469,7 @@ class DatasetView extends React.Component<any, State> {
                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
                 </Button>
             </Dropdown>
-            <Checkbox onChange={this.withTable.bind(this)}>Download with table</Checkbox>
+            <Checkbox onChange={this.withTable.bind(this)}>{t("download with table")}</Checkbox>
 
             <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
                     onClick={()=>{}}
@@ -1468,18 +1497,88 @@ class DatasetView extends React.Component<any, State> {
         </div>
     };
 
+    getEditPanel = () => {
+        const { t } = this.props;
+        return <div id="editPanel">
+            <Button
+                title={t('edit')}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    if (this.state.isEditMode && this.gridRef.getBuffer().length > 0) {
+                        this.setState({isCheckEditBufferVisible: true})
+                    } else if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
+                        || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
+                        this.refresh()
+                    } else {
+                        this.setState({isEditMode:!this.state.isEditMode},()=>{
+                            this.gridRef.onEdit()
+                        })
+                    }
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
+                title={t("add row")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => this.gridRef.onInsert()}
+            >
+                <FontAwesomeIcon icon={faPlus} size='lg' color="#7b7979"/>
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
+                title={t("delete selected")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => this.gridRef.onDeleteSelected()}
+            >
+                <FontAwesomeIcon icon={faTrash} size='lg' color="#7b7979"/>
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode}
+                title={t("apply changes")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    //Убрал т.к. есть подсветки
+                    /*this.gridRef.removeRowsFromGrid();*/
+                    this.onApplyEditChanges(this.gridRef.getBuffer());
+                }}
+            >
+                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+            </Button>
+            <Button
+                hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
+                title={t("copy selected")}
+                style={{color: 'rgb(151, 151, 151)'}}
+                onClick={() => {
+                    this.gridRef.copySelected();
+                }}
+            >
+                {t("copy selected")}
+            </Button>
+            <Input
+                hidden={!this.state.isEditMode}
+                style={{width:'250px'}}
+                type="text"
+                onInput={() => this.gridRef.onQuickFilterChanged()}
+                id={"quickFilter"}
+                placeholder={t("quick filter")}
+            />
+        </div>
+    };
+
     handleSaveMenu = () => {
         this.setState({saveMenuVisible:!this.state.saveMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
-
-
     handleDeleteMenu = () => {
-       this.handleDeleteMenuForCancel()
+       this.handleDeleteMenuForCancel();
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
-                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'))
+                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'));
                     this.getAllDatasetComponents(true)
 
                 }
@@ -1488,7 +1587,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDeleteGridMenu = () => {
-        this.handleDiagramChange("delete")
+        this.handleDiagramChange("delete");
         this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
     };
 
@@ -1506,7 +1605,60 @@ class DatasetView extends React.Component<any, State> {
         }
     };
 
+    onApplyEditChanges = (buffer:any[]) => {
+        buffer.sort(function compare(a:any,b:any) {
+            if (a.operationMark__ === dmlOperation.delete && b.operationMark__ !== dmlOperation.delete)
+                return -1;
+            if (a.operationMark__ === dmlOperation.insert && b.operationMark__ !== dmlOperation.insert)
+                return 1;
+            if (a.operationMark__ === dmlOperation.update && b.operationMark__ === dmlOperation.insert)
+                return -1;
+            if (a.operationMark__ === dmlOperation.update && b.operationMark__ === dmlOperation.delete)
+                return 1;
+            return 0
+        });
+        buffer.forEach(d => {
+            const primaryKey = this.state.columnDefs
+                .filter(c => c.get('isPrimaryKey'))
+                .map(c => {
+                    return {
+                        parameterName: c.get('field'),
+                        parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
+                        parameterDataType: c.get('type'),
+                        isPrimaryKey: true
+                    }
+                });
+            const values = this.state.columnDefs
+                .filter(c => c.get('editable'))
+                .map(c => {
+                    return {
+                        parameterName: c.get('field'),
+                        parameterValue: d[c.get('field')],
+                        parameterDataType: c.get('type'),
+                        isPrimaryKey: c.get('isPrimaryKey')
+                    }
+                });
+            const params = primaryKey.concat(values);
+            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).then(()=>{
 
+                }
+            ).catch(()=>{
+                    //Выходим из редактора, что на ловить ошибки ag-grid
+                    this.setState({isEditMode:false},() => {
+                        //Восстанавливаем значение в случае ошибки
+                        this.refresh()
+                    });
+                }
+            ).finally(()=>{
+                d.operationMark__ = undefined;
+                d.prevOperationMark__ = undefined;
+                buffer.shift();
+                if (buffer.length === 0) {
+                    this.refresh(true)
+                }
+            })
+        });
+    };
 
     render() {
         const { t } = this.props;
@@ -1516,30 +1668,35 @@ class DatasetView extends React.Component<any, State> {
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div>
-                {(this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
-                {(this.state.currentDiagram)
-                    ?
-                    <DatasetDiagram
-                        {...this.props}
-                        rowData={this.state.rowData}
-                        diagramParams={this.state.currentDiagram}
-                    />
-                    :
-                    <DatasetGrid
-                        {...this.props}
-                        isAggregatesHighlighted = {(this.state.serverAggregates.filter((f)=>{return f.enable && f.datasetColumn}).length !== 0)}
-                        serverAggregates = {this.state.serverAggregates}
-                        isAggregations = {this.state.isAggregations}
-                        highlights = {this.state.highlights}
-                        currentDatasetComponent = {this.state.currentDatasetComponent}
-                        rowData = {this.state.rowData}
-                        columnDefs = {this.state.columnDefs}
-                        currentTheme = {this.state.currentTheme}
-                        showUniqRow = {this.state.showUniqRow}
-                        isHighlightsUpdated = {this.state.isHighlightsUpdated}
-                        saveChanges = {this.changeDatasetViewState}
-                    />
-                }
+                {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
+                <DatasetDiagram
+                    {...this.props}
+                    hide={!this.state.currentDiagram}
+                    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
+                    diagramParams={this.state.currentDiagram}
+                />
+                <DatasetGrid
+                    hide={!!this.state.currentDiagram}
+                    ref={(g:any) => {
+                        this.gridRef = g
+                    }}
+                    serverAggregates = {this.state.serverAggregates}
+                    isAggregations = {this.state.isAggregations}
+                    highlights = {this.state.highlights}
+                    currentDatasetComponent = {this.state.currentDatasetComponent}
+                    rowData = {this.state.rowData}
+                    columnDefs = {this.state.columnDefs}
+                    currentTheme = {this.state.currentTheme}
+                    showUniqRow = {this.state.showUniqRow}
+                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
+                    saveChanges = {this.changeDatasetViewState}
+                    onApplyEditChanges = {this.onApplyEditChanges}
+                    isEditMode = {this.state.isEditMode}
+                    showEditDeleteButton = {this.state.isDeleteAllowed}
+                    showMenuCopyButton = {this.state.isInsertAllowed}
+                    aggregatedRows = {this.state.aggregatedRows}
+                    {...this.props}
+                />
                 <div id="filterButton">
                 <Drawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
@@ -1844,6 +2001,62 @@ class DatasetView extends React.Component<any, State> {
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             closeModal={this.handleSaveMenu}
                         />
+                    </Modal>
+                </div>
+                <div id="edit_applyChangesButton">
+                    <Modal
+                        getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
+                        key="check_edit_buffer"
+                        width={'500px'}
+                        title={t('edit buffer')}
+                        visible={this.state.isCheckEditBufferVisible}
+                        footer={null}
+                        onCancel={()=>{
+                            this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})
+                        }}
+                    >
+                        <div style={{textAlign:"center"}}>
+                            <b>{t("unresolved changes left")}</b>
+                            <br/>
+                            <br/>
+                            <div>
+                                <Button
+                                    onClick={()=>{
+                                        this.gridRef.removeRowsFromGrid();
+                                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                                        this.setState({
+                                            isEditMode:!this.state.isEditMode,
+                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                            },()=>{
+                                            this.gridRef.onEdit();
+                                        })
+                                    }}
+                                >
+                                    {t("apply and quit")}
+                                </Button>
+                                <Button
+                                    onClick={()=>{
+                                        this.setState({
+                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                        })
+                                    }}
+                                >
+                                    {t("back to edit")}
+                                </Button>
+                                <Button
+                                    onClick={()=>{
+                                        this.gridRef.resetBuffer();
+                                        this.setState({isEditMode:false
+                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                                            this.gridRef.onEdit();
+                                            this.refresh()
+                                        })
+                                    }}
+                                >
+                                    {t("reset changes")}
+                                </Button>
+                            </div>
+                        </div>
                     </Modal>
                 </div>
             </div>

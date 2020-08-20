@@ -112,7 +112,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                 <Tabs onChange={(key: string) => {
                                     setFields({ key: { value: key } });
                                 }}>
-                                    <TabPane tab='Data Search' key='data_search'>
+                                    <TabPane tab={this.props.t('data search')} key='data_search'>
                                         <FormItem>
                                             {getFieldDecorator('selectEClass', {
                                                 initialValue: this.props.specialEClass === undefined
@@ -169,7 +169,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                             undefined
                                         }
                                     </TabPane>
-                                    <TabPane tab='Json Search' key='json_search'>
+                                    <TabPane tab={this.props.t('json search')} key='json_search'>
                                         <FormItem>
                                             {getFieldDecorator('json_field', {
                                                 initialValue: JSON.stringify({
