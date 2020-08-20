@@ -256,7 +256,11 @@ class DatasetView extends React.Component<any, State> {
                             if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                         }
                         result.forEach( (d: Ecore.Resource) => {
-                            allDatasetComponents.push(d);
+                            if (d.eContents()[0].get('dataset')) {
+                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('datasetComponent').get('dataset').get('name')) {
+                                    allDatasetComponents.push(d);
+                                }
+                            }
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
