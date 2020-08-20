@@ -133,7 +133,7 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
                         )}
                     </AgGridReact>
                 </div>
-                <div style={{marginLeft: "800px", marginBottom: "20px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
                     <Paginator
                         {...this.props}
                         currentPage = {this.state.paginationCurrentPage}

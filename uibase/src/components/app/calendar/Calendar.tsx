@@ -721,7 +721,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 </AgGridReact>
                 }
-                <div style={{marginLeft: "800px", float: "right", opacity: this.state.isGridReady ? 1 : 0}}>
+                <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
                     <Paginator
                         {...this.props}
                         currentPage = {this.state.paginationCurrentPage}
