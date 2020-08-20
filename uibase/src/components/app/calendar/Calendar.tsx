@@ -25,8 +25,7 @@ import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import { NeoSelect } from 'neo-design';
-import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 
 const myNote = 'Личная заметка';
 
@@ -800,9 +799,10 @@ class Calendar extends React.Component<any, any> {
                         </div>
 
                         <div className="col col-start">
-                            <div className="icon" onClick={this.prevMonth}>
-                                chevron_left
-                            </div>
+                            <NeoButton type={'link'} onClick={this.prevMonth}
+                                       style={{marginTop: '4px', marginRight:'16px'}}>
+                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} />
+                            </NeoButton>
                         </div>
                         <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
@@ -810,9 +810,10 @@ class Calendar extends React.Component<any, any> {
                     </span>
                         </div>
                         <div className="col col-end" >
-                            <div className="icon" onClick={this.nextMonth}>
-                                chevron_right
-                            </div>
+                            <NeoButton type={'link'} onClick={this.nextMonth}
+                            style={{marginLeft:'16px'}}>
+                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} style={{transform:'rotate(-180deg)'}}/>
+                            </NeoButton>
                         </div>
 
                         <NeoButton
@@ -920,10 +921,6 @@ class Calendar extends React.Component<any, any> {
                 >
                     <NeoIcon icon={'print'} color={'#5E6785'} />
                 </NeoButton>
-
-
-        {/*<div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>*/}
-
 
         <NeoButton
             type="link"
@@ -1054,6 +1051,9 @@ class Calendar extends React.Component<any, any> {
                         <Fullscreen
                             enabled={this.state.fullScreenOn}
                             onChange={fullScreenOn => this.setState({ fullScreenOn })}>
+                            <div style={{margin:'1em 0 0 4em'}}>
+                                <h2>{this.props.appModuleName}</h2>
+                            </div>
                         <div className="calendar">
                             {this.state.createMenuVisible && this.renderCreateNotification()}
                             {this.state.editMenuVisible && this.renderEditNotification()}

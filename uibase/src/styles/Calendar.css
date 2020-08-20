@@ -97,7 +97,7 @@
     position: relative;
     width: 100%;
     line-height: initial;
-    padding: 4em 4em 0 4em;
+    padding: 0 4em 0 4em;
 }
 
 .calendar .header {
@@ -410,7 +410,7 @@
 
 /*______________________________________________*/
 .ant-select-dropdown div {
-    overflow-y: hidden !important;
+    /*overflow-y: hidden !important;*/
     text-align: center;
 }
 .select .ant-select-selection-search {
@@ -460,5 +460,5 @@
 }
 
 .functionalBar__header svg {
-    fill: #2a356c;
+    fill: #5E6785;
 }
