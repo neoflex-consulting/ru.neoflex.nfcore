@@ -59,7 +59,7 @@
     text-transform: uppercase;
 }
 .col-col-center {
-    margin-right: 30px;
+    /*margin-right: 30px;*/
 }
 
 .row {
@@ -71,14 +71,9 @@
     width: 100%;
 }
 
-.col {
-    flex-basis: 0;
-    max-width: 100%;
-}
-
 .col-start {
     flex-grow: 3;
-    justify-content: flex-start;
+    justify-content: flex-end !important;
     text-align: end;
 }
 
@@ -91,7 +86,7 @@
 
 .col-end {
     flex-grow: 3;
-    justify-content: flex-end;
+    justify-content: flex-start !important;
     text-align: start;
 }
 
@@ -102,14 +97,7 @@
     position: relative;
     width: 100%;
     line-height: initial;
-    background: var(--neutral-color);
-    border: 1px solid var(--border-color);
-    padding: 1em 1em 0 1em;
-    background-color: rgb(243, 244, 251);
-}
-
-.primary {
-    background-color: rgb(243, 244, 251);
+    padding: 0 4em 0 4em;
 }
 
 .calendar .header {
@@ -117,13 +105,13 @@
     font-weight: 700;
     border-bottom: 1px solid var(--border-color);
     height: 49px;
+    background-color: #EBEBEB;
+    border-radius: 4px;
 }
 
 .calendar .header .icon {
     cursor: pointer;
     transition: .15s ease-out;
-    margin-left: -15px;
-    margin-right: 17px;
 }
 
 .calendar .header .icon:hover {
@@ -137,16 +125,13 @@
     align-items: center;
 }
 
-.calendar .header .date button{
-    background-color: rgb(255,204,102);
-    color: white;
-}
-
 .calendar .date {
-
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-div .body {
+.calendar div .body {
     border: 1px solid rgba(200, 200, 200, 0.65);
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
@@ -189,16 +174,20 @@ div .body {
 .days-header {
     display: flex;
     padding-top: .5em;
+    height: 25px;
 }
 
 /*!*Даты в месяце*!*/
 .calendar .body .cell {
     position: relative;
-    min-height: 30px;
     border-right: 1px solid var(--border-color);
     overflow: hidden;
     background: var(--neutral-color);
     transition: 0.25s ease-out;
+    flex-direction: column;
+    align-items: unset;
+    height: auto;
+    justify-content: unset;
 }
 
 /*!*Подсветка ячейки при наведении мыши*!*/
@@ -215,6 +204,7 @@ div .body {
 
 .calendar .body .row {
     border-bottom: 2px solid var(--border-color);
+    align-items: unset;
 }
 
 .calendar .body .row:last-child {
@@ -364,29 +354,50 @@ div .body {
     background-color: rgb(239, 239, 239);
     height: 28px;
     width: 93%;
-    overflow-x:hidden;
     font-size: 12px;
     color: #000000;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border: none;
-    line-height: 28px;
+    line-height: 1;
+    justify-content: flex-start;
 }
 
-.notification-btn Button:hover{
+.notification-btn button:hover{
     outline: none;
     border: none;
     color: black;
+    background-color: #ffffff;
 }
 
 /*Легенда*/
+.calendar .ant-drawer-body .col {
+    justify-content: unset;
+}
+.calendar .ant-drawer-right .ant-drawer-content-wrapper {
+    top: 80px;
+}
 
 .calendar .ant-drawer-wrapper-body .ant-drawer-title {
     font-weight: 600;
     font-size: 20px;
 }
 
-.ant-drawer-body .ant-col-17 {
+.calendar .ant-drawer-wrapper-body {
+
+}
+
+.calendar .ant-drawer-body div.legend__acceptButton {
+    position: fixed;
+    bottom: 0;
+    height: 64px;
+    width: 450px;
+    background-color: #f2f2f2;
+    transform: translateX(-25px);
+    padding: 16px 0 16px 40px;
+}
+
+.calendar .ant-drawer-body .ant-col-17 {
     font-weight: 500;
 }
 
@@ -395,4 +406,59 @@ div .body {
 .calendar .ant-btn-primary:focus {
     background-color: #293468;
     border: 1px solid #293468;
+}
+
+/*______________________________________________*/
+.ant-select-dropdown div {
+    /*overflow-y: hidden !important;*/
+    text-align: center;
+}
+.select .ant-select-selection-search {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    bottom: 0;
+    left: 11px;
+}
+
+.select .ant-select-selection-item {
+    padding: 0;
+    height: 30px;
+    line-height: 30px;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    flex: 1 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.select .ant-select-selector {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    width: 100%;
+    height: 32px;
+    padding: 0 11px;
+}
+
+.verticalLine {
+    border-left: 1px solid #B3B3B3;
+    height: 32px;
+    margin: auto 10px;
+}
+
+.ant-select-item-option-content {
+    cursor: pointer;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.functionalBar__header svg {
+    fill: #5E6785;
 }

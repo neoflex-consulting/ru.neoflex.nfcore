@@ -1,6 +1,7 @@
 import * as React from "react";
 import {withTranslation} from "react-i18next";
 import {Button, Col, Row } from "antd";
+import {NeoButton, NeoCol, NeoRow} from "neo-design/lib";
 import './../styles/BreadcrumbApp.css';
 
 import { Menu, Dropdown } from 'antd';
@@ -23,29 +24,21 @@ class HeaderMenu extends React.Component<any, any> {
     appsMenu(selectedApp:any) {
         const {applications, t} = this.props
         return (
-            <Row>
+            <NeoRow style={{justifyContent: 'space-between', width: '100%'}}>
                 {applications.slice(0,3).map((app: any) =>
-                    <Col span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
-                        <Button
+                    <NeoCol span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
+                        <NeoButton
                             className='btn-appName'
                             key={app.eContents()[0].get('name')}
                             type="link"
-                            ghost
-                            style={{
-                                fontWeight: 500,
-                                background: "rgb(255,255,255)",
-                                fontSize: selectedApp === app.eContents()[0].get('name') ? "larger" : "medium",
-                                color: selectedApp === app.eContents()[0].get('name') ? "rgb(255, 255, 255)" : "rgb(255, 255, 255, 0.7)",
-                                cursor: "pointer"
-                            }}
                             onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
                         >
                             {app.eContents()[0].get('name')}
-                        </Button>
-                    </Col>
+                        </NeoButton>
+                    </NeoCol>
                 )}
                 {applications.length >= 4 &&
-                <Col span={3}>
+                <NeoCol span={3}>
                     <Dropdown overlay={(
                         <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
                             {applications.slice(3).map(
@@ -61,19 +54,21 @@ class HeaderMenu extends React.Component<any, any> {
                             )}
                         </Menu>
                     )} placement="bottomCenter">
-                        <Button className='btn-appName'
+                        <NeoButton
+                            className='btn-appName'
                                 type="link"
-                                ghost style={{
+                                style={{
                             fontWeight: 500,
                             background: "rgb(255,255,255)",
                             cursor: "pointer"
-                        }}>
+                        }}
+                        >
                             {t('more')}
-                        </Button>
+                        </NeoButton>
                     </Dropdown>
-                </Col>
+                </NeoCol>
                 }
-            </Row>
+            </NeoRow>
         )
 }
 
@@ -95,7 +90,7 @@ class HeaderMenu extends React.Component<any, any> {
         }
 
         return (
-            <Row style={{marginTop: '0px'}} className='apps-menu'>
+            <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu'>
                 {
                     this.props.applications.length === 0
                         ?
@@ -103,7 +98,7 @@ class HeaderMenu extends React.Component<any, any> {
                         :
                         this.appsMenu(selectedApp)
                 }
-            </Row>
+            </NeoRow>
         );
     }
 }

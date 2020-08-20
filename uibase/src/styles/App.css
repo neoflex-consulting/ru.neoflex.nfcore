@@ -1,10 +1,15 @@
 .app-logo {
+  margin: auto auto auto 30px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
   height: 64px;
   line-height: 60px;
   cursor: pointer;
+}
+
+.ant-collapse-content-box {
+  padding: unset!important;
 }
 
 .app-logo span, .app-logo-settings span {
@@ -273,6 +278,38 @@
 }
 
 /*Antd styles*/
+
+/*ServerFilter*/
+.ant-tree-node-content-wrapper-open .ant-tree-title {
+  color: #B38136
+}
+.ant-tree-iconEle {
+  display: none !important;
+}
+
+.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
+.ant-tree-treenode-switcher-close:hover>::before,
+.ant-tree-node-content-wrapper:hover>::before {
+  background: #FFF8E0 !important;
+}
+.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
+  color: black !important;
+}
+
+/*Select*/
+
+.ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+  background-color: #fff8e0 !important;
+}
+
+.ant-select-dropdown-menu {
+  overflow: hidden !important;
+}
+
+
+
 .ant-menu-submenu-title {
   color: black;
 }
@@ -335,3 +372,59 @@
   border-radius: 4px;
   box-shadow: none !important;
 }
+/* Paginator ! */
+
+
+.ant-select-sm .ant-select-selection--single {
+  height: 20px;
+  width: 104px;
+  margin-left: 40px;
+}
+
+.ant-pagination.mini .ant-pagination-options-quick-jumper input {
+  margin-left: 16px;
+  width: 36px !important;
+
+}
+.ant-pagination.mini .ant-pagination-item{
+  margin: 0 5px !important;
+}
+.ant-pagination.mini .ant-select-sm .ant-select-selection--single{
+  margin-left: 12px;
+}
+.ant-pagination-item-link{
+  margin-left: 20px;
+  margin-right: 20px;
+}
+.ant-pagination.mini .ant-pagination-options-quick-jumper {
+  margin-left: 12px;
+}
+
+.ant-pagination.mini .ant-pagination-item-active {
+  font-weight: 500;
+  background: #FFF8E0;
+  border: 1px solid #FFCC66;
+  box-sizing: border-box;
+  border-radius: 2px;
+}
+
+.ant-pagination.mini .ant-select-sm .ant-select-selection__rendered {
+  margin-left: 12px;
+  line-height: 22px;
+}
+
+.ant-pagination.mini .ant-pagination-prev
+  :hover{
+    font-size: 12px;
+     color: #022af8;
+   }
+
+.ant-pagination.mini .ant-pagination-next
+:hover{
+  font-size: 12px;
+  color: #022af8;
+}
+
+
+
+

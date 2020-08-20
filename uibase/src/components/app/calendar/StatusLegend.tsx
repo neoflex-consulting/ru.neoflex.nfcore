@@ -1,6 +1,6 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Checkbox, Col, Row} from "antd";
+import {NeoRow, NeoCol, NeoButton, NeoInput} from "neo-design/lib";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 interface Props {
@@ -41,41 +41,48 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
     render() {
         const {t} = this.props;
         return (
+            <>
             <div>
                 {
                     this.state.notificationStatus!
                         .map((c: any, index:number) =>
-                            <Row style={{marginBottom: '15px'}} key={`statusLegendRow-${index}`}>
-                                <Col span={2}>
-                                    <Checkbox
+                            <NeoRow style={{marginBottom: '15px'}} key={`statusLegendRow-${index}`}>
+                                <NeoCol span={2}>
+                                    <NeoInput
+                                        type={'checkbox'}
                                         defaultChecked={c['enable']}
                                         onChange={(e: any) => {
+                                            console.log('onchange')
                                             const event = JSON.stringify({enable: e.target.checked, name: c['name'], color: c['color']});
                                             this.handleChange(event)
-                                        }}>
-                                    </Checkbox>
-                                </Col>
-                                <Col span={4}>
+                                        }}
+                                    >
+                                    </NeoInput>
+                                </NeoCol>
+                                <NeoCol span={4}>
 
                                     <div style={{height: '29px', width: '52px', backgroundColor: c['color'], borderRadius: '5px'}}/>
-                                </Col>
-                                <Col span={17}>
+                                </NeoCol>
+                                <NeoCol span={17}>
 
                             <span
                                 key={JSON.stringify({name: c['name'], color: c['color']})}
                             >
                                 {c['name']}
                             </span>
-                                </Col>
-                            </Row>
+                                </NeoCol>
+                            </NeoRow>
                         )
                 }
-                <Button
+            </div>
+            <div className={'legend__acceptButton'}>
+                <NeoButton
                      title={t('apply')}
                          onClick={()=> this.apply(this.state.notificationStatus)}>
                     {t('apply')}
-                </Button>
+                </NeoButton>
             </div>
+        </>
         )
     }
 }

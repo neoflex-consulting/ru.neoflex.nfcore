@@ -10,6 +10,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {NeoButton, NeoCol, NeoIcon, NeoRow} from "neo-design/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -37,12 +38,23 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div className="SortableItem">
-        <Row gutter={[8, 0]}>
-            <Col span={1}>
+        <NeoRow style={{height:'100%'}}>
+            <NeoCol span={1}>
                 <span>{value.index}</span>
-            </Col>
-            <Col span={7}>
-                <Form.Item style={{ display: 'inline-block' }}>
+            </NeoCol>
+            <NeoCol  span={2}>
+                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+                    <Switch
+                        defaultChecked={value.enable !== undefined ? value.enable : true}
+                        onChange={(e: any) => {
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                            value.handleChange(event)
+                        }}>
+                    </Switch>
+                </Form.Item>
+            </NeoCol>
+            <NeoCol span={7}>
+                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
                             initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
@@ -77,9 +89,9 @@ const SortableItem = SortableElement(({value}: any) => {
                         </Select>
                     )}
                 </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item style={{ display: 'inline-block' }}>
+            </NeoCol>
+            <NeoCol span={7}>
+                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idOperation}`,
                         {
                             initialValue: value.t(value.operation) || undefined,
@@ -113,9 +125,9 @@ const SortableItem = SortableElement(({value}: any) => {
                         </Select>
                     )}
                 </Form.Item>
-            </Col>
-            <Col span={5}>
-                <Form.Item style={{ display: 'inline-block' }}>
+            </NeoCol>
+            <NeoCol span={5}>
+                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idValue}`,
                         {
                             initialValue: value.value,
@@ -139,31 +151,23 @@ const SortableItem = SortableElement(({value}: any) => {
                         />
                     )}
                 </Form.Item>
-            </Col>
-            <Col  span={2}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    <Switch
-                        defaultChecked={value.enable !== undefined ? value.enable : true}
-                        onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                            value.handleChange(event)
-                        }}>
-                    </Switch>
-                </Form.Item>
-            </Col>
-            <Col span={2}>
-                <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
-                    <Button
+            </NeoCol>
+
+            <NeoCol span={2}>
+                <Form.Item style={{ display: 'inline-block' , marginTop: '35px'}}>
+                    <NeoButton
+                        type={'link'}
                         title={value.t("delete row")}
                         key={'deleteRowButton'}
-                        value={'deleteRowButton'}
+                        // value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
-                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                    </Button>
+                        <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
+                        {/*<FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>*/}
+                    </NeoButton>
                 </Form.Item>
-            </Col>
-        </Row>
+            </NeoCol>
+        </NeoRow>
     </div>
 });
 
