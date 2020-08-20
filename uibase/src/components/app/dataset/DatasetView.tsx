@@ -1248,6 +1248,31 @@ class DatasetView extends React.Component<any, State> {
                                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
                             <NeoIcon icon={'add'} color={'#5E6785'}/>
                         </NeoButton>
+                    <NeoButton type={'link'} title={t('hiddencolumns')}
+                               style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
+                               onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
+                    >
+                        <img style={{width: '24px', height: '24px'}} src={hiddenColumnIcon} alt="hiddenColumns" />
+                    </NeoButton>
+                    <Button
+                        hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
+                        title={t('edit')}
+                        style={{color: 'rgb(151, 151, 151)'}}
+                        onClick={() => {
+                            if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
+                                || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
+                                || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
+                                || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
+                                this.refresh(true);
+                            } else {
+                                this.setState({isEditMode:!this.state.isEditMode},()=>{
+                                    this.gridRef.onEdit()
+                                })
+                            }
+                        }}
+                    >
+                        <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+                    </Button>
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('save')}
                                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
