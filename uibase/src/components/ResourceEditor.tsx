@@ -539,24 +539,26 @@ class ResourceEditor extends React.Component<any, State> {
                 _id: id
             };
             let added:any[] = [];
-            traverseEObject(newObject,  (obj:any)=>{
+            const pattern = new RegExp("(^//@[a-zA-Z]+)|^(ui_generated_[0-9\-]+)",'g');
+            traverseEObject(newObject,  (obj:any, key: string, level: number)=>{
                 //Add missing external refs
-                if (obj["$ref"] && obj["$ref"] !== "/" && !obj["$ref"].startsWith('//') && !obj["$ref"].startsWith(id)) {
-                    if (!added.includes( API.parseRef(obj["$ref"]).id)) {
-                        added.push(API.parseRef(obj["$ref"]).id)
+                if (key === "$ref"
+                    && obj[key].search(new RegExp('^[0-9#]','g')) === 0) {
+                    if (!added.includes( API.parseRef(obj[key]).id)) {
+                        added.push(API.parseRef(obj[key]).id)
                         const resourceSet = Ecore.ResourceSet.create();
-                        API.instance().fetchResource(obj["$ref"], 1, resourceSet, {}).then((resource: Ecore.Resource) => {
+                        API.instance().fetchResource(obj[key], 1, resourceSet, {}).then((resource: Ecore.Resource) => {
                             this.handleAddNewResource([resource])
                         });
                     }
                 }
                 //Change inner _id
-                if (obj["_id"]) {
-                    obj["_id"] = (obj["_id"] as string).replace(new RegExp('^//@[a-zA-Z]+', 'g'),id)
+                if (key === "_id") {
+                    obj[key] = (obj[key] as string).replace(pattern,id)
                 }
-                //Change same page ref
-                if (obj["$ref"] && obj["$ref"] !== "/" && obj["$ref"].startsWith('//')) {
-                    obj["$ref"] = (obj["$ref"] as string).replace(new RegExp('^//@[a-zA-Z]+', 'g'),id)
+                //Change same page ref for children
+                if (key === "$ref" && level != 1) {
+                    obj[key] = (obj[key] as string).replace(pattern,id)
                 }
             });
             if (node.upperBound === -1) {
