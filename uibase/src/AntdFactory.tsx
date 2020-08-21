@@ -401,7 +401,7 @@ export class Button_ extends ViewContainer {
     }
 }
 
-class Select_ extends ViewContainer {
+export class Select_ extends ViewContainer {
     private selected = "";
     private urlCurrentValue:string|undefined = "";
 
@@ -413,6 +413,10 @@ class Select_ extends ViewContainer {
         }
         value = this.urlCurrentValue ? this.urlCurrentValue : this.viewObject.get('value') || "";
 
+        let defaultAgGridValue = "";
+        if (this.props.isAgEdit) {
+            defaultAgGridValue = this.props.data[this.props.colData]
+        }
         this.state = {
             selectData: [],
             params: [],
@@ -420,6 +424,7 @@ class Select_ extends ViewContainer {
             dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
+            defaultAgGridValue: defaultAgGridValue
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -490,10 +495,10 @@ class Select_ extends ViewContainer {
                                 value: el[this.viewObject.get('datasetValueColumn').get('name')]
                             }
                         }),
-                        currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
+                        currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
                     },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
                         parameterName: this.viewObject.get('name'),
-                        parameterValue: this.state.currentValue
+                        parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
                     })
                     );
                 });
@@ -579,10 +584,10 @@ class Select_ extends ViewContainer {
         }
         this.setState({
             selectData:staticValues,
-            currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
+            currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
         },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
             parameterName: this.viewObject.get('name'),
-            parameterValue: this.state.currentValue
+            parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
         }))
     }
 
@@ -616,7 +621,7 @@ class Select_ extends ViewContainer {
                         placeholder={this.viewObject.get('placeholder')}
                         mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
                         style={{width: width}}
-                        defaultValue={this.viewObject.get('value') || undefined}
+                        defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
                         value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
                             this.onChange(currentValue);
