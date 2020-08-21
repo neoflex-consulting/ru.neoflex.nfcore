@@ -305,7 +305,7 @@
 }
 
 .ant-select-dropdown-menu {
-  overflow: hidden !important;
+  /*overflow: hidden !important;*/
 }
 
 

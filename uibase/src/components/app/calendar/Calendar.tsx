@@ -929,10 +929,7 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            {this.state.fullScreenOn  ?
-                <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
-            :
-            <NeoIcon icon={'fullScreen'} color={'#5E6785'} />}
+            <NeoIcon icon={'fullScreen'} color={'#5E6785'} />
         </NeoButton>
             </div>
 

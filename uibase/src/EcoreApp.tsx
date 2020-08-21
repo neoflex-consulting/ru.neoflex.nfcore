@@ -584,14 +584,14 @@ class EcoreApp extends React.Component<any, State> {
                             >
                             <Link to={`/developer/data`}>
                                     {/*<FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>*/}
-                                    <NeoIcon icon={'settings'} size={'16'} color={'white'} />
+                                    <NeoIcon icon={'settings'} size={'14'} color={'white'} />
                             </Link>
                             </NeoButton>
                             <NeoButton  type="link"
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <FontAwesomeIcon icon={faBellSlash} size="sm" style={{marginLeft: '-3px'}}/>
+                                        <NeoIcon icon={'notification_off'} size={'16'} color={'white'} />
                                     :
                                         <NeoIcon icon={'notification'} size={'16'} color={'white'} />}
                             </NeoButton>
