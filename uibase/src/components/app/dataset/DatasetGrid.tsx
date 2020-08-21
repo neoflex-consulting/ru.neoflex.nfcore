@@ -203,7 +203,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     highlightAggregate() {
         if (this.props.aggregatedRows.length > 0) {
             this.gridOptions.getRowClass = (params: any) => {
-                if (this.props.aggregatedRows.find((a:{[key: string]: unknown}) => Object.is(a,params.data))) {
+                if (params.node.rowIndex >= this.props.rowData.length - this.props.aggregatedRows.length) {
                     return 'aggregate-highlight';
                 }
                 return ""

@@ -758,7 +758,7 @@ class DatasetView extends React.Component<any, State> {
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
             && params.value
-            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
+            && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
             splitted = params.value.split(":");
             params.value = splitted[1];
         }
@@ -783,7 +783,7 @@ class DatasetView extends React.Component<any, State> {
             formattedParam = params.value;
         if (this.state.aggregatedRows.length > 0
             && params.value
-            && this.state.aggregatedRows.find(a => Object.is(a,params.data))) {
+            && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
             splitted[1] = formattedParam;
             formattedParam = splitted.join(":")
         }
@@ -911,9 +911,7 @@ class DatasetView extends React.Component<any, State> {
                                 rowData: result,
                                 columnDefs: newColumnDef,
                                 isAggregations: true,
-                                //Если не проверять то при одинаковых данных, ag-grid не подставляет новые в грид
-                                //Поэтому проверка ссылки на новые записи при выполнении valueFormatter будет давать false
-                                aggregatedRows: _.isEqual(result,this.state.rowData) ? this.state.aggregatedRows : this.getAggregatedRows(aggregationParams, result),
+                                aggregatedRows: this.getAggregatedRows(aggregationParams, result),
                                 hiddenColumns: hiddenColumns},callback);
                             this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
                 } else {
