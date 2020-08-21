@@ -1670,10 +1670,12 @@ class DatasetView extends React.Component<any, State> {
                         || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
                         || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
                         this.refresh()
-                    } else {
+                    } else if (this.gridRef.whichEdited().length === 0) {
                         this.setState({isEditMode:!this.state.isEditMode},()=>{
                             this.gridRef.onEdit()
-                        })
+                        });
+                    } else {
+                        this.gridRef.stopEditing()
                     }
                 }}
             >

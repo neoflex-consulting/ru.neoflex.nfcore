@@ -475,6 +475,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.buffer = [];
     };
 
+    stopEditing = () => {
+        this.grid.current.api.stopEditing();
+    };
+
+    whichEdited = () => {
+        return this.grid.current.api.getEditingCells()
+    };
+
     onEdit = () => {
         if (this.props.isEditMode) {
             this.gridOptions.getRowClass = (params: any): string => {
@@ -509,7 +517,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             });
         } else {
             let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== this.props.t('data menu') && c.get('field') !== this.props.t('delete row'));
-
             this.gridOptions.getRowClass = undefined;
             this.grid.current.api.setQuickFilter(undefined);
             this.disableSelection();
@@ -605,7 +612,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 this.buffer.push(params.node.data)
             }
             this.grid.current.api.redrawRows(this.grid.current.api.getRowNode(this.buffer));
-
         }
     };
 
