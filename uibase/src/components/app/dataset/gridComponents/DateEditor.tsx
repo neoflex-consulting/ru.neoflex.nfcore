@@ -37,7 +37,7 @@ export default class DateEditor extends React.Component<Props, State> {
         //Возвращаем в формате по умолчаню
         return this.state.currentValue !== this.state.defaultValue
                     ? moment(this.state.currentValue, this.props.mask).format(this.state.format)
-                    : this.state.defaultValue;
+                    : moment(this.state.defaultValue, this.props.mask).format(this.state.format);
     }
 
     render() {

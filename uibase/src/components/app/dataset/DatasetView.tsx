@@ -307,6 +307,7 @@ class DatasetView extends React.Component<any, State> {
         let columnDefs: any = [];
         resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
             let rowData = new Map();
+            const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
             let componentRenderCondition = c.get('componentRenderCondition');
             if (componentRenderCondition)
@@ -332,7 +333,8 @@ class DatasetView extends React.Component<any, State> {
             rowData.set('resizable', c.get('resizable'));
             rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
             rowData.set('type', type);
-            rowData.set('component', c.get('component'));
+            rowData.set('component', !isEditGridComponent ? c.get('component') : undefined);
+            rowData.set('editComponent', isEditGridComponent ? c.get('component') : undefined);
             rowData.set('componentRenderCondition', componentRenderCondition);
             rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
             rowData.set('formatMask', c.get('formatMask'));
@@ -671,6 +673,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
+                rowData.set('editComponent', c.get('editComponent'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
@@ -696,6 +699,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
                 rowData.set('updateCallback',c.get('updateCallback'));
                 rowData.set('component', c.get('component'));
+                rowData.set('editComponent', c.get('editComponent'));
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', c.get('textAlign'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
@@ -1666,10 +1670,12 @@ class DatasetView extends React.Component<any, State> {
                         || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
                         || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
                         this.refresh()
-                    } else {
+                    } else if (this.gridRef.whichEdited().length === 0) {
                         this.setState({isEditMode:!this.state.isEditMode},()=>{
                             this.gridRef.onEdit()
-                        })
+                        });
+                    } else {
+                        this.gridRef.stopEditing()
                     }
                 }}
             >

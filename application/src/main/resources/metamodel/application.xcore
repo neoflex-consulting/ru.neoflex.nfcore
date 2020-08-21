@@ -35,6 +35,7 @@ abstract class DynamicActionElement {
 
 abstract class GridComponent {
     GridComponentValueType returnValueType
+    boolean isEditGridComponent
 }
 
 @Ecore(constraints="IsValid")
@@ -197,7 +198,7 @@ class GradientStyle extends Style {
     contains Color[] colors
 }
 
-class Select extends ViewElement, ValueItem, CommandElement {
+class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     String placeholder
     SelectMode mode = "Default"
     boolean isDynamic
