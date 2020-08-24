@@ -9,7 +9,7 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import {Button_, Href_} from '../../../AntdFactory';
+import {Button_, Href_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
 import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
@@ -83,6 +83,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
+                    selectComponent: Select_,
                     buttonComponent: Button_,
                     hrefComponent: Href_,
                     DateEditor: DateEditor,
@@ -451,6 +452,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             return 'hrefComponent'
         } else if (className === "//Button") {
             return 'buttonComponent'
+        } else if (className === "//Select") {
+            return 'selectComponent'
         } else {
             return className
         }
@@ -470,6 +473,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.disableSelection();
         this.grid.current.api.setQuickFilter(undefined);
         this.buffer = [];
+    };
+
+    stopEditing = () => {
+        this.grid.current.api.stopEditing();
+    };
+
+    whichEdited = () => {
+        return this.grid.current.api.getEditingCells()
     };
 
     onEdit = () => {
@@ -601,7 +612,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 this.buffer.push(params.node.data)
             }
             this.grid.current.api.redrawRows(this.grid.current.api.getRowNode(this.buffer));
-
         }
     };
 
@@ -712,8 +722,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                             return params.valueFormatted? params.valueFormatted : params.value;
                                         }
                                     }
-                                    cellEditor = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
-                                    cellEditorParams = {[appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? {mask: col.get('mask'), type: col.get('type')} : undefined}
+                                    cellEditor = {(col.get('editComponent')) ? this.getComponent(col.get('editComponent').eClass ? col.get('editComponent').eClass._id : col.get('editComponent')) : [appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
+                                    cellEditorParams = {(col.get('editComponent'))
+                                        ? {
+                                        ...this.props,
+                                        viewObject: col.get('editComponent'),
+                                        isAgEdit: true,
+                                        colData: col.get('field')
+                                        }
+                                        : [appTypes.Date,appTypes.Timestamp].includes(col.get('type'))
+                                            ? {mask: col.get('mask'), type: col.get('type')}
+                                            : undefined}
                                     valueFormatter = {col.get('valueFormatter')}
                                 />
                             )}

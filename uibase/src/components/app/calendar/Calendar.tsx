@@ -20,13 +20,12 @@ import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
 import legend from '../../../icons/legend.svg';
-import searchIcon from '../../../icons/searchIcon.svg';
-import printIcon from '../../../icons/printIcon.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
+import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import domtoimage from "dom-to-image";
@@ -420,24 +419,25 @@ class Calendar extends React.Component<any, any> {
 
     changeSearchValue = (e: any) => {
         this.setState({searchValue: e})
+        this.searchValue(e)
     };
 
-    searchValue = () => {
-        if (this.state.searchValue === "") {
+    searchValue = (searchValue :any) => {
+        if (searchValue === "") {
             this.setState({filteredRowData: undefined})
         } else {
             let filteredRowData: any = [];
             this.state.rowData.forEach((r:any) => {
                 if (
-                    r['Полное название формы'].includes(this.state.searchValue) ||
-                    r['Краткое название формы'].includes(this.state.searchValue) ||
-                    r['Периодичность сдачи'].includes(this.state.searchValue) ||
-                    r['Рабочий день сдачи'].includes(this.state.searchValue) ||
-                    r['Время сдачи'].includes(this.state.searchValue) ||
-                    r['Отчетность по выходным'].includes(this.state.searchValue) ||
-                    r['Интервал расчета'].includes(this.state.searchValue)
+                    r['Полное название формы'].includes(searchValue) ||
+                    r['Краткое название формы'].includes(searchValue) ||
+                    r['Периодичность сдачи'].includes(searchValue) ||
+                    r['Рабочий день сдачи'].includes(searchValue) ||
+                    r['Время сдачи'].includes(searchValue) ||
+                    r['Отчетность по выходным'].includes(searchValue) ||
+                    r['Интервал расчета'].includes(searchValue)
                     ||
-                    r['Отчетная дата "на"'].find((d:any) => d.includes(this.state.searchValue))
+                    r['Отчетная дата "на"'].find((d:any) => d.includes(searchValue))
                 ) {
                     filteredRowData.push(r)
                 }
@@ -467,7 +467,6 @@ class Calendar extends React.Component<any, any> {
             )
         }
     }
-
 
     private getTitle(day: any) {
         let temp: any = [];
@@ -729,9 +728,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div
                 style={{
-                    marginTop: '30px',
                     height: this.state.fullScreenOn ?  550*5.5/4 : 550,
-                    width: '98%'
                 }}
                 className={'ag-theme-material'}
             >
@@ -793,42 +790,45 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents"}}
                     >
                         <div
-                            className="date">
+                            className="date"
+                        style={{flexGrow: 0.2, marginLeft: '16px'}}>
 
-                        <Button
-                                className='buttonToday'
+                        <NeoButton
+                            type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
                             {t('today')}
-                        </Button>
+                        </NeoButton>
 
-                        <Select className='selectYear'
+                        <NeoSelect className='selectYear'
                                 getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             value={this.state.currentMonth.getFullYear()}
                             style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
-                            onChange={(e: any) => {this.handleChange(e, 'year')}}>
+                            onChange={(e: any) => {this.handleChange(e, 'year')}}
+                            width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
-                                    <Select.Option
+                                    <option
                                         key={y}
                                         value={y}
                                     >
                                         {y}
-                                    </Select.Option>
+                                    </option>
                                 )
                             }
-                        </Select>
+                        </NeoSelect>
 
-                        <Select
+                        <NeoSelect
                             className='selectMonth'
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
+                            defaultValue={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
+                            width={'100px'}
                         >
                             {
                                 this.state.months!.map((m: any) =>
-                                    <Select.Option
+                                    <option
                                         className='selectMonth2'
                                         key={m}
                                         value={m}
@@ -837,16 +837,17 @@ class Calendar extends React.Component<any, any> {
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
                                         }
-                                    </Select.Option>
+                                    </option>
                                 )
                             }
-                        </Select>
+                        </NeoSelect>
                         </div>
 
                         <div className="col col-start">
-                            <div className="icon" onClick={this.prevMonth}>
-                                chevron_left
-                            </div>
+                            <NeoButton type={'link'} onClick={this.prevMonth}
+                                       style={{marginTop: '4px', marginRight:'16px'}}>
+                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} />
+                            </NeoButton>
                         </div>
                         <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
@@ -854,15 +855,18 @@ class Calendar extends React.Component<any, any> {
                     </span>
                         </div>
                         <div className="col col-end" >
-                            <div className="icon" onClick={this.nextMonth}>
-                                chevron_right
-                            </div>
+                            <NeoButton type={'link'} onClick={this.nextMonth}
+                            style={{marginLeft:'16px'}}>
+                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} style={{transform:'rotate(-180deg)'}}/>
+                            </NeoButton>
                         </div>
 
-                        <Button className="buttonLegend" style={{width: '26px', height: '26px', color: '#6e6e6e'}} type="link"
-                                onClick={this.handleLegendMenu}>
-                            <img  alt="Not found" src={legend}  style={{marginLeft: '-9px', marginTop: '4px'}}/>
-                        </Button>
+                        <NeoButton
+                            style={{width: '24px', height: '24px', color: '#6e6e6e', marginRight: '5px'}}
+                            type="link"
+                            onClick={this.handleLegendMenu}>
+                            <NeoIcon icon={'legend'} />
+                        </NeoButton>
                     </div>
                 }
 
@@ -872,22 +876,8 @@ class Calendar extends React.Component<any, any> {
                         style={{display: "contents", marginTop: '2px'}}
                     >
                             <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
-                                <Input
-                                    style={{
-                                        width: '186px',
-                                        borderRadius: '4px',
-                                        fill: '#ffffff',
-                                        strokeWidth: 1,
-                                        height: '32px'
-                                    }}
-                                    placeholder="Поиск"
-                                    suffix={
-                                        <img
-                                            alt="Not found"
-                                            src={searchIcon}
-                                            onClick={this.searchValue}
-                                        />
-                                    }
+                                <NeoInput
+                                    type={'search'}
                                     onChange={(e: any) => {
                                         this.changeSearchValue(e.target.value)
                                     }}
@@ -895,7 +885,7 @@ class Calendar extends React.Component<any, any> {
                             </div>
 
 
-                            <Select
+                            <NeoSelect
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
                                 style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px'}}
@@ -903,46 +893,34 @@ class Calendar extends React.Component<any, any> {
                                     this.handleChange(e, 'select')
                                 }}
                             >
-                                <Select.Option
+                                <option
                                     key={this.props.viewObject.get('defaultStatus').get('name')}
                                     value={this.props.viewObject.get('defaultStatus').get('name')}
                                 >
                                     {this.props.viewObject.get('defaultStatus').get('name')}
-                                </Select.Option>
+                                </option>
 
-                                <Select.Option
+                                <option
                                     key={'Системные заметки'}
                                     value={'Системные заметки'}
                                 >
                                     Системные заметки
-                                </Select.Option>
-                            </Select>
+                                </option>
+                            </NeoSelect>
 
 
                     </div>
                 }
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '6px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
 
-
-                    <Button
-                        className="buttonPlus"
-                        type="primary"
-                        style={{
-                            width: '20px',
-                            height: '30px',
-                            marginTop: this.state.fullScreenOn ? '11px' : '2px',
-                            backgroundColor: '#293468'
-                        }}
+                    <NeoButton
+                        type="link"
                         onClick={this.handleCreateMenu}>
-                        <FontAwesomeIcon icon={faPlus} size="1x" style={{marginLeft: '-6px'}}/>
-                    </Button>
+                        <NeoIcon icon={'plus'} color={'#5E6785'} />
+                    </NeoButton>
 
-
-
-
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '6px', marginRight: '10px', height: '34px'}}/>
-
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
                 <Button
                     disabled={this.state.calendarVisible}
                     className="calendarAlt"
@@ -959,6 +937,7 @@ class Calendar extends React.Component<any, any> {
                                          marginLeft: '-8px',
                                          color: this.state.calendarVisible ? '#293468' : '#a0a0a0'
                                      }}/>
+                                     {/*<NeoIcon icon={'calendar'} />*/}
                 </Button>
                 <Button
                     disabled={!this.state.calendarVisible}
@@ -979,47 +958,25 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
-                <Button
-                    className="buttonPrint"
+                <NeoButton
                     type="link"
-                    ghost
                     style={{
-                        marginRight: '10px',
-                        width: '32px',
-                        height: '32px'
+                        marginRight: '5px',
                     }}
                     onClick={this.onActionMenu}
                 >
-                    <img
-                        alt="Not found"
-                        src={printIcon}
-                        style={{
-                            marginLeft: '-6px',
-                            color: '#515151'
-                        }}
-                    />
-                </Button>
+                    <NeoIcon icon={'print'} color={'#5E6785'} />
+                </NeoButton>
 
-
-        <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '0px', height: '34px'}}/>
-
-
-        <Button
-            className="buttonFullScreen"
+        <NeoButton
             type="link"
-            ghost
             style={{
-                marginRight: '10px',
-                width: '32px',
-                height: '32px'
+                marginRight: '18px',
             }}
             onClick={this.onFullScreen}
         >
-            {this.state.fullScreenOn  ?
-                <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
-            :
-            <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
-        </Button>
+            <NeoIcon icon={'fullScreen'} color={'#5E6785'} />
+        </NeoButton>
             </div>
 
 
@@ -1034,14 +991,14 @@ class Calendar extends React.Component<any, any> {
         let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
-                <div key={i}
+                <NeoCol span={3} key={i}
                      className="col col-center col-text border-line" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
-                </div>
+                </NeoCol>
             );
         }
-        return <div className="days row">{days}</div>;
+        return <NeoRow className="days row">{days}</NeoRow>;
 
 
     }
@@ -1084,16 +1041,15 @@ class Calendar extends React.Component<any, any> {
                                     <div className="notification-btn" key={`btn-div-${index}`}
                                     style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
-                                    <Button
+                                    <NeoButton
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${index}`}
-                                        size="small"
                                         title={`${r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}\n${dateFns.format(dateFns.parseISO(r.contents[0]['calendarDate']), "PPpp ",{locale: ru})}\n
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}
                                     >
                                             {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
-                                    </Button>
+                                    </NeoButton>
                                     </div>
                                 )
                                 : ""}
@@ -1144,6 +1100,9 @@ class Calendar extends React.Component<any, any> {
                                            width: "100%",
                                            height: 600
                                        }}>
+                            <div style={{margin:'1em 0 0 4em'}}>
+                                <h2>{this.props.appModuleName}</h2>
+                            </div>
                         <div className="calendar">
                             {this.state.createMenuVisible && this.renderCreateNotification()}
                             {this.state.editMenuVisible && this.renderEditNotification()}

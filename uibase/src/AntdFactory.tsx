@@ -2,8 +2,9 @@ import {View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
-    Button,
     Col,
+    Collapse,
+    ConfigProvider,
     DatePicker,
     Drawer,
     Form,
@@ -12,9 +13,7 @@ import {
     Row,
     Select,
     Tabs,
-    Typography,
-    Collapse,
-    ConfigProvider
+    Typography
 } from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
@@ -39,6 +38,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
+import {NeoButton} from "neo-design/lib";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -246,6 +246,50 @@ class Row_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        return (
+            <Row
+                key={this.viewObject._id.toString() + '_7'}
+                hidden={this.state.isHidden}
+                style={{}}
+                gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
+            >
+                {this.renderChildren(isReadOnly)}
+            </Row>
+        )
+    }
+}
+
+class Region_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.viewObject.get('name')+this.viewObject._id,
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const marginRight = this.viewObject.get('marginRight') === null ? '0px' : `${this.viewObject.get('marginRight')}`;
         const marginBottom = this.viewObject.get('marginBottom') === null ? '0px' : `${this.viewObject.get('marginBottom')}`;
         const marginTop = this.viewObject.get('marginTop') === null ? '0px' : `${this.viewObject.get('marginTop')}`;
@@ -254,10 +298,20 @@ class Row_ extends ViewContainer {
         const height = this.viewObject.get('height');
         return (
             <Row
-                key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{}}
-                gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
+                style={{
+                    background: '#FFFFFF',
+                    boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
+                    borderRadius: '4px',
+                    padding: '16px',
+                    margin: '16px'}}
+                // style={{
+                //     position: 'absolute',
+                //     background: '#FFFFFF',
+                //     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
+                //     borderRadius: '4px',
+                //     margin: '26px',
+                //     height: '200px'}}
             >
                 {this.renderChildren(isReadOnly)}
             </Row>
@@ -388,20 +442,20 @@ export class Button_ extends ViewContainer {
         return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
+            <NeoButton title={'Submit'} style={{ width: '100px', left: span}}
                     onClick={isReadOnly ? ()=>{} : () => {
-                                    this.props.context.notifyAllEventHandlers({
-                                        type:eventType.click,
-                                        itemId:this.viewObject.get('name')+this.viewObject._id,
-                                        value:value});
-                                }}>
+                        this.props.context.notifyAllEventHandlers({
+                            type:eventType.click,
+                            itemId:this.viewObject.get('name')+this.viewObject._id,
+                            value:value});
+                    }}>
                 {(label)? label: t('submit')}
-            </Button>
+            </NeoButton>
         </div> : <div> {this.props.getValue()} </div>
     }
 }
 
-class Select_ extends ViewContainer {
+export class Select_ extends ViewContainer {
     private selected = "";
     private urlCurrentValue:string|undefined = "";
 
@@ -413,6 +467,10 @@ class Select_ extends ViewContainer {
         }
         value = this.urlCurrentValue ? this.urlCurrentValue : this.viewObject.get('value') || "";
 
+        let defaultAgGridValue = "";
+        if (this.props.isAgEdit) {
+            defaultAgGridValue = this.props.data[this.props.colData]
+        }
         this.state = {
             selectData: [],
             params: [],
@@ -420,6 +478,7 @@ class Select_ extends ViewContainer {
             dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
+            defaultAgGridValue: defaultAgGridValue
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -490,10 +549,10 @@ class Select_ extends ViewContainer {
                                 value: el[this.viewObject.get('datasetValueColumn').get('name')]
                             }
                         }),
-                        currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
+                        currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
                     },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
                         parameterName: this.viewObject.get('name'),
-                        parameterValue: this.state.currentValue
+                        parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
                     })
                     );
                 });
@@ -579,18 +638,34 @@ class Select_ extends ViewContainer {
         }
         this.setState({
             selectData:staticValues,
-            currentValue: this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
+            currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
         },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
             parameterName: this.viewObject.get('name'),
-            parameterValue: this.state.currentValue
+            parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
         }))
     }
 
+    //ag-grid
+    getValue() {
+        return this.state.currentValue;
+    }
+
     render = () => {
+        let componentRenderCondition = false;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = '200px';
+        //componentRenderCondition ag-grid props
+        try {
+            componentRenderCondition = !this.props.componentRenderCondition
+                // eslint-disable-next-line
+                || eval(this.props.componentRenderCondition)
+        } catch (e) {
+            this.props.context.notification("Select.componentRenderCondition",
+                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
+                "warning")
+        }
             return (
-                <div
+                componentRenderCondition ? <div
                     hidden={this.state.isHidden}
                     style={{marginBottom: marginBottom}}>
                     <Select
@@ -600,7 +675,7 @@ class Select_ extends ViewContainer {
                         placeholder={this.viewObject.get('placeholder')}
                         mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
                         style={{width: width}}
-                        defaultValue={this.viewObject.get('value') || undefined}
+                        defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
                         value={(this.state.currentValue)? this.state.currentValue: undefined}
                         onChange={(currentValue: string|string[]) => {
                             this.onChange(currentValue);
@@ -625,7 +700,7 @@ class Select_ extends ViewContainer {
                             </Select.Option>
                         }
                     </Select>
-                </div>
+                </div> : <div>{this.props.getValue()}</div>
             )
         }
 }
@@ -1517,6 +1592,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
         this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
         this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
+        this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

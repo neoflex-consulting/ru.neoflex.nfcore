@@ -28,8 +28,8 @@ import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
-//import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoIcon, NeoAlert, NeoInput} from "neo-design/lib";
+import 'neo-design/dist/neoDesign.css';
+import {NeoRow, NeoCol, NeoIcon, NeoButton} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
 
@@ -533,9 +533,9 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout style={{height: '100vh'}}>
                 <FetchSpinner/>
-                <Header className="app-header" style={{height: '80px', padding: '10px 0 0 0', backgroundColor: backgroundColor}}>
-                    <Row style={{height: '70'}}>
-                        <Col span={5} style={{display: "block", height: 'inherit', paddingLeft: '20px'}}>
+                <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
+                    <NeoRow style={{height: '80px'}}>
+                        <NeoCol span={5} style={{height: 'inherit'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
@@ -543,14 +543,9 @@ class EcoreApp extends React.Component<any, State> {
                                 <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px' }}/>
                                 <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
                             </div>
-                        </Col>
-                        {/*<Col span={8}>
-
-
-
-                        </Col>*/}
-                        <Col span={14}
-                                    style={{textAlign: 'center', height: 'inherit'}}> 
+                        </NeoCol>
+                        <NeoCol span={14}
+                                    style={{textAlign: 'center', alignItems: 'center', height: 'inherit'}}>
                                     {
                                         this.props.location.pathname.includes('/app/') &&
 
@@ -564,51 +559,61 @@ class EcoreApp extends React.Component<any, State> {
                                             }}
                                         </MainContext.Consumer>
                                     }
-                        </Col>
-                        <Col span={5}
+                        </NeoCol>
+                        <NeoCol span={5}
                              style={{
-                                    height: 'inherit'
+                                    height: 'inherit',
+                                 alignItems: 'center'
                              }}>
-                            <Button
-                                onClick={this.logOut}
-                                type="link" className="bell-icon logout-icon" ghost style={{
-                                width: '5px',
-                                height: '20px',
-                                marginTop: '22px',
-                                background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                            >
-                            </Button>
-                            <Link to={`/developer/data`}>
-                                    <FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>
-                            </Link>
-                            <div className='header-menu'>
-                                    <span style={{
-                                        textTransform: "capitalize",
-                                        fontSize: '15px',
-                                        lineHeight: '39px'
-                                    }}>
-                                        <span>{principal.name}</span></span>
-                            </div>
+                            <div
+                                style={{
+                                    width: '75%',
+                                    margin: 'auto 32px auto auto',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    lineHeight:'1',
+                                    justifyContent:'flex-end'
+                                }}>
                             <Dropdown overlay={langMenu} placement="bottomCenter">
-                                    <div className="lang-label" style={{ fontVariantCaps: 'petite-caps' }}>
+                                    <div className="lang-label" style={{ fontVariantCaps: 'petite-caps', marginRight:'25px' }}>
                                         {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
                                     </div>
                             </Dropdown>
-                            <Button  type="link"
-                                    className="bell-icon" ghost style={{
-                                    width: '5px',
-                                    height: '20px',
-                                    marginRight: '5px',
-                                    color: '#ffffff',
-                                    background: "rgb(255,255,255)", borderColor: "rgb(250,250,250)"}}
-                                         onClick={this.onClickBellIcon}>
+                            <NeoButton type={'link'}
+                                       style={{marginRight:'10px'}}
+                            >
+                            <Link to={`/developer/data`}>
+                                    {/*<FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>*/}
+                                    <NeoIcon icon={'settings'} size={'14'} color={'white'} />
+                            </Link>
+                            </NeoButton>
+                            <NeoButton  type="link"
+                                        style={{marginRight:'10px'}}
+                                        onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <FontAwesomeIcon icon={faBellSlash} size="lg" style={{marginLeft: '-3px'}}/>
+                                        <NeoIcon icon={'notification_off'} size={'16'} color={'white'} />
                                     :
-                                        <FontAwesomeIcon icon={faBell} size="lg"/>}
-                            </Button>
-                        </Col>
-                    </Row>
+                                        <NeoIcon icon={'notification'} size={'16'} color={'white'} />}
+                            </NeoButton>
+                                    <span style={{
+                                        textTransform: "capitalize",
+                                        fontSize: '15px',
+                                        height: '32px',
+                                        color: '#ffffff',
+                                        marginRight:'25px',
+                                        lineHeight: '2'
+                                    }}>
+                                        <span>{principal.name}</span>
+                                    </span>
+                            <NeoButton
+                                onClick={this.logOut}
+                                type="link"
+                            >
+                                <NeoIcon icon={'exit'} size={'16'} color={'white'} />
+                            </NeoButton>
+                            </div>
+                        </NeoCol>
+                    </NeoRow>
                 </Header>
                 <Switch>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>

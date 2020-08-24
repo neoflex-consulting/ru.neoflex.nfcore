@@ -1,4 +1,5 @@
 .app-logo {
+  margin: auto auto auto 30px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
@@ -277,6 +278,38 @@
 }
 
 /*Antd styles*/
+
+/*ServerFilter*/
+.ant-tree-node-content-wrapper-open .ant-tree-title {
+  color: #B38136
+}
+.ant-tree-iconEle {
+  display: none !important;
+}
+
+.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
+.ant-tree-treenode-switcher-close:hover>::before,
+.ant-tree-node-content-wrapper:hover>::before {
+  background: #FFF8E0 !important;
+}
+.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
+  color: black !important;
+}
+
+/*Select*/
+
+.ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+  background-color: #fff8e0 !important;
+}
+
+.ant-select-dropdown-menu {
+  /*overflow: hidden !important;*/
+}
+
+
+
 .ant-menu-submenu-title {
   color: black;
 }

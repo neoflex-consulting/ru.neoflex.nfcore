@@ -126,13 +126,14 @@ function findObjectById(data: any, id: String): any {
     }
 }
 
-function traverseEObject(obj: any, func: (obj: any)=>void) {
+function traverseEObject(obj: any, func: (obj: any, key: string, level: number)=>void, level = 1) {
     for (let k in obj) {
         if (obj.hasOwnProperty(k) && obj[k] && typeof obj[k] === 'object') {
-            traverseEObject(obj[k], func)
+            level = k === "children" ? level + 1 : level
+            traverseEObject(obj[k], func, level)
         } else {
             // Do something with obj
-            func(obj);
+            func(obj, k, level);
         }
     }
 }
