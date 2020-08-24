@@ -876,40 +876,37 @@ class Calendar extends React.Component<any, any> {
                     </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
-                <Button
-                    disabled={this.state.calendarVisible}
+                <NeoButton
+                    type={this.state.calendarVisible ? 'disabled' : "link"}
+                    // disabled={this.state.calendarVisible}
                     className="calendarAlt"
                     style={{
                         marginRight: '10px',
-                        width: '32px',
-                        height: '32px',
-                        backgroundColor: '#ffffff'
+                        width: '24px',
+                        height: '24px',
+                        padding: '3px',
+                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
+                        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
                     }}
-                    onClick={this.handleCalendarVisible}
+                    onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <FontAwesomeIcon color={'#6e6e6e'} icon={faCalendarAlt} size="lg"
-                                     style={{
-                                         marginLeft: '-8px',
-                                         color: this.state.calendarVisible ? '#293468' : '#a0a0a0'
-                                     }}/>
-                                     {/*<NeoIcon icon={'calendar'} />*/}
-                </Button>
-                <Button
-                    disabled={!this.state.calendarVisible}
+                    <NeoIcon icon={'calendar'} size={'16px'} />
+                </NeoButton>
+                <NeoButton
+                    type={!this.state.calendarVisible ? 'disabled' : "link"}
+                    // disabled={!this.state.calendarVisible}
                     className="alignJustify"
                     style={{
-                        width: '32px',
-                        height: '32px',
-                        backgroundColor: '#ffffff'
+                        width: '24px',
+                        height: '24px',
+                        padding: '3px',
+                        backgroundColor: !this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
+                        border: !this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
                     }}
-                    onClick={this.handleCalendarVisible}
+                    onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <FontAwesomeIcon icon={faAlignJustify} size="lg"
-                                     style={{
-                                         marginLeft: '-8px',
-                                         color: this.state.calendarVisible ? '#a0a0a0' : '#293468'
-                                     }}/>
-                </Button>
+                    <NeoIcon icon={"table"} size={'16px'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
 
