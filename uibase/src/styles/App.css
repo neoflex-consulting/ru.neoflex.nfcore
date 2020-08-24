@@ -425,6 +425,11 @@
   color: #022af8;
 }
 
+/*Logo*/
+.app-logo span, .app-logo-settings span {
+  margin: unset!important;
+}
+
 
 
 

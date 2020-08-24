@@ -26,6 +26,10 @@ import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
 import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
+import {saveAs} from "file-saver";
+import domtoimage from "dom-to-image";
+import {Resizable} from "re-resizable";
 
 const myNote = 'Личная заметка';
 
@@ -38,9 +42,18 @@ interface Props {
     viewObject: any,
 }
 
+const resizeStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "solid 1px #ddd",
+    background: "#ffffff"
+};
+
 class Calendar extends React.Component<any, any> {
 
     private grid: React.RefObject<any>;
+    private node: (Resizable|null);
 
     constructor(props: any) {
         super(props);
@@ -261,6 +274,14 @@ class Calendar extends React.Component<any, any> {
             this.setState({spinnerVisible: false})
         })
     };
+
+    onActionMenu = () => {
+        handleExportDocx(this.props.context.getDocxHandlers(), false, false).then(blob => {
+            saveAs(new Blob([blob]), "example.docx");
+            console.log("Document created successfully");
+        });
+    }
+
 
     updateAllStatuses = (notificationStatus: any[]) => {
         this.setState({notificationStatus})
@@ -513,10 +534,34 @@ class Calendar extends React.Component<any, any> {
             type:eventType.componentLoad,
             itemId:this.props.viewObject.eURI()
         });
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
     }
+
+    private getDocxData(): docxExportObject {
+        const width = (this.node) ? this.node.size.width : 700;
+        const height = (this.node) ? this.node.size.height : 400;
+        if (this.node && this.node?.resizable !== null) {
+            return {
+                hidden: this.props.hidden,
+                docxComponentType : docxElementExportType.diagram,
+                diagramData: {
+                    blob: domtoimage.toBlob(this.node?.resizable,{
+                        width: width,
+                        height: height
+                    }),
+                    width: width,
+                    height: height
+                }
+            };
+        }
+
+        return {hidden: this.props.hidden, docxComponentType: docxElementExportType.diagram}
+    }
+
 
     componentWillUnmount() {
         this.props.context.removeEventAction()
+        this.props.context.removeDocxHandler()
     }
 
     setGridData(myNotificationVisible: boolean, newNotification?: any): void {
@@ -915,6 +960,7 @@ class Calendar extends React.Component<any, any> {
                     style={{
                         marginRight: '5px',
                     }}
+                    onClick={this.onActionMenu}
                 >
                     <NeoIcon icon={'print'} color={'#5E6785'} />
                 </NeoButton>
@@ -1045,6 +1091,12 @@ class Calendar extends React.Component<any, any> {
                         <Fullscreen
                             enabled={this.state.fullScreenOn}
                             onChange={fullScreenOn => this.setState({ fullScreenOn })}>
+                            <Resizable ref={(n) => { this.node = n}}
+                                       style={resizeStyle}
+                                       defaultSize={{
+                                           width: "100%",
+                                           height: 600
+                                       }}>
                             <div style={{margin:'1em 0 0 4em'}}>
                                 <h2>{this.props.appModuleName}</h2>
                             </div>
@@ -1057,6 +1109,7 @@ class Calendar extends React.Component<any, any> {
                             {this.state.calendarVisible && this.renderCells(context)}
                             {!this.state.calendarVisible && this.renderGrid()}
                         </div>
+                            </Resizable>
                         </Fullscreen>
                     )}
                 </MainContext.Consumer>
