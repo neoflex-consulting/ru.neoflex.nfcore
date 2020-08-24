@@ -545,14 +545,12 @@ class EcoreApp extends React.Component<any, State> {
                             </div>
                         </Col>
                         {/*<Col span={8}>
-                            <NeoAlert typee={"error"} message={"test"} width={"200px"} closable={true}></NeoAlert>
 
-                            <NeoInput type={"default"}></NeoInput>
-                            <NeoIcon icon={"calendar"}></NeoIcon>
+
 
                         </Col>*/}
                         <Col span={14}
-                                    style={{textAlign: 'center', height: 'inherit'}}>
+                                    style={{textAlign: 'center', height: 'inherit'}}> 
                                     {
                                         this.props.location.pathname.includes('/app/') &&
 
