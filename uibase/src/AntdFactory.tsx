@@ -289,24 +289,13 @@ class Row_ extends ViewContainer {
         };
     }
 
+
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(false);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)();
     }
 
     render = () => {
@@ -334,7 +323,7 @@ class Region_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        mountComponent.bind(this)();
+        mountComponent.bind(this)(false);
     }
 
     componentWillUnmount(): void {
@@ -427,7 +416,7 @@ export class Button_ extends ViewContainer {
         return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
-            <NeoButton title={'Submit'} style={{ width: '100px', left: span}}
+            <NeoButton style={{ width: '100px', left: span}}
                     onClick={isReadOnly ? ()=>{} : () => {
                         const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                         handleClick.bind(this)(value);
