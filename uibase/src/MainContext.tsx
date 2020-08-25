@@ -31,12 +31,14 @@ export interface IEvent {
     value?: string
 }
 
+export interface IAction {
+    actionType: actionType,
+    callback: (value:string|undefined) => void
+}
+
 export interface IEventAction {
     itemId: string,
-    actions: {
-        actionType: actionType,
-        callback: (value:string|undefined) => void
-    }[]
+    actions: IAction[]
 }
 
 export interface IEventHandler {
