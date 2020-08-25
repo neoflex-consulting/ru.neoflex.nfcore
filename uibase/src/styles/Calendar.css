@@ -409,41 +409,6 @@
 }
 
 /*______________________________________________*/
-.ant-select-dropdown div {
-    /*overflow-y: hidden !important;*/
-    text-align: center;
-}
-.select .ant-select-selection-search {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    bottom: 0;
-    left: 11px;
-}
-
-.select .ant-select-selection-item {
-    padding: 0;
-    height: 30px;
-    line-height: 30px;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
-    flex: 1 1;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.select .ant-select-selector {
-    position: relative;
-    background-color: #fff;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-    width: 100%;
-    height: 32px;
-    padding: 0 11px;
-}
 
 .verticalLine {
     border-left: 1px solid #B3B3B3;

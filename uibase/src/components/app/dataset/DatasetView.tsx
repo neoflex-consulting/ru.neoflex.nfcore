@@ -1253,6 +1253,7 @@ class DatasetView extends React.Component<any, State> {
                             <NeoIcon icon={'barChart'} color={'#5E6785'}/>
                         </NeoButton>
                         <NeoButton type={'link'} title={t('grouping')}
+                                   style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
                             <NeoIcon icon={'add'} color={'#5E6785'}/>
                         </NeoButton>
@@ -1260,7 +1261,7 @@ class DatasetView extends React.Component<any, State> {
                                style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                     >
-                        <img style={{width: '24px', height: '24px'}} src={hiddenColumnIcon} alt="hiddenColumns" />
+                        <NeoIcon icon={"hide"} color={'#5E6785'}/>
                     </NeoButton>
                     <Button
                         hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
