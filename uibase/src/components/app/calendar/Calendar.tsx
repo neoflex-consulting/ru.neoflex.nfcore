@@ -1092,11 +1092,11 @@ class Calendar extends React.Component<any, any> {
                             enabled={this.state.fullScreenOn}
                             onChange={fullScreenOn => this.setState({ fullScreenOn })}>
                             <Resizable ref={(n) => { this.node = n}}
-                                       style={resizeStyle}
+                                       /*style={resizeStyle}
                                        defaultSize={{
                                            width: "100%",
                                            height: 600
-                                       }}>
+                                       }}*/>
                             <div style={{margin:'1em 0 0 4em'}}>
                                 <h2>{this.props.appModuleName}</h2>
                             </div>

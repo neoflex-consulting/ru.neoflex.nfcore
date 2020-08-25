@@ -20,12 +20,13 @@ export default class DateEditor extends React.Component<Props, State> {
     constructor(props:any) {
         super(props);
         const format = (this.props.type === 'Timestamp') ? defaultTimestampFormat : defaultDateFormat;
-        const formatedValue = this.props.mask ? moment(this.props.value, format).format(this.props.mask) : undefined;
+        const value = this.props.value ? this.props.value : '1900-01-01';
+        const formattedValue = this.props.mask ? moment(value, format).format(this.props.mask) : undefined;
         this.state = {
-            pickedDate: formatedValue ? moment(formatedValue, this.props.mask) : moment(this.props.value, format),
-            currentValue: formatedValue ? formatedValue : this.props.value,
             format: format,
-            defaultValue: formatedValue ? formatedValue : this.props.value
+            pickedDate: formattedValue ? moment(formattedValue, this.props.mask) : moment(value, format),
+            currentValue: formattedValue ? formattedValue : value,
+            defaultValue: formattedValue ? formattedValue : value
         };
     }
 

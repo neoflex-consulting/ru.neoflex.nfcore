@@ -9,7 +9,7 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import {Button_, Href_, Select_} from '../../../AntdFactory';
+import {Button_, Checkbox_, Href_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
 import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
@@ -86,6 +86,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     selectComponent: Select_,
                     buttonComponent: Button_,
                     hrefComponent: Href_,
+                    checkboxComponent: Checkbox_,
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
@@ -203,7 +204,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     highlightAggregate() {
         if (this.props.aggregatedRows.length > 0) {
             this.gridOptions.getRowClass = (params: any) => {
-                if (this.props.aggregatedRows.find((a:{[key: string]: unknown}) => Object.is(a,params.data))) {
+                if (params.node.rowIndex >= this.props.rowData.length - this.props.aggregatedRows.length) {
                     return 'aggregate-highlight';
                 }
                 return ""
@@ -454,6 +455,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             return 'buttonComponent'
         } else if (className === "//Select") {
             return 'selectComponent'
+        } else if (className === "//Checkbox") {
+            return 'checkboxComponent'
         } else {
             return className
         }
@@ -715,7 +718,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         componentRenderCondition: col.get('componentRenderCondition'),
                                         onDelete: this.onDelete,
                                         editGrid: this,
-                                        showMenuCopyButton: this.props.showMenuCopyButton
+                                        showMenuCopyButton: this.props.showMenuCopyButton,
+                                        isAgComponent: true
                                     } : undefined}
                                     cellRenderer = {
                                         (col.get('component')) ? this.getComponent(col.get('component').eClass ? col.get('component').eClass._id : col.get('component')) : function (params: any) {
@@ -727,6 +731,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                         ? {
                                         ...this.props,
                                         viewObject: col.get('editComponent'),
+                                        isAgComponent: true,
                                         isAgEdit: true,
                                         colData: col.get('field')
                                         }

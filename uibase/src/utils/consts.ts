@@ -232,6 +232,8 @@ const defaultDecimalFormat = '### ##0.00';
 const defaultDateFormat = 'YYYY-MM-DD';
 const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss' ;
 
+const contextStringSeparator = ",";
+
 export {
     positionMap,
     positionEnum,
@@ -248,5 +250,6 @@ export {
     defaultDecimalFormat,
     defaultIntegerFormat,
     appTypes,
-    textAlignMap
+    textAlignMap,
+    contextStringSeparator
 }
