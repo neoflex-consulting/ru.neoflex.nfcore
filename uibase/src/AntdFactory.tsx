@@ -2,8 +2,9 @@ import {View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {
-    Button,
     Col,
+    Collapse,
+    ConfigProvider,
     DatePicker,
     Drawer,
     Form,
@@ -12,9 +13,7 @@ import {
     Row,
     Select,
     Tabs,
-    Typography,
-    Collapse,
-    ConfigProvider
+    Typography
 } from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
@@ -39,7 +38,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoInput} from "neo-design/lib";
+import {NeoButton, NeoInput} from "neo-design/lib";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
@@ -291,6 +290,50 @@ class Row_ extends ViewContainer {
     }
 
     componentDidMount(): void {
+        this.props.context.addEventAction({
+            itemId:this.viewObject.get('name')+this.viewObject._id,
+            actions:[
+                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+            ]
+        });
+        this.props.context.notifyAllEventHandlers({
+            type:eventType.componentLoad,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        });
+    }
+
+    componentWillUnmount(): void {
+        this.props.context.removeEventAction();
+    }
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        return (
+            <Row
+                key={this.viewObject._id.toString() + '_7'}
+                hidden={this.state.isHidden}
+                style={{}}
+                gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
+            >
+                {this.renderChildren(isReadOnly)}
+            </Row>
+        )
+    }
+}
+
+class Region_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+        };
+    }
+
+    componentDidMount(): void {
         mountComponent.bind(this)();
     }
 
@@ -302,10 +345,20 @@ class Row_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         return (
             <Row
-                key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{}}
-                gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
+                style={{
+                    background: '#FFFFFF',
+                    boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
+                    borderRadius: '4px',
+                    padding: '16px',
+                    margin: '16px'}}
+                // style={{
+                //     position: 'absolute',
+                //     background: '#FFFFFF',
+                //     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
+                //     borderRadius: '4px',
+                //     margin: '26px',
+                //     height: '200px'}}
             >
                 {this.renderChildren(isReadOnly)}
             </Row>
@@ -374,13 +427,13 @@ export class Button_ extends ViewContainer {
         return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
-            <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
+            <NeoButton title={'Submit'} style={{ width: '100px', left: span}}
                     onClick={isReadOnly ? ()=>{} : () => {
                         const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                         handleClick.bind(this)(value);
                         }}>
                 {(label)? label: t('submit')}
-            </Button>
+            </NeoButton>
         </div> : <div> {this.props.getValue()} </div>
     }
 }
@@ -1403,6 +1456,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
         this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
         this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
+        this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
         this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
     }
 
