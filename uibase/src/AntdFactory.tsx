@@ -25,11 +25,11 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {IEventAction} from "./MainContext";
+import {IAction, IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
-    actionType,
+    actionType, contextStringSeparator,
     defaultDateFormat,
     defaultTimestampFormat,
     eventType,
@@ -39,12 +39,114 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
+import {NeoInput} from "neo-design/lib";
 
 const { TabPane } = Tabs;
 const { Paragraph } = Typography;
 const marginBottom = '20px';
 
 let startResource: Object;
+
+function getAgGridValue(this: any, returnValueType: string, defaultValue: string) {
+    if (returnValueType === 'object') {
+        return this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get(defaultValue)}
+    }
+    if (returnValueType === 'string') {
+        return this.props.getValue ? this.props.getValue() : this.viewObject.get(defaultValue)
+    }
+    return ""
+}
+
+function getRenderConditionResult(this: any, notificationTitle: string) {
+    let componentRenderCondition = false;
+    try {
+        componentRenderCondition = !this.props.componentRenderCondition
+            // eslint-disable-next-line
+            || eval(this.props.componentRenderCondition)
+    } catch (e) {
+        this.props.context.notification(notificationTitle,
+            this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
+            "warning")
+    }
+    return componentRenderCondition
+}
+
+function mountComponent(this: any, isExportable: boolean = false, additionalActions: IAction[]|undefined = undefined) {
+    if (isExportable) {
+        this.props.context.addDocxHandler(this.getDocxData.bind(this));
+        this.props.context.addExcelHandler(this.getExcelData.bind(this));
+    }
+    let actions = [
+        {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
+        {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
+        {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
+        {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
+    ] as IAction[];
+    actions = additionalActions ? actions.concat(additionalActions) : actions;
+    this.props.context.addEventAction({
+        itemId:this.viewObject.get('name')+this.viewObject._id,
+        actions:actions
+    });
+    this.props.context.notifyAllEventHandlers({
+        type:eventType.componentLoad,
+        itemId:this.viewObject.get('name')+this.viewObject._id,
+        value: this.viewObject.get('value')
+    });
+}
+
+function unmountComponent(this: any, isExportable = false, isCleanContext = false) {
+    if (isExportable) {
+        this.props.context.removeDocxHandler();
+        this.props.context.removeExcelHandler();
+    }
+    this.props.context.removeEventAction();
+    if (isCleanContext) {
+        this.props.context.contextItemValues.delete(this.viewObject.get('name') + this.viewObject._id);
+    }
+}
+
+function handleChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+    let contextItemValues = this.props.context.contextItemValues;
+    let globalValues = this.props.context.globalValues;
+    contextValue = contextValue ? contextValue : currentValue;
+    const parameterObj = {
+        parameterName: this.viewObject.get('name'),
+        parameterValue: (currentValue === undefined) ? null : contextValue,
+        parameterDataType: dataType
+    };
+    contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
+    if (this.viewObject.get('isGlobal')) {
+        globalValues.set(this.viewObject.get('name'), parameterObj)
+    }
+    this.setState({currentValue:currentValue});
+    this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
+        ()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.change,
+            itemId:this.viewObject.get('name')+this.viewObject._id,
+            value:contextValue
+        }));
+}
+
+function handleClick(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+    let contextItemValues = this.props.context.contextItemValues;
+    let globalValues = this.props.context.globalValues;
+    contextValue = contextValue ? contextValue : currentValue;
+    const parameterObj = {
+        parameterName: this.viewObject.get('name'),
+        parameterValue: (currentValue === undefined) ? null : contextValue,
+        parameterDataType: dataType
+    };
+    contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
+    if (this.viewObject.get('isGlobal')) {
+        globalValues.set(this.viewObject.get('name'), parameterObj)
+    }
+    this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
+        ()=>this.props.context.notifyAllEventHandlers({
+            type:eventType.click,
+            itemId:this.viewObject.get('name')+this.viewObject._id,
+            value:contextValue
+        }));
+}
 
 abstract class ViewContainer extends View {
     renderChildren = (isParentDisabled:boolean = false) => {
@@ -79,23 +181,11 @@ class Col_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)();
     }
 
     render = () => {
@@ -121,23 +211,11 @@ class Form_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)();
     }
 
     render = () => {
@@ -162,23 +240,11 @@ class TabsViewReport_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)();
     }
 
     render = () => {
@@ -187,7 +253,7 @@ class TabsViewReport_ extends ViewContainer {
         const props = {
             ...this.props,
             isParentDisabled: isReadOnly
-        }
+        };
         return (
             <div hidden={this.state.isHidden}>
             <Tabs
@@ -225,33 +291,15 @@ class Row_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)();
     }
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const marginRight = this.viewObject.get('marginRight') === null ? '0px' : `${this.viewObject.get('marginRight')}`;
-        const marginBottom = this.viewObject.get('marginBottom') === null ? '0px' : `${this.viewObject.get('marginBottom')}`;
-        const marginTop = this.viewObject.get('marginTop') === null ? '0px' : `${this.viewObject.get('marginTop')}`;
-        const marginLeft = this.viewObject.get('marginLeft') === null ? '0px' : `${this.viewObject.get('marginLeft')}`;
-        const borderBottom = this.viewObject.get('borderBottom') === true ? '1px solid #eeeff0' : 'none';
-        const height = this.viewObject.get('height');
         return (
             <Row
                 key={this.viewObject._id.toString() + '_7'}
@@ -275,58 +323,23 @@ export class Href_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(false, true)
     }
 
     render = () => {
-        let componentRenderCondition;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        let value : string;
-        const returnValueType = this.viewObject.get('returnValueType') || 'string';
-        //this.props.data/this.props.getValue props из ag-grid
-        if (returnValueType === 'object') {
-            value = this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get('label')}
-        }
-        if (returnValueType === 'string') {
-            value = this.props.getValue ? this.props.getValue() : this.viewObject.get('label')
-        }
-        //componentRenderCondition ag-grid props
-        try {
-            componentRenderCondition = !this.props.componentRenderCondition
-                // eslint-disable-next-line
-                || eval(this.props.componentRenderCondition)
-        } catch (e) {
-            this.props.context.notification("Href.componentRenderCondition",
-                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
-                "warning")
-        }
+        const componentRenderCondition = getRenderConditionResult.bind(this)("Href.componentRenderCondition");
         return componentRenderCondition ? <a
             hidden={this.state.isHidden}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
-                      const contextItemValues = this.props.context.contextItemValues;
-                      contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-                          parameterName: this.viewObject.get('name'),
-                          parameterValue: value
-                      });
-                      this.props.context.notifyAllEventHandlers({
-                      type:eventType.click,
-                      itemId:this.viewObject.get('name')+this.viewObject._id,
-                      value:value
-                      })
+                      //this.props.data/this.props.getValue props из ag-grid
+                      const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
+                      handleClick.bind(this)(value)
                   }}>
             { this.viewObject.get('label')
                 ? this.viewObject.get('label')
@@ -345,56 +358,27 @@ export class Button_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)()
     }
 
     render = () => {
-        let componentRenderCondition = false;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
         const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
         const label = t(this.viewObject.get('label'));
-        let value : string;
-        const returnValueType = this.viewObject.get('returnValueType') || 'string';
-        //this.props.data/this.props.getValue props из ag-grid
-        if (returnValueType === 'object') {
-            value = this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get('ref')}
-        }
-        if (returnValueType === 'string') {
-            value = this.props.getValue ? this.props.getValue() : this.viewObject.get('ref')
-        }
-        //componentRenderCondition ag-grid props
-        try {
-            componentRenderCondition = !this.props.componentRenderCondition
-                // eslint-disable-next-line
-                || eval(this.props.componentRenderCondition)
-        } catch (e) {
-            this.props.context.notification("Button.componentRenderCondition",
-                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
-                "warning")
-        }
+        const componentRenderCondition = getRenderConditionResult.bind(this)("Button.componentRenderCondition");
         return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
             <Button title={'Submit'} style={{ width: '100px', left: span, marginBottom: marginBottom}}
                     onClick={isReadOnly ? ()=>{} : () => {
-                                    this.props.context.notifyAllEventHandlers({
-                                        type:eventType.click,
-                                        itemId:this.viewObject.get('name')+this.viewObject._id,
-                                        value:value});
-                                }}>
+                        const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                        handleClick.bind(this)(value);
+                        }}>
                 {(label)? label: t('submit')}
             </Button>
         </div> : <div> {this.props.getValue()} </div>
@@ -462,24 +446,7 @@ export class Select_ extends ViewContainer {
             this.selected = temp.join(",");
             currentValue = currentValue.join(",");
         }
-        let contextItemValues = this.props.context.contextItemValues;
-        let globalValues = this.props.context.globalValues;
-        const parameterObj = {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: (currentValue === undefined) ? null : currentValue
-        };
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
-        if (this.viewObject.get('isGlobal')) {
-            globalValues.set(this.viewObject.get('name'), parameterObj)
-        }
-        this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-                ()=>this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemId:this.viewObject.get('name')+this.viewObject._id,
-                    value:this.selected
-                }))
-        );
+        handleChange.bind(this)(currentValue)
     };
 
     componentDidMount(): void {
@@ -506,30 +473,11 @@ export class Select_ extends ViewContainer {
         } else if (this.viewObject.get('staticValues')) {
             this.getStaticValues(this.viewObject.get('staticValues'))
         }
-        this.props.context.addDocxHandler(this.getDocxData.bind(this));
-        this.props.context.addExcelHandler(this.getExcelData.bind(this));
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
-            ]
-        });
-
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(true,[{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeDocxHandler();
-        this.props.context.removeExcelHandler();
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(true, true)
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -597,20 +545,10 @@ export class Select_ extends ViewContainer {
     }
 
     render = () => {
-        let componentRenderCondition = false;
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = '200px';
-        //componentRenderCondition ag-grid props
-        try {
-            componentRenderCondition = !this.props.componentRenderCondition
-                // eslint-disable-next-line
-                || eval(this.props.componentRenderCondition)
-        } catch (e) {
-            this.props.context.notification("Select.componentRenderCondition",
-                this.props.t("exception while evaluating") + ` ${this.props.componentRenderCondition}`,
-                "warning")
-        }
-            return (
+        const componentRenderCondition = getRenderConditionResult.bind(this)("Select.componentRenderCondition");
+        return (
                 componentRenderCondition ? <div
                     hidden={this.state.isHidden}
                     style={{marginBottom: marginBottom}}>
@@ -704,28 +642,11 @@ export class DatePicker_ extends ViewContainer {
 
     componentDidMount(): void {
         this.onChange(this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format));
-        this.props.context.addDocxHandler(this.getDocxData.bind(this));
-        this.props.context.addExcelHandler(this.getExcelData.bind(this));
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(true);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeDocxHandler();
-        this.props.context.removeExcelHandler();
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(true, true)
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -735,27 +656,9 @@ export class DatePicker_ extends ViewContainer {
     }
 
     onChange = (currentValue: string) => {
-        let contextItemValues = this.props.context.contextItemValues;
-        let globalValues = this.props.context.globalValues;
         //Возвращаем формат по умолчанию
         const formattedCurrentValue = moment(currentValue, this.state.mask).format(this.state.format);
-        const parameterObj = {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: (currentValue === undefined) ? null : formattedCurrentValue,
-            parameterDataType: this.viewObject.get('showTime') ? "Timestamp" : "Date"
-        };
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
-        if (this.viewObject.get('isGlobal')) {
-            globalValues.set(this.viewObject.get('name'), parameterObj)
-        }
-        this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-                ()=>this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemId:this.viewObject.get('name')+this.viewObject._id,
-                    value:formattedCurrentValue
-                }))
-        );
+        handleChange.bind(this)(currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
     };
 
     render = () => {
@@ -804,20 +707,11 @@ class HtmlContent_ extends ViewContainer {
     };
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-                {actionType: actionType.setValue, callback: this.onChange.bind(this)},
-            ]
-        });
+        mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)()
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -850,51 +744,32 @@ class HtmlContent_ extends ViewContainer {
 
 class GroovyCommand_ extends ViewContainer {
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions: [
-                {actionType: actionType.execute,callback: this.execute.bind(this)},
-                ]
-        });
         if (this.viewObject.get('executeOnStartup')) {
             this.execute()
         }
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(false, [{actionType: actionType.execute,callback: this.execute.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(false, true)
     }
 
-
     setValue = (result: any) => {
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: result
-        });
-        this.props.context.updateContext!({contextItemValues: contextItemValues},
-            ()=>this.props.context.notifyAllEventHandlers({
-                type:eventType.change,
-                itemId:this.viewObject.get('name')+this.viewObject._id,
-                value: result
-            }));
+        handleChange.bind(this)(result)
     };
 
     execute = () => {
         const commandType = this.viewObject.get('commandType')||"Eval";
         const command = this.viewObject.get('command');
+        const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
         if (commandType === "Resource") {
+
             API.instance().fetchJson('/script/resource?path='+this.viewObject.get('gitResourcePath'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+                body: body
             }).then(res => {
                 this.setValue(res);
                 if (this.viewObject.get('downloadFile')) {
@@ -908,7 +783,7 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+                body: body
             }).then(res => {
                 this.setValue(res);
                 if (this.viewObject.get('downloadFile')) {
@@ -922,7 +797,7 @@ class GroovyCommand_ extends ViewContainer {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+                body: body
             }).then(res => {
                 this.setValue(res);
                 if (this.viewObject.get('downloadFile')) {
@@ -958,49 +833,17 @@ class ValueHolder_ extends ViewContainer {
         }
     }
 
-    onChange = (currentValue?: string) => {
-        let contextItemValues = this.props.context.contextItemValues;
-        let globalValues = this.props.context.globalValues;
-        const parameterObj = {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: (currentValue === undefined) ? null : currentValue
-        };
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
-        if (this.viewObject.get('isGlobal')) {
-            globalValues.set(this.viewObject.get('name'), parameterObj)
-        }
-        this.setState({currentValue:currentValue},()=>
-            this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-                ()=>this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemId:this.viewObject.get('name')+this.viewObject._id,
-                    value:currentValue
-                }))
-        );
+    onChange = (currentValue: string) => {
+        handleChange.bind(this)(currentValue);
     };
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions: [
-                {actionType: actionType.setValue,callback: this.onChange.bind(this)}
-            ]
-        });
-        const contextItemValues = this.props.context.contextItemValues;
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: this.viewObject.get('value')
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            value: this.viewObject.get('value')
-        });
+        this.onChange(this.viewObject.get('value'));
+        mountComponent.bind(this)(false, [{actionType: actionType.setValue,callback: this.onChange.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(false, true)
     }
 
     render = () => {
@@ -1033,25 +876,11 @@ class Input_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.setValue, callback: this.onChange.bind(this)}
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(false, true)
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -1072,22 +901,7 @@ class Input_ extends ViewContainer {
     };
 
     onChangeDebounced = (currentValue: string) => {
-        let contextItemValues = this.props.context.contextItemValues;
-        let globalValues = this.props.context.globalValues;
-        const parameterObj = {
-            parameterName: this.viewObject.get('name'),
-            parameterValue: (currentValue === undefined) ? null : currentValue
-        };
-        contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
-        if (this.viewObject.get('isGlobal')) {
-            globalValues.set(this.viewObject.get('name'), parameterObj)
-        }
-        this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-                ()=>this.props.context.notifyAllEventHandlers({
-                    type:eventType.change,
-                    itemId:this.viewObject.get('name')+this.viewObject._id,
-                    value:currentValue
-                }));
+        handleChange.bind(this)(currentValue)
     };
 
     render = () => {
@@ -1135,6 +949,85 @@ class Input_ extends ViewContainer {
     }
 }
 
+export class Checkbox_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        let value;
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        }
+        value = value ? value : this.viewObject.get('value') || "";
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+            currentValue: value,
+            checked: this.viewObject.get('isChecked')
+        };
+        if (this.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.viewObject.get('name'),{
+                parameterName: this.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
+    }
+
+    componentDidMount(): void {
+        if (this.viewObject.get('isChecked')) {
+            this.onChecked(this.state.checked);
+        }
+        mountComponent.bind(this)();
+    }
+
+    componentWillUnmount(): void {
+        unmountComponent.bind(this)(false, true)
+    }
+
+    changeSelection = (currentValue: string, newValue: string) => {
+        let textArr = currentValue ? currentValue.split(contextStringSeparator) : [];
+        if (!textArr.includes(newValue)) {
+            textArr.push(newValue)
+        } else {
+            textArr = textArr.filter(a => a !== newValue)
+        }
+        return textArr.join(contextStringSeparator)
+    };
+
+    onChecked = (isChecked: boolean) => {
+        if (this.props.isAgComponent) {
+            const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
+            this.onChange(value)
+        } else {
+            this.onChange(this.state.currentValue)
+        }
+        this.setState({checked:isChecked});
+    };
+
+    onChange = (currentValue: string) => {
+        let contextItemValues = this.props.context.contextItemValues;
+        let currentContextValue = contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
+        let newContextValue = this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, currentValue);
+        handleChange.bind(this)(newContextValue);
+    };
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+            return(
+                <div
+                    key={this.viewObject._id}
+                    hidden={this.state.isHidden}
+                    style={{marginBottom: marginBottom}}>
+                    <NeoInput
+                        type={'checkbox'}
+                        checked={this.state.checked}
+                        onChange={isReadOnly ? ()=>{} : (e:any) => {
+                            this.onChecked(e.currentTarget.checked);
+                        }}
+                    >{this.viewObject.get('label')}</NeoInput>
+                </div>
+            )
+    }
+}
+
 class Typography_ extends ViewContainer {
     constructor(props: any) {
         super(props);
@@ -1146,29 +1039,11 @@ class Typography_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addDocxHandler(this.getDocxData.bind(this));
-        this.props.context.addExcelHandler(this.getExcelData.bind(this));
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-                {actionType: actionType.setValue,callback: this.onChange.bind(this)},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(true, [{actionType: actionType.setValue,callback: this.onChange.bind(this)}] as IAction[]);
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeDocxHandler();
-        this.props.context.removeExcelHandler();
-        this.props.context.removeEventAction();
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(true, true)
     }
 
     private getDocxData(): docxExportObject {
@@ -1310,12 +1185,12 @@ class EventHandler_ extends ViewContainer {
                                         ? action.callback(value[el.get('valueObjectKey')])
                                         : this.props.context.notification("Event handler warning",
                                         `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                        "warning")
+                                        "warning");
                                     isHandled = true;
                                 } else if (value === Object(value) && action.actionType === actionType.setValue) {
                                     this.props.context.notification("Event handler warning",
                                         `Object Key is not specified in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
-                                        "warning")
+                                        "warning");
                                     isHandled = true;
                                 } else {
                                     action.callback(value);
@@ -1330,7 +1205,7 @@ class EventHandler_ extends ViewContainer {
                         && el.get('triggerItem').get('message')) {
                         this.props.context.notification(el.get('triggerItem').get('header'),
                             el.get('triggerItem').get('message'),
-                            el.get('triggerItem').get('messageType') || "success")
+                            el.get('triggerItem').get('messageType') || "success");
                         isHandled = true;
                     }
                     if (el.get('action') === actionType.redirect) {
@@ -1367,10 +1242,7 @@ class EventHandler_ extends ViewContainer {
                 })
             });
         }
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)(false)
     }
 
     componentWillUnmount(): void {
@@ -1379,7 +1251,7 @@ class EventHandler_ extends ViewContainer {
                 this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
             });
         }
-        this.props.context.contextItemValues.delete(this.viewObject.get('name')+this.viewObject._id);
+        unmountComponent.bind(this)(false, true)
     }
 
     render = () => {
@@ -1397,23 +1269,11 @@ class Drawer_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.props.context.addEventAction({
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            actions:[
-                {actionType: actionType.show, callback: ()=>this.setState({isHidden:false})},
-                {actionType: actionType.hide, callback: ()=>this.setState({isHidden:true})},
-                {actionType: actionType.enable, callback: ()=>this.setState({isDisabled:false})},
-                {actionType: actionType.disable, callback: ()=>this.setState({isDisabled:true})},
-            ]
-        });
-        this.props.context.notifyAllEventHandlers({
-            type:eventType.componentLoad,
-            itemId:this.viewObject.get('name')+this.viewObject._id
-        });
+        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeEventAction();
+        unmountComponent.bind(this)()
     }
 
     render = () => {
@@ -1447,12 +1307,17 @@ class Collapse_ extends ViewContainer {
         };
     }
 
+    componentDidMount(): void {
+        mountComponent.bind(this)();
+    }
 
+    componentWillUnmount(): void {
+        unmountComponent.bind(this)()
+    }
 
-       render = () => {
-
+    render = () => {
         return (
-            <div>
+            <div hidden={this.state.isHidden}>
                 <Collapse
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}
@@ -1538,6 +1403,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
         this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
         this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
+        this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

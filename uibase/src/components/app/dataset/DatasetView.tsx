@@ -913,10 +913,18 @@ class DatasetView extends React.Component<any, State> {
                                 isAggregations: true,
                                 aggregatedRows: this.getAggregatedRows(aggregationParams, result),
                                 hiddenColumns: hiddenColumns},callback);
-                            this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)})
+                            this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)});
+                            this.props.context.notifyAllEventHandlers({
+                                type:eventType.change,
+                                itemId:this.props.viewObject.get('name')+this.props.viewObject._id
+                            })
                 } else {
                     this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, aggregatedRows: [], hiddenColumns: hiddenColumns},callback);
-                    this.updatedDatasetComponents(newColumnDef, result, datasetComponentName)
+                    this.updatedDatasetComponents(newColumnDef, result, datasetComponentName);
+                    this.props.context.notifyAllEventHandlers({
+                        type:eventType.change,
+                        itemId:this.props.viewObject.get('name')+this.props.viewObject._id
+                    })
                 }
             }
         )

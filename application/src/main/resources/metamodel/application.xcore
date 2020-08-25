@@ -228,6 +228,11 @@ class Input extends ViewElement, ValueItem {
     String placeholder
 }
 
+class Checkbox extends ViewElement, GridComponent, ValueItem {
+    String label
+    boolean isChecked
+}
+
 class Button extends ViewElement, GridComponent {
     refers ButtonStyle buttonStyle
     String label
