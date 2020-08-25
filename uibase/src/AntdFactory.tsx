@@ -28,7 +28,8 @@ import {IAction, IEventAction} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
-    actionType, contextStringSeparator,
+    actionType,
+    contextStringSeparator,
     defaultDateFormat,
     defaultTimestampFormat,
     eventType,
@@ -189,11 +190,18 @@ class Col_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
                  hidden={this.state.isHidden}
-                 style={{}}>
+                 className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+            >
                 {this.renderChildren(isReadOnly)}
             </Col>
         )
@@ -219,10 +227,18 @@ class Form_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <Form style={{marginBottom: marginBottom}}
                   hidden={this.state.isHidden}
-                  key={this.viewObject._id.toString() + '_4'}>
+                  key={this.viewObject._id.toString() + '_4'}
+                  className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+            >
                 {this.renderChildren(isReadOnly)}
             </Form>
         )
@@ -253,19 +269,26 @@ class TabsViewReport_ extends ViewContainer {
             ...this.props,
             isParentDisabled: isReadOnly
         };
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <div hidden={this.state.isHidden}>
-            <Tabs
-                defaultActiveKey={children[0] ? children[0]._id : undefined}
-                tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}>
-                {
-                    children.map((c: Ecore.EObject) =>
-                        <TabPane tab={c.get('name')} key={c._id} >
-                            {this.viewFactory.createView(c, props)}
-                        </TabPane>
-                    )
-                }
-            </Tabs>
+                <Tabs
+                    className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+                    defaultActiveKey={children[0] ? children[0]._id : undefined}
+                    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}>
+                    {
+                        children.map((c: Ecore.EObject) =>
+                            <TabPane tab={c.get('name')} key={c._id} >
+                                {this.viewFactory.createView(c, props)}
+                            </TabPane>
+                        )
+                    }
+                </Tabs>
             </div>
         )
     }
@@ -300,11 +323,17 @@ class Row_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <Row
                 key={this.viewObject._id.toString() + '_7'}
                 hidden={this.state.isHidden}
-                style={{}}
+                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly)}
@@ -332,6 +361,12 @@ class Region_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <Row
                 hidden={this.state.isHidden}
@@ -341,13 +376,7 @@ class Region_ extends ViewContainer {
                     borderRadius: '4px',
                     padding: '16px',
                     margin: '16px'}}
-                // style={{
-                //     position: 'absolute',
-                //     background: '#FFFFFF',
-                //     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
-                //     borderRadius: '4px',
-                //     margin: '26px',
-                //     height: '200px'}}
+                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
             >
                 {this.renderChildren(isReadOnly)}
             </Row>
@@ -408,6 +437,12 @@ export class Button_ extends ViewContainer {
     }
 
     render = () => {
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
         const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
@@ -416,11 +451,12 @@ export class Button_ extends ViewContainer {
         return componentRenderCondition ? <div
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
-            <NeoButton style={{ width: '100px', left: span}}
-                    onClick={isReadOnly ? ()=>{} : () => {
-                        const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                        handleClick.bind(this)(value);
-                        }}>
+            <NeoButton
+                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined} style={{ width: '100px', left: span}}
+                onClick={isReadOnly ? ()=>{} : () => {
+                    const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                    handleClick.bind(this)(value);
+                }}>
                 {(label)? label: t('submit')}
             </NeoButton>
         </div> : <div> {this.props.getValue()} </div>
@@ -590,28 +626,35 @@ export class Select_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const width = '200px';
         const componentRenderCondition = getRenderConditionResult.bind(this)("Select.componentRenderCondition");
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
-                componentRenderCondition ? <div
-                    hidden={this.state.isHidden}
-                    style={{marginBottom: marginBottom}}>
-                    <Select
-                        key={this.viewObject._id}
-                        disabled={isReadOnly}
-                        showSearch={this.viewObject.get('showSearch')}
-                        placeholder={this.viewObject.get('placeholder')}
-                        mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
-                        style={{width: width}}
-                        defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
-                        value={(this.state.currentValue)? this.state.currentValue: undefined}
-                        onChange={(currentValue: string|string[]) => {
-                            this.onChange(currentValue);
-                            this.setState({
-                                currentValue: currentValue
-                            })
-                        }}
-                    >
-                        {
-                            (this.state.selectData.length > 0)
+            componentRenderCondition ? <div
+                hidden={this.state.isHidden}
+                style={{marginBottom: marginBottom}}>
+                <Select
+                    key={this.viewObject._id}
+                    className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+                    disabled={isReadOnly}
+                    showSearch={this.viewObject.get('showSearch')}
+                    placeholder={this.viewObject.get('placeholder')}
+                    mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
+                    style={{width: width}}
+                    defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
+                    value={(this.state.currentValue)? this.state.currentValue: undefined}
+                    onChange={(currentValue: string|string[]) => {
+                        this.onChange(currentValue);
+                        this.setState({
+                            currentValue: currentValue
+                        })
+                    }}
+                >
+                    {
+                        (this.state.selectData.length > 0)
                             ?
                             this.state.selectData.map((data: {key:string,value:string}) =>
                                 <Select.Option key={data.key}
@@ -624,11 +667,11 @@ export class Select_ extends ViewContainer {
                                            value={this.viewObject.get('name') + 'Select'}>
 
                             </Select.Option>
-                        }
-                    </Select>
-                </div> : <div>{this.props.getValue()}</div>
-            )
-        }
+                    }
+                </Select>
+            </div> : <div>{this.props.getValue()}</div>
+        )
+    }
 }
 
 export class DatePicker_ extends ViewContainer {
@@ -705,22 +748,29 @@ export class DatePicker_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <div hidden={this.state.isHidden}
                  style={{marginBottom: marginBottom}}>
                 <ConfigProvider locale={this.state.locale}>
-                 <DatePicker
-                    key={this.viewObject._id}
-                    showTime={this.viewObject.get('showTime')}
-                    defaultValue={this.state.defaultDate}
-                    value={moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format)}
-                    disabled={isReadOnly}
-                    allowClear={this.viewObject.get('allowClear') || false}
-                    format={this.state.mask}
-                    style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
-                    onChange={(date, dateString) => {
-                        this.onChange(dateString)
-                    }}/>
+                    <DatePicker
+                        key={this.viewObject._id}
+                        className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+                        showTime={this.viewObject.get('showTime')}
+                        defaultValue={this.state.defaultDate}
+                        value={moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format)}
+                        disabled={isReadOnly}
+                        allowClear={this.viewObject.get('allowClear') || false}
+                        format={this.state.mask}
+                        style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
+                        onChange={(date, dateString) => {
+                            this.onChange(dateString)
+                        }}/>
                 </ConfigProvider>
             </div>
         )
@@ -773,11 +823,17 @@ class HtmlContent_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <div hidden={this.state.isHidden}
                  aria-disabled={isReadOnly}
                  style={{marginBottom: marginBottom}}
-                 className="content"
+                 className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')} content` : 'content'}
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
         )
@@ -948,6 +1004,12 @@ class Input_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
@@ -956,6 +1018,7 @@ class Input_ extends ViewContainer {
                     style={{marginBottom: marginBottom}}>
                     <InputNumber
                         hidden={this.state.isHidden}
+                        className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                         style={{width: width}}
                         disabled={isReadOnly}
                         min={this.viewObject.get('minValue') || 1}
@@ -976,6 +1039,7 @@ class Input_ extends ViewContainer {
                      style={{marginBottom: marginBottom}}>
                     <Input
                         hidden={this.state.isHidden}
+                        className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                         style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
                         placeholder={this.viewObject.get('placeholder')}
@@ -1053,20 +1117,27 @@ export class Checkbox_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-            return(
-                <div
-                    key={this.viewObject._id}
-                    hidden={this.state.isHidden}
-                    style={{marginBottom: marginBottom}}>
-                    <NeoInput
-                        type={'checkbox'}
-                        checked={this.state.checked}
-                        onChange={isReadOnly ? ()=>{} : (e:any) => {
-                            this.onChecked(e.currentTarget.checked);
-                        }}
-                    >{this.viewObject.get('label')}</NeoInput>
-                </div>
-            )
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
+        return(
+            <div
+                key={this.viewObject._id}
+                hidden={this.state.isHidden}
+                style={{marginBottom: marginBottom}}>
+                <NeoInput
+                    className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
+                    type={'checkbox'}
+                    checked={this.state.checked}
+                    onChange={isReadOnly ? ()=>{} : (e:any) => {
+                        this.onChecked(e.currentTarget.checked);
+                    }}
+                >{this.viewObject.get('label')}</NeoInput>
+            </div>
+        )
     }
 }
 
@@ -1114,6 +1185,12 @@ class Typography_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         let drawObject = this.viewObject;
         if (this.viewObject.get('typographyStyle') !== null) {
             drawObject = this.viewObject.get('typographyStyle')
@@ -1129,6 +1206,7 @@ class Typography_ extends ViewContainer {
             <div hidden={this.state.isHidden}>
                 <Paragraph
                     key={this.viewObject._id}
+                    className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                     style={{
                         marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
                         marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
@@ -1320,8 +1398,15 @@ class Drawer_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <Drawer
+                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
@@ -1358,9 +1443,16 @@ class Collapse_ extends ViewContainer {
     }
 
     render = () => {
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return (
             <div hidden={this.state.isHidden}>
                 <Collapse
+                    className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}
                 >

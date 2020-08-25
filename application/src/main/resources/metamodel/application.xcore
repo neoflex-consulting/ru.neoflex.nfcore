@@ -74,6 +74,7 @@ abstract class ViewElement extends DynamicActionElement {
     GrantType grantType = "Write"
     boolean hidden
     boolean disabled
+    refers CssClass cssClass
 }
 
 abstract class ViewContainer extends ViewElement {
@@ -193,11 +194,6 @@ class Color {
     String name
 }
 
-class GradientStyle extends Style {
-    String position
-    contains Color[] colors
-}
-
 class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     String placeholder
     SelectMode mode = "Default"
@@ -241,6 +237,16 @@ class Button extends ViewElement, GridComponent {
 /* Style */
 abstract class Style {
     QName name
+}
+
+@Ecore(constraints="IsValid")
+class CssClass extends Style {
+    String style
+}
+
+class GradientStyle extends Style {
+    String position
+    contains Color[] colors
 }
 
 class TypographyStyle extends Style {
