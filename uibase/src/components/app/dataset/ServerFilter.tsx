@@ -10,7 +10,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoIcon, NeoRow} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -53,8 +53,10 @@ const SortableItem = SortableElement(({value}: any) => {
                     </Switch>
                 </Form.Item>
             </NeoCol>
-            <NeoCol span={7}>
-                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+            <NeoCol span={8}>
+                <Form.Item
+                    style={{ margin: 'auto' }}
+                >
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
                             initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
@@ -65,10 +67,10 @@ const SortableItem = SortableElement(({value}: any) => {
                                 message: ' '
                             }]
                         })(
-                        <Select
+                        <NeoSelect
+                           width={'208px'}
                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ width: '179px', marginRight: '10px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -79,19 +81,19 @@ const SortableItem = SortableElement(({value}: any) => {
                             {
                                 value.columnDefs!
                                     .map((c: any) =>
-                                        <Select.Option
+                                        <option
                                             key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                             value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                         >
                                             {c.get('headerName')}
-                                        </Select.Option>)
+                                        </option>)
                             }
-                        </Select>
+                        </NeoSelect>
                     )}
                 </Form.Item>
             </NeoCol>
-            <NeoCol span={7}>
-                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+            <NeoCol span={8}>
+                <Form.Item style={{ margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idOperation}`,
                         {
                             initialValue: value.t(value.operation) || undefined,
@@ -102,7 +104,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 message: ' '
                             }]
                         })(
-                        <Select
+                        <NeoSelect
+                            width={'208px'}
                             getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('operation')}
                             style={{ width: '179px', marginLeft: '5px' }}
@@ -115,19 +118,19 @@ const SortableItem = SortableElement(({value}: any) => {
                             {
                                 value.allOperations!
                                     .map((o: any) =>
-                                        <Select.Option
+                                        <option
                                             key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
                                             value={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
                                         >
                                             {value.t(o.get('name'))}
-                                        </Select.Option>)
+                                        </option>)
                             }
-                        </Select>
+                        </NeoSelect>
                     )}
                 </Form.Item>
             </NeoCol>
-            <NeoCol span={5}>
-                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+            <NeoCol span={4}>
+                <Form.Item style={{  margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idValue}`,
                         {
                             initialValue: value.value,
@@ -138,7 +141,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 message: ' '
                             }]
                         })(
-                        <Input
+                        <NeoInput
+                            width={'90px'}
                             placeholder={value.t('value')}
                             disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty'}
                             style={{ width: '110px', marginRight: '10px' }}
@@ -153,17 +157,16 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
 
-            <NeoCol span={2}>
+            <NeoCol span={1}>
                 <Form.Item style={{ display: 'inline-block' , marginTop: '35px'}}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
                         key={'deleteRowButton'}
-                        // value={'deleteRowButton'}
+                        value={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
                         <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
-                        {/*<FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>*/}
                     </NeoButton>
                 </Form.Item>
             </NeoCol>
@@ -189,7 +192,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('sysfilters')}</div>
+                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{t('sysfilters')}</div>
                     </Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Button
@@ -221,7 +224,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                         </Button>
                     </Col>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item style={{marginBottom:'0'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((serverFilter: any) => (
@@ -240,6 +243,27 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                                     parametersArray: this.state.parametersArray
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
+                </Form.Item>
+                <Form.Item>
+                    <NeoButton
+                        type={'link'}
+                        title={t("add row")}
+                        key={'createNewRowButton'}
+                        value={'createNewRowButton'}
+                        onClick={this.createNewRow}
+                    >
+                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto'}}/>
+                        <h4 style={{color: '#B38136'}}>Добавить</h4>
+                    </NeoButton>
+                </Form.Item>
+                <Form.Item>
+                    <div className={'filter__acceptButton'}>
+                        <NeoButton
+                            title={t('apply')}
+                            onClick={()=> {}}>
+                            {t('apply')}
+                        </NeoButton>
+                    </div>
                 </Form.Item>
             </Form>
         )

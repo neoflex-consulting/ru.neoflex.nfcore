@@ -807,7 +807,7 @@ class Calendar extends React.Component<any, any> {
 
                         <NeoSelect className='selectYear'
                                 getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            value={this.state.currentMonth.getFullYear()}
+                            defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
                             width={'96px'}>

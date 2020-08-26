@@ -56,6 +56,19 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     }
 
     @Override
+    public boolean validateCssClass_IsValid(CssClass cssClass, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (cssClass.getName() == null || cssClass.getName().equals("")) {
+            return validate(cssClass, diagnostics, context, "field name - must be set");
+        }
+        if (cssClass.getStyle() == null || cssClass.getStyle().equals("")) {
+            return validate(cssClass, diagnostics, context, "field style - must be set");
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
     public boolean validateTreeNode_IsValid(TreeNode treeNode, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (treeNode.getName() == null) {
             return validate(treeNode, diagnostics, context, "name - must be set");

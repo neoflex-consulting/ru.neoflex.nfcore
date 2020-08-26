@@ -5,7 +5,6 @@ import ru.neoflex.nfcore.application.YearBook
 
 class ApplicationFactoryExt extends ApplicationFactoryImpl {
 
-
     @Override
     Calendar createCalendar() {
         return new CalendarExt()
@@ -15,4 +14,5 @@ class ApplicationFactoryExt extends ApplicationFactoryImpl {
     YearBook createYearBook() {
         return new YearBookExt()
     }
+
 }

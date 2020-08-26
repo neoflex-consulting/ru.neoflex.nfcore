@@ -253,7 +253,10 @@
   /*overflow: hidden !important;*/
 }
 
-
+/*Отключение подписи ошибки у select */
+.has-error .ant-form-explain, .has-error .ant-form-split {
+  display: none;
+}
 
 .ant-menu-submenu-title {
   color: black;
