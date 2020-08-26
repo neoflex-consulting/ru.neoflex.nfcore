@@ -537,6 +537,10 @@ class Calendar extends React.Component<any, any> {
         this.props.context.addDocxHandler(this.getDocxData.bind(this));
     }
 
+    filter (node: any) {
+        return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify");
+    }
+
     private getDocxData(): docxExportObject {
         const width = (this.node) ? this.node.size.width : 700;
         const height = (this.node) ? this.node.size.height : 400;
@@ -547,7 +551,8 @@ class Calendar extends React.Component<any, any> {
                 diagramData: {
                     blob: domtoimage.toBlob(this.node?.resizable,{
                         width: width,
-                        height: height
+                        height: height,
+                        filter: this.filter
                     }),
                     width: width,
                     height: height
