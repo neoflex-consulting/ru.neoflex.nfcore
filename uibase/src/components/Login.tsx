@@ -1,10 +1,12 @@
 import * as React from "react";
-import {Dropdown, Menu} from 'antd'
+import {Col, Dropdown, Menu, Row} from 'antd'
 import { API } from "../modules/api";
 import logo from '../icons/logo.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
 import pony from '../icons/pony.png';
+import authorizationIcon from '../icons/44 3.jpg';
+import {NeoButton} from "neo-design/lib";
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -83,7 +85,73 @@ export class Login extends React.Component<any, State> {
         else {
             return (
                 <div>
-                    <div className="login-box">
+                    <Col span={11} style={{zIndex: 10}}>
+                        <div style={{background: "#20326F", height: "188px"}}>
+                            <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
+                            <div className={"secondLine"}>Налогового мониторинга</div>
+                        </div>
+                        <img src={authorizationIcon} style={{width: "100%", position: "absolute", height: "565px"}}/>
+
+                        <Row style={{background: "#20326F", height: "2px"}}>
+
+                        </Row>
+
+                    </Col>
+                    <Col span={13} style={{background: "#F2F2F2", height: "750px", zIndex: 100}}>
+                        <Row>
+                            <div className={"nameOfApp"}>Neoflex Reporting</div>
+                        </Row>
+
+                        <Row>
+                            <div className={"authorizing"}>Авторизация</div>
+                        </Row>
+                        <Row className={"Login"} style={{textAlign: "center" , marginRight: "330px"}}>
+                                Логин
+                        </Row>
+                        <div className={"inputLogin"}>
+                            <input
+                                autoFocus
+                                className="input-login"
+                                key="user"
+                                /*placeholder={t('username')}*/
+                                onChange={e => {
+                                    this.setState({ userName: e.target.value })
+                                }}
+                                onKeyUp={this.authenticateIfEnterPress}
+                            />
+                            </div>
+                        <Row className={"Password"} style={{textAlign: "center" , marginRight: "323px"}}>
+                                Пароль
+                        </Row>
+                        <div className={"inputPassword"}>
+                            <input
+                                className="input-login"
+                                key="pass"
+                                type="password"
+                                /*placeholder={t('password')}*/
+                                onChange={e => {
+                                    this.setState({ password: e.target.value })
+                                }}
+                                onKeyUp={this.authenticateIfEnterPress}
+                            />
+                        </div>
+                        <Row className={"button"} style={{textAlign: "center"}}>
+                        <NeoButton key="conbutton" className={"loginButton"}
+                                   onClick={this.authenticate}>
+                            {t('login')}
+                        </NeoButton>
+                        </Row>
+                        {/*<Row className={"login-button"}>
+                            <NeoButton key="conbutton" className={"loginButton"}
+                                    onClick={this.authenticate}>
+                                {t('login')}
+                            </NeoButton>
+                        </Row>*/}
+
+
+
+
+                    {/*<div className="login-box">
                         <div className="app-logo" style={{ width: '100%', textAlign: 'center' }}>
                             <img alt={t('notfound')} src={pony} style={{ height: '45px', width: '55px', marginRight: '10px', marginBottom: '10px' }}/>
                             <span style={{ fontVariantCaps: 'normal' }}>{t('appname')}</span>
@@ -121,7 +189,9 @@ export class Login extends React.Component<any, State> {
                             </div>
                         </Dropdown>
                         }
-                    </div>
+                    </div>*/}
+
+                    </Col>
                 </div>
             )
         }
