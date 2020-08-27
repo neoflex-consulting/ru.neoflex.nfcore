@@ -184,9 +184,9 @@ class Tools extends React.Component<any, State> {
         }));
 
         const branchRegion = <div className={"tools-branch-region tools-vertical-center-element"}>
-            <p className={"tools-header tools-padding-top tools-margin-left"}>{t("branch parameters")}</p>
-            <p className={"tools-text tools-margin-left"}>{t("branch")}</p>
-            <div className={"tools-select-area"}>
+            <div>
+                <p className={"tools-header tools-padding-top tools-margin-left"}>{t("branch parameters")}</p>
+                <p className={"tools-text tools-margin-left"}>{t("branch")}</p>
                 <NeoSelect
                     placeholder={t("choose from the list")}
                     className={"tools-select tools-margin-left"} onChange={(currentValue: string)=>{
@@ -198,14 +198,14 @@ class Tools extends React.Component<any, State> {
                         </Select.Option>
                     })}
                 </NeoSelect>
-                <div className={"tools-select-checkbox-area"}>
-                    <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is default")}</p>
-                    <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isDefault}/>
-                </div>
-                <div className={"tools-select-checkbox-area"}>
-                    <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is current")}</p>
-                    <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isCurrent}/>
-                </div>
+            </div>
+            <div className={"tools-select-checkbox-area"}>
+                <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is default")}</p>
+                <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isDefault}/>
+            </div>
+            <div className={"tools-select-checkbox-area"}>
+                <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is current")}</p>
+                <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isCurrent}/>
             </div>
         </div>;
 

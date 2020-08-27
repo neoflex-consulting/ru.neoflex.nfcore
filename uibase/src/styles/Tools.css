@@ -38,6 +38,7 @@
 
 .input-checkbox {
     margin-bottom: 0px !important;
+    height: 20px !important;
 }
 /*padding*/
 .tools-padding-top {
@@ -115,6 +116,10 @@
     background: #FFFFFF;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     flex-wrap: wrap;
 }
 
@@ -179,17 +184,13 @@
 }
 
 .tools-select-area {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
 }
 
 .tools-select-checkbox-area {
     display: inline-flex;
     flex-direction: column;
     margin-left: 38px;
-    margin-top: -52px;
+    margin-top: 52px;
 }
 
 .tools-import-region {
