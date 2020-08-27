@@ -5,7 +5,7 @@ import logo from '../icons/logo.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
 import pony from '../icons/pony.png';
-import authorizationIcon from '../icons/44 3.jpg';
+import authorizationIcon from '../icons/authorization.jpg';
 import {NeoButton} from "neo-design/lib";
 
 export interface Props {
