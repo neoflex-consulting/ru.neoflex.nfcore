@@ -579,15 +579,27 @@ class EcoreApp extends React.Component<any, State> {
                                         {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
                                     </div>
                             </Dropdown>
-                            <NeoButton type={'link'}
-                                       style={{marginRight:'10px'}}
-                            >
-                            <Link to={`/developer/data`}>
-                                    {/*<FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>*/}
-                                    <NeoIcon icon={'settings'} size={'14'} color={'white'} />
-                            </Link>
-                            </NeoButton>
-                            <NeoButton  type="link"
+                                {
+                                    this.props.history.location.pathname.includes('developer')
+                                        ?
+                                        <NeoButton
+                                            style={{marginRight: '10px'}}
+                                            type={"link"}
+                                            onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
+                                        >
+                                            <NeoIcon icon={"diagram"} size={'14'} color={'white'} />
+                                        </NeoButton>
+                                        :
+                                        <NeoButton type={'link'}
+                                                   style={{marginRight:'10px'}}
+                                        >
+                                            <Link to={`/developer/data`}>
+                                                <NeoIcon icon={'settings'} size={'14'} color={'white'} />
+                                            </Link>
+                                        </NeoButton>
+                                }
+                            <NeoButton
+                                type="link"
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
