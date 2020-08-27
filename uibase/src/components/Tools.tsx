@@ -221,7 +221,7 @@ class Tools extends React.Component<any, State> {
         const exportFilesRegion = <div
             className={"tools-region-element tools-horizontal-center-element tools-export-files"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"icon"}/>
+                <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
                        this.fileSystemLookupRef.showDialog()
@@ -260,7 +260,7 @@ class Tools extends React.Component<any, State> {
             </NeoInput>
             <div className={"tools-horizontal-center-element tools-export-files"}>
                 <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                    <ExportIcon className={"icon"}/>
+                    <ExportIcon className={"tools-icon"}/>
                     <a className={"tools-highlighted-text"}
                        onClick={() => {
                            this.setState({modalResourceVisible: true})
@@ -368,7 +368,7 @@ class Tools extends React.Component<any, State> {
 
         const importFilesRegion = <div className={"tools-import-files tools-region-element"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"icon"}/>
+                <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
                        this.importObjectInputRef.click()
@@ -403,7 +403,7 @@ class Tools extends React.Component<any, State> {
 
         const importMasterData = <div className={"tools-import-masterdata"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"icon"}/>
+                <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                     onClick={(event) => {
                         this.importMDInputRef.click()

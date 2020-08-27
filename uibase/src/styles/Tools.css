@@ -1,4 +1,4 @@
-/*override antd*/
+/*override antd & neo design*/
 .ant-tabs {
     overflow: unset;
 }
@@ -32,6 +32,13 @@
     font-size: 14px !important;
 }
 
+.btn {
+    font-size: 14px !important;
+}
+
+.input-checkbox {
+    margin-bottom: 0px !important;
+}
 /*padding*/
 .tools-padding-top {
     padding-top: 19px !important;
@@ -238,7 +245,7 @@
     color: #B38136 !important;
 }
 
-.icon {
+.tools-icon {
     height: 26px;
     width: 26px;
     margin-top: inherit;
@@ -252,10 +259,6 @@
 
 .tools-branch-checkbox {
     margin-top: 0px !important;
-}
-
-.input-checkbox {
-    margin-bottom: 0px !important;
 }
 
 .tools-select {
