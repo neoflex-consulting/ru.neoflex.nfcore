@@ -1,20 +1,29 @@
 import * as React from "react";
-import {Row, Col, Table, Checkbox, Button, Tooltip, Divider, Input, Form, Modal, Tag, notification} from 'antd';
+import {
+    Input,
+    Modal,
+    Tag,
+    notification,
+    Tabs,
+    Select
+} from 'antd';
 import {API} from "../modules/api";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 // import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
 // import Splitter from './CustomSplitter'
-import {faCheckCircle, faCloudDownloadAlt, faCloudUploadAlt, faPlusCircle} from '@fortawesome/free-solid-svg-icons'
 import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
+import { NeoButton } from "neo-design";
+// CSS
+import './../styles/Tools.css';
+import {ReactComponent as ExportIcon} from './../icons/exportFileIcon.svg'
+import { NeoInput, NeoSelect} from "neo-design/lib";
 
-const {Column} = Table;
-const ButtonGroup = Button.Group
+const { TabPane } = Tabs;
 
 interface Props {
 }
@@ -34,10 +43,23 @@ interface State {
         branches: string[]
     },
     mdFileName?: string,
-    sql?: string
+    sql?: string,
+    currentBranch: {
+        branch: string,
+        key: string,
+        isCurrent: boolean,
+        isDefault: boolean
+    }
+    MDUploadArray: File[],
+    filesUploadArray: File[],
 }
 
 class Tools extends React.Component<any, State> {
+
+    fileSystemLookupRef: any;
+    deploySupplyInputRef: any;
+    importObjectInputRef: any;
+    importMDInputRef: any;
 
     state: State = {
         modalResourceVisible: false,
@@ -50,10 +72,22 @@ class Tools extends React.Component<any, State> {
             current: "master",
             default: 'master',
             branches: ["master"]
-        }
+        },
+        currentBranch: {
+            branch: "",
+            key: "",
+            isCurrent: false,
+            isDefault: false
+        },
+        MDUploadArray: [],
+        filesUploadArray: [],
     };
 
     componentDidMount(): void {
+        this.fileSystemLookupRef = React.createRef();
+        this.deploySupplyInputRef = React.createRef();
+        this.importObjectInputRef = React.createRef();
+        this.importMDInputRef = React.createRef();
         this.fetchBranchInfo()
     }
 
@@ -64,7 +98,7 @@ class Tools extends React.Component<any, State> {
         API.instance().fetchJson("/system/branch").then(branchInfo => {
             this.setState({branchInfo})
         })
-    }
+    };
 
     setCurrentBranch = (branch: string) => {
         API.instance().fetchJson("/system/branch/" + branch, {
@@ -76,7 +110,7 @@ class Tools extends React.Component<any, State> {
         }).then(branchInfo => {
             this.setState({branchInfo})
         })
-    }
+    };
 
     uploadFile = (file: any) => {
         let form = new FormData()
@@ -85,7 +119,7 @@ class Tools extends React.Component<any, State> {
         API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
-    }
+    };
 
     uploadMD = (file: any) => {
         let form = new FormData()
@@ -94,7 +128,7 @@ class Tools extends React.Component<any, State> {
         API.instance().fetchJson("/masterdata/import", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
-    }
+    };
 
     deployFile = (file: any) => {
         let form = new FormData()
@@ -103,12 +137,12 @@ class Tools extends React.Component<any, State> {
         API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json => {
             notification.success({message: JSON.stringify(json, undefined, 4)})
         })
-    }
+    };
 
     downloadAll = () => {
         let filename = "export.zip";
         API.instance().download("/system/exportdb", {}, filename)
-    }
+    };
 
     downloadSelected = () => {
         let filename = "export.zip";
@@ -122,7 +156,7 @@ class Tools extends React.Component<any, State> {
                 files: this.state.checkedFiles
             })
         }, filename)
-    }
+    };
 
     downloadSQL = () => {
         let filename = "masterdata.json";
@@ -132,13 +166,13 @@ class Tools extends React.Component<any, State> {
                 'Content-Type': 'application/json'
             }
         }, filename)
-    }
+    };
 
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
         const {resourceList} = this.state
         resourceList.push(...resources)
         this.setState({modalResourceVisible: false})
-    }
+    };
 
     render() {
         const {t} = this.props as Props & WithTranslation;
@@ -147,45 +181,178 @@ class Tools extends React.Component<any, State> {
             key: branch,
             isCurrent: branch === this.state.branchInfo.current,
             isDefault: branch === this.state.branchInfo.default
-        }))
-        const fileInput = <Tooltip title={this.props.t("import")}>
-            <label>
-                <FontAwesomeIcon icon={faCloudUploadAlt}/>
-                <Input type="file" style={{display: "none"}}
-                       onChange={e => {
-                           const file = e!.target!.files![0]
-                           if (file) {
-                               this.uploadFile(file)
-                           }
-                       }}
-                       onClick={e => {
-                           this.setState({fileName: undefined})
-                       }}
-                />
-            </label>
-        </Tooltip>
+        }));
 
-        const mdInput = <Tooltip title={this.props.t("import")}>
-            <label>
-                <FontAwesomeIcon icon={faCloudUploadAlt}/>
-                <Input type="file" style={{display: "none"}}
-                       onChange={e => {
-                           const file = e!.target!.files![0]
-                           if (file) {
-                               this.uploadMD(file)
-                           }
-                       }}
-                       onClick={e => {
-                           this.setState({fileName: undefined})
-                       }}
-                />
-            </label>
-        </Tooltip>
+        const branchRegion = <div className={"tools-branch-region tools-vertical-center-element"}>
+            <p className={"tools-header tools-padding-top tools-margin-left"}>{t("branch parameters")}</p>
+            <p className={"tools-text tools-margin-left"}>{t("branch")}</p>
+            <div className={"tools-select-area"}>
+                <NeoSelect
+                    placeholder={t("choose from the list")}
+                    className={"tools-select tools-margin-left"} onChange={(currentValue: string)=>{
+                    this.setState({currentBranch:branches.find(b=>b.key === currentValue)!})
+                }}>
+                    {branches.map(b=>{
+                        return <Select.Option key={b.key} >
+                            {b.key}
+                        </Select.Option>
+                    })}
+                </NeoSelect>
+                <div className={"tools-select-checkbox-area"}>
+                    <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is default")}</p>
+                    <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isDefault}/>
+                </div>
+                <div className={"tools-select-checkbox-area"}>
+                    <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is current")}</p>
+                    <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isCurrent}/>
+                </div>
+            </div>
+        </div>;
 
-        const fileDeploy = <Tooltip title={this.props.t("import")}>
-            <label>
-                <FontAwesomeIcon icon={faCloudUploadAlt}/>
-                <Input type="file" style={{display: "none"}}
+        const exportAllObjectsRegion = <div
+            className={"tools-region-element tools-export-all-objects"}>
+            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>{t("export parameters")}</p>
+            <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
+               onClick={() => {this.downloadAll();}}>
+                {t("export all objects")}
+            </a>
+        </div>;
+
+        const exportFilesRegion = <div
+            className={"tools-region-element tools-horizontal-center-element tools-export-files"}>
+            <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
+                <ExportIcon className={"icon"}/>
+                <a className={"tools-highlighted-text"}
+                   onClick={(event) => {
+                       this.fileSystemLookupRef.showDialog()
+                   }}>
+                    {this.props.t("select export scripts")}
+                </a>
+            </div>
+            <div className={"tools-horizontal-center-element"}>
+                <FilesystemLookup ref={(ref:any)=>this.fileSystemLookupRef = ref}
+                                  checked={this.state.checkedFiles}
+                                  onCheck={paths => this.setState({checkedFiles: paths})}/>
+            </div>
+        </div>;
+
+        const exportObjectsRegion = <div
+            className={"tools-region-element tools-export-objects-region"}>
+            <p className={"tools-sub-header tools-margin-top tools-margin-left"}>{t("export metadata")}</p>
+            <p className={"tools-text tools-margin-left"}>{t("select metadata parameters")}</p>
+            <NeoInput type={"checkbox"}
+                      className={"tools-checkbox tools-margin-left"}
+                      checked={this.state.withReferences}
+                      onChange={(e:any) => this.setState({withReferences: e.target.checked})}>
+                {t("with references")}
+            </NeoInput>
+            <NeoInput type={"checkbox"}
+                      className={"tools-checkbox tools-margin-left"}
+                      checked={this.state.withDependents}
+                      onChange={(e:any) => this.setState({withDependents: e.target.checked})}>
+                {t("with dependents")}
+            </NeoInput>
+            <NeoInput type={"checkbox"}
+                      className={"tools-checkbox tools-margin-left"}
+                      checked={this.state.recursiveDependents}
+                      onChange={(e:any) => this.setState({recursiveDependents: e.target.checked})}>
+                {t("recursive dependents")}
+            </NeoInput>
+            <div className={"tools-horizontal-center-element tools-export-files"}>
+                <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
+                    <ExportIcon className={"icon"}/>
+                    <a className={"tools-highlighted-text"}
+                       onClick={() => {
+                           this.setState({modalResourceVisible: true})
+                       }}>
+                        {t("select metadata for export")}
+                    </a>
+                </div>
+                <div className={"tools-horizontal-center-element"}>
+                    {this.state.resourceList.map(r =>
+                        <Tag key={r.get("uri")} closable={true} onClose={() => {
+                            const index = this.state.resourceList.indexOf(r);
+                            this.state.resourceList.splice(index, 1)
+                        }}>
+                            {r.eContents()[0].get('name') || r.get('uri')}
+                        </Tag>
+                    )}
+                </div>
+                {this.state.modalResourceVisible && <Modal
+                    key="add_resource_modal"
+                    width={'1000px'}
+                    title={t('addresource')}
+                    visible={this.state.modalResourceVisible}
+                    footer={null}
+                    onCancel={() => this.setState({modalResourceVisible: false})}>
+                    <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
+                                specialEClass={undefined}/>
+                </Modal>}
+            </div>
+        </div>;
+
+        const exportSQL = <div
+            className={"tools-export-sql"}>
+            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}>{t("export master data")}</p>
+            <Input.TextArea className={"tools-sql-area tools-margin-left"} placeholder="SQL" value={this.state.sql}
+                            onChange={(e) => this.setState({sql: e.target.value})}/>
+        </div>;
+
+        const exportButtonRegion = <div className={"tools-button-region"}>
+            <NeoButton
+                className={"tools-button tools-action-button tools-margin-left"}
+                type={this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0 && !this.state.sql ? "disabled" : undefined}
+                onClick={() => {
+                    if (!(this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0))
+                        this.downloadSelected();
+                    if (this.state.sql)
+                        this.downloadSQL();
+                    this.setState({resourceList:[], checkedFiles:[], sql: undefined})
+                }}
+            >{t('do export')}</NeoButton>
+            <NeoButton
+                className={"tools-button tools-clear-button tools-margin-left"}
+                type={"secondary"}
+                onClick={()=>{
+                    this.setState({resourceList:[], checkedFiles:[], sql: undefined})
+                }}>
+                {t('clear')}
+            </NeoButton>
+        </div>;
+
+        const importButtonRegion = <div className={"tools-button-region"}>
+            <NeoButton
+                className={"tools-button tools-action-button tools-margin-left"}
+                type={this.state.filesUploadArray.length === 0 && this.state.MDUploadArray.length === 0 ? "disabled" : undefined}
+                onClick={() => {
+                    if (this.state.filesUploadArray.length !== 0) {
+                        this.state.filesUploadArray.forEach(f=>this.uploadFile(f));
+                    }
+                    if (this.state.MDUploadArray.length !== 0) {
+                        this.state.MDUploadArray.forEach(f=>this.uploadMD(f));
+                    }
+                    this.setState({MDUploadArray: [], filesUploadArray: []})
+                }}
+            >{t('import files')}</NeoButton>
+            <NeoButton
+                className={"tools-button tools-clear-button tools-margin-left"}
+                type={"secondary"}
+                onClick={()=>{
+                    this.setState({MDUploadArray: [], filesUploadArray: []})
+                }}>
+                {t('clear')}
+            </NeoButton>
+        </div>;
+
+        const importParametersRegion = <div className={"tools-import-parameters tools-region-element"}>
+            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>{t("import parameters")}</p>
+            <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
+               onClick={() => {
+                   this.deploySupplyInputRef.click()
+               }}>
+                {t("deploy supply")}
+                <input ref={(r)=>{this.deploySupplyInputRef = r}}
+                       type="file" style={{display: "none"}}
                        onChange={e => {
                            const file = e!.target!.files![0]
                            if (file) {
@@ -196,149 +363,110 @@ class Tools extends React.Component<any, State> {
                            this.setState({deployName: undefined})
                        }}
                 />
-            </label>
-        </Tooltip>
+            </a>
+        </div>;
+
+        const importFilesRegion = <div className={"tools-import-files tools-region-element"}>
+            <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
+                <ExportIcon className={"icon"}/>
+                <a className={"tools-highlighted-text"}
+                   onClick={(event) => {
+                       this.importObjectInputRef.click()
+                   }}>
+                    {this.props.t("select files")}
+                    <input ref={(r)=>{this.importObjectInputRef = r}}
+                           type="file" style={{display: "none"}}
+                           onChange={e => {
+                               const file = e!.target!.files![0];
+                               if (file) {
+                                   this.setState({filesUploadArray: this.state.filesUploadArray.concat([file])})
+                                   this.importObjectInputRef.value = ""
+                               }
+                           }}
+                           onClick={e => {
+                               this.setState({fileName: undefined})
+                           }}
+                    />
+                </a>
+            </div>
+            <div className={"tools-horizontal-center-element"}>
+                {this.state.filesUploadArray.map(r =>
+                    <Tag key={r.name} closable={true} onClose={() => {
+                        const index = this.state.filesUploadArray.indexOf(r);
+                        this.state.filesUploadArray.splice(index, 1);
+                    }}>
+                        {r.name}
+                    </Tag>
+                )}
+            </div>
+        </div>;
+
+        const importMasterData = <div className={"tools-import-masterdata"}>
+            <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
+                <ExportIcon className={"icon"}/>
+                <a className={"tools-highlighted-text"}
+                    onClick={(event) => {
+                        this.importMDInputRef.click()
+                    }}>
+                    {this.props.t("select masterdata")}
+                    <input ref={(r)=>{this.importMDInputRef = r}}
+                           type="file" style={{display: "none"}}
+                           onChange={e => {
+                               const file = e!.target!.files![0];
+                               if (file) {
+                                   this.setState({MDUploadArray: this.state.MDUploadArray.concat([file])})
+                                   this.importMDInputRef.value = ""
+                               }
+                           }}
+                           onClick={e => {
+                               this.setState({fileName: undefined})
+                           }}
+                    />
+                </a>
+            </div>
+            <div className={"tools-horizontal-center-element"}>
+                {this.state.MDUploadArray.map(r =>
+                    <Tag key={r.name} closable={true} onClose={() => {
+                        const index = this.state.MDUploadArray.indexOf(r);
+                        this.state.MDUploadArray.splice(index, 1);
+                    }}>
+                        {r.name}
+                    </Tag>
+                )}
+            </div>
+        </div>;
 
         return (
-            <Row>
+            <div >
                 <Helmet>
                     <title>{this.props.t('tools')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
-                <Col span={3}/>
-                <Col span={18}>
-                    <Table pagination={false} size="small" dataSource={branches}>
-                        <Column title={this.props.t("branch")}
-                                dataIndex={"branch"} key={"branch"}
-                        />
-                        <Column
-                            title={this.props.t("is current")}
-                            dataIndex={"isCurrent"} key={"isCurrent"}
-                            render={(text) => <Checkbox disabled={true} checked={text === true}/>}
-                        />
-                        <Column title={this.props.t("is default")}
-                                dataIndex={"isDefault"} key={"isDefault"}
-                                render={(text) => <Checkbox disabled={true} checked={text === true}/>}
-                        />
-                        <Column dataIndex={"branch"} key={"command"}
-                                render={branch => (
-                                    <ButtonGroup className="pull-right">
-                                        <Tooltip title={this.props.t("set current")}>
-                                            <Button type="dashed" size="small" onClick={() => {
-                                                this.setCurrentBranch(branch)
-                                            }}>
-                                                <FontAwesomeIcon icon={faCheckCircle}/>
-                                            </Button>
-                                        </Tooltip>
-                                    </ButtonGroup>
-                                )}
-                        />
-                    </Table>
-                    <Divider orientation="left">{this.props.t("export all objects")}</Divider>
-                    <Tooltip title={this.props.t("export")}>
-                        <Button type="dashed" size="small" onClick={() => {
-                            this.downloadAll();
-                        }}>
-                            <FontAwesomeIcon icon={faCloudDownloadAlt}/>
-                        </Button>
-                    </Tooltip>
-                    <Divider orientation="left">{this.props.t("export selected files objects")}</Divider>
-                    <div>
-                        <FilesystemLookup checked={this.state.checkedFiles}
-                                          onCheck={paths => this.setState({checkedFiles: paths})}/>
-                    </div>
-                    {this.state.modalResourceVisible && <Modal
-                        key="add_resource_modal"
-                        width={'1000px'}
-                        title={t('addresource')}
-                        visible={this.state.modalResourceVisible}
-                        footer={null}
-                        onCancel={() => this.setState({modalResourceVisible: false})}>
-                        <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
-                                    specialEClass={undefined}/>
-                    </Modal>}
-                    <div>
-                        <Tooltip title={this.props.t("add objects")}>
-                            <Button type="dashed" size="small" onClick={() => {
-                                this.setState({modalResourceVisible: true})
-                            }}>
-                                <FontAwesomeIcon icon={faPlusCircle}/>
-                            </Button>
-                        </Tooltip>
-                        {this.state.resourceList.map(r =>
-                            <Tooltip title={r.eContents()[0].eClass.get('name')}>
-                                <Tag key={r.get("uri")} closable={true} onClose={() => {
-                                    const index = this.state.resourceList.indexOf(r);
-                                    this.state.resourceList.splice(index, 1)
-                                }}>
-                                    {r.eContents()[0].get('name') || r.get('uri')}
-                                </Tag>
-                            </Tooltip>
-                        )}
-                    </div>
-                    <Form layout={"inline"}>
-                        <Form.Item>
-                            <Tooltip title={this.props.t("export with all referenced objects")}>
-                                <Checkbox checked={this.state.withReferences}
-                                          onChange={(e) => this.setState({withReferences: e.target.checked})}>
-                                    {this.props.t("with references")}</Checkbox>
-                            </Tooltip>
-                            <Tooltip title={this.props.t("export with dependent objects")}>
-                                <Checkbox checked={this.state.withDependents}
-                                          onChange={(e) => this.setState({withDependents: e.target.checked})}>
-                                    {this.props.t("with dependents")}</Checkbox>
-                            </Tooltip>
-                            <Tooltip title={this.props.t("collect dependent objects recursively")}>
-                                <Checkbox checked={this.state.recursiveDependents}
-                                          onChange={(e) => this.setState({recursiveDependents: e.target.checked})}>
-                                    {this.props.t("recursive dependents")}</Checkbox>
-                            </Tooltip>
-                            <Tooltip title={this.props.t("export selected")}>
-                                <Button type="dashed" size="small"
-                                        disabled={this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0}
-                                        onClick={() => {
-                                            this.downloadSelected()
-                                        }}>
-                                    <FontAwesomeIcon icon={faCloudDownloadAlt}/>
-                                </Button>
-                            </Tooltip>
-                        </Form.Item>
-                    </Form>
-                    <Divider orientation="left">{this.props.t("import objects")}</Divider>
-                    <Form layout={"inline"}>
-                        <Form.Item>
-                            <Input addonBefore={fileInput} value={this.state!.fileName} readOnly={true}/>
-                        </Form.Item>
-                    </Form>
-                    <Divider orientation="left">{this.props.t("deploy supply")}</Divider>
-                    <Form layout={"inline"}>
-                        <Form.Item>
-                            <Input addonBefore={fileDeploy} value={this.state!.deployName} readOnly={true}/>
-                        </Form.Item>
-                    </Form>
-                    <Divider orientation="left">{this.props.t("export master data")}</Divider>
-                    <Form layout={"inline"}>
-                        <Tooltip title={this.props.t("query data to export")}>
-                            <Input.TextArea placeholder="SQL" value={this.state.sql}
-                                            onChange={(e) => this.setState({sql: e.target.value})}></Input.TextArea>
-                        </Tooltip>
-                        <Tooltip title={this.props.t("export selected")}>
-                            <Button type="dashed" size="small" disabled={!this.state.sql} onClick={() => {
-                                this.downloadSQL()
-                            }}>
-                                <FontAwesomeIcon icon={faCloudDownloadAlt}/>
-                            </Button>
-                        </Tooltip>
-                    </Form>
-                    <Divider orientation="left">{this.props.t("import master data")}</Divider>
-                    <Form layout={"inline"}>
-                        <Form.Item>
-                            <Input addonBefore={mdInput} value={this.state!.mdFileName} readOnly={true}/>
-                        </Form.Item>
-                    </Form>
-                </Col>
-                <Col span={3}/>
-            </Row>
+                {branchRegion}
+                <Tabs className={"tools-tabs-region tools-vertical-center-element"}
+                    defaultActiveKey={"export"}
+                    tabPosition={'top'}>
+                    <TabPane tab={t("export")} key={t("export")}>
+                        <div
+                            className={"tools-export-region tools-vertical-center-element"}>
+                            {exportAllObjectsRegion}
+                            {exportFilesRegion}
+                            {exportObjectsRegion}
+                            {exportSQL}
+                        </div>
+                        {exportButtonRegion}
+                    </TabPane>
+                    <TabPane tab={t("import")} key={t("import")} >
+                        <div
+                            className={"tools-import-region tools-vertical-center-element"}>
+                            {importParametersRegion}
+                            {importFilesRegion}
+                            {importMasterData}
+                        </div>
+                        {importButtonRegion}
+                    </TabPane>
+                </Tabs>
+            </div>
         );
     }
 }

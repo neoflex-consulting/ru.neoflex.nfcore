@@ -1,11 +1,10 @@
 import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
-import {Button, Modal, Tag, Tooltip} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {Modal, Tag, Tooltip} from "antd";
 import FilesystemTree from "./FilesystemTree";
-import {faFolderPlus} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
+    ref: any,
     checked: string[],
     onCheck: (paths: string[]) => void
 }
@@ -17,7 +16,11 @@ interface State {
 class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
     state = {
         showDialog: false
-    }
+    };
+
+    showDialog = () => {
+        this.setState({showDialog: true})
+    };
 
     render() {
         const {onCheck, checked} = this.props
@@ -29,17 +32,11 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
             >
                 <FilesystemTree checked={checked} onCheck={onCheck}/>
             </Modal>
-            <Tooltip title={this.props.t("add files")}>
-                <Button type="dashed" size={'small'}
-                        onClick={(event) => {
-                            this.setState({showDialog: true})
-                        }}>
-                    <FontAwesomeIcon icon={faFolderPlus}/>
-                </Button>
-            </Tooltip>
+            <div style={{display: "unset !important",alignItems:"unset !important"}}>
             {this.props.checked.filter(r => (r.split("/").pop() || "").includes(".")).map(r =>
                 <Tooltip title={r}>
-                    <Tag key={r} closable={false} onClose={() => {
+                    <Tag
+                        key={r} closable={true} onClose={() => {
                         const index = this.props.checked.indexOf(r);
                         this.props.checked.splice(index, 1)
                     }}>
@@ -47,8 +44,9 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
                     </Tag>
                 </Tooltip>
             )}
+            </div>
         </React.Fragment>;
     }
 }
 
-export default withTranslation()(FilesystemLookup)
+export default withTranslation('common', { withRef: true })(FilesystemLookup)
