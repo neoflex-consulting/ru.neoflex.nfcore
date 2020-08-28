@@ -4,8 +4,6 @@
 }
 
 .ant-tabs-nav {
-    font-style: normal;
-    font-weight: 500;
     font-size: 18px;
     line-height: 16px;
     color: #424D78;
@@ -45,11 +43,6 @@
 
 .btn {
     font-size: 14px !important;
-}
-
-.input-checkbox {
-    margin-bottom: 0 !important;
-    height: 20px !important;
 }
 
 /*padding*/
