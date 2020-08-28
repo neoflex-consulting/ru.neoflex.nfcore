@@ -1,17 +1,14 @@
 import * as React from "react";
 import {
     Input,
-    Modal,
     Tag,
     notification,
     Tabs,
-    Select
+    Select, Drawer
 } from 'antd';
 import {API} from "../modules/api";
-// import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
-// import Splitter from './CustomSplitter'
 import {WithTranslation, withTranslation} from "react-i18next";
 import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
@@ -31,7 +28,7 @@ interface Props {
 interface State {
     fileName?: string,
     deployName?: string,
-    modalResourceVisible: boolean,
+    drawerResourceVisible: boolean,
     withReferences: boolean,
     withDependents: boolean,
     recursiveDependents: boolean,
@@ -56,13 +53,13 @@ interface State {
 
 class Tools extends React.Component<any, State> {
 
-    fileSystemLookupRef: any;
-    deploySupplyInputRef: any;
-    importObjectInputRef: any;
-    importMDInputRef: any;
+    fileSystemLookupRef = React.createRef<any>();
+    deploySupplyInputRef = React.createRef<HTMLInputElement>();
+    importObjectInputRef = React.createRef<HTMLInputElement>();
+    importMDInputRef = React.createRef<HTMLInputElement>();
 
     state: State = {
-        modalResourceVisible: false,
+        drawerResourceVisible: false,
         withReferences: false,
         withDependents: false,
         recursiveDependents: false,
@@ -85,9 +82,6 @@ class Tools extends React.Component<any, State> {
 
     componentDidMount(): void {
         this.fileSystemLookupRef = React.createRef();
-        this.deploySupplyInputRef = React.createRef();
-        this.importObjectInputRef = React.createRef();
-        this.importMDInputRef = React.createRef();
         this.fetchBranchInfo()
     }
 
@@ -171,7 +165,7 @@ class Tools extends React.Component<any, State> {
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
         const {resourceList} = this.state
         resourceList.push(...resources)
-        this.setState({modalResourceVisible: false})
+        this.setState({drawerResourceVisible: false})
     };
 
     render() {
@@ -224,13 +218,13 @@ class Tools extends React.Component<any, State> {
                 <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
-                       this.fileSystemLookupRef.showDialog()
+                       this.fileSystemLookupRef.current.showDrawer()
                    }}>
                     {this.props.t("select export scripts")}
                 </a>
             </div>
             <div className={"tools-horizontal-center-element"}>
-                <FilesystemLookup ref={(ref:any)=>this.fileSystemLookupRef = ref}
+                <FilesystemLookup ref={this.fileSystemLookupRef}
                                   checked={this.state.checkedFiles}
                                   onCheck={paths => this.setState({checkedFiles: paths})}/>
             </div>
@@ -263,7 +257,7 @@ class Tools extends React.Component<any, State> {
                     <ExportIcon className={"tools-icon"}/>
                     <a className={"tools-highlighted-text"}
                        onClick={() => {
-                           this.setState({modalResourceVisible: true})
+                           this.setState({drawerResourceVisible: true})
                        }}>
                         {t("select metadata for export")}
                     </a>
@@ -278,16 +272,18 @@ class Tools extends React.Component<any, State> {
                         </Tag>
                     )}
                 </div>
-                {this.state.modalResourceVisible && <Modal
-                    key="add_resource_modal"
-                    width={'1000px'}
-                    title={t('addresource')}
-                    visible={this.state.modalResourceVisible}
-                    footer={null}
-                    onCancel={() => this.setState({modalResourceVisible: false})}>
+                <Drawer
+                    title={this.props.t("select data")}
+                    width={'50vw'}
+                    visible={this.state.drawerResourceVisible}
+                    placement={"right"}
+                    mask={false}
+                    maskClosable={false}
+                    onClose={()=>this.setState({drawerResourceVisible: false})}
+                >
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
                                 specialEClass={undefined}/>
-                </Modal>}
+                </Drawer>
             </div>
         </div>;
 
@@ -348,10 +344,10 @@ class Tools extends React.Component<any, State> {
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>{t("import parameters")}</p>
             <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
                onClick={() => {
-                   this.deploySupplyInputRef.click()
+                   this.deploySupplyInputRef.current!.click()
                }}>
                 {t("deploy supply")}
-                <input ref={(r)=>{this.deploySupplyInputRef = r}}
+                <input ref={this.deploySupplyInputRef}
                        type="file" style={{display: "none"}}
                        onChange={e => {
                            const file = e!.target!.files![0]
@@ -371,16 +367,16 @@ class Tools extends React.Component<any, State> {
                 <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
-                       this.importObjectInputRef.click()
+                       this.importObjectInputRef.current!.click()
                    }}>
                     {this.props.t("select files")}
-                    <input ref={(r)=>{this.importObjectInputRef = r}}
+                    <input ref={this.importObjectInputRef}
                            type="file" style={{display: "none"}}
                            onChange={e => {
                                const file = e!.target!.files![0];
                                if (file) {
                                    this.setState({filesUploadArray: this.state.filesUploadArray.concat([file])})
-                                   this.importObjectInputRef.value = ""
+                                   this.importObjectInputRef.current!.value = ""
                                }
                            }}
                            onClick={e => {
@@ -406,16 +402,16 @@ class Tools extends React.Component<any, State> {
                 <ExportIcon className={"tools-icon"}/>
                 <a className={"tools-highlighted-text"}
                     onClick={(event) => {
-                        this.importMDInputRef.click()
+                        this.importMDInputRef.current!.click()
                     }}>
                     {this.props.t("select masterdata")}
-                    <input ref={(r)=>{this.importMDInputRef = r}}
+                    <input ref={this.importMDInputRef}
                            type="file" style={{display: "none"}}
                            onChange={e => {
                                const file = e!.target!.files![0];
                                if (file) {
                                    this.setState({MDUploadArray: this.state.MDUploadArray.concat([file])})
-                                   this.importMDInputRef.value = ""
+                                   this.importMDInputRef.current!.value = ""
                                }
                            }}
                            onClick={e => {

@@ -358,7 +358,9 @@
         "import parameters": "Параметры импорта",
         "select masterdata": "Выбрать Master Data для импорта",
         "import files": "Импортировать файлы",
-        "do export": "Экспортировать"
+        "do export": "Экспортировать",
+        "select scripts": "Выберите скрипты",
+        "select data": "Добавление данных"
 
 }
 

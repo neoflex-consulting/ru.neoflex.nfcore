@@ -349,6 +349,8 @@
         "import parameters": "導入選項",
         "select masterdata": "選擇要導入的主數據",
         "import files": "導入文件",
-        "do export": "出口"
+        "do export": "出口",
+        "select scripts": "選擇腳本",
+        "select data": "新增資料"
 
 }

@@ -357,5 +357,7 @@
         "import parameters": "Import parameters",
         "select masterdata": "Select masterdata",
         "import files": "Import files",
-        "do export": "Export"
+        "do export": "Export",
+        "select scripts": "Select scripts",
+        "select data": "Select data"
 }
