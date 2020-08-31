@@ -90,7 +90,12 @@ class Tools extends React.Component<any, State> {
 
     fetchBranchInfo = () => {
         API.instance().fetchJson("/system/branch").then(branchInfo => {
-            this.setState({branchInfo})
+            this.setState({branchInfo, currentBranch:{
+                    branch: branchInfo.current,
+                    key: branchInfo.current,
+                    isCurrent: true,
+                    isDefault: branchInfo.current === branchInfo.default
+                }})
         })
     };
 
@@ -183,9 +188,11 @@ class Tools extends React.Component<any, State> {
                 <p className={"tools-text tools-margin-left"}>{t("branch")}</p>
                 <NeoSelect
                     placeholder={t("choose from the list")}
-                    className={"tools-select tools-margin-left"} onChange={(currentValue: string)=>{
-                    this.setState({currentBranch:branches.find(b=>b.key === currentValue)!})
-                }}>
+                    className={"tools-select tools-margin-left"}
+                    value={this.state.currentBranch.branch}
+                    onChange={(currentValue: string)=>{
+                        this.setState({currentBranch:branches.find(b=>b.key === currentValue)!})
+                    }}>
                     {branches.map(b=>{
                         return <Select.Option key={b.key} >
                             {b.key}
