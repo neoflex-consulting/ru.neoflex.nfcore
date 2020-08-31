@@ -338,6 +338,19 @@
         "move up": "向上移動",
         "move down": "向下移動",
         "paste": "從",
-        "add child": "添加"
+        "add child": "添加",
+        "branch parameters": "Git分支結帳選項",
+        "export parameters": "導出選項",
+        "select export scripts": "導出選項",
+        "export metadata": "出口資源",
+        "select metadata for export": "選擇要導出的資產",
+        "select metadata parameters": "選擇資源上傳選項",
+        "choose from the list": "從列表中選擇",
+        "import parameters": "導入選項",
+        "select masterdata": "選擇要導入的主數據",
+        "import files": "導入文件",
+        "do export": "出口",
+        "select scripts": "選擇腳本",
+        "select data": "新增資料"
 
 }
