@@ -203,3 +203,21 @@ li:hover .lang-title {
 .btn-appName:hover span, .bell-icon:hover, .lang-label:hover, .ant-menu-item-selected>a {
 	color: white;
 }
+
+/*HeaderPanel in Dev*/
+
+.ant-menu-item{
+	border-bottom: unset!important;
+	opacity: 0.5;
+	font-size: 16px;
+}
+.ant-menu-item:hover{
+	opacity: 1!important;
+}
+
+.ant-menu-item-selected{
+	opacity: 1!important;
+}
+
+
+

@@ -224,44 +224,7 @@
 
 /*Antd styles*/
 
-/*ServerFilter*/
-.leftSplitter .ant-tree-node-content-wrapper-open .ant-tree-title {
-  color: #B38136;
-  text-align: center!important;
-}
-.leftSplitter .ant-tree-iconEle {
-  display: none !important;
-}
 
-.ant-tree li ul {
-  padding: unset!important;
-}
-
-.leftSplitter .ant-tree li span.ant-tree-switcher, .ant-tree li span.ant-tree-iconEle {
-      left: 90%;
-
-}
-
-.ant-tree li span.ant-tree-switcher.ant-tree-switcher_open .ant-tree-switcher-icon:hover{
-  font-size: 12px;
-  color: #022af8;
-}
-
-
-
-
-
-
-.leftSplitter .ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree-treenode-switcher-close:hover>::before,
-.leftSplitter .ant-tree-node-content-wrapper:hover>::before {
-  background: #FFF8E0 !important;
-}
-.leftSplitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
-  color: black !important;
-}
 
 /*Select*/
 

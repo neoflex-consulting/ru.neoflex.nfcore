@@ -96,6 +96,7 @@ class Calendar extends React.Component<any, any> {
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
+            isShowPrint: false
         };
         this.grid = React.createRef();
         this.handleEditMenu = this.handleEditMenu.bind(this)
@@ -798,7 +799,7 @@ class Calendar extends React.Component<any, any> {
                             className="date"
                         style={{flexGrow: 0.2, marginLeft: '16px'}}>
 
-                        <NeoButton
+                        <NeoButton style={{width: "111px", height: "32px"}}
                             type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
@@ -808,7 +809,7 @@ class Calendar extends React.Component<any, any> {
                         <NeoSelect className='selectYear'
                                 getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             defaultValue={this.state.currentMonth.getFullYear()}
-                            style={{width: '75px', marginLeft: '10px', fontWeight: "normal", position: "relative"}}
+                            style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
                             width={'96px'}>
                             {
@@ -827,7 +828,7 @@ class Calendar extends React.Component<any, any> {
                             className='selectMonth'
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             defaultValue={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
-                            style={{width: '100px', marginLeft: '10px', fontWeight: "normal"}}
+                            style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
                             width={'100px'}
                         >
@@ -935,8 +936,8 @@ class Calendar extends React.Component<any, any> {
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
-                        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
+                        backgroundColor: !this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
+                        border: !this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
@@ -950,8 +951,8 @@ class Calendar extends React.Component<any, any> {
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: !this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
-                        border: !this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
+                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
+                        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
@@ -959,7 +960,7 @@ class Calendar extends React.Component<any, any> {
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
-
+                {this.state.calendarVisible ?
                 <NeoButton
                     type="link"
                     style={{
@@ -969,7 +970,9 @@ class Calendar extends React.Component<any, any> {
                 >
                     <NeoIcon icon={'print'} color={'#5E6785'} />
                 </NeoButton>
-
+                    :
+                    null
+                }
         <NeoButton
             type="link"
             style={{

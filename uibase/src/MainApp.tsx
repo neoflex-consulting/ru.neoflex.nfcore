@@ -310,8 +310,7 @@ export class MainApp extends React.Component<any, State> {
                         localStorage.setItem('mainapp_refsplitter_pos', size)
                     }}
                 >
-                    <div className={'leftSplitter'}
-                                             style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
+                    <div className={'leftSplitter'} style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
                         {this.renderReferences()}
                     </div>
                     <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
