@@ -1,15 +1,15 @@
 import * as React from "react";
-import { Helmet } from 'react-helmet';
+import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
-import {Layout, Tooltip} from "antd";
+import {Layout, Tooltip, Tree} from "antd";
 import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
-import {Tree} from 'antd'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
+
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Dropdown, Layout, Menu, notification, Row} from "antd/lib";
+import {Button, Dropdown, Layout, Menu, notification} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -15,9 +15,6 @@ import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map";
 import Tools from "./components/Tools";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faEquals, faTools,} from "@fortawesome/free-solid-svg-icons";
-import {faBell, faBellSlash} from "@fortawesome/free-regular-svg-icons";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
@@ -29,7 +26,7 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoRow, NeoCol, NeoIcon, NeoButton} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoIcon, NeoRow} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
 
