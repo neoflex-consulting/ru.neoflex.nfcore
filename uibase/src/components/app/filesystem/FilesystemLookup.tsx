@@ -14,6 +14,7 @@ interface State {
 }
 
 class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
+
     state = {
         showDrawer: false
     };
@@ -40,8 +41,17 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
             {this.props.checked.filter(r => (r.split("/").pop() || "").includes(".")).map(r =>
                 <Tag
                     key={r} closable={true} onClose={() => {
-                    const index = this.props.checked.indexOf(r);
-                    this.props.checked.splice(index, 1)
+                    let checked: string[] = [];
+                    let prevElement = "";
+                    r.split("/").forEach((value, index, array)=>{
+                        if (index === 0) {
+                            checked.push("/");
+                        } else {
+                            checked.push(prevElement.concat("/", value));
+                            prevElement = prevElement.concat("/", value)
+                        }
+                    });
+                    this.props.onCheck(this.props.checked.filter(e=> !checked.includes(e)))
                 }}>
                     {r.split("/").pop()}
                 </Tag>

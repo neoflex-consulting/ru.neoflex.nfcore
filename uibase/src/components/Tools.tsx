@@ -195,11 +195,29 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is default")}</p>
-                <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isDefault}/>
+                <NeoInput
+                    className={"tools-branch-checkbox"}
+                    type={"checkbox"}
+                    disabled={true}
+                    checked={this.state.currentBranch.isDefault}
+                />
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is current")}</p>
-                <NeoInput className={"tools-branch-checkbox"} type={"checkbox"} disabled={true} checked={this.state.currentBranch.isCurrent}/>
+                <NeoInput
+                    className={"tools-branch-checkbox"}
+                    type={"checkbox"}
+                    disabled={this.state.currentBranch.isCurrent}
+                    checked={this.state.currentBranch.isCurrent}
+                    onChange={()=>{
+                        if (!this.state.currentBranch.isCurrent && this.state.currentBranch.branch) {
+                            const newBranchInfo = {
+                                ...this.state.currentBranch,
+                                isCurrent: true
+                            };
+                            this.setState({currentBranch:newBranchInfo}, ()=> this.setCurrentBranch(this.state.currentBranch.branch));
+                        }
+                    }}/>
             </div>
         </div>;
 
@@ -226,7 +244,8 @@ class Tools extends React.Component<any, State> {
             <div className={"tools-horizontal-center-element"}>
                 <FilesystemLookup ref={this.fileSystemLookupRef}
                                   checked={this.state.checkedFiles}
-                                  onCheck={paths => this.setState({checkedFiles: paths})}/>
+                                  onCheck={paths => this.setState({checkedFiles: paths})
+                                  }/>
             </div>
         </div>;
 
