@@ -565,7 +565,7 @@ class EcoreApp extends React.Component<any, State> {
 
                                         this.props.location.pathname.includes('/developer/') &&
 
-                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, fontVariantCaps: 'petite-caps', textAlign: "center", paddingLeft: "70px" }}>
+                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center", paddingLeft: "70px" }}>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "28px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
                                                     <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('metadata')}</span>
