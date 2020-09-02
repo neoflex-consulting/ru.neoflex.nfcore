@@ -10,6 +10,9 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.auth.Audit
 
+annotation "ru.neoflex.nfcore" as NFCore
+
+@NFCore(internal="true", documentation="Поставка - порция метаданных, загружаемых в единой транзакции")
 class Supply {
     QName name
     Timestamp date
