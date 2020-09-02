@@ -1,27 +1,50 @@
 import * as React from "react";
-import {Col, Row, Table} from 'antd';
+import {Tabs} from 'antd';
 import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
+import { NeoInput } from "neo-design/lib";
+//CSS
+import './../styles/MetaBrowser.css';
+import DatasetGrid from "./app/dataset/DatasetGrid";
+
+const { TabPane } = Tabs;
 
 export interface Props {
 }
 
 interface State {
     ePackages: Ecore.EPackage[];
+    data: {name:string,type:string,uri:string}[];
 }
 
 class MetaBrowser extends React.Component<Props & WithTranslation, State> {
-    state = {ePackages: Ecore.EPackage.Registry.ePackages()};
+
+    gridRef = React.createRef<any>();
+
+    state = {
+        ePackages: Ecore.EPackage.Registry.ePackages(),
+        data: [] as {
+            name:string,
+            type:string,
+            uri:string
+            children:any,
+            show:any,
+            hide:any
+        }[]
+    };
 
     componentDidMount(): void {
         API.instance().fetchPackages().then(packages=>{
-            this.setState({ePackages: packages})
+            this.setState({ePackages: packages},
+                ()=>{
+                    this.setState({data: this.getData()})
+                })
         })
     }
 
-    getName = (eObject: any): JSX.Element => {
+    getName = (eObject: any): string => {
         let prefix: string = '';
         let name: string = eObject.get('name');
         let postfix: string = '';
@@ -83,21 +106,75 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 return p.get('eType').get('name') + ' ' + p.get('name')
             }).join(', ') + ')';
         }
-        return <span>{prefix}<b>{name}</b>{postfix}</span>;
+        return `<span>${prefix}<b>${name}</b>${postfix}</span>`;
     };
 
-    render() {
+
+    getColDefs = () => {
+        let colDef = [];
+        let rowData = new Map();
+        rowData.set('field', 'name');
+        rowData.set('headerName', this.props.t('metadata name'));
+        rowData.set('textAlign','right');
+        rowData.set('component','expand');
+        rowData.set('width', '737');
+        colDef.push(rowData);
+        rowData = new Map();
+        rowData.set('field', 'type');
+        rowData.set('headerName', this.props.t('metadata type'));
+        rowData.set('textAlign','right');
+        rowData.set('width', '322');
+        colDef.push(rowData);
+        rowData = new Map();
+        rowData.set('field', 'key');
+        rowData.set('headerName', this.props.t('metadata uri'));
+        rowData.set('textAlign','right');
+        rowData.set('width', '707');
+        colDef.push(rowData);
+        return colDef
+    };
+
+    getData = () => {
         let data: any[] = [];
         for (let ePackage of this.state.ePackages) {
             let eClassifiers: any[] = [];
-            data.push({key: ePackage.eURI(), name: this.getName(ePackage), type: ePackage.eClass.get('name'), children: eClassifiers});
+            data.push({
+                key: ePackage.eURI(),
+                name: ePackage.get('name'),
+                type: ePackage.eClass.get('name'),
+                children: eClassifiers,
+                isVisible: true
+            });
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
                 let child = {
                     key: eClassifier.eURI(),
                     name: this.getName(eClassifier),
                     type: eClassifier.eClass.get('name'),
-                    children: children2
+                    depth: 0,
+                    children: children2,
+                    isExpanded: false,
+                    isVisible: true,
+                    show: (redraw: boolean = false) => {
+                        child.isExpanded = true;
+                        children2.forEach(c => {
+                            c.isVisible = true;
+                        });
+                        if (redraw) {
+                            this.gridRef.current.onFilterChanged();
+                            this.gridRef.current.redraw();
+                        }
+                    },
+                    hide: (redraw: boolean = false) => {
+                        child.isExpanded = false;
+                        children2.forEach(c => {
+                            c.isVisible = false;
+                        });
+                        if (redraw) {
+                            this.gridRef.current.onFilterChanged();
+                            this.gridRef.current.redraw();
+                        }
+                    }
                 };
                 eClassifiers.push(child);
                 let eStructuralFeatures = eClassifier.get('eStructuralFeatures');
@@ -106,7 +183,13 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         children2.push({
                             key: eStructuralFeature.eURI(),
                             name: this.getName(eStructuralFeature),
-                            type: eStructuralFeature.eClass.get('name')
+                            type: eStructuralFeature.eClass.get('name'),
+                            depth: 1,
+                            isVisible: false,
+                            showParent: () => {
+                                child.isVisible = true;
+                                child.isExpanded = true;
+                            }
                         })
                     }
                 }
@@ -116,7 +199,13 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         children2.push({
                             key: eLiteral.eURI(),
                             name: eLiteral.get('name'),
-                            type: eLiteral.eClass.get('name')
+                            type: eLiteral.eClass.get('name'),
+                            depth: 1,
+                            isVisible: false,
+                            showParent: ()=>{
+                                child.isVisible = true;
+                                child.isExpanded = true;
+                            }
                         })
                     }
                 }
@@ -126,33 +215,89 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         children2.push({
                             key: eOperation.eURI(),
                             name: this.getName(eOperation),
-                            type: eOperation.eClass.get('name')
+                            type: eOperation.eClass.get('name'),
+                            depth: 1,
+                            isVisible: false,
+                            showParent: ()=> {
+                                child.isVisible = true;
+                                child.isExpanded = true;
+                            }
                         })
                     }
                 }
                 if (children2.length === 0) {
-                    delete child['children']
+                    delete child['children'];
                 }
+                children2.forEach(c=>{
+                    eClassifiers.push(c);
+                })
             }
         }
+        return data
+    };
+
+    render() {
         const {t} = this.props as Props & WithTranslation;
         return (
-            <Row style={{ marginTop: 15 }}>
+            <div id={"meta-browser"}>
                 <Helmet>
                     <title>{this.props.t('metadata')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
-                <Col span={1}/>
-                <Col span={22}>
-                    <Table dataSource={data} pagination={false}>
-                        <Table.Column title={t("name")} dataIndex="name" key="name"/>
-                        <Table.Column title={t("datatype")} dataIndex="type" key="type"/>
-                        <Table.Column title="URI" dataIndex="key" key="key"/>
-                    </Table>
-                </Col>
-                <Col span={1}/>
-            </Row>
-        );
+                <NeoInput
+                    className={"meta-browser-input"}
+                    type={"search"}
+                    onSearch={(str:string)=>{
+                        if (str !== "") {
+                            this.state.data.forEach(el=>{
+                                el.children.forEach((c1:any)=>{
+                                    if (c1.name.match(new RegExp(str,'gi'))) {
+                                        c1.isVisible = true;
+                                        if (c1.showParent)
+                                            c1.showParent();
+                                    } else {
+                                        c1.isVisible = false;
+                                    }
+                                })
+                            });
+                        } else {
+                            this.state.data.forEach(el=>{
+                                el.children.forEach((c1:any)=>{
+                                    if (c1.depth === 0) {
+                                        c1.isVisible = true;
+                                        c1.isExpanded = false;
+                                    } else {
+                                        c1.isVisible = false;
+                                    }
+                                })
+                            });
+                        }
+                        this.gridRef.current.onFilterChanged();
+                        this.gridRef.current.redraw();
+                    }}
+                />
+                <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
+                      defaultActiveKey={"ecore"}
+                      tabPosition={'top'}>
+                    {this.state.data.map(eObj=>{
+                        return <TabPane tab={t(eObj.name)}
+                                        key={t(eObj.name)}>
+                            <DatasetGrid
+                                ref={this.gridRef}
+                                height={654}
+                                rowData = {eObj.children}
+                                columnDefs = {this.getColDefs()}
+                                highlightClassFunction = {(params: any) => {
+                                    if (params.data.depth > 0)
+                                        return "meta-browser-highlight";
+                                    return ""
+                                }}
+                            />
+                        </TabPane>
+                    })}
+                </Tabs>
+            </div>
+        )
     }
 }
 

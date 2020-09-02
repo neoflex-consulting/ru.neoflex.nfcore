@@ -459,7 +459,7 @@ class Tools extends React.Component<any, State> {
         </div>;
 
         return (
-            <div >
+            <div id={"tools"}>
                 <Helmet>
                     <title>{this.props.t('tools')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />

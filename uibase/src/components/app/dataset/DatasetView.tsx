@@ -1848,8 +1848,6 @@ class DatasetView extends React.Component<any, State> {
                     ref={(g:any) => {
                         this.gridRef = g
                     }}
-                    serverAggregates = {this.state.serverAggregates}
-                    isAggregations = {this.state.isAggregations}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
@@ -1863,6 +1861,12 @@ class DatasetView extends React.Component<any, State> {
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}
                     aggregatedRows = {this.state.aggregatedRows}
+                    highlightClassFunction = {(params: any) => {
+                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
+                            return 'aggregate-highlight';
+                        }
+                        return ""
+                    }}
                     {...this.props}
                 />
                 <div id="filterButton">
@@ -2192,7 +2196,6 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <div style={{textAlign:"center"}}>
                             <b>{t("unresolved changes left")}</b>
-                            <br/>
                             <br/>
                             <div>
                                 <Button

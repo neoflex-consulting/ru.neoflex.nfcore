@@ -360,7 +360,10 @@
         "import files": "Импортировать файлы",
         "do export": "Экспортировать",
         "select scripts": "Выберите скрипты",
-        "select data": "Добавление данных"
+        "select data": "Добавление данных",
+        "metadata name": "Наименование",
+        "metadata type": "Тип данных",
+        "metadata uri": "URI"
 
 }
 
