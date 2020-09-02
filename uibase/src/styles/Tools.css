@@ -181,7 +181,7 @@
 }
 
 .tools-export-sql {
-    height: 162px;
+    height: 143px;
     border-bottom: none
 }
 
@@ -277,7 +277,8 @@
 }
 
 .tools-checkbox {
-    margin-top: 13px !important;
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
 }
 
 .tools-branch-checkbox {
