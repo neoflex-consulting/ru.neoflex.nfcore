@@ -3,7 +3,7 @@ import '../../../styles/Calendar.css';
 import {Button, Col, Input, InputNumber, Row, Select, Switch} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoInputNumber} from "neo-design/lib";
 
 interface Props {
     onCreateNotification?: (notificationStatus: any[]) => void;
@@ -151,17 +151,15 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                             <span>{t('deadlineDay')}</span>
                         </NeoCol>
                         <NeoCol span={12}>
-                            <InputNumber
-                                min={1}
-                                max={220}
-                                value={newNotification['deadlineDay']}
-                                disabled={false}
-                                style={{ width: '200px'}}
-                                onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e});
-                                    this.handleChange(event)
-                                }}
-                            />
+                            <NeoInputNumber
+                                    min={1}
+                                    max={220}
+                                    defaultValue={newNotification['deadlineDay']}
+                                    style={{width: '200px'}}
+                                    onChange={(e: any) => {
+                                        const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e});
+                                        this.handleChange(event)
+                                    }}/>
                         </NeoCol>
                     </NeoRow>
 
@@ -170,19 +168,19 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                             <span>{t('deadlineTime')}</span>
                         </NeoCol>
                         <NeoCol span={12}>
-                            <InputNumber
+                            <NeoInputNumber
                                 min={0}
                                 max={23}
-                                value={newNotification['deadlineTime']}
+                                defaultValue={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
-                                parser={value => value !== undefined ? value.replace(':00', '') : 1}
+                                /*parser={value => value !== undefined ? value.replace(':00', '') : 1}*/
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
                                     this.handleChange(event)
                                 }}
                             >
-                            </InputNumber>
+                            </NeoInputNumber>
                         </NeoCol>
                     </NeoRow>
                 </NeoRow>
