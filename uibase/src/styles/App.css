@@ -1,3 +1,20 @@
+/* полоса прокрутки (скроллбар) */
+::-webkit-scrollbar {
+  width: 4px; /* ширина для вертикального скролла */
+  height: 8px; /* высота для горизонтального скролла */
+  background-color: #f2f2f2;
+}
+
+/* ползунок скроллбара */
+::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #2a356c;
+}
+
 .app-logo {
   margin: auto auto auto 30px;
   color: #ffffff;
@@ -279,6 +296,20 @@
 
 /*Antd styles*/
 
+/*Drawer*/
+.ant-drawer {
+  position: absolute !important;
+  transform: translateY(-43%) !important;
+}
+
+.ant-drawer-header {
+  padding: 16px 24px 16px 40px !important;
+}
+
+.ant-drawer-body {
+  padding: 10px 40px 10px 40px !important;
+}
+
 /*ServerFilter*/
 .leftSplitter .ant-tree-node-content-wrapper-open .ant-tree-title {
   color: #B38136
@@ -309,8 +340,13 @@
 }
 
 /*Отключение подписи ошибки у select */
-.has-error .ant-form-explain, .has-error .ant-form-split {
-  display: none;
+.has-error .ant-form-explain, .has-error .ant-form-split, .show-help-leave-active {
+  display: none !important;
+  min-height: 0px !important;
+}
+
+.ant-form-item-with-help {
+  margin: auto !important;
 }
 
 .ant-menu-submenu-title {
@@ -433,6 +469,29 @@
   margin: unset!important;
 }
 
+.ant-modal-content{
+  height: auto !important;
+}
 
+#filterButton .ant-modal-content {
+  width: auto;
+}
 
+/*Calculator button*/
+.calc-block {
+  width: 194px;
+  height: 219px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+}
+
+.calc-button {
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid #D9D9D9 !important;
+  color: black !important;
+  margin: 5px;
+}
 
