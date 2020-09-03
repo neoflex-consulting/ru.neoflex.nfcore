@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Dropdown, Layout, Menu, notification, Row} from "antd/lib";
+import {Button, Dropdown, Layout, Menu, notification} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
@@ -15,9 +15,6 @@ import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
 import _map from "lodash/map";
 import Tools from "./components/Tools";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faEquals, faTools,} from "@fortawesome/free-solid-svg-icons";
-import {faBell, faBellSlash} from "@fortawesome/free-regular-svg-icons";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
@@ -29,7 +26,7 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoRow, NeoCol, NeoIcon, NeoButton} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoIcon, NeoRow} from "neo-design/lib";
 
 const backgroundColor = "#2a356c";
 
@@ -519,6 +516,8 @@ class EcoreApp extends React.Component<any, State> {
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
+        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata', 'filesystem']
+            .filter(k => this.props.location.pathname.split('/').includes(k));
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
@@ -546,19 +545,57 @@ class EcoreApp extends React.Component<any, State> {
                         </NeoCol>
                         <NeoCol span={14}
                                     style={{textAlign: 'center', alignItems: 'center', height: 'inherit'}}>
-                                    {
-                                        this.props.location.pathname.includes('/app/') &&
+                            {
+                                this.props.location.pathname.includes('/app/') &&
 
-                                        <MainContext.Consumer>
-                                            {(context: any) => {
-                                                return <HeaderMenu
-                                                    {...props}
-                                                    applications={this.state.applications}
-                                                    context={context}
-                                                />
-                                            }}
-                                        </MainContext.Consumer>
+                                <MainContext.Consumer>
+                                    {(context: any) => {
+                                        return <HeaderMenu
+                                            {...props}
+                                            applications={this.state.applications}
+                                            context={context}
+                                        />
+                                    }}
+                                </MainContext.Consumer>
+                            }
+                            {
+
+                                        this.props.location.pathname.includes('/developer/') &&
+
+                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center", paddingLeft: "70px" }}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px" }} key={'metadata'}>
+                                                <Link to={`/developer/metadata`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('metadata')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'data'}>
+                                                <Link to={`/developer/data`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('data')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'query'}>
+                                                <Link to={`/developer/query`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('query')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'tools'}>
+                                                <Link to={`/developer/tools`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('tools')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'masterdata'}>
+                                                <Link to={`/developer/masterdata`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('masterdata')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'filesystem'}>
+                                                <Link to={`/developer/filesystem`}>
+                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('filesystem')}</span>
+                                                </Link>
+                                            </Menu.Item>
+                                        </Menu>
                                     }
+
                         </NeoCol>
                         <NeoCol span={5}
                              style={{
@@ -579,15 +616,27 @@ class EcoreApp extends React.Component<any, State> {
                                         {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
                                     </div>
                             </Dropdown>
-                            <NeoButton type={'link'}
-                                       style={{marginRight:'10px'}}
-                            >
-                            <Link to={`/developer/data`}>
-                                    {/*<FontAwesomeIcon className="bell-icon developer-icon" icon={faTools} size="1x"/>*/}
-                                    <NeoIcon icon={'settings'} size={'14'} color={'white'} />
-                            </Link>
-                            </NeoButton>
-                            <NeoButton  type="link"
+                                {
+                                    this.props.history.location.pathname.includes('developer')
+                                        ?
+                                        <NeoButton
+                                            style={{marginRight: '10px'}}
+                                            type={"link"}
+                                            onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
+                                        >
+                                            <NeoIcon icon={"diagram"} size={'14'} color={'white'} />
+                                        </NeoButton>
+                                        :
+                                        <NeoButton type={'link'}
+                                                   style={{marginRight:'10px'}}
+                                        >
+                                            <Link to={`/developer/data`}>
+                                                <NeoIcon icon={'settings'} size={'14'} color={'white'} />
+                                            </Link>
+                                        </NeoButton>
+                                }
+                            <NeoButton
+                                type="link"
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
@@ -617,8 +666,14 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>
                 <Switch>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
-                    <Route path='/developer' component={this.renderSettings}/>
                     <Route path='/test' component={this.renderTest}/>
+                    <Route path='/developer/metadata' component={MetaBrowser}/>
+                    <Route path='/developer/query' component={QueryRunner}/>
+                    <Route exact={true} path='/developer/data' component={DataBrowser}/>
+                    <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
+                    <Route path='/developer/tools' component={Tools}/>
+                    <Route path='/developer/masterdata' component={MasterdataBrowser}/>
+                    <Route path='/developer/filesystem' component={FilesystemBrowser}/>
                 </Switch>
             </Layout>
         )
@@ -660,68 +715,6 @@ class EcoreApp extends React.Component<any, State> {
             </div>
     )};
 
-    renderSettings=()=>{
-        const {t} = this.props as WithTranslation;
-        let selectedKeys = ['metadata', 'data', 'query', 'tools', 'masterdata', 'filesystem']
-            .filter(k => this.props.location.pathname.split('/').includes(k));
-        return (
-            <Layout>
-                <Sider collapsible breakpoint="lg" collapsedWidth="0" theme="dark" width='260px' style={{ backgroundColor: '#1b2430' }}>
-                    <Menu className="sider-menu" theme="dark" mode="inline" selectedKeys={selectedKeys} style={{ marginTop: '20px', backgroundColor: '#1b2430', fontVariantCaps: 'petite-caps' }}>
-                        <Menu.Item style={{ fontSize: 14 }} key={'metadata'}>
-                            <Link to={`/developer/metadata`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee' }}/>
-                                <span style={{ color: '#eeeeee', }}>{t('metadata')}</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'data'}>
-                            <Link to={`/developer/data`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee' }}/>
-                                <span style={{ color: '#eeeeee' }}>{t('data')}</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'query'}>
-                            <Link to={`/developer/query`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
-                                <span style={{ color: '#eeeeee' }}>{t('query')}</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'tools'}>
-                            <Link to={`/developer/tools`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
-                                <span style={{ color: '#eeeeee' }}>{t('tools')}</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'masterdata'}>
-                            <Link to={`/developer/masterdata`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
-                                <span style={{ color: '#eeeeee' }}>{t('masterdata')}</span>
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item style={{ fontSize: 14 }} key={'filesystem'}>
-                            <Link to={`/developer/filesystem`}>
-                                <FontAwesomeIcon icon={faEquals} size="1x" style={{marginRight: "10px", color: '#eeeeee'}}/>
-                                <span style={{ color: '#eeeeee' }}>{t('filesystem')}</span>
-                            </Link>
-                        </Menu.Item>
-                    </Menu>
-                </Sider>
-                <Layout>
-                    <Content className="app-content">
-                        <Switch>
-                            <Route path='/developer/metadata' component={MetaBrowser}/>
-                            <Route path='/developer/query' component={QueryRunner}/>
-                            <Route exact={true} path='/developer/data' component={DataBrowser}/>
-                            <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
-                            <Route path='/developer/tools' component={Tools}/>
-                            <Route path='/developer/masterdata' component={MasterdataBrowser}/>
-                            <Route path='/developer/filesystem' component={FilesystemBrowser}/>
-                        </Switch>
-                    </Content>
-                </Layout>
-            </Layout>
-        )
-    };
 
     renderApplication = ()=>{
         return (

@@ -206,6 +206,9 @@ public class Exporter {
 
     public void zipResourceReferences(ZipOutputStream zipOutputStream, Resource resource) throws IOException {
         for (EObject eObject: resource.getContents()) {
+            if (isInternal(eObject)) {
+                continue;
+            }
             EClass eClass = eObject.eClass();
             EPackage ePackage = eClass.getEPackage();
             EStructuralFeature nameAttribute = Store.qualifiedNameDelegate.apply(eClass);
@@ -226,8 +229,18 @@ public class Exporter {
         }
     }
 
+    public static boolean isInternal(EObject eObject) {
+        return eObject.eClass().getEAnnotations().stream()
+                .filter(eAnnotation -> "ru.neoflex.nfcore".equals(eAnnotation.getSource()))
+                .flatMap(eAnnotation -> eAnnotation.getDetails().stream())
+                .anyMatch(entry -> "internal".equalsIgnoreCase(entry.getKey()) && "true".equalsIgnoreCase(entry.getValue()));
+    }
+
     public void zipResource(ZipOutputStream zipOutputStream, Resource resource) throws IOException {
         for (EObject eObject: resource.getContents()) {
+            if (isInternal(eObject)) {
+                continue;
+            }
             EClass eClass = eObject.eClass();
             EPackage ePackage = eClass.getEPackage();
             EStructuralFeature nameAttribute = Store.qualifiedNameDelegate.apply(eClass);
