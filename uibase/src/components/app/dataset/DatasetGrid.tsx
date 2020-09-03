@@ -116,7 +116,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             }
             this.gridOptions.isExternalFilterPresent = () => {return true;};
             this.gridOptions.doesExternalFilterPass = (node) => {
-                return node.data.__isVisible !== undefined ? node.data.__isVisible : true
+                return node.data.isVisible__ !== undefined ? node.data.isVisible__ : true
             };
             this.gridOptions.api!.onFilterChanged()
         }
