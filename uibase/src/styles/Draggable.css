@@ -25,6 +25,8 @@
 
 .SortableList {
     padding: unset;
+    /*max-height: 280px;*/
+    /*overflow: auto;*/
 }
 
 .SortableItem {
@@ -82,9 +84,9 @@
     -ms-flex-align: center;
     align-items: center;
     width: 100%;
-    height: 135px;
-    padding: 0 0px;
-    padding-top: 20px;
+    height: 104px;
+    /*padding: 0 0px;*/
+    padding-top: 5px;
     background-color: #FFF;
     border-top: 1px solid #EFEFEF;
     border-bottom: 1px solid #EFEFEF;
@@ -98,14 +100,17 @@
 }
 
 .ant-drawer-body div.filter__acceptButton {
-    position: fixed;
-    right: -25px;
-    top: 655px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
     height: 64px;
-    width: 720px;
+    width: 100%;
     background-color: #f2f2f2;
-    transform: translateX(-25px);
     padding: 16px 0 16px 40px;
+}
+
+.ant-drawer-right .ant-drawer-content-wrapper {
+    height: 840px !important;
 }
 
 .SortableHelper {
@@ -141,4 +146,15 @@
     user-select: none;
     color: #333;
     font-weight: 500;
+}
+
+#diagram .ant-drawer-content-wrapper,
+#aggregationButton .ant-drawer-content-wrapper,
+#aggregationGroupsButton .ant-drawer-content-wrapper,
+#hiddenColumnsButton .ant-drawer-content-wrapper,
+#calculatableexpressionsButton .ant-drawer-content-wrapper,
+#diagramButton .ant-drawer-content-wrapper,
+#filterButton .ant-drawer-content-wrapper,
+#sortButton .ant-drawer-content-wrapper{
+    height: 100vh !important;
 }
