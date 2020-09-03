@@ -129,7 +129,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         rowData.set('field', 'key');
         rowData.set('headerName', this.props.t('metadata uri'));
         rowData.set('textAlign','right');
-        rowData.set('width', '707');
+        rowData.set('width', '706');
         colDef.push(rowData);
         return colDef
     };
@@ -177,6 +177,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     }
                 };
                 eClassifiers.push(child);
+                let children2Index = 0;
                 let eStructuralFeatures = eClassifier.get('eStructuralFeatures');
                 if (eStructuralFeatures) {
                     for (let eStructuralFeature of eStructuralFeatures.array()) {
@@ -189,8 +190,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             showParent: () => {
                                 child.isVisible = true;
                                 child.isExpanded = true;
-                            }
-                        })
+                            },
+                            index: children2Index
+                        });
+                        children2Index += 1;
                     }
                 }
                 let eLiterals = eClassifier.get('eLiterals');
@@ -205,8 +208,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             showParent: ()=>{
                                 child.isVisible = true;
                                 child.isExpanded = true;
-                            }
-                        })
+                            },
+                            index: children2Index
+                        });
+                        children2Index += 1;
                     }
                 }
                 let eOperations = eClassifier.get('eOperations');
@@ -221,8 +226,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             showParent: ()=> {
                                 child.isVisible = true;
                                 child.isExpanded = true;
-                            }
-                        })
+                            },
+                            index: children2Index
+                        });
+                        children2Index += 1;
                     }
                 }
                 if (children2.length === 0) {
@@ -288,8 +295,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                 rowData = {eObj.children}
                                 columnDefs = {this.getColDefs()}
                                 highlightClassFunction = {(params: any) => {
-                                    if (params.data.depth > 0)
-                                        return "meta-browser-highlight";
+                                    if (params.data.depth > 0 && params.data.index % 2 === 0)
+                                        return "meta-browser-highlight-even";
+                                    if (params.data.depth > 0 && params.data.index % 2 !== 0)
+                                        return "meta-browser-highlight-odd";
                                     return ""
                                 }}
                             />

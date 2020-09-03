@@ -17,7 +17,7 @@ import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
 import DeleteButton from "./gridComponents/DeleteButton";
 //CSS
-import './../../../styles/RichGrid.css';
+import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import './../../../styles/AggregateHighlight.css';
@@ -664,7 +664,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const { t } = this.props;
         const {gridOptions} = this.state;
         return (
-            <div id="menuButton"
+            <div id="datasetGrid"
                  hidden={this.props.hide}
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
@@ -755,7 +755,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         </AgGridReact>
                     </ConfigProvider>
                     }
-                    <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
+                    <div id="datasetPaginator"
+                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
