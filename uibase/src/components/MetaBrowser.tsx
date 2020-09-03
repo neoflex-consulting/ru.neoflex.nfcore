@@ -143,7 +143,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 name: ePackage.get('name'),
                 type: ePackage.eClass.get('name'),
                 children: eClassifiers,
-                isVisible: true
+                __isVisible: true
             });
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
@@ -154,11 +154,11 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     depth: 0,
                     children: children2,
                     isExpanded: false,
-                    isVisible: true,
+                    __isVisible: true,
                     show: (redraw: boolean = false) => {
                         child.isExpanded = true;
                         children2.forEach(c => {
-                            c.isVisible = true;
+                            c.__isVisible = true;
                         });
                         if (redraw) {
                             this.gridRef.current.onFilterChanged();
@@ -168,7 +168,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     hide: (redraw: boolean = false) => {
                         child.isExpanded = false;
                         children2.forEach(c => {
-                            c.isVisible = false;
+                            c.__isVisible = false;
                         });
                         if (redraw) {
                             this.gridRef.current.onFilterChanged();
@@ -186,9 +186,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: this.getName(eStructuralFeature),
                             type: eStructuralFeature.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            __isVisible: false,
                             showParent: () => {
-                                child.isVisible = true;
+                                child.__isVisible = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -204,9 +204,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: eLiteral.get('name'),
                             type: eLiteral.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            __isVisible: false,
                             showParent: ()=>{
-                                child.isVisible = true;
+                                child.__isVisible = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -222,9 +222,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: this.getName(eOperation),
                             type: eOperation.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            __isVisible: false,
                             showParent: ()=> {
-                                child.isVisible = true;
+                                child.__isVisible = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -259,11 +259,11 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             this.state.data.forEach(el=>{
                                 el.children.forEach((c1:any)=>{
                                     if (c1.name.match(new RegExp(str,'gi'))) {
-                                        c1.isVisible = true;
+                                        c1.__isVisible = true;
                                         if (c1.showParent)
                                             c1.showParent();
                                     } else {
-                                        c1.isVisible = false;
+                                        c1.__isVisible = false;
                                     }
                                 })
                             });
@@ -271,10 +271,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             this.state.data.forEach(el=>{
                                 el.children.forEach((c1:any)=>{
                                     if (c1.depth === 0) {
-                                        c1.isVisible = true;
+                                        c1.__isVisible = true;
                                         c1.isExpanded = false;
                                     } else {
-                                        c1.isVisible = false;
+                                        c1.__isVisible = false;
                                     }
                                 })
                             });
