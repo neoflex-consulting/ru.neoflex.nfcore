@@ -24,10 +24,6 @@
     white-space: nowrap;
 }
 
-/*.ant-tabs-nav-container {
-    width: 400px !important;
-}*/
-
 /*regions*/
 #meta-browser {
     padding-top: 32px;
@@ -79,6 +75,7 @@
 }
 
 .meta-browser-highlighted-text[data-color="blue"] {
+    color: #424D78 !important;
 }
 
 .meta-browser-highlighted-text[data-color="yellow"] {
