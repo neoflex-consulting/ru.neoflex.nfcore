@@ -1,20 +1,21 @@
 /*override*/
-#meta-browser * .ag-header-cell-label {
-    justify-content: center;
-}
-
-#meta-browser * .ant-tabs-nav-container {
-    max-width: 880px !important;
+#meta-browser > .ant-tabs {
+    overflow: unset;
 }
 
 #meta-browser * .ant-tabs-top-bar {
-    max-width: 880px !important;
+    max-width: 1290px !important;
     margin-bottom: 40px;
 }
 
 #meta-browser * .ant-input {
     width: 396px;
 }
+
+#meta-browser * .ant-tabs-nav-container {
+    max-width: 1290px !important;
+}
+
 
 #meta-browser *  .ant-tabs-tab {
     color: #424D78 !important;
@@ -23,7 +24,6 @@
     word-wrap: unset;
     white-space: nowrap;
 }
-
 /*regions*/
 #meta-browser {
     padding-top: 32px;
@@ -32,7 +32,7 @@
 .meta-browser-tabs-region {
     position: relative;
     width: 92vw;
-    height: 840px;
+    height: 810px;
 }
 
 .meta-browser-center-element {
@@ -82,7 +82,11 @@
     color: #B38136 !important;
 }
 
-.meta-browser-highlight {
+.meta-browser-highlight-even {
+    background-color: #FFF8E0 !important;
+}
+
+.meta-browser-highlight-odd {
     background-color: #FFFCF3 !important;
 }
 
