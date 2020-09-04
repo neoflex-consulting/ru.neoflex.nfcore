@@ -1,3 +1,7 @@
-.aggregate-highlight {
-    background-color: lightcoral !important;
+.aggregate-highlight-even {
+    background-color: #FFF8E0 !important;
 }
+
+.aggregate-highlight-odd {
+     background-color: #FFFCF3 !important;
+ }

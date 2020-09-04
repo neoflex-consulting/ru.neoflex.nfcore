@@ -20,9 +20,8 @@ import DeleteButton from "./gridComponents/DeleteButton";
 import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import './../../../styles/AggregateHighlight.css';
 import './../../../styles/GridEdit.css';
-import {GridOptions, GridReadyEvent, RowNode, ValueGetterParams} from "ag-grid-community";
+import {GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
 
