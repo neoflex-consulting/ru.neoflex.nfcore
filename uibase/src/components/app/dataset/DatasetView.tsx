@@ -606,17 +606,6 @@ class DatasetView extends React.Component<any, State> {
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findParams(this.state.currentDatasetComponent, this.state.columnDefs);
             }
-            else if ((refresh === undefined || refresh.length === 0) &&
-                this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name') &&
-                this.props.context.userProfile.eResource().to().params !== undefined) {
-                this.getAllDatasetComponents(false)
-            }
-            else if (prevState.allDatasetComponents.length !== 0 &&
-                this.props.viewObject.get('datasetComponent').get('name') === this.state.currentDatasetComponent.eContents()[0].get('name')
-                && JSON.stringify(this.props.viewObject.get('datasetComponent').eResource().to()) !== JSON.stringify(this.state.currentDatasetComponent.to())
-            ) {
-                this.getAllDatasetComponents(false)
-            }
         }
         if (prevProps.t !== this.props.t && this.state.serverCalculatedExpression) {
             this.setState({serverCalculatedExpression: this.state.serverCalculatedExpression.map(expr => {
@@ -1305,7 +1294,7 @@ class DatasetView extends React.Component<any, State> {
                 <NeoSelect
                          getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                          width={'250px'}
-                         defaultValue={this.state.currentDatasetComponent.eContents()[0].get('name')}
+                         value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
                              this.handleChange(e)
                          }}
@@ -2063,6 +2052,21 @@ class DatasetView extends React.Component<any, State> {
                                 </Button>
                             </div>
                         </div>
+                    </Modal>
+                    <Modal
+                        key="save_menu"
+                        width={'500px'}
+                        title={t('saveReport')}
+                        visible={this.state.saveMenuVisible}
+                        footer={null}
+                        onCancel={this.handleSaveMenu}
+                    >
+                        <SaveDatasetComponent
+                            closeModal={this.handleSaveMenu}
+                            onSave={()=>this.getAllDatasetComponents(false)}
+                            currentDatasetComponent={this.state.currentDatasetComponent}
+                            {...this.props}
+                        />
                     </Modal>
                 </div>
             </div>

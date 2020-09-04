@@ -80,7 +80,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             columnDefs: this.props.columnDefs,
             rowData: this.props.rowData,
             highlights: [],
-            saveMenuVisible: false,
             locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
@@ -447,10 +446,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    handleSaveMenu = () => {
-        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
-    };
-
     getComponent = (className: string) => {
         if (className === "//Href") {
             return 'hrefComponent'
@@ -765,19 +760,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         />
                     </div>
                 </div>
-                <Modal
-                    key="save_menu"
-                    width={'500px'}
-                    title={t('saveReport')}
-                    visible={this.state.saveMenuVisible}
-                    footer={null}
-                    onCancel={this.handleSaveMenu}
-                >
-                    <SaveDatasetComponent
-                        closeModal={this.handleSaveMenu}
-                        {...this.props}
-                    />
-                </Modal>
             </div>
         )
     }
