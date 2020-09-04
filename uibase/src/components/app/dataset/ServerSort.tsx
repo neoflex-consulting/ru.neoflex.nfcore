@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import { Form, Switch} from 'antd';
+import { Form } from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -42,13 +42,12 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                 </NeoCol>
                 <NeoCol span={2}>
                     <Form.Item style={{ margin: 'auto' }}>
-                        <Switch
+                        <NeoSwitch
                             defaultChecked={value.enable !== undefined ? value.enable : true}
                             onChange={(e: any) => {
                                 const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                                 value.handleChange(event)
-                            }}>
-                        </Switch>
+                            }}/>
                     </Form.Item>
                 </NeoCol>
                 <NeoCol span={10}>
