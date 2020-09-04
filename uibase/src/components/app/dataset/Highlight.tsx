@@ -9,7 +9,8 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;

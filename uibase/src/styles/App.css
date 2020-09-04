@@ -244,7 +244,7 @@
 /*Drawer*/
 .ant-drawer {
   position: absolute !important;
-  transform: translateY(-43%) !important;
+  /*transform: translateY(-43%) !important;*/
 }
 
 .ant-drawer-header {

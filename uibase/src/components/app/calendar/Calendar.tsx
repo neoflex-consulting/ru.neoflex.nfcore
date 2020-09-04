@@ -25,7 +25,8 @@ import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import domtoimage from "dom-to-image";
@@ -654,7 +655,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="PlusIconInFullScreen">
             <Drawer
-                style={{top:'70px'}}
+                style={{top:'-160px'}}
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('createNotification')}
@@ -681,6 +682,7 @@ class Calendar extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <Drawer
+                style={{top:'-160px'}}
                 placement='right'
                 title={t('editNotification')}
                 width={'450px'}
@@ -708,7 +710,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="legendIconInFullScreen" key={"legendDrawer"}>
             <Drawer
-                style={{top:'70px'}}
+                style={{top:'-160px'}}
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
                 placement='right'
@@ -854,7 +856,7 @@ class Calendar extends React.Component<any, any> {
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
                                        style={{marginTop: '4px', marginRight:'16px'}}>
-                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} />
+                                <NeoIcon icon={"arrowLeft"} size={'s'} color={'#000000'} />
                             </NeoButton>
                         </div>
                         <div className="col-col-center">
@@ -865,7 +867,7 @@ class Calendar extends React.Component<any, any> {
                         <div className="col col-end" >
                             <NeoButton type={'link'} onClick={this.nextMonth}
                             style={{marginLeft:'16px'}}>
-                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} style={{transform:'rotate(-180deg)'}}/>
+                                <NeoIcon icon={"arrowRight"} size={'s'} color={'#000000'} />
                             </NeoButton>
                         </div>
 
@@ -873,7 +875,7 @@ class Calendar extends React.Component<any, any> {
                             style={{width: '24px', height: '24px', color: '#6e6e6e', marginRight: '5px'}}
                             type="link"
                             onClick={this.handleLegendMenu}>
-                            <NeoIcon icon={'legend'} />
+                            <NeoIcon icon={'legend'} size={'m'} />
                         </NeoButton>
                     </div>
                 }
@@ -925,7 +927,7 @@ class Calendar extends React.Component<any, any> {
                     <NeoButton
                         type="link"
                         onClick={this.handleCreateMenu}>
-                        <NeoIcon icon={'plus'} color={'#5E6785'} />
+                        <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'} />
                     </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
@@ -943,7 +945,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'} size={'16px'} />
+                    <NeoIcon icon={'calendar'} size={'s'} />
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -958,7 +960,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} size={'16px'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} size={'s'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
@@ -970,7 +972,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.onActionMenu}
                 >
-                    <NeoIcon icon={'print'} color={'#5E6785'} />
+                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'} />
                 </NeoButton>
                     :
                     null
@@ -982,7 +984,7 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            <NeoIcon icon={'fullScreen'} color={'#5E6785'} />
+            <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'} />
         </NeoButton>
             </div>
 

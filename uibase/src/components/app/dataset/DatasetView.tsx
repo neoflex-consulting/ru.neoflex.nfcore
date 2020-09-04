@@ -51,7 +51,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-import {NeoIcon, NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;
@@ -1234,40 +1235,40 @@ class DatasetView extends React.Component<any, State> {
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>
-                            <NeoIcon icon={'filter'} color={'#5E6785'}/>
+                            <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         <NeoButton type={'link'} title={t('sorts')}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
-                            <NeoIcon icon={'sort'} color={'#5E6785'}/>
+                            <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('calculator')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
-                            <NeoIcon icon={'calculator'} color={'#5E6785'}/>
+                            <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         <NeoButton type={'link'} title={t('aggregations')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
-                            <NeoIcon icon={'plusBlock'} color={'#5E6785'}/>
+                            <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         <NeoButton type={'link'} title={t('diagram')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=> {
                                        this.DiagramButton()
                                    }}>
-                            <NeoIcon icon={'barChart'} color={'#5E6785'}/>
+                            <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         <NeoButton type={'link'} title={t('grouping')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
-                            <NeoIcon icon={'add'} color={'#5E6785'}/>
+                            <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                     <NeoButton type={'link'} title={t('hiddencolumns')}
                                style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                     >
-                        <NeoIcon icon={"hide"} color={'#5E6785'}/>
+                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <Button
                         hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
@@ -1291,7 +1292,7 @@ class DatasetView extends React.Component<any, State> {
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('save')}
                                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
-                            <NeoIcon icon={'mark'} color={'#5E6785'}/>
+                            <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                     <div className='verticalLine' />
                 </div>
@@ -1359,14 +1360,14 @@ class DatasetView extends React.Component<any, State> {
                 <NeoButton type={'link'} title={t('grouping')}
                            style={{marginRight:'5px'}}
                            onClick={()=>{}}>
-                    <NeoIcon icon={'print'} color={'#5E6785'}/>
+                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'}/>
                 </NeoButton>
                 <NeoButton type={'link'}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
-                        <NeoIcon icon={'fullScreen'} color={'#5E6785'}/>
+                        <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
                              :
-                        <NeoIcon icon={'fullScreen'} color={'#5E6785'}/>
+                        <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
                     }
                 </NeoButton>
             </div>
@@ -1695,7 +1696,7 @@ class DatasetView extends React.Component<any, State> {
                 />
                 <div id="filterButton">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
@@ -1743,7 +1744,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="aggregationButton">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     placement='right'
                     title={t('aggregations')}
@@ -1773,7 +1774,7 @@ class DatasetView extends React.Component<any, State> {
                     </div>
                 <div id="aggregationGroupsButton">
                     <Drawer
-                        style={{top: '80px'}}
+                        style={{top: '-310px'}}
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
                         title={t('grouping')}
@@ -1819,7 +1820,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="sortButton">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
                     placement='right'
                     title={t('sorts')}
@@ -1849,7 +1850,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="hiddenColumnsButton">
                     <Drawer
-                        style={{top: '80px'}}
+                        style={{top: '-310px'}}
                         getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
                         placement='right'
                         title={t('hiddencolumns')}
@@ -1878,7 +1879,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="calculatableexpressionsButton">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
                     title={t('calculator')}
@@ -1910,7 +1911,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagramButton">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
@@ -1939,7 +1940,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagram">
                 <Drawer
-                    style={{top: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('diagram') as HTMLElement}
                     placement='right'
                     title={t('diagram')}

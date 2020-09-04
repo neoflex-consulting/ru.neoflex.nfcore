@@ -26,7 +26,8 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoCol, NeoIcon, NeoRow} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 const backgroundColor = "#2a356c";
 
@@ -624,14 +625,14 @@ class EcoreApp extends React.Component<any, State> {
                                             type={"link"}
                                             onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
-                                            <NeoIcon icon={"diagram"} size={'14'} color={'white'} />
+                                            <NeoIcon icon={"diagram"} size={'m'} color={'white'} />
                                         </NeoButton>
                                         :
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
                                         >
                                             <Link to={`/developer/data`}>
-                                                <NeoIcon icon={'settings'} size={'14'} color={'white'} />
+                                                <NeoIcon icon={'settings'} size={'m'} color={'white'} />
                                             </Link>
                                         </NeoButton>
                                 }
@@ -640,9 +641,9 @@ class EcoreApp extends React.Component<any, State> {
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <NeoIcon icon={'notification_off'} size={'16'} color={'white'} />
+                                        <NeoIcon icon={'notification_off'} size={'m'} color={'white'} />
                                     :
-                                        <NeoIcon icon={'notification'} size={'16'} color={'white'} />}
+                                        <NeoIcon icon={'notification'} size={'m'} color={'white'} />}
                             </NeoButton>
                                     <span style={{
                                         textTransform: "capitalize",
@@ -658,7 +659,7 @@ class EcoreApp extends React.Component<any, State> {
                                 onClick={this.logOut}
                                 type="link"
                             >
-                                <NeoIcon icon={'exit'} size={'16'} color={'white'} />
+                                <NeoIcon icon={'exit'} size={'m'} color={'white'} />
                             </NeoButton>
                             </div>
                         </NeoCol>
