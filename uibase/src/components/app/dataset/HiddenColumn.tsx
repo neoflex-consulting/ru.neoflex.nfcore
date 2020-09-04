@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
-import {Col, Form, Row, Switch, Typography} from 'antd';
+import {Col, Form, Row, Typography} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {NeoSwitch} from "neo-design/lib";
 
 const { Paragraph } = Typography;
 
@@ -50,13 +51,12 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableHi
         </Col>
         <Col span={2}>
             <Form.Item style={{ display: 'inline-block' }}>
-                <Switch
+                <NeoSwitch
                     defaultChecked={value.enable !== undefined ? value.enable : true}
                     onChange={(e: any) => {
                         const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                         value.handleChange(event, true)
-                    }}>
-                </Switch>
+                    }}/>
             </Form.Item>
         </Col>
     </Row>

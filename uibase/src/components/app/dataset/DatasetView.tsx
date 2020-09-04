@@ -35,20 +35,13 @@ import {
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 //icons
-import filterIcon from "../../../icons/filterIcon.svg";
 import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import groupIcon from "../../../icons/groupIcon.svg";
-import orderIcon from "../../../icons/orderIcon.svg";
-import calculatorIcon from "../../../icons/calculatorIcon.svg";
-import diagramIcon from "../../../icons/diagramIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
 import penIcon from "../../../icons/penIcon.svg";
 import flagIcon from "../../../icons/flagIcon.svg";
 import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
-import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
-import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";

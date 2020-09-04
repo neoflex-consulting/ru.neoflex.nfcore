@@ -1,15 +1,16 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch} from 'antd';
+import {Button, Row, Col, Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {paramType} from "./DatasetView"
+import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {NeoSwitch} from "neo-design/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -76,13 +77,12 @@ const SortableItem = SortableElement(({value}: any) => {
             </Col>
             <Col span={2}>
                 <Form.Item style={{ display: 'inline-block' }}>
-                    <Switch
+                    <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
                             const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                             value.handleChange(event)
-                        }}>
-                    </Switch>
+                        }}/>
                 </Form.Item>
             </Col>
             <Col span={2}>

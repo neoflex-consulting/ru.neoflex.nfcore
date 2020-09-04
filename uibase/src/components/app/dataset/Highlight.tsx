@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Form, Switch, Modal, Radio} from 'antd';
+import {Form, Modal, Radio} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
@@ -9,7 +9,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -49,13 +49,12 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
             <NeoCol span={2} style={{alignItems:'flex-start'}}>
                 <Form.Item style={{ display: 'inline-block' }}>
-                    <Switch
+                    <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
                             const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                             value.handleChange(event)
-                        }}>
-                    </Switch>
+                        }}/>
                 </Form.Item>
             </NeoCol>
             <NeoCol span={8} style={{flexDirection:'column', alignItems:'flex-start'}}>
