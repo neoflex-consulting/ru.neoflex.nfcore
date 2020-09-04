@@ -16,7 +16,15 @@ export interface Props {
 
 interface State {
     ePackages: Ecore.EPackage[];
-    data: {name:string,type:string,uri:string}[];
+    data: {
+        name:string,
+        type:string,
+        uri:string
+        children:any,
+        show:any,
+        hide:any,
+        isVisible__:boolean
+    }[];
 }
 
 class MetaBrowser extends React.Component<Props & WithTranslation, State> {
@@ -31,7 +39,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             uri:string
             children:any,
             show:any,
-            hide:any
+            hide:any,
+            isVisible__:boolean
         }[]
     };
 
@@ -255,38 +264,41 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     className={"meta-browser-input"}
                     type={"search"}
                     onSearch={(str:string)=>{
-                        if (str !== "") {
                             this.state.data.forEach(el=>{
+                                el.isVisible__ = str === "";
                                 el.children.forEach((c1:any)=>{
-                                    if (c1.name.match(new RegExp(str,'gi'))) {
-                                        c1.isVisible__ = true;
-                                        if (c1.showParent)
-                                            c1.showParent();
+                                    if (str !== "") {
+                                        if (c1.name.match(new RegExp(str,'gi'))) {
+                                            c1.isVisible__ = true;
+                                            el.isVisible__ = true;
+                                            if (c1.showParent)
+                                                c1.showParent();
+                                        } else {
+                                            c1.isVisible__ = false;
+                                        }
                                     } else {
-                                        c1.isVisible__ = false;
+                                        if (c1.depth === 0) {
+                                            el.isVisible__ = true;
+                                            c1.isVisible__ = true;
+                                            c1.isExpanded = false;
+                                        } else {
+                                            c1.isVisible__ = false;
+                                        }
                                     }
                                 })
                             });
-                        } else {
-                            this.state.data.forEach(el=>{
-                                el.children.forEach((c1:any)=>{
-                                    if (c1.depth === 0) {
-                                        c1.isVisible__ = true;
-                                        c1.isExpanded = false;
-                                    } else {
-                                        c1.isVisible__ = false;
-                                    }
-                                })
-                            });
+                        if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
+                            this.gridRef.current.onFilterChanged();
+                            this.gridRef.current.redraw();
                         }
-                        this.gridRef.current.onFilterChanged();
-                        this.gridRef.current.redraw();
+                        this.setState({data:this.state.data.slice()})
                     }}
                 />
                 <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
                       defaultActiveKey={"ecore"}
                       tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
+                        if (eObj.isVisible__ )
                         return <TabPane tab={t(eObj.name)}
                                         key={t(eObj.name)}>
                             <DatasetGrid
