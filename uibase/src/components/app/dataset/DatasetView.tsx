@@ -118,7 +118,6 @@ interface State {
     allLegendPosition: Array<EObject>;
     currentTheme: string;
     showUniqRow: boolean;
-    isHighlightsUpdated: boolean;
     isHidden: boolean;
     isDisabled: boolean;
     isReadOnly: boolean;
@@ -192,7 +191,6 @@ class DatasetView extends React.Component<any, State> {
             allLegendPosition: [],
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
@@ -1071,7 +1069,7 @@ class DatasetView extends React.Component<any, State> {
             const serverParam = filterParam(newServerParam);
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
-            this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
+            this.setState<never>({[paramName]: newServerParam});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
@@ -1667,7 +1665,6 @@ class DatasetView extends React.Component<any, State> {
                     columnDefs = {this.state.columnDefs}
                     currentTheme = {this.state.currentTheme}
                     showUniqRow = {this.state.showUniqRow}
-                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
                     saveChanges = {this.changeDatasetViewState}
                     onApplyEditChanges = {this.onApplyEditChanges}
                     isEditMode = {this.state.isEditMode}
