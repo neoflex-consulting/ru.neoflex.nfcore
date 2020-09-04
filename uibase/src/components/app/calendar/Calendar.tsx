@@ -654,6 +654,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="PlusIconInFullScreen">
             <Drawer
+                style={{top:'70px'}}
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('createNotification')}
@@ -707,6 +708,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="legendIconInFullScreen" key={"legendDrawer"}>
             <Drawer
+                style={{top:'70px'}}
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
                 placement='right'
