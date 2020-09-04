@@ -51,7 +51,8 @@ import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
 import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-import {NeoIcon, NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
 const textAlignMap_: any = textAlignMap;

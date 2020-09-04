@@ -1,19 +1,16 @@
 import React from 'react';
 import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
+import {add} from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
-import {ru, enUS} from "date-fns/locale";
+import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer, Input, Select} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCalendarAlt} from "@fortawesome/free-regular-svg-icons";
-import {faAlignJustify, faPlus, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {Button, Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import {add} from "date-fns";
 import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
@@ -25,7 +22,8 @@ import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import domtoimage from "dom-to-image";
@@ -852,7 +850,7 @@ class Calendar extends React.Component<any, any> {
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
                                        style={{marginTop: '4px', marginRight:'16px'}}>
-                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} />
+                                <NeoIcon icon={"arrowLeft"} size={'m'} color={'#000000'} />
                             </NeoButton>
                         </div>
                         <div className="col-col-center">
@@ -863,7 +861,7 @@ class Calendar extends React.Component<any, any> {
                         <div className="col col-end" >
                             <NeoButton type={'link'} onClick={this.nextMonth}
                             style={{marginLeft:'16px'}}>
-                                <NeoIcon icon={"left"} size={'16'} color={'#000000'} style={{transform:'rotate(-180deg)'}}/>
+                                <NeoIcon icon={"arrowLeft"} size={'m'} color={'#000000'} style={{transform:'rotate(-180deg)'}}/>
                             </NeoButton>
                         </div>
 
@@ -941,7 +939,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'} size={'16px'} />
+                    <NeoIcon icon={'calendar'} size={'m'} />
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -956,7 +954,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} size={'16px'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} size={'m'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>

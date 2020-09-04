@@ -173,7 +173,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 max={23}
                                 defaultValue={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
-                                /*parser={value => value !== undefined ? value.replace(':00', '') : 1}*/
+                                parser={value => value !== undefined ? value.replace(':00', '') : 1}
                                 style={{ width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});

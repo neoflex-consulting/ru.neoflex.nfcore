@@ -10,7 +10,8 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoIcon, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -163,7 +164,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         type={'link'}
                         title={value.t("delete row")}
                         key={'deleteRowButton'}
-                        value={'deleteRowButton'}
+                        /*value={'deleteRowButton'}*/
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
                         <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
@@ -249,7 +250,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                         type={'link'}
                         title={t("add row")}
                         key={'createNewRowButton'}
-                        value={'createNewRowButton'}
+                        /*value={'createNewRowButton'}*/
                         onClick={this.createNewRow}
                     >
                         <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto'}}/>
