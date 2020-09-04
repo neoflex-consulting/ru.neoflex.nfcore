@@ -61,7 +61,9 @@ class DatasetValidatorExt extends DatasetValidator {
                     }
                 }
                 catch (Throwable e) {}
-                if (currentDatasetComponent.size() == 0 || currentDatasetComponent.size() == 1) {
+                if (currentDatasetComponent.size() == 0 ||
+                        (currentDatasetComponent.size() == 1 && currentDatasetComponent.contents[0].get(0).access != Access.DEFAULT)
+                ) {
                     return validate(datasetComponent, diagnostics, context, "access - must be set 'Default' ")
                 }
             }

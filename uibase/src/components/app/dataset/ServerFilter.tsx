@@ -1,16 +1,14 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select, Switch, Input} from 'antd';
+import { Form } from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {paramType} from "./DatasetView"
+import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -43,15 +41,16 @@ const SortableItem = SortableElement(({value}: any) => {
             <NeoCol span={1}>
                 <span>{value.index}</span>
             </NeoCol>
-            <NeoCol  span={2}>
+            <NeoCol span={2}>
                 <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
-                    <Switch
+                    <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
                             const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
                             value.handleChange(event)
-                        }}>
-                    </Switch>
+                        }}
+                    />
+
                 </Form.Item>
             </NeoCol>
             <NeoCol span={8}>
@@ -109,7 +108,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             width={'208px'}
                             getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                             placeholder={value.t('operation')}
-                            style={{ width: '179px', marginLeft: '5px' }}
+                            style={{ marginLeft: '5px' }}
                             allowClear={true}
                             onChange={(e: any) => {
                                 const event = e ? e : JSON.stringify({index: value.index, columnName: 'operation', value: undefined})
@@ -163,8 +162,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
-                        key={'deleteRowButton'}
-                        /*value={'deleteRowButton'}*/
+                        id={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
                         <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
@@ -191,39 +189,18 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
         const {t} = this.props;
         return (
             <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
-                <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
-                    <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, color: '#878787'}}>{t('sysfilters')}</div>
-                    </Col>
-                    <Col span={12} style={{textAlign: "right"}}>
-                        <Button
-                            title={t("reset")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'resetButton'}
-                            value={'resetButton'}
-                            onClick={this.reset}
-                        >
-                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={t("add row")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'createNewRowButton'}
-                            value={'createNewRowButton'}
-                            onClick={this.createNewRow}
-                        >
-                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={t("run query")}
-                            style={{width: '40px'}}
-                            key={'runQueryButton'}
-                            value={'runQueryButton'}
-                            htmlType="submit"
-                        >
-                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-                        </Button>
-                    </Col>
+                <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('sysfilters')}</div>
+                    </NeoCol>
+                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                        <NeoButton type={'link'}
+                                   title={t("reset")}
+                                   id={'resetButton'}
+                                   onClick={this.reset}>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Фильтры по умолчанию</span>
+                        </NeoButton>
+                    </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>
                     {
@@ -249,23 +226,22 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                     <NeoButton
                         type={'link'}
                         title={t("add row")}
-                        key={'createNewRowButton'}
-                        /*value={'createNewRowButton'}*/
+                        id={'createNewRowButton'}
                         onClick={this.createNewRow}
                     >
-                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto'}}/>
-                        <h4 style={{color: '#B38136'}}>Добавить</h4>
+                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
                     </NeoButton>
                 </Form.Item>
-                <Form.Item>
-                    <div className={'filter__acceptButton'}>
-                        <NeoButton
-                            title={t('apply')}
-                            onClick={()=> {}}>
-                            {t('apply')}
-                        </NeoButton>
-                    </div>
-                </Form.Item>
+                <div className={'filter__acceptButton'}>
+                    <NeoButton
+                        id={'runQueryButton'}
+                        title={t('apply')}
+                        style={{width: '144px'}}
+                        onClick={this.handleSubmit}>
+                        {t('apply')}
+                    </NeoButton>
+                </div>
             </Form>
         )
     }

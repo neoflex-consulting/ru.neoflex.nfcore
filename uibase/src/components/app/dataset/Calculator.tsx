@@ -1,9 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
-import {Button, Row, Col, Form, Select, Input, List} from 'antd';
+import {Form, List} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {DrawerParameterComponent} from './DrawerParameterComponent';
@@ -13,6 +11,7 @@ import {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
 import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 
 const inputOperationKey: string = "_inputOperationKey";
 const selectTypeKey: string = "_selectTypeKey";
@@ -52,47 +51,57 @@ interface FunctionsEventHandlerProps {
 }
 
 function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandlerProps) {
-    return <Col>
-                <Row>
-                    <Button style={{width: '40px'}} value={"1"} onClick={onButtonClick}>1</Button>
-                    <Button style={{width: '40px'}} value={"2"} onClick={onButtonClick}>2</Button>
-                    <Button style={{width: '40px'}} value={"3"} onClick={onButtonClick}>3</Button>
-                    <Button style={{width: '40px'}} value={"+"} onClick={onButtonClick}>+</Button>
-                </Row>
-                <Row>
-                    <Button style={{width: '40px'}} value={"4"} onClick={onButtonClick}>4</Button>
-                    <Button style={{width: '40px'}} value={"5"} onClick={onButtonClick}>5</Button>
-                    <Button style={{width: '40px'}} value={"6"} onClick={onButtonClick}>6</Button>
-                    <Button style={{width: '40px'}} value={"-"} onClick={onButtonClick}>-</Button>
-                </Row>
-                <Row>
-                    <Button style={{width: '40px'}} value={"7"} onClick={onButtonClick}>7</Button>
-                    <Button style={{width: '40px'}} value={"8"} onClick={onButtonClick}>8</Button>
-                    <Button style={{width: '40px'}} value={"9"} onClick={onButtonClick}>9</Button>
-                    <Button style={{width: '40px'}} value={"/"} onClick={onButtonClick}>/</Button>
-                </Row>
-                <Row>
-                    <Button style={{width: '40px'}} onClick={onClearClick}>c</Button>
-                    <Button style={{width: '40px'}} value={"0"} onClick={onButtonClick}>0</Button>
-                    <Button style={{width: '40px'}} value={"."} onClick={onButtonClick}>.</Button>
-                    <Button style={{width: '40px'}} value={"*"} onClick={onButtonClick}>*</Button>
-                </Row>
-                <Row>
-                    <Button style={{width: '40px'}} value={"("} onClick={onButtonClick}>(</Button>
-                    <Button style={{width: '80px'}} value={" "} onClick={onButtonClick}>{t("space")}</Button>
-                    <Button style={{width: '40px'}} value={")"} onClick={onButtonClick}>)</Button>
-                </Row>
-            </Col>
+    return <NeoCol style={{flexDirection:'column'}}>
+                <NeoRow>
+                    <NeoButton type={'link'} className={'calc-button'} id={'1'} onClick={onButtonClick}>1</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'2'} onClick={onButtonClick}>2</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'3'} onClick={onButtonClick}>3</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'4'} onClick={onButtonClick}>4</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'5'} onClick={onButtonClick}>5</NeoButton>
+                </NeoRow>
+                <NeoRow>
+                    <NeoButton type={'link'} className={'calc-button'} id={'6'} onClick={onButtonClick}>6</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'7'} onClick={onButtonClick}>7</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'8'} onClick={onButtonClick}>8</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'9'} onClick={onButtonClick}>9</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'0'} onClick={onButtonClick}>0</NeoButton>
+                </NeoRow>
+                <NeoRow>
+                    <NeoButton type={'link'} className={'calc-button'} id={'('} onClick={onButtonClick}>(</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={')'} onClick={onButtonClick}>)</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'`'} onClick={onButtonClick}>`</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'.'} onClick={onButtonClick}>.</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={','} onClick={onButtonClick}>,</NeoButton>
+                </NeoRow>
+                <NeoRow>
+                    <NeoButton type={'link'} className={'calc-button'} id={'-'} onClick={onButtonClick}>-</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'+'} onClick={onButtonClick}>+</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'*'} onClick={onButtonClick}>*</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'/'} onClick={onButtonClick}>/</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'||'} onClick={onButtonClick}>||</NeoButton>
+                    {/*<NeoButton type={'link'} className={'calc-button'} onClick={onClearClick}>c</NeoButton>*/}
+                </NeoRow>
+                <NeoRow>
+                    <NeoButton type={'link'} style={{width: '175px', height: '24px', marginTop: '5px', border: '1px solid #D9D9D9', color: 'black'}} onClick={onButtonClick} id={' '}>{t("space")}</NeoButton>
+                </NeoRow>
+            </NeoCol>
 }
 
 function CreateFunctions({onButtonClick, functions,t}:FunctionsEventHandlerProps) {
-    return (<Col key={"CreateFunctionsCol"}>
+    return (<NeoCol key={"CreateFunctionsCol"} style={{flexDirection:'column'}}>
         {functions ? functions.map(func => {
-            return <Row key={func.get("literal") + "row"}>
-                <Button key={func.get("literal")} style={{textAlign: "left"}} value={t(func.get("literal"))} onClick={onButtonClick}>{t(func.get("literal")).split("(")[0]}</Button>
-            </Row>
+            return <NeoRow key={func.get("literal") + "row"}>
+                <NeoButton
+                    type={'link'}
+                    key={func.get("literal")}
+                    style={{textAlign: "left", color: 'black'}}
+                    id={t(func.get("literal"))}
+                    onClick={onButtonClick}>
+                    {t(func.get("literal")).split("(")[0]}
+                </NeoButton>
+            </NeoRow>
         }) : null}
-    </Col>)
+    </NeoCol>)
 }
 
 interface ColumnButtonsProps {
@@ -115,15 +124,17 @@ export function hash(s: string) : string {
 }
 
 function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
-    return <List>
+    return <List style={{padding:'8px 12px 17px'}}>
                 {columnDefs?.map((element, index) =>{
-                    return <Button style={{marginRight: '2px', marginTop: '2px', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left" }}
-                                   key={"Button"+element.get("field")}
-                                   onClick={onClick}
-                                   value={encode(index)}
+                    return <NeoButton
+                        type={'link'}
+                        style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left" }}
+                        key={"Button"+element.get("field")}
+                        onClick={onClick}
+                        id={encode(index)}
                             >
                              {encode(index) + " - " + element.get("headerName")}
-                           </Button>
+                           </NeoButton>
                 })}
             </List>
 }
@@ -186,8 +197,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         const cursorEndPosition = this.expressionRef.current.resizableTextArea.textArea.selectionEnd!;
         const oldString = (this.getFieldValue(inputOperationKey))?this.getFieldValue(inputOperationKey):"";
         if (cursorStartPosition !== cursorEndPosition) {
-            newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.value + oldString.substring(cursorEndPosition);
-            this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.value).length;
+            newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorEndPosition);
+            this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
             this.setFieldsValue({
                 [inputOperationKey]: newString
             })
@@ -197,8 +208,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
             } else {
                 this.caretLastPosition = cursorStartPosition!
             }
-            newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.value + oldString.substring(cursorStartPosition);
-            this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.value).length;
+            newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorStartPosition);
+            this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
             this.setFieldsValue({
                 [inputOperationKey]: newString
             })
@@ -295,37 +306,39 @@ class Calculator extends DrawerParameterComponent<Props, State> {
     render() {
     return (
         <div>
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form >
+                <Form.Item style={{marginBottom:'0px', lineHeight:'19px'}}>
+                        <div style={{ display: "inherit", fontSize: '16px', fontWeight: 500, color: '#333333'}}>
+                            {this.t('calculatableExpressions')}
+                        </div>
+                </Form.Item>
                 <Form.Item>
-                    <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{this.t('calculatableExpressions')}</div>
-                    </Col>
-                    <Col span={12}>
                         {
                             this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
-                                <Select getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
+                                <NeoCol span={12} style={{justifyContent:'flex-start'}}>
+                                <NeoSelect
+                                    width={'310px'}
+                                    getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
-                                        onChange={(e: any) => {
-                                            this.setState({currentIndex:e});
-                                        }}>
+                                    onChange={(e: any) => {
+                                        this.setState({currentIndex:e});
+                                    }}>
                                     {this.state.parametersArray?.map((element)=> {
-                                        return <Select.Option
+                                        return <option
                                             key={(element.datasetColumn)? element.datasetColumn : ""}
                                             value={(element.index)? element.index - 1 : 0}
                                         >
                                             {element.datasetColumn}
-                                        </Select.Option>
+                                        </option>
                                     })}
 
-                                </Select>
+                                </NeoSelect>
+                                </NeoCol>
                             )
                         }
-                    </Col>
-                </Form.Item>
-                <Form.Item>
-                    <Col span={8}>
+                    <NeoCol span={12} style={{justifyContent:'flex-end'}}>
                         {
                             this.getFieldDecorator(inputFieldKey,{
                                 rules: [{
@@ -333,89 +346,50 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                     message: ' '
                                 }]
                             })(
-                                <Input placeholder={this.t("Enter new column name")}/>
+                                <NeoInput width={'310px'} placeholder={this.t("Enter new column name")}/>
                             )
                         }
-                    </Col>
-                    <Col span={8}>
-                        <Button
-                            title={this.t("add row")}
-                            style={{width: '40px', marginLeft: '10px', marginRight: '10px'}}
-                            key={'createNewRowButton'}
-                            value={'createNewRowButton'}
-                            onClick={this.createNewRow}
-                        >
-                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={this.t("run query")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'runQueryButton'}
-                            value={'runQueryButton'}
-                            htmlType="submit"
-                        >
-                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={this.t("delete")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'deleteButton'}
-                            value={'deleteButton'}
-                            onClick={this.deleteRow}
-                        >
-                            <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={this.t("reset")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'resetButton'}
-                            value={'resetButton'}
-                            onClick={this.reset}
-                        >
-                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                        </Button>
-                    </Col>
-                    <Col span={8}/>
+                    </NeoCol>
                 </Form.Item>
-                <Row>
                 <Form.Item>
-                <Col span={8}>
+                <NeoCol span={12} style={{justifyContent:'flex-start'}}>
                     {
                         this.getFieldDecorator(selectTypeKey,{
                             rules: [{
                             }]
                         })(
-                            <Select placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true}>
-                                {Object.keys(appTypes).map(type => <Select.Option key={type} value={type}>
+                            <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}>
+                                {Object.keys(appTypes).map(type => <option key={type} value={type}>
                                     {this.t(type)}
-                                </Select.Option>)}
-                            </Select>
+                                </option>)}
+                            </NeoSelect>
                         )
                     }
-                </Col>
-                </Form.Item>
-                <Form.Item>
-                <Col span={8}>
+                </NeoCol>
+                <NeoCol span={12} style={{justifyContent:'flex-end'}}>
                     {
                         this.getFieldDecorator(selectMaskKey,{
                             rules: [{
                             }]
                         })(
-                            <Select placeholder={this.t('format')} key={selectMaskKey} allowClear={true}>
-                                {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <Select.Option
+                            <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}>
+                                {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
                                     key={mask.key}
                                     value={mask.value}>
                                     {this.t(mask.key)}
-                                </Select.Option>) : undefined}
-                            </Select>
+                                </option>) : undefined}
+                            </NeoSelect>
                         )
                     }
-                </Col>
+                </NeoCol>
                 </Form.Item>
-                </Row>
-                <Form.Item>
-                    <Row>
-                        <Col span={24}>
+                <Form.Item style={{marginBottom:'0px'}}>
+                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>Вычислительное выражение</div>
+                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>Создайте вычисление, используя псевдонимы столбцов</div>
+                </Form.Item>
+                    <Form.Item>
+                    <NeoRow style={{marginBottom: '12px'}}>
+                        <NeoCol span={24}>
                             {
                                 this.getFieldDecorator(inputOperationKey,{
                                     /*value: this.currentOperation,*/
@@ -425,49 +399,74 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                         message: ' '
                                     }]
                                 })(
-                                    <TextArea ref={this.expressionRef}
-                                           placeholder={this.t("Expression")}
-                                           style={{height:"150px"}}
+                                    <TextArea
+                                       ref={this.expressionRef}
+                                       placeholder={this.t("Expression")}
+                                       style={{height:"112px"}}
                                     />
                                   )
                             }
-
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={8}>
-                            <div style={{textAlign:"center"}}>
-                                {this.t("columns")}
+                        </NeoCol>
+                    </NeoRow>
+                    <NeoRow>
+                        <NeoCol span={8} style={{justifyContent: 'flex-start'}}>
+                            <div className={'calc-block'}>
+                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                    {this.t("columns")}
+                                </div>
+                                <div style={{ height: '219px', overflowY:"auto"}}>
+                                    <CreateColumnButtons
+                                        onClick={this.handleCalculate}
+                                        columnDefs={this.props.defaultColumnDefs.filter((def:any) => !def.get('hide'))}/>
+                                </div>
                             </div>
-                            <div style={{ height: '500px', overflowY:"scroll"}}>
-                                <CreateColumnButtons
-                                    onClick={this.handleCalculate}
-                                    columnDefs={this.props.defaultColumnDefs.filter((def:any) => !def.get('hide'))}/>
-                            </div>
-                        </Col>
-                        <Col span={8}>
-                            <div style={{textAlign:"center"}}>
-                                {this.t("keypad")}
-                            </div>
-                            <CreateCalculator
-                                onButtonClick={this.handleCalculate}
-                                onClearClick={this.handleClear}
-                                t={this.t}/>
-                        </Col>
-                        <Col span={8}>
-                            <div style={{textAlign:"center"}}>
-                                {this.t("functions/operators")}
-                            </div>
-                            <div style={{ height: '500px', overflowY:"scroll" }}>
-                                <CreateFunctions
+                        </NeoCol>
+                        <NeoCol span={8}>
+                            <div className={'calc-block'}>
+                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                    {this.t("keypad")}
+                                </div>
+                                <CreateCalculator
                                     onButtonClick={this.handleCalculate}
-                                    functions={this.state.calculatorFunction}
-                                    t={this.t}
-                                />
+                                    onClearClick={this.handleClear}
+                                    t={this.t}/>
                             </div>
-                        </Col>
-                    </Row>
+                        </NeoCol>
+                        <NeoCol span={8} style={{justifyContent: 'flex-end'}}>
+                            <div className={'calc-block'}>
+                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                    {this.t("functions/operators")}
+                                </div>
+                                <div style={{ height: '219px', overflowY:"auto" }}>
+                                    <CreateFunctions
+                                        onButtonClick={this.handleCalculate}
+                                        functions={this.state.calculatorFunction}
+                                        t={this.t}
+                                    />
+                                </div>
+                            </div>
+                        </NeoCol>
+                    </NeoRow>
                 </Form.Item>
+                    <div className={'filter__acceptButton'}>
+                        <NeoButton
+                                title={this.t("run query")}
+                                style={{width: '127px'}}
+                                id={'runQueryButton'}
+                                onClick={this.handleSubmit}
+                            >
+                            {this.props.t('apply')}
+                        </NeoButton>
+                        <NeoButton
+                            type={'secondary'}
+                            title={this.t("reset")}
+                            style={{width: '117px', marginLeft: '16px'}}
+                            id={'resetButton'}
+                            onClick={this.reset}
+                        >
+                            {this.props.t('clear')}
+                        </NeoButton>
+                    </div>
             </Form>
         </div>
         )

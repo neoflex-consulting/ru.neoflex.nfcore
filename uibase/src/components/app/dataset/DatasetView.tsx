@@ -34,21 +34,15 @@ import {
 } from "../../../utils/consts";
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
+import './../../../styles/AggregateHighlight.css';
 //icons
-import filterIcon from "../../../icons/filterIcon.svg";
 import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import groupIcon from "../../../icons/groupIcon.svg";
-import orderIcon from "../../../icons/orderIcon.svg";
-import calculatorIcon from "../../../icons/calculatorIcon.svg";
-import diagramIcon from "../../../icons/diagramIcon.svg";
 import plusIcon from "../../../icons/plusIcon.svg";
 import penIcon from "../../../icons/penIcon.svg";
 import flagIcon from "../../../icons/flagIcon.svg";
 import trashcanIcon from "../../../icons/trashcanIcon.svg";
 import downloadIcon from "../../../icons/downloadIcon.svg";
 import printIcon from "../../../icons/printIcon.svg";
-import aggregationGroupsIcon from "../../../icons/aggregationGroupsIcon.svg";
-import hiddenColumnIcon from "../../../icons/hide.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
@@ -141,6 +135,7 @@ interface State {
     isDropdownVisible: boolean
     isDropdownVisibleForDiagramm: boolean
     aggregatedRows: {[key: string]: unknown}[];
+    isGroovyDataset: boolean;
 }
 
 const defaultComponentValues = {
@@ -215,8 +210,9 @@ class DatasetView extends React.Component<any, State> {
             isCheckEditBufferVisible: false,
             isDropdownVisible: false,
             isDropdownVisibleForDiagramm: false,
-            aggregatedRows: []
-        }
+            aggregatedRows: [],
+            isGroovyDataset: false
+        };
         this.gridRef = React.createRef();
     }
 
@@ -269,6 +265,9 @@ class DatasetView extends React.Component<any, State> {
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
+                        }
+                        if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
+                            this.setState({isGroovyDataset: true})
                         }
                     })
             }
@@ -1239,40 +1238,40 @@ class DatasetView extends React.Component<any, State> {
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>
-                            <NeoIcon icon={'filter'} color={'#5E6785'}/>
+                            <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
-                        <NeoButton type={'link'} title={t('sorts')}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
-                            <NeoIcon icon={'sort'} color={'#5E6785'}/>
-                        </NeoButton>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('sorts')}
+                                                                 onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
+                            <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>
+                        </NeoButton> : null}
                     <div className='verticalLine' />
-                        <NeoButton type={'link'} title={t('calculator')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
-                            <NeoIcon icon={'calculator'} color={'#5E6785'}/>
-                        </NeoButton>
-                        <NeoButton type={'link'} title={t('aggregations')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
-                            <NeoIcon icon={'plusBlock'} color={'#5E6785'}/>
-                        </NeoButton>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('calculator')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
+                            <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
+                        </NeoButton> : null}
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('aggregations')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
+                            <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
+                        </NeoButton> : null}
                         <NeoButton type={'link'} title={t('diagram')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=> {
                                        this.DiagramButton()
                                    }}>
-                            <NeoIcon icon={'barChart'} color={'#5E6785'}/>
+                            <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
-                        <NeoButton type={'link'} title={t('grouping')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
-                            <NeoIcon icon={'add'} color={'#5E6785'}/>
-                        </NeoButton>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('grouping')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
+                            <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
+                        </NeoButton> : null}
                     <NeoButton type={'link'} title={t('hiddencolumns')}
                                style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                     >
-                        <NeoIcon icon={"hide"} color={'#5E6785'}/>
+                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <Button
                         hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
@@ -1296,7 +1295,7 @@ class DatasetView extends React.Component<any, State> {
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('save')}
                                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
-                            <NeoIcon icon={'mark'} color={'#5E6785'}/>
+                            <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                     <div className='verticalLine' />
                 </div>
@@ -1366,187 +1365,17 @@ class DatasetView extends React.Component<any, State> {
                 <NeoButton type={'link'} title={t('grouping')}
                            style={{marginRight:'5px'}}
                            onClick={()=>{}}>
-                    <NeoIcon icon={'print'} color={'#5E6785'}/>
+                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'}/>
                 </NeoButton>
                 <NeoButton type={'link'}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
-                        <NeoIcon icon={'fullScreen'} color={'#5E6785'}/>
+                        <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
                              :
-                        <NeoIcon icon={'fullScreen'} color={'#5E6785'}/>
+                        <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
                     }
                 </NeoButton>
             </div>
-
-            {/*<Button*/}
-            {/*    hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}*/}
-            {/*    title={t('edit')}*/}
-            {/*    style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*    onClick={() => {*/}
-            {/*        if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0*/}
-            {/*            || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0*/}
-            {/*            || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0*/}
-            {/*            || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {*/}
-            {/*            this.refresh(true);*/}
-            {/*        } else {*/}
-            {/*            this.setState({isEditMode:!this.state.isEditMode},()=>{*/}
-            {/*                this.gridRef.onEdit()*/}
-            {/*            })*/}
-            {/*        }*/}
-            {/*    }}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('filters')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={filterIcon} alt="filterIcon" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('sorts')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={orderIcon} alt="orderIcon" />*/}
-            {/*</Button>*/}
-            {/*<div style={{display: 'inline-block', height: '30px',*/}
-            {/*    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',*/}
-            {/*    borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>*/}
-            {/*<Button title={t('calculator')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={calculatorIcon} alt="calculatorIcon" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('aggregations')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={groupIcon} alt="groupIcon" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('diagram')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{*/}
-            {/*            this.DiagramButton()*/}
-            {/*        }*/}
-            {/*        }*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={diagramIcon} alt="diagramIcon" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('grouping')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={aggregationGroupsIcon} alt="aggregationGroups" />*/}
-            {/*</Button>*/}
-            {/*<Button title={t('hiddencolumns')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*        onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}*/}
-            {/*>*/}
-            {/*    <img style={{width: '24px', height: '24px'}} src={hiddenColumnIcon} alt="hiddenColumns" />*/}
-            {/*</Button>*/}
-            {/*<div style={{display: 'inline-block', height: '30px',*/}
-            {/*    borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',*/}
-            {/*     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>*/}
-
-            {/* <Button title={t('save')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*         onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}*/}
-            {/* >*/}
-            {/*     <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />*/}
-            {/* </Button>*/}
-
-            {/*{*/}
-            {/*      this.state.currentDatasetComponent.rev !== undefined &&*/}
-            {/*      this.state.currentDatasetComponent.eContents()[0].get( 'access') !== 'Default' &&*/}
-            {/*     <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*     >*/}
-            {/*         <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon"*/}
-            {/*              onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}/>*/}
-            {/*     </Button>*/}
-            {/* }*/}
-
-            {/* <div style={{display: 'inline-block', height: '30px',*/}
-            {/*     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',*/}
-            {/*     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>*/}
-            {/* {this.state.allDatasetComponents.length !== 0*/}
-            {/* && this.state.currentDatasetComponent !== undefined*/}
-            {/* &&*/}
-            {/* <div id="selectsInFullScreen" style={{display: 'inline-block'}}>*/}
-            {/*     <Select*/}
-            {/*         getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}*/}
-            {/*         style={{ width: '250px'}}*/}
-            {/*         showSearch={true}*/}
-            {/*         value={this.state.currentDatasetComponent.eContents()[0].get('name')}*/}
-            {/*         onChange={(e: any) => {*/}
-            {/*             this.handleChange(e)*/}
-            {/*         }}*/}
-            {/*     >*/}
-            {/*         <OptGroup*/}
-            {/*             label='Default'>*/}
-            {/*             {*/}
-            {/*                 this.state.allDatasetComponents*/}
-            {/*                     .filter((c: any) => c.eContents()[0].get('access') === 'Default')*/}
-            {/*                     .map( (c: any) =>*/}
-            {/*                         <Option*/}
-            {/*                             key={c.eContents()[0].get('name')}*/}
-            {/*                             value={c.eContents()[0].get('name')}>*/}
-            {/*                             {c.eContents()[0].get('name')}*/}
-            {/*                         </Option>)*/}
-            {/*             }*/}
-            {/*         </OptGroup>*/}
-            {/*         <OptGroup label='Private'>*/}
-            {/*             {*/}
-            {/*                 this.state.allDatasetComponents*/}
-            {/*                     .filter((c: any) => c.eContents()[0].get('access') === 'Private')*/}
-            {/*                     .map( (c: any) =>*/}
-            {/*                         <Option*/}
-            {/*                             key={c.eContents()[0].get('name')}*/}
-            {/*                             value={c.eContents()[0].get('name')}>*/}
-            {/*                             {c.eContents()[0].get('name')}*/}
-            {/*                         </Option>)*/}
-            {/*             }*/}
-            {/*         </OptGroup>*/}
-            {/*         <OptGroup label='Public'>*/}
-            {/*             {*/}
-            {/*                 this.state.allDatasetComponents*/}
-            {/*                     .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')*/}
-            {/*                     .map( (c: any) =>*/}
-            {/*                         <Option*/}
-            {/*                             key={c.eContents()[0].get('name')}*/}
-            {/*                             value={c.eContents()[0].get('name')}>*/}
-            {/*                             {c.eContents()[0].get('name')}*/}
-            {/*                         </Option>)*/}
-            {/*             }*/}
-            {/*         </OptGroup>*/}
-            {/*     </Select>*/}
-            {/* </div>*/}
-            {/* }*/}
-            {/* <div style={{display: 'inline-block', height: '30px',*/}
-            {/*     borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',*/}
-            {/*     borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>*/}
-
-            {/* <Dropdown overlay={menu} placement="bottomLeft">*/}
-            {/*     <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>*/}
-            {/*         <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />*/}
-            {/*     </Button>*/}
-            {/* </Dropdown>*/}
-
-
-            {/* <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}*/}
-            {/*         onClick={()=>{}}*/}
-            {/* >*/}
-            {/*     <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />*/}
-            {/* </Button>*/}
-            {/* <Button*/}
-            {/*     className="buttonFullScreen"*/}
-            {/*     type="link"*/}
-            {/*     ghost*/}
-            {/*     style={{*/}
-            {/*         marginRight: '10px',*/}
-            {/*         width: '32px',*/}
-            {/*         height: '32px',*/}
-            {/*         color: 'rgb(151, 151, 151)'*/}
-            {/*     }}*/}
-            {/*     onClick={this.onFullScreen}*/}
-            {/* >*/}
-            {/*     {this.state.fullScreenOn  ?*/}
-            {/*         <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>*/}
-            {/*         :*/}
-            {/*         <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}*/}
-            {/* </Button>*/}
         </div>
     };
 
@@ -1850,8 +1679,6 @@ class DatasetView extends React.Component<any, State> {
                     ref={(g:any) => {
                         this.gridRef = g
                     }}
-                    serverAggregates = {this.state.serverAggregates}
-                    isAggregations = {this.state.isAggregations}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
@@ -1865,15 +1692,26 @@ class DatasetView extends React.Component<any, State> {
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}
                     aggregatedRows = {this.state.aggregatedRows}
+                    highlightClassFunction = {(params: any) => {
+                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length
+                            && (params.node.rowIndex - (this.state.rowData.length - this.state.aggregatedRows.length)) % 2 === 0) {
+                            return 'aggregate-highlight-even';
+                        }
+                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length
+                            && (params.node.rowIndex - (this.state.rowData.length - this.state.aggregatedRows.length)) % 2 !== 0) {
+                            return 'aggregate-highlight-odd';
+                        }
+                        return ""
+                    }}
                     {...this.props}
                 />
                 <div id="filterButton">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
-                    width={'720px'}
+                    width={'711px'}
                     visible={this.state.filtersMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
                     mask={false}
@@ -1881,7 +1719,7 @@ class DatasetView extends React.Component<any, State> {
                 >
                     {
 
-                        this.state.serverFilters
+                        this.state.serverFilters && !this.state.isGroovyDataset
                             ?
                             <ServerFilter
                                 {...this.props}
@@ -1894,7 +1732,7 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.filter}
                             />
                             :
-                            <ServerFilter/>
+                            null
                     }
                     {
                         this.state.highlights && this.state.allHighlightType
@@ -1917,18 +1755,16 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="aggregationButton">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     placement='right'
                     title={t('aggregations')}
-                    width={'700px'}
+                    width={'720px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
                     maskClosable={false}
                 >
-
-
                     {
                         this.state.serverAggregates
                             ?
@@ -1949,7 +1785,7 @@ class DatasetView extends React.Component<any, State> {
                     </div>
                 <div id="aggregationGroupsButton">
                     <Drawer
-                        style={{marginTop: '80px'}}
+                        style={{top: '-310px'}}
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
                         title={t('grouping')}
@@ -1995,11 +1831,11 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="sortButton">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
                     placement='right'
                     title={t('sorts')}
-                    width={'700px'}
+                    width={'720px'}
                     visible={this.state.sortsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
                     mask={false}
@@ -2025,6 +1861,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="hiddenColumnsButton">
                     <Drawer
+                        style={{top: '-310px'}}
                         getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
                         placement='right'
                         title={t('hiddencolumns')}
@@ -2053,11 +1890,11 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="calculatableexpressionsButton">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
                     title={t('calculator')}
-                    width={'700px'}
+                    width={'712px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
                     mask={false}
@@ -2085,7 +1922,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagramButton">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
@@ -2114,7 +1951,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagram">
                 <Drawer
-                    style={{marginTop: '80px'}}
+                    style={{top: '-310px'}}
                     getContainer={() => document.getElementById ('diagram') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
@@ -2194,7 +2031,6 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <div style={{textAlign:"center"}}>
                             <b>{t("unresolved changes left")}</b>
-                            <br/>
                             <br/>
                             <div>
                                 <Button

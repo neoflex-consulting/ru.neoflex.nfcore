@@ -1,0 +1,69 @@
+#datasetGrid {
+    filter: drop-shadow(-2px -2px 4px rgba(0, 0, 0, 0.05));
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#datasetGrid * .ag-header-cell-label {
+    justify-content: center;
+    font-size: 14px;
+}
+
+.functionalBar__header {
+    background: #F2F2F2 !important;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+#datasetGrid * .ag-header {
+    background: #F2F2F2;
+}
+
+#datasetGrid * .ag-column-hover {
+    background-color: unset;
+}
+
+#datasetGrid * .ag-header-cell:after {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 100%;
+    width: 1px;
+    height: 100%;
+    background-color: #E6E6E6;
+}
+
+#datasetGrid * .ag-center-cols-viewport {
+    border-left: 1px solid #E6E6E6;
+}
+
+#datasetGrid .ag-cell {
+    border-right: 1px solid #E6E6E6;
+    border-bottom: none;
+    border-top: none;
+}
+
+#datasetGrid .ag-row {
+    border: none;
+}
+
+#datasetGrid .ag-row:hover {
+    margin: -1px !important;
+    border: 1px solid #E6E6E6;
+    background: #FAFAFA !important;
+    box-sizing: border-box;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+#datasetGrid .ag-cell-focus {
+    border-left: 1px solid transparent;
+}
+
+#datasetGrid .ag-row:nth-child(even) {
+    background: #FAFAFA;
+}
+
+#datasetPaginator {
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}

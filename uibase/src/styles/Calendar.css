@@ -388,13 +388,17 @@
 }
 
 .calendar .ant-drawer-body div.legend__acceptButton {
-    position: fixed;
-    bottom: 0;
+    position: absolute;
+    bottom: 40px;
+    right: 0;
     height: 64px;
     width: 450px;
     background-color: #f2f2f2;
-    transform: translateX(-25px);
     padding: 16px 0 16px 40px;
+}
+
+.calendar .ant-drawer-body {
+    padding: 24px 40px !important;
 }
 
 .calendar .ant-drawer-body .ant-col-17 {

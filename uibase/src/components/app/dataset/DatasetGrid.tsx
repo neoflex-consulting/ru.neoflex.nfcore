@@ -17,40 +17,42 @@ import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
 import DeleteButton from "./gridComponents/DeleteButton";
 //CSS
-import './../../../styles/RichGrid.css';
+import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
-import './../../../styles/AggregateHighlight.css';
 import './../../../styles/GridEdit.css';
-import {GridOptions, GridReadyEvent, RowNode, ValueGetterParams} from "ag-grid-community";
+import {GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
+import Expand from "./gridComponents/Expand";
 
 const backgroundColor = "#fdfdfd";
 
 interface Props {
-    hide: boolean,
+    hide?: boolean,
     onCtrlA?: Function,
     onCtrlShiftA?: Function,
+    highlights?: {[key: string]: unknown}[];
     headerSelection?: boolean,
     onHeaderSelection?: Function,
     activeReportDateField: boolean,
-    currentDatasetComponent: Ecore.Resource,
+    currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
     columnDefs: Map<String,any>[],
-    paginationCurrentPage: number,
-    paginationTotalPage: number,
-    paginationPageSize: number,
-    isGridReady: boolean,
-    showUniqRow: boolean,
-    isHighlightsUpdated: boolean,
-    isAggregations: boolean;
+    paginationCurrentPage?: number,
+    paginationTotalPage?: number,
+    paginationPageSize?: number,
+    showUniqRow?: boolean,
+    isHighlightsUpdated?: boolean,
     saveChanges?: (newParam: any, paramName: string) => void;
-    serverAggregates: any[],
     numberOfNewLines: boolean,
-    onApplyEditChanges: (buffer: any[]) => void;
-    showEditDeleteButton: boolean;
-    showMenuCopyButton: boolean;
-    aggregatedRows: {[key: string]: unknown}[]
+    onApplyEditChanges?: (buffer: any[]) => void;
+    isEditMode?: boolean;
+    showEditDeleteButton?: boolean;
+    showMenuCopyButton?: boolean;
+    aggregatedRows?: {[key: string]: unknown}[];
+    height?: number;
+    width?: number;
+    highlightClassFunction?: ()=>{};
 }
 
 function isFirstColumn (params:ValueGetterParams) {
@@ -75,9 +77,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: 10,
             isGridReady: false,
-            isAggregations: true,
-            columnDefs: [],
-            rowData: [],
+            columnDefs: this.props.columnDefs,
+            rowData: this.props.rowData,
             highlights: [],
             saveMenuVisible: false,
             locale: switchAntdLocale(this.props.i18n, this.props.t),
@@ -90,6 +91,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
+                    expand: Expand,
                 },
                 defaultColDef: {
                     resizable: true,
@@ -108,8 +110,19 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (this.grid.current !== null) {
             this.grid.current.api = event.api;
             this.grid.current.columnApi = event.columnApi;
-            this.highlightAggregate();
+            if (this.props.highlightClassFunction) {
+                this.gridOptions.getRowClass = this.props.highlightClassFunction
+            }
+            this.gridOptions.isExternalFilterPresent = () => {return true;};
+            this.gridOptions.doesExternalFilterPass = (node) => {
+                return node.data.isVisible__ !== undefined ? node.data.isVisible__ : true
+            };
+            this.gridOptions.api!.onFilterChanged()
         }
+    };
+
+    onFilterChanged = () => {
+        this.gridOptions.api!.onFilterChanged()
     };
 
     onPaginationChanged = () => {
@@ -168,13 +181,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidMount(): void {
-        this.props.context.addDocxHandler(this.getDocxData.bind(this));
-        this.props.context.addExcelHandler(this.getExcelData.bind(this));
+        if (this.props.context) {
+            this.props.context.addDocxHandler(this.getDocxData.bind(this));
+            this.props.context.addExcelHandler(this.getExcelData.bind(this));
+        }
     }
 
     componentWillUnmount(): void {
-        this.props.context.removeDocxHandler();
-        this.props.context.removeExcelHandler();
+        if (this.props.context) {
+            this.props.context.removeDocxHandler();
+            this.props.context.removeExcelHandler();
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -196,23 +213,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
             },()=> !this.state.rowData || this.state.rowData.length === 0 ? this.grid.current.api.showNoRowsOverlay() : undefined
             )
         }
-        if (this.props.aggregatedRows.length > 0){
-            this.highlightAggregate();
+        if (this.props.aggregatedRows && this.props.aggregatedRows.length > 0 && this.props.highlightClassFunction){
+            this.gridOptions.getRowClass = this.props.highlightClassFunction
         }
-    }
-
-    highlightAggregate() {
-        if (this.props.aggregatedRows.length > 0) {
-            this.gridOptions.getRowClass = (params: any) => {
-                if (params.node.rowIndex >= this.props.rowData.length - this.props.aggregatedRows.length) {
-                    return 'aggregate-highlight';
-                }
-                return ""
-            };
-        } else if (!this.props.isEditMode) {
-            this.gridOptions.getRowClass = undefined;
-        }
-
     }
 
     private changeHighlight() {
@@ -652,16 +655,22 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
+    redraw = () => {
+        this.grid.current.api.redrawRows()
+    }
+
     render() {
         const { t } = this.props;
         const {gridOptions} = this.state;
         return (
-            <div id="menuButton"
+            <div id="datasetGrid"
                  hidden={this.props.hide}
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >
-                <div style={{ marginTop: '30px', height: 750, width: "99,5%"}}>
+                <div style={{
+                    height: this.props.height ? this.props.height : 750,
+                    width: this.props.width ? this.props.width : "99,5%"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -694,6 +703,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 <AgGridColumn
                                     onCellValueChanged={this.props.isEditMode ? this.onUpdate : undefined}
                                     onCellClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
+                                    width={col.get('width')}
                                     type={col.get('type')}
                                     key={col.get('field')}
                                     field={col.get('field')}
@@ -744,7 +754,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         </AgGridReact>
                     </ConfigProvider>
                     }
-                    <div style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
+                    <div id="datasetPaginator"
+                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}

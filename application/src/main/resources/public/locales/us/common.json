@@ -359,5 +359,8 @@
         "import files": "Import files",
         "do export": "Export",
         "select scripts": "Select scripts",
-        "select data": "Select data"
+        "select data": "Select data",
+        "metadata name": "Name",
+        "metadata type": "Type",
+        "metadata uri": "URI"
 }

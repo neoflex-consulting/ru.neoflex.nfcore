@@ -641,7 +641,7 @@ class EcoreApp extends React.Component<any, State> {
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <NeoIcon icon={'notificationOff'} size={'m'} color={'white'} />
+                                        <NeoIcon icon={'notification_off'} size={'m'} color={'white'} />
                                     :
                                         <NeoIcon icon={'notification'} size={'m'} color={'white'} />}
                             </NeoButton>

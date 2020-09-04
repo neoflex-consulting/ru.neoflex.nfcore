@@ -1,0 +1,115 @@
+/*override*/
+#meta-browser > .ant-tabs {
+    overflow: unset;
+}
+
+#meta-browser * .ant-tabs-top-bar {
+    max-width: 1290px !important;
+    margin-bottom: 40px;
+}
+
+#meta-browser * .ant-input {
+    width: 396px;
+}
+
+#meta-browser * .ant-tabs-nav-container {
+    max-width: 1290px !important;
+}
+
+
+#meta-browser *  .ant-tabs-tab {
+    color: #424D78 !important;
+    font-size: 15px;
+    font-family: 'Roboto', sans-serif;
+    word-wrap: unset;
+    white-space: nowrap;
+}
+/*regions*/
+#meta-browser {
+    padding-top: 32px;
+}
+
+.meta-browser-tabs-region {
+    position: relative;
+    width: 92vw;
+    height: 810px;
+}
+
+.meta-browser-center-element {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/*fonts*/
+/* roboto-regular - latin_cyrillic-ext_cyrillic */
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.eot'); /* IE9 Compat Modes */
+    src: local('Roboto'), local('Roboto-Regular'),
+    url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.woff') format('woff'), /* Modern Browsers */
+    url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../fonts/roboto-v20-latin_cyrillic-ext_cyrillic-regular.svg#Roboto') format('svg'); /* Legacy iOS */
+}
+
+/*text*/
+
+.meta-browser-text {
+    color: #333333;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    word-wrap: unset;
+    white-space: nowrap;
+    margin-bottom: 4px;
+}
+
+.meta-browser-highlighted-text {
+    margin-top: inherit;
+    margin-bottom: inherit;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    text-decoration: underline;
+}
+
+.meta-browser-highlighted-text[data-color="blue"] {
+    color: #424D78 !important;
+}
+
+.meta-browser-highlighted-text[data-color="yellow"] {
+    color: #B38136 !important;
+}
+
+.meta-browser-highlight-even {
+    background-color: #FFF8E0 !important;
+}
+
+.meta-browser-highlight-odd {
+    background-color: #FFFCF3 !important;
+}
+
+/*grid row*/
+
+.meta-browser-parent-element {
+    display: flex;
+    justify-content: space-between;
+}
+
+/*elements*/
+
+.meta-browser-button  {
+    background-color: transparent;
+    border: transparent;
+}
+
+.meta-browser-button:active  {
+    outline: none;
+}
+
+.meta-browser-input {
+    position: absolute;
+    right: 5vw;
+    top:  140px
+}
