@@ -18,11 +18,15 @@
     background: #F2F2F2;
 }
 
-#datasetGrid * .ag-header-cell-resize:after {
+#datasetGrid * .ag-column-hover {
+    background-color: unset;
+}
+
+#datasetGrid * .ag-header-cell:after {
     content: "";
     position: absolute;
     display: block;
-    left: 50%;
+    left: 100%;
     width: 1px;
     height: 100%;
     background-color: #E6E6E6;

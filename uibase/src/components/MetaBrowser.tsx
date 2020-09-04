@@ -16,7 +16,15 @@ export interface Props {
 
 interface State {
     ePackages: Ecore.EPackage[];
-    data: {name:string,type:string,uri:string}[];
+    data: {
+        name:string,
+        type:string,
+        uri:string
+        children:any,
+        show:any,
+        hide:any,
+        isVisible__:boolean
+    }[];
 }
 
 class MetaBrowser extends React.Component<Props & WithTranslation, State> {
@@ -31,7 +39,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             uri:string
             children:any,
             show:any,
-            hide:any
+            hide:any,
+            isVisible__:boolean
         }[]
     };
 
@@ -143,7 +152,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 name: ePackage.get('name'),
                 type: ePackage.eClass.get('name'),
                 children: eClassifiers,
-                isVisible: true
+                isVisible__: true
             });
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
@@ -154,11 +163,11 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     depth: 0,
                     children: children2,
                     isExpanded: false,
-                    isVisible: true,
+                    isVisible__: true,
                     show: (redraw: boolean = false) => {
                         child.isExpanded = true;
                         children2.forEach(c => {
-                            c.isVisible = true;
+                            c.isVisible__ = true;
                         });
                         if (redraw) {
                             this.gridRef.current.onFilterChanged();
@@ -168,7 +177,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     hide: (redraw: boolean = false) => {
                         child.isExpanded = false;
                         children2.forEach(c => {
-                            c.isVisible = false;
+                            c.isVisible__ = false;
                         });
                         if (redraw) {
                             this.gridRef.current.onFilterChanged();
@@ -186,9 +195,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: this.getName(eStructuralFeature),
                             type: eStructuralFeature.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            isVisible__: false,
                             showParent: () => {
-                                child.isVisible = true;
+                                child.isVisible__ = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -204,9 +213,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: eLiteral.get('name'),
                             type: eLiteral.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            isVisible__: false,
                             showParent: ()=>{
-                                child.isVisible = true;
+                                child.isVisible__ = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -222,9 +231,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                             name: this.getName(eOperation),
                             type: eOperation.eClass.get('name'),
                             depth: 1,
-                            isVisible: false,
+                            isVisible__: false,
                             showParent: ()=> {
-                                child.isVisible = true;
+                                child.isVisible__ = true;
                                 child.isExpanded = true;
                             },
                             index: children2Index
@@ -255,38 +264,41 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     className={"meta-browser-input"}
                     type={"search"}
                     onSearch={(str:string)=>{
-                        if (str !== "") {
                             this.state.data.forEach(el=>{
+                                el.isVisible__ = str === "";
                                 el.children.forEach((c1:any)=>{
-                                    if (c1.name.match(new RegExp(str,'gi'))) {
-                                        c1.isVisible = true;
-                                        if (c1.showParent)
-                                            c1.showParent();
+                                    if (str !== "") {
+                                        if (c1.name.match(new RegExp(str,'gi'))) {
+                                            c1.isVisible__ = true;
+                                            el.isVisible__ = true;
+                                            if (c1.showParent)
+                                                c1.showParent();
+                                        } else {
+                                            c1.isVisible__ = false;
+                                        }
                                     } else {
-                                        c1.isVisible = false;
+                                        if (c1.depth === 0) {
+                                            el.isVisible__ = true;
+                                            c1.isVisible__ = true;
+                                            c1.isExpanded = false;
+                                        } else {
+                                            c1.isVisible__ = false;
+                                        }
                                     }
                                 })
                             });
-                        } else {
-                            this.state.data.forEach(el=>{
-                                el.children.forEach((c1:any)=>{
-                                    if (c1.depth === 0) {
-                                        c1.isVisible = true;
-                                        c1.isExpanded = false;
-                                    } else {
-                                        c1.isVisible = false;
-                                    }
-                                })
-                            });
+                        if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
+                            this.gridRef.current.onFilterChanged();
+                            this.gridRef.current.redraw();
                         }
-                        this.gridRef.current.onFilterChanged();
-                        this.gridRef.current.redraw();
+                        this.setState({data:this.state.data.slice()})
                     }}
                 />
                 <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
                       defaultActiveKey={"ecore"}
                       tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
+                        if (eObj.isVisible__ )
                         return <TabPane tab={t(eObj.name)}
                                         key={t(eObj.name)}>
                             <DatasetGrid
