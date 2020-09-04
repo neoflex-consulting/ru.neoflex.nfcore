@@ -34,6 +34,7 @@ import {
 } from "../../../utils/consts";
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
+import './../../../styles/AggregateHighlight.css';
 //icons
 import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import plusIcon from "../../../icons/plusIcon.svg";
@@ -132,6 +133,7 @@ interface State {
     isUpdateAllowed: boolean;
     isCheckEditBufferVisible: boolean;
     aggregatedRows: {[key: string]: unknown}[];
+    isGroovyDataset: boolean;
 }
 
 const defaultComponentValues = {
@@ -204,8 +206,9 @@ class DatasetView extends React.Component<any, State> {
             isUpdateAllowed: false,
             isDeleteAllowed: false,
             isCheckEditBufferVisible: false,
-            aggregatedRows: []
-        }
+            aggregatedRows: [],
+            isGroovyDataset: false
+        };
         this.gridRef = React.createRef();
     }
 
@@ -258,6 +261,9 @@ class DatasetView extends React.Component<any, State> {
                         });
                         if (allDatasetComponents.length !== 0) {
                             this.setState({allDatasetComponents})
+                        }
+                        if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
+                            this.setState({isGroovyDataset: true})
                         }
                     })
             }
@@ -1230,21 +1236,21 @@ class DatasetView extends React.Component<any, State> {
                                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>
                             <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
-                        <NeoButton type={'link'} title={t('sorts')}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('sorts')}
+                                                                 onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
                             <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>
-                        </NeoButton>
+                        </NeoButton> : null}
                     <div className='verticalLine' />
-                        <NeoButton type={'link'} title={t('calculator')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('calculator')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
                             <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
-                        </NeoButton>
-                        <NeoButton type={'link'} title={t('aggregations')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
+                        </NeoButton> : null}
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('aggregations')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
                             <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
-                        </NeoButton>
+                        </NeoButton> : null}
                         <NeoButton type={'link'} title={t('diagram')}
                                    style={{marginRight:'5px'}}
                                    onClick={()=> {
@@ -1252,11 +1258,11 @@ class DatasetView extends React.Component<any, State> {
                                    }}>
                             <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
-                        <NeoButton type={'link'} title={t('grouping')}
-                                   style={{marginRight:'5px'}}
-                                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('grouping')}
+                                                                  style={{marginRight:'5px'}}
+                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
                             <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
-                        </NeoButton>
+                        </NeoButton> : null}
                     <NeoButton type={'link'} title={t('hiddencolumns')}
                                style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
@@ -1680,8 +1686,13 @@ class DatasetView extends React.Component<any, State> {
                     showMenuCopyButton = {this.state.isInsertAllowed}
                     aggregatedRows = {this.state.aggregatedRows}
                     highlightClassFunction = {(params: any) => {
-                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
-                            return 'aggregate-highlight';
+                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length
+                            && (params.node.rowIndex - (this.state.rowData.length - this.state.aggregatedRows.length)) % 2 === 0) {
+                            return 'aggregate-highlight-even';
+                        }
+                        if (params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length
+                            && (params.node.rowIndex - (this.state.rowData.length - this.state.aggregatedRows.length)) % 2 !== 0) {
+                            return 'aggregate-highlight-odd';
                         }
                         return ""
                     }}
@@ -1701,7 +1712,7 @@ class DatasetView extends React.Component<any, State> {
                 >
                     {
 
-                        this.state.serverFilters
+                        this.state.serverFilters && !this.state.isGroovyDataset
                             ?
                             <ServerFilter
                                 {...this.props}
@@ -1714,7 +1725,7 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.filter}
                             />
                             :
-                            <ServerFilter/>
+                            null
                     }
                     {
                         this.state.highlights && this.state.allHighlightType
