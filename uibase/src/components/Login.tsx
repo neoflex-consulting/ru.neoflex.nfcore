@@ -127,7 +127,6 @@ export class Login extends React.Component<any, State> {
                             <NeoInput
                                 className="input-login"
                                 key="pass"
-                                password
                                 onChange={(e: any) => {
                                     this.setState({ password: e.target.value })
                                 }}
