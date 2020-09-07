@@ -131,6 +131,8 @@ interface State {
     isDeleteAllowed: boolean;
     isUpdateAllowed: boolean;
     isCheckEditBufferVisible: boolean;
+    isDropdownVisible: boolean
+    isDropdownVisibleForDiagramm: boolean
     aggregatedRows: {[key: string]: unknown}[];
     isGroovyDataset: boolean;
 }
@@ -204,6 +206,8 @@ class DatasetView extends React.Component<any, State> {
             isUpdateAllowed: false,
             isDeleteAllowed: false,
             isCheckEditBufferVisible: false,
+            isDropdownVisible: false,
+            isDropdownVisibleForDiagramm: false,
             aggregatedRows: [],
             isGroovyDataset: false
         };
@@ -1338,10 +1342,12 @@ class DatasetView extends React.Component<any, State> {
             </div>
             }
                 <div className='verticalLine'/>
-                 <Dropdown overlay={menu} placement="bottomLeft">
-                     <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
-                         <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-                     </Button>
+
+                 <Dropdown overlay={menu} placement="bottomLeft" visible={this.state.isDropdownVisible}>
+                     <NeoButton type={'link'} title={t('download')} style={{marginRight:'5px', marginTop:'2px'}}
+                                onClick={()=>{this.setState({isDropdownVisible:!this.state.isDropdownVisible})}}>
+                         <NeoIcon icon={"download"} color={'#5E6785'}/>
+                     </NeoButton>
                  </Dropdown>
                 <NeoButton type={'link'} title={t('grouping')}
                            style={{marginRight:'5px'}}
@@ -1441,10 +1447,11 @@ class DatasetView extends React.Component<any, State> {
                 borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
                 borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft">
-                <Button title={t('download')} style={{color: 'rgb(151, 151, 151)'}}>
+            <Dropdown overlay={menu} placement="bottomLeft" visible={this.state.isDropdownVisibleForDiagramm}>
+                    <NeoButton type={'link'} title={t('download')} style={{marginRight:'5px'}}
+                               onClick={()=>{this.setState({isDropdownVisibleForDiagramm:!this.state.isDropdownVisibleForDiagramm})}}>
                     <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-                </Button>
+                </NeoButton>
             </Dropdown>
             <Checkbox onChange={this.withTable.bind(this)}>{t("download with table")}</Checkbox>
 

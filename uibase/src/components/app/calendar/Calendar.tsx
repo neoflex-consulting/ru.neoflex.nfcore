@@ -3,14 +3,11 @@ import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
-import {ru, enUS} from "date-fns/locale";
+import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer, Input, Select} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCalendarAlt} from "@fortawesome/free-regular-svg-icons";
-import {faAlignJustify, faPlus, faExpandArrowsAlt, faCompressArrowsAlt} from "@fortawesome/free-solid-svg-icons";
+import {Button, Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import {add} from "date-fns";
@@ -655,7 +652,6 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="PlusIconInFullScreen">
             <Drawer
-                style={{top:'-160px'}}
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 placement='right'
                 title={t('createNotification')}
@@ -682,7 +678,6 @@ class Calendar extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <Drawer
-                style={{top:'-160px'}}
                 placement='right'
                 title={t('editNotification')}
                 width={'450px'}
@@ -710,7 +705,6 @@ class Calendar extends React.Component<any, any> {
         return (
             <div id="legendIconInFullScreen" key={"legendDrawer"}>
             <Drawer
-                style={{top:'-160px'}}
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
                 placement='right'
