@@ -105,7 +105,7 @@ export class Login extends React.Component<any, State> {
                         <Row>
                             <div className={"authorizing"}>Авторизация</div>
                         </Row>
-                        <Row className={"Login"} style={{textAlign: "center" , marginRight: "230px"}}>
+                        <Row className={"Login"}>
                                 Логин
                         </Row>
                         <div className={"inputLogin"}>
@@ -118,7 +118,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                             </div>
-                        <Row className={"Password"} style={{textAlign: "center" , marginRight: "223px"}}>
+                        <Row className={"Password"}>
                                 Пароль
                         </Row>
                         <div className={"inputPassword"}>

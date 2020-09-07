@@ -458,12 +458,14 @@
   }
 
   .Login {
+    text-align: center;
+    margin-right: 229px!important;
     margin-top: 4.2%;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 14px;
     color: #333333;
   }
 
@@ -483,12 +485,14 @@
   }
 
   .Password {
+    margin-right: 223px!important;
+    text-align: center;
     margin-top: 1.1%;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 14px;
     color: #333333;
   }
 
@@ -520,7 +524,7 @@
     width: 100%;
     height: 16px;
     background-color: #FFCC66;
-    margin-top: 40.75%;
+    margin-top: 41.25%;
   }
 
   .yellowLineColumn1 {
@@ -531,7 +535,7 @@
   }
 
   .backGroundImage {
-    height: 98.6%!important;
+    height: 100%!important;
     width: 100%!important;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1920.jpg);
@@ -576,19 +580,21 @@
 @media screen and (min-width: 1281px) and (max-width: 1440px){
   .secondColumn {
     background: #ffffff;
-    height: 920px;
+    height: 100%;
     width: 41.7%!important;
+    float: right;
   }
 
   .firstColumn{
     width: 52.3%!important;
+    float: left;
   }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 1.6%;
-    margin-right: 2.2%;
+    margin-top: 2.6%;
+    margin-right: 5.3%;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -598,7 +604,7 @@
   }
 
   .nameOfApp {
-    margin-top: 9.2%;
+    margin-top: 14.4%;
     text-align: center;
     font-family: Roboto;
     font-style: normal;
@@ -610,7 +616,7 @@
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
+    margin-top: 10.6%;
     font-family: Roboto;
     font-style: normal;
     font-weight: 500;
@@ -620,18 +626,20 @@
   }
 
   .Login {
-    margin-top: 24px;
+    margin-right: 237px!important;
+    text-align: center;
+    margin-top: 2.6%;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
-    font-size: 8px;
-    line-height: 10px;
+    font-size: 10px;
+    line-height: 12px;
     color: #333333;
   }
 
   .inputLogin {
     text-align: center;
-    margin-top: 4px;
+    margin-top: 0.4%;
 
   }
 
@@ -640,17 +648,19 @@
     border: 1px solid #E6E6E6;
     box-sizing: border-box;
     border-radius: 4px;
-    width: 368px !important;
-    height: 32px !important;
+    width: 268px !important;
+    height: 27px !important;
   }
 
   .Password {
+    margin-right: 230px!important;
+    text-align: center;
     margin-top: 12px;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
-    font-size: 8px;
-    line-height: 10px;
+    font-size: 10px;
+    line-height: 12px;
     color: #333333;
   }
 
@@ -661,20 +671,20 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 41px;
+    margin-top: 3.2%;
 
   }
 
   .loginButton {
     background: #424D78;
-    width: 98px !important;
-    height: 32px !important;
+    width: 94px !important;
+    height: 29px !important;
     text-align: center;
     font-family: Roboto;
     font-style: normal;
-    font-weight: normal;
-    font-size: 12px !important;
-    line-height: 14px;
+    font-weight: normal!important;
+    font-size: 14px !important;
+    line-height: 16px;
     color: #FFFFFF;
   }
 
@@ -682,34 +692,29 @@
     width: 100%;
     height: 12px;
     background-color: #FFCC66;
-    margin-top: 331px;
+    margin-top: 48.2%!important;
+    float: bottom;
   }
 
   .yellowLineColumn1 {
-    width: 100%;
+    width: 150%;
     height: 12px;
     background-color: #FFCC66;
-    margin-top: 617px;
+    margin-top: 57.5%!important;
+    float: bottom;
   }
 
   .backGroundImage {
-    height: 99%;
-    width: 100%;
+    height: 100%!important;
+    width: 100%!important;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1440.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 908px;
-    width: 100%;
-    position: relative;
-  }
-
   .comfort {
-    padding-top: 173px;
+    margin-top: 18.8%;
     font-family: Roboto;
-    margin-left: 64px;
+    margin-left: 7.6%;
     font-style: normal;
     font-weight: 500;
     font-size: 56px;
@@ -730,7 +735,7 @@
   }
 
   .secondLine {
-    padding-top: 16px;
+    margin-top: 16px;
     font-family: Roboto;
     margin-left: 64px;
     font-style: normal;
@@ -743,22 +748,24 @@
 }
 
 
-@media screen and (max-width: 1280px) {
+@media screen and (min-width: 801px) and (max-width: 1280px) {
   .secondColumn {
     background: #ffffff;
-    height: 720px;
-    width: 600px;
+    height: 100%;
+    width: 46.8%!important;
+    float: right;
   }
 
   .firstColumn{
-    width: 680px!important;
+    width: 53.2%!important;
+    float: left;
   }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 24px;
-    margin-right: 32px;
+    margin-top: 3.3%;
+    margin-right: 35.3%;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -768,7 +775,7 @@
   }
 
   .nameOfApp {
-    margin-top: 90px;
+    margin-top: 12.5%;
     text-align: center;
     font-family: Roboto;
     font-style: normal;
@@ -780,7 +787,7 @@
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
+    margin-top: 13.6%;
     font-family: Roboto;
     font-style: normal;
     font-weight: 500;
@@ -790,7 +797,9 @@
   }
 
   .Login {
-    margin-top: 24px;
+    margin-top: 3.3%;
+    text-align: center;
+    margin-right: 230px!important;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
@@ -810,12 +819,14 @@
     border: 1px solid #E6E6E6;
     box-sizing: border-box;
     border-radius: 4px;
-    width: 368px !important;
-    height: 32px !important;
+    width: 268px !important;
+    height: 27px !important;
   }
 
   .Password {
-    margin-top: 12px;
+    text-align: center;
+    margin-right: 230px!important;
+    margin-top: 1.6%;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
@@ -831,20 +842,20 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 32px;
+    margin-top: 4.4%;
 
   }
 
   .loginButton {
     background: #424D78;
-    width: 98px !important;
-    height: 32px !important;
+    width: 94px !important;
+    height: 29px !important;
     text-align: center;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal!important;
-    font-size: 12px !important;
-    line-height: 14px;
+    font-size: 14px !important;
+    line-height: 16px;
     color: #FFFFFF;
   }
 
@@ -852,34 +863,27 @@
     width: 100%;
     height: 12px;
     background-color: #FFCC66;
-    margin-top: 221.5px;
+    margin-top: 31%!important;
   }
 
   .yellowLineColumn1 {
     width: 100%;
     height: 12px;
     background-color: #FFCC66;
-    margin-top: 481px;
+    margin-top: 58%!important;
   }
 
   .backGroundImage {
-    height: 720px;
-    width: 1280px;
+    height: 100%;
+    width: 100%;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1280.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 708px;
-    width: 100%;
-    position: relative;
-  }
-
   .comfort {
-    padding-top: 130px;
+    margin-top: 18%;
     font-family: Roboto;
-    margin-left: 64px;
+    margin-left: 9%;
     font-style: normal;
     font-weight: 500;
     font-size: 40px;
@@ -900,9 +904,9 @@
   }
 
   .secondLine {
-    padding-top: 16px;
+    margin-top: 16px;
     font-family: Roboto;
-    margin-left: 64px;
+    margin-left: 9%;
     font-style: normal;
     font-weight: normal;
     font-size: 30px;
@@ -912,29 +916,35 @@
   }
 }
 
+
 @media screen and (max-width: 800px) {
+
+
   .secondColumn {
     background: #ffffff;
-    height: 600px;
+    height: 100%!important;
     width: 800px!important;
   }
 
+  .firstColumn{
+    height: 0!important;
+    width: 0!important;
+  }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 24px;
-    margin-right: 32px;
+    margin-top: 4%!important;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
     line-height: 16px;
-    margin-left: 95%;
+    margin-left: 96%;
     color: #8C8C8C;
   }
 
   .nameOfApp {
-    margin-top: 90px;
+    margin-top: 5.5%;
     text-align: center;
     font-family: Roboto;
     font-style: normal;
@@ -946,7 +956,7 @@
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
+    margin-top: 16.3%;
     font-family: Roboto;
     font-style: normal;
     font-weight: 500;
@@ -956,7 +966,9 @@
   }
 
   .Login {
-    margin-top: 24px;
+    text-align: center;
+    margin-right: 325px!important;
+    margin-top: 4%!important;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
@@ -981,7 +993,9 @@
   }
 
   .Password {
-    margin-top: 12px;
+    text-align: center;
+    margin-right: 325px!important;
+    margin-top: 4%!important;
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
@@ -997,7 +1011,7 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 32px;
+    margin-top: 5.3%;
 
   }
 
@@ -1029,17 +1043,11 @@
 
   .backGroundImage {
     height: 0px;
-    width: 0px;
+    width: 100%;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1920.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 0px;
-    width: 0%;
-    position: relative;
-  }
 
   .comfort {
     padding-top: 0px;
