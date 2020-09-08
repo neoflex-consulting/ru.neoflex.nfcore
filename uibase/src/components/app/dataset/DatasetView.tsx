@@ -648,7 +648,7 @@ class DatasetView extends React.Component<any, State> {
                 let aggByColumn = this.state.serverGroupBy
                     .find((s: any) => s.value === prop);
                 let colDef = this.state.defaultColumnDefs
-                    .find((s: any) => s.get('field') === prop || s.get('field') === aggByColumn!.datasetColumn)!;
+                    .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
                 rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
                 rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
