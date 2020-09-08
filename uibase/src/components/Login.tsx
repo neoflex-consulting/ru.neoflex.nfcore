@@ -63,7 +63,7 @@ export class Login extends React.Component<any, State> {
         };
         const storeLangValue = String(localStorage.getItem('i18nextLng'))
 
-        const langMenu = () => <Menu style={{ marginTop: '24px', color: 'black' }}>
+        const langMenu = () => <Menu style={{ marginTop: '5px', color: 'black' }}>
             {_map(languages, (lang:any, index:number)=>
                 <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '25px', backgroundColor: '#fdfdfd', marginRight: "20px" }}>
                     <span style={{ fontVariantCaps: 'petite-caps', color: 'black' }}>{lang}</span>
@@ -83,16 +83,14 @@ export class Login extends React.Component<any, State> {
         else {
             return (
                 <div className={"backGroundImage"}>
-                    <Col span={12} className={"firstColumn"}>
-                        <div className={"container"}>
+                    <Col className={"firstColumn"}>
                             <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
                             <div className={"secondLine"}>Налогового мониторинга</div>
                             <div className={"yellowLineColumn1"}/>
-                        </div>
                     </Col>
 
 
-                    <Col span={12}  className={"secondColumn"}>
+                    <Col className={"secondColumn"}>
                         {this.state.languages.length !== 0 &&
                         <Dropdown overlay={langMenu} placement="bottomCenter">
                             <div className="lang-login">
@@ -107,7 +105,7 @@ export class Login extends React.Component<any, State> {
                         <Row>
                             <div className={"authorizing"}>Авторизация</div>
                         </Row>
-                        <Row className={"Login"} style={{textAlign: "center" , marginRight: "330px"}}>
+                        <Row className={"Login"}>
                                 Логин
                         </Row>
                         <div className={"inputLogin"}>
@@ -120,7 +118,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                             </div>
-                        <Row className={"Password"} style={{textAlign: "center" , marginRight: "323px"}}>
+                        <Row className={"Password"}>
                                 Пароль
                         </Row>
                         <div className={"inputPassword"}>

@@ -408,22 +408,25 @@
 
 
 
-@media screen and (max-width: 1920px) , screen and (max-height: 1080px) {
+@media screen and (min-width: 1441px) and (max-width: 1920px){
   .secondColumn {
     background: #ffffff;
-    height: 1080px;
-    width: 906px!important;
+    height: 100%!important;
+    width: 47.18%!important;
+    float: right;
   }
 
   .firstColumn{
-    width: 1014px!important;
+    width: 52.82%!important;
+    height: 100%!important;
+    float: left;
   }
 
   .lang-login {
     width: 35px;
     height: 35px;
-    margin-top: 40px;
-    margin-right: 56px;
+    margin-top: 3.7%;
+    margin-right: 6.1%;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -433,40 +436,42 @@
   }
 
   .nameOfApp {
-    margin-top: 130px;
+    margin-top: 12%;
     text-align: center;
-    font-family: Roboto;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: bold;
-    font-size: 32px;
-    line-height: 37px;
+    font-size: 27px;
+    line-height: 35px;
     color: #2A356C;
   }
 
   .authorizing {
     text-align: center;
-    margin-top: 80px;
-    font-family: Roboto;
+    margin-top: 7.4%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: 500;
-    font-size: 24px;
-    line-height: 28px;
+    font-size: 19px;
+    line-height: 23px;
     color: #2A356C;
   }
 
   .Login {
-    margin-top: 46px;
-    font-family: Roboto;
+    text-align: center;
+    margin-right: 330px!important;
+    margin-top: 4.2%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 14px;
     color: #333333;
   }
 
   .inputLogin {
     text-align: center;
-    margin-top: 4px;
+    margin-top: 0.37%;
 
   }
 
@@ -476,16 +481,18 @@
     box-sizing: border-box;
     border-radius: 4px;
     width: 368px !important;
-    height: 32px !important;
+    height: 34px !important;
   }
 
   .Password {
-    margin-top: 12px;
-    font-family: Roboto;
+    margin-right: 322px!important;
+    text-align: center;
+    margin-top: 1.5%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 12px;
+    line-height: 14px;
     color: #333333;
   }
 
@@ -496,16 +503,16 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 38px;
+    margin-top: 3.5%
 
   }
 
   .loginButton {
     background: #424D78;
-    width: 104px !important;
+    width: 94px !important;
     height: 34px !important;
     text-align: center;
-    font-family: Roboto;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal!important;
     font-size: 14px !important;
@@ -514,42 +521,37 @@
   }
 
   .yellowLineColumn2 {
-    width: 100%;
-    height: 16px;
-    background-color: #FFCC66;
-    margin-top: 481px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .yellowLineColumn1 {
-    width: 100%;
-    height: 16px;
-    background-color: #FFCC66;
-    margin-top: 773px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .backGroundImage {
-    height: 1080px;
-    width: 1920px;
+    min-height: 98%!important;
+    width: 100%!important;
+    height: 100vh!important;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1920.jpg);
-  }
-
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 1080px;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-  }
+}
 
   .comfort {
-    padding-top: 173px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 16%;
+    /*font-family: Roboto;*/
+    margin-left: 5%;
     font-style: normal;
-    font-weight: 500;
-    font-size: 56px;
-    line-height: 66px;
+    font-weight: 500!important;
+    font-size: 58px;
+    line-height: 53px;
     color: #FFFFFF;
     opacity: 1;
 
@@ -557,43 +559,45 @@
 
   .comfortWord {
     font-style: normal;
-    font-family: Roboto;
-    font-weight: 500;
-    font-size: 56px;
-    line-height: 66px;
-    color: #FFDD8F;
+    /*font-family: Roboto;*/
+    font-weight: 700!important;
+    font-size: 58px;
+    line-height: 53px;
+    color: #FFCC66;
     opacity: 1;
   }
 
   .secondLine {
-    padding-top: 16px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 35px;
+    /*font-family: Roboto;*/
+    margin-left: 5%;
     font-style: normal;
     font-weight: normal;
-    font-size: 32px;
-    line-height: 37px;
+    font-size: 38px;
+    line-height: 30px;
     opacity: 1 !important;
     color: #FFFFFF;
   }
 }
 
-@media screen and (max-width: 1440px) , screen and (max-height: 920px) {
+@media screen and (min-width: 1281px) and (max-width: 1440px){
   .secondColumn {
     background: #ffffff;
-    height: 920px;
-    width: 600px!important;
+    height: 100%;
+    width: 41.7%!important;
+    float: right;
   }
 
   .firstColumn{
-    width: 840px!important;
+    width: 52.3%!important;
+    float: left;
   }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 24px;
-    margin-right: 32px;
+    margin-top: 2.6%;
+    margin-right: 5.3%;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -603,20 +607,20 @@
   }
 
   .nameOfApp {
-    margin-top: 172px;
+    margin-top: 13.4%;
     text-align: center;
-    font-family: Roboto;
+   /* font-family: Roboto;*/
     font-style: normal;
     font-weight: bold;
-    font-size: 32px;
+    font-size: 30px;
     line-height: 37px;
     color: #2A356C;
   }
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
-    font-family: Roboto;
+    margin-top: 12.6%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: 500;
     font-size: 20px;
@@ -625,18 +629,20 @@
   }
 
   .Login {
-    margin-top: 24px;
-    font-family: Roboto;
+    margin-right: 237px!important;
+    text-align: center;
+    margin-top: 2.6%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 10px;
+    line-height: 12px;
     color: #333333;
   }
 
   .inputLogin {
     text-align: center;
-    margin-top: 4px;
+    margin-top: 0.4%;
 
   }
 
@@ -645,17 +651,19 @@
     border: 1px solid #E6E6E6;
     box-sizing: border-box;
     border-radius: 4px;
-    width: 368px !important;
+    width: 320px !important;
     height: 32px !important;
   }
 
   .Password {
+    margin-right: 230px!important;
+    text-align: center;
     margin-top: 12px;
-    font-family: Roboto;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
-    font-size: 12px;
-    line-height: 14px;
+    font-size: 10px;
+    line-height: 12px;
     color: #333333;
   }
 
@@ -666,59 +674,54 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 41px;
+    margin-top: 3.4%;
 
   }
 
   .loginButton {
     background: #424D78;
-    width: 98px !important;
+    width: 94px !important;
     height: 32px !important;
     text-align: center;
-    font-family: Roboto;
+    /*font-family: Roboto;*/
     font-style: normal;
-    font-weight: normal;
-    font-size: 12px !important;
-    line-height: 14px;
+    font-weight: normal!important;
+    font-size: 14px !important;
+    line-height: 16px;
     color: #FFFFFF;
   }
 
   .yellowLineColumn2 {
-    width: 100%;
-    height: 12px;
-    background-color: #FFCC66;
-    margin-top: 331px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .yellowLineColumn1 {
-    width: 100%;
-    height: 12px;
-    background-color: #FFCC66;
-    margin-top: 617px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .backGroundImage {
-    height: 920px;
-    width: 1440px;
+    height: 100%!important;
+    width: 100%!important;
+    height: 100vh!important;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1440.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 908px;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-  }
-
   .comfort {
-    padding-top: 173px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 12.8%;
+    /*font-family: Roboto;*/
+    margin-left: 7.6%;
     font-style: normal;
     font-weight: 500;
-    font-size: 56px;
+    font-size: 47px;
     line-height: 66px;
     color: #FFFFFF;
     opacity: 1;
@@ -727,21 +730,21 @@
 
   .comfortWord {
     font-style: normal;
-    font-family: Roboto;
-    font-weight: 500;
-    font-size: 56px;
+    /*font-family: Roboto;*/
+    font-weight: 700;
+    font-size: 47px;
     line-height: 66px;
     color: #FFDD8F;
     opacity: 1;
   }
 
   .secondLine {
-    padding-top: 16px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 18px;
+    /*font-family: Roboto;*/
+    margin-left: 7.6%;
     font-style: normal;
     font-weight: normal;
-    font-size: 32px;
+    font-size: 35px;
     line-height: 37px;
     opacity: 1 !important;
     color: #FFFFFF;
@@ -749,22 +752,24 @@
 }
 
 
-@media screen and (max-width: 1280px) , screen and (max-height: 720px) {
+@media screen and (min-width: 801px) and (max-width: 1280px) {
   .secondColumn {
     background: #ffffff;
-    height: 720px;
-    width: 600px;
+    height: 100%;
+    width: 46.8%!important;
+    float: right;
   }
 
   .firstColumn{
-    width: 680px!important;
+    width: 53.2%!important;
+    float: left;
   }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 24px;
-    margin-right: 32px;
+    margin-top: 3.3%;
+    margin-right: 35.3%;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
@@ -774,20 +779,20 @@
   }
 
   .nameOfApp {
-    margin-top: 90px;
+    margin-top: 11%;
     text-align: center;
-    font-family: Roboto;
+  /*  font-family: Roboto;*/
     font-style: normal;
     font-weight: bold;
-    font-size: 32px;
+    font-size: 26px;
     line-height: 37px;
     color: #2A356C;
   }
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
-    font-family: Roboto;
+    margin-top: 13%;
+    /*  font-family: Roboto;*/
     font-style: normal;
     font-weight: 500;
     font-size: 20px;
@@ -796,8 +801,10 @@
   }
 
   .Login {
-    margin-top: 24px;
-    font-family: Roboto;
+    margin-top: 3.3%;
+    text-align: center;
+    margin-right: 230px!important;
+    /*  font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
@@ -816,13 +823,15 @@
     border: 1px solid #E6E6E6;
     box-sizing: border-box;
     border-radius: 4px;
-    width: 368px !important;
+    width: 300px !important;
     height: 32px !important;
   }
 
   .Password {
-    margin-top: 12px;
-    font-family: Roboto;
+    text-align: center;
+    margin-right: 230px!important;
+    margin-top: 1.6%;
+    /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
@@ -837,56 +846,51 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 32px;
+    margin-top: 4.4%;
 
   }
 
   .loginButton {
     background: #424D78;
-    width: 98px !important;
+    width: 94px !important;
     height: 32px !important;
     text-align: center;
-    font-family: Roboto;
+    /*  font-family: Roboto;*/
     font-style: normal;
     font-weight: normal!important;
-    font-size: 12px !important;
-    line-height: 14px;
+    font-size: 14px !important;
+    line-height: 16px;
     color: #FFFFFF;
   }
 
   .yellowLineColumn2 {
-    width: 100%;
-    height: 12px;
-    background-color: #FFCC66;
-    margin-top: 221.5px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .yellowLineColumn1 {
-    width: 100%;
-    height: 12px;
-    background-color: #FFCC66;
-    margin-top: 481px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .backGroundImage {
-    height: 720px;
-    width: 1280px;
+    height: 100%;
+    width: 100%;
+    height: 100vh!important;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1280.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 708px;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-  }
-
   .comfort {
-    padding-top: 130px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 13%;
+    /*  font-family: Roboto;*/
+    margin-left: 9%;
     font-style: normal;
     font-weight: 500;
     font-size: 40px;
@@ -898,7 +902,7 @@
 
   .comfortWord {
     font-style: normal;
-    font-family: Roboto;
+    /*  font-family: Roboto;*/
     font-weight: 500;
     font-size: 40px;
     line-height: 47px;
@@ -907,9 +911,9 @@
   }
 
   .secondLine {
-    padding-top: 16px;
-    font-family: Roboto;
-    margin-left: 64px;
+    margin-top: 14px;
+    /*  font-family: Roboto;*/
+    margin-left: 9%;
     font-style: normal;
     font-weight: normal;
     font-size: 30px;
@@ -919,42 +923,48 @@
   }
 }
 
-@media screen and (max-width: 800px) , screen and (max-height: 600px) {
+
+@media screen and (max-width: 800px) {
+
+
   .secondColumn {
     background: #ffffff;
-    height: 600px;
+    height: 100%!important;
     width: 800px!important;
   }
 
+  .firstColumn{
+    height: 0!important;
+    width: 0!important;
+  }
 
   .lang-login {
     width: 28px;
     height: 16px;
-    margin-top: 24px;
-    margin-right: 32px;
+    margin-top: 4%!important;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
     line-height: 16px;
-    margin-left: 95%;
+    margin-left: 96%;
     color: #8C8C8C;
   }
 
   .nameOfApp {
-    margin-top: 90px;
+    margin-top: 5.5%;
     text-align: center;
-    font-family: Roboto;
+ /*   font-family: Roboto;*/
     font-style: normal;
     font-weight: bold;
-    font-size: 32px;
+    font-size: 28px;
     line-height: 37px;
     color: #2A356C;
   }
 
   .authorizing {
     text-align: center;
-    margin-top: 98px;
-    font-family: Roboto;
+    margin-top: 12.3%;
+    /*   font-family: Roboto;*/
     font-style: normal;
     font-weight: 500;
     font-size: 20px;
@@ -963,8 +973,10 @@
   }
 
   .Login {
-    margin-top: 24px;
-    font-family: Roboto;
+    text-align: center;
+    margin-right: 325px!important;
+    margin-top: 4%!important;
+    /*   font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
@@ -988,8 +1000,10 @@
   }
 
   .Password {
-    margin-top: 12px;
-    font-family: Roboto;
+    text-align: center;
+    margin-right: 325px!important;
+    margin-top: 2%!important;
+    /*   font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
@@ -1004,7 +1018,7 @@
 
   .button {
     border-radius: 4px;
-    margin-top: 32px;
+    margin-top: 4.5%;
 
   }
 
@@ -1013,7 +1027,7 @@
     width: 98px !important;
     height: 32px !important;
     text-align: center;
-    font-family: Roboto;
+    /*   font-family: Roboto;*/
     font-style: normal;
     font-weight: normal!important;
     font-size: 12px !important;
@@ -1022,36 +1036,32 @@
   }
 
   .yellowLineColumn2 {
-    width: 100%;
-    height: 12px;
-    background-color: #FFCC66;
-    margin-top: 101px;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .yellowLineColumn1 {
-    width: 0%;
-    height: 0px;
-    background-color: #FFCC66;
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: #FFCC66; /* Цвет фона */
+    width: 100%; /* Ширина слоя */
   }
 
   .backGroundImage {
     height: 0px;
-    width: 0px;
+    width: 100%;
     position: relative;
     background-image: url(../icons/BackGroundForLogin1920.jpg);
   }
 
-  .container {
-    background: rgba(42, 53, 108, 0.5);
-    height: 0px;
-    width: 0%;
-    position: relative;
-    z-index: 10;
-  }
 
   .comfort {
     padding-top: 0px;
-    font-family: Roboto;
+    /*   font-family: Roboto;*/
     margin-left: 0px;
     font-style: normal;
     font-weight: 500;
@@ -1064,7 +1074,7 @@
 
   .comfortWord {
     font-style: normal;
-    font-family: Roboto;
+   /*   font-family: Roboto;*/
     font-weight: 500;
     font-size: 0px;
     line-height: 0px;
@@ -1074,7 +1084,7 @@
 
   .secondLine {
     padding-top: 0px;
-    font-family: Roboto;
+    /*   font-family: Roboto;*/
     margin-left: 0px;
     font-style: normal;
     font-weight: normal;
