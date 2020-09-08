@@ -523,7 +523,7 @@
   .yellowLineColumn2 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 8px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -531,7 +531,7 @@
   .yellowLineColumn1 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 8px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -629,7 +629,7 @@
   }
 
   .Login {
-    margin-right: 237px!important;
+    margin-right: 283px!important;
     text-align: center;
     margin-top: 2.6%;
     /*font-family: Roboto;*/
@@ -656,7 +656,7 @@
   }
 
   .Password {
-    margin-right: 230px!important;
+    margin-right: 280px!important;
     text-align: center;
     margin-top: 12px;
     /*font-family: Roboto;*/
@@ -694,7 +694,7 @@
   .yellowLineColumn2 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 7px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -702,7 +702,7 @@
   .yellowLineColumn1 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 7px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -803,7 +803,7 @@
   .Login {
     margin-top: 3.3%;
     text-align: center;
-    margin-right: 230px!important;
+    margin-right: 259px!important;
     /*  font-family: Roboto;*/
     font-style: normal;
     font-weight: normal;
@@ -829,7 +829,7 @@
 
   .Password {
     text-align: center;
-    margin-right: 230px!important;
+    margin-right: 255px!important;
     margin-top: 1.6%;
     /*font-family: Roboto;*/
     font-style: normal;
@@ -866,7 +866,7 @@
   .yellowLineColumn2 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 5px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -874,7 +874,7 @@
   .yellowLineColumn1 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 5px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -1038,7 +1038,7 @@
   .yellowLineColumn2 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 4px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
@@ -1046,7 +1046,7 @@
   .yellowLineColumn1 {
     position: fixed; /* Фиксированное положение */
     left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 4px; /* Поля вокруг текста */
     background: #FFCC66; /* Цвет фона */
     width: 100%; /* Ширина слоя */
   }
