@@ -176,7 +176,11 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idValue}`,
                         {
-                            initialValue: value.value
+                            initialValue: value.value,
+                            rules: [{
+                                required: value.operation,
+                                message: ' '
+                            }]
                         })(
                         <Input
                             placeholder={value.t('label')}

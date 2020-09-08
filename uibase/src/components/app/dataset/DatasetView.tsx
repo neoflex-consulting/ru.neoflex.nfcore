@@ -643,64 +643,40 @@ class DatasetView extends React.Component<any, State> {
 
     getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
         let newColumnDefs: any[] = [];
-        columnDefs.forEach((c:any) => {
-            if (rowDataShow[0][c.get('field')] !== undefined) {
+        for (const prop in rowDataShow[0]) {
+            if (rowDataShow[0][prop] !== undefined) {
+                let aggByColumn = this.state.serverGroupBy
+                    .find((s: any) => s.value === prop);
+                let colDef = this.state.defaultColumnDefs
+                    .find((s: any) => s.get('field') === prop || s.get('field') === aggByColumn!.datasetColumn)!;
                 let rowData = new Map();
-                let newHeaderName = this.state.serverGroupBy
-                    .find((s: any) => s['datasetColumn'] === c.get('field'));
-                rowData.set('field', c.get('field'));
-                rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
-                rowData.set('headerTooltip', c.get('headerTooltip'));
-                rowData.set('hide', c.get('hide'));
-                rowData.set('pinned', c.get('pinned'));
-                rowData.set('filter', c.get('filter'));
-                rowData.set('sort', c.get('sort'));
-                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
-                rowData.set('checkboxSelection', c.get('checkboxSelection'));
-                rowData.set('sortable', c.get('sortable'));
-                rowData.set('suppressMenu', c.get('suppressMenu'));
-                rowData.set('resizable', c.get('resizable'));
-                rowData.set('type', c.get('type'));
-                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
-                rowData.set('updateCallback',c.get('updateCallback'));
-                rowData.set('component', c.get('component'));
-                rowData.set('editComponent', c.get('editComponent'));
-                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
-                rowData.set('textAlign', c.get('textAlign'));
-                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('formatMask', c.get('formatMask'));
-                rowData.set('mask', this.evalMask(c.get('formatMask')));
-                rowData.set('valueFormatter', c.get('valueFormatter'));
+                rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
+                rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
+                rowData.set('headerTooltip', colDef.get('headerTooltip'));
+                rowData.set('hide', colDef.get('hide'));
+                rowData.set('pinned', colDef.get('pinned'));
+                rowData.set('filter', colDef.get('filter'));
+                rowData.set('sort', colDef.get('sort'));
+                rowData.set('editable', this.state.isReadOnly ? false : colDef.get('editable'));
+                rowData.set('checkboxSelection', colDef.get('checkboxSelection'));
+                rowData.set('sortable', colDef.get('sortable'));
+                rowData.set('suppressMenu', colDef.get('suppressMenu'));
+                rowData.set('resizable', colDef.get('resizable'));
+                rowData.set('type', colDef.get('type'));
+                rowData.set('onCellDoubleClicked', colDef.get('onCellDoubleClicked'));
+                rowData.set('updateCallback', colDef.get('updateCallback'));
+                rowData.set('component', colDef.get('component'));
+                rowData.set('editComponent', colDef.get('editComponent'));
+                rowData.set('componentRenderCondition', colDef.get('componentRenderCondition'));
+                rowData.set('textAlign', colDef.get('textAlign'));
+                rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
+                rowData.set('formatMask', colDef.get('formatMask'));
+                rowData.set('mask', this.evalMask(colDef.get('formatMask')));
+                rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 newColumnDefs.push(rowData);
-            } else {
-                let rowData = new Map();
-                rowData.set('field', c.get('field'));
-                rowData.set('headerName', c.get('headerName'));
-                rowData.set('headerTooltip', c.get('headerTooltip'));
-                rowData.set('hide', true);
-                rowData.set('pinned', c.get('pinned'));
-                rowData.set('filter', c.get('filter'));
-                rowData.set('sort', c.get('sort'));
-                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
-                rowData.set('checkboxSelection', c.get('checkboxSelection'));
-                rowData.set('sortable', c.get('sortable'));
-                rowData.set('suppressMenu', c.get('suppressMenu'));
-                rowData.set('resizable', c.get('resizable'));
-                rowData.set('type', c.get('type'));
-                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
-                rowData.set('updateCallback',c.get('updateCallback'));
-                rowData.set('component', c.get('component'));
-                rowData.set('editComponent', c.get('editComponent'));
-                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
-                rowData.set('textAlign', c.get('textAlign'));
-                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('formatMask', c.get('formatMask'));
-                rowData.set('mask', this.evalMask(c.get('formatMask')));
-                rowData.set('formatMask',c.get('formatMask'));
-                rowData.set('valueFormatter', c.get('valueFormatter'));
-                newColumnDefs.push(rowData);
+
             }
-        });
+        }
         return newColumnDefs
     };
 
@@ -1787,7 +1763,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupByColumn
                                     {...this.props}
                                     parametersArray={this.state.groupByColumn}
-                                    columnDefs={this.state.columnDefs}
+                                    columnDefs={this.state.defaultColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
@@ -1803,7 +1779,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupBy
                                     {...this.props}
                                     parametersArray={this.state.serverGroupBy}
-                                    columnDefs={this.state.columnDefs}
+                                    columnDefs={this.state.defaultColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
