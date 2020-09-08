@@ -63,6 +63,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         >
                             {
                                 value.columnDefs!
+                                    .filter((c:any) => !value.parametersArray.find((f:any)=>f.datasetColumn === c.get('field')))
                                     .map((c: any) =>
                                         <Select.Option
                                             key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
