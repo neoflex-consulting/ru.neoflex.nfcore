@@ -1,10 +1,9 @@
 import * as React from "react";
 import {
-    Input,
     Tag,
     notification,
     Tabs,
-    Select, Drawer
+    Drawer
 } from 'antd';
 import {API} from "../modules/api";
 import 'brace/mode/json';
@@ -18,7 +17,7 @@ import { NeoButton } from "neo-design";
 // CSS
 import './../styles/Tools.css';
 import {ReactComponent as ExportIcon} from './../icons/exportFileIcon.svg'
-import { NeoInput, NeoSelect} from "neo-design/lib";
+import {NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
 
 const { TabPane } = Tabs;
 
@@ -184,8 +183,10 @@ class Tools extends React.Component<any, State> {
 
         const branchRegion = <div className={"tools-branch-region tools-vertical-center-element"}>
             <div>
-                <p className={"tools-header tools-padding-top tools-margin-left"}>{t("branch parameters")}</p>
-                <p className={"tools-text tools-margin-left"}>{t("branch")}</p>
+                <p className={"tools-header tools-padding-top tools-margin-left"}>
+                    <NeoTypography type={"body-medium"}>{t("branch parameters")}</NeoTypography>
+                </p>
+                <p className={"tools-text tools-margin-left"}><NeoTypography>{t("branch")}</NeoTypography></p>
                 <NeoSelect
                     placeholder={t("choose from the list")}
                     className={"tools-select tools-margin-left"}
@@ -194,14 +195,16 @@ class Tools extends React.Component<any, State> {
                         this.setState({currentBranch:branches.find(b=>b.key === currentValue)!})
                     }}>
                     {branches.map(b=>{
-                        return <Select.Option key={b.key} >
+                        return <option key={b.key} >
                             {b.key}
-                        </Select.Option>
+                        </option>
                     })}
                 </NeoSelect>
             </div>
             <div className={"tools-select-checkbox-area"}>
-                <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is default")}</p>
+                <p className={"tools-text tools-branch-checkbox-text-margin"}>
+                    <NeoTypography type={"capture-regular"}>{t("is default")}</NeoTypography>
+                </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
                     type={"checkbox"}
@@ -210,7 +213,9 @@ class Tools extends React.Component<any, State> {
                 />
             </div>
             <div className={"tools-select-checkbox-area"}>
-                <p className={"tools-text tools-branch-checkbox-text-margin"}>{t("is current")}</p>
+                <p className={"tools-text tools-branch-checkbox-text-margin"}>
+                    <NeoTypography type={"capture-regular"}>{t("is current")}</NeoTypography>
+                </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
                     type={"checkbox"}
@@ -230,10 +235,12 @@ class Tools extends React.Component<any, State> {
 
         const exportAllObjectsRegion = <div
             className={"tools-region-element tools-export-all-objects"}>
-            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>{t("export parameters")}</p>
+            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
+                <NeoTypography type={"body-medium"}>{t("export parameters")}</NeoTypography>
+            </p>
             <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
                onClick={() => {this.downloadAll();}}>
-                {t("export all objects")}
+                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>{t("export all objects")}</NeoTypography>
             </a>
         </div>;
 
@@ -258,25 +265,29 @@ class Tools extends React.Component<any, State> {
 
         const exportObjectsRegion = <div
             className={"tools-region-element tools-export-objects-region"}>
-            <p className={"tools-sub-header tools-margin-top tools-margin-left"}>{t("export metadata")}</p>
-            <p className={"tools-text tools-margin-left"}>{t("select metadata parameters")}</p>
+            <p className={"tools-sub-header tools-margin-top tools-margin-left"}>
+                <NeoTypography type={"body-regular"}>{t("export metadata")}</NeoTypography>
+            </p>
+            <p className={"tools-text tools-margin-left"}>
+                <NeoTypography type={"capture-regular"}>{t("select metadata parameters")}</NeoTypography>
+            </p>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.withReferences}
                       onChange={(e:any) => this.setState({withReferences: e.target.checked})}>
-                {t("with references")}
+                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("with references")}</NeoTypography>
             </NeoInput>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.withDependents}
                       onChange={(e:any) => this.setState({withDependents: e.target.checked})}>
-                {t("with dependents")}
+                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("with dependents")}</NeoTypography>
             </NeoInput>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.recursiveDependents}
                       onChange={(e:any) => this.setState({recursiveDependents: e.target.checked})}>
-                {t("recursive dependents")}
+                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("recursive dependents")}</NeoTypography>
             </NeoInput>
             <div className={"tools-horizontal-center-element tools-export-files"}>
                 <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
@@ -316,13 +327,19 @@ class Tools extends React.Component<any, State> {
         const exportSQL = <div
             className={"tools-export-sql"}>
             <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}>{t("export master data")}</p>
-            <Input.TextArea className={"tools-sql-area tools-margin-left"} placeholder="SQL" value={this.state.sql}
-                            onChange={(e) => this.setState({sql: e.target.value})}/>
+            <NeoInput
+                type={"textArea"}
+                width={'90%'}
+                className={"tools-sql-area tools-margin-left"}
+                placeholder="SQL"
+                value={this.state.sql}
+                onChange={(e:any) => this.setState({sql: e.target.value})}/>
         </div>;
 
         const exportButtonRegion = <div className={"tools-button-region"}>
             <NeoButton
                 className={"tools-button tools-action-button tools-margin-left"}
+                style={{width:'157px'}}
                 type={this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0 && !this.state.sql ? "disabled" : undefined}
                 onClick={() => {
                     if (!(this.state.resourceList.length === 0 && this.state.checkedFiles.length === 0))
@@ -334,6 +351,7 @@ class Tools extends React.Component<any, State> {
             >{t('do export')}</NeoButton>
             <NeoButton
                 className={"tools-button tools-clear-button tools-margin-left"}
+                style={{width:'117px'}}
                 type={"secondary"}
                 onClick={()=>{
                     this.setState({resourceList:[], checkedFiles:[], sql: undefined})
@@ -344,6 +362,7 @@ class Tools extends React.Component<any, State> {
 
         const importButtonRegion = <div className={"tools-button-region"}>
             <NeoButton
+                style={{width:'195px'}}
                 className={"tools-button tools-action-button tools-margin-left"}
                 type={this.state.filesUploadArray.length === 0 && this.state.MDUploadArray.length === 0 ? "disabled" : undefined}
                 onClick={() => {
@@ -357,6 +376,7 @@ class Tools extends React.Component<any, State> {
                 }}
             >{t('import files')}</NeoButton>
             <NeoButton
+                style={{width:'117px'}}
                 className={"tools-button tools-clear-button tools-margin-left"}
                 type={"secondary"}
                 onClick={()=>{
@@ -367,12 +387,14 @@ class Tools extends React.Component<any, State> {
         </div>;
 
         const importParametersRegion = <div className={"tools-import-parameters tools-region-element"}>
-            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>{t("import parameters")}</p>
+            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
+                <NeoTypography type={"body-medium"}>{t("import parameters")}</NeoTypography>
+            </p>
             <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
                onClick={() => {
                    this.deploySupplyInputRef.current!.click()
                }}>
-                {t("deploy supply")}
+                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>{t("deploy supply")}</NeoTypography>
                 <input ref={this.deploySupplyInputRef}
                        type="file" style={{display: "none"}}
                        onChange={e => {
