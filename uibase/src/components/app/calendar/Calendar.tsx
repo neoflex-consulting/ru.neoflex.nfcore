@@ -16,7 +16,6 @@ import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import legend from '../../../icons/legend.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
@@ -39,14 +38,6 @@ interface Props {
     context: any,
     viewObject: any,
 }
-
-const resizeStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "solid 1px #ddd",
-    background: "#ffffff"
-};
 
 class Calendar extends React.Component<any, any> {
 
@@ -1100,12 +1091,7 @@ class Calendar extends React.Component<any, any> {
                         <Fullscreen
                             enabled={this.state.fullScreenOn}
                             onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-                            <Resizable ref={(n) => { this.node = n}}
-                                       /*style={resizeStyle}
-                                       defaultSize={{
-                                           width: "100%",
-                                           height: 600
-                                       }}*/>
+                            <Resizable ref={(n) => { this.node = n}}>
                             <div style={{margin:'1em 0 0 4em'}}>
                                 <h2>{this.props.appModuleName}</h2>
                             </div>

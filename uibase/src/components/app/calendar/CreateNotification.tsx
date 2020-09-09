@@ -1,9 +1,8 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Col, Input, InputNumber, Row, Select, Switch} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoInputNumber} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoInputNumber, NeoRow, NeoSelect} from "neo-design/lib";
 
 interface Props {
     onCreateNotification?: (notificationStatus: any[]) => void;
