@@ -4,7 +4,7 @@ import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
-import { NeoInput } from "neo-design/lib";
+import {NeoInput} from "neo-design/lib";
 //CSS
 import './../styles/MetaBrowser.css';
 import DatasetGrid from "./app/dataset/DatasetGrid";

@@ -55,7 +55,8 @@ class DatasetValidatorExt extends DatasetValidator {
                 def currentDatasetComponent = []
                 try {
                     for (int i = 0; i < allDatasetComponent.size(); i++) {
-                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1 && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
+                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1
+                                && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
                             currentDatasetComponent.add(allDatasetComponent[i])
                         }
                     }
@@ -74,7 +75,8 @@ class DatasetValidatorExt extends DatasetValidator {
                 def currentDatasetComponent = []
                 try {
                     for (int i = 0; i < allDatasetComponent.size(); i++) {
-                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1 && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
+                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1
+                                && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
                             currentDatasetComponent.add(allDatasetComponent[i])
                         }
                     }
