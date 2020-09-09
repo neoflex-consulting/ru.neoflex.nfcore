@@ -531,7 +531,7 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>;
 
         return (
-            <Layout style={{height: '100vh'}}>
+            <Layout style={{height: '90vh', marginTop: '80px'}}>
                 <FetchSpinner/>
                 <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>
