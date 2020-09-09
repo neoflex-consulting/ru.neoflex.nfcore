@@ -939,7 +939,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'} size={'s'} />
+                    <NeoIcon icon={'calendar'}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -954,7 +954,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} size={'s'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
@@ -978,7 +978,10 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'} />
+            {this.state.fullScreenOn  ?
+                <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+                :
+                <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
         </NeoButton>
             </div>
 
