@@ -193,7 +193,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (!_.isEqual(this.state.highlights, this.props.highlights)) {
+        if (this.props.highlights && !_.isEqual(this.state.highlights, this.props.highlights)) {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
