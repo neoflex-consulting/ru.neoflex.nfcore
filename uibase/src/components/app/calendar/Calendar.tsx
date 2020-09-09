@@ -1,6 +1,7 @@
 import React from 'react';
 import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
+import {add} from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
 import {enUS, ru} from "date-fns/locale";
@@ -10,13 +11,11 @@ import {MainContext} from "../../../MainContext";
 import {Button, Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import {add} from "date-fns";
 import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import legend from '../../../icons/legend.svg';
 import trashcanIcon from '../../../icons/trashcanIcon.svg';
 import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
@@ -39,14 +38,6 @@ interface Props {
     context: any,
     viewObject: any,
 }
-
-const resizeStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "solid 1px #ddd",
-    background: "#ffffff"
-};
 
 class Calendar extends React.Component<any, any> {
 
@@ -849,7 +840,7 @@ class Calendar extends React.Component<any, any> {
 
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
-                                       style={{marginTop: '4px', marginRight:'16px'}}>
+                                       style={{marginRight:'16px'}}>
                                 <NeoIcon icon={"arrowLeft"} size={'s'} color={'#000000'} />
                             </NeoButton>
                         </div>
@@ -939,7 +930,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'} size={'s'} />
+                    <NeoIcon icon={"calendarFull"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -954,7 +945,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} size={'s'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
@@ -978,7 +969,10 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'} />
+            {this.state.fullScreenOn  ?
+                <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+                :
+                <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
         </NeoButton>
             </div>
 
@@ -1097,12 +1091,7 @@ class Calendar extends React.Component<any, any> {
                         <Fullscreen
                             enabled={this.state.fullScreenOn}
                             onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-                            <Resizable ref={(n) => { this.node = n}}
-                                       /*style={resizeStyle}
-                                       defaultSize={{
-                                           width: "100%",
-                                           height: 600
-                                       }}*/>
+                            <Resizable ref={(n) => { this.node = n}}>
                             <div style={{margin:'1em 0 0 4em'}}>
                                 <h2>{this.props.appModuleName}</h2>
                             </div>

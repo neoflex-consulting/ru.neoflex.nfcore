@@ -557,7 +557,7 @@ class ResourceEditor extends React.Component<any, State> {
                     obj[key] = (obj[key] as string).replace(pattern,id)
                 }
                 //Change same page ref for children
-                if (key === "$ref" && level != 1) {
+                if (key === "$ref" && level !== 1) {
                     obj[key] = (obj[key] as string).replace(pattern,id)
                 }
             });

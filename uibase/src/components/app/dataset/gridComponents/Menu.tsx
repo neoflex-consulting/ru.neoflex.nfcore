@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dropdown, Menu} from "antd";
+import {Dropdown, Menu} from "antd";
 import {dmlOperation} from "../../../../utils/consts";
 
 interface Props {

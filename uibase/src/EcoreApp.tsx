@@ -31,7 +31,7 @@ import {NeoIcon} from "neo-icon/lib";
 
 const backgroundColor = "#2a356c";
 
-const { Header, Content, Sider } = Layout;
+const { Header } = Layout;
 
 interface State {
     principal?: any;
@@ -340,7 +340,7 @@ class EcoreApp extends React.Component<any, State> {
 
     isDatasetComponentsBufferEmpty = () => {
         if (this.state.context.datasetComponents) {
-            for (const [key, value] of Object.entries(this.state.context.datasetComponents)) {
+            for (const [key] of Object.entries(this.state.context.datasetComponents)) {
                 if (this.state.context.datasetComponents[key].getBuffer
                     && this.state.context.datasetComponents[key].getBuffer().length > 0) {
                     this.state.context.datasetComponents[key].showModal();
@@ -625,14 +625,14 @@ class EcoreApp extends React.Component<any, State> {
                                             type={"link"}
                                             onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
-                                            <NeoIcon icon={"diagram"} size={'m'} color={'white'} />
+                                            <NeoIcon icon={"play"} color={'white'} />
                                         </NeoButton>
                                         :
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
                                         >
                                             <Link to={`/developer/data`}>
-                                                <NeoIcon icon={'settings'} size={'m'} color={'white'} />
+                                                <NeoIcon icon={'settings'} color={'white'} />
                                             </Link>
                                         </NeoButton>
                                 }
@@ -641,9 +641,9 @@ class EcoreApp extends React.Component<any, State> {
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <NeoIcon icon={'notificationOff'} size={'m'} color={'white'} />
+                                        <NeoIcon icon={'notificationOff'} color={'white'} />
                                     :
-                                        <NeoIcon icon={'notification'} size={'m'} color={'white'} />}
+                                        <NeoIcon icon={'notification'} color={'white'} />}
                             </NeoButton>
                                     <span style={{
                                         textTransform: "capitalize",
@@ -656,10 +656,11 @@ class EcoreApp extends React.Component<any, State> {
                                         <span>{principal.name}</span>
                                     </span>
                             <NeoButton
+                                style={{marginRight: "10px"}}
                                 onClick={this.logOut}
                                 type="link"
                             >
-                                <NeoIcon icon={'exit'} size={'m'} color={'white'} />
+                                <NeoIcon icon={'exit'} color={'white'} />
                             </NeoButton>
                             </div>
                         </NeoCol>

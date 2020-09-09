@@ -1123,3 +1123,17 @@
   margin: 5px;
 }
 
+/*Diagram Bar*/
+
+.selectInGetDiagramPanel{
+  height: 56px;
+  background: #F2F2F2 !important;
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+
+.checkboxDiagram .input-checkbox{
+    display: unset!important;
+  padding-left: unset!important;
+}

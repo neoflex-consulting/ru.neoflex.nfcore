@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Checkbox, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Button, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -25,27 +25,28 @@ import moment from "moment";
 import format from "number-format.js";
 import HiddenColumn from "./HiddenColumn";
 import {
-    actionType, appTypes,
-    calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
+    actionType,
+    appTypes,
+    calculatorFunctionTranslator,
+    defaultDateFormat,
+    defaultDecimalFormat,
+    defaultIntegerFormat,
+    defaultTimestampFormat,
     dmlOperation,
     eventType,
-    grantType, textAlignMap
+    grantType,
+    textAlignMap
 } from "../../../utils/consts";
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 //icons
-import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import plusIcon from "../../../icons/plusIcon.svg";
+import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import penIcon from "../../../icons/penIcon.svg";
 import flagIcon from "../../../icons/flagIcon.svg";
-import trashcanIcon from "../../../icons/trashcanIcon.svg";
-import downloadIcon from "../../../icons/downloadIcon.svg";
-import printIcon from "../../../icons/printIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -601,10 +602,6 @@ class DatasetView extends React.Component<any, State> {
 
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.state.currentDatasetComponent.rev !== undefined) {
-            let refresh = this.props.context.userProfile.eResource().to().params !== undefined ?
-                this.props.context.userProfile.eResource().to().params
-                    .find( (p: any) => JSON.parse(p.value).name === this.state.currentDatasetComponent.eResource().to().name)
-                : undefined;
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findParams(this.state.currentDatasetComponent, this.state.columnDefs);
             }
@@ -1236,25 +1233,29 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
-                    <Button
-                        hidden={!(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed)}
-                        title={t('edit')}
-                        style={{color: 'rgb(151, 151, 151)'}}
-                        onClick={() => {
-                            if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
-                                || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
-                                || this.state.serverAggregates.filter(c=>c.enable && c.datasetColumn).length > 0
-                                || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
-                                this.refresh(true);
-                            } else {
-                                this.setState({isEditMode:!this.state.isEditMode},()=>{
-                                    this.gridRef.onEdit()
-                                })
-                            }
-                        }}
-                    >
-                        <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
-                    </Button>
+                    {(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed) ?
+                        <NeoButton
+                            type={'link'}
+                            title={t('edit')}
+                            style={{color: 'rgb(151, 151, 151)', background: '#F2F2F2'}}
+                            onClick={() => {
+                                if (this.state.groupByColumn.filter(c => c.enable && c.datasetColumn).length > 0
+                                    || this.state.serverGroupBy.filter(c => c.enable && c.datasetColumn).length > 0
+                                    || this.state.serverAggregates.filter(c => c.enable && c.datasetColumn).length > 0
+                                    || this.state.serverCalculatedExpression.filter(c => c.enable && c.datasetColumn).length > 0) {
+                                    this.refresh(true);
+                                } else {
+                                    this.setState({isEditMode: !this.state.isEditMode}, () => {
+                                        this.gridRef.onEdit()
+                                    })
+                                }
+                            }}
+                        >
+                            <NeoIcon icon={"edit"} color={'#5E6785'} size={'m'}/>
+                        </NeoButton>
+                        :
+                        null
+                    }
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('save')}
                                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
@@ -1264,7 +1265,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
 
             <div className='block'>
-                <span className='caption'>Версия</span>
+                <span className='caption'>{t("version")}</span>
             {this.state.allDatasetComponents.length !== 0
             && this.state.currentDatasetComponent !== undefined
             &&
@@ -1319,21 +1320,20 @@ class DatasetView extends React.Component<any, State> {
             }
                 <div className='verticalLine'/>
 
-                 <Dropdown overlay={menu} placement="bottomLeft" visible={this.state.isDropdownVisible}>
-                     <NeoButton type={'link'} title={t('download')} style={{marginRight:'5px', marginTop:'2px'}}
-                                onClick={()=>{this.setState({isDropdownVisible:!this.state.isDropdownVisible})}}>
-                         <NeoIcon icon={"download"} color={'#5E6785'}/>
-                     </NeoButton>
+                 <Dropdown overlay={menu} placement="bottomLeft">
+                     <div style={{marginRight: "5px"}}>
+                         <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
+                     </div>
                  </Dropdown>
                 <NeoButton type={'link'} title={t('grouping')}
                            style={{marginRight:'5px'}}
                            onClick={()=>{}}>
                     <NeoIcon icon={'print'} color={'#5E6785'} size={'m'}/>
                 </NeoButton>
-                <NeoButton type={'link'}
+                <NeoButton type={'link'} style={{marginRight: "5px"}}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
-                        <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={'fullScreenUnDo'} color={'#5E6785'} size={'m'}/>
                              :
                         <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
                     }
@@ -1356,49 +1356,53 @@ class DatasetView extends React.Component<any, State> {
                 {t("export to excel")}
             </Menu.Item>
         </Menu>);
-        return <div id="selectInGetDiagramPanel">
-            <Button title={t("back to table")} style={{color: 'rgb(151, 151, 151)'}}
+        return (
+        <div className="functionalBar__header">
+            <div className='block' style={{margin: "auto 16px", display: "flex"}}>
+                <a>
+            <NeoButton type={'link'} title={t("back to table")} style={{background: '#F2F2F2', color: "#333333", marginTop: "4px"}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
             >
-                {t("back to table")}
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <Button title={t('add')} style={{color: 'rgb(151, 151, 151)'}}
+                <NeoIcon icon={"arrowLong"} color={'#5E6785'} style={{marginRight: "6px"}} />
+                <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
+            </NeoButton>
+                </a>
+            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible);
                     }}
             >
-                <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="addIcon" />
-            </Button>
-            <Button title={t('edit')} style={{color: 'rgb(151, 151, 151)'}}
+                <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
+            </NeoButton>
+            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible);
                     }}
             >
-                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <NeoIcon icon={"edit"} size={"m"} color={'#5E6785'}/>
+            </NeoButton>
+                <div className='verticalLine' style={{marginTop: "4px"}}/>
 
-            <Button title={t('delete')} style={{color: 'rgb(151, 151, 151)'}}
+            <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "4px", background: '#F2F2F2'}}
                     onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
             >
-                <img style={{width: '24px', height: '24px'}} src={trashcanIcon} alt="trashcanIcon" />
-            </Button>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
-            <div style={{display: 'inline-block'}}>
-                <Select
+                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+            </NeoButton>
+                <div className='verticalLine' style={{marginTop: "4px"}}/>
+            </div>
+
+            <div className='block'>
+
+                <span className={"caption"} style={{marginTop: "12px", color: 'black', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("version")}</span>
+                <div style={{display: 'inline-block', marginTop: "4px"}}>
+                <NeoSelect
                     getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
-                    style={{ width: '250px'}}
+                    style={{ width: '250px', marginLeft: "12px"}}
                     showSearch={true}
                     value={this.state.currentDiagram?.diagramName}
                     onChange={(e: string) => {
@@ -1417,44 +1421,47 @@ class DatasetView extends React.Component<any, State> {
                                 {c.diagramName}
                             </Option>)
                     }
-                </Select>
+                </NeoSelect>
             </div>
-            <div style={{display: 'inline-block', height: '30px',
-                borderLeft: '1px solid rgb(217, 217, 217)', marginLeft: '10px', marginRight: '10px', marginBottom: '-10px',
-                borderRight: '1px solid rgb(217, 217, 217)', width: '6px'}}/>
+                <div className='verticalLine' style={{marginTop: "4px"}}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft" visible={this.state.isDropdownVisibleForDiagramm}>
-                    <NeoButton type={'link'} title={t('download')} style={{marginRight:'5px'}}
-                               onClick={()=>{this.setState({isDropdownVisibleForDiagramm:!this.state.isDropdownVisibleForDiagramm})}}>
-                    <img style={{width: '24px', height: '24px'}} src={downloadIcon} alt="downloadIcon" />
-                </NeoButton>
+            <Dropdown overlay={menu} placement="bottomLeft">
+                <div style={{marginRight: "5px"}}>
+                <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "7px"}}/>
+                </div>
             </Dropdown>
-            <Checkbox onChange={this.withTable.bind(this)}>{t("download with table")}</Checkbox>
+                <span className={"checkboxDiagram"} style={{marginTop: "8px"}}>
+                    <NeoInput type={'checkbox'} onChange={this.withTable.bind(this)} style={{marginTop: "4px", background: '#F2F2F2'}}/>
+                  <span style={{display: 'inline-block', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal", marginLeft: "30px"}}>{t("download with table")}</span>
+                </span>
 
-            <Button title={t('print')} style={{color: 'rgb(151, 151, 151)'}}
+
+            <NeoButton type={'link'} title={t('print')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginLeft: "20px"}}
                     onClick={()=>{}}
             >
-                <img style={{width: '24px', height: '24px'}} src={printIcon} alt="printIcon" />
-            </Button>
-            <Button
+                <NeoIcon icon={"print"} size={"m"} color={'#5E6785'}/>
+            </NeoButton>
+            <NeoButton
                 className="buttonFullScreen"
                 type="link"
-                ghost
                 style={{
-                    marginRight: '10px',
-                    width: '32px',
-                    height: '32px',
-                    color: 'rgb(151, 151, 151)'
+                    float: "right",
+                    marginLeft: '10px',
+                    color: 'rgb(151, 151, 151)',
+                    marginTop: "4px",
+                    background: '#F2F2F2'
                 }}
                 onClick={this.onFullScreen}
             >
                 {this.state.fullScreenOn  ?
-                    <FontAwesomeIcon icon={faCompressArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>
+                   <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
                     :
-                    <FontAwesomeIcon icon={faExpandArrowsAlt} size="lg" style={{marginLeft: '-6px', color: '#515151'}}/>}
-            </Button>
+                    <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
+            </NeoButton>
+            </div>
 
         </div>
+        )
     };
 
     getEditPanel = () => {
