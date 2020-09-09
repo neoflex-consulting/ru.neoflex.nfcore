@@ -9,6 +9,7 @@ import {paramType} from "./DatasetView";
 
 interface Props {
     closeModal?: () => void;
+    onSave?: () => void;
     currentDatasetComponent?: any;
 }
 
@@ -159,7 +160,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}));
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave());
             });
     }
 

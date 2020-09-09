@@ -40,7 +40,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableItem">
+    return <div className="SortableItemGroupBy">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 {value.index}
@@ -176,7 +176,11 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ display: 'inline-block' }}>
                     {value.getFieldDecorator(`${value.idValue}`,
                         {
-                            initialValue: value.value
+                            initialValue: value.value,
+                            rules: [{
+                                required: value.operation,
+                                message: ' '
+                            }]
                         })(
                         <Input
                             placeholder={value.t('label')}

@@ -118,7 +118,6 @@ interface State {
     allLegendPosition: Array<EObject>;
     currentTheme: string;
     showUniqRow: boolean;
-    isHighlightsUpdated: boolean;
     isHidden: boolean;
     isDisabled: boolean;
     isReadOnly: boolean;
@@ -194,7 +193,6 @@ class DatasetView extends React.Component<any, State> {
             allLegendPosition: [],
             currentTheme: 'material',
             showUniqRow: this.props.viewObject.get('showUniqRow') || false,
-            isHighlightsUpdated: true,
             isHidden: this.props.hidden,
             isDisabled: this.props.disabled,
             isReadOnly: this.props.grantType === grantType.read || this.props.disabled || this.props.isParentDisabled,
@@ -610,17 +608,6 @@ class DatasetView extends React.Component<any, State> {
             if (prevProps.location.pathname !== this.props.location.pathname) {
                 this.findParams(this.state.currentDatasetComponent, this.state.columnDefs);
             }
-            else if ((refresh === undefined || refresh.length === 0) &&
-                this.props.viewObject.get('datasetComponent').get('name') !== this.state.currentDatasetComponent.eContents()[0].get('name') &&
-                this.props.context.userProfile.eResource().to().params !== undefined) {
-                this.getAllDatasetComponents(false)
-            }
-            else if (prevState.allDatasetComponents.length !== 0 &&
-                this.props.viewObject.get('datasetComponent').get('name') === this.state.currentDatasetComponent.eContents()[0].get('name')
-                && JSON.stringify(this.props.viewObject.get('datasetComponent').eResource().to()) !== JSON.stringify(this.state.currentDatasetComponent.to())
-            ) {
-                this.getAllDatasetComponents(false)
-            }
         }
         if (prevProps.t !== this.props.t && this.state.serverCalculatedExpression) {
             this.setState({serverCalculatedExpression: this.state.serverCalculatedExpression.map(expr => {
@@ -656,64 +643,40 @@ class DatasetView extends React.Component<any, State> {
 
     getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
         let newColumnDefs: any[] = [];
-        columnDefs.forEach((c:any) => {
-            if (rowDataShow[0][c.get('field')] !== undefined) {
+        for (const prop in rowDataShow[0]) {
+            if (rowDataShow[0][prop] !== undefined) {
+                let aggByColumn = this.state.serverGroupBy
+                    .find((s: any) => s.value === prop);
+                let colDef = this.state.defaultColumnDefs
+                    .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
-                let newHeaderName = this.state.serverGroupBy
-                    .find((s: any) => s['datasetColumn'] === c.get('field'));
-                rowData.set('field', c.get('field'));
-                rowData.set('headerName', newHeaderName && newHeaderName.value ? newHeaderName.value : c.get('headerName'));
-                rowData.set('headerTooltip', c.get('headerTooltip'));
-                rowData.set('hide', c.get('hide'));
-                rowData.set('pinned', c.get('pinned'));
-                rowData.set('filter', c.get('filter'));
-                rowData.set('sort', c.get('sort'));
-                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
-                rowData.set('checkboxSelection', c.get('checkboxSelection'));
-                rowData.set('sortable', c.get('sortable'));
-                rowData.set('suppressMenu', c.get('suppressMenu'));
-                rowData.set('resizable', c.get('resizable'));
-                rowData.set('type', c.get('type'));
-                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
-                rowData.set('updateCallback',c.get('updateCallback'));
-                rowData.set('component', c.get('component'));
-                rowData.set('editComponent', c.get('editComponent'));
-                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
-                rowData.set('textAlign', c.get('textAlign'));
-                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('formatMask', c.get('formatMask'));
-                rowData.set('mask', this.evalMask(c.get('formatMask')));
-                rowData.set('valueFormatter', c.get('valueFormatter'));
+                rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
+                rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
+                rowData.set('headerTooltip', colDef.get('headerTooltip'));
+                rowData.set('hide', colDef.get('hide'));
+                rowData.set('pinned', colDef.get('pinned'));
+                rowData.set('filter', colDef.get('filter'));
+                rowData.set('sort', colDef.get('sort'));
+                rowData.set('editable', this.state.isReadOnly ? false : colDef.get('editable'));
+                rowData.set('checkboxSelection', colDef.get('checkboxSelection'));
+                rowData.set('sortable', colDef.get('sortable'));
+                rowData.set('suppressMenu', colDef.get('suppressMenu'));
+                rowData.set('resizable', colDef.get('resizable'));
+                rowData.set('type', colDef.get('type'));
+                rowData.set('onCellDoubleClicked', colDef.get('onCellDoubleClicked'));
+                rowData.set('updateCallback', colDef.get('updateCallback'));
+                rowData.set('component', colDef.get('component'));
+                rowData.set('editComponent', colDef.get('editComponent'));
+                rowData.set('componentRenderCondition', colDef.get('componentRenderCondition'));
+                rowData.set('textAlign', colDef.get('textAlign'));
+                rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
+                rowData.set('formatMask', colDef.get('formatMask'));
+                rowData.set('mask', this.evalMask(colDef.get('formatMask')));
+                rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 newColumnDefs.push(rowData);
-            } else {
-                let rowData = new Map();
-                rowData.set('field', c.get('field'));
-                rowData.set('headerName', c.get('headerName'));
-                rowData.set('headerTooltip', c.get('headerTooltip'));
-                rowData.set('hide', true);
-                rowData.set('pinned', c.get('pinned'));
-                rowData.set('filter', c.get('filter'));
-                rowData.set('sort', c.get('sort'));
-                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
-                rowData.set('checkboxSelection', c.get('checkboxSelection'));
-                rowData.set('sortable', c.get('sortable'));
-                rowData.set('suppressMenu', c.get('suppressMenu'));
-                rowData.set('resizable', c.get('resizable'));
-                rowData.set('type', c.get('type'));
-                rowData.set('onCellDoubleClicked',c.get('onCellDoubleClicked'));
-                rowData.set('updateCallback',c.get('updateCallback'));
-                rowData.set('component', c.get('component'));
-                rowData.set('editComponent', c.get('editComponent'));
-                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
-                rowData.set('textAlign', c.get('textAlign'));
-                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-                rowData.set('formatMask', c.get('formatMask'));
-                rowData.set('mask', this.evalMask(c.get('formatMask')));
-                rowData.set('formatMask',c.get('formatMask'));
-                rowData.set('valueFormatter', c.get('valueFormatter'));
-                newColumnDefs.push(rowData);
+
             }
-        });
+        }
         return newColumnDefs
     };
 
@@ -1086,7 +1049,7 @@ class DatasetView extends React.Component<any, State> {
             const serverParam = filterParam(newServerParam);
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
-            this.setState<never>({[paramName]: newServerParam, isHighlightsUpdated: (paramName === paramType.highlights)});
+            this.setState<never>({[paramName]: newServerParam});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
@@ -1313,7 +1276,7 @@ class DatasetView extends React.Component<any, State> {
                 <NeoSelect
                          getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                          width={'250px'}
-                         defaultValue={this.state.currentDatasetComponent.eContents()[0].get('name')}
+                         value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
                              this.handleChange(e)
                          }}
@@ -1695,7 +1658,6 @@ class DatasetView extends React.Component<any, State> {
                     columnDefs = {this.state.columnDefs}
                     currentTheme = {this.state.currentTheme}
                     showUniqRow = {this.state.showUniqRow}
-                    isHighlightsUpdated = {this.state.isHighlightsUpdated}
                     saveChanges = {this.changeDatasetViewState}
                     onApplyEditChanges = {this.onApplyEditChanges}
                     isEditMode = {this.state.isEditMode}
@@ -1811,7 +1773,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupByColumn
                                     {...this.props}
                                     parametersArray={this.state.groupByColumn}
-                                    columnDefs={this.state.columnDefs}
+                                    columnDefs={this.state.defaultColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
@@ -1827,7 +1789,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupBy
                                     {...this.props}
                                     parametersArray={this.state.serverGroupBy}
-                                    columnDefs={this.state.columnDefs}
+                                    columnDefs={this.state.defaultColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
@@ -2080,6 +2042,21 @@ class DatasetView extends React.Component<any, State> {
                                 </Button>
                             </div>
                         </div>
+                    </Modal>
+                    <Modal
+                        key="save_menu"
+                        width={'500px'}
+                        title={t('saveReport')}
+                        visible={this.state.saveMenuVisible}
+                        footer={null}
+                        onCancel={this.handleSaveMenu}
+                    >
+                        <SaveDatasetComponent
+                            closeModal={this.handleSaveMenu}
+                            onSave={()=>this.getAllDatasetComponents(false)}
+                            currentDatasetComponent={this.state.currentDatasetComponent}
+                            {...this.props}
+                        />
                     </Modal>
                 </div>
             </div>
