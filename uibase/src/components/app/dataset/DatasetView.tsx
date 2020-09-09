@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Checkbox, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Button, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -25,27 +25,28 @@ import moment from "moment";
 import format from "number-format.js";
 import HiddenColumn from "./HiddenColumn";
 import {
-    actionType, appTypes,
-    calculatorFunctionTranslator, defaultDateFormat,
-    defaultDecimalFormat, defaultIntegerFormat, defaultTimestampFormat,
+    actionType,
+    appTypes,
+    calculatorFunctionTranslator,
+    defaultDateFormat,
+    defaultDecimalFormat,
+    defaultIntegerFormat,
+    defaultTimestampFormat,
     dmlOperation,
     eventType,
-    grantType, textAlignMap
+    grantType,
+    textAlignMap
 } from "../../../utils/consts";
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 //icons
-import {faCompressArrowsAlt, faExpandArrowsAlt, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import plusIcon from "../../../icons/plusIcon.svg";
+import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import penIcon from "../../../icons/penIcon.svg";
 import flagIcon from "../../../icons/flagIcon.svg";
-import trashcanIcon from "../../../icons/trashcanIcon.svg";
-import downloadIcon from "../../../icons/downloadIcon.svg";
-import printIcon from "../../../icons/printIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-import {NeoInput, NeoSelect, NeoButton} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;

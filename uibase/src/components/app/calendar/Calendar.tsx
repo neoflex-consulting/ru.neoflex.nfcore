@@ -1,6 +1,7 @@
 import React from 'react';
 import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
+import {add} from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
 import {enUS, ru} from "date-fns/locale";
@@ -10,7 +11,6 @@ import {MainContext} from "../../../MainContext";
 import {Button, Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import {add} from "date-fns";
 import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
