@@ -1700,7 +1700,7 @@ class DatasetView extends React.Component<any, State> {
                 />
                 <div id="filterButton">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     placement='right'
                     title={t('filters')}
@@ -1748,7 +1748,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="aggregationButton">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     placement='right'
                     title={t('aggregations')}
@@ -1778,7 +1778,7 @@ class DatasetView extends React.Component<any, State> {
                     </div>
                 <div id="aggregationGroupsButton">
                     <Drawer
-                        style={{top: '-310px'}}
+                        style={{top: '80px'}}
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
                         placement='right'
                         title={t('grouping')}
@@ -1824,7 +1824,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="sortButton">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
                     placement='right'
                     title={t('sorts')}
@@ -1854,7 +1854,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="hiddenColumnsButton">
                     <Drawer
-                        style={{top: '-310px'}}
+                        style={{top: '80px'}}
                         getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
                         placement='right'
                         title={t('hiddencolumns')}
@@ -1883,7 +1883,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="calculatableexpressionsButton">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
                     placement='right'
                     title={t('calculator')}
@@ -1915,7 +1915,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagramButton">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placement='right'
                     title={t('diagram')}
@@ -1944,7 +1944,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id="diagram">
                 <Drawer
-                    style={{top: '-310px'}}
+                    style={{top: '80px'}}
                     getContainer={() => document.getElementById ('diagram') as HTMLElement}
                     placement='right'
                     title={t('diagram')}

@@ -242,10 +242,6 @@
 /*Antd styles*/
 
 /*Drawer*/
-.ant-drawer {
-  position: absolute !important;
-  /*transform: translateY(-43%) !important;*/
-}
 
 .ant-drawer-header {
   padding: 16px 24px 16px 40px !important;
