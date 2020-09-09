@@ -171,8 +171,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 serverGroupByColumn = groupByColumn.datasetColumn
             }
 
-            if (groupBy && serverGroupByColumn) {
-                allColumns = groupBy.datasetColumn
+            if (groupBy || serverGroupByColumn) {
+                allColumns = groupBy.value
                 for (int i = 0; i < serverGroupByColumn.size(); i++) {
                     if (!allColumns.contains(serverGroupByColumn[i])) {
                         allColumns.add(serverGroupByColumn[i])
@@ -239,27 +239,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
             //Group by
             if (groupBy) {
                 for (int i = 0; i <= groupBy.size() - 1; ++i) {
-                    if (allColumns.contains(groupBy[i].datasetColumn) && groupBy[i].enable) {
+                    if (allColumns.contains(groupBy[i].value) && groupBy[i].enable) {
                         def map = [:]
-                        map["column"] = groupBy[i].datasetColumn
+                        map["column"] = groupBy[i].value
                             def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                         if (operator == 'AVG') {
-                            map["select"] = "AVG(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "AVG(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (operator == 'COUNT') {
-                            map["select"] = "COUNT(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "COUNT(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (operator == 'COUNT_DISTINCT') {
-                            map["select"] = "COUNT(DISTINCT t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "COUNT(DISTINCT t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (operator == 'MAX') {
-                            map["select"] = "MAX(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "MAX(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (operator == 'MIN') {
-                            map["select"] = "MIN(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "MIN(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (operator == 'SUM') {
-                            map["select"] = "SUM(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].datasetColumn}\""
+                            map["select"] = "SUM(t.\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
                         }
                         if (!serverGroupByAggregation.contains(map)) {
                             serverGroupByAggregation.add(map)

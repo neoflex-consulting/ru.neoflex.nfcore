@@ -39,7 +39,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableItemColumn">
+    return <div className="SortableTotalItem">
         <Row gutter={[8, 0]}>
             <Col span={1}>
                 {value.index}
@@ -63,6 +63,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         >
                             {
                                 value.columnDefs!
+                                    .filter((c:any) => !value.parametersArray.find((f:any)=>f.datasetColumn === c.get('field')))
                                     .map((c: any) =>
                                         <Select.Option
                                             key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}

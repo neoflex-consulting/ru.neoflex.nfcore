@@ -1,6 +1,7 @@
 import React from 'react';
 import Fullscreen from "react-full-screen";
 import * as dateFns from "date-fns";
+import {add} from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
 import {enUS, ru} from "date-fns/locale";
@@ -10,7 +11,6 @@ import {MainContext} from "../../../MainContext";
 import {Button, Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import {add} from "date-fns";
 import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
@@ -849,7 +849,7 @@ class Calendar extends React.Component<any, any> {
 
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
-                                       style={{marginTop: '4px', marginRight:'16px'}}>
+                                       style={{marginRight:'16px'}}>
                                 <NeoIcon icon={"arrowLeft"} size={'s'} color={'#000000'} />
                             </NeoButton>
                         </div>
@@ -939,7 +939,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'} size={'s'} />
+                    <NeoIcon icon={"calendarFull"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -954,7 +954,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} size={'s'} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
@@ -978,7 +978,10 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'} />
+            {this.state.fullScreenOn  ?
+                <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+                :
+                <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
         </NeoButton>
             </div>
 

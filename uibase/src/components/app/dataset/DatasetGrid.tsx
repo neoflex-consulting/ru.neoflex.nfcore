@@ -42,7 +42,6 @@ interface Props {
     paginationTotalPage?: number,
     paginationPageSize?: number,
     showUniqRow?: boolean,
-    isHighlightsUpdated?: boolean,
     saveChanges?: (newParam: any, paramName: string) => void;
     numberOfNewLines: boolean,
     onApplyEditChanges?: (buffer: any[]) => void;
@@ -80,7 +79,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             columnDefs: this.props.columnDefs,
             rowData: this.props.rowData,
             highlights: [],
-            saveMenuVisible: false,
             locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
@@ -195,8 +193,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (!_.isEqual(this.state.highlights, this.props.highlights)
-            && this.props.isHighlightsUpdated) {
+        if (!_.isEqual(this.state.highlights, this.props.highlights)) {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
@@ -221,7 +218,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
     private changeHighlight() {
         const {gridOptions} = this.state;
         this.setState({highlights: this.props.highlights});
-        this.props.saveChanges(false, "isHighlightsUpdated");
         const newCellStyle = (params: any) => {
             const columnDef = this.state.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
             let returnObject = {
@@ -446,10 +442,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.grid.current.api.redrawRows()
         }
     }
-
-    handleSaveMenu = () => {
-        this.state.saveMenuVisible ? this.setState({ saveMenuVisible: false }) : this.setState({ saveMenuVisible: true })
-    };
 
     getComponent = (className: string) => {
         if (className === "//Href") {
@@ -765,19 +757,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         />
                     </div>
                 </div>
-                <Modal
-                    key="save_menu"
-                    width={'500px'}
-                    title={t('saveReport')}
-                    visible={this.state.saveMenuVisible}
-                    footer={null}
-                    onCancel={this.handleSaveMenu}
-                >
-                    <SaveDatasetComponent
-                        closeModal={this.handleSaveMenu}
-                        {...this.props}
-                    />
-                </Modal>
             </div>
         )
     }
