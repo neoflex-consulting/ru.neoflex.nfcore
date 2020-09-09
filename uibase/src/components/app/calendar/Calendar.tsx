@@ -849,7 +849,7 @@ class Calendar extends React.Component<any, any> {
 
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
-                                       style={{marginTop: '4px', marginRight:'16px'}}>
+                                       style={{marginRight:'16px'}}>
                                 <NeoIcon icon={"arrowLeft"} size={'s'} color={'#000000'} />
                             </NeoButton>
                         </div>
@@ -939,7 +939,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={'calendar'}/>
+                    <NeoIcon icon={"calendarFull"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
