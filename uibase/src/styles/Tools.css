@@ -128,7 +128,7 @@
 .tools-branch-region {
     position: relative;
     width: 92vw;
-    min-height: 135px;
+    min-height: 115px;
     margin-top: 39px;
     background: #FFFFFF;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -203,7 +203,7 @@
 .tools-select-checkbox-area {
     display: inline-flex;
     flex-direction: column;
-    margin-left: 38px;
+    margin-left: 33px;
     align-self: flex-end;
     margin-bottom: 20px;
 }
@@ -243,11 +243,11 @@
 }
 
 .tools-action-button {
-    width: 209px !important;
+    width: 157px;
 }
 
 .tools-clear-button {
-    width: 156px !important;
+    width: 117px;
 }
 
 .tools-href {
@@ -279,13 +279,36 @@
 }
 
 .tools-select {
-    width: 738px !important;
+    width: 528px !important;
     height: 38px !important;
 }
 
 .tools-sql-area {
     margin-top: 8px !important;
     height: 79px !important;
-    width: 554px;
+    width: 90%;
+    max-width: 416px;
     resize: none;
+}
+
+@media screen and (max-width: 800px){
+    .tools-branch-region div {
+        width: 100%
+    }
+
+    .tools-branch-region .select {
+        width: 90% !important;
+        max-width: 528px;
+    }
+
+    .tools-select-checkbox-area {
+        width: auto;
+    }
+
+    .tools-sql-area {
+        height: 79px !important;
+        width: 90%;
+        max-width: 416px;
+        resize: none;
+    }
 }

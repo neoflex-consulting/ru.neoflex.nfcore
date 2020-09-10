@@ -31,7 +31,7 @@ import {NeoIcon} from "neo-icon/lib";
 
 const backgroundColor = "#2a356c";
 
-const { Header, Content, Sider } = Layout;
+const { Header } = Layout;
 
 interface State {
     principal?: any;
@@ -340,7 +340,7 @@ class EcoreApp extends React.Component<any, State> {
 
     isDatasetComponentsBufferEmpty = () => {
         if (this.state.context.datasetComponents) {
-            for (const [key, value] of Object.entries(this.state.context.datasetComponents)) {
+            for (const [key] of Object.entries(this.state.context.datasetComponents)) {
                 if (this.state.context.datasetComponents[key].getBuffer
                     && this.state.context.datasetComponents[key].getBuffer().length > 0) {
                     this.state.context.datasetComponents[key].showModal();
@@ -531,7 +531,7 @@ class EcoreApp extends React.Component<any, State> {
         </Menu>;
 
         return (
-            <Layout style={{height: '100vh'}}>
+            <Layout style={{height: '90vh', marginTop: '80px'}}>
                 <FetchSpinner/>
                 <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>

@@ -12,7 +12,6 @@ import {
     InputNumber,
     Row,
     Select,
-    Tabs,
     Typography
 } from 'antd';
 import UserComponent from './components/app/UserComponent';
@@ -39,9 +38,8 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoInput} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoTabs} from "neo-design/lib";
 
-const { TabPane } = Tabs;
 const { Paragraph } = Typography;
 const marginBottom = '20px';
 
@@ -277,18 +275,18 @@ class TabsViewReport_ extends ViewContainer {
         }
         return (
             <div hidden={this.state.isHidden}>
-                <Tabs
+                <NeoTabs
                     className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                     defaultActiveKey={children[0] ? children[0]._id : undefined}
                     tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}>
                     {
                         children.map((c: Ecore.EObject) =>
-                            <TabPane tab={c.get('name')} key={c._id} >
+                            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} >
                                 {this.viewFactory.createView(c, props)}
-                            </TabPane>
+                            </NeoTabs.NeoTabPane>
                         )
                     }
-                </Tabs>
+                </NeoTabs>
             </div>
         )
     }

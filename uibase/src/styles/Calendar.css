@@ -372,13 +372,9 @@
     font-size: 20px;
 }
 
-.calendar .ant-drawer-wrapper-body {
-
-}
-
 .calendar .ant-drawer-body div.legend__acceptButton {
-    position: absolute;
-    bottom: 40px;
+    position: fixed;
+    bottom: 0;
     right: 0;
     height: 64px;
     width: 450px;

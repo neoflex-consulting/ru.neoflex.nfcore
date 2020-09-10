@@ -29,7 +29,7 @@ async function handleExportDocx(this: any, handlers: any[], withTable: any, isDo
         const docxData: docxExportObject = handlers[i]();
 
         if (!docxData.hidden) {
-            if((!(isDownloadFromDiagramPanel && !withTable && docxData.docxComponentType === 1)) || isDownloadFromDiagramPanel === false && withTable == false && docxData.docxComponentType === 0) {
+            if((!(isDownloadFromDiagramPanel && !withTable && docxData.docxComponentType === 1)) || isDownloadFromDiagramPanel === false && withTable === false && docxData.docxComponentType === 0) {
 
 
                 if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {

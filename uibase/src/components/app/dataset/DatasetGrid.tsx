@@ -1,10 +1,9 @@
 import React from 'react';
 import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
-import {ConfigProvider, Modal} from 'antd';
+import {ConfigProvider} from 'antd';
 import {withTranslation} from 'react-i18next';
 import Ecore from 'ecore';
-import SaveDatasetComponent from "./SaveDatasetComponent";
 import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
@@ -193,7 +192,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
-        if (!_.isEqual(this.state.highlights, this.props.highlights)) {
+        if (this.props.highlights && !_.isEqual(this.state.highlights, this.props.highlights)) {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
@@ -637,7 +636,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         } else if (data.operationMark__ === dmlOperation.update) {
             for (const [old_key, old_value] of Object.entries(data)) {
                 for (const [new_key] of Object.entries(data)) {
-                    if (old_key == `${new_key}__` && old_key !== new_key && old_key !== "operationMark__")
+                    if (old_key === `${new_key}__` && old_key !== new_key && old_key !== "operationMark__")
                         data[new_key] = old_value
                 }
             }
@@ -652,7 +651,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
     }
 
     render() {
-        const { t } = this.props;
         const {gridOptions} = this.state;
         return (
             <div id="datasetGrid"

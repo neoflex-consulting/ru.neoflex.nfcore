@@ -55,6 +55,10 @@
   border-bottom: 1px solid #e8e8e8;
 }
 
+.head-panel {
+  position: unset;
+}
+
 .app-content{
   background-color: #fdfdfd;
 }
@@ -242,10 +246,6 @@
 /*Antd styles*/
 
 /*Drawer*/
-.ant-drawer {
-  position: absolute !important;
-  /*transform: translateY(-43%) !important;*/
-}
 
 .ant-drawer-header {
   padding: 16px 24px 16px 40px !important;
