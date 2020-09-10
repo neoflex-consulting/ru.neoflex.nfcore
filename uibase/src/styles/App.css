@@ -1161,7 +1161,6 @@
   margin-bottom: 6px!important;
 }
 
-
 .chooseRow{
   content: 'space-between';
 }
@@ -1176,8 +1175,6 @@
   margin: 8px 0;
 }
 
-.Selects{
-}
 .bottomButtons{
   content: 'flex-start';
   position: fixed;
@@ -1210,6 +1207,7 @@
 #diagram .ant-form-item{
   margin-bottom: 6px!important;
 }
+
 
 .diagrams{
   font-family: Roboto;
