@@ -307,6 +307,7 @@ class Tools extends React.Component<any, State> {
                     )}
                 </div>
                 <Drawer
+                    style={{top:'80px'}}
                     title={this.props.t("select data")}
                     width={'50vw'}
                     visible={this.state.drawerResourceVisible}
