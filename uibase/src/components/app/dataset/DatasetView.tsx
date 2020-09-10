@@ -733,10 +733,10 @@ class DatasetView extends React.Component<any, State> {
             params.value = splitted[1];
         }
 
-        if (mask && mask.toLowerCase().startsWith("eval")) {
+        if (mask && this.state.columnDefs.find(c => mask.includes(c.get('field')))) {
             try {
                 // eslint-disable-next-line
-                mask = eval(replaceAllCollisionless(mask.match(/\(.*\)/,"gi")[0], this.state.columnDefs.map(c=>{
+                mask = eval(replaceAllCollisionless(mask, this.state.columnDefs.map(c=>{
                     return {
                         name: c.get('field'),
                         replacement: `params.data.${c.get('field')}`
