@@ -12,7 +12,6 @@ import {
     InputNumber,
     Row,
     Select,
-    Tabs,
     Typography
 } from 'antd';
 import UserComponent from './components/app/UserComponent';

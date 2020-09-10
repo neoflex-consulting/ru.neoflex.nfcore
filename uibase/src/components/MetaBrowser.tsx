@@ -1,5 +1,4 @@
 import * as React from "react";
-import {Tabs} from 'antd';
 import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";

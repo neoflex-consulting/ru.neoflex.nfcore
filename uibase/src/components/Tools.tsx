@@ -2,7 +2,6 @@ import * as React from "react";
 import {
     Tag,
     notification,
-    Tabs,
     Drawer
 } from 'antd';
 import {API} from "../modules/api";
