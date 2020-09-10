@@ -4,12 +4,10 @@ import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
-import {NeoInput} from "neo-design/lib";
+import {NeoInput, NeoTabs} from "neo-design/lib";
 //CSS
 import './../styles/MetaBrowser.css';
 import DatasetGrid from "./app/dataset/DatasetGrid";
-
-const { TabPane } = Tabs;
 
 export interface Props {
 }
@@ -294,12 +292,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         this.setState({data:this.state.data.slice()})
                     }}
                 />
-                <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
+                <NeoTabs className={"meta-browser-tabs-region meta-browser-center-element"}
                       defaultActiveKey={"ecore"}
                       tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ )
-                        return <TabPane tab={t(eObj.name)}
+                        return <NeoTabs.NeoTabPane tab={t(eObj.name)}
                                         key={t(eObj.name)}>
                             <DatasetGrid
                                 ref={this.gridRef}
@@ -314,9 +312,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                     return ""
                                 }}
                             />
-                        </TabPane>
+                        </NeoTabs.NeoTabPane>
                     })}
-                </Tabs>
+                </NeoTabs>
             </div>
         )
     }

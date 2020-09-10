@@ -17,9 +17,7 @@ import { NeoButton } from "neo-design";
 // CSS
 import './../styles/Tools.css';
 import {ReactComponent as ExportIcon} from './../icons/exportFileIcon.svg'
-import {NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
-
-const { TabPane } = Tabs;
+import {NeoInput, NeoSelect, NeoTabs, NeoTypography} from "neo-design/lib";
 
 interface Props {
 }
@@ -487,10 +485,10 @@ class Tools extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
                 {branchRegion}
-                <Tabs className={"tools-tabs-region tools-vertical-center-element"}
+                <NeoTabs className={"tools-tabs-region tools-vertical-center-element"}
                     defaultActiveKey={"export"}
                     tabPosition={'top'}>
-                    <TabPane tab={t("export")} key={t("export")}>
+                    <NeoTabs.NeoTabPane tab={t("export")} key={t("export")}>
                         <div
                             className={"tools-export-region tools-vertical-center-element"}>
                             {exportAllObjectsRegion}
@@ -499,8 +497,8 @@ class Tools extends React.Component<any, State> {
                             {exportSQL}
                         </div>
                         {exportButtonRegion}
-                    </TabPane>
-                    <TabPane tab={t("import")} key={t("import")} >
+                    </NeoTabs.NeoTabPane>
+                    <NeoTabs.NeoTabPane tab={t("import")} key={t("import")} >
                         <div
                             className={"tools-import-region tools-vertical-center-element"}>
                             {importParametersRegion}
@@ -508,8 +506,8 @@ class Tools extends React.Component<any, State> {
                             {importMasterData}
                         </div>
                         {importButtonRegion}
-                    </TabPane>
-                </Tabs>
+                    </NeoTabs.NeoTabPane>
+                </NeoTabs>
             </div>
         );
     }
