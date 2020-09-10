@@ -6,12 +6,8 @@ import {EObject} from "ecore";
 import {IDiagram} from "./DatasetView";
 import {diagramAnchorMap} from "../../../utils/consts";
 import * as _ from 'lodash';
-import lineIcon from "../../../icons/lineIcon.svg";
-import barIcon from "../../../icons/barIcon.svg";
-import pieIcon from "../../../icons/pieIcon.svg";
-import lineHighlightIcon from "../../../icons/lineHighlightIcon.svg";
-import barHighlightIcon from "../../../icons/barHighlightIcon.svg";
-import pieHighlightIcon from "../../../icons/pieHighlightIcon.svg";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 const diagramAnchorMap_: any = diagramAnchorMap;
 
@@ -117,7 +113,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
                         <Select.Option
@@ -126,7 +122,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         >
                             {c.get('headerName')}
                         </Select.Option>)}
-                </Select>
+                </NeoSelect>
             )}
         </Form.Item>
         </div>
@@ -143,7 +139,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Select getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
                         <Select.Option
@@ -152,7 +148,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         >
                             {this.props.t(diagramAnchorMap_[c.get('name')])}
                         </Select.Option>)}
-                </Select>
+                </NeoSelect>
             )}
         </Form.Item>
         </div>
@@ -168,7 +164,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <Input disabled={disabled} placeholder={this.props.t(placeHolder)}/>
+                <NeoInput width= 'none' disabled={disabled} placeholder={this.props.t(placeHolder)}/>
             )}
         </Form.Item>
     };
@@ -213,33 +209,50 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form style={{ marginTop: '30px' }} >
-                <Row>
-                    {this.props.action === "edit"
-                        ?<Col span={6}><Button onClick={this.handleSubmit}>{this.props.t('edit')}</Button></Col>
-                        :<Col span={6}><Button onClick={this.handleSubmit}>{this.props.t('create')}</Button></Col>}
-                    <Col span={6}><Button onClick={this.resetFields}>{this.props.t('reset')}</Button></Col>
-                </Row>
-                {this.props.t('choose diagram type')}
-                <Row>
-                    <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Bar"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Bar")?barHighlightIcon:barIcon} alt="barIcon" /></Button></Col>
-                    <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Pie"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Pie")?pieHighlightIcon:pieIcon} alt="pieIcon" /></Button></Col>
-                    <Col span={4}><Button onClick={()=>{this.setState({diagramType:"Line"})}}><img style={{width: '24px', height: '24px'}} src={(this.state.diagramType==="Line")?lineHighlightIcon:lineIcon} alt="lineIcon" /></Button></Col>
-                </Row>
-                <Row>
+            <Form style={{ height:'83vh', boxShadow:'0 0 5px #F2F2F2', width: '700px', position: "relative" }}>
+                <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px'}}>
+                <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: 500, fontSize: "16px", lineHeight: "19px", color: "#333333", marginTop: "10px"}}>{this.props.t('choose diagram type')}</span>
+                </div>
+                    <div style={{height:'53px', padding:'0px 40px'}}>
+                    <NeoRow className={'chooseRow'}>
+                        <NeoCol span={7} className={'chooseCol'}>
+                            <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Bar" ? "#FFF8E0" : "white", border: this.state.diagramType === "Bar" ? "1px solid #FFCC66": "1px solid #424D78"}}
+                                       onClick={()=>{this.setState({diagramType:"Bar"})}}>
+                                <NeoIcon icon={"barChart"} color={'#424D78'} style={{marginTop: "4px"}}/>
+                            </NeoButton>
+                            <h4 className={'types'}>Линейчатая</h4>
+                        </NeoCol>
+                        <NeoCol span={6} className={'chooseCol'}>
+                            <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Pie" ? "#FFF8E0" : "white", border: this.state.diagramType === "Pie" ? "1px solid #FFCC66": "1px solid #424D78"}}
+                                       onClick={()=>{this.setState({diagramType:"Pie"})}}>
+                                <NeoIcon icon={"diagramCircle"} color={'#424D78'} style={{marginTop: "4px"}}/>
+                            </NeoButton>
+                            <h4 className={'types'}>Круговая</h4>
+                        </NeoCol>
+                        <NeoCol span={4} className={'chooseCol'}>
+                            <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Line" ? "#FFF8E0" : "white", border: this.state.diagramType === "Line" ? "1px solid #FFCC66": "1px solid #424D78"}}
+                                       onClick={()=>{this.setState({diagramType:"Line"})}}>
+                                <NeoIcon icon={"diagram"} color={'#424D78'} style={{marginTop: "4px"}}/>
+                            </NeoButton>
+                            <h4 className={'types'}>График</h4>
+                        </NeoCol>
+                    </NeoRow>
+                </div>
+                <div style={{border: 'solid 1px #F2F2F2', maxHeight:'298px', padding:'12px 40px'}}>
+                <NeoRow className={'Selects'}>
                     {this.getInput("diagramName",this.props.t("diagram name"))}
-                </Row>
-                <Row>
+                </NeoRow>
+                <NeoRow className={'Selects'}>
                     {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
-                </Row>
-                <Row>
-                    <Col span={12}>
+                </NeoRow>
+                <NeoRow gutter={16} className={'Selects'}>
+                    <NeoCol span={12} className={'Selectss'}>
                         {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
-                    </Col>
-                    <Col span={12}>
+                    </NeoCol>
+                    <NeoCol className={'Selectss'} span={12}>
                         {this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
-                    </Col>
-                </Row>
+                    </NeoCol>
+                </NeoRow>
                 {/*Временно отключено, пока через фильтры в datasetView*/}
                 {/*<Row>
                     <Col span={12}>
@@ -249,18 +262,28 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         {this.getEnumSelectOptions("orderBy","order by", this.props.allSorts)}
                     </Col>
                 </Row>*/}
-                <Row>
-                    <Col span={12}>
+                <NeoRow gutter={16} className={'Selects'}>
+                    <NeoCol span={12} className={'Selectss'} >
                         {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel",this.props.t("axis X label")):""}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={12}>
+                    </NeoCol>
+                    <NeoCol className={'Selects'} span={12}>
                         {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel",this.props.t("axis Y label")):""}
-                    </Col>
-                </Row>
-                <Row>
-                </Row>
+                    </NeoCol>
+                </NeoRow>
+                </div>
+                <NeoRow className={'nameOfDiagram'}>
+                </NeoRow>
+                    {/*<div style={{minHeight:'34%'}}>
+
+                    </div>*/}
+                    <div style={{backgroundColor: '#F2F2F2', padding:'16px 40px', height:'65px', left: "0", bottom: "0", position: "absolute", width: "100%"}}>
+                    <NeoRow className={'Bottom'}>
+                    {this.props.action === "edit"
+                        ?<NeoCol span={6}><NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('edit')}</NeoButton></NeoCol>
+                        :<NeoCol span={6}><NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('create')}</NeoButton></NeoCol>}
+                    <NeoCol span={6}><NeoButton className={'Buttons'} type={'secondary'} onClick={this.resetFields}>{this.props.t('reset')}</NeoButton></NeoCol>
+                </NeoRow>
+                    </div>
             </Form>
         )
     }

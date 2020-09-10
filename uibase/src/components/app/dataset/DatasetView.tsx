@@ -1420,7 +1420,7 @@ class DatasetView extends React.Component<any, State> {
             <div className='block'>
 
                 <span className={"caption"} style={{marginTop: "12px", color: 'black', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("version")}</span>
-                <div style={{display: 'inline-block', marginTop: "4px"}}>
+                <div id="selectInGetDiagramPanel" style={{display: 'inline-block', marginTop: "4px"}}>
                 <NeoSelect
                     getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
                     style={{ width: '250px', marginLeft: "12px"}}

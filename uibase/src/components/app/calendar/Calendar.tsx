@@ -930,7 +930,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"calendarFull"}/>
+                    <NeoIcon icon={"calendarFull"} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -945,7 +945,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#a0a0a0' : '#293468'} />
+                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>

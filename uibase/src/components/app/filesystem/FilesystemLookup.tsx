@@ -27,6 +27,7 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
         const {onCheck, checked} = this.props;
         return <React.Fragment>
             <Drawer
+                style={{top:'80px'}}
                 title={this.props.t("select scripts")}
                 width={'50vw'}
                 visible={this.state.showDrawer}
