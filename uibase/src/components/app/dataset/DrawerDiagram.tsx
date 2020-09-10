@@ -209,7 +209,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form style={{ height:'92.5vh', boxShadow:'0 0 5px #F2F2F2', width: '700px', position: "relative" }}>
+            <Form style={{ height:'83vh', boxShadow:'0 0 5px #F2F2F2', width: '700px', position: "relative" }}>
                 <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px'}}>
                 <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: 500, fontSize: "16px", lineHeight: "19px", color: "#333333", marginTop: "10px"}}>{this.props.t('choose diagram type')}</span>
                 </div>
