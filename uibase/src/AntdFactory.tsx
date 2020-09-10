@@ -39,6 +39,7 @@ import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
 import {NeoButton, NeoInput, NeoTabs} from "neo-design/lib";
+import _ from "lodash";
 
 const { Paragraph } = Typography;
 const marginBottom = '20px';
@@ -158,7 +159,7 @@ abstract class ViewContainer extends View {
                 return this.viewFactory.createView(c, props)
             }
         );
-        return <div key={this.viewObject._id.toString() + '_2'}>{childrenView}</div>
+        return childrenView
 
     };
 
@@ -402,7 +403,14 @@ export class Href_ extends ViewContainer {
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const componentRenderCondition = getRenderConditionResult.bind(this)("Href.componentRenderCondition");
+        let cssClass = undefined;
+        if (this.viewObject.get('cssClass') !== null) {
+            cssClass = document.createElement('style');
+            cssClass.innerHTML = `.${this.viewObject.get('cssClass').get('name')} { ${this.viewObject.get('cssClass').get('style')} }`;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
         return componentRenderCondition ? <a
+            className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
             hidden={this.state.isHidden}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
@@ -450,7 +458,7 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden}
             key={this.viewObject._id}>
             <NeoButton
-                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined} style={{ width: '100px', left: span}}
+                className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                 onClick={isReadOnly ? ()=>{} : () => {
                     const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                     handleClick.bind(this)(value);
@@ -569,26 +577,28 @@ export class Select_ extends ViewContainer {
                         value: el[this.viewObject.get('datasetValueColumn').get('name')]
                     }
                 });
-                let currentValue: string;
-                if (this.urlCurrentValue) {
-                    currentValue = this.urlCurrentValue;
-                    //Чтобы не восстанавливать значение при смене параметров
-                    this.urlCurrentValue = "";
-                } else {
-                    currentValue = this.state.currentValue
+                if (!_.isEqual(resArr, this.state.selectData)) {
+                    let currentValue: string;
+                    if (this.urlCurrentValue) {
+                        currentValue = this.urlCurrentValue;
+                        //Чтобы не восстанавливать значение при смене параметров
+                        this.urlCurrentValue = "";
+                    } else {
+                        currentValue = this.state.currentValue
+                    }
+                    const isContainsValue = resArr.find((obj:any) => {
+                        return obj.key === currentValue
+                    });
+                    this.setState({
+                        params: newParams,
+                        currentValue: isContainsValue ? currentValue : "",
+                        selectData: resArr
+                    });
+                    this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
+                        parameterName: this.viewObject.get('name'),
+                        parameterValue: this.state.currentValue
+                    });
                 }
-                const isContainsValue = resArr.find((obj:any) => {
-                    return obj.key === currentValue
-                });
-                this.setState({
-                    params: newParams,
-                    currentValue: isContainsValue ? currentValue : "",
-                    selectData: resArr
-                });
-                this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-                    parameterName: this.viewObject.get('name'),
-                    parameterValue: this.state.currentValue
-                });
             });
         }
     }
