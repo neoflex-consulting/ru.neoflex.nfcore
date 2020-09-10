@@ -110,6 +110,7 @@ export class Login extends React.Component<any, State> {
                         </Row>
                         <div className={"inputLogin"}>
                             <NeoInput
+                                autofocus
                                 className="input-login"
                                 key="user"
                                 onChange={(e: any) => {
@@ -123,6 +124,7 @@ export class Login extends React.Component<any, State> {
                         </Row>
                         <div className={"inputPassword"}>
                             <NeoInput
+                                password
                                 className="input-login"
                                 key="pass"
                                 onChange={(e: any) => {

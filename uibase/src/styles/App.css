@@ -1036,19 +1036,21 @@
   }
 
   .yellowLineColumn2 {
-    position: fixed; /* Фиксированное положение */
-    left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 4px; /* Поля вокруг текста */
-    background: #FFCC66; /* Цвет фона */
-    width: 100%; /* Ширина слоя */
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 4px;
+    background: #FFCC66;
+    width: 100%;
   }
 
   .yellowLineColumn1 {
-    position: fixed; /* Фиксированное положение */
-    left: 0; bottom: 0; /* Левый нижний угол */
-    padding: 4px; /* Поля вокруг текста */
-    background: #FFCC66; /* Цвет фона */
-    width: 100%; /* Ширина слоя */
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 4px;
+    background: #FFCC66;
+    width: 100%;
   }
 
   .backGroundImage {
@@ -1137,3 +1139,105 @@
     display: unset!important;
   padding-left: unset!important;
 }
+
+/*Diagram Drawer*/
+
+.chooseButton{
+  min-width: 24px!important;
+  width: 24px!important;
+  min-height: 24px!important;
+  height: 24px!important;
+  padding: 0;
+  border: 1px solid #424D78;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+ #diagramButton .ant-drawer-body {
+     padding: unset!important;
+  }
+
+#diagramButton .ant-form-item{
+  margin-bottom: 6px!important;
+}
+
+
+.chooseRow{
+  content: 'space-between';
+}
+
+.chooseCol{
+  display: flex!important;
+  width: 155px;
+  height: 25px;
+}
+
+.nameOfDiagram{
+  margin: 8px 0;
+}
+
+.Selects{
+}
+.bottomButtons{
+  content: 'flex-start';
+  position: fixed;
+  left: 0; bottom: 0;
+}
+.Buttons{
+  font-size: 12px;
+  width: 116.71px;
+  height: 32px;
+  font-weight: unset!important;
+}
+
+.Bottom .btn{
+  width: 136px;
+  height: 32px;
+}
+
+#diagram .ant-drawer-body{
+  padding: unset!important;
+}
+
+#diagram .ant-drawer-body{
+  padding: unset!important;
+}
+
+#diagram .ant-drawer-body {
+  padding: unset!important;
+}
+
+#diagram .ant-form-item{
+  margin-bottom: 6px!important;
+}
+
+.diagrams{
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal!important;
+  font-size: 20px!important;
+  line-height: 23px;
+  color: #333333;
+}
+
+.chooseType{
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 500!important;
+  font-size: 16px!important;
+  line-height: 19px;
+  color: #333333;
+}
+
+.types{
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal!important;
+  font-size: 14px!important;
+  line-height: 16px;
+  color: #333333;
+  margin-top: 5px!important;
+  content: 'space-between'!important;
+  margin-left: 12px;
+}
+
