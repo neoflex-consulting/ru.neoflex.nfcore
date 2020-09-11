@@ -1212,7 +1212,13 @@ class DatasetView extends React.Component<any, State> {
         return <div className='functionalBar__header'>
 
                 <div className='block'>
-                    <NeoInput type={'search'} width='192px' />
+                    <NeoInput
+                        style={{width:'192px'}}
+                        type="search"
+                        onChange={() => this.gridRef.onQuickFilterChanged()}
+                        id={"quickFilter"}
+                        placeholder={t("quick filter")}
+                    />
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginRight:'5px'}}
