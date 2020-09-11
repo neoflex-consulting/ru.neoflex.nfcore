@@ -43,8 +43,6 @@ import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 //icons
 import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import penIcon from "../../../icons/penIcon.svg";
-import flagIcon from "../../../icons/flagIcon.svg";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
@@ -1508,7 +1506,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <img style={{width: '24px', height: '24px'}} src={penIcon} alt="penIcon" />
+                <NeoIcon icon={"edit"} size={'m'}/>
             </Button>
             <Button
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
@@ -1516,7 +1514,7 @@ class DatasetView extends React.Component<any, State> {
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => this.gridRef.onInsert()}
             >
-                <FontAwesomeIcon icon={faPlus} size='lg' color="#7b7979"/>
+                <NeoIcon icon={"plus"}  size={'m'}/>
             </Button>
             <Button
                 hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
@@ -1524,7 +1522,7 @@ class DatasetView extends React.Component<any, State> {
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => this.gridRef.onDeleteSelected()}
             >
-                <FontAwesomeIcon icon={faTrash} size='lg' color="#7b7979"/>
+                <NeoIcon icon={"rubbish"} size={'m'}/>
             </Button>
             <Button
                 hidden={!this.state.isEditMode}
@@ -1536,7 +1534,7 @@ class DatasetView extends React.Component<any, State> {
                     this.onApplyEditChanges(this.gridRef.getBuffer());
                 }}
             >
-                <img style={{width: '24px', height: '24px'}} src={flagIcon} alt="flagIcon" />
+                <NeoIcon icon={"mark"} size={'m'}/>
             </Button>
             <Button
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
@@ -1546,7 +1544,7 @@ class DatasetView extends React.Component<any, State> {
                     this.gridRef.copySelected();
                 }}
             >
-                {t("copy selected")}
+                <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: "normal", fontSize: "14px", lineHeight: "16px", color: "#333333"}}>{t("copy selected")}</span>
             </Button>
             <Input
                 hidden={!this.state.isEditMode}
