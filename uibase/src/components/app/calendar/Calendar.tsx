@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Drawer} from "antd";
+import {Drawer, Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
@@ -762,6 +762,15 @@ class Calendar extends React.Component<any, any> {
         const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
+        const menu = (<Menu
+            key='actionMenu'
+            onClick={(e: any) => this.onActionMenu}
+            style={{width: '150px'}}
+        >
+            <Menu.Item key='exportToDocx'>
+                {t("export to docx")}
+            </Menu.Item>
+        </Menu>);
         return (
 
             <div id="selectInFullScreen" className="header row flex-middle">
@@ -936,15 +945,11 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
                 {this.state.calendarVisible ?
-                <NeoButton
-                    type="link"
-                    style={{
-                        marginRight: '5px',
-                    }}
-                    onClick={this.onActionMenu}
-                >
-                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'} />
-                </NeoButton>
+                    <Dropdown overlay={menu} placement="bottomLeft">
+                        <div style={{marginRight: "5px"}}>
+                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
+                        </div>
+                    </Dropdown>
                     :
                     null
                 }

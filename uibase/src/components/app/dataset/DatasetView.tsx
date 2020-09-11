@@ -1344,11 +1344,6 @@ class DatasetView extends React.Component<any, State> {
                          <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
                      </div>
                  </Dropdown>
-                <NeoButton type={'link'} title={t('grouping')}
-                           style={{marginRight:'5px'}}
-                           onClick={()=>{}}>
-                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
                 <NeoButton type={'link'} style={{marginRight: "5px"}}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
@@ -1455,11 +1450,6 @@ class DatasetView extends React.Component<any, State> {
                 </span>
 
 
-            <NeoButton type={'link'} title={t('print')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginLeft: "20px"}}
-                    onClick={()=>{}}
-            >
-                <NeoIcon icon={"print"} size={"m"} color={'#5E6785'}/>
-            </NeoButton>
             <NeoButton
                 className="buttonFullScreen"
                 type="link"

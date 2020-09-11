@@ -1,8 +1,8 @@
 import React from 'react';
-import {ReactComponent as ExpandIcon} from './../../../../icons/expandIcon.svg'
-import {ReactComponent as CollapseIcon} from './../../../../icons/collapseIcon.svg'
 //CSS
 import './../../../../styles/MetaBrowser.css';
+import {NeoButton} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     node: any;
@@ -16,25 +16,27 @@ interface State {
 export default class Expand extends React.Component<Props, State> {
 
     getExpandButton = () => {
-        return <button className={"meta-browser-button"}
+        return <NeoButton className={"meta-browser-button"}
+                          type={'link'}
             onClick={() => {
                 this.props.data.show(true);
             }}
             style={{color: 'rgb(151, 151, 151)'}}
         >
-            <ExpandIcon/>
-        </button>
+            <NeoIcon icon={"arrowDown"}/>
+        </NeoButton>
     };
 
     getCollapseButton = () => {
-        return <button className={"meta-browser-button"}
+        return <NeoButton className={"meta-browser-button"}
+                          type={'link'}
             onClick={() => {
                 this.props.data.hide(true);
             }}
             style={{color: 'rgb(151, 151, 151)'}}
         >
-            <CollapseIcon/>
-        </button>
+            <NeoIcon icon={"arrowUp"}/>
+        </NeoButton>
     };
 
     render() {
