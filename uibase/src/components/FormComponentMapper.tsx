@@ -4,6 +4,7 @@ import { Input, Tag, Button, Select, DatePicker } from 'antd';
 import moment from 'moment';
 
 import { boolSelectionOption, convertPrimitiveToString } from './../utils/resourceEditorUtils';
+import {NeoTag} from "neo-design/lib";
 
 
 interface EditableTextAreaProps {
@@ -86,7 +87,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
     const elements = value && value !== null ?
         upperBound === -1 ? (value.length !== 0?
             value.map((el: { [key: string]: any }, idx: number) =>
-                <Tag
+                <NeoTag
                     onClose={(e: any) => {
                         props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
                     }}
@@ -94,10 +95,10 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                     key={el["$ref"]}
                 >
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
-                    {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp; 
-                </Tag>) : [])
+                    {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp;
+                </NeoTag>) : [])
             :
-            <Tag
+            <NeoTag
                 onClose={(e: any) => {
                     props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
                 }}
@@ -106,7 +107,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             >
                 {(relatedResource && relatedResource.get('name')) || (value.$ref && value.$ref.split('//')[1])}&nbsp;
                 {(relatedResource && relatedResource.eClass.get('name')) || (value.eClass && value.eClass.split('//')[2])}&nbsp;
-            </Tag>
+            </NeoTag>
         :
         []
     const component = <React.Fragment key={ukey + "_" + idx}>

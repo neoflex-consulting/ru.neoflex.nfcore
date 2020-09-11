@@ -1239,3 +1239,7 @@
   margin-left: 12px;
 }
 
+.ant-tag .anticon-close{
+border: unset!important;
+}
+
