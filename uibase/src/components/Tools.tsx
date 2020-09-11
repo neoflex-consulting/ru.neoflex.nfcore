@@ -16,7 +16,7 @@ import { NeoButton } from "neo-design";
 // CSS
 import './../styles/Tools.css';
 import {ReactComponent as ExportIcon} from './../icons/exportFileIcon.svg'
-import {NeoInput, NeoSelect, NeoTabs, NeoTypography} from "neo-design/lib";
+import {NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 
 interface Props {
 }
@@ -298,12 +298,12 @@ class Tools extends React.Component<any, State> {
                 </div>
                 <div className={"tools-horizontal-center-element"}>
                     {this.state.resourceList.map(r =>
-                        <Tag key={r.get("uri")} closable={true} onClose={() => {
+                        <NeoTag key={r.get("uri")} closable={true} onClose={() => {
                             const index = this.state.resourceList.indexOf(r);
                             this.state.resourceList.splice(index, 1)
                         }}>
                             {r.eContents()[0].get('name') || r.get('uri')}
-                        </Tag>
+                        </NeoTag>
                     )}
                 </div>
                 <Drawer
@@ -433,12 +433,12 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-horizontal-center-element"}>
                 {this.state.filesUploadArray.map(r =>
-                    <Tag key={r.name} closable={true} onClose={() => {
+                    <NeoTag key={r.name} closable={true} onClose={() => {
                         const index = this.state.filesUploadArray.indexOf(r);
                         this.state.filesUploadArray.splice(index, 1);
                     }}>
                         {r.name}
-                    </Tag>
+                    </NeoTag>
                 )}
             </div>
         </div>;
@@ -468,12 +468,12 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-horizontal-center-element"}>
                 {this.state.MDUploadArray.map(r =>
-                    <Tag key={r.name} closable={true} onClose={() => {
+                    <NeoTag key={r.name} closable={true} onClose={() => {
                         const index = this.state.MDUploadArray.indexOf(r);
                         this.state.MDUploadArray.splice(index, 1);
                     }}>
                         {r.name}
-                    </Tag>
+                    </NeoTag>
                 )}
             </div>
         </div>;

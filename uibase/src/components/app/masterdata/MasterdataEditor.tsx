@@ -15,12 +15,12 @@ import {faBackward, faSave, faTrash, faClone} from "@fortawesome/free-solid-svg-
 
 import './masterdata.css'
 import {Button} from "antd";
-import clockRefreshIcon from "../../../icons/clockRefreshIcon.svg";
-import plusIcon from "../../../icons/plusIcon.svg";
 import MasterdataForm from "./MasterdataForm";
 import {truncate} from './utils'
 import MasterdataGrid from "./MasterdataGrid";
 import {actionType, eventType, grantType} from "../../../utils/consts";
+import {NeoIcon} from "neo-icon/lib";
+import {NeoButton} from "neo-design/lib";
 
 interface Props {
     entityType: EObject,
@@ -241,9 +241,9 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         return (
             <React.Fragment>
                 <div>
-                    <Button title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.refresh}>
-                        <img style={{width: '24px', height: '24px'}} src={clockRefreshIcon} alt="clockRefreshIcon"/>
-                    </Button>
+                    <NeoButton type={'link'} title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginTop: "15px"}} onClick={this.refresh}>
+                        <NeoIcon icon={"update-clock"} size={'m'}/>
+                    </NeoButton>
                     <div style={{
                         display: 'inline-block',
                         height: '30px',
@@ -256,9 +256,9 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
                     }}/>
                     {this.state.isDisabled
                         ? <div/>
-                        :<Button title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.create}>
-                        <img style={{width: '24px', height: '24px'}} src={plusIcon} alt="clockRefreshIcon"/>
-                    </Button>}
+                        :<NeoButton type={'link'} title={t('create')} style={{color: 'rgb(151, 151, 151)'}} onClick={this.create}>
+                            <NeoIcon icon={"plus"} size={'m'}/>
+                    </NeoButton>}
                 </div>
                 <MasterdataGrid entityType={entityType} rowData={rowData} onSelect={row =>
                     onSelect? onSelect(row) : (this.state.isDisabled ? null : this.edit(row['@rid']))

@@ -2,6 +2,7 @@ import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Tag, Drawer} from "antd";
 import FilesystemTree from "./FilesystemTree";
+import {NeoTag} from "neo-design/lib";
 
 interface Props {
     ref: any,
@@ -40,7 +41,7 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
             </Drawer>
             <div style={{display: "unset !important",alignItems:"unset !important"}}>
             {this.props.checked.filter(r => (r.split("/").pop() || "").includes(".")).map(r =>
-                <Tag
+                <NeoTag
                     key={r} closable={true} onClose={() => {
                     let checked: string[] = [];
                     let prevElement = "";
@@ -55,7 +56,7 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
                     this.props.onCheck(this.props.checked.filter(e=> !checked.includes(e)))
                 }}>
                     {r.split("/").pop()}
-                </Tag>
+                </NeoTag>
             )}
             </div>
         </React.Fragment>;
