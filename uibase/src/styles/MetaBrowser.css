@@ -1,8 +1,4 @@
 /*override*/
-#meta-browser > .ant-tabs {
-    overflow: unset;
-}
-
 #meta-browser * .ant-tabs-top-bar {
     max-width: 1290px !important;
     margin-bottom: 40px;

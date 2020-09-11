@@ -14,6 +14,7 @@ export interface Props {
 interface State {
     ePackages: Ecore.EPackage[];
     data: {
+        gridRef:any;
         name:string,
         type:string,
         uri:string
@@ -26,11 +27,12 @@ interface State {
 
 class MetaBrowser extends React.Component<Props & WithTranslation, State> {
 
-    gridRef = React.createRef<any>();
+    gridRef : any;
 
     state = {
         ePackages: Ecore.EPackage.Registry.ePackages(),
         data: [] as {
+            gridRef:any;
             name:string,
             type:string,
             uri:string
@@ -48,6 +50,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     this.setState({data: this.getData()})
                 })
         })
+        this.gridRef = React.createRef();
     }
 
     getName = (eObject: any): string => {
@@ -144,13 +147,16 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         let data: any[] = [];
         for (let ePackage of this.state.ePackages) {
             let eClassifiers: any[] = [];
-            data.push({
+            let parent = {
+                //mock
+                gridRef: {onFilterChanged:()=>{},redraw:()=>{}},
                 key: ePackage.eURI(),
                 name: ePackage.get('name'),
                 type: ePackage.eClass.get('name'),
                 children: eClassifiers,
                 isVisible__: true
-            });
+            };
+            data.push(parent);
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
                 let child = {
@@ -166,9 +172,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         children2.forEach(c => {
                             c.isVisible__ = true;
                         });
-                        if (redraw) {
-                            this.gridRef.current.onFilterChanged();
-                            this.gridRef.current.redraw();
+                        if (redraw && parent.gridRef) {
+                            parent.gridRef.onFilterChanged();
+                            parent.gridRef.redraw();
                         }
                     },
                     hide: (redraw: boolean = false) => {
@@ -176,9 +182,9 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         children2.forEach(c => {
                             c.isVisible__ = false;
                         });
-                        if (redraw) {
-                            this.gridRef.current.onFilterChanged();
-                            this.gridRef.current.redraw();
+                        if (redraw && parent.gridRef) {
+                            parent.gridRef.onFilterChanged();
+                            parent.gridRef.redraw();
                         }
                     }
                 };
@@ -285,8 +291,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                 })
                             });
                         if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
-                            this.gridRef.current.onFilterChanged();
-                            this.gridRef.current.redraw();
+                            this.state.data.forEach(e=>{
+                                if (e.isVisible__ && e.gridRef) {
+                                    e.gridRef.onFilterChanged();
+                                    e.gridRef.redraw();
+                                }
+                            })
                         }
                         this.setState({data:this.state.data.slice()})
                     }}
@@ -299,7 +309,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         return <NeoTabs.NeoTabPane tab={t(eObj.name)}
                                         key={t(eObj.name)}>
                             <DatasetGrid
-                                ref={this.gridRef}
+                                ref={(ref:any)=> {
+                                    eObj.gridRef = ref;
+                                    this.gridRef = ref;
+                                }}
                                 height={654}
                                 rowData = {eObj.children}
                                 columnDefs = {this.getColDefs()}
