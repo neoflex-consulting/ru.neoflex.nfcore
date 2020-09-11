@@ -24,6 +24,7 @@ import DeleteDatasetComponent from "./DeleteDatasetComponent";
 import moment from "moment";
 import format from "number-format.js";
 import HiddenColumn from "./HiddenColumn";
+import {replaceAllCollisionless} from "../../../utils/replacer";
 import {
     actionType,
     appTypes,
@@ -306,20 +307,25 @@ class DatasetView extends React.Component<any, State> {
 
     findColumnDefs(resource: Ecore.Resource){
         let columnDefs: any = [];
-        resource.eContents()[0].get('column')._internal.forEach( (c: Ecore.Resource) => {
+        resource.eContents()[0].get('column').each( (c: Ecore.EObject) => {
             let rowData = new Map();
             const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
             const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
             let componentRenderCondition = c.get('componentRenderCondition');
-            if (componentRenderCondition)
-                resource.eContents()[0].get('column')._internal.forEach( (cn: Ecore.Resource) => {
+            if (componentRenderCondition) {
+                const repArr = resource.eContents()[0].get('column').map((cn: Ecore.EObject)=> {
                     const regxType = cn.get('datasetColumn') !== null ? cn.get('datasetColumn').get('convertDataType') : null;
-                    componentRenderCondition = (regxType === appTypes.Integer)
-                        ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseInt(this.props.data.${cn.get('name')})`)
-                        : (regxType === appTypes.Decimal)
-                            ? componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), `parseFloat(this.props.data.${cn.get('name')})`)
-                            : componentRenderCondition.replace(new RegExp(cn.get('name'), 'g'), "this.props.data."+cn.get('name'))
+                    return {
+                        name:cn.get('name'),
+                        replacement:(regxType === appTypes.Integer)
+                            ? `parseInt(this.props.data.${cn.get('name')})`
+                            : (regxType === appTypes.Decimal)
+                                ? `parseFloat(this.props.data.${cn.get('name')})`
+                                : `this.props.data.${cn.get('name')}`
+                    }
                 });
+                componentRenderCondition = replaceAllCollisionless(componentRenderCondition, repArr);
+            }
             rowData.set('field', c.get('name'));
             rowData.set('headerName', c.get('headerName').get('name'));
             rowData.set('headerTooltip', c.get('headerTooltip'));
@@ -716,7 +722,7 @@ class DatasetView extends React.Component<any, State> {
 
     valueFormatter = (params: ValueFormatterParams) => {
         const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
-        const mask = found ? found.get('mask') : undefined;
+        let mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
             && params.value
@@ -725,6 +731,21 @@ class DatasetView extends React.Component<any, State> {
             params.value = splitted[1];
         }
 
+        if (mask && this.state.columnDefs.find(c => mask.includes(c.get('field')))) {
+            try {
+                // eslint-disable-next-line
+                mask = eval(replaceAllCollisionless(mask, this.state.columnDefs.map(c=>{
+                    return {
+                        name: c.get('field'),
+                        replacement: `params.data.${c.get('field')}`
+                    }
+                })))
+            } catch (e) {
+                this.props.context.notification("FormatMask",
+                    this.props.t("exception while evaluating") + ` ${mask}`,
+                    "warning")
+            }
+        }
         if (params.value)
             formattedParam = params.colDef.type === appTypes.Date && mask
                 ? moment(params.value, defaultDateFormat).format(mask)
