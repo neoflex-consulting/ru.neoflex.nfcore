@@ -1,19 +1,15 @@
 /*override*/
-#meta-browser > .ant-tabs {
-    overflow: unset;
-}
-
 #meta-browser * .ant-tabs-top-bar {
-    max-width: 1290px !important;
+    max-width: 48.9vw !important;
     margin-bottom: 40px;
 }
 
 #meta-browser * .ant-input {
-    width: 396px;
+    width: 20vw;
 }
 
 #meta-browser * .ant-tabs-nav-container {
-    max-width: 1290px !important;
+    max-width: 48.9vw !important;
 }
 
 
