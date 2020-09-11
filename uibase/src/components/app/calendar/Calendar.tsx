@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Button, Drawer} from "antd";
+import {Drawer} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
@@ -16,8 +16,6 @@ import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 
-import trashcanIcon from '../../../icons/trashcanIcon.svg';
-import settingsIcon from '../../../icons/settingsIcon.svg';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
@@ -93,34 +91,22 @@ class Calendar extends React.Component<any, any> {
 
     actionMenu = (params: any) => (
         <div style={{marginLeft: '-32px'}}>
-            <Button
+            <NeoButton
                 type="link"
-                style={{width: '35px'}}
+                style={{width: '35px', marginTop: "12px"}}
                 onClick={() => this.handleEditMenu(params)}
             >
-                <img
-                    alt="Not found"
-                    src={settingsIcon}
-                    style={{
-                        color: '#515151'
-                    }}
-                />
-            </Button>
+                <NeoIcon icon={"gear"}  color={'#515151'}/>
+            </NeoButton>
             {
                 this.state.myNotificationVisible &&
-                <Button
+                <NeoButton
                     type="link"
-                    style={{width: '35px',}}
+                    style={{width: '35px', marginTop: "5px"}}
                     onClick={() => this.deleteNotification(params)}
                 >
-                    <img
-                        alt="Not found"
-                        src={trashcanIcon}
-                        style={{
-                            color: '#515151'
-                        }}
-                    />
-                </Button>
+                    <NeoIcon icon={"rubbish"} color={'#515151'}/>
+                </NeoButton>
             }
         </div>
     );
