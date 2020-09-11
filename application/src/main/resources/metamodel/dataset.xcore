@@ -139,6 +139,7 @@ abstract class DatasetColumnView {
     TextAlign textAlign = "Undefined"
     String componentRenderCondition
     contains GridComponent component
+    boolean showTooltipField
 }
 
 class RdbmsColumn extends DatasetColumnView {
