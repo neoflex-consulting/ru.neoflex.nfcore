@@ -1,7 +1,6 @@
 import * as React from "react";
 import {Col, Dropdown, Menu, Row} from 'antd'
 import { API } from "../modules/api";
-import logo from '../icons/logo.png';
 import { WithTranslation, withTranslation } from "react-i18next";
 import _map from "lodash/map"
 import {NeoButton, NeoInput} from "neo-design/lib";
@@ -16,7 +15,6 @@ interface State {
     password: string | undefined;
     waitMinute: boolean;
     count: number;
-    images: any;
     languages: Array<string>;
 }
 
@@ -27,7 +25,6 @@ export class Login extends React.Component<any, State> {
         password: undefined,
         waitMinute: true,
         count: 0,
-        images: logo,
         languages: [],
     };
 
