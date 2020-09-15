@@ -41,9 +41,6 @@ import {
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
-//icons
-import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";

@@ -1,6 +1,6 @@
 import React from 'react';
 import moment, {Moment} from "moment";
-import {DatePicker} from "antd";
+import {NeoDatePicker} from "neo-design/lib";
 import {defaultDateFormat, defaultTimestampFormat} from "../../../../utils/consts";
 
 interface Props {
@@ -43,10 +43,10 @@ export default class DateEditor extends React.Component<Props, State> {
 
     render() {
         return (
-                <DatePicker
+                <NeoDatePicker
                     defaultValue={this.state.pickedDate}
                     showTime={this.props.type === 'Timestamp'}
-                    onChange={(date, dateString) => {
+                    onChange={(date: any, dateString: string) => {
                         this.onChange(dateString)
                     }}
                     format={this.props.mask}
