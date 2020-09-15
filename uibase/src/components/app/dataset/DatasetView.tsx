@@ -355,6 +355,7 @@ class DatasetView extends React.Component<any, State> {
                 }
             });
             rowData.set('valueFormatter', this.valueFormatter);
+            rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
             columnDefs.push(rowData);
         });
         this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs},()=>{
@@ -671,6 +672,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('formatMask', colDef.get('formatMask'));
                 rowData.set('mask', this.evalMask(colDef.get('formatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
+                rowData.set('tooltipField', colDef.get('valueFormatter'));
                 newColumnDefs.push(rowData);
 
             }
@@ -1209,7 +1211,13 @@ class DatasetView extends React.Component<any, State> {
         return <div className='functionalBar__header'>
 
                 <div className='block'>
-                    <NeoInput type={'search'} width='192px' />
+                    <NeoInput
+                        style={{width:'192px'}}
+                        type="search"
+                        onChange={() => this.gridRef.onQuickFilterChanged()}
+                        id={"quickFilter"}
+                        placeholder={t("quick filter")}
+                    />
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginRight:'5px'}}

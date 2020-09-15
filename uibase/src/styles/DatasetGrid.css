@@ -59,7 +59,7 @@
     border-left: 1px solid transparent;
 }
 
-#datasetGrid .ag-row:nth-child(even) {
+#datasetGrid .ag-row-even {
     background: #FAFAFA;
 }
 

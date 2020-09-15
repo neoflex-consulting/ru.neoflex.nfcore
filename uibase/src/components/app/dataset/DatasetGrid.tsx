@@ -687,6 +687,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             gridOptions={this.gridOptions}
                             /*stopEditingWhenGridLosesFocus={true}*/
                             overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
+                            tooltipShowDelay = {1000}
                             {...gridOptions}
                         >
                             {this.state.columnDefs.map((col: any) =>
@@ -698,7 +699,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                     key={col.get('field')}
                                     field={col.get('field')}
                                     headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
-                                    headerTooltip={col.get('headerTooltip')}
+                                    headerTooltip={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
                                     hide={col.get('hide') || false}
                                     editable={col.get('editable') || false}
                                     pinned={col.get('pinned') === 'Left' ? 'left' : col.get('pinned') === 'Right' ? 'right' : false}
@@ -739,6 +740,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                             ? {mask: col.get('mask'), type: col.get('type')}
                                             : undefined}
                                     valueFormatter = {col.get('valueFormatter')}
+                                    tooltipField = {col.get('tooltipField')}
                                 />
                             )}
                         </AgGridReact>
