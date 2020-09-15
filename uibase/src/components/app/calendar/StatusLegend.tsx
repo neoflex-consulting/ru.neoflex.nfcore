@@ -41,7 +41,6 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
     render() {
         const {t} = this.props;
         return (
-            <>
             <div>
                 {
                     this.state.notificationStatus!
@@ -63,26 +62,31 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
 
                                     <div style={{height: '29px', width: '52px', backgroundColor: c['color'], borderRadius: '5px'}}/>
                                 </NeoCol>
-                                <NeoCol span={17}>
-
-                            <span
-                                key={JSON.stringify({name: c['name'], color: c['color']})}
-                            >
-                                {c['name']}
-                            </span>
+                                <NeoCol span={17} style={{justifyContent: 'start'}}>
+                                    <span
+                                        key={JSON.stringify({name: c['name'], color: c['color']})}
+                                    >
+                                        {c['name']}
+                                    </span>
                                 </NeoCol>
                             </NeoRow>
                         )
                 }
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                    <NeoButton onClick={()=> this.apply(this.state.notificationStatus)} style={{marginRight:'16px'}}>
+                        {t('apply')}
+                    </NeoButton>
+                </div>
             </div>
-            <div className={'legend__acceptButton'}>
-                <NeoButton
-                     title={t('apply')}
-                         onClick={()=> this.apply(this.state.notificationStatus)}>
-                    {t('apply')}
-                </NeoButton>
-            </div>
-        </>
         )
     }
 }

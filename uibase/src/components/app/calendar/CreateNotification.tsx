@@ -202,7 +202,16 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                     </NeoCol>
 
                 </NeoRow>
-                        <div className={'legend__acceptButton'}>
+                        <div style={{
+                            position: 'absolute',
+                            right: 0,
+                            bottom: '80px',
+                            width: '100%',
+                            borderTop: '1px solid #e9e9e9',
+                            padding: '16px 40px',
+                            background: '#F2F2F2',
+                            textAlign: 'left',
+                        }}>
                             <NeoButton
                                 title={t('create')}
                                 style={{ width: '100px', right: '6px', }}

@@ -19,7 +19,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoDrawer, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -628,15 +628,13 @@ class Calendar extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <div id="PlusIconInFullScreen">
-            <Drawer
+            <NeoDrawer
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
-                placement='right'
                 title={t('createNotification')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.createMenuVisible}
                 onClose={this.handleCreateMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     <CreateNotification
@@ -646,7 +644,7 @@ class Calendar extends React.Component<any, any> {
                         spinnerVisible={this.state.spinnerVisible}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
             </div>
         );
     }
@@ -681,16 +679,14 @@ class Calendar extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <div id="legendIconInFullScreen" key={"legendDrawer"}>
-            <Drawer
+            <NeoDrawer
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
-                placement='right'
                 title={t('legend')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.legendMenuVisible}
                 onClose={this.handleLegendMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     <StatusLegend
@@ -699,7 +695,7 @@ class Calendar extends React.Component<any, any> {
                         onChangeNotificationStatus={this.updateAllStatuses}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
             </div>
         );
     }
@@ -916,7 +912,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"calendarFull"} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
+                    <NeoIcon icon={"calendarFull"} style={{margin:'auto'}} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -931,7 +927,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
+                    <NeoIcon icon={"table"} style={{margin:'auto'}} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
