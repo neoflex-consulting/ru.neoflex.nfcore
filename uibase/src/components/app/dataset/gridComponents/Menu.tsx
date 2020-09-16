@@ -1,6 +1,7 @@
 import React from 'react';
 import {Dropdown, Menu} from "antd";
 import {dmlOperation} from "../../../../utils/consts";
+import {NeoTypography} from "neo-design/lib";
 
 interface Props {
     t: any,
@@ -13,7 +14,6 @@ interface Props {
 interface State {
 }
 
-
 export default class GridMenu extends React.Component<Props, State> {
 
     menu = (
@@ -23,14 +23,14 @@ export default class GridMenu extends React.Component<Props, State> {
                 onClick={()=>{
                     this.props.editGrid.undoChanges(this.props.data)
                 }}>
-                <a>{this.props.t("undo changes")}</a>
+                <NeoTypography>{this.props.t("undo changes")}</NeoTypography>
             </Menu.Item>
             <Menu.Item hidden={!this.props.showMenuCopyButton}
                 key="1"
                 onClick={()=>{
                     this.props.editGrid.copy([{...this.props.data, operationMark__ : dmlOperation.insert}], this.props.rowIndex + 1)
                 }}>
-                <a>{this.props.t("copy")}</a>
+                <NeoTypography>{this.props.t("copy")}</NeoTypography>
             </Menu.Item>
         </Menu>
     );
