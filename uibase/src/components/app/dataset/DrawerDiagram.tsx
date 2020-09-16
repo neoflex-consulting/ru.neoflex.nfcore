@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Row, Col, Form, Input, Select} from "antd";
+import {Form, Select} from "antd";
 import {withTranslation, WithTranslation} from 'react-i18next';
 import {FormComponentProps} from "antd/lib/form";
 import {EObject} from "ecore";

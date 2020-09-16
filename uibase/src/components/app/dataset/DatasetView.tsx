@@ -1344,7 +1344,8 @@ class DatasetView extends React.Component<any, State> {
             }
                 <div className='verticalLine'/>
 
-                 <Dropdown overlay={menu} placement="bottomLeft">
+                 <Dropdown overlay={menu} placement="bottomRight"
+                           getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}>
                      <div style={{marginRight: "5px"}}>
                          <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
                      </div>
@@ -1442,9 +1443,10 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </NeoSelect>
             </div>
-                <div className='verticalLine' style={{marginTop: "4px"}}/>
+                <div id={"dropdownInGridPanel"}   className='verticalLine' style={{marginTop: "4px"}}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft">
+            <Dropdown overlay={menu} placement="bottomLeft"
+                      getPopupContainer={() => document.getElementById ("dropdownInGridPanel") as HTMLElement}>
                 <div style={{marginRight: "5px"}}>
                 <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "7px"}}/>
                 </div>

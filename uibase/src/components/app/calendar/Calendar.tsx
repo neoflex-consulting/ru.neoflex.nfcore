@@ -19,7 +19,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoDrawer, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoDrawer} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -514,7 +514,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     filter (node: any) {
-        return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify");
+        return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify") && (node.className !== "ant-dropdown ant-dropdown-placement-bottomRight slide-up-leave");
     }
 
     private getDocxData(): docxExportObject {
@@ -703,7 +703,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div
                 style={{
-                    height: this.state.fullScreenOn ?  550*5.5/4 : 550,
+                    height: this.state.fullScreenOn ?  550*5.5/4 - 100 : 550,
                 }}
                 className={'ag-theme-material'}
             >
@@ -758,7 +758,7 @@ class Calendar extends React.Component<any, any> {
         const dateFormat_ = "LLLL";
         const menu = (<Menu
             key='actionMenu'
-            onClick={(e: any) => this.onActionMenu}
+            onClick={this.onActionMenu}
             style={{width: '150px'}}
         >
             <Menu.Item key='exportToDocx'>
@@ -781,7 +781,7 @@ class Calendar extends React.Component<any, any> {
                             type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
-                            {t('today')}
+                            <NeoTypography type={'capture-regular'}>{t('today')}</NeoTypography>
                         </NeoButton>
 
                         <NeoSelect className='selectYear'
@@ -859,7 +859,7 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents", marginTop: '2px'}}
                     >
-                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
+                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '1px' : '0px'}}>
                                 <NeoInput
                                     type={'search'}
                                     onChange={(e: any) => {
@@ -868,7 +868,7 @@ class Calendar extends React.Component<any, any> {
                                 />
                             </div>
 
-
+                        <div style={{marginBottom: this.state.fullScreenOn ? '6px' : '0px'}}>
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
@@ -891,6 +891,7 @@ class Calendar extends React.Component<any, any> {
                                     Системные заметки
                                 </option>
                             </NeoSelect>
+                        </div>
 
 
                     </div>
@@ -939,7 +940,8 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
                 {this.state.calendarVisible ?
-                    <Dropdown overlay={menu} placement="bottomLeft">
+                    <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
+                        overlay={menu} placement="bottomLeft">
                         <div style={{marginRight: "5px"}}>
                             <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
                         </div>

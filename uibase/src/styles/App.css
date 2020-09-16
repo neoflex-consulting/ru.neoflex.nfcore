@@ -417,6 +417,12 @@
   color: #022af8;
 }
 
+/*DropDown*/
+
+.ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover{
+  background: #FFF8E0!important;
+}
+
 /*Logo*/
 .app-logo span, .app-logo-settings span {
   margin: unset!important;

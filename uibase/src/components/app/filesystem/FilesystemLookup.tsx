@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
-import {Tag, Drawer} from "antd";
+import {Drawer} from "antd";
 import FilesystemTree from "./FilesystemTree";
 import {NeoDrawer, NeoTag} from "neo-design/lib";
 
