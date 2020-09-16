@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Dropdown, Menu} from "antd";
+import {Drawer, Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
@@ -627,7 +627,7 @@ class Calendar extends React.Component<any, any> {
     renderCreateNotification() {
         const {t} = this.props;
         return (
-            <div id="PlusIconInFullScreen">
+            <div id="PlusIconInFullScreen" key={"CreateNotificationDrawer"}>
             <NeoDrawer
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 title={t('createNotification')}
