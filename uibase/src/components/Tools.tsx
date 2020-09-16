@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-    Tag,
-    notification,
-    Drawer
-} from 'antd';
+import {Drawer, notification} from 'antd';
 import {API} from "../modules/api";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -12,11 +8,11 @@ import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
-import { NeoButton } from "neo-design";
+import {NeoButton} from "neo-design";
 // CSS
 import './../styles/Tools.css';
-import {ReactComponent as ExportIcon} from './../icons/exportFileIcon.svg'
 import {NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
 }
@@ -244,7 +240,7 @@ class Tools extends React.Component<any, State> {
         const exportFilesRegion = <div
             className={"tools-region-element tools-horizontal-center-element tools-export-files"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"tools-icon"}/>
+                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
                        this.fileSystemLookupRef.current.showDrawer()
@@ -288,7 +284,7 @@ class Tools extends React.Component<any, State> {
             </NeoInput>
             <div className={"tools-horizontal-center-element tools-export-files"}>
                 <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                    <ExportIcon className={"tools-icon"}/>
+                    <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
                     <a className={"tools-highlighted-text"}
                        onClick={() => {
                            this.setState({drawerResourceVisible: true})
@@ -410,7 +406,7 @@ class Tools extends React.Component<any, State> {
 
         const importFilesRegion = <div className={"tools-import-files tools-region-element"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"tools-icon"}/>
+                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
                 <a className={"tools-highlighted-text"}
                    onClick={(event) => {
                        this.importObjectInputRef.current!.click()
@@ -445,7 +441,7 @@ class Tools extends React.Component<any, State> {
 
         const importMasterData = <div className={"tools-import-masterdata"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <ExportIcon className={"tools-icon"}/>
+                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
                 <a className={"tools-highlighted-text"}
                     onClick={(event) => {
                         this.importMDInputRef.current!.click()

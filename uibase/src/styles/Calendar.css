@@ -96,7 +96,7 @@
     display: block;
     position: relative;
     width: 100%;
-    line-height: initial;
+    line-height: 1;
     padding: 0 4em 0 4em;
 }
 
@@ -312,7 +312,7 @@
     margin-top: 17px;
 }
 .fullscreen-enabled .header .col-col-center{
-    margin-top: 1px;
+    margin-top: 11px;
 }
 
 
@@ -357,37 +357,6 @@
     border: none;
     color: black;
     background-color: #ffffff;
-}
-
-/*Легенда*/
-.calendar .ant-drawer-body .col {
-    justify-content: unset;
-}
-.calendar .ant-drawer-right .ant-drawer-content-wrapper {
-    top: 80px;
-}
-
-.calendar .ant-drawer-wrapper-body .ant-drawer-title {
-    font-weight: 600;
-    font-size: 20px;
-}
-
-.calendar .ant-drawer-body div.legend__acceptButton {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    height: 64px;
-    width: 450px;
-    background-color: #f2f2f2;
-    padding: 16px 0 16px 40px;
-}
-
-.calendar .ant-drawer-body {
-    padding: 24px 40px !important;
-}
-
-.calendar .ant-drawer-body .ant-col-17 {
-    font-weight: 500;
 }
 
 .calendar .ant-btn-primary,

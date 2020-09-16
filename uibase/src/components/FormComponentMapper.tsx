@@ -1,9 +1,9 @@
-import React, { useState, Fragment } from 'react';
+import React, {Fragment, useState} from 'react';
 import Ecore from 'ecore';
-import { Input, Tag, Button, Select, DatePicker } from 'antd';
+import {Button, DatePicker, Input, Select} from 'antd';
 import moment from 'moment';
 
-import { boolSelectionOption, convertPrimitiveToString } from './../utils/resourceEditorUtils';
+import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
 import {NeoTag} from "neo-design/lib";
 
 

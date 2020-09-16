@@ -1,6 +1,6 @@
 /* полоса прокрутки (скроллбар) */
 ::-webkit-scrollbar {
-  width: 4px; /* ширина для вертикального скролла */
+  width: 8px; /* ширина для вертикального скролла */
   height: 8px; /* высота для горизонтального скролла */
   background-color: #f2f2f2;
 }
@@ -247,12 +247,8 @@
 
 /*Drawer*/
 
-.ant-drawer-header {
-  padding: 16px 24px 16px 40px !important;
-}
-
-.ant-drawer-body {
-  padding: 10px 40px 10px 40px !important;
+.Drawer {
+  z-index: 900 !important;
 }
 
 /*ServerFilter*/
@@ -354,11 +350,29 @@
   width: 104px;
   margin-left: 40px;
 }
+.ant-select-sm .ant-select-selection--single:hover {
+  border: 1px solid #424D78 !important;
+}
 
 .ant-pagination.mini .ant-pagination-options-quick-jumper input {
   margin-left: 16px;
   width: 36px !important;
+  box-shadow: unset!important;
+}
 
+.ant-pagination.mini .ant-pagination-options-quick-jumper input:hover{
+  border: 1px solid #424D78 !important;
+}
+
+.ant-pagination-options-quick-jumper input:focus,
+.ant-pagination-options-quick-jumper input:hover {
+  box-shadow: none !important;
+  border: 1px solid #2A356C !important;
+}
+
+.ant-select-focused .ant-select-selection, .ant-select-selection:focus, .ant-select-selection:active{
+  border-color: #424D78 !important;
+  box-shadow: unset!important;
 }
 .ant-pagination.mini .ant-pagination-item{
   margin: 0 5px !important;
@@ -397,6 +411,12 @@
 :hover{
   font-size: 12px;
   color: #022af8;
+}
+
+/*DropDown*/
+
+.ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover{
+  background: #FFF8E0!important;
 }
 
 /*Logo*/
@@ -1241,5 +1261,9 @@
 
 .ant-tag .anticon-close{
 border: unset!important;
+}
+
+#selectButton .col {
+  justify-content: start;
 }
 

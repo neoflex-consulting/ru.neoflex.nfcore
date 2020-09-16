@@ -305,7 +305,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                       defaultActiveKey={"ecore"}
                       tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
-                        if (eObj.isVisible__ )
+                        if (eObj.isVisible__ ){
                         return <NeoTabs.NeoTabPane tab={t(eObj.name)}
                                         key={t(eObj.name)}>
                             <DatasetGrid
@@ -324,7 +324,10 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                     return ""
                                 }}
                             />
-                        </NeoTabs.NeoTabPane>
+                        </NeoTabs.NeoTabPane>}
+                        else{
+                            return null
+                        }
                     })}
                 </NeoTabs>
             </div>

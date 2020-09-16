@@ -1,19 +1,7 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {
-    Col,
-    Collapse,
-    ConfigProvider,
-    DatePicker,
-    Drawer,
-    Form,
-    Input,
-    InputNumber,
-    Row,
-    Select,
-    Typography
-} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, Typography} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
@@ -38,7 +26,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoInput, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 
 const { Paragraph } = Typography;
@@ -451,7 +439,6 @@ export class Button_ extends ViewContainer {
         }
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
-        const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
         const label = t(this.viewObject.get('label'));
         const componentRenderCondition = getRenderConditionResult.bind(this)("Button.componentRenderCondition");
         return componentRenderCondition ? <div
@@ -766,7 +753,7 @@ export class DatePicker_ extends ViewContainer {
             <div hidden={this.state.isHidden}
                  style={{marginBottom: marginBottom}}>
                 <ConfigProvider locale={this.state.locale}>
-                    <DatePicker
+                    <NeoDatePicker
                         key={this.viewObject._id}
                         className={cssClass !== undefined ?`${this.viewObject.get('cssClass').get('name')}` : undefined}
                         showTime={this.viewObject.get('showTime')}
@@ -775,8 +762,8 @@ export class DatePicker_ extends ViewContainer {
                         disabled={isReadOnly}
                         allowClear={this.viewObject.get('allowClear') || false}
                         format={this.state.mask}
-                        style={{width: "200px", display: (this.state.isHidden) ? 'none' : undefined}}
-                        onChange={(date, dateString) => {
+                        width={'200px'}
+                        onChange={(date: any, dateString: string) => {
                             this.onChange(dateString)
                         }}/>
                 </ConfigProvider>

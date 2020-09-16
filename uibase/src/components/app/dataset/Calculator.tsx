@@ -305,7 +305,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
 
     render() {
     return (
-        <div>
+        <div id={"selectsInCalculator"}>
             <Form >
                 <Form.Item style={{marginBottom:'0px', lineHeight:'19px'}}>
                         <div style={{ display: "inherit", fontSize: '16px', fontWeight: 500, color: '#333333'}}>
@@ -358,7 +358,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             rules: [{
                             }]
                         })(
-                            <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}>
+                            <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
+                                       getPopupContainer={() => document.getElementById ('selectsInCalculator') as HTMLElement}>
                                 {Object.keys(appTypes).map(type => <option key={type} value={type}>
                                     {this.t(type)}
                                 </option>)}
@@ -372,7 +373,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                             rules: [{
                             }]
                         })(
-                            <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}>
+                            <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
+                                       getPopupContainer={() => document.getElementById ('selectsInCalculator') as HTMLElement}>
                                 {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
                                     key={mask.key}
                                     value={mask.value}>
@@ -448,7 +450,16 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                         </NeoCol>
                     </NeoRow>
                 </Form.Item>
-                    <div className={'filter__acceptButton'}>
+                    <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        bottom: '80px',
+                        width: '100%',
+                        borderTop: '1px solid #e9e9e9',
+                        padding: '16px 40px',
+                        background: '#F2F2F2',
+                        textAlign: 'left',
+                    }}>
                         <NeoButton
                                 title={this.t("run query")}
                                 style={{width: '127px'}}
