@@ -247,9 +247,9 @@
 
 /*Drawer*/
 
-.Drawer {
-  z-index: 900 !important;
-}
+/*.Drawer {*/
+/*  z-index: 900 !important;*/
+/*}*/
 
 .diagram .ant-drawer-body {
   padding: 0 0 80px 0 !important;
