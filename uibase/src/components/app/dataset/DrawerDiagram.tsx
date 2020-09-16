@@ -209,7 +209,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form style={{ height:'83vh', boxShadow:'0 0 5px #F2F2F2', width: '700px', position: "relative" }}>
+            <Form>
                 <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px'}}>
                 <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: 500, fontSize: "16px", lineHeight: "19px", color: "#333333", marginTop: "10px"}}>{this.props.t('choose diagram type')}</span>
                 </div>
@@ -276,13 +276,22 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     {/*<div style={{minHeight:'34%'}}>
 
                     </div>*/}
-                    <div style={{backgroundColor: '#F2F2F2', padding:'16px 40px', height:'65px', left: "0", bottom: "0", position: "absolute", width: "100%"}}>
-                    <NeoRow className={'Bottom'}>
+                    <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        bottom: '80px',
+                        width: '100%',
+                        borderTop: '1px solid #e9e9e9',
+                        padding: '16px 40px',
+                        background: '#F2F2F2',
+                        textAlign: 'left',
+                    }}>
+                    {/*<NeoRow className={'Bottom'}>*/}
                     {this.props.action === "edit"
-                        ?<NeoCol span={6}><NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('edit')}</NeoButton></NeoCol>
-                        :<NeoCol span={6}><NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('create')}</NeoButton></NeoCol>}
-                    <NeoCol span={6}><NeoButton className={'Buttons'} type={'secondary'} onClick={this.resetFields}>{this.props.t('reset')}</NeoButton></NeoCol>
-                </NeoRow>
+                        ?<NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('edit')}</NeoButton>
+                        :<NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('create')}</NeoButton>}
+                     <NeoButton className={'Buttons'} type={'secondary'} onClick={this.resetFields}>{this.props.t('reset')}</NeoButton>
+                {/*</NeoRow>*/}
                     </div>
             </Form>
         )
