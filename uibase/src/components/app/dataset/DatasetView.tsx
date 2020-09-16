@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoInput, NeoSelect, NeoDrawer} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect, NeoDrawer, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -1387,7 +1387,7 @@ class DatasetView extends React.Component<any, State> {
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
             >
-                <NeoIcon icon={"arrowLong"} color={'#5E6785'} style={{marginRight: "6px"}} />
+                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginRight: "6px"}} />
                 <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
             </NeoButton>
                 </a>
@@ -1482,8 +1482,10 @@ class DatasetView extends React.Component<any, State> {
 
     getEditPanel = () => {
         const { t } = this.props;
-        return <div id="editPanel">
-            <Button
+        return <div className="functionalBar__header">
+            <a>
+            <NeoButton
+                type={'link'}
                 title={t('edit')}
                 style={{color: 'rgb(151, 151, 151)'}}
                 onClick={() => {
@@ -1503,8 +1505,10 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <NeoIcon icon={"edit"} size={'m'}/>
-            </Button>
+                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginLeft: "17px", marginTop: "4px"}} />
+                <span><NeoTypography  style={{marginLeft:"10px", color: "#333333"}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
+            </NeoButton>
+            </a>
             <Button
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("add row")}
