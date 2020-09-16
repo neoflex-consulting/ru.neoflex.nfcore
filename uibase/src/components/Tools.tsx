@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-    Tag,
-    notification,
-    Drawer
-} from 'antd';
+import {Drawer, notification} from 'antd';
 import {API} from "../modules/api";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -12,7 +8,7 @@ import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
-import { NeoButton } from "neo-design";
+import {NeoButton} from "neo-design";
 // CSS
 import './../styles/Tools.css';
 import {NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";

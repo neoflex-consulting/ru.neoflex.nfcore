@@ -439,7 +439,6 @@ export class Button_ extends ViewContainer {
         }
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
-        const span = this.viewObject.get('span') ? `${this.viewObject.get('span')}px` : '0px';
         const label = t(this.viewObject.get('label'));
         const componentRenderCondition = getRenderConditionResult.bind(this)("Button.componentRenderCondition");
         return componentRenderCondition ? <div
