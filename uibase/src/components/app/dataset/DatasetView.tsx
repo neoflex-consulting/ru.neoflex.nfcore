@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Button, Dropdown, Input, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -1929,6 +1929,7 @@ class DatasetView extends React.Component<any, State> {
                     visible={this.state.diagramAddMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}}
                     mask={false}
+                    className={'diagram'}
                 >
                     {
                         <DrawerDiagram
@@ -1948,16 +1949,13 @@ class DatasetView extends React.Component<any, State> {
                 </NeoDrawer>
                 </div>
                 <div id="diagram">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('diagram') as HTMLElement}
-                    placement='right'
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramEditMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         <DrawerDiagram
@@ -1974,7 +1972,7 @@ class DatasetView extends React.Component<any, State> {
                             id={(this.state.currentDiagram)? this.state.currentDiagram.id: 0}
                         />
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="delete_menuButton">
                     <Modal

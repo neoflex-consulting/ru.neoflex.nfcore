@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Drawer, Dropdown, Menu} from "antd";
+import {Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
@@ -652,14 +652,12 @@ class Calendar extends React.Component<any, any> {
     renderEditNotification() {
         const {t} = this.props;
         return (
-            <Drawer
-                placement='right'
+            <NeoDrawer
                 title={t('editNotification')}
                 width={'450px'}
                 visible={this.state.editMenuVisible}
                 onClose={this.handleEditMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     this.state.editableNotification !== undefined && <EditNotification
@@ -671,7 +669,7 @@ class Calendar extends React.Component<any, any> {
                         myNotificationVisible={this.state.myNotificationVisible}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
         );
     }
 

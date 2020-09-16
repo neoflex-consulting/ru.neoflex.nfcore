@@ -1,5 +1,7 @@
 import * as React from "react";
-import {Drawer, notification} from 'antd';
+import {
+    notification,
+} from 'antd';
 import {API} from "../modules/api";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -8,10 +10,9 @@ import SearchGrid from "./SearchGrid";
 import Ecore from "ecore";
 import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
-import {NeoButton} from "neo-design";
 // CSS
 import './../styles/Tools.css';
-import {NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -302,19 +303,16 @@ class Tools extends React.Component<any, State> {
                         </NeoTag>
                     )}
                 </div>
-                <Drawer
-                    style={{top:'80px'}}
+                <NeoDrawer
                     title={this.props.t("select data")}
                     width={'50vw'}
                     visible={this.state.drawerResourceVisible}
-                    placement={"right"}
                     mask={false}
-                    maskClosable={false}
                     onClose={()=>this.setState({drawerResourceVisible: false})}
                 >
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
                                 specialEClass={undefined}/>
-                </Drawer>
+                </NeoDrawer>
             </div>
         </div>;
 

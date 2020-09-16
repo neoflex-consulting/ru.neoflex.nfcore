@@ -251,6 +251,10 @@
   z-index: 900 !important;
 }
 
+.diagram .ant-drawer-body {
+  padding: 0 0 80px 0 !important;
+}
+
 /*ServerFilter*/
 .leftSplitter .ant-tree-node-content-wrapper-open .ant-tree-title {
   color: #B38136
