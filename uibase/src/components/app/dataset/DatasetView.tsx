@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect, NeoDrawer} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -1691,16 +1691,13 @@ class DatasetView extends React.Component<any, State> {
                     {...this.props}
                 />
                 <div id="filterButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
-                    placement='right'
                     title={t('filters')}
                     width={'711px'}
                     visible={this.state.filtersMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
 
@@ -1736,19 +1733,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <Highlight/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="aggregationButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                    placement='right'
                     title={t('aggregations')}
                     width={'720px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverAggregates
@@ -1766,19 +1760,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerAggregate/>
                     }
-                </Drawer>
+                </NeoDrawer>
                     </div>
                 <div id="aggregationGroupsButton">
-                    <Drawer
-                        style={{top: '80px'}}
+                    <NeoDrawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
-                        placement='right'
                         title={t('grouping')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
                         mask={false}
-                        maskClosable={false}
                     >
                         {
                             this.state.groupByColumn
@@ -1812,19 +1803,16 @@ class DatasetView extends React.Component<any, State> {
                                 :
                                 <ServerGroupBy/>
                         }
-                    </Drawer>
+                    </NeoDrawer>
                 </div>
                 <div id="sortButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
-                    placement='right'
                     title={t('sorts')}
                     width={'720px'}
                     visible={this.state.sortsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverSorts
@@ -1842,19 +1830,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerSort/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="hiddenColumnsButton">
-                    <Drawer
-                        style={{top: '80px'}}
+                    <NeoDrawer
                         getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
-                        placement='right'
                         title={t('hiddencolumns')}
                         width={'700px'}
                         visible={this.state.hiddenColumnsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                         mask={false}
-                        maskClosable={false}
                     >
                         {
                             this.state.hiddenColumns
@@ -1871,19 +1856,16 @@ class DatasetView extends React.Component<any, State> {
                                 :
                                 <HiddenColumn/>
                         }
-                    </Drawer>
+                    </NeoDrawer>
                 </div>
                 <div id="calculatableexpressionsButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
-                    placement='right'
                     title={t('calculator')}
                     width={'712px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverCalculatedExpression
@@ -1903,19 +1885,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <Calculator/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="diagramButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
-                    placement='right'
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramAddMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         <DrawerDiagram
@@ -1932,7 +1911,7 @@ class DatasetView extends React.Component<any, State> {
                             id={this.state.diagrams.length}
                         />
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="diagram">
                 <Drawer

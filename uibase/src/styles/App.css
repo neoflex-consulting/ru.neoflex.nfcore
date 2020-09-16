@@ -247,12 +247,8 @@
 
 /*Drawer*/
 
-.ant-drawer-header {
-  padding: 16px 24px 16px 40px !important;
-}
-
-.ant-drawer-body {
-  padding: 10px 40px 10px 40px !important;
+.Drawer {
+  z-index: 900 !important;
 }
 
 /*ServerFilter*/
@@ -1265,5 +1261,9 @@
 
 .ant-tag .anticon-close{
 border: unset!important;
+}
+
+#selectButton .col {
+  justify-content: start;
 }
 
