@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Drawer, Dropdown, Menu} from "antd";
+import {Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
