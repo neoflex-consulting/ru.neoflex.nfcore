@@ -627,7 +627,7 @@ class Calendar extends React.Component<any, any> {
     renderCreateNotification() {
         const {t} = this.props;
         return (
-            <div id="PlusIconInFullScreen">
+            <div id="PlusIconInFullScreen" key={"CreateNotificationDrawer"}>
             <NeoDrawer
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
                 title={t('createNotification')}

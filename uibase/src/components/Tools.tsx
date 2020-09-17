@@ -1,7 +1,5 @@
 import * as React from "react";
-import {
-    notification,
-} from 'antd';
+import {notification,} from 'antd';
 import {API} from "../modules/api";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -12,8 +10,9 @@ import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
 // CSS
 import './../styles/Tools.css';
-import {NeoButton, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import {paramType} from "./app/dataset/DatasetView";
 
 interface Props {
 }
@@ -180,7 +179,7 @@ class Tools extends React.Component<any, State> {
                 <p className={"tools-header tools-padding-top tools-margin-left"}>
                     <NeoTypography type={"body-medium"}>{t("branch parameters")}</NeoTypography>
                 </p>
-                <p className={"tools-text tools-margin-left"}><NeoTypography>{t("branch")}</NeoTypography></p>
+                <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{t("branch")}</NeoTypography></p>
                 <NeoSelect
                     placeholder={t("choose from the list")}
                     className={"tools-select tools-margin-left"}
@@ -232,22 +231,32 @@ class Tools extends React.Component<any, State> {
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
                 <NeoTypography type={"body-medium"}>{t("export parameters")}</NeoTypography>
             </p>
-            <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
-               onClick={() => {this.downloadAll();}}>
-                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>{t("export all objects")}</NeoTypography>
-            </a>
+            <NeoButton
+                type={'link'}
+                title={t("back to table")}
+                className={"tools-href tools-horizontal-center-element tools-margin-right"}
+                onClick={() => {this.downloadAll()}}
+            >
+                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>
+                    {t("export all objects")}
+                </NeoTypography>
+            </NeoButton>
         </div>;
 
         const exportFilesRegion = <div
             className={"tools-region-element tools-horizontal-center-element tools-export-files"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
-                <a className={"tools-highlighted-text"}
-                   onClick={(event) => {
-                       this.fileSystemLookupRef.current.showDrawer()
-                   }}>
-                    {this.props.t("select export scripts")}
-                </a>
+                <NeoButton
+                    type={'link'}
+                    className={"tools-highlighted-text"}
+                    style={{marginTop: "4px"}}
+                    suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
+                    onClick={(event) => {
+                        this.fileSystemLookupRef.current.showDrawer()
+                    }}
+                >
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>{this.props.t("select export scripts")}</NeoTypography>
+                </NeoButton>
             </div>
             <div className={"tools-horizontal-center-element"}>
                 <FilesystemLookup ref={this.fileSystemLookupRef}
@@ -259,10 +268,10 @@ class Tools extends React.Component<any, State> {
 
         const exportObjectsRegion = <div
             className={"tools-region-element tools-export-objects-region"}>
-            <p className={"tools-sub-header tools-margin-top tools-margin-left"}>
+            <p className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}}>
                 <NeoTypography type={"body-regular"}>{t("export metadata")}</NeoTypography>
             </p>
-            <p className={"tools-text tools-margin-left"}>
+            <p className={"tools-text tools-margin-left"} style={{marginBottom:'13px'}}>
                 <NeoTypography type={"capture-regular"}>{t("select metadata parameters")}</NeoTypography>
             </p>
             <NeoInput type={"checkbox"}
@@ -285,13 +294,17 @@ class Tools extends React.Component<any, State> {
             </NeoInput>
             <div className={"tools-horizontal-center-element tools-export-files"}>
                 <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                    <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
-                    <a className={"tools-highlighted-text"}
-                       onClick={() => {
-                           this.setState({drawerResourceVisible: true})
-                       }}>
-                        {t("select metadata for export")}
-                    </a>
+                    <NeoButton
+                        type={'link'}
+                        className={"tools-highlighted-text"}
+                        style={{marginTop: "4px"}}
+                        suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
+                        onClick={() => {
+                            this.setState({drawerResourceVisible: true})
+                        }}
+                    >
+                        <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>{t("select metadata for export")}</NeoTypography>
+                    </NeoButton>
                 </div>
                 <div className={"tools-horizontal-center-element"}>
                     {this.state.resourceList.map(r =>
@@ -318,7 +331,7 @@ class Tools extends React.Component<any, State> {
 
         const exportSQL = <div
             className={"tools-export-sql"}>
-            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}>{t("export master data")}</p>
+            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}><NeoTypography type={"capture-regular"} style={{color:'#5E6785'}}>{t("export master data")}</NeoTypography></p>
             <NeoInput
                 type={"textArea"}
                 width={'90%'}
@@ -382,48 +395,59 @@ class Tools extends React.Component<any, State> {
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
                 <NeoTypography type={"body-medium"}>{t("import parameters")}</NeoTypography>
             </p>
-            <a className={"tools-href tools-horizontal-center-element tools-margin-right"}
-               onClick={() => {
-                   this.deploySupplyInputRef.current!.click()
-               }}>
-                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>{t("deploy supply")}</NeoTypography>
-                <input ref={this.deploySupplyInputRef}
-                       type="file" style={{display: "none"}}
-                       onChange={e => {
-                           const file = e!.target!.files![0]
-                           if (file) {
-                               this.deployFile(file)
-                           }
-                       }}
-                       onClick={e => {
-                           this.setState({deployName: undefined})
-                       }}
-                />
-            </a>
+            <NeoButton
+                type={'link'}
+                title={t("back to table")}
+                className={"tools-href tools-horizontal-center-element tools-margin-right"}
+                onClick={() => {
+                    this.deploySupplyInputRef.current!.click()
+                }}
+            >
+                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>
+                    {t("deploy supply")}
+                </NeoTypography>
+            </NeoButton>
+            <input ref={this.deploySupplyInputRef}
+                   type="file" style={{display: "none"}}
+                   onChange={e => {
+                       const file = e!.target!.files![0]
+                       if (file) {
+                           this.deployFile(file)
+                       }
+                   }}
+                   onClick={e => {
+                       this.setState({deployName: undefined})
+                   }}
+            />
         </div>;
 
         const importFilesRegion = <div className={"tools-import-files tools-region-element"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
-                <a className={"tools-highlighted-text"}
-                   onClick={(event) => {
-                       this.importObjectInputRef.current!.click()
-                   }}>
-                    {this.props.t("select files")}
-                    <input ref={this.importObjectInputRef}
-                           type="file" style={{display: "none"}}
-                           onChange={e => {
-                               const file = e!.target!.files![0];
-                               if (file) {
-                                   this.setState({filesUploadArray: this.state.filesUploadArray.concat([file])})
-                                   this.importObjectInputRef.current!.value = ""
-                               }
-                           }}
-                           onClick={e => {
-                               this.setState({fileName: undefined})
-                           }}
-                    />
-                </a>
+                <NeoButton
+                    type={'link'}
+                    className={"tools-highlighted-text"}
+                    suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
+                    onClick={(event) => {
+                        this.importObjectInputRef.current!.click()
+                    }}
+                >
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>
+                        {this.props.t("select files")}
+                    </NeoTypography>
+                </NeoButton>
+                <input ref={this.importObjectInputRef}
+                       type="file" style={{display: "none"}}
+                       onChange={e => {
+                           const file = e!.target!.files![0];
+                           if (file) {
+                               this.setState({filesUploadArray: this.state.filesUploadArray.concat([file])})
+                               this.importObjectInputRef.current!.value = ""
+                           }
+                       }}
+                       onClick={e => {
+                           this.setState({fileName: undefined})
+                       }}
+                />
             </div>
             <div className={"tools-horizontal-center-element"}>
                 {this.state.filesUploadArray.map(r =>
@@ -439,26 +463,31 @@ class Tools extends React.Component<any, State> {
 
         const importMasterData = <div className={"tools-import-masterdata"}>
             <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
-                <NeoIcon icon={"exportFile"} className={"tools-icon"} size={'m'}/>
-                <a className={"tools-highlighted-text"}
+                <NeoButton
+                    type={'link'}
+                    className={"tools-highlighted-text"}
+                    suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
                     onClick={(event) => {
                         this.importMDInputRef.current!.click()
-                    }}>
-                    {this.props.t("select masterdata")}
-                    <input ref={this.importMDInputRef}
-                           type="file" style={{display: "none"}}
-                           onChange={e => {
-                               const file = e!.target!.files![0];
-                               if (file) {
-                                   this.setState({MDUploadArray: this.state.MDUploadArray.concat([file])})
-                                   this.importMDInputRef.current!.value = ""
-                               }
-                           }}
-                           onClick={e => {
-                               this.setState({fileName: undefined})
-                           }}
-                    />
-                </a>
+                    }}
+                >
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>
+                        {this.props.t("select masterdata")}
+                    </NeoTypography>
+                </NeoButton>
+                <input ref={this.importMDInputRef}
+                       type="file" style={{display: "none"}}
+                       onChange={e => {
+                           const file = e!.target!.files![0];
+                           if (file) {
+                               this.setState({MDUploadArray: this.state.MDUploadArray.concat([file])})
+                               this.importMDInputRef.current!.value = ""
+                           }
+                       }}
+                       onClick={e => {
+                           this.setState({fileName: undefined})
+                       }}
+                />
             </div>
             <div className={"tools-horizontal-center-element"}>
                 {this.state.MDUploadArray.map(r =>

@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography, NeoColor} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -1379,18 +1379,19 @@ class DatasetView extends React.Component<any, State> {
         return (
         <div className="functionalBar__header">
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
-                <a>
-            <NeoButton type={'link'} title={t("back to table")} style={{background: '#F2F2F2', color: "#333333", marginTop: "4px"}}
+                <NeoButton
+                    type={'link'}
+                    title={t("back to table")}
+                    style={{background: '#F2F2F2', color: NeoColor.grey_9, marginTop: "4px"}}
+                    suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
-            >
-                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginRight: "6px"}} />
-                <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
-            </NeoButton>
-                </a>
+                >
+                    <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
+                </NeoButton>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
             <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
@@ -1484,11 +1485,11 @@ class DatasetView extends React.Component<any, State> {
         const { t } = this.props;
         return <div className="functionalBar__header">
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
-            <a>
             <NeoButton
                 type={'link'}
                 title={t('edit')}
-                style={{color: 'rgb(151, 151, 151)'}}
+                style={{color: NeoColor.grey_9, marginTop: "4px"}}
+                suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                 onClick={() => {
                     if (this.state.isEditMode && this.gridRef.getBuffer().length > 0) {
                         this.setState({isCheckEditBufferVisible: true})
@@ -1506,10 +1507,8 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginTop: "4px"}} />
-                <span><NeoTypography  style={{marginLeft:"10px", color: "#333333"}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
+                <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
             </NeoButton>
-            </a>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
             <NeoButton
                 type={'link'}
