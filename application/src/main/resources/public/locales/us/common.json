@@ -71,6 +71,7 @@
         "run": "Run",
         "save": "Save",
         "saveReport": "Saving",
+        "saveChanges": "Save changes?",
         "search": "Search: ",
         "searchsimple": "Search",
         "select": "Select",
@@ -90,6 +91,7 @@
         "tools": "Tools",
         "more": "More",
         "wrongOperation": "Wrong operation",
+        "warningForEditMode": "You still have unsaved changes. By clicking the \"Delete\" button you will return to the table without changes.",
 
         "EqualTo": "equals",
         "NotEqual": "does not equal",

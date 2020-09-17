@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Dropdown, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoInput, NeoSelect, NeoDrawer, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -2014,60 +2014,40 @@ class DatasetView extends React.Component<any, State> {
                     </Modal>
                 </div>
                 <div id="edit_applyChangesButton">
+                    <NeoModal  onCancel={()=>{
+                        this.setState({
+                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                        })
+                    }} closable={true} type={'edit'}
+                               title={t('saveChanges')}
+                               content={t("warningForEditMode")}
+                               visible={this.state.isCheckEditBufferVisible}
+                               onLeftButtonClick={()=>{
+                        this.gridRef.resetBuffer();
+                        this.setState({isEditMode:false
+                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                            this.gridRef.onEdit();
+                            this.refresh()
+                        })
+                    }}
+                               onRightButtonClick={()=>{
+                                   this.gridRef.removeRowsFromGrid();
+                                   this.onApplyEditChanges(this.gridRef.getBuffer());
+                                   this.setState({
+                                       isEditMode:!this.state.isEditMode,
+                                       isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                   },()=>{
+                                       this.gridRef.onEdit();
+                                   })
+                               }}
+                               textOfLeftButton={t("delete")}
+                               textOfRightButton={t("save")}
+                    >
+                    </NeoModal>
+
+
                     <Modal
                         getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
-                        key="check_edit_buffer"
-                        width={'500px'}
-                        title={t('edit buffer')}
-                        visible={this.state.isCheckEditBufferVisible}
-                        footer={null}
-                        onCancel={()=>{
-                            this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})
-                        }}
-                    >
-                        <div style={{textAlign:"center"}}>
-                            <b>{t("unresolved changes left")}</b>
-                            <br/>
-                            <div>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.removeRowsFromGrid();
-                                        this.onApplyEditChanges(this.gridRef.getBuffer());
-                                        this.setState({
-                                            isEditMode:!this.state.isEditMode,
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                            },()=>{
-                                            this.gridRef.onEdit();
-                                        })
-                                    }}
-                                >
-                                    {t("apply and quit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.setState({
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                        })
-                                    }}
-                                >
-                                    {t("back to edit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.resetBuffer();
-                                        this.setState({isEditMode:false
-                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                                            this.gridRef.onEdit();
-                                            this.refresh()
-                                        })
-                                    }}
-                                >
-                                    {t("reset changes")}
-                                </Button>
-                            </div>
-                        </div>
-                    </Modal>
-                    <Modal
                         key="save_menu"
                         width={'500px'}
                         title={t('saveReport')}
