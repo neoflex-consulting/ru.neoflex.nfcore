@@ -32,7 +32,7 @@
 }
 
 #tools * .btn {
-    font-size: 14px !important;
+    font-size: 12px !important;
 }
 
 /*padding*/
@@ -53,11 +53,11 @@
 }
 
 .tools-margin-top {
-    margin-top: 19px !important;
+    margin-top: 16px !important;
 }
 
 .tools-margin-left {
-    margin-left: 19px !important;
+    margin-left: 16px !important;
 }
 
 .tools-margin-right {
@@ -94,7 +94,7 @@
     font-family: 'Roboto', sans-serif;
     word-wrap: unset;
     white-space: nowrap;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .tools-highlighted-text {
@@ -111,7 +111,8 @@
     position: relative;
     width: 92vw;
     min-height: 115px;
-    margin-top: 39px;
+    margin-top: 32px;
+    margin-bottom: 12px;
     background: #FFFFFF;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
@@ -129,7 +130,7 @@
 }
 
 .tools-export-region {
-    min-height: 526px;
+    min-height: 448px;
     width: 100%;
     z-index: 10;
     background: #FFFFFF;
@@ -137,32 +138,32 @@
 }
 
 .tools-export-all-objects {
-    min-height: 56px;
+    min-height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .tools-export-files {
-    min-height: 66px;
+    min-height: 56px;
     display: flex;
     align-items: normal
 }
 
 .tools-export-objects-region {
-    min-height: 242px;
+    min-height: 206px;
     display: flex;
     flex-direction: column
 }
 
 .tools-export-sql {
-    height: 143px;
+    height: 138px;
     border-bottom: none
 }
 
 .tools-button-region {
     width: 100%;
-    height: 75px;
+    height: 64px;
     overflow: hidden;
     background: #F2F2F2;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -191,7 +192,7 @@
 }
 
 .tools-import-region {
-    min-height: 205px;
+    min-height: 176px;
     width: 100%;
     z-index: 10;
     background: #FFFFFF;
@@ -199,20 +200,20 @@
 }
 
 .tools-import-parameters {
-    height: 56px;
+    height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .tools-import-files {
-    min-height: 66px;
+    min-height: 56px;
     display: inline-flex;
     align-items: center;
 }
 
 .tools-import-masterdata {
-    min-height: 85px;
+    min-height: 72px;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -248,7 +249,7 @@
     width: 26px;
     margin-top: inherit;
     margin-bottom: inherit;
-    margin-right: 12px;
+    margin-right: 8px;
 }
 
 .tools-checkbox {
@@ -262,7 +263,8 @@
 
 .tools-select {
     width: 528px !important;
-    height: 38px !important;
+    height: 32px !important;
+    margin-bottom: 16px;
 }
 
 .tools-sql-area {

@@ -179,7 +179,7 @@ class Tools extends React.Component<any, State> {
                 <p className={"tools-header tools-padding-top tools-margin-left"}>
                     <NeoTypography type={"body-medium"}>{t("branch parameters")}</NeoTypography>
                 </p>
-                <p className={"tools-text tools-margin-left"}><NeoTypography>{t("branch")}</NeoTypography></p>
+                <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{t("branch")}</NeoTypography></p>
                 <NeoSelect
                     placeholder={t("choose from the list")}
                     className={"tools-select tools-margin-left"}
@@ -268,10 +268,10 @@ class Tools extends React.Component<any, State> {
 
         const exportObjectsRegion = <div
             className={"tools-region-element tools-export-objects-region"}>
-            <p className={"tools-sub-header tools-margin-top tools-margin-left"}>
+            <p className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}}>
                 <NeoTypography type={"body-regular"}>{t("export metadata")}</NeoTypography>
             </p>
-            <p className={"tools-text tools-margin-left"}>
+            <p className={"tools-text tools-margin-left"} style={{marginBottom:'13px'}}>
                 <NeoTypography type={"capture-regular"}>{t("select metadata parameters")}</NeoTypography>
             </p>
             <NeoInput type={"checkbox"}
@@ -331,7 +331,7 @@ class Tools extends React.Component<any, State> {
 
         const exportSQL = <div
             className={"tools-export-sql"}>
-            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}>{t("export master data")}</p>
+            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}><NeoTypography type={"capture-regular"} style={{color:'#5E6785'}}>{t("export master data")}</NeoTypography></p>
             <NeoInput
                 type={"textArea"}
                 width={'90%'}
