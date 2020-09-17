@@ -1088,6 +1088,8 @@ export class Checkbox_ extends ViewContainer {
     componentDidMount(): void {
         if (this.viewObject.get('isChecked')) {
             this.onChecked(this.state.checked);
+        } else {
+            this.onChange('');
         }
         mountComponent.bind(this)();
     }
