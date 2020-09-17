@@ -1,7 +1,7 @@
 import React from 'react';
 import {Dropdown, Menu} from "antd";
 import {dmlOperation} from "../../../../utils/consts";
-import {NeoTypography} from "neo-design/lib";
+import {NeoColor, NeoTypography} from "neo-design/lib";
 
 interface Props {
     t: any,
@@ -38,9 +38,9 @@ export default class GridMenu extends React.Component<Props, State> {
     render() {
         return (
             <Dropdown overlay={this.menu} trigger={['click']}>
-                <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-                    {this.props.t("action")}
-                </a>
+                <div style={{cursor: 'pointer'}}>
+                    <NeoTypography style={{color: NeoColor.violete_5}}>{this.props.t("action")}</NeoTypography>
+                </div>
             </Dropdown>
 
         );
