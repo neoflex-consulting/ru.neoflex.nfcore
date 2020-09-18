@@ -509,20 +509,28 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
                 throw new IllegalArgumentException("jdbcDataset table is not specified")
 
-            String primaryKey = parameters.findAll{ qp -> qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName} = ${qp.parameterValue}"}.join(" and \n")
+            String primaryKey = parameters.findAll{ qp -> qp.isPrimaryKey }
+                    .collect{qp -> qp.parameterDataType == DataType.DATE.getName()
+                            ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
+                            : qp.parameterDataType == DataType.TIMESTAMP.getName()
+                            ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
+                            : qp.parameterValue == "" || qp.parameterValue == null
+                            ? "${qp.parameterName} IS NULL"
+                            : qp.parameterDataType == DataType.STRING.getName()
+                            ? "${qp.parameterName} = '${qp.parameterValue}'"
+                            : "${qp.parameterName} = ${qp.parameterValue}"}.join(" and \n")
             if (primaryKey == "" || !primaryKey)
                 throw new IllegalArgumentException("primaryKey column is not specified")
-            String values = parameters
-                    .findAll{ qp -> !qp.isPrimaryKey }
+            String values = parameters.findAll{ qp -> !qp.isPrimaryKey }
                     .collect{qp -> return qp.parameterDataType == DataType.DATE.getName()
                             ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
                             : qp.parameterDataType == DataType.TIMESTAMP.getName()
                             ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
+                            : qp.parameterValue == "" || qp.parameterValue == null
+                            ? "${qp.parameterName} = NULL"
                             : qp.parameterDataType == DataType.STRING.getName()
                             ? "${qp.parameterName} = '${qp.parameterValue}'"
                             : "${qp.parameterName} = ${qp.parameterValue}"}.join(", \n")
-            if (values == "" || !values)
-                throw new IllegalArgumentException("values is empty")
 
             switch (queryType) {
                 case DMLQueryType.UPDATE:
@@ -545,7 +553,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     ? "${qp.parameterName} = to_timestamp('${qp.parameterValue.substring(0,19)}','${qp.parameterTimestampFormat}')"
                                     : qp.parameterDataType == DataType.STRING.getName() && qp.parameterValue
                                     ? "'${qp.parameterValue}'"
-                                    : qp.parameterValue == "" && qp.parameterDataType != DataType.STRING.getName()
+                                    : qp.parameterValue == "" || qp.parameterValue == null
                                     ? "NULL"
                                     : qp.parameterValue
                                     ? "${qp.parameterValue}"

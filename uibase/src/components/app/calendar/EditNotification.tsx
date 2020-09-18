@@ -1,8 +1,9 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {Button, Col, Input, InputNumber, Row, Select, Switch} from "antd";
+import {InputNumber} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
+import {NeoButton, NeoCol, NeoInput, NeoInputNumber, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 
 interface Props {
     onEditNotification?: (notificationStatus: any[]) => void;
@@ -69,20 +70,21 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
 
     save(editableNotification: any): void {
         this.setState({spinnerVisible: true});
-        this.props.onEditNotification(editableNotification)
+        this.props.onEditNotification(editableNotification);
+        this.props.handleEditMenu(editableNotification)
     }
 
     render() {
         const {t} = this.props;
         const {editableNotification} = this.state;
         return (
-            <div>
-                <Row>
-                    <Col span={10} style={{marginRight: '10px',textAlign: 'right'}}>
+            <div id={'editNotificationButton'}>
+                <NeoRow>
+                    <NeoCol span={10} style={{marginRight: '10px',textAlign: 'right'}}>
                         <span>{t('fullName')}</span>
-                    </Col>
-                    <Col span={12}>
-                        <Input
+                    </NeoCol>
+                    <NeoCol span={12}>
+                        <NeoInput
                             value={editableNotification['fullName']}
                             disabled={false}
                             style={{ width: '200px'}}
@@ -92,14 +94,14 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                                 this.handleChange(event)
                             }}
                         />
-                    </Col>
-                </Row>
-                <Row style={{marginTop: '10px'}}>
-                <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow style={{marginTop: '10px'}}>
+                <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
                     <span>{t('shortName')}</span>
-                </Col>
-                <Col span={12}>
-                    <Input
+                </NeoCol>
+                <NeoCol span={12}>
+                    <NeoInput
                         value={editableNotification['shortName']}
                         disabled={!this.state.myNotificationVisible}
                         style={{ width: '200px'}}
@@ -109,14 +111,14 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                             this.handleChange(event)
                         }}
                     />
-                </Col>
-                </Row>
-                <Row style={{marginTop: '10px'}}>
-                    <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                </NeoCol>
+                </NeoRow>
+                <NeoRow style={{marginTop: '10px'}}>
+                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
                         <span>{t('weekendReporting')}</span>
-                    </Col>
-                    <Col span={12}>
-                        <Switch
+                    </NeoCol>
+                    <NeoCol span={12}>
+                        <NeoSwitch
                             checked={editableNotification['weekendReporting']}
                             disabled={!this.state.myNotificationVisible}
                             onChange={(e: any) => {
@@ -124,19 +126,19 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                                 this.handleChange(event)
                             }}
                         />
-                    </Col>
-                </Row>
-                <Row style={{marginTop: '10px'}}>
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow style={{marginTop: '10px'}}>
 
-                    <Row style={{marginTop: '10px'}}>
-                        <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoRow style={{marginTop: '10px'}}>
+                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
                             <span>{t('periodicity')}</span>
-                        </Col>
-                        <Col span={12}>
-                            <Select
+                        </NeoCol>
+                        <NeoCol span={12}>
+                            <NeoSelect
                                 disabled={!this.state.myNotificationVisible}
                                 value={t(editableNotification['periodicity'])}
-                                style={{ width: '200px'}}
+                                width={'200px'}
                                 allowClear={true}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({row: 'periodicity', value: undefined});
@@ -145,24 +147,24 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                             >
                                 {
                                     this.state.periodicity!.map((p: any) =>
-                                    <Select.Option
+                                    <option
                                         key={JSON.stringify({row: 'periodicity', value: p})}
                                         value={JSON.stringify({row: 'periodicity', value: p})}
                                     >
                                         {t(p)}
-                                    </Select.Option>
+                                    </option>
                                     )
                                 }
-                            </Select>
-                        </Col>
-                    </Row>
+                            </NeoSelect>
+                        </NeoCol>
+                    </NeoRow>
 
-                    <Row style={{marginTop: '10px'}}>
-                        <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoRow style={{marginTop: '10px'}}>
+                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
                             <span>{t('deadlineDay')}</span>
-                        </Col>
-                        <Col span={12}>
-                            <InputNumber
+                        </NeoCol>
+                        <NeoCol span={12}>
+                            <NeoInputNumber
                                 min={1}
                                 max={220}
                                 value={editableNotification['deadlineDay']}
@@ -173,15 +175,15 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                                     this.handleChange(event)
                                 }}
                             />
-                        </Col>
-                    </Row>
+                        </NeoCol>
+                    </NeoRow>
 
-                    <Row style={{marginTop: '10px'}}>
-                        <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoRow style={{marginTop: '10px'}}>
+                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
                             <span>{t('deadlineTime')}</span>
-                        </Col>
-                        <Col span={12}>
-                            <InputNumber
+                        </NeoCol>
+                        <NeoCol span={12}>
+                            <NeoInputNumber
                                 min={0}
                                 max={23}
                                 value={editableNotification['deadlineTime']}
@@ -194,16 +196,16 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                                     this.handleChange(event)
                                 }}
                             >
-                            </InputNumber>
-                        </Col>
-                    </Row>
-                </Row>
+                            </NeoInputNumber>
+                        </NeoCol>
+                    </NeoRow>
+                </NeoRow>
 
 
-                <Row style={{marginTop: '15px'}}>
-                    <Col span={10} style={{marginRight: '10px', textAlign: 'right'}}>
-                    </Col>
-                    <Col span={13}>
+                <NeoRow style={{marginTop: '15px'}}>
+                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    </NeoCol>
+                    <NeoCol span={13}>
 
                         {
                             this.state.spinnerVisible &&
@@ -214,27 +216,36 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                             </div>
                         }
 
-                        <Button
+                    </NeoCol>
+
+                </NeoRow>
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                        <NeoButton
                             title={t('save')}
                             style={{ width: '100px', right: '6px', }}
-                            type="primary"
                             onClick={()=> this.save(this.state.editableNotification)}
                         >
                             {t('save')}
-                        </Button>
+                        </NeoButton>
 
-                        <Button
+                        <NeoButton
+                            type={'secondary'}
                             title={t('clear')}
                             style={{ marginLeft: '10px', width: '100px', right: '6px', }}
                             onClick={()=> this.clear()}
                         >
                             {t('clear')}
-                        </Button>
-                    </Col>
-
-                </Row>
-
-
+                        </NeoButton>
+                </div>
             </div>
         )
     }

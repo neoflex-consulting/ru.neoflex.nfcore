@@ -1,3 +1,9 @@
+#datasetGrid * .ag-cell-inline-editing {
+    height: inherit;
+    padding: 0 0 0 8px;
+}
+
+
 #datasetGrid {
     filter: drop-shadow(-2px -2px 4px rgba(0, 0, 0, 0.05));
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -47,8 +53,7 @@
 }
 
 #datasetGrid .ag-row:hover {
-    margin: -1px !important;
-    border: 1px solid #E6E6E6;
+    outline: 1px solid #E6E6E6;
     background: #FAFAFA !important;
     box-sizing: border-box;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);

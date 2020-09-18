@@ -39,7 +39,7 @@ function getAgGridValue(this: any, returnValueType: string, defaultValue: string
         return this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get(defaultValue)}
     }
     if (returnValueType === 'string') {
-        return this.props.getValue ? this.props.getValue() : this.viewObject.get(defaultValue)
+        return this.props.getValue ? this.props.getValue() : this.props.value ? this.props.value : this.viewObject.get(defaultValue)
     }
     return ""
 }
@@ -1017,11 +1017,12 @@ export class Checkbox_ extends ViewContainer {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
         value = value ? value : this.viewObject.get('value') || "";
+        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label')
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
             currentValue: value,
-            checked: this.viewObject.get('isChecked')
+            checked: value === agValue ? true : this.viewObject.get('isChecked')
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -1034,12 +1035,18 @@ export class Checkbox_ extends ViewContainer {
     componentDidMount(): void {
         if (this.viewObject.get('isChecked')) {
             this.onChecked(this.state.checked);
+        } else {
+            this.onChange('');
         }
         mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
         unmountComponent.bind(this)(false, true)
+    }
+
+    getValue() {
+        return this.state.checked ? this.viewObject.get('value') : undefined;
     }
 
     changeSelection = (currentValue: string, newValue: string) => {

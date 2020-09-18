@@ -64,7 +64,8 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
 
     apply(newNotification: any): void {
         this.setState({spinnerVisible: true});
-        this.props.onCreateNotification(newNotification)
+        this.props.onCreateNotification(newNotification);
+        this.props.handleCreateMenu()
     }
 
     render() {
