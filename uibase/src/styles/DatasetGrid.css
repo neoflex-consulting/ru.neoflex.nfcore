@@ -1,8 +1,11 @@
 #datasetGrid * .ag-cell-inline-editing {
     height: inherit;
-    padding: 0 0 0 8px;
+    padding: 0 8px 0 8px;
 }
 
+#datasetGrid * .ag-cell-inline-editing {
+    border-color: #ffffff transparent !important;
+}
 
 #datasetGrid {
     filter: drop-shadow(-2px -2px 4px rgba(0, 0, 0, 0.05));
