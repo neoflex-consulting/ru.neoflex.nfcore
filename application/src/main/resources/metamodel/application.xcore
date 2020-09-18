@@ -74,7 +74,7 @@ abstract class ViewElement extends DynamicActionElement {
     GrantType grantType = "Write"
     boolean hidden
     boolean disabled
-    refers CssClass cssClass
+    refers CssClass[] cssClass
 }
 
 abstract class ViewContainer extends ViewElement {

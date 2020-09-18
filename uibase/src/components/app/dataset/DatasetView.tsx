@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Dropdown, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoInput, NeoSelect, NeoDrawer, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography, NeoColor} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -1175,13 +1175,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('schemaName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('schemaName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('tableName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('tableName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
         }
@@ -1379,18 +1379,19 @@ class DatasetView extends React.Component<any, State> {
         return (
         <div className="functionalBar__header">
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
-                <a>
-            <NeoButton type={'link'} title={t("back to table")} style={{background: '#F2F2F2', color: "#333333", marginTop: "4px"}}
+                <NeoButton
+                    type={'link'}
+                    title={t("back to table")}
+                    style={{background: '#F2F2F2', color: NeoColor.grey_9, marginTop: "4px"}}
+                    suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
-            >
-                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginRight: "6px"}} />
-                <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
-            </NeoButton>
-                </a>
+                >
+                    <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
+                </NeoButton>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
             <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
@@ -1484,11 +1485,11 @@ class DatasetView extends React.Component<any, State> {
         const { t } = this.props;
         return <div className="functionalBar__header">
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
-            <a>
             <NeoButton
                 type={'link'}
                 title={t('edit')}
-                style={{color: 'rgb(151, 151, 151)'}}
+                style={{color: NeoColor.grey_9, marginTop: "4px"}}
+                suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                 onClick={() => {
                     if (this.state.isEditMode && this.gridRef.getBuffer().length > 0) {
                         this.setState({isCheckEditBufferVisible: true})
@@ -1506,10 +1507,8 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <NeoIcon icon={"arrowLong"} color={'#333333'} style={{marginTop: "4px"}} />
-                <span><NeoTypography  style={{marginLeft:"10px", color: "#333333"}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
+                <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
             </NeoButton>
-            </a>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
             <NeoButton
                 type={'link'}
@@ -1641,7 +1640,8 @@ class DatasetView extends React.Component<any, State> {
                 .filter(c => c.get('isPrimaryKey'))
                 .map(c => {
                     return {
-                        parameterName: c.get('field'),
+                        parameterName: d.operationMark__ === dmlOperation.update
+                            && !this.props.viewObject.get('datasetComponent').get("updateQuery").get('generateFromModel') ? `${c.get('field')}_pk` : c.get('field'),
                         parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
@@ -1654,7 +1654,7 @@ class DatasetView extends React.Component<any, State> {
                         parameterName: c.get('field'),
                         parameterValue: d[c.get('field')],
                         parameterDataType: c.get('type'),
-                        isPrimaryKey: c.get('isPrimaryKey')
+                        isPrimaryKey: false
                     }
                 });
             const params = primaryKey.concat(values);
@@ -2014,60 +2014,40 @@ class DatasetView extends React.Component<any, State> {
                     </Modal>
                 </div>
                 <div id="edit_applyChangesButton">
+                    <NeoModal  onCancel={()=>{
+                        this.setState({
+                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                        })
+                    }} closable={true} type={'edit'}
+                               title={t('saveChanges')}
+                               content={t("warningForEditMode")}
+                               visible={this.state.isCheckEditBufferVisible}
+                               onLeftButtonClick={()=>{
+                        this.gridRef.resetBuffer();
+                        this.setState({isEditMode:false
+                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                            this.gridRef.onEdit();
+                            this.refresh()
+                        })
+                    }}
+                               onRightButtonClick={()=>{
+                                   this.gridRef.removeRowsFromGrid();
+                                   this.onApplyEditChanges(this.gridRef.getBuffer());
+                                   this.setState({
+                                       isEditMode:!this.state.isEditMode,
+                                       isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                   },()=>{
+                                       this.gridRef.onEdit();
+                                   })
+                               }}
+                               textOfLeftButton={t("delete")}
+                               textOfRightButton={t("save")}
+                    >
+                    </NeoModal>
+
+
                     <Modal
                         getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
-                        key="check_edit_buffer"
-                        width={'500px'}
-                        title={t('edit buffer')}
-                        visible={this.state.isCheckEditBufferVisible}
-                        footer={null}
-                        onCancel={()=>{
-                            this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})
-                        }}
-                    >
-                        <div style={{textAlign:"center"}}>
-                            <b>{t("unresolved changes left")}</b>
-                            <br/>
-                            <div>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.removeRowsFromGrid();
-                                        this.onApplyEditChanges(this.gridRef.getBuffer());
-                                        this.setState({
-                                            isEditMode:!this.state.isEditMode,
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                            },()=>{
-                                            this.gridRef.onEdit();
-                                        })
-                                    }}
-                                >
-                                    {t("apply and quit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.setState({
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                        })
-                                    }}
-                                >
-                                    {t("back to edit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.resetBuffer();
-                                        this.setState({isEditMode:false
-                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                                            this.gridRef.onEdit();
-                                            this.refresh()
-                                        })
-                                    }}
-                                >
-                                    {t("reset changes")}
-                                </Button>
-                            </div>
-                        </div>
-                    </Modal>
-                    <Modal
                         key="save_menu"
                         width={'500px'}
                         title={t('saveReport')}
