@@ -26,7 +26,7 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoCol, NeoRow} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const backgroundColor = "#2a356c";
@@ -564,34 +564,70 @@ class EcoreApp extends React.Component<any, State> {
                                         this.props.location.pathname.includes('/developer/') &&
 
                                         <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center", paddingLeft: "70px" }}>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px" }} key={'metadata'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('metadata')}</span>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/metadata') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('metadata')}</NeoTypography>
+                                                        :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('metadata')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'data'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'data'}>
                                                 <Link to={`/developer/data`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('data')}</span>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/data') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('data')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('data')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'query'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'query'}>
                                                 <Link to={`/developer/query`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('query')}</span>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/query') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('query')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('query')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'tools'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'tools'}>
                                                 <Link to={`/developer/tools`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('tools')}</span>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/tools') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('tools')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('tools')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'masterdata'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'masterdata'}>
                                                 <Link to={`/developer/masterdata`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('masterdata')}</span>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/masterdata') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('masterdata')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('masterdata')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px"  }} key={'filesystem'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'filesystem'}>
                                                 <Link to={`/developer/filesystem`}>
-                                                    <span style={{ color: '#eeeeee', fontStyle: "normal", fontWeight: 300, fontSize: "16px", fontFamily: "Roboto" }}>{t('filesystem')}</span>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/filesystem') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('filesystem')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('filesystem')}</NeoTypography>
+                                                        }
+                                                        </span>
                                                 </Link>
                                             </Menu.Item>
                                         </Menu>

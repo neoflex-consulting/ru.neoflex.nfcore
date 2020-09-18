@@ -423,6 +423,13 @@
   background: #FFF8E0!important;
 }
 
+.ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title{
+  background: #ffffff !important;
+}
+ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown-menu-vertical{
+  background-color: white!important;
+}
+
 /*Logo*/
 .app-logo span, .app-logo-settings span {
   margin: unset!important;
@@ -1269,5 +1276,11 @@ border: unset!important;
 
 #selectButton .col {
   justify-content: start;
+}
+
+/*Button in edit modalr*/
+
+button.btn.edit-button-right{
+  margin-left: 16px!important;
 }
 
