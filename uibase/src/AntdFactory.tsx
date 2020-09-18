@@ -151,7 +151,7 @@ function createCssClass(viewObject: any){
 
 abstract class ViewContainer extends View {
     renderChildren = (isParentDisabled:boolean = false) => {
-        let children = this.viewObject.get('children') as Ecore.EObject[];
+        let children = this.props.viewObject.get('children') as Ecore.EObject[];
         const props = {
             ...this.props,
             isParentDisabled: isParentDisabled
