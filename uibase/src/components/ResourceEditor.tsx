@@ -539,7 +539,7 @@ class ResourceEditor extends React.Component<any, State> {
                 _id: id
             };
             let added:any[] = [];
-            const pattern = new RegExp("(^//@[a-zA-Z]+)|^(ui_generated_[0-9\-]+)",'g');
+            const pattern = new RegExp("(^//@[a-zA-Z]+)|^(ui_generated_[0-9]+)",'g');
             traverseEObject(newObject,  (obj:any, key: string, level: number)=>{
                 //Add missing external refs
                 if (key === "$ref"

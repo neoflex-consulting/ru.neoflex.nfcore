@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Button, Drawer, Dropdown, Input, Menu, Modal, Select} from 'antd';
+import {Dropdown, Menu, Modal, Select} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -41,11 +41,8 @@ import {
 import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
-//icons
-import {faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography, NeoColor} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -1214,7 +1211,13 @@ class DatasetView extends React.Component<any, State> {
         return <div className='functionalBar__header'>
 
                 <div className='block'>
-                    <NeoInput type={'search'} width='192px' />
+                    <NeoInput
+                        style={{width:'192px'}}
+                        type="search"
+                        onChange={() => this.gridRef.onQuickFilterChanged()}
+                        id={"quickFilter"}
+                        placeholder={t("quick filter")}
+                    />
                     <div className='verticalLine' />
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginRight:'5px'}}
@@ -1341,16 +1344,12 @@ class DatasetView extends React.Component<any, State> {
             }
                 <div className='verticalLine'/>
 
-                 <Dropdown overlay={menu} placement="bottomLeft">
+                 <Dropdown overlay={menu} placement="bottomRight"
+                           getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}>
                      <div style={{marginRight: "5px"}}>
                          <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
                      </div>
                  </Dropdown>
-                <NeoButton type={'link'} title={t('grouping')}
-                           style={{marginRight:'5px'}}
-                           onClick={()=>{}}>
-                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
                 <NeoButton type={'link'} style={{marginRight: "5px"}}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
@@ -1380,27 +1379,28 @@ class DatasetView extends React.Component<any, State> {
         return (
         <div className="functionalBar__header">
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
-                <a>
-            <NeoButton type={'link'} title={t("back to table")} style={{background: '#F2F2F2', color: "#333333", marginTop: "4px"}}
+                <NeoButton
+                    type={'link'}
+                    title={t("back to table")}
+                    style={{background: '#F2F2F2', color: NeoColor.grey_9, marginTop: "4px"}}
+                    suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,false);
                         this.handleDrawerVisibility(paramType.diagramsAdd,false);
                         this.setState({currentDiagram:undefined, isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel });
                     }}
-            >
-                <NeoIcon icon={"arrowLong"} color={'#5E6785'} style={{marginRight: "6px"}} />
-                <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
-            </NeoButton>
-                </a>
+                >
+                    <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
+                </NeoButton>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
-            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginRight:'5px'}}
+            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible);
                     }}
             >
                 <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
             </NeoButton>
-            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginRight:'5px'}}
+            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible);
                     }}
@@ -1409,7 +1409,7 @@ class DatasetView extends React.Component<any, State> {
             </NeoButton>
                 <div className='verticalLine' style={{marginTop: "4px"}}/>
 
-            <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "4px", background: '#F2F2F2'}}
+            <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "6px", background: '#F2F2F2'}}
                     onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
             >
                 <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
@@ -1420,7 +1420,7 @@ class DatasetView extends React.Component<any, State> {
             <div className='block'>
 
                 <span className={"caption"} style={{marginTop: "12px", color: 'black', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("version")}</span>
-                <div id="selectInGetDiagramPanel" style={{display: 'inline-block', marginTop: "4px"}}>
+                <div id="selectInGetDiagramPanel" style={{display: 'inline-block', marginTop: "6px"}}>
                 <NeoSelect
                     getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
                     style={{ width: '250px', marginLeft: "12px"}}
@@ -1444,24 +1444,20 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </NeoSelect>
             </div>
-                <div className='verticalLine' style={{marginTop: "4px"}}/>
+                <div id={"dropdownInGridPanel"}   className='verticalLine' style={{marginTop: "6px"}}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft">
+            <Dropdown overlay={menu} placement="bottomLeft"
+                      getPopupContainer={() => document.getElementById ("dropdownInGridPanel") as HTMLElement}>
                 <div style={{marginRight: "5px"}}>
                 <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "7px"}}/>
                 </div>
             </Dropdown>
                 <span className={"checkboxDiagram"} style={{marginTop: "8px"}}>
-                    <NeoInput type={'checkbox'} onChange={this.withTable.bind(this)} style={{marginTop: "4px", background: '#F2F2F2'}}/>
+                    <NeoInput type={'checkbox'} onChange={this.withTable.bind(this)} style={{marginTop: "6px", background: '#F2F2F2'}}/>
                   <span style={{display: 'inline-block', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal", marginLeft: "30px"}}>{t("download with table")}</span>
                 </span>
 
 
-            <NeoButton type={'link'} title={t('print')} style={{color: 'rgb(151, 151, 151)', marginTop: "4px", background: '#F2F2F2', marginLeft: "20px"}}
-                    onClick={()=>{}}
-            >
-                <NeoIcon icon={"print"} size={"m"} color={'#5E6785'}/>
-            </NeoButton>
             <NeoButton
                 className="buttonFullScreen"
                 type="link"
@@ -1469,7 +1465,7 @@ class DatasetView extends React.Component<any, State> {
                     float: "right",
                     marginLeft: '10px',
                     color: 'rgb(151, 151, 151)',
-                    marginTop: "4px",
+                    marginTop: "6px",
                     background: '#F2F2F2'
                 }}
                 onClick={this.onFullScreen}
@@ -1487,10 +1483,13 @@ class DatasetView extends React.Component<any, State> {
 
     getEditPanel = () => {
         const { t } = this.props;
-        return <div id="editPanel">
-            <Button
+        return <div className="functionalBar__header">
+            <div className='block' style={{margin: "auto 16px", display: "flex"}}>
+            <NeoButton
+                type={'link'}
                 title={t('edit')}
-                style={{color: 'rgb(151, 151, 151)'}}
+                style={{color: NeoColor.grey_9, marginTop: "4px"}}
+                suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                 onClick={() => {
                     if (this.state.isEditMode && this.gridRef.getBuffer().length > 0) {
                         this.setState({isCheckEditBufferVisible: true})
@@ -1508,54 +1507,83 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <NeoIcon icon={"edit"} size={'m'}/>
-            </Button>
-            <Button
+                <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
+            </NeoButton>
+            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <NeoButton
+                type={'link'}
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("add row")}
-                style={{color: 'rgb(151, 151, 151)'}}
+                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                 onClick={() => this.gridRef.onInsert()}
             >
                 <NeoIcon icon={"plus"}  size={'m'}/>
-            </Button>
-            <Button
-                hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
-                title={t("delete selected")}
-                style={{color: 'rgb(151, 151, 151)'}}
-                onClick={() => this.gridRef.onDeleteSelected()}
-            >
-                <NeoIcon icon={"rubbish"} size={'m'}/>
-            </Button>
-            <Button
-                hidden={!this.state.isEditMode}
-                title={t("apply changes")}
-                style={{color: 'rgb(151, 151, 151)'}}
-                onClick={() => {
-                    //Убрал т.к. есть подсветки
-                    /*this.gridRef.removeRowsFromGrid();*/
-                    this.onApplyEditChanges(this.gridRef.getBuffer());
-                }}
-            >
-                <NeoIcon icon={"mark"} size={'m'}/>
-            </Button>
-            <Button
+            </NeoButton>
+            <div className='verticalLine' style={{marginTop: "4px"}}/>
+                <NeoButton
+                    type={'link'}
+                    hidden={!this.state.isEditMode}
+                    title={t("apply changes")}
+                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                    onClick={() => {
+                        //Убрал т.к. есть подсветки
+                        /*this.gridRef.removeRowsFromGrid();*/
+                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                    }}
+                >
+                    <NeoIcon icon={"mark"} size={'m'}/>
+                </NeoButton>
+                <NeoButton
+                    type={'link'}
+                    hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
+                    title={t("delete selected")}
+                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                    onClick={() => this.gridRef.onDeleteSelected()}
+                >
+                    <NeoIcon icon={"rubbish"} size={'m'}/>
+                </NeoButton>
+            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <NeoButton
+                type={'link'}
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("copy selected")}
-                style={{color: 'rgb(151, 151, 151)'}}
+                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
                 onClick={() => {
                     this.gridRef.copySelected();
                 }}
             >
-                <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: "normal", fontSize: "14px", lineHeight: "16px", color: "#333333"}}>{t("copy selected")}</span>
-            </Button>
-            <Input
+                <NeoIcon icon={"duplicate"} size={'m'}/>
+            </NeoButton>
+            </div>
+            <div className='block' style={{margin: "auto 16px", display: "flex"}}>
+            <NeoInput
                 hidden={!this.state.isEditMode}
                 style={{width:'250px'}}
-                type="text"
-                onInput={() => this.gridRef.onQuickFilterChanged()}
+                type={"search"}
+                onChange={() => this.gridRef.onQuickFilterChanged()}
                 id={"quickFilter"}
                 placeholder={t("quick filter")}
             />
+            <div className='verticalLine' style={{marginTop: "4px"}}/>
+
+                <NeoButton
+                    className="buttonFullScreen"
+                    type="link"
+                    style={{
+                        float: "right",
+                        marginLeft: '10px',
+                        color: 'rgb(151, 151, 151)',
+                        marginTop: "6px",
+                        background: '#F2F2F2'
+                    }}
+                    onClick={this.onFullScreen}
+                >
+                    {this.state.fullScreenOn  ?
+                        <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+                        :
+                        <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
+                </NeoButton>
+            </div>
         </div>
     };
 
@@ -1697,16 +1725,13 @@ class DatasetView extends React.Component<any, State> {
                     {...this.props}
                 />
                 <div id="filterButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
-                    placement='right'
                     title={t('filters')}
                     width={'711px'}
                     visible={this.state.filtersMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
 
@@ -1742,19 +1767,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <Highlight/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="aggregationButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                    placement='right'
                     title={t('aggregations')}
                     width={'720px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverAggregates
@@ -1772,19 +1794,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerAggregate/>
                     }
-                </Drawer>
+                </NeoDrawer>
                     </div>
                 <div id="aggregationGroupsButton">
-                    <Drawer
-                        style={{top: '80px'}}
+                    <NeoDrawer
                         getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
-                        placement='right'
                         title={t('grouping')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
                         mask={false}
-                        maskClosable={false}
                     >
                         {
                             this.state.groupByColumn
@@ -1818,19 +1837,16 @@ class DatasetView extends React.Component<any, State> {
                                 :
                                 <ServerGroupBy/>
                         }
-                    </Drawer>
+                    </NeoDrawer>
                 </div>
                 <div id="sortButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('sortButton') as HTMLElement}
-                    placement='right'
                     title={t('sorts')}
                     width={'720px'}
                     visible={this.state.sortsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverSorts
@@ -1848,19 +1864,16 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <ServerSort/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="hiddenColumnsButton">
-                    <Drawer
-                        style={{top: '80px'}}
+                    <NeoDrawer
                         getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
-                        placement='right'
                         title={t('hiddencolumns')}
                         width={'700px'}
                         visible={this.state.hiddenColumnsMenuVisible}
                         onClose={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                         mask={false}
-                        maskClosable={false}
                     >
                         {
                             this.state.hiddenColumns
@@ -1877,19 +1890,16 @@ class DatasetView extends React.Component<any, State> {
                                 :
                                 <HiddenColumn/>
                         }
-                    </Drawer>
+                    </NeoDrawer>
                 </div>
                 <div id="calculatableexpressionsButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
-                    placement='right'
                     title={t('calculator')}
                     width={'712px'}
                     visible={this.state.calculationsMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         this.state.serverCalculatedExpression
@@ -1909,19 +1919,17 @@ class DatasetView extends React.Component<any, State> {
                             :
                             <Calculator/>
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="diagramButton">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
-                    placement='right'
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramAddMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
+                    className={'diagram'}
                 >
                     {
                         <DrawerDiagram
@@ -1938,19 +1946,16 @@ class DatasetView extends React.Component<any, State> {
                             id={this.state.diagrams.length}
                         />
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="diagram">
-                <Drawer
-                    style={{top: '80px'}}
+                <NeoDrawer
                     getContainer={() => document.getElementById ('diagram') as HTMLElement}
-                    placement='right'
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramEditMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
                     mask={false}
-                    maskClosable={false}
                 >
                     {
                         <DrawerDiagram
@@ -1967,7 +1972,7 @@ class DatasetView extends React.Component<any, State> {
                             id={(this.state.currentDiagram)? this.state.currentDiagram.id: 0}
                         />
                     }
-                </Drawer>
+                </NeoDrawer>
                 </div>
                 <div id="delete_menuButton">
                     <Modal
@@ -2009,60 +2014,40 @@ class DatasetView extends React.Component<any, State> {
                     </Modal>
                 </div>
                 <div id="edit_applyChangesButton">
+                    <NeoModal  onCancel={()=>{
+                        this.setState({
+                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                        })
+                    }} closable={true} type={'edit'}
+                               title={t('saveChanges')}
+                               content={t("warningForEditMode")}
+                               visible={this.state.isCheckEditBufferVisible}
+                               onLeftButtonClick={()=>{
+                        this.gridRef.resetBuffer();
+                        this.setState({isEditMode:false
+                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
+                            this.gridRef.onEdit();
+                            this.refresh()
+                        })
+                    }}
+                               onRightButtonClick={()=>{
+                                   this.gridRef.removeRowsFromGrid();
+                                   this.onApplyEditChanges(this.gridRef.getBuffer());
+                                   this.setState({
+                                       isEditMode:!this.state.isEditMode,
+                                       isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                                   },()=>{
+                                       this.gridRef.onEdit();
+                                   })
+                               }}
+                               textOfLeftButton={t("delete")}
+                               textOfRightButton={t("save")}
+                    >
+                    </NeoModal>
+
+
                     <Modal
                         getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
-                        key="check_edit_buffer"
-                        width={'500px'}
-                        title={t('edit buffer')}
-                        visible={this.state.isCheckEditBufferVisible}
-                        footer={null}
-                        onCancel={()=>{
-                            this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})
-                        }}
-                    >
-                        <div style={{textAlign:"center"}}>
-                            <b>{t("unresolved changes left")}</b>
-                            <br/>
-                            <div>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.removeRowsFromGrid();
-                                        this.onApplyEditChanges(this.gridRef.getBuffer());
-                                        this.setState({
-                                            isEditMode:!this.state.isEditMode,
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                            },()=>{
-                                            this.gridRef.onEdit();
-                                        })
-                                    }}
-                                >
-                                    {t("apply and quit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.setState({
-                                            isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                        })
-                                    }}
-                                >
-                                    {t("back to edit")}
-                                </Button>
-                                <Button
-                                    onClick={()=>{
-                                        this.gridRef.resetBuffer();
-                                        this.setState({isEditMode:false
-                                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                                            this.gridRef.onEdit();
-                                            this.refresh()
-                                        })
-                                    }}
-                                >
-                                    {t("reset changes")}
-                                </Button>
-                            </div>
-                        </div>
-                    </Modal>
-                    <Modal
                         key="save_menu"
                         width={'500px'}
                         title={t('saveReport')}

@@ -8,7 +8,7 @@ import {enUS, ru} from "date-fns/locale";
 import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
-import {Drawer} from "antd";
+import {Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
 import Paginator from "../Paginator";
@@ -19,7 +19,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoDrawer} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -514,7 +514,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     filter (node: any) {
-        return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify");
+        return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify") && (node.className !== "ant-dropdown ant-dropdown-placement-bottomRight slide-up-leave");
     }
 
     private getDocxData(): docxExportObject {
@@ -627,16 +627,14 @@ class Calendar extends React.Component<any, any> {
     renderCreateNotification() {
         const {t} = this.props;
         return (
-            <div id="PlusIconInFullScreen">
-            <Drawer
+            <div id="PlusIconInFullScreen" key={"CreateNotificationDrawer"}>
+            <NeoDrawer
                 getContainer={() => document.getElementById ('PlusIconInFullScreen') as HTMLElement}
-                placement='right'
                 title={t('createNotification')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.createMenuVisible}
                 onClose={this.handleCreateMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     <CreateNotification
@@ -646,7 +644,7 @@ class Calendar extends React.Component<any, any> {
                         spinnerVisible={this.state.spinnerVisible}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
             </div>
         );
     }
@@ -654,14 +652,12 @@ class Calendar extends React.Component<any, any> {
     renderEditNotification() {
         const {t} = this.props;
         return (
-            <Drawer
-                placement='right'
+            <NeoDrawer
                 title={t('editNotification')}
                 width={'450px'}
                 visible={this.state.editMenuVisible}
                 onClose={this.handleEditMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     this.state.editableNotification !== undefined && <EditNotification
@@ -673,7 +669,7 @@ class Calendar extends React.Component<any, any> {
                         myNotificationVisible={this.state.myNotificationVisible}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
         );
     }
 
@@ -681,16 +677,14 @@ class Calendar extends React.Component<any, any> {
         const {t} = this.props;
         return (
             <div id="legendIconInFullScreen" key={"legendDrawer"}>
-            <Drawer
+            <NeoDrawer
                 className="legendDrawer"
                 getContainer={() => document.getElementById ('legendIconInFullScreen') as HTMLElement}
-                placement='right'
                 title={t('legend')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.legendMenuVisible}
                 onClose={this.handleLegendMenu}
                 mask={false}
-                maskClosable={false}
             >
                 {
                     <StatusLegend
@@ -699,7 +693,7 @@ class Calendar extends React.Component<any, any> {
                         onChangeNotificationStatus={this.updateAllStatuses}
                     />
                 }
-            </Drawer>
+            </NeoDrawer>
             </div>
         );
     }
@@ -709,7 +703,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <div
                 style={{
-                    height: this.state.fullScreenOn ?  550*5.5/4 : 550,
+                    height: this.state.fullScreenOn ?  550*5.5/4 - 100 : 550,
                 }}
                 className={'ag-theme-material'}
             >
@@ -762,6 +756,15 @@ class Calendar extends React.Component<any, any> {
         const {i18n, t} = this.props;
         const dateFormat = "LLLL yyyy";
         const dateFormat_ = "LLLL";
+        const menu = (<Menu
+            key='actionMenu'
+            onClick={this.onActionMenu}
+            style={{width: '150px'}}
+        >
+            <Menu.Item key='exportToDocx'>
+                {t("export to docx")}
+            </Menu.Item>
+        </Menu>);
         return (
 
             <div id="selectInFullScreen" className="header row flex-middle">
@@ -778,11 +781,11 @@ class Calendar extends React.Component<any, any> {
                             type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
-                            {t('today')}
+                            <NeoTypography style={{color: "#424D78", margin: "0px 10px"}} type={'capture-regular'}>{t('today')}</NeoTypography>
                         </NeoButton>
 
                         <NeoSelect className='selectYear'
-                                getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
+                            getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
@@ -793,7 +796,7 @@ class Calendar extends React.Component<any, any> {
                                         key={y}
                                         value={y}
                                     >
-                                        {y}
+                                        <NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{y}</NeoTypography>
                                     </option>
                                 )
                             }
@@ -802,7 +805,7 @@ class Calendar extends React.Component<any, any> {
                         <NeoSelect
                             className='selectMonth'
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            defaultValue={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
+                            defaultValue={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
                             width={'100px'}
@@ -814,10 +817,11 @@ class Calendar extends React.Component<any, any> {
                                         key={m}
                                         value={m}
                                     >
+                                        <NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>
                                         {
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
-                                        }
+                                        }</NeoTypography>
                                     </option>
                                 )
                             }
@@ -856,7 +860,7 @@ class Calendar extends React.Component<any, any> {
                     <div
                         style={{display: "contents", marginTop: '2px'}}
                     >
-                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '8px' : '0px'}}>
+                            <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '1px' : '0px'}}>
                                 <NeoInput
                                     type={'search'}
                                     onChange={(e: any) => {
@@ -865,7 +869,7 @@ class Calendar extends React.Component<any, any> {
                                 />
                             </div>
 
-
+                        <div style={{marginBottom: this.state.fullScreenOn ? '6px' : '0px'}}>
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
@@ -888,6 +892,7 @@ class Calendar extends React.Component<any, any> {
                                     Системные заметки
                                 </option>
                             </NeoSelect>
+                        </div>
 
 
                     </div>
@@ -916,7 +921,7 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"calendarFull"} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
+                    <NeoIcon icon={"calendarFull"} style={{margin:'auto'}} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
                 </NeoButton>
                 <NeoButton
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
@@ -931,20 +936,17 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
+                    <NeoIcon icon={"table"} style={{margin:'auto'}} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
                 </NeoButton>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
                 {this.state.calendarVisible ?
-                <NeoButton
-                    type="link"
-                    style={{
-                        marginRight: '5px',
-                    }}
-                    onClick={this.onActionMenu}
-                >
-                    <NeoIcon icon={'print'} color={'#5E6785'} size={'m'} />
-                </NeoButton>
+                    <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
+                        overlay={menu} placement="bottomLeft">
+                        <div style={{marginRight: "5px"}}>
+                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
+                        </div>
+                    </Dropdown>
                     :
                     null
                 }

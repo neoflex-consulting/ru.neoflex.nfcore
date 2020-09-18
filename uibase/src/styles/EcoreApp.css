@@ -174,7 +174,7 @@ header .header-menu{
 }
 
 
-li .lang-title, .ant-menu-item, .ant-menu-item>a, .ant-menu, .header-menu {
+li .ant-menu-item, .ant-menu-item>a, .ant-menu, .header-menu {
 	color: #ffffff;
 }
 
@@ -186,29 +186,25 @@ li:hover .lang-title {
 	background-color: #2a356c;
 }
 
-.logout-icon {
-	margin-top: 18px;
-	width: 25px;
-	background-image: url("../icons/logoutIcon.svg") !important;
-	background-repeat:  no-repeat !important;
+
+.btn-appName{
+	width: auto !important;
 }
 
-.developer-icon {
-	padding: 0;
-	/*margin-top: 23px;*/
-	width: 15px;
-	height: 15px;
-	/*margin-right: 15px;*/
-	background-image: url("../icons/developer-icon.svg") !important;
-	background-repeat:  no-repeat !important;
+.btn-appName .btn-link:hover{
+	background-color: unset!important;
+	text-decoration: unset!important;
+}
+
+.appName:hover{
+	color: white!important;
+}
+
+.appName:hover{
 	color: white;
 }
 
-.btn-appName{
-	font-size: 16px !important;
-	width: auto !important;
-}
-.btn-appName:hover span, .bell-icon:hover, .lang-label:hover, .ant-menu-item-selected>a {
+.bell-icon:hover, .lang-label:hover, .ant-menu-item-selected>a {
 	color: white;
 }
 
@@ -216,16 +212,17 @@ li:hover .lang-title {
 
 .ant-menu-item{
 	border-bottom: unset!important;
-	opacity: 0.5;
-	font-size: 16px;
-}
-.ant-menu-item:hover{
-	opacity: 1!important;
 }
 
-.ant-menu-item-selected{
-	opacity: 1!important;
+.ant-menu-item > a:hover{
+
+	text-decoration: unset!important;
+
 }
 
+
+.ant-menu-item > a:hover .typography.typography-h4-light.namesOfDevMenu{
+	color: white!important;
+}
 
 

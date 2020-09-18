@@ -1,7 +1,7 @@
 import * as React from "react";
 import {withTranslation} from "react-i18next";
 import {Dropdown, Menu} from "antd";
-import {NeoButton, NeoCol, NeoRow} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
 import './../styles/BreadcrumbApp.css';
 
 interface State {
@@ -21,48 +21,49 @@ class HeaderMenu extends React.Component<any, any> {
 
     appsMenu(selectedApp:any) {
         const {applications, t} = this.props
+        const menu = (<Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
+            {applications.slice(3).map(
+                (app: any) =>
+                    <Menu.Item
+                        key={app.eContents()[0].get('name')}
+                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
+                    >
+                    <span
+                          style={{ fontWeight:600 }}>
+                        {app.eContents()[0].get('name')}</span>
+                    </Menu.Item>
+            )}
+        </Menu>);
         return (
             <NeoRow style={{justifyContent: 'space-between', width: '100%'}}>
                 {applications.slice(0,3).map((app: any) =>
-                    <NeoCol span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
+                    <NeoCol className='btn-appName' span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
                         <NeoButton
-                            className='btn-appName'
                             key={app.eContents()[0].get('name')}
                             type="link"
                             onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
                         >
-                            {app.eContents()[0].get('name')}
+                            <NeoTypography className='appName' style={{color: app.eContents()[0].get('name') === selectedApp ? "#FFFFFF"  : "#B3B3B3"}} type={app.eContents()[0].get('name') === selectedApp ? 'h4-regular' : 'h4-light'}>{app.eContents()[0].get('name')}</NeoTypography>
                         </NeoButton>
                     </NeoCol>
                 )}
                 {applications.length >= 4 &&
                 <NeoCol span={3}>
-                    <Dropdown overlay={(
-                        <Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
-                            {applications.slice(3).map(
-                                (app: any) =>
-                                    <Menu.Item
-                                        key={app.eContents()[0].get('name')}
-                                        onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
-                                    >
-                    <span className='lang-title'
-                          style={{ fontWeight:600 }}>
-                        {app.eContents()[0].get('name')}</span>
-                                    </Menu.Item>
-                            )}
-                        </Menu>
-                    )} placement="bottomCenter">
+                    <Dropdown overlay={menu} placement="bottomCenter" className={'headerDropdown'}>
+                        <div className='btn-appName'>
                         <NeoButton
-                            className='btn-appName'
+
                                 type="link"
                                 style={{
                             fontWeight: 500,
-                            background: "rgb(255,255,255)",
+                            background: "#2a356c",
+                            color: "white",
                             cursor: "pointer"
                         }}
                         >
-                            {t('more')}
+                            <NeoTypography className='appName' style={{color: "#B3B3B3"}} type={'h4-light'}> {t('more')}</NeoTypography>
                         </NeoButton>
+                        </div>
                     </Dropdown>
                 </NeoCol>
                 }
