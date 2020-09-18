@@ -642,6 +642,7 @@ class Calendar extends React.Component<any, any> {
                         onCreateNotification={this.createNotification}
                         periodicity={this.state.periodicity}
                         spinnerVisible={this.state.spinnerVisible}
+                        handleCreateMenu={this.handleCreateMenu}
                     />
                 }
             </NeoDrawer>
@@ -654,7 +655,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <NeoDrawer
                 title={t('editNotification')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.editMenuVisible}
                 onClose={this.handleEditMenu}
                 mask={false}
@@ -667,6 +668,7 @@ class Calendar extends React.Component<any, any> {
                         spinnerVisible={this.state.spinnerVisible}
                         editableNotification={this.state.editableNotification}
                         myNotificationVisible={this.state.myNotificationVisible}
+                        handleEditMenu={this.handleEditMenu}
                     />
                 }
             </NeoDrawer>
@@ -691,6 +693,7 @@ class Calendar extends React.Component<any, any> {
                         {...this.props}
                         notificationStatus={this.state.notificationStatus}
                         onChangeNotificationStatus={this.updateAllStatuses}
+                        handleLegendMenu={this.handleLegendMenu}
                     />
                 }
             </NeoDrawer>

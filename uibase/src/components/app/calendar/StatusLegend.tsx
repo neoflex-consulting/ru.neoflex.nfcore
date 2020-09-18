@@ -35,7 +35,8 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
         };
         this.props.context.changeUserProfile(objectId, params).then (()=> {
             this.props.onChangeNotificationStatus(this.state.notificationStatus)
-        })
+        }).then(()=>this.props.handleLegendMenu())
+
     }
 
     render() {

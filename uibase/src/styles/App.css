@@ -1267,7 +1267,7 @@
 border: unset!important;
 }
 
-#selectButton .col {
+#selectButton .col, #editNotificationButton .col {
   justify-content: start;
 }
 
