@@ -1178,13 +1178,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('schemaName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('schemaName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('tableName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('tableName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
         }
@@ -1612,7 +1612,8 @@ class DatasetView extends React.Component<any, State> {
                 .filter(c => c.get('isPrimaryKey'))
                 .map(c => {
                     return {
-                        parameterName: c.get('field'),
+                        parameterName: d.operationMark__ === dmlOperation.update
+                            && !this.props.viewObject.get('datasetComponent').get("updateQuery").get('generateFromModel') ? `${c.get('field')}_pk` : c.get('field'),
                         parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
@@ -1625,7 +1626,7 @@ class DatasetView extends React.Component<any, State> {
                         parameterName: c.get('field'),
                         parameterValue: d[c.get('field')],
                         parameterDataType: c.get('type'),
-                        isPrimaryKey: c.get('isPrimaryKey')
+                        isPrimaryKey: false
                     }
                 });
             const params = primaryKey.concat(values);
