@@ -1,6 +1,5 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {InputNumber} from "antd";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {EObject} from "ecore";
 import {NeoButton, NeoCol, NeoInput, NeoInputNumber, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
