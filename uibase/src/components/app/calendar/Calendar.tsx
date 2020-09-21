@@ -151,30 +151,32 @@ class Calendar extends React.Component<any, any> {
     };
 
     getAllStatuses() {
-        const userProfileValue = this.props.context.userProfile.get('params').array()
-            .filter( (p: any) => p.get('key') === this.props.viewObject._id);
-        if (userProfileValue.length !== 0) {
-            let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus;
-            this.setState({notificationStatus})
-        }
-        else {
-            API.instance().fetchAllClasses(false).then(classes => {
-                const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
-                if (temp !== undefined) {
-                    API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                        .then((result) => {
-                            let notificationStatus = result.map ((r: any) => {
-                                return {
-                                    name: r.eContents()[0].get('name'),
-                                    color: r.eContents()[0].get('color'),
-                                    enable: true
-                                }
-                            });
-                            this.setState({notificationStatus})
-                        })
-                }
-            })
-        }
+        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+            const userProfileValue = userProfile.eContents()[0].get('params').array()
+                .filter( (p: any) => p.get('key') === this.props.viewObject._id);
+            if (userProfileValue.length !== 0) {
+                let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus;
+                this.setState({notificationStatus})
+            }
+            else {
+                API.instance().fetchAllClasses(false).then(classes => {
+                    const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
+                    if (temp !== undefined) {
+                        API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                            .then((result) => {
+                                let notificationStatus = result.map ((r: any) => {
+                                    return {
+                                        name: r.eContents()[0].get('name'),
+                                        color: r.eContents()[0].get('color'),
+                                        enable: true
+                                    }
+                                });
+                                this.setState({notificationStatus})
+                            })
+                    }
+                })
+            }
+        });
     };
 
     getAllPeriodicity() {
@@ -642,6 +644,7 @@ class Calendar extends React.Component<any, any> {
                         onCreateNotification={this.createNotification}
                         periodicity={this.state.periodicity}
                         spinnerVisible={this.state.spinnerVisible}
+                        handleCreateMenu={this.handleCreateMenu}
                     />
                 }
             </NeoDrawer>
@@ -654,7 +657,7 @@ class Calendar extends React.Component<any, any> {
         return (
             <NeoDrawer
                 title={t('editNotification')}
-                width={'450px'}
+                width={'488px'}
                 visible={this.state.editMenuVisible}
                 onClose={this.handleEditMenu}
                 mask={false}
@@ -667,6 +670,7 @@ class Calendar extends React.Component<any, any> {
                         spinnerVisible={this.state.spinnerVisible}
                         editableNotification={this.state.editableNotification}
                         myNotificationVisible={this.state.myNotificationVisible}
+                        handleEditMenu={this.handleEditMenu}
                     />
                 }
             </NeoDrawer>
@@ -691,6 +695,7 @@ class Calendar extends React.Component<any, any> {
                         {...this.props}
                         notificationStatus={this.state.notificationStatus}
                         onChangeNotificationStatus={this.updateAllStatuses}
+                        handleLegendMenu={this.handleLegendMenu}
                     />
                 }
             </NeoDrawer>

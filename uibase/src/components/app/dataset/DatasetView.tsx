@@ -238,32 +238,35 @@ class DatasetView extends React.Component<any, State> {
             if (temp !== undefined) {
                 API.instance().findByKind(temp,  {contents: {eClass: temp.eURI()}})
                     .then((result: Ecore.Resource[]) => {
-                        const userComponentName = this.props.context.userProfile.get('params').array()
-                            .filter( (p: any) => p.get('key') === this.props.viewObject.eURI());
-                        let currentDatasetComponent = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
-                            result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
-                            : result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === JSON.parse(userComponentName[0].get('value'))['name']);
-                        if (currentDatasetComponent === undefined) {
-                            currentDatasetComponent = result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'));
-                            this.props.context.changeUserProfile(this.props.viewObject.eURI(), undefined)
-                        }
-                        if (currentDatasetComponent) {
-                            this.setState({currentDatasetComponent});
-                            if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
-                        }
-                        result.forEach( (d: Ecore.Resource) => {
-                            if (d.eContents()[0].get('dataset')) {
-                                if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('datasetComponent').get('dataset').get('name')) {
-                                    allDatasetComponents.push(d);
-                                }
+                        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+                            const userComponentName = userProfile.eContents()[0].get('params').array()
+                                .filter( (p: any) => p.get('key') === this.props.viewObject.eURI());
+                            let currentDatasetComponent = userComponentName.length === 0 || JSON.parse(userComponentName[0].get('value'))['name'] === undefined ?
+                                result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'))
+                                : result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === JSON.parse(userComponentName[0].get('value'))['name']);
+                            if (currentDatasetComponent === undefined) {
+                                currentDatasetComponent = result.find( (d: Ecore.Resource) => d.eContents()[0].get('name') === this.props.viewObject.get('datasetComponent').get('name'));
+                                this.props.context.changeUserProfile(this.props.viewObject.eURI(), undefined)
                             }
+                            if (currentDatasetComponent) {
+                                this.setState({currentDatasetComponent});
+                                if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
+                            }
+                            result.forEach( (d: Ecore.Resource) => {
+                                if (d.eContents()[0].get('dataset')) {
+                                    if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('datasetComponent').get('dataset').get('name')) {
+                                        allDatasetComponents.push(d);
+                                    }
+                                }
+                            });
+                            if (allDatasetComponents.length !== 0) {
+                                this.setState({allDatasetComponents})
+                            }
+                            if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
+                                this.setState({isGroovyDataset: true})
+                            }
+
                         });
-                        if (allDatasetComponents.length !== 0) {
-                            this.setState({allDatasetComponents})
-                        }
-                        if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
-                            this.setState({isGroovyDataset: true})
-                        }
                     })
             }
         })
@@ -536,70 +539,72 @@ class DatasetView extends React.Component<any, State> {
         let serverCalculatedExpression: IServerQueryParam[] = [];
         let hiddenColumns: IServerQueryParam[] = [];
         let diagrams: IDiagram[] = [];
-        const userProfileValue = this.props.context.userProfile.get('params').array()
-            .filter( (p: any) => p.get('key') === resource.eContents()[0].eURI());
-        if (userProfileValue.length !== 0) {
-            serverFilters = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverFilters);
-            serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
-            serverSorts = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverSorts);
-            serverGroupBy = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupBy);
-            groupByColumn = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).groupByColumn);
-            highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
-            serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
-            diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
-            hiddenColumns = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).hiddenColumns);
-        }
-        else if (resource !== undefined) {
-            serverFilters = getParamsFromComponent(resource, 'serverFilter');
-            serverAggregates = getParamsFromComponent(resource, 'serverAggregation');
-            serverSorts = getParamsFromComponent(resource, 'serverSort');
-            serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
-            groupByColumn = getParamsFromComponent(resource, 'groupByColumn');
-            highlights = getParamsFromComponent(resource, 'highlight');
-            serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
-            diagrams = getDiagramsFromComponent(resource, 'diagram');
-            hiddenColumns = getParamsFromComponent(resource, 'hiddenColumn');
-        }
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
-        }
-        addEmpty(serverFilters);
-        addEmpty(serverAggregates);
-        addEmpty(serverSorts);
-        addEmpty(serverGroupBy);
-        addEmpty(groupByColumn);
-        addEmpty(highlights);
-        addEmpty(serverCalculatedExpression);
-        hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
-            return {
-                datasetColumn: c.get('field'),
-                enable: c.get('hide') ? !c.get('hide') : true
-            } as IServerQueryParam
-        }).concat(serverCalculatedExpression).map((c,index)=>{
-            return {
-                index: index + 1,
-                datasetColumn: c.datasetColumn,
-                enable: c.enable
+        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+            const userProfileValue = userProfile.eContents()[0].get('params').array()
+                .filter( (p: any) => p.get('key') === resource.eContents()[0].eURI());
+            if (userProfileValue.length !== 0) {
+                serverFilters = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverFilters);
+                serverAggregates = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverAggregates);
+                serverSorts = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverSorts);
+                serverGroupBy = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverGroupBy);
+                groupByColumn = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).groupByColumn);
+                highlights = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).highlights);
+                serverCalculatedExpression = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).serverCalculatedExpression);
+                diagrams = getDiagramsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).diagrams);
+                hiddenColumns = getParamsFromUserProfile(JSON.parse(userProfileValue[0].get('value')).hiddenColumns);
             }
+            else if (resource !== undefined) {
+                serverFilters = getParamsFromComponent(resource, 'serverFilter');
+                serverAggregates = getParamsFromComponent(resource, 'serverAggregation');
+                serverSorts = getParamsFromComponent(resource, 'serverSort');
+                serverGroupBy = getParamsFromComponent(resource, 'serverGroupBy');
+                groupByColumn = getParamsFromComponent(resource, 'groupByColumn');
+                highlights = getParamsFromComponent(resource, 'highlight');
+                serverCalculatedExpression = getParamsFromComponent(resource, 'serverCalculatedExpression');
+                diagrams = getDiagramsFromComponent(resource, 'diagram');
+                hiddenColumns = getParamsFromComponent(resource, 'hiddenColumn');
+            }
+            if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+                serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
+            }
+            addEmpty(serverFilters);
+            addEmpty(serverAggregates);
+            addEmpty(serverSorts);
+            addEmpty(serverGroupBy);
+            addEmpty(groupByColumn);
+            addEmpty(highlights);
+            addEmpty(serverCalculatedExpression);
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
+                return {
+                    datasetColumn: c.get('field'),
+                    enable: c.get('hide') ? !c.get('hide') : true
+                } as IServerQueryParam
+            }).concat(serverCalculatedExpression).map((c,index)=>{
+                return {
+                    index: index + 1,
+                    datasetColumn: c.datasetColumn,
+                    enable: c.enable
+                }
+            });
+            this.setState({
+                serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
+                serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
+                serverSorts: (parameterName === paramType.sort || parameterName === undefined) ? serverSorts : this.state.serverSorts,
+                serverGroupBy: (parameterName === paramType.group || parameterName === undefined) ? serverGroupBy : this.state.serverGroupBy,
+                groupByColumn: (parameterName === paramType.groupByColumn || parameterName === undefined) ? groupByColumn : this.state.groupByColumn,
+                highlights: (parameterName === paramType.highlights || parameterName === undefined) ? highlights : this.state.highlights,
+                serverCalculatedExpression: (parameterName === paramType.calculations || parameterName === undefined) ? serverCalculatedExpression : this.state.serverCalculatedExpression,
+                diagrams,
+                hiddenColumns,
+                useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+            this.prepParamsAndRun(resource,
+                serverFilters,
+                serverAggregates,
+                serverSorts,
+                serverGroupBy,
+                serverCalculatedExpression,
+                groupByColumn);
         });
-        this.setState({
-            serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
-            serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
-            serverSorts: (parameterName === paramType.sort || parameterName === undefined) ? serverSorts : this.state.serverSorts,
-            serverGroupBy: (parameterName === paramType.group || parameterName === undefined) ? serverGroupBy : this.state.serverGroupBy,
-            groupByColumn: (parameterName === paramType.groupByColumn || parameterName === undefined) ? groupByColumn : this.state.groupByColumn,
-            highlights: (parameterName === paramType.highlights || parameterName === undefined) ? highlights : this.state.highlights,
-            serverCalculatedExpression: (parameterName === paramType.calculations || parameterName === undefined) ? serverCalculatedExpression : this.state.serverCalculatedExpression,
-            diagrams,
-            hiddenColumns,
-            useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
-        this.prepParamsAndRun(resource,
-            serverFilters,
-            serverAggregates,
-            serverSorts,
-            serverGroupBy,
-            serverCalculatedExpression,
-            groupByColumn);
     }
 
     componentDidUpdate(prevProps: any, prevState: any): void {
@@ -1048,7 +1053,7 @@ class DatasetView extends React.Component<any, State> {
         });
     }
 
-    //Меняем фильтры, выполняем запрос и пишем в userProfile
+    //Меняем фильтры, выполняем запрос и пишем в userProfilePromise
 
     onChangeParams = (newServerParam: any[], paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
@@ -1175,13 +1180,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('schemaName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('schemaName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('dataset').get('tableName')) {
+            && !this.props.viewObject.get('datasetComponent').get('dataset').get('tableName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
         }
@@ -1640,8 +1645,9 @@ class DatasetView extends React.Component<any, State> {
                 .filter(c => c.get('isPrimaryKey'))
                 .map(c => {
                     return {
-                        parameterName: c.get('field'),
-                        parameterValue: d.operationMark__ === dmlOperation.update ? d[`${c.get('field')}__`] : d[c.get('field')],
+                        parameterName: d.operationMark__ === dmlOperation.update
+                            && !this.props.viewObject.get('datasetComponent').get("updateQuery").get('generateFromModel') ? `${c.get('field')}_pk` : c.get('field'),
+                        parameterValue: d.operationMark__ === dmlOperation.update && d[`${c.get('field')}__`] !== undefined ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
                     }
@@ -1653,7 +1659,7 @@ class DatasetView extends React.Component<any, State> {
                         parameterName: c.get('field'),
                         parameterValue: d[c.get('field')],
                         parameterDataType: c.get('type'),
-                        isPrimaryKey: c.get('isPrimaryKey')
+                        isPrimaryKey: false
                     }
                 });
             const params = primaryKey.concat(values);

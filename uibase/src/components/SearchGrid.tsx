@@ -9,6 +9,8 @@ import DataSearch from "./DataSearch";
 import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
+import './../styles/Data.css'
+
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;

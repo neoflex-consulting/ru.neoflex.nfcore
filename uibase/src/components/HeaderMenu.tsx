@@ -3,6 +3,7 @@ import {withTranslation} from "react-i18next";
 import {Dropdown, Menu, Select} from "antd";
 import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
 import './../styles/BreadcrumbApp.css';
+import Ecore from "ecore"
 
 interface State {
 }
@@ -75,19 +76,21 @@ class HeaderMenu extends React.Component<any, any> {
 
     render() {
         let selectedApp: any = undefined;
-        if (this.props.applications.length !== 0 && this.props.context !== undefined) {
-            if (this.props.context.userProfile !== undefined) {
-                const application = this.props.context.userProfile.get('params').array()
-                    .filter((u: any) => u.get('key') === 'startApp');
-                if (application.length !== 0 && application[0].get('value') !== undefined) {
-                    selectedApp = JSON.parse(application[0].get('value'))
-                }
-                else {
+        if (this.props.applications.length !== 0 && this.props.context !== undefined && this.props.context.userProfilePromise !== undefined) {
+            this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+                if (userProfile !== undefined) {
+                    const application = userProfile.eContents()[0].get('params').array()
+                        .filter((u: any) => u.get('key') === 'startApp');
+                    if (application.length !== 0 && application[0].get('value') !== undefined) {
+                        selectedApp = JSON.parse(application[0].get('value'))
+                    }
+                    else {
+                        selectedApp = this.props.applications[0].eContents()[0].get('name')
+                    }
+                } else {
                     selectedApp = this.props.applications[0].eContents()[0].get('name')
                 }
-            } else {
-                selectedApp = this.props.applications[0].eContents()[0].get('name')
-            }
+            });
         }
 
         return (
