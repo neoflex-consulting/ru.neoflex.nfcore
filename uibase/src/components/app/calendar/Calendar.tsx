@@ -151,30 +151,32 @@ class Calendar extends React.Component<any, any> {
     };
 
     getAllStatuses() {
-        const userProfileValue = this.props.context.userProfile.get('params').array()
-            .filter( (p: any) => p.get('key') === this.props.viewObject._id);
-        if (userProfileValue.length !== 0) {
-            let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus;
-            this.setState({notificationStatus})
-        }
-        else {
-            API.instance().fetchAllClasses(false).then(classes => {
-                const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
-                if (temp !== undefined) {
-                    API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                        .then((result) => {
-                            let notificationStatus = result.map ((r: any) => {
-                                return {
-                                    name: r.eContents()[0].get('name'),
-                                    color: r.eContents()[0].get('color'),
-                                    enable: true
-                                }
-                            });
-                            this.setState({notificationStatus})
-                        })
-                }
-            })
-        }
+        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+            const userProfileValue = userProfile.eContents()[0].get('params').array()
+                .filter( (p: any) => p.get('key') === this.props.viewObject._id);
+            if (userProfileValue.length !== 0) {
+                let notificationStatus = JSON.parse(userProfileValue[0].get('value')).notificationStatus;
+                this.setState({notificationStatus})
+            }
+            else {
+                API.instance().fetchAllClasses(false).then(classes => {
+                    const temp = classes.find((c: Ecore.EObject) => c._id === "//NotificationStatus");
+                    if (temp !== undefined) {
+                        API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                            .then((result) => {
+                                let notificationStatus = result.map ((r: any) => {
+                                    return {
+                                        name: r.eContents()[0].get('name'),
+                                        color: r.eContents()[0].get('color'),
+                                        enable: true
+                                    }
+                                });
+                                this.setState({notificationStatus})
+                            })
+                    }
+                })
+            }
+        });
     };
 
     getAllPeriodicity() {
@@ -795,6 +797,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
+                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
                             width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
@@ -814,6 +817,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
+                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             width={'100px'}
                         >
                             {
