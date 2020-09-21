@@ -789,6 +789,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
+                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
                             width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
@@ -808,6 +809,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
+                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             width={'100px'}
                         >
                             {

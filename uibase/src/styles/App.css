@@ -1284,3 +1284,25 @@ button.btn.edit-button-right{
   margin-left: 16px!important;
 }
 
+.ant-dropdown.ant-dropdown-placement-bottomCenter{
+    height: 1500px!important;
+  top: 70px!important;
+}
+
+li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item:hover {
+    color: #B38136 !important;
+  background: unset!important;
+  }
+
+.appNameInMenu:hover{
+  color: #B38136 !important;
+}
+
+li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+
+
+

@@ -1,7 +1,7 @@
 import * as React from "react";
 import {withTranslation} from "react-i18next";
-import {Dropdown, Menu} from "antd";
-import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
+import {Dropdown, Menu, Select} from "antd";
+import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
 import './../styles/BreadcrumbApp.css';
 
 interface State {
@@ -21,21 +21,22 @@ class HeaderMenu extends React.Component<any, any> {
 
     appsMenu(selectedApp:any) {
         const {applications, t} = this.props
-        const menu = (<Menu style={{ marginTop: '10px', backgroundColor: '#2a356c' }}>
+        const menu = (<Menu style={{ marginTop: '10px', backgroundColor: '#2a356c',
+            height: '10%',
+            overflow: 'auto',
+        width: "200px"}}>
             {applications.slice(3).map(
                 (app: any) =>
-                    <Menu.Item
+                    <Menu.Item className={'headerMenu'}
                         key={app.eContents()[0].get('name')}
                         onClick={ ()=> this.selectApplication(app.eContents()[0].get('name')) }
                     >
-                    <span
-                          style={{ fontWeight:600 }}>
-                        {app.eContents()[0].get('name')}</span>
+                        <NeoTypography className='appNameInMenu' style={{color: app.eContents()[0].get('name') === selectedApp ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}> {app.eContents()[0].get('name')}</NeoTypography>
                     </Menu.Item>
             )}
         </Menu>);
         return (
-            <NeoRow style={{justifyContent: 'space-between', width: '100%'}}>
+            <NeoRow style={{justifyContent: 'space-between', width: '100%', marginLeft: "70px"}}>
                 {applications.slice(0,3).map((app: any) =>
                     <NeoCol className='btn-appName' span={applications.length < 4 ? 8 : 7} key={app.eContents()[0].get('name')}>
                         <NeoButton
@@ -49,7 +50,7 @@ class HeaderMenu extends React.Component<any, any> {
                 )}
                 {applications.length >= 4 &&
                 <NeoCol span={3}>
-                    <Dropdown overlay={menu} placement="bottomCenter" className={'headerDropdown'}>
+                        <Dropdown overlay={menu} placement="bottomCenter" className={'headerDropdown'}>
                         <div className='btn-appName'>
                         <NeoButton
 
@@ -58,7 +59,8 @@ class HeaderMenu extends React.Component<any, any> {
                             fontWeight: 500,
                             background: "#2a356c",
                             color: "white",
-                            cursor: "pointer"
+                            cursor: "pointer",
+                                    marginRight: "90px"
                         }}
                         >
                             <NeoTypography className='appName' style={{color: "#B3B3B3"}} type={'h4-light'}> {t('more')}</NeoTypography>
