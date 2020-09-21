@@ -653,7 +653,9 @@ class Calendar extends React.Component<any, any> {
     renderEditNotification() {
         const {t} = this.props;
         return (
+            <div id="EditNotification" key={"EditNotification"}>
             <NeoDrawer
+                getContainer={() => document.getElementById ('EditNotification') as HTMLElement}
                 title={t('editNotification')}
                 width={'488px'}
                 visible={this.state.editMenuVisible}
@@ -672,6 +674,7 @@ class Calendar extends React.Component<any, any> {
                     />
                 }
             </NeoDrawer>
+            </div>
         );
     }
 
