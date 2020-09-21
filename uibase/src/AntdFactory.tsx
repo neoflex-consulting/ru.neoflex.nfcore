@@ -612,7 +612,7 @@ export class Select_ extends ViewContainer {
                     showSearch={this.viewObject.get('showSearch')}
                     placeholder={this.viewObject.get('placeholder')}
                     mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
-                    style={{width: width}}
+                    style={{width: this.props.isAgEdit ? undefined : width}}
                     defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
                     value={(this.state.currentValue)? this.state.currentValue: undefined}
                     onChange={(currentValue: string|string[]) => {

@@ -598,15 +598,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (params.oldValue !== params.newValue
             //Частный случай когда ячейка не заполнена
             && !(params.newValue === undefined && params.oldValue === null)) {
-            let foundObject = this.buffer.find(el=> Object.is(el, params.node.data));
-            if (!foundObject && params.node.data.operationMark__ !== dmlOperation.insert) {
-                if (params.node.data.operationMark__ === undefined) {
-                    for (const [key, value] of Object.entries(params.node.data)) {
-                        params.node.data[`${key}__`] = params.column.getColDef().field === key ? params.oldValue : value
-                    }
-                }
+            if (params.node.data.operationMark__ !== dmlOperation.insert) {
+                    //Если ниразу не записывали в историю
+                    if (params.node.data[`${params.column.getColDef().field}__`] === undefined)
+                        params.node.data[`${params.column.getColDef().field}__`] = params.oldValue ? params.oldValue : null;
                 params.node.data.operationMark__ = dmlOperation.update;
-                this.buffer.push(params.node.data)
+                if (!this.buffer.find(el=> Object.is(el, params.node.data)))
+                    this.buffer.push(params.node.data)
             }
             this.grid.current.api.redrawRows(this.grid.current.api.getRowNode(this.buffer));
         }
