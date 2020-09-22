@@ -500,7 +500,10 @@ export class Select_ extends ViewContainer {
     };
 
     componentDidMount(): void {
-        this.setState({dataset:this.viewObject.get('dataset').eContainer});
+        if (this.viewObject.get('isDynamic')
+            && this.viewObject.get('dataset')) {
+            this.setState({dataset:this.viewObject.get('dataset').eContainer});
+        }
         if (this.viewObject.get('isDynamic')
             && this.viewObject.get('dataset')
             && this.viewObject.get('valueItems').size() === 0) {
@@ -517,7 +520,6 @@ export class Select_ extends ViewContainer {
                 );
             });
         } else if (this.viewObject.get('isDynamic')
-            && this.viewObject.get('dataset')
             && this.viewObject.get('valueItems').size() !== 0
             && this.props.isAgEdit) {
             this.onChange(this.state.defaultAgGridValue)
