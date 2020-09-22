@@ -503,9 +503,12 @@ export class Select_ extends ViewContainer {
         if (this.viewObject.get('isDynamic')
             && this.viewObject.get('dataset')) {
             this.setState({dataset:this.viewObject.get('dataset').eContainer});
-            if (this.viewObject.get('valueItems').size() === 0) {
-                this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
-                    this.setState({
+        }
+        if (this.viewObject.get('isDynamic')
+            && this.viewObject.get('dataset')
+            && this.viewObject.get('valueItems').size() === 0) {
+            this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
+                this.setState({
                         selectData: JSON.parse(result).map((el: any)=>{
                             return {
                                 key: el[this.viewObject.get('datasetKeyColumn').get('name')],
@@ -513,13 +516,13 @@ export class Select_ extends ViewContainer {
                             }
                         }),
                         currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
-                    },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-                        parameterName: this.viewObject.get('name'),
-                        parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
-                    })
-                    );
-                });
-            }
+                    },()=> this.onChange(this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : ""))
+                );
+            });
+        } else if (this.viewObject.get('isDynamic')
+            && this.viewObject.get('valueItems').size() !== 0
+            && this.props.isAgEdit) {
+            this.onChange(this.state.defaultAgGridValue)
         } else if (this.viewObject.get('staticValues')) {
             this.getStaticValues(this.viewObject.get('staticValues'))
         }
@@ -559,11 +562,7 @@ export class Select_ extends ViewContainer {
                         params: newParams,
                         currentValue: isContainsValue ? currentValue : "",
                         selectData: resArr
-                    });
-                    this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
-                        parameterName: this.viewObject.get('name'),
-                        parameterValue: this.state.currentValue
-                    });
+                    },()=>this.onChange(isContainsValue ? currentValue : ""));
                 }
             });
         }
@@ -571,16 +570,20 @@ export class Select_ extends ViewContainer {
 
     getStaticValues(stringValues: string) {
         const staticValues = stringValues
-            .split("\\;")
+            .replace("\\;","-//-")
+            .replace("\\:","-\\-")
+            .split(";")
             .map((e:string)=>{
-                const keyValue = e.split("\\:");
+                const keyValue = e
+                    .replace("-//-",";")
+                    .split(":");
                 return {
-                    key: keyValue[0],
-                    value: keyValue[1]
+                    key: keyValue[0] ? keyValue[0].replace("-\\-",":") : undefined,
+                    value: keyValue[1] ? keyValue[1].replace("-\\-",":") : undefined
                 }
             });
         if (staticValues.length > 0) {
-            this.selected = staticValues[0].key;
+            this.selected = staticValues[0].key!;
         }
         this.setState({
             selectData:staticValues,
@@ -593,7 +596,9 @@ export class Select_ extends ViewContainer {
 
     //ag-grid
     getValue() {
-        return this.state.currentValue;
+        return this.state.currentValue && Array.isArray(this.state.currentValue)
+            ? this.state.currentValue.join(',')
+            : this.state.currentValue;
     }
 
     render = () => {
