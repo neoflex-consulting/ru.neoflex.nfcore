@@ -593,7 +593,9 @@ export class Select_ extends ViewContainer {
 
     //ag-grid
     getValue() {
-        return this.state.currentValue;
+        return ["Multiple","Tags"].includes(this.props.viewObject.get('mode')) && this.state.currentValue
+            ? this.state.currentValue.join(',')
+            : this.state.currentValue;
     }
 
     render = () => {
