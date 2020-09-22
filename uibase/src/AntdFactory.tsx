@@ -570,16 +570,20 @@ export class Select_ extends ViewContainer {
 
     getStaticValues(stringValues: string) {
         const staticValues = stringValues
-            .split("\\;")
+            .replace("\\;","-//-")
+            .replace("\\:","-\\-")
+            .split(";")
             .map((e:string)=>{
-                const keyValue = e.split("\\:");
+                const keyValue = e
+                    .replace("-//-",";")
+                    .split(":");
                 return {
-                    key: keyValue[0],
-                    value: keyValue[1]
+                    key: keyValue[0] ? keyValue[0].replace("-\\-",":") : undefined,
+                    value: keyValue[1] ? keyValue[1].replace("-\\-",":") : undefined
                 }
             });
         if (staticValues.length > 0) {
-            this.selected = staticValues[0].key;
+            this.selected = staticValues[0].key!;
         }
         this.setState({
             selectData:staticValues,
@@ -592,7 +596,7 @@ export class Select_ extends ViewContainer {
 
     //ag-grid
     getValue() {
-        return ["Multiple","Tags"].includes(this.props.viewObject.get('mode')) && this.state.currentValue
+        return this.state.currentValue && Array.isArray(this.state.currentValue)
             ? this.state.currentValue.join(',')
             : this.state.currentValue;
     }
