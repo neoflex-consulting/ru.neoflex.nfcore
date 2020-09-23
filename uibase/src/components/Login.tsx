@@ -31,7 +31,8 @@ export class Login extends React.Component<any, State> {
     authenticate = () => {
         return API.instance().authenticate(this.state.userName, this.state.password)
             .then((principal) => {
-                this.props.onLoginSucceed(principal)
+                this.props.onLoginSucceed(principal);
+                API.instance().stompConnect();
             })
     };
 
