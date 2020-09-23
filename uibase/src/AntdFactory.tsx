@@ -384,6 +384,7 @@ export class Href_ extends ViewContainer {
         return componentRenderCondition ? <a
             className={cssClass}
             hidden={this.state.isHidden}
+            style={{justifyContent: this.props.getValue ?  "inherit" : undefined}}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
                       //this.props.data/this.props.getValue props из ag-grid
@@ -458,7 +459,8 @@ export class Select_ extends ViewContainer {
             dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
-            defaultAgGridValue: defaultAgGridValue
+            defaultAgGridValue: defaultAgGridValue,
+            isFirstLoad: true
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -560,9 +562,11 @@ export class Select_ extends ViewContainer {
                     });
                     this.setState({
                         params: newParams,
-                        currentValue: isContainsValue ? currentValue : "",
                         selectData: resArr
-                    },()=>this.onChange(isContainsValue ? currentValue : ""));
+                    },()=> {
+                        this.onChange(this.state.isFirstLoad && this.viewObject.get('value') ? this.viewObject.get('value') : isContainsValue ? currentValue : "")
+                        this.setState({isFirstLoad: false})
+                    });
                 }
             });
         }
