@@ -113,44 +113,45 @@ class SaveDatasetComponent extends React.Component<any, State> {
     saveDatasetComponentOptions(): void {
         let objectId = this.props.viewObject.eURI();
         let params: any = {};
-        this.props.context.changeUserProfile(objectId, params).then (()=> {
-            let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
-            currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
-            if (!this.state.changeCurrent) {
-                currentDatasetComponent.get('audit').get('createdBy', null);
-                currentDatasetComponent.get('audit').set('created', null);
-                currentDatasetComponent.get('audit').set('modifiedBy', null);
-                currentDatasetComponent.get('audit').set('modified', null);
+        this.props.context.changeUserProfile(objectId, params);
+        let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
+        currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
+        if (!this.state.changeCurrent) {
+            currentDatasetComponent.get('audit').get('createdBy', null);
+            currentDatasetComponent.get('audit').set('created', null);
+            currentDatasetComponent.get('audit').set('modifiedBy', null);
+            currentDatasetComponent.get('audit').set('modified', null);
+        }
+        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+            const userProfileValue = userProfile.eContents()[0].get('params').array()
+                .filter( (p: any) => p.get('key') === currentDatasetComponent.eURI());
+            if (userProfileValue.length !== 0) {
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
+                this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
+                this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
+                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
+                this.addComponentServerParam(currentDatasetComponent, this.state.hiddenColumnPattern!, userProfileValue, 'hiddenColumns', 'hiddenColumn');
+                this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
             }
+            this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined);
+
             this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
-                const userProfileValue = userProfile.eContents()[0].get('params').array()
-                    .filter( (p: any) => p.get('key') === currentDatasetComponent.eURI());
-                if (userProfileValue.length !== 0) {
-                    this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
-                    this.addComponentServerParam(currentDatasetComponent, this.state.hiddenColumnPattern!, userProfileValue, 'hiddenColumns', 'hiddenColumn');
-                    this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
-                }
-                this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined).then (()=> {
-                    const resource = currentDatasetComponent.eResource();
-                    if (resource) {
-                        if (!this.state.changeCurrent) {
-                            const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
-                            contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
-                            resource.eContents()[0].set('name', `${this.state.componentName}`);
-                            resource.set('uri', null);
-                            resource.eContents()[0].set('serverFilters', `${this.state.componentName}`);
-                            this.props.context.changeUserProfile(this.props.viewObject.eURI(), {name: this.state.componentName})
-                        }
-                        this.saveDatasetComponent(resource);
+                const resource = currentDatasetComponent.eResource();
+                if (resource) {
+                    if (!this.state.changeCurrent) {
+                        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+                        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
+                        resource.eContents()[0].set('name', `${this.state.componentName}`);
+                        resource.set('uri', null);
+                        resource.eContents()[0].set('serverFilters', `${this.state.componentName}`);
+                        this.props.context.changeUserProfile(this.props.viewObject.eURI(), {name: this.state.componentName})
                     }
-                })
-            });
+                    this.saveDatasetComponent(resource);
+                }
+            })
         });
     }
 

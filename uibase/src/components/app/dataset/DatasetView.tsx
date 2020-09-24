@@ -1083,9 +1083,8 @@ class DatasetView extends React.Component<any, State> {
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
         }
         else {
-            this.datasetViewChangeUserProfile(datasetComponentId, paramName, []).then(()=>
-                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs, paramName)
-            )
+            this.datasetViewChangeUserProfile(datasetComponentId, paramName, []);
+            this.findParams(this.state.currentDatasetComponent, this.state.columnDefs, paramName)
         }
     };
 

@@ -71,7 +71,6 @@ export interface IMainContext {
     runQueryDataset? : (resource: Ecore.Resource, queryParams: IServerNamedParam[]) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
-    // userProfile?: Ecore.EObject;
     userProfilePromise?: Promise<Ecore.Resource>;
     changeUserProfile?: (viewObjectId: string, userProfileParams: any) => void;
     addDocxHandler?: (handler:any)=>void;

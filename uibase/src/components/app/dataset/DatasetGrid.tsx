@@ -219,12 +219,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.setState({highlights: this.props.highlights});
         const newCellStyle = (params: any) => {
             const columnDef = this.state.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
+            const textAlign = columnDef && columnDef.get('textAlign')
+                ? columnDef.get('textAlign')
+                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
+                    ? "right"
+                    : undefined;
             let returnObject = {
-                textAlign: columnDef && columnDef.get('textAlign')
-                    ? columnDef.get('textAlign')
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
-                        ? "right"
-                        : undefined
+                textAlign: textAlign,
+                justifyContent: textAlign == "right" ? "flex-end" : textAlign == "left" ? "flex-start" : textAlign
             };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {

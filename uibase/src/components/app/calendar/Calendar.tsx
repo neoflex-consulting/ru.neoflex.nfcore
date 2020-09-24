@@ -19,7 +19,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoDrawer} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoDrawer, NeoColor} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -797,7 +797,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
-                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
+                            value={<NeoTypography style={{marginTop: "9px", color: NeoColor.grey_9}} type={'capture-regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
                             width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
@@ -805,20 +805,20 @@ class Calendar extends React.Component<any, any> {
                                         key={y}
                                         value={y}
                                     >
-                                        <NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{y}</NeoTypography>
+                                        <NeoTypography style={{marginTop: "10px", color: NeoColor.grey_9}} type={'capture-regular'}>{y}</NeoTypography>
                                     </option>
                                 )
                             }
                         </NeoSelect>
 
                         <NeoSelect
-                            className='selectMonth'
+                            /*className='selectMonth'*/
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            defaultValue={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            defaultValue={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
-                            value={<NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
-                            width={'100px'}
+                            value={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            width={'124px'}
                         >
                             {
                                 this.state.months!.map((m: any) =>
@@ -846,7 +846,7 @@ class Calendar extends React.Component<any, any> {
                         </div>
                         <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
-                        {dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}
+                        <NeoTypography style={{color: NeoColor.grey_9}} type={'h3-medium'}>{dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}</NeoTypography>
                     </span>
                         </div>
                         <div className="col col-end" >
@@ -926,8 +926,8 @@ class Calendar extends React.Component<any, any> {
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: !this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
-                        border: !this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
+                        backgroundColor: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
+                        border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66'
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
@@ -941,20 +941,20 @@ class Calendar extends React.Component<any, any> {
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : 'rgba(0,0,0,0)',
-                        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid rgba(0,0,0,0)'
+                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
+                        border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78'
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
                     <NeoIcon icon={"table"} style={{margin:'auto'}} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
                 </NeoButton>
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '13px', height: '34px'}}/>
                 {this.state.calendarVisible ?
                     <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                         overlay={menu} placement="bottomLeft">
-                        <div style={{marginRight: "5px"}}>
-                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
+                        <div>
+                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginRight: "10px"}}/>
                         </div>
                     </Dropdown>
                     :

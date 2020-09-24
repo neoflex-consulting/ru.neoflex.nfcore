@@ -1,31 +1,46 @@
 import * as React from "react";
 import {withTranslation} from "react-i18next";
-import {Dropdown, Menu, Select} from "antd";
-import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
+import {Dropdown, Menu} from "antd";
+import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
 import './../styles/BreadcrumbApp.css';
 import Ecore from "ecore"
 
 interface State {
+    isResolved: boolean;
 }
 
 class HeaderMenu extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        this.state = {}
+        this.state = {
+            isResolved: false,
+        }
     }
 
     selectApplication(applicationName: string): void  {
+        const {applications, t} = this.props
+        for (let i = 3; i < applications.length; i++){
+            if (applications[i].eContents()[0].get('name') === applicationName){
+                let temp: any = applications[0].eContents()[0]
+                applications[0].eContents()[0] = applications[i].eContents()[0]
+                applications[i].eContents()[0] = temp
+                for (let i = 1; i < applications.length; i++) {
+
+                }
+            }
+        }
         this.props.context.changeURL!(applicationName, false);
         this.props.context.changeUserProfile('startApp', applicationName)
     }
 
     appsMenu(selectedApp:any) {
+
         const {applications, t} = this.props
         const menu = (<Menu style={{ marginTop: '10px', backgroundColor: '#2a356c',
             height: '10%',
             overflow: 'auto',
-        width: "200px"}}>
+            width: "200px"}}>
             {applications.slice(3).map(
                 (app: any) =>
                     <Menu.Item className={'headerMenu'}
@@ -75,7 +90,7 @@ class HeaderMenu extends React.Component<any, any> {
 }
 
     render() {
-        let selectedApp: any = undefined;
+        let selectedApp: any;
         if (this.props.applications.length !== 0 && this.props.context !== undefined && this.props.context.userProfilePromise !== undefined) {
             this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
                 if (userProfile !== undefined) {
@@ -83,24 +98,34 @@ class HeaderMenu extends React.Component<any, any> {
                         .filter((u: any) => u.get('key') === 'startApp');
                     if (application.length !== 0 && application[0].get('value') !== undefined) {
                         selectedApp = JSON.parse(application[0].get('value'))
+                        if (selectedApp !== this.state.App && selectedApp !== undefined){
+                            this.setState({App: selectedApp})
+                        }
+
                     }
                     else {
-                        selectedApp = this.props.applications[0].eContents()[0].get('name')
+                            selectedApp = this.props.applications[0].eContents()[0].get('name')
+                        if (selectedApp !== this.state.App && selectedApp !== undefined){
+                            this.setState({App: selectedApp})
+                        }
                     }
                 } else {
                     selectedApp = this.props.applications[0].eContents()[0].get('name')
+                    if (selectedApp !== this.state.App && selectedApp !== undefined){
+                        this.setState({App: selectedApp})
+                    }
                 }
             });
         }
-
         return (
             <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu'>
                 {
-                    this.props.applications.length === 0
+
+                    this.props.applications.length === 0 && this.state.App === undefined
                         ?
                         <span style={{fontWeight: 500, color: 'rgb(255, 255, 255)'}}>Loading... </span>
                         :
-                        this.appsMenu(selectedApp)
+                        this.appsMenu(this.state.App)
                 }
             </NeoRow>
         );

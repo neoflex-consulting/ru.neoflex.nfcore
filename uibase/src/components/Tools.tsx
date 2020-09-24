@@ -12,7 +12,6 @@ import {Helmet} from "react-helmet";
 import './../styles/Tools.css';
 import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
-import {paramType} from "./app/dataset/DatasetView";
 
 interface Props {
 }
