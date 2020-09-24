@@ -28,6 +28,7 @@
         "createdir": "Создать каталог",
         "createfile": "Создать файл",
         "upload": "Загрузить",
+        "description": "Описание",
         "download": "Выгрузить",
         "data": "Данные",
         "datatype": "Тип данных",
