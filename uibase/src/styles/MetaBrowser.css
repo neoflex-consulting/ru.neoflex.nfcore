@@ -1,11 +1,11 @@
 /*override*/
 #meta-browser * .ant-tabs-top-bar {
     max-width: 48.9vw !important;
-    margin-bottom: 40px;
+    margin-bottom: 16px;
 }
 
 #meta-browser * .ant-input {
-    width: 20vw;
+    width: 319px;
 }
 
 #meta-browser * .ant-tabs-nav-container {
@@ -21,12 +21,12 @@
 }
 /*regions*/
 #meta-browser {
-    padding-top: 32px;
+    padding: 22px 0 0;
 }
 
 .meta-browser-tabs-region {
     position: relative;
-    width: 92vw;
+    width: 1328px;
     height: 810px;
 }
 
@@ -90,6 +90,8 @@
 
 .meta-browser-input {
     position: absolute;
-    right: 5vw;
-    top:  140px
+    right: 0;
+    /*right: 5vw;*/
+    top:  105px;
+    z-index: 10000;
 }

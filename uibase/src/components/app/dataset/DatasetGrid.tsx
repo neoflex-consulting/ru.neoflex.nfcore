@@ -658,7 +658,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             >
                 <div style={{
                     height: this.props.height ? this.props.height : 750,
-                    width: this.props.width ? this.props.width : "99,5%"}}>
+                    width: this.props.width ? this.props.width : "99,5%",
+                    minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -674,7 +675,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
                             suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                             allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
-                            headerHeight={40} //высота header в px (25 по умолчанию)
+                            headerHeight={48} //высота header в px (25 по умолчанию)
+                            rowHeight={40} //высота row в px
                             suppressRowClickSelection //строки не выделяются при нажатии на них
                             pagination={true}
                             suppressPaginationPanel={true}

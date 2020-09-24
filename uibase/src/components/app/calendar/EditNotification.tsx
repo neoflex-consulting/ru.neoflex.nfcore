@@ -85,9 +85,9 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </NeoCol>
                     <NeoCol span={12}>
                         <NeoInput
+                            width={'200px'}
                             value={editableNotification['fullName']}
                             disabled={false}
-                            style={{ width: '200px'}}
                             allowClear={true}
                             onChange={(e: any) => {
                                 const event = JSON.stringify({row: 'fullName', value: e.target.value === "" ? undefined : e.target.value});
@@ -102,9 +102,9 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                 </NeoCol>
                 <NeoCol span={12}>
                     <NeoInput
+                        width={'200px'}
                         value={editableNotification['shortName']}
                         disabled={!this.state.myNotificationVisible}
-                        style={{ width: '200px'}}
                         allowClear={true}
                         onChange={(e: any) => {
                             const event = JSON.stringify({row: 'shortName', value: e.target.value === "" ? undefined : e.target.value});
@@ -165,11 +165,11 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                         </NeoCol>
                         <NeoCol span={12}>
                             <NeoInputNumber
+                                width={'200px'}
                                 min={1}
                                 max={220}
                                 value={editableNotification['deadlineDay']}
                                 disabled={false}
-                                style={{ width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e})
                                     this.handleChange(event)
@@ -184,12 +184,12 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                         </NeoCol>
                         <NeoCol span={12}>
                             <NeoInputNumber
+                                width={'200px'}
                                 min={0}
                                 max={23}
                                 value={editableNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
                                 parser={value => value !== undefined ? value.replace(':00', '') : 1}
-                                style={{ width: '200px'}}
                                 disabled={!this.state.myNotificationVisible}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e});
