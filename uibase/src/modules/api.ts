@@ -576,7 +576,7 @@ export class API implements IErrorHandler {
 
         this.stompClient.configure({
             webSocketFactory: () => {
-                return new WebSocket('ws://localhost:8080/socket-registry')
+                return new WebSocket('ws://localhost:3000/socket-registry')
             },
             onConnect: () => {
                 console.log('onConnect');
