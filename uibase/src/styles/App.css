@@ -53,6 +53,7 @@
 .app-header {
   background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
+  z-index: 100000;
 }
 
 .head-panel {
@@ -1285,8 +1286,8 @@ button.btn.edit-button-right{
 }
 
 .ant-dropdown.ant-dropdown-placement-bottomCenter{
-    height: 1500px!important;
-  top: 70px!important;
+  /*height: 1500px!important;*/
+  top: 120px!important;
 }
 
 li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item:hover {
@@ -1303,6 +1304,7 @@ li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item {
   margin-bottom: 16px;
 }
 
-
-
-
+/*Notification message*/
+.ant-notification {
+  z-index: 100000 !important;
+}
