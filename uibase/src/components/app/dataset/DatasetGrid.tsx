@@ -655,7 +655,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     handleResize = (event: ColumnResizedEvent|undefined) => {
-        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject.eURI().split('#')[0]} .ag-header-cell-text`);
+
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
@@ -671,7 +672,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >
-                <div id={`datasetGrid${this.props.viewObject.eURI().split('#')[0]}`}
+                <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     style={{
                     height: this.props.height ? this.props.height : 750,
                     width: this.props.width ? this.props.width : "99,5%",
@@ -691,8 +692,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
                             suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                             allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
-                            /*headerHeight={48} //высота header в px (25 по умолчанию)
-                            rowHeight={40} //высота row в px*/
+                            headerHeight={48} //высота header в px (25 по умолчанию)
+                            rowHeight={40} //высота row в px
                             suppressRowClickSelection //строки не выделяются при нажатии на них
                             pagination={true}
                             suppressPaginationPanel={true}
@@ -710,7 +711,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                                 <AgGridColumn
                                     onCellValueChanged={this.props.isEditMode ? this.onUpdate : undefined}
                                     onCellClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
-                                    /*width={col.get('width')}*/
+                                    width={col.get('width')}
                                     type={col.get('type')}
                                     key={col.get('field')}
                                     field={col.get('field')}
