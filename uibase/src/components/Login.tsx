@@ -32,7 +32,7 @@ export class Login extends React.Component<any, State> {
         return API.instance().authenticate(this.state.userName, this.state.password)
             .then((principal) => {
                 this.props.onLoginSucceed(principal);
-                // API.instance().stompConnect();
+                API.instance().stompConnect();
             })
     };
 
