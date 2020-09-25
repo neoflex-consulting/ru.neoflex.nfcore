@@ -15,6 +15,7 @@ annotation "ru.neoflex.nfcore" as NFCore
 @NFCore(internal="true", documentation="Поставка - порция метаданных, загружаемых в единой транзакции")
 class Supply {
     QName name
+    @NFCore(internal="true", documentation="Дата поставки фиксируется во время импорта поставки")
     Timestamp date
     String description
     contains Audit audit

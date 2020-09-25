@@ -30,7 +30,7 @@ function getNamedParams(valueItems: EList, contextItemValues: Map<String,IServer
                 namedParams.push({
                     parameterName: item.get('name'),
                     //Проверка параметров в url'ах
-                    parameterValue: item.get('value') !== undefined && item.get('value') !== null ? item.get('value') : getUrlParam(params, item.get('name'))
+                    parameterValue: item.get('value') !== undefined && item.get('value') !== null && item.get('value') !== "" ? item.get('value') : getUrlParam(params, item.get('name'))
                 })
             }
         });

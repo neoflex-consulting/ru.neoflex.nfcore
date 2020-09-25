@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,9 @@ public class Store implements EventsRegistration {
     @Autowired
     Workspace workspace;
 
+    @Autowired
+    public SimpMessageSendingOperations messagingTemplate;
+
     public final static Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> {
         for (EAttribute eAttribute: eClass.getEAllAttributes()) {
             if (eAttribute.getEAttributeType() == TypesPackage.Literals.QNAME) {
@@ -47,9 +51,6 @@ public class Store implements EventsRegistration {
 
     @Autowired
     private StoreSPI provider;
-//    @Autowired
-//    public SimpMessageSendingOperations messagingTemplate;
-
 
     public TransactionSPI getCurrentTransaction() throws IOException {
         TransactionSPI tx = provider.getCurrentTransaction();
@@ -61,10 +62,10 @@ public class Store implements EventsRegistration {
 
     @PostConstruct
     public void init() {
-//        registerAfterSave((resource, resource2) -> {
-//            ObjectNode result = EmfJson.resourceToTree(this, resource2);
-//            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
-//        });
+        registerAfterSave((resource, resource2) -> {
+            ObjectNode result = EmfJson.resourceToTree(this, resource2);
+            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
+        });
     }
 
     public ResourceSet createResourceSet() throws IOException {

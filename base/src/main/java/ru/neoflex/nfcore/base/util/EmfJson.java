@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceImpl;
 import org.emfjson.jackson.annotations.EcoreIdentityInfo;
 import org.emfjson.jackson.annotations.EcoreTypeInfo;
 import org.emfjson.jackson.databind.EMFContext;
@@ -25,7 +24,6 @@ import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -107,8 +105,10 @@ public class EmfJson {
 //                jsonResource.setID(eObject, orientDBResource.getID(eObject));
 //            }
 //        }
-        jsonResource.getContents().addAll(resource.getContents());
-        result.withArray("contents").add(mapper.valueToTree(jsonResource.getContents().get(0)));
+        jsonResource.getContents().addAll(EcoreUtil.copyAll(resource.getContents()));
+        result.withArray("contents").addAll(
+                jsonResource.getContents().stream().map(mapper::<JsonNode>valueToTree).collect(Collectors.toList())
+        );
         return result;
     }
 

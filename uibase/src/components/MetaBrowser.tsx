@@ -17,7 +17,8 @@ interface State {
         gridRef:any;
         name:string,
         type:string,
-        uri:string
+        uri:string,
+        description:string,
         children:any,
         show:any,
         hide:any,
@@ -35,7 +36,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             gridRef:any;
             name:string,
             type:string,
-            uri:string
+            uri:string,
+            description:any,
             children:any,
             show:any,
             hide:any,
@@ -126,19 +128,25 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         rowData.set('headerName', this.props.t('metadata name'));
         rowData.set('textAlign','right');
         rowData.set('component','expand');
-        rowData.set('width', '737');
+        rowData.set('width', '554');
         colDef.push(rowData);
         rowData = new Map();
         rowData.set('field', 'type');
         rowData.set('headerName', this.props.t('metadata type'));
         rowData.set('textAlign','right');
-        rowData.set('width', '322');
+        rowData.set('width', '242');
         colDef.push(rowData);
         rowData = new Map();
         rowData.set('field', 'key');
         rowData.set('headerName', this.props.t('metadata uri'));
         rowData.set('textAlign','right');
-        rowData.set('width', '706');
+        rowData.set('width', '532');
+        colDef.push(rowData);
+        rowData = new Map();
+        rowData.set('field', 'description');
+        rowData.set('headerName', this.props.t('description'));
+        rowData.set('textAlign','right');
+        rowData.set('width', '600');
         colDef.push(rowData);
         return colDef
     };
@@ -159,6 +167,15 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             data.push(parent);
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
+                let description = undefined;
+                if (eClassifier.get('eAnnotations').array().length !== 0) {
+                    eClassifier.get('eAnnotations').array()[0].get('details').array()
+                        .forEach((e: any)=> {
+                            if (e.get('key') === 'documentation') {
+                                description = e.get('value');
+                            }
+                        });
+                }
                 let child = {
                     key: eClassifier.eURI(),
                     name: this.getName(eClassifier),
@@ -167,6 +184,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     children: children2,
                     isExpanded: false,
                     isVisible__: true,
+                    description: description,
                     show: (redraw: boolean = false) => {
                         child.isExpanded = true;
                         children2.forEach(c => {
@@ -263,44 +281,46 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     <title>{this.props.t('metadata')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
-                <NeoInput
-                    className={"meta-browser-input"}
-                    type={"search"}
-                    onSearch={(str:string)=>{
-                            this.state.data.forEach(el=>{
-                                el.isVisible__ = str === "";
-                                el.children.forEach((c1:any)=>{
-                                    if (str !== "") {
-                                        if (c1.name.match(new RegExp(str,'gi'))) {
-                                            c1.isVisible__ = true;
-                                            el.isVisible__ = true;
-                                            if (c1.showParent)
-                                                c1.showParent();
+                <div style={{top:'-100px', height:'0'}} className={"meta-browser-tabs-region meta-browser-center-element"}>
+                    <NeoInput
+                        className={"meta-browser-input"}
+                        type={"search"}
+                        onSearch={(str:string)=>{
+                                this.state.data.forEach(el=>{
+                                    el.isVisible__ = str === "";
+                                    el.children.forEach((c1:any)=>{
+                                        if (str !== "") {
+                                            if (c1.name.match(new RegExp(str,'gi'))) {
+                                                c1.isVisible__ = true;
+                                                el.isVisible__ = true;
+                                                if (c1.showParent)
+                                                    c1.showParent();
+                                            } else {
+                                                c1.isVisible__ = false;
+                                            }
                                         } else {
-                                            c1.isVisible__ = false;
+                                            if (c1.depth === 0) {
+                                                el.isVisible__ = true;
+                                                c1.isVisible__ = true;
+                                                c1.isExpanded = false;
+                                            } else {
+                                                c1.isVisible__ = false;
+                                            }
                                         }
-                                    } else {
-                                        if (c1.depth === 0) {
-                                            el.isVisible__ = true;
-                                            c1.isVisible__ = true;
-                                            c1.isExpanded = false;
-                                        } else {
-                                            c1.isVisible__ = false;
-                                        }
+                                    })
+                                });
+                            if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
+                                this.state.data.forEach(e=>{
+                                    if (e.isVisible__ && e.gridRef) {
+                                        e.gridRef.onFilterChanged();
+                                        e.gridRef.redraw();
                                     }
                                 })
-                            });
-                        if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
-                            this.state.data.forEach(e=>{
-                                if (e.isVisible__ && e.gridRef) {
-                                    e.gridRef.onFilterChanged();
-                                    e.gridRef.redraw();
-                                }
-                            })
-                        }
-                        this.setState({data:this.state.data.slice()})
-                    }}
-                />
+                            }
+                            this.setState({data:this.state.data.slice()})
+                        }}
+                    />
+                </div>
                 <NeoTabs className={"meta-browser-tabs-region meta-browser-center-element"}
                       defaultActiveKey={"ecore"}
                       tabPosition={'top'}>
@@ -313,7 +333,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                     eObj.gridRef = ref;
                                     this.gridRef = ref;
                                 }}
-                                height={654}
+                                minWidth={1328}
+                                height={460}
                                 rowData = {eObj.children}
                                 columnDefs = {this.getColDefs()}
                                 highlightClassFunction = {(params: any) => {
