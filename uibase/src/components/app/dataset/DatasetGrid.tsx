@@ -20,10 +20,11 @@ import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import './../../../styles/GridEdit.css';
-import {GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
+import {ColumnResizedEvent, GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
 
+const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
 
 interface Props {
@@ -114,7 +115,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.gridOptions.doesExternalFilterPass = (node) => {
                 return node.data.isVisible__ !== undefined ? node.data.isVisible__ : true
             };
-            this.gridOptions.api!.onFilterChanged()
+            this.gridOptions.api!.onFilterChanged();
+            this.gridOptions.onColumnResized = this.handleResize
         }
     };
 
@@ -200,7 +202,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
         if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)
             && !this.props.isEditMode) {
-            this.setState({columnDefs: this.props.columnDefs})
+            this.setState({columnDefs: this.props.columnDefs}, ()=>{
+                this.handleResize(undefined)
+            })
         }
         if (prevProps.t !== this.props.t) {
             this.setState({
@@ -648,7 +652,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     redraw = () => {
         this.grid.current.api.redrawRows()
-    }
+    };
+
+    handleResize = (event: ColumnResizedEvent|undefined) => {
+
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
+        let minHeight = minHeaderHeight;
+        headerCells.forEach(cell => {
+            minHeight = Math.max(minHeight, cell.scrollHeight);
+        });
+        this.gridOptions.api?.setHeaderHeight(minHeight)
+    };
 
     render() {
         const {gridOptions} = this.state;
@@ -658,7 +672,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >
-                <div style={{
+                <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
+                    style={{
                     height: this.props.height ? this.props.height : 750,
                     width: this.props.width ? this.props.width : "99,5%",
                     minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
