@@ -655,7 +655,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     handleResize = (event: ColumnResizedEvent|undefined) => {
-        const headerCells = document.querySelectorAll(`#${this.props.viewObject.get('name')} .ag-header-cell-text`);
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject.eURI().split('#')[0]} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
@@ -671,7 +671,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >
-                <div id={this.props.viewObject.get('name')}
+                <div id={`datasetGrid${this.props.viewObject.eURI().split('#')[0]}`}
                     style={{
                     height: this.props.height ? this.props.height : 750,
                     width: this.props.width ? this.props.width : "99,5%",
