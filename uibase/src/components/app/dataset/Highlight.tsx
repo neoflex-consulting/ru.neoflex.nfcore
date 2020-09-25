@@ -245,7 +245,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     marginTop:'15px'
                     }}
                 >
-                    <NeoIcon icon={"fill"} />
+                    <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
                 </NeoButton>
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
@@ -297,7 +297,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         marginTop:'15px'
                     }}
                 >
-                    <NeoIcon icon={"letter"} />
+                    <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
                 </NeoButton>
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
