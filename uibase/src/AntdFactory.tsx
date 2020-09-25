@@ -802,6 +802,10 @@ class HtmlContent_ extends ViewContainer {
                  aria-disabled={isReadOnly}
                  style={{marginBottom: marginBottom}}
                  className={`${cssClass} content`}
+                 onClick={isReadOnly ? ()=>{} : () => {
+                     const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                     handleClick.bind(this)(value);
+                 }}
                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
         )
@@ -1261,7 +1265,9 @@ class EventHandler_ extends ViewContainer {
                                 && action.actionType !== actionType.showMessage
                                 && action.actionType !== actionType.redirect) {
                                 if (el.get('valueObjectKey') && value === Object(value)) {
-                                    (value[el.get('valueObjectKey')])
+                                    (value[el.get('valueObjectKey')]
+                                        //Если запрос вернул null
+                                        || value[el.get('valueObjectKey')] === null)
                                         ? action.callback(value[el.get('valueObjectKey')])
                                         : this.props.context.notification("Event handler warning",
                                         `Object Key ${el.get('valueObjectKey')} in action=${el.get('action')} / event=${this.viewObject.get('name')} (${el.get('triggerItem').get('name')}) not found`,
