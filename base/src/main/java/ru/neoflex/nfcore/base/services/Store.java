@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.base.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -14,7 +15,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.services.providers.*;
@@ -33,6 +34,9 @@ public class Store implements EventsRegistration {
     private final static Log logger = LogFactory.getLog(Store.class);
     @Autowired
     Workspace workspace;
+
+    @Autowired
+    public SimpMessageSendingOperations messagingTemplate;
 
     public final static Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> {
         for (EAttribute eAttribute: eClass.getEAllAttributes()) {
@@ -56,6 +60,10 @@ public class Store implements EventsRegistration {
 
     @PostConstruct
     public void init() {
+        registerAfterSave((resource, resource2) -> {
+            ObjectNode result = EmfJson.resourceToTree(this, resource2);
+            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
+        });
     }
 
     public ResourceSet createResourceSet() throws IOException {
