@@ -47,8 +47,8 @@ public class Store implements EventsRegistration {
 
     @Autowired
     private StoreSPI provider;
-    @Autowired
-    public SimpMessageSendingOperations messagingTemplate;
+//    @Autowired
+//    public SimpMessageSendingOperations messagingTemplate;
 
 
     public TransactionSPI getCurrentTransaction() throws IOException {
@@ -61,10 +61,10 @@ public class Store implements EventsRegistration {
 
     @PostConstruct
     public void init() {
-        registerAfterSave((resource, resource2) -> {
-            ObjectNode result = EmfJson.resourceToTree(this, resource2);
-            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
-        });
+//        registerAfterSave((resource, resource2) -> {
+//            ObjectNode result = EmfJson.resourceToTree(this, resource2);
+//            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
+//        });
     }
 
     public ResourceSet createResourceSet() throws IOException {
