@@ -236,7 +236,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     : undefined;
             let returnObject = {
                 textAlign: textAlign,
-                justifyContent: textAlign == "right" ? "flex-end" : textAlign == "left" ? "flex-start" : textAlign
+                justifyContent: textAlign === "right" ? "flex-end" : textAlign === "left" ? "flex-start" : textAlign
             };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
