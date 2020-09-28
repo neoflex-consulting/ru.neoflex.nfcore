@@ -17,7 +17,9 @@ class JdbcUtils {
                 if (!parameters[i].parameterValue) {
                     p.setString(parameters[i].parameterName, null)
                 }
-                if (parameters[i].parameterValue == null) {
+                if (parameters[i].parameterValue == null && parameters[i].parameterDataType == DataType.DATE.getName()) {
+                    p.setDate(parameters[i].parameterName, null)
+                } else if (parameters[i].parameterValue == null) {
                     p.setObject(parameters[i].parameterName, null)
                 } else if (parameters[i].parameterDataType == DataType.DATE.getName()) {
                     p.setDate(parameters[i].parameterName, Date.valueOf(LocalDate.parse(parameters[i].parameterValue, parameters[i].parameterDateFormat)))

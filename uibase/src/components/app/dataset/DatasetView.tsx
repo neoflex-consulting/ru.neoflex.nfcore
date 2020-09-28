@@ -1354,7 +1354,9 @@ class DatasetView extends React.Component<any, State> {
                          <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
                      </div>
                  </Dropdown>
-                <NeoButton type={'link'} style={{marginRight: "5px"}}
+                <NeoButton
+                    title={t('fullscreen')}
+                    type={'link'} style={{marginRight: "5px"}}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
                         <NeoIcon icon={'fullScreenUnDo'} color={'#5E6785'} size={'m'}/>
@@ -1463,6 +1465,7 @@ class DatasetView extends React.Component<any, State> {
 
 
             <NeoButton
+                title={t('fullscreen')}
                 className="buttonFullScreen"
                 type="link"
                 style={{
@@ -1571,6 +1574,7 @@ class DatasetView extends React.Component<any, State> {
             <div className='verticalLine' style={{marginTop: "4px"}}/>
 
                 <NeoButton
+                    title={t('fullscreen')}
                     className="buttonFullScreen"
                     type="link"
                     style={{
@@ -1627,7 +1631,7 @@ class DatasetView extends React.Component<any, State> {
         }
     };
 
-    onApplyEditChanges = (buffer:any[]) => {
+        onApplyEditChanges = (buffer:any[]) => {
         buffer.sort(function compare(a:any,b:any) {
             if (a.operationMark__ === dmlOperation.delete && b.operationMark__ !== dmlOperation.delete)
                 return -1;
@@ -1652,7 +1656,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
             const values = this.state.columnDefs
-                .filter(c => c.get('editable'))
+                .filter(c => c.get('editable') || c.get('isPrimaryKey'))
                 .map(c => {
                     return {
                         parameterName: c.get('field'),
@@ -1666,10 +1670,12 @@ class DatasetView extends React.Component<any, State> {
 
                 }
             ).catch(()=>{
-                    //Выходим из редактора, что на ловить ошибки ag-grid
+                    //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
-                        this.refresh()
+                        /*this.refresh()*/
+                        this.gridRef.resetBuffer();
+                        /*this.refresh();*/
                     });
                 }
             ).finally(()=>{

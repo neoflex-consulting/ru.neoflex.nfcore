@@ -1,5 +1,6 @@
 import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
+import {Client} from '@stomp/stompjs';
 
 const indexer = (() => {
     let i = 0
@@ -45,14 +46,15 @@ export class API implements IErrorHandler {
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
     private processHandlers: ((processes: any[])=>void)[];
+    private stompClient: Client;
 
     private constructor() {
         this.errorHandlers = [this];
         this.ePackagesPromise = new Promise<Ecore.EPackage[]>((resolve, reject) => {
             this.resolvePackages = resolve
         });
-        this.processes = []
-        this.processHandlers = []
+        this.processes = [];
+        this.processHandlers = [];
     }
 
     static instance(): API {
@@ -569,5 +571,35 @@ export class API implements IErrorHandler {
         })
     }
 
+    stompConnect = () => {
+        this.stompClient = new Client();
+
+        this.stompClient.configure({
+            webSocketFactory: () => {
+                // eslint-disable-next-line no-restricted-globals
+                return new WebSocket('ws://' + location.host + '/socket-registry')
+            },
+            onConnect: () => {
+                console.log('onConnect');
+
+                this.stompClient.subscribe('/topic/afterSave', message => {
+                    console.log(JSON.parse(message.body));
+                });
+            },
+            debug: (str) => {
+                console.log(new Date(), str);
+            },
+            // onWebSocketError: (evt: Event) => {
+            //     this.stompDisconnect();
+            //     window.location.pathname = "/";
+            // }
+        });
+
+        this.stompClient.activate();
+    };
+
+    stompDisconnect() {
+        this.stompClient.deactivate()
+    }
 
 }
