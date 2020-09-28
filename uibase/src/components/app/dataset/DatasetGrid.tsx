@@ -20,7 +20,13 @@ import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import './../../../styles/GridEdit.css';
-import {ColumnResizedEvent, GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
+import {
+    ColumnResizedEvent,
+    DisplayedColumnsChangedEvent,
+    GridOptions,
+    GridReadyEvent,
+    ValueGetterParams
+} from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
 
@@ -116,7 +122,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 return node.data.isVisible__ !== undefined ? node.data.isVisible__ : true
             };
             this.gridOptions.api!.onFilterChanged();
-            this.gridOptions.onColumnResized = this.handleResize
+            this.gridOptions.onColumnResized = this.handleResize;
+            this.gridOptions.onDisplayedColumnsChanged = this.handleResize;
+            this.gridOptions.onVirtualColumnsChanged = this.handleResize;
         }
     };
 
@@ -202,9 +210,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
         if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)
             && !this.props.isEditMode) {
-            this.setState({columnDefs: this.props.columnDefs}, ()=>{
-                this.handleResize(undefined)
-            })
+            this.setState({columnDefs: this.props.columnDefs})
         }
         if (prevProps.t !== this.props.t) {
             this.setState({
@@ -654,7 +660,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.grid.current.api.redrawRows()
     };
 
-    handleResize = (event: ColumnResizedEvent|undefined) => {
+    handleResize = (event: DisplayedColumnsChangedEvent|ColumnResizedEvent|undefined) => {
 
         const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;

@@ -100,10 +100,10 @@ export class Login extends React.Component<any, State> {
                         </Row>
 
                         <Row>
-                            <div className={"authorizing"}>Авторизация</div>
+                            <div className={"authorizing"}>{t('authorization')}</div>
                         </Row>
                         <Row className={"Login"}>
-                                Логин
+                                {t('login')}
                         </Row>
                         <div className={"inputLogin"}>
                             <NeoInput
@@ -117,7 +117,7 @@ export class Login extends React.Component<any, State> {
                             />
                             </div>
                         <Row className={"Password"}>
-                                Пароль
+                                {t('password')}
                         </Row>
                         <div className={"inputPassword"}>
                             <NeoInput

@@ -367,5 +367,13 @@
         "select data": "Select data",
         "metadata name": "Name",
         "metadata type": "Type",
-        "metadata uri": "URI"
+        "metadata uri": "URI",
+
+        "authorization": "Authorization",
+        "fullscreen": "Fullscreen",
+
+        "add event": "Add event",
+        "calendar": "Calendar",
+        "list": "List",
+        "system notes": "System notes"
 }

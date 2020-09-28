@@ -368,7 +368,15 @@
         "select data": "Добавление данных",
         "metadata name": "Наименование",
         "metadata type": "Тип данных",
-        "metadata uri": "URI"
+        "metadata uri": "URI",
+
+        "authorization": "Авторизация",
+        "fullscreen": "Полный экран",
+
+        "add event": "Добавить событие",
+        "calendar": "Календарь",
+        "list": "Список",
+        "system notes": "Системные заметки"
 
 }
 
