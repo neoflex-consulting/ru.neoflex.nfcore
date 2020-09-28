@@ -348,7 +348,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         id={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
-                        <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
+                        <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
                     </NeoButton>
                 </Form.Item>
             </NeoCol>
@@ -462,7 +462,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Фильтры по умолчанию</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Заливка по умолчанию</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
@@ -504,7 +504,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                         id={'createNewRowButton'}
                         onClick={this.createNewRow}
                     >
-                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
                         <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
                     </NeoButton>
                 </Form.Item>

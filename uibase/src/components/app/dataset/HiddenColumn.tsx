@@ -7,7 +7,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoSwitch} from "neo-design/lib";
 
 const { Paragraph } = Typography;
 
@@ -18,6 +18,7 @@ interface Props {
     saveChanges?: (newParam: any, paramName: string) => void;
     isVisible?: boolean;
     componentType?: paramType;
+    handleDrawerVisability?:any;
 }
 
 interface State {
@@ -73,9 +74,15 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
+    handleOnSubmit=(e:any)=>{
+        this.handleSubmit(e);
+        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
+    }
+
     render() {
+        const {t} = this.props
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
                 <Form.Item>
                     {
                         <SortableList items={this.state.parametersArray!
@@ -94,6 +101,24 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
                                       helperClass="SortableHelper"/>
                     }
                 </Form.Item>
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                    <NeoButton
+                        id={'runQueryButton'}
+                        title={t('apply')}
+                        style={{width: '144px'}}
+                        onClick={this.handleOnSubmit}>
+                        {t('apply')}
+                    </NeoButton>
+                </div>
             </Form>
         )
     }
