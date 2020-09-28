@@ -230,7 +230,6 @@ class Checkbox extends ViewElement, GridComponent, ValueItem {
 }
 
 class Button extends ViewElement, GridComponent {
-    refers ButtonStyle buttonStyle
     String label
 }
 
@@ -269,10 +268,6 @@ class TypographyStyle extends Style {
     String color
     String backgroundColor
     refers GradientStyle gradientStyle
-}
-
-class ButtonStyle extends Style {
-    contains Button button
 }
 
 /* Trees */
