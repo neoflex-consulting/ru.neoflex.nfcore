@@ -589,10 +589,10 @@ export class API implements IErrorHandler {
             debug: (str) => {
                 console.log(new Date(), str);
             },
-            onWebSocketError: (evt: Event) => {
-                this.stompDisconnect();
-                window.location.pathname = "/";
-            }
+            // onWebSocketError: (evt: Event) => {
+            //     this.stompDisconnect();
+            //     window.location.pathname = "/";
+            // }
         });
 
         this.stompClient.activate();
