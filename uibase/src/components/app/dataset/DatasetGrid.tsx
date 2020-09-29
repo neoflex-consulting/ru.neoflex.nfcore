@@ -144,15 +144,21 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getDocxData() : docxExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push(elem.get("headerName"))
+            if (!elem.get('hide')) {
+                header.push(elem.get("headerName"))
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
         tableData.push(header);
         for (const elem of this.state.rowData) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
@@ -165,14 +171,20 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getExcelData() : excelExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push({name: elem.get("headerName"), filterButton: true})
+            if (!elem.get('hide')) {
+                header.push({name: elem.get("headerName"), filterButton: true})
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
         for (const elem of this.state.rowData) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
