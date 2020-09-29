@@ -58,6 +58,7 @@ interface Props {
     height?: number;
     width?: number;
     highlightClassFunction?: ()=>{};
+    valueFormatter?: any;
 }
 
 function isFirstColumn (params:ValueGetterParams) {
@@ -153,10 +154,19 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
         let tableData = [];
         tableData.push(header);
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                if (visible.includes(prop)) {
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
                     dataRow.push(elem[prop])
                 }
             }
@@ -179,10 +189,19 @@ class DatasetGrid extends React.Component<Props & any, any> {
             }
         }
         let tableData = [];
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                if (visible.includes(prop)) {
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
                     dataRow.push(elem[prop])
                 }
             }

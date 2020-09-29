@@ -725,7 +725,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
+        const found = this.state.columnDefs.find(c=> params.colDef.field === c.get('field'));
         let mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
@@ -1736,6 +1736,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                         return ""
                     }}
+                    valueFormatter={this.valueFormatter}
                     {...this.props}
                 />
                 <div id="filterButton">
