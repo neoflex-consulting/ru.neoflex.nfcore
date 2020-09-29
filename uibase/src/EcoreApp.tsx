@@ -834,6 +834,9 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        API.instance().onServerDown = ()=> {
+            this.setState({principal: undefined})
+        };
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
         if (!this.state.queryParameterPattern) this.getEobjectByClass("dataset","QueryParameter", "queryParameterPattern");
@@ -850,24 +853,12 @@ class EcoreApp extends React.Component<any, State> {
                 if (error.status === 401) {
                     _this.setState({principal: undefined});
                 }
-                let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
-                    Close All
-                </Button>);
-                let key = error.error + error.status + error.message;
-                    notification.error({
-                        message: "Error: " + error.status + " (" + error.error + ")",
-                        btn,
-                        duration: _this.state.notifierDuration,
-                        description: error.message,
-                        key,
-                        style: {
-                            width: 450,
-                            marginLeft: -52,
-                            marginTop: 16,
-                            wordWrap: "break-word",
-                            fontWeight: 350
-                        },
-                    })
+                if (error.status === 504 || error.error === "Unknown error") {
+                    _this.notification("Уведомление", "Сервер недоступен","info")
+                }
+                else {
+                    _this.notification("Error: " + error.status + " (" + error.error + ")", error.message!,"error")
+                }
             }
         } as IErrorHandler;
         API.instance().addErrorHandler(errorHandler);
