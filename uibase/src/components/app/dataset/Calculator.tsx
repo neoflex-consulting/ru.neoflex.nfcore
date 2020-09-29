@@ -291,6 +291,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                 });
                 this.setState({parametersArray});
                 this.props.onChangeParameters!(parametersArray!, this.props.componentType)
+                this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
             }
         });
     };
@@ -303,11 +304,6 @@ class Calculator extends DrawerParameterComponent<Props, State> {
             [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!
         });
     };
-
-    handleOnSubmit=(e:any)=>{
-        this.handleSubmit(e);
-        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-    }
 
     render() {
     return (
@@ -470,7 +466,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                 title={this.t("run query")}
                                 style={{width: '127px'}}
                                 id={'runQueryButton'}
-                                onClick={this.handleOnSubmit}
+                                onClick={this.handleSubmit}
                             >
                             {this.props.t('apply')}
                         </NeoButton>
