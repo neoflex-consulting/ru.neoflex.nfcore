@@ -1,16 +1,15 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select} from 'antd';
+import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     distance?: number;
@@ -21,6 +20,7 @@ interface Props {
     isVisible?: boolean;
     allAggregates?: Array<EObject>;
     componentType?: paramType;
+    handleDrawerVisability?: any;
 }
 
 interface State {
@@ -87,14 +87,23 @@ function isDublicatee(parametersArray :any, index: number) : boolean{
 }
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableTotalItem">
-        <Row gutter={[8, 0]}>
-            <Form>
-            <Col span={1}>
+    return <div className="SortableItem">
+        <NeoRow style={{height:'100%'}}>
+            <NeoCol span={1}>
                 {value.index}
-            </Col>
-            <Col span={10}>
-                <Form.Item style={{ display: 'inline-block' }}>
+            </NeoCol>
+            <NeoCol  span={2}>
+                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+                    <NeoSwitch
+                        defaultChecked={value.enable !== undefined ? value.enable : true}
+                        onChange={(e: any) => {
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                            value.handleChange(event)
+                        }}/>
+                </Form.Item>
+            </NeoCol>
+            <NeoCol span={10}>
+                <Form.Item style={{ margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
                             initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
@@ -115,10 +124,11 @@ const SortableItem = SortableElement(({value}: any) => {
                                 message: value.t('duplicateRow'),
                             }]
                         })(
-                        <Select
+                        <NeoSelect
+                            width={'208px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ width: '239px', marginRight: '10px', marginLeft: '10px' }}
+                            style={{ marginRight: '10px'}}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -129,21 +139,21 @@ const SortableItem = SortableElement(({value}: any) => {
                             {
                                 value.columnDefs!
                                     .map((c: any) =>
-                                        <Select.Option
+                                        <option
                                             key={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                             value={JSON.stringify({index: value.index, columnName: 'datasetColumn', value: c.get('field')})}
                                         >
                                             {c.get('headerName')}
-                                        </Select.Option>)
+                                        </option>)
 
                             }
-                        </Select>
+                        </NeoSelect>
                     )}
                 </Form.Item>
-            </Col>
-            <Col span={9}>
+            </NeoCol>
+            <NeoCol span={10}>
                 {
-                    <Form.Item style={{display: 'inline-block'}}>
+                    <Form.Item style={{margin: 'auto'}}>
                         {value.getFieldDecorator(`${value.idOperation}`,
                             {
                                 initialValue: value.t(value.operation) || undefined,
@@ -166,10 +176,11 @@ const SortableItem = SortableElement(({value}: any) => {
                             message: value.t('wrongOperation'),
                         }]
                             })(
-                            <Select
+                            <NeoSelect
+                                width={'208px'}
                                 getPopupContainer={() => document.getElementById('aggregationButton') as HTMLElement}
                                 placeholder={value.t('operation')}
-                                style={{width: '219px', marginRight: '10px'}}
+                                style={{ marginRight: '10px'}}
                                 allowClear={true}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({
@@ -184,7 +195,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     value.allAggregates!
                                         .map((o: any) =>
 
-                                            <Select.Option
+                                            <option
                                                 key={JSON.stringify({
                                                     index: value.index,
                                                     columnName: 'operation',
@@ -197,13 +208,13 @@ const SortableItem = SortableElement(({value}: any) => {
                                                 })}
                                             >
                                                 {value.t(o.get('name'))}
-                                            </Select.Option>)
+                                            </option>)
                                     :
                                     getColumnType(value.columnDefs, value.parametersArray[value.index-1].datasetColumn)=== "String" ?
                                     value.allAggregates!.filter((a: any) => a.get('name') === "Count" || a.get('name') === "CountDistinct")
                                         .map((o: any) =>
 
-                                            <Select.Option
+                                            <option
                                                 key={JSON.stringify({
                                                     index: value.index,
                                                     columnName: 'operation',
@@ -216,13 +227,13 @@ const SortableItem = SortableElement(({value}: any) => {
                                                 })}
                                             >
                                                 {value.t(o.get('name'))}
-                                            </Select.Option>)
+                                            </option>)
                                         :
 
                                         value.allAggregates!.filter((a: any) => a.get('name') === "Count" || a.get('name') === "CountDistinct" || a.get('name') === "Maximum" || a.get('name') === "Minimum")
                                             .map((o: any) =>
 
-                                                <Select.Option
+                                                <option
                                                     key={JSON.stringify({
                                                         index: value.index,
                                                         columnName: 'operation',
@@ -235,40 +246,28 @@ const SortableItem = SortableElement(({value}: any) => {
                                                     })}
                                                 >
                                                     {value.t(o.get('name'))}
-                                                </Select.Option>)
+                                                </option>)
 
 
                                 }
-                            </Select>
+                            </NeoSelect>
                         )}
                     </Form.Item>
-
                 }
-            </Col>
-            <Col  span={2}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    <NeoSwitch
-                        defaultChecked={value.enable !== undefined ? value.enable : true}
-                        onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                            value.handleChange(event)
-                        }}/>
-                </Form.Item>
-            </Col>
-            <Col span={2}>
-                <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
-                    <Button
+            </NeoCol>
+            <NeoCol span={1}>
+                <Form.Item style={{ marginTop: '35px' }}>
+                    <NeoButton
+                        type={'link'}
                         title={value.t("delete row")}
-                        key={'deleteRowButton'}
-                        value={'deleteRowButton'}
+                        id={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
-                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                    </Button>
+                        <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
+                    </NeoButton>
                 </Form.Item>
-            </Col>
-                </Form>
-        </Row>
+            </NeoCol>
+        </NeoRow>
     </div>
 });
 
@@ -284,43 +283,27 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
+    handleOnSubmit=(e:any)=>{
+        this.handleSubmit(e);
+        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
+    }
+
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
-                <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
-                    <Col span={12}>
-                        <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('total')}</div>
-                    </Col>
-                    <Col span={12} style={{textAlign: "right"}}>
-                        <Button
-                            title={t("reset")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'resetButton'}
-                            value={'resetButton'}
-                            onClick={this.reset}
-                        >
-                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={t("add row")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'createNewRowButton'}
-                            value={'createNewRowButton'}
-                            onClick={this.createNewRow}
-                        >
-                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={t("run query")}
-                            style={{width: '40px'}}
-                            key={'runQueryButton'}
-                            value={'runQueryButton'}
-                            htmlType="submit"
-                        >
-                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-                        </Button>
-                    </Col>
+            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
+                <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('total')}</div>
+                    </NeoCol>
+                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                        <NeoButton type={'link'}
+                                   title={t("reset")}
+                                   id={'resetButton'}
+                                   onClick={this.reset}>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Фильтры по умолчанию</span>
+                        </NeoButton>
+                    </NeoCol>
                 </Form.Item>
                 <Form.Item>
                     {
@@ -341,6 +324,24 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                    <NeoButton
+                        id={'runQueryButton'}
+                        title={t("run query")}
+                        style={{width: '144px'}}
+                        onClick={this.handleOnSubmit}>
+                        {t('apply')}
+                    </NeoButton>
+                </div>
             </Form>
         )
     }

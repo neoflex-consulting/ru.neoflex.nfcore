@@ -333,7 +333,6 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                     eObj.gridRef = ref;
                                     this.gridRef = ref;
                                 }}
-                                minWidth={1328}
                                 height={460}
                                 rowData = {eObj.children}
                                 columnDefs = {this.getColDefs()}

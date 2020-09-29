@@ -1,16 +1,15 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Button, Row, Col, Form, Select} from 'antd';
+import {Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo, faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     parametersArray?: Array<IServerQueryParam>;
@@ -20,6 +19,7 @@ interface Props {
     isVisible?: boolean;
     allAggregates?: Array<EObject>;
     componentType?: paramType;
+    handleDrawerVisability?:any;
 }
 
 interface State {
@@ -39,21 +39,31 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
-    return <div className="SortableTotalItem">
-        <Row gutter={[8, 0]}>
-            <Col span={1}>
+    return <div className="SortableItem">
+        <NeoRow style={{height:'100%', marginBottom:'0'}}>
+            <NeoCol span={1}>
                 {value.index}
-            </Col>
-            <Col span={19}>
-                <Form.Item style={{ display: 'inline-block' }}>
+            </NeoCol>
+            <NeoCol span={2}>
+                <Form.Item style={{ margin: 'auto' }}>
+                    <NeoSwitch
+                        defaultChecked={value.enable !== undefined ? value.enable : true}
+                        onChange={(e: any) => {
+                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                            value.handleChange(event)
+                        }}/>
+                </Form.Item>
+            </NeoCol>
+            <NeoCol span={20}>
+                <Form.Item style={{ margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
                             initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined
                         })(
-                        <Select
+                        <NeoSelect
+                            width={'525px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ width: '475px', marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -72,33 +82,23 @@ const SortableItem = SortableElement(({value}: any) => {
                                             {c.get('headerName')}
                                         </Select.Option>)
                             }
-                        </Select>
+                        </NeoSelect>
                     )}
                 </Form.Item>
-            </Col>
-            <Col span={2}>
-                <Form.Item style={{ display: 'inline-block' }}>
-                    <NeoSwitch
-                        defaultChecked={value.enable !== undefined ? value.enable : true}
-                        onChange={(e: any) => {
-                            const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                            value.handleChange(event)
-                        }}/>
-                </Form.Item>
-            </Col>
-            <Col span={2}>
-                <Form.Item style={{ display: 'inline-block' , marginLeft: '6px'}}>
-                    <Button
+            </NeoCol>
+            <NeoCol span={1}>
+                <Form.Item style={{ marginTop: '35px' }}>
+                    <NeoButton
+                        type={'link'}
                         title={value.t("delete row")}
-                        key={'deleteRowButton'}
-                        value={'deleteRowButton'}
+                        id={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
-                        <FontAwesomeIcon icon={faTrash} size='xs' color="#7b7979"/>
-                    </Button>
+                        <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
+                    </NeoButton>
                 </Form.Item>
-            </Col>
-        </Row>
+            </NeoCol>
+        </NeoRow>
     </div>
 });
 
@@ -114,32 +114,29 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
+    handleOnSubmit=(e:any)=>{
+        this.handleSubmit(e);
+        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
+    }
+
     render() {
+        const {t} = this.props;
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
-                <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
-                    <Col span={24} style={{textAlign: "left"}}>
-                        <Button
-                            title={this.t("reset")}
-                            style={{width: '40px', marginRight: '10px'}}
-                            key={'resetButton'}
-                            value={'resetButton'}
-                            onClick={this.reset}
-                        >
-                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
-                        </Button>
-                        <Button
-                            title={this.t("run query")}
-                            style={{width: '40px'}}
-                            key={'runQueryButton'}
-                            value={'runQueryButton'}
-                            htmlType="submit"
-                        >
-                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
-                        </Button>
-                    </Col>
+            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
+                <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите столбцы для группировки</div>
+                    </NeoCol>
+                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                        <NeoButton type={'link'}
+                                   title={t("reset")}
+                                   id={'resetButton'}
+                                   onClick={this.reset}>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>По умолчанию</span>
+                        </NeoButton>
+                    </NeoCol>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item style={{marginBottom:'0'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((serverGroupByColumn: any) => (
@@ -157,15 +154,35 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
-                <Button
-                    title="add row"
-                    style={{width: '40px', marginRight: '10px'}}
-                    key={'createNewRowButton'}
-                    value={'createNewRowButton'}
-                    onClick={this.createNewRow}
-                >
-                    <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
-                </Button>
+                <Form.Item>
+                    <NeoButton
+                        type={'link'}
+                        title={t("add row")}
+                        id={'createNewRowButton'}
+                        onClick={this.createNewRow}
+                    >
+                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
+                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
+                    </NeoButton>
+                </Form.Item>
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                    <NeoButton
+                        id={'runQueryButton'}
+                        title={t('apply')}
+                        style={{width: '144px'}}
+                        onClick={this.handleOnSubmit}>
+                        {t('apply')}
+                    </NeoButton>
+                </div>
             </Form>
         )
     }

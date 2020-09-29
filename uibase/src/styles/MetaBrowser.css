@@ -18,6 +18,7 @@
     font-family: 'Roboto', sans-serif;
     word-wrap: unset;
     white-space: nowrap;
+    text-transform: capitalize;
 }
 /*regions*/
 #meta-browser {
@@ -26,13 +27,11 @@
 
 .meta-browser-tabs-region {
     position: relative;
-    width: 1328px;
     height: 810px;
 }
 
 .meta-browser-center-element {
-    margin-left: auto !important;
-    margin-right: auto !important;
+    padding: 0 56px;
 }
 
 /*text*/
@@ -90,8 +89,7 @@
 
 .meta-browser-input {
     position: absolute;
-    right: 0;
-    /*right: 5vw;*/
+    right: 56px;
     top:  105px;
     z-index: 10000;
 }

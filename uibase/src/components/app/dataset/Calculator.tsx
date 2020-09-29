@@ -29,6 +29,7 @@ interface Props {
     onChangeColumnDefs?: (columnDefs: any, rowData: any, datasetComponentName: string) => void;
     defaultColumnDefs?: Array<any>;
     formatMasks?: {key:string,value:string}[]
+    handleDrawerVisability?: any;
 }
 
 interface State {
@@ -303,6 +304,11 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         });
     };
 
+    handleOnSubmit=(e:any)=>{
+        this.handleSubmit(e);
+        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
+    }
+
     render() {
     return (
         <div id={"selectsInCalculator"}>
@@ -464,7 +470,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                 title={this.t("run query")}
                                 style={{width: '127px'}}
                                 id={'runQueryButton'}
-                                onClick={this.handleSubmit}
+                                onClick={this.handleOnSubmit}
                             >
                             {this.props.t('apply')}
                         </NeoButton>

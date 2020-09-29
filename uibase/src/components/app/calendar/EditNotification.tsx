@@ -70,7 +70,7 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
     save(editableNotification: any): void {
         this.setState({spinnerVisible: true});
         this.props.onEditNotification(editableNotification);
-        this.props.handleEditMenu(editableNotification)
+        this.props.handleEditMenu(editableNotification);
     }
 
     render() {

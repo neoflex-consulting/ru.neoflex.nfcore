@@ -725,7 +725,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
+        const found = this.state.columnDefs.find(c=> params.colDef.field === c.get('field'));
         let mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
@@ -1535,7 +1535,11 @@ class DatasetView extends React.Component<any, State> {
                     onClick={() => {
                         //Убрал т.к. есть подсветки
                         /*this.gridRef.removeRowsFromGrid();*/
-                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                        if (this.gridRef.whichEdited().length === 0) {
+                            this.onApplyEditChanges(this.gridRef.getBuffer());
+                        } else {
+                            this.gridRef.stopEditing()
+                        }
                     }}
                 >
                     <NeoIcon icon={"mark"} size={'m'}/>
@@ -1732,6 +1736,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                         return ""
                     }}
+                    valueFormatter={this.valueFormatter}
                     {...this.props}
                 />
                 <div id="filterButton">
@@ -1756,6 +1761,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                                 componentType={paramType.filter}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             null
@@ -1783,7 +1789,7 @@ class DatasetView extends React.Component<any, State> {
                 <NeoDrawer
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     title={t('aggregations')}
-                    width={'720px'}
+                    width={'711px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
@@ -1800,6 +1806,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                                 componentType={paramType.aggregate}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <ServerAggregate/>
@@ -1827,6 +1834,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.groupByColumn}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <ServerGroupByColumn/>
@@ -1843,6 +1851,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.group}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <ServerGroupBy/>
@@ -1870,6 +1879,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.sortsMenuVisible}
                                 componentType={paramType.sort}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <ServerSort/>
@@ -1896,6 +1906,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.hiddenColumnsMenuVisible}
                                     componentType={paramType.hiddenColumns}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <HiddenColumn/>
@@ -1925,6 +1936,7 @@ class DatasetView extends React.Component<any, State> {
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
                                 defaultColumnDefs={this.state.defaultColumnDefs}
                                 formatMasks={this.state.formatMasks}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <Calculator/>
