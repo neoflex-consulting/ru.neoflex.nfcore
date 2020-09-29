@@ -236,7 +236,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
 
     render() {
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>

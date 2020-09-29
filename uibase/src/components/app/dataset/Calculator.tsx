@@ -312,8 +312,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form >
-                <Form.Item style={{marginBottom:'0px', lineHeight:'19px'}}>
+            <Form style={{ marginTop: '15px' }}>
+                <Form.Item style={{marginTop: '-28px', marginBottom:'0px', lineHeight:'19px'}}>
                         <div style={{ display: "inherit", fontSize: '16px', fontWeight: 500, color: '#333333'}}>
                             {this.t('calculatableExpressions')}
                         </div>
