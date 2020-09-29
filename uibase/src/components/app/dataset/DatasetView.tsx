@@ -1761,6 +1761,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                                 componentType={paramType.filter}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             null
@@ -1788,7 +1789,7 @@ class DatasetView extends React.Component<any, State> {
                 <NeoDrawer
                     getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                     title={t('aggregations')}
-                    width={'720px'}
+                    width={'711px'}
                     visible={this.state.aggregatesMenuVisible}
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
@@ -1805,6 +1806,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.aggregatesMenuVisible}
                                 componentType={paramType.aggregate}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <ServerAggregate/>
@@ -1832,6 +1834,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.groupByColumn}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <ServerGroupByColumn/>
@@ -1848,6 +1851,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.group}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <ServerGroupBy/>
@@ -1875,6 +1879,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.sortsMenuVisible}
                                 componentType={paramType.sort}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <ServerSort/>
@@ -1901,6 +1906,7 @@ class DatasetView extends React.Component<any, State> {
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.hiddenColumnsMenuVisible}
                                     componentType={paramType.hiddenColumns}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
                                 />
                                 :
                                 <HiddenColumn/>
@@ -1930,6 +1936,7 @@ class DatasetView extends React.Component<any, State> {
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
                                 defaultColumnDefs={this.state.defaultColumnDefs}
                                 formatMasks={this.state.formatMasks}
+                                handleDrawerVisability={this.handleDrawerVisibility}
                             />
                             :
                             <Calculator/>

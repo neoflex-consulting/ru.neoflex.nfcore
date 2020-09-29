@@ -19,6 +19,7 @@ interface Props {
     isVisible?: boolean;
     allOperations?: Array<EObject>;
     componentType?: paramType;
+    handleDrawerVisability?: any;
 }
 
 interface State {
@@ -165,7 +166,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         id={'deleteRowButton'}
                         onClick={(e: any) => {value.deleteRow({index: value.index})}}
                     >
-                        <NeoIcon icon={'rubbish'} color="#B3B3B3"/>
+                        <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
                     </NeoButton>
                 </Form.Item>
             </NeoCol>
@@ -185,10 +186,15 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
+    handleOnSubmit=(e:any)=>{
+        this.handleSubmit(e);
+        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
+    }
+
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('sysfilters')}</div>
@@ -229,7 +235,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                         id={'createNewRowButton'}
                         onClick={this.createNewRow}
                     >
-                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
                         <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
                     </NeoButton>
                 </Form.Item>
@@ -247,7 +253,7 @@ class ServerFilter extends DrawerParameterComponent<Props, State> {
                             id={'runQueryButton'}
                             title={t('apply')}
                             style={{width: '144px'}}
-                            onClick={this.handleSubmit}>
+                            onClick={this.handleOnSubmit}>
                             {t('apply')}
                         </NeoButton>
                     </div>
