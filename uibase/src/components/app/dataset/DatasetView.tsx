@@ -1535,7 +1535,11 @@ class DatasetView extends React.Component<any, State> {
                     onClick={() => {
                         //Убрал т.к. есть подсветки
                         /*this.gridRef.removeRowsFromGrid();*/
-                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                        if (this.gridRef.whichEdited().length === 0) {
+                            this.onApplyEditChanges(this.gridRef.getBuffer());
+                        } else {
+                            this.gridRef.stopEditing()
+                        }
                     }}
                 >
                     <NeoIcon icon={"mark"} size={'m'}/>
