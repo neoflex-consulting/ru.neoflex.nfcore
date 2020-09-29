@@ -376,7 +376,8 @@
         "add event": "Добавить событие",
         "calendar": "Календарь",
         "list": "Список",
-        "system notes": "Системные заметки"
+        "system notes": "Системные заметки",
+        "component name is empty": "Название профиля не задано"
 
 }
 
