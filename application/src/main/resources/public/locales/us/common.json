@@ -375,5 +375,6 @@
         "add event": "Add event",
         "calendar": "Calendar",
         "list": "List",
-        "system notes": "System notes"
+        "system notes": "System notes",
+        "component name is empty": "Component name is empty"
 }
