@@ -58,6 +58,7 @@ interface Props {
     height?: number;
     width?: number;
     highlightClassFunction?: ()=>{};
+    valueFormatter?: any;
 }
 
 function isFirstColumn (params:ValueGetterParams) {
@@ -144,15 +145,30 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getDocxData() : docxExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push(elem.get("headerName"))
+            if (!elem.get('hide')) {
+                header.push(elem.get("headerName"))
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
         tableData.push(header);
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
@@ -165,14 +181,29 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getExcelData() : excelExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push({name: elem.get("headerName"), filterButton: true})
+            if (!elem.get('hide')) {
+                header.push({name: elem.get("headerName"), filterButton: true})
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
@@ -683,8 +714,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     style={{
-                    height: this.props.height ? this.props.height : 750,
-                    width: this.props.width ? this.props.width : "99,5%",
+                        height: this.props.height ? this.props.height : 535,
+                        width: this.props.width ? this.props.width : "99,5%",
                     minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>

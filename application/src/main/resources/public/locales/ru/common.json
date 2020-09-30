@@ -6,7 +6,7 @@
         "addresources": "Добавить ресурсы",
         "aggregations": "Рассчитать итоги",
         "apply": "Применить",
-        "appname": "Neooflex Reporting",
+        "appname": "Neoflex Reporting",
         "axis X column name": "Ось x",
         "axis Y column name": "Ось y",
         "axis X label": "Подпись оси x",
@@ -376,7 +376,8 @@
         "add event": "Добавить событие",
         "calendar": "Календарь",
         "list": "Список",
-        "system notes": "Системные заметки"
+        "system notes": "Системные заметки",
+        "component name is empty": "Название профиля не задано"
 
 }
 

@@ -364,6 +364,7 @@
         "add event": "添加事件",
         "calendar": "日曆",
         "list": "列表",
-        "system notes": "系統說明"
+        "system notes": "系統說明",
+        "component name is empty": "配置文件名稱未設置"
 
 }

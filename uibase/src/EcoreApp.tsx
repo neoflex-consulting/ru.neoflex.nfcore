@@ -64,6 +64,7 @@ class EcoreApp extends React.Component<any, State> {
         const context: IMainContext = {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
+            getURL: this.getURL,
             runQuery: this.runQuery,
             runQueryDataset: this.runQueryDataset,
             executeDMLOperation: this.executeDMLOperation,
@@ -434,6 +435,91 @@ class EcoreApp extends React.Component<any, State> {
         }
     };
 
+    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
+        if (this.isDatasetComponentsBufferEmpty()) {
+            let path: any[] = [];
+            let urlElement: ConfigUrlElement = {
+                appModule: appModuleName,
+                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                params: params,
+                useParentReferenceTree: useParentReferenceTree || false
+            };
+            let appModuleNameThis = appModuleName || this.state.appModuleName;
+            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
+                path.push(urlElement)
+            }
+            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+                this.state.pathFull.forEach( (p:any) => {
+                    urlElement = p;
+                    if (p.appModule === appModuleNameThis) {
+                        urlElement.tree = treeValue.split('/');
+                        urlElement.params = params;
+                        path.push(urlElement)
+                    }
+                    else {
+                        path.push(urlElement)
+                    }
+                });
+            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
+                this.state.pathFull.forEach( (p:any) => {
+                    urlElement = p;
+                    if (p.appModule === appModuleNameThis) {
+                        urlElement.params = params;
+                        path.push(urlElement)
+                    }
+                    else {
+                        path.push(urlElement)
+                    }
+                });
+            } else if (appModuleName !== this.state.appModuleName) {
+                let splitPathFull: any = [];
+                /*this.state.pathFull.forEach((p: any, index: any) => {
+                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
+                });*/
+                if (splitPathFull.length === 0) {
+                    this.state.pathFull.forEach( (p:any, index: any) => {
+                        path.push(p);
+                    });
+                    urlElement.appModule = appModuleName;
+                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                    urlElement.params = params ? params : [];
+                    this.state.context.globalValues?.forEach(obj => {
+                        urlElement.params = urlElement.params!.concat(obj)
+                    });
+
+                    /*const nextPath = path[path.length - 1];
+                    if (
+                        nextPath &&
+                        nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
+                        path.length !== 1
+                    ) {
+                        path.pop()
+                    }*/
+                    //Ограничить переходы
+                    if (path.length >= 50) {
+                        path.shift()
+                    }
+                    path.push(urlElement)
+                } else {
+                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
+                }
+            } else if (appModuleName === this.state.appModuleName) {
+                path = this.state.pathFull
+            }
+            return `/app/${
+                btoa(
+                    encodeURIComponent(
+                        JSON.stringify(
+                            path
+                        )
+                    )
+                )
+            }`
+        }
+    };
+
+
+
     logOut = () => {
         API.instance().logout().then(() => {
             this.setState({principal : undefined, getUserProfile: true});
@@ -533,18 +619,58 @@ class EcoreApp extends React.Component<any, State> {
             )}
         </Menu>;
 
+        const devMenu = (<Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
+                    <Link to={`/developer/metadata`}>
+
+                                                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('metadata')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'data'}>
+                    <Link to={`/developer/data`}>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/data') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('data')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'query'}>
+                    <Link to={`/developer/query`}>
+                                                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('query')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'tools'}>
+                    <Link to={`/developer/tools`}>
+
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('tools')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'masterdata'}>
+                    <Link to={`/developer/masterdata`}>
+
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('masterdata')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'filesystem'}>
+                    <Link to={`/developer/filesystem`}>
+
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('filesystem')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
+            </Menu>
+
+        )
+
+
         return (
             <Layout style={{height: '90vh', marginTop: '80px'}}>
                 <FetchSpinner/>
                 <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>
-                        <NeoCol span={5} style={{height: 'inherit'}}>
+                        <NeoCol className={'headerAppNameSpanLarge'} span={5} style={{height: 'inherit'}}>
                             <div className={window.location.pathname.includes('developer' +
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px' }}/>
-                                <span style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,2)}</span>{t('appname').substr(3)}
+                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px'}}/>
+                                <span  className={'nameOfAppFirstWord'} style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,8)}</span><span className={'nameOfAppSecondWord'}>{t('appname').substr(8)}</span>
                             </div>
                         </NeoCol>
                         <NeoCol span={14}
@@ -565,9 +691,12 @@ class EcoreApp extends React.Component<any, State> {
                             {
 
                                         this.props.location.pathname.includes('/developer/') &&
+                                            <div>
 
-                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center", paddingLeft: "70px" }}>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px" }} key={'metadata'}>
+                                            <div>
+                                    <div className="headerDev-menu">
+                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
                                                     <span>
                                                         {this.props.location.pathname.includes('/developer/metadata') ?
@@ -578,7 +707,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'data'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'data'}>
                                                 <Link to={`/developer/data`}>
                                                     <span>
                                                         {this.props.location.pathname.includes('/developer/data') ?
@@ -589,7 +718,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'query'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'query'}>
                                                 <Link to={`/developer/query`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/query') ?
@@ -600,7 +729,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'tools'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
                                                 <Link to={`/developer/tools`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/tools') ?
@@ -611,7 +740,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'masterdata'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
                                                 <Link to={`/developer/masterdata`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/masterdata') ?
@@ -622,7 +751,7 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "28px", paddingBottom: "12px"   }} key={'filesystem'}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
                                                 <Link to={`/developer/filesystem`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/filesystem') ?
@@ -634,6 +763,18 @@ class EcoreApp extends React.Component<any, State> {
                                                 </Link>
                                             </Menu.Item>
                                         </Menu>
+                                    </div>
+
+
+                                            </div>
+                                 <div className={'devMenuSmallWidth'}>
+                                    <Dropdown overlay={devMenu} placement="bottomCenter">
+                                        <div style={{float: "left"}}>
+                                            <NeoIcon color={'white'} icon={"table"} size={'m'}/>
+                                        </div>
+                                    </Dropdown>
+                                </div>
+                                </div>
                                     }
 
                         </NeoCol>
@@ -642,7 +783,7 @@ class EcoreApp extends React.Component<any, State> {
                                     height: 'inherit',
                                  alignItems: 'center'
                              }}>
-                            <div
+                            <div className={'headerRightSide'}
                                 style={{
                                     width: '75%',
                                     margin: 'auto 32px auto auto',
@@ -662,16 +803,18 @@ class EcoreApp extends React.Component<any, State> {
                                         <NeoButton
                                             style={{marginRight: '10px'}}
                                             type={"link"}
-                                            onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
+                                                onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
-                                            <NeoIcon icon={"play"} color={'white'} />
+                                            <a href={this.getURL(this.state.applicationNames[0], false)}>
+                                            <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
+                                            </a>
                                         </NeoButton>
                                         :
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
                                         >
                                             <Link to={`/developer/data`}>
-                                                <NeoIcon icon={'settings'} color={'white'} />
+                                                <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
                                             </Link>
                                         </NeoButton>
                                 }
@@ -680,9 +823,9 @@ class EcoreApp extends React.Component<any, State> {
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
-                                        <NeoIcon icon={'notificationOff'} color={'white'} />
+                                        <NeoIcon className={'bellButton'} icon={'notificationOff'} color={'white'} />
                                     :
-                                        <NeoIcon icon={'notification'} color={'white'} />}
+                                        <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
                             </NeoButton>
                                     <span style={{
                                         textTransform: "capitalize",
@@ -692,7 +835,7 @@ class EcoreApp extends React.Component<any, State> {
                                         marginRight:'25px',
                                         lineHeight: '2'
                                     }}>
-                                        <span>{principal.name}</span>
+                                        <span className={'NameOfUser'}>{principal.name}</span>
                                     </span>
                             <NeoButton
                                 style={{marginRight: "10px"}}
@@ -834,6 +977,9 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        API.instance().onServerDown = ()=> {
+            this.setState({principal: undefined})
+        };
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");
         if (!this.state.queryParameterPattern) this.getEobjectByClass("dataset","QueryParameter", "queryParameterPattern");
@@ -850,24 +996,12 @@ class EcoreApp extends React.Component<any, State> {
                 if (error.status === 401) {
                     _this.setState({principal: undefined});
                 }
-                let btn = (<Button type="link" size="small" onClick={() => notification.destroy()}>
-                    Close All
-                </Button>);
-                let key = error.error + error.status + error.message;
-                    notification.error({
-                        message: "Error: " + error.status + " (" + error.error + ")",
-                        btn,
-                        duration: _this.state.notifierDuration,
-                        description: error.message,
-                        key,
-                        style: {
-                            width: 450,
-                            marginLeft: -52,
-                            marginTop: 16,
-                            wordWrap: "break-word",
-                            fontWeight: 350
-                        },
-                    })
+                if (error.status === 504 || error.error === "Unknown error") {
+                    _this.notification("Уведомление", "Сервер недоступен","info")
+                }
+                else {
+                    _this.notification("Error: " + error.status + " (" + error.error + ")", error.message!,"error")
+                }
             }
         } as IErrorHandler;
         API.instance().addErrorHandler(errorHandler);

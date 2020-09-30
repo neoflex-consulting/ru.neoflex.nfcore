@@ -47,6 +47,7 @@ export class API implements IErrorHandler {
     private processes: any[];
     private processHandlers: ((processes: any[])=>void)[];
     private stompClient: Client;
+    public onServerDown: () => void;
 
     private constructor() {
         this.errorHandlers = [this];
@@ -577,29 +578,24 @@ export class API implements IErrorHandler {
         this.stompClient.configure({
             webSocketFactory: () => {
                 // eslint-disable-next-line no-restricted-globals
-                return new WebSocket('ws://' + location.host + '/socket-registry')
+                return new WebSocket('ws://' + window.location.host + '/socket-registry')
             },
             onConnect: () => {
-                console.log('onConnect');
-
                 this.stompClient.subscribe('/topic/afterSave', message => {
-                    console.log(JSON.parse(message.body));
+                    console.log('ON CONNECT: ', JSON.parse(message.body));
                 });
             },
             debug: (str) => {
-                console.log(new Date(), str);
+                console.log('DEBUG:', new Date(), str);
             },
-            // onWebSocketError: (evt: Event) => {
-            //     this.stompDisconnect();
-            //     window.location.pathname = "/";
-            // }
+            onWebSocketError: (evt: Event) => {
+                if (this.onServerDown) {
+                    this.onServerDown();
+                    this.stompClient.deactivate();
+                }
+            }
         });
-
         this.stompClient.activate();
     };
-
-    stompDisconnect() {
-        this.stompClient.deactivate()
-    }
 
 }

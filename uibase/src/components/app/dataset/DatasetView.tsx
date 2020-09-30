@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography, NeoColor} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
@@ -725,7 +725,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const found = this.state.columnDefs.find(c=>params.colDef.field === c.get('field'));
+        const found = this.state.columnDefs.find(c=> params.colDef.field === c.get('field'));
         let mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
@@ -1234,29 +1234,29 @@ class DatasetView extends React.Component<any, State> {
                         </NeoButton> : null}
                     <div className='verticalLine' />
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('calculator')}
-                                                                  style={{marginRight:'5px'}}
+                                                                  style={{marginRight:'8px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
                             <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('aggregations')}
-                                                                  style={{marginRight:'5px'}}
+                                                                  style={{marginRight:'8px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
                             <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                         <NeoButton type={'link'} title={t('diagram')}
-                                   style={{marginRight:'5px'}}
+                                   style={{marginRight:'8px'}}
                                    onClick={()=> {
                                        this.DiagramButton()
                                    }}>
                             <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('grouping')}
-                                                                  style={{marginRight:'5px'}}
+                                                                  style={{marginRight:'8px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
                             <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                     <NeoButton type={'link'} title={t('hiddencolumns')}
-                               style={{color: 'rgb(151, 151, 151)', margin: 'auto'}}
+                               style={{color: 'rgb(151, 151, 151)', marginRight:'8px'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                     >
                         <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
@@ -1350,8 +1350,8 @@ class DatasetView extends React.Component<any, State> {
 
                  <Dropdown overlay={menu} placement="bottomRight"
                            getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}>
-                     <div style={{marginRight: "5px"}}>
-                         <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "3px"}}/>
+                     <div>
+                         <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginRight: "10px", marginTop: "1px"}}/>
                      </div>
                  </Dropdown>
                 <NeoButton
@@ -1384,7 +1384,7 @@ class DatasetView extends React.Component<any, State> {
         </Menu>);
         return (
         <div className="functionalBar__header">
-            <div className='block' style={{margin: "auto 16px", display: "flex"}}>
+            <div className='block' style={{marginLeft: "17.33px", display: "flex", marginRight: "40px"}}>
                 <NeoButton
                     type={'link'}
                     title={t("back to table")}
@@ -1399,14 +1399,14 @@ class DatasetView extends React.Component<any, State> {
                     <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
                 </NeoButton>
             <div className='verticalLine' style={{marginTop: "4px"}}/>
-            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'8px', marginLeft:'8px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible);
                     }}
             >
                 <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
             </NeoButton>
-            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'8px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible);
                     }}
@@ -1535,7 +1535,11 @@ class DatasetView extends React.Component<any, State> {
                     onClick={() => {
                         //Убрал т.к. есть подсветки
                         /*this.gridRef.removeRowsFromGrid();*/
-                        this.onApplyEditChanges(this.gridRef.getBuffer());
+                        if (this.gridRef.whichEdited().length === 0) {
+                            this.onApplyEditChanges(this.gridRef.getBuffer());
+                        } else {
+                            this.gridRef.stopEditing()
+                        }
                     }}
                 >
                     <NeoIcon icon={"mark"} size={'m'}/>
@@ -1732,6 +1736,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                         return ""
                     }}
+                    valueFormatter={this.valueFormatter}
                     {...this.props}
                 />
                 <div id="filterButton">

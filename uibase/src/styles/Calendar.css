@@ -72,7 +72,7 @@
 }
 
 .col-start {
-    flex-grow: 3;
+    flex-grow: 2;
     justify-content: flex-end !important;
     text-align: end;
 }
@@ -104,8 +104,9 @@
     text-transform: capitalize;
     font-weight: 700;
     border-bottom: 1px solid var(--border-color);
-    height: 49px;
-    background-color: #EBEBEB;
+    height: 56px;
+    background-color: #E6E6E6;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
 }
 
@@ -129,6 +130,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: 2px;
 }
 
 .calendar div .body {
