@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoButton, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography, NeoColor} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoModal, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const { Option, OptGroup } = Select;
