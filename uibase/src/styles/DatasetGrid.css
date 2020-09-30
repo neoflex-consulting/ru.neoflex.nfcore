@@ -7,6 +7,10 @@
     border-color: #ffffff transparent !important;
 }
 
+#datasetGrid * .ag-react-container {
+    justify-content: inherit;
+}
+
 #datasetGrid {
     filter: drop-shadow(-2px -2px 4px rgba(0, 0, 0, 0.05));
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);

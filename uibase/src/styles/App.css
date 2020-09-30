@@ -57,6 +57,7 @@
 .app-header {
   background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
+  z-index: 100000;
 }
 
 .head-panel {
@@ -1593,3 +1594,7 @@ a.linksInMoreWord:hover{
 
 
 
+/*Notification message*/
+.ant-notification {
+  z-index: 100000 !important;
+}

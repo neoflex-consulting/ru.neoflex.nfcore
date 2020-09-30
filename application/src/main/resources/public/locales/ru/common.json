@@ -28,6 +28,7 @@
         "createdir": "Создать каталог",
         "createfile": "Создать файл",
         "upload": "Загрузить",
+        "description": "Описание",
         "download": "Выгрузить",
         "data": "Данные",
         "datatype": "Тип данных",
@@ -367,7 +368,16 @@
         "select data": "Добавление данных",
         "metadata name": "Наименование",
         "metadata type": "Тип данных",
-        "metadata uri": "URI"
+        "metadata uri": "URI",
+
+        "authorization": "Авторизация",
+        "fullscreen": "Полный экран",
+
+        "add event": "Добавить событие",
+        "calendar": "Календарь",
+        "list": "Список",
+        "system notes": "Системные заметки",
+        "component name is empty": "Название профиля не задано"
 
 }
 

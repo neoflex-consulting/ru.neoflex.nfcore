@@ -41,7 +41,13 @@ class SaveDatasetComponent extends React.Component<any, State> {
     }
 
     onClick(): void {
-        this.saveDatasetComponentOptions();
+        if (this.state.componentName !== "") {
+            this.saveDatasetComponentOptions();
+        } else {
+            this.props.context.notification(this.props.t("DatasetComponent"),
+                this.props.t("component name is empty"),
+                "error")
+        }
     }
 
     getPattern(className:string, paramName:string) {

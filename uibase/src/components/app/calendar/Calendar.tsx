@@ -857,7 +857,8 @@ class Calendar extends React.Component<any, any> {
                         </div>
 
                         <NeoButton
-                            style={{width: '24px', height: '24px', color: '#6e6e6e'}}
+                            title={t('legend')}
+                            style={{width: '24px', height: '24px', color: '#6e6e6e', marginRight: '5px'}}
                             type="link"
                             onClick={this.handleLegendMenu}>
                             <NeoIcon icon={'legend'} size={'m'} />
@@ -900,7 +901,7 @@ class Calendar extends React.Component<any, any> {
                                     key={'Системные заметки'}
                                     value={'Системные заметки'}
                                 >
-                                    Системные заметки
+                                    {t('Системные заметки')}
                                 </option>
                             </NeoSelect>
                         </div>
@@ -912,6 +913,7 @@ class Calendar extends React.Component<any, any> {
                 <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '18px', height: '40px'}}/>
 
                     <NeoButton
+                        title={t('add event')}
                         type="link"
                         onClick={this.handleCreateMenu}>
                         <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'} />
@@ -919,6 +921,7 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '16px', height: '40px'}}/>
                 <NeoButton
+                    title={t('calendar')}
                     type={this.state.calendarVisible ? 'disabled' : "link"}
                     // disabled={this.state.calendarVisible}
                     className="calendarAlt"
@@ -935,6 +938,7 @@ class Calendar extends React.Component<any, any> {
                     <NeoIcon icon={"calendarFull"} style={{margin:'auto'}} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
                 </NeoButton>
                 <NeoButton
+                    title={t('list')}
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
                     // disabled={!this.state.calendarVisible}
                     className="alignJustify"
@@ -962,6 +966,7 @@ class Calendar extends React.Component<any, any> {
                     null
                 }
         <NeoButton
+            title={t('fullscreen')}
             type="link"
             style={{
                 marginRight: '18px',

@@ -33,6 +33,7 @@
         "datatype": "Data Type",
         "delete report": "Deleting",
         "delete": "Delete",
+        "description": "Description",
         "developer": "Developer",
         "diagram": "Diagrams",
         "diagram name": "Diagram name",
@@ -366,5 +367,14 @@
         "select data": "Select data",
         "metadata name": "Name",
         "metadata type": "Type",
-        "metadata uri": "URI"
+        "metadata uri": "URI",
+
+        "authorization": "Authorization",
+        "fullscreen": "Fullscreen",
+
+        "add event": "Add event",
+        "calendar": "Calendar",
+        "list": "List",
+        "system notes": "System notes",
+        "component name is empty": "Component name is empty"
 }

@@ -20,10 +20,17 @@ import '../../../styles/DatasetGrid.css';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import './../../../styles/GridEdit.css';
-import {GridOptions, GridReadyEvent, ValueGetterParams} from "ag-grid-community";
+import {
+    ColumnResizedEvent,
+    DisplayedColumnsChangedEvent,
+    GridOptions,
+    GridReadyEvent,
+    ValueGetterParams
+} from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
 
+const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
 
 interface Props {
@@ -51,6 +58,7 @@ interface Props {
     height?: number;
     width?: number;
     highlightClassFunction?: ()=>{};
+    valueFormatter?: any;
 }
 
 function isFirstColumn (params:ValueGetterParams) {
@@ -114,7 +122,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.gridOptions.doesExternalFilterPass = (node) => {
                 return node.data.isVisible__ !== undefined ? node.data.isVisible__ : true
             };
-            this.gridOptions.api!.onFilterChanged()
+            this.gridOptions.api!.onFilterChanged();
+            this.gridOptions.onColumnResized = this.handleResize;
+            this.gridOptions.onDisplayedColumnsChanged = this.handleResize;
+            this.gridOptions.onVirtualColumnsChanged = this.handleResize;
         }
     };
 
@@ -134,15 +145,30 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getDocxData() : docxExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push(elem.get("headerName"))
+            if (!elem.get('hide')) {
+                header.push(elem.get("headerName"))
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
         tableData.push(header);
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
@@ -155,14 +181,29 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     private getExcelData() : excelExportObject {
         let header = [];
+        const visible = [];
         for (const elem of this.state.columnDefs) {
-            header.push({name: elem.get("headerName"), filterButton: true})
+            if (!elem.get('hide')) {
+                header.push({name: elem.get("headerName"), filterButton: true})
+                visible.push(elem.get("field"))
+            }
         }
         let tableData = [];
-        for (const elem of this.state.rowData) {
+        for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const prop in elem) {
-                dataRow.push(elem[prop])
+                if (visible.includes(prop) && this.props.valueFormatter) {
+                    let params = {
+                        value: elem[prop],
+                        data: elem,
+                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const formatted = this.props.valueFormatter(params);
+                    dataRow.push(formatted)
+                } else if (visible.includes(prop)) {
+                    dataRow.push(elem[prop])
+                }
             }
             tableData.push(dataRow)
         }
@@ -219,12 +260,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.setState({highlights: this.props.highlights});
         const newCellStyle = (params: any) => {
             const columnDef = this.state.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
+            const textAlign = columnDef && columnDef.get('textAlign')
+                ? columnDef.get('textAlign')
+                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
+                    ? "right"
+                    : undefined;
             let returnObject = {
-                textAlign: columnDef && columnDef.get('textAlign')
-                    ? columnDef.get('textAlign')
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
-                        ? "right"
-                        : undefined
+                textAlign: textAlign,
+                justifyContent: textAlign === "right" ? "flex-end" : textAlign === "left" ? "flex-start" : textAlign
             };
             let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
             if (highlights.length !== 0) {
@@ -646,7 +689,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
 
     redraw = () => {
         this.grid.current.api.redrawRows()
-    }
+    };
+
+    handleResize = (event: DisplayedColumnsChangedEvent|ColumnResizedEvent|undefined) => {
+
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
+        let minHeight = minHeaderHeight;
+        headerCells.forEach(cell => {
+            minHeight = Math.max(minHeight, cell.scrollHeight);
+        });
+        this.gridOptions.api?.setHeaderHeight(minHeight)
+    };
 
     render() {
         const {gridOptions} = this.state;
@@ -656,9 +709,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  style={{boxSizing: 'border-box', height: '100%', backgroundColor: backgroundColor}}
                  className={'ag-theme-material'}
             >
-                <div style={{
-                    height: this.props.height ? this.props.height : 535,
-                    width: this.props.width ? this.props.width : "99,5%"}}>
+                <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
+                    style={{
+                        height: this.props.height ? this.props.height : 535,
+                        width: this.props.width ? this.props.width : "99,5%",
+                    minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -674,7 +729,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
                             suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                             allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
-                            headerHeight={40} //высота header в px (25 по умолчанию)
+                            headerHeight={48} //высота header в px (25 по умолчанию)
+                            rowHeight={40} //высота row в px
                             suppressRowClickSelection //строки не выделяются при нажатии на них
                             pagination={true}
                             suppressPaginationPanel={true}

@@ -30,6 +30,7 @@
         "datatype": "數據類型",
         "delete report": "刪除報告",
         "delete": "刪除",
+        "description": "描述",
         "developer": "開發人員",
         "diagram name": "图表名称",
         "diagram legend": "图例",
@@ -355,6 +356,15 @@
         "select data": "新增資料",
         "metadata name": "名稱",
         "metadata type": "數據類型",
-        "metadata uri": "URI"
+        "metadata uri": "URI",
+
+        "authorization": "授權書",
+        "fullscreen": "全屏",
+
+        "add event": "添加事件",
+        "calendar": "日曆",
+        "list": "列表",
+        "system notes": "系統說明",
+        "component name is empty": "配置文件名稱未設置"
 
 }

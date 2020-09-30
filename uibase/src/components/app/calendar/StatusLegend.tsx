@@ -31,12 +31,11 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
     apply(notificationStatus: Object[]): void {
         let objectId = this.props.viewObject._id;
         let params: any = {
-            'notificationStatus' : this.state.notificationStatus
+            'notificationStatus' : notificationStatus
         };
-        this.props.context.changeUserProfile(objectId, params).then (()=> {
-            this.props.onChangeNotificationStatus(this.state.notificationStatus)
-        }).then(()=>this.props.handleLegendMenu())
-
+        this.props.context.changeUserProfile(objectId, params);
+        this.props.onChangeNotificationStatus(notificationStatus);
+        this.props.handleLegendMenu();
     }
 
     render() {

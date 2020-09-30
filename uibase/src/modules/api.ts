@@ -1,5 +1,6 @@
 import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
+import {Client} from '@stomp/stompjs';
 
 const indexer = (() => {
     let i = 0
@@ -45,14 +46,16 @@ export class API implements IErrorHandler {
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
     private processHandlers: ((processes: any[])=>void)[];
+    private stompClient: Client;
+    public onServerDown: () => void;
 
     private constructor() {
         this.errorHandlers = [this];
         this.ePackagesPromise = new Promise<Ecore.EPackage[]>((resolve, reject) => {
             this.resolvePackages = resolve
         });
-        this.processes = []
-        this.processHandlers = []
+        this.processes = [];
+        this.processHandlers = [];
     }
 
     static instance(): API {
@@ -568,6 +571,39 @@ export class API implements IErrorHandler {
             document.body.removeChild(a)
         })
     }
+    stompGet = () => {
+        console.log(this.stompClient)
+    }
 
+    stompConnect = () => {
+        this.stompClient = new Client();
+
+        const echo = new WebSocket('ws://' + window.location.host + '/socket-registry');
+        if (echo !== undefined) {
+            this.stompClient.configure({
+                webSocketFactory: () => {
+                    // eslint-disable-next-line no-restricted-globals
+                    return new WebSocket('ws://' + window.location.host + '/socket-registry')
+                },
+                onConnect: () => {
+                    console.log('onConnect');
+
+                    this.stompClient.subscribe('/topic/afterSave', message => {
+                        console.log('/topic/afterSave:', JSON.parse(message.body));
+                    });
+                },
+                debug: (str) => {
+                    console.log('DEBUG:', new Date(), str);
+                },
+                onWebSocketError: (evt: Event) => {
+                    if (this.onServerDown) {
+                        this.onServerDown();
+                        this.stompClient.deactivate()
+                    }
+                }
+            });
+            this.stompClient.activate();
+        }
+    };
 
 }

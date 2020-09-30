@@ -331,12 +331,7 @@ public class Session implements Closeable {
     }
 
     private void populateOElementCross(EObject eObject, OVertex oElement) {
-        for (OEdge oEdge : oElement.getEdges(ODirection.OUT, EREFERENCE)) {
-            if (oEdge.getTo().getSchemaType().get().isSubClassOf(EPROXY)) {
-                oEdge.getTo().delete();
-            }
-            oEdge.delete();
-        }
+        Set<OEdge> edges = StreamSupport.stream(oElement.getEdges(ODirection.OUT, EREFERENCE).spliterator(), false).collect(Collectors.toSet());
         new EcoreUtil.CrossReferencer(Collections.singleton(eObject)) {
             {
                 crossReference();
@@ -359,16 +354,37 @@ public class Session implements Closeable {
                     } else { // internal reference
                         crVertex = oElement;
                     }
-                    OEdge oEdge = oElement.addEdge(crVertex, EREFERENCE);
-                    oEdge.setProperty("fromFragment", fromFragment);
-                    oEdge.setProperty("feature", feature);
-                    oEdge.setProperty("toFragment", toFragment);
-                    oEdge.setProperty("index", index);
-                    oEdge.setProperty("eClass", EcoreUtil.getURI(crossReferencedEObject.eClass()).toString());
-                    oEdge.save();
+                    String eClassUri = EcoreUtil.getURI(crossReferencedEObject.eClass()).toString();
+                    OVertex toVertex = crVertex;
+                    Optional<OEdge> oEdgeOpt = edges.stream().filter(e ->
+                            e.getProperty("fromFragment").equals(fromFragment)
+                            && e.getProperty("feature").equals(feature)
+                            && e.getProperty("toFragment").equals(toFragment)
+                            && e.getProperty("index").equals(index)
+                            && e.getProperty("eClass").equals(eClassUri)
+                            && e.getTo().equals(toVertex)
+                    ).findFirst();
+                    if (oEdgeOpt.isPresent()) {
+                        edges.remove(oEdgeOpt.get());
+                    }
+                    else {
+                        OEdge oEdge = oElement.addEdge(crVertex, EREFERENCE);
+                        oEdge.setProperty("fromFragment", fromFragment);
+                        oEdge.setProperty("feature", feature);
+                        oEdge.setProperty("toFragment", toFragment);
+                        oEdge.setProperty("index", index);
+                        oEdge.setProperty("eClass", eClassUri);
+                        oEdge.save();
+                    }
                 }
             }
         };
+        for (OEdge oEdge : edges) {
+            if (oEdge.getTo().getSchemaType().get().isSubClassOf(EPROXY)) {
+                oEdge.getTo().delete();
+            }
+            oEdge.delete();
+        }
     }
 
     private OVertex createProxyOElement(URI uri) {
