@@ -657,7 +657,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  className={'ag-theme-material'}
             >
                 <div style={{
-                    height: this.props.height ? this.props.height : 750,
+                    height: this.props.height ? this.props.height : 535,
                     width: this.props.width ? this.props.width : "99,5%"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>

@@ -74,4 +74,5 @@
 #datasetPaginator {
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
+    margin-bottom: 50px;
 }
