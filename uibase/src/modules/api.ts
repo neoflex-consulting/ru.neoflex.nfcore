@@ -571,39 +571,31 @@ export class API implements IErrorHandler {
             document.body.removeChild(a)
         })
     }
-    stompGet = () => {
-        console.log(this.stompClient)
-    }
 
     stompConnect = () => {
         this.stompClient = new Client();
 
-        const echo = new WebSocket('ws://' + window.location.host + '/socket-registry');
-        if (echo !== undefined) {
-            this.stompClient.configure({
-                webSocketFactory: () => {
-                    // eslint-disable-next-line no-restricted-globals
-                    return new WebSocket('ws://' + window.location.host + '/socket-registry')
-                },
-                onConnect: () => {
-                    console.log('onConnect');
-
-                    this.stompClient.subscribe('/topic/afterSave', message => {
-                        console.log('/topic/afterSave:', JSON.parse(message.body));
-                    });
-                },
-                debug: (str) => {
-                    console.log('DEBUG:', new Date(), str);
-                },
-                onWebSocketError: (evt: Event) => {
-                    if (this.onServerDown) {
-                        this.onServerDown();
-                        this.stompClient.deactivate()
-                    }
+        this.stompClient.configure({
+            webSocketFactory: () => {
+                // eslint-disable-next-line no-restricted-globals
+                return new WebSocket('ws://' + window.location.host + '/socket-registry')
+            },
+            onConnect: () => {
+                this.stompClient.subscribe('/topic/afterSave', message => {
+                    console.log('ON CONNECT: ', JSON.parse(message.body));
+                });
+            },
+            debug: (str) => {
+                console.log('DEBUG:', new Date(), str);
+            },
+            onWebSocketError: (evt: Event) => {
+                if (this.onServerDown) {
+                    this.onServerDown();
+                    this.stompClient.deactivate();
                 }
-            });
-            this.stompClient.activate();
-        }
+            }
+        });
+        this.stompClient.activate();
     };
 
 }
