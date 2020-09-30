@@ -115,24 +115,6 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
                                       helperClass="SortableHelper"/>
                     }
                 </Form.Item>
-                <div style={{
-                    position: 'absolute',
-                    right: 0,
-                    bottom: '80px',
-                    width: '100%',
-                    borderTop: '1px solid #e9e9e9',
-                    padding: '16px 40px',
-                    background: '#F2F2F2',
-                    textAlign: 'left',
-                }}>
-                    <NeoButton
-                        id={'runQueryButton'}
-                        title={t('apply')}
-                        style={{width: '144px'}}
-                        onClick={this.handleOnSubmit}>
-                        {t('apply')}
-                    </NeoButton>
-                </div>
             </Form>
         )
     }
