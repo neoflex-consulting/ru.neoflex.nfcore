@@ -53,6 +53,7 @@ export interface IMainContext {
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
     changeURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: Object[] | undefined) => void;
+    getURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: Object[] | undefined) => any;
     runQuery?: (
         resource: Ecore.Resource,
         queryParams: IServerNamedParam[],

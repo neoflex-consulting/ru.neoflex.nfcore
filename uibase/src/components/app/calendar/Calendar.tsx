@@ -840,8 +840,8 @@ class Calendar extends React.Component<any, any> {
 
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
-                                       style={{marginRight:'16px'}}>
-                                <NeoIcon icon={"arrowLeft"} size={'s'} color={'#000000'} />
+                                       style={{marginRight:'20px', marginTop: "3px"}}>
+                                <NeoIcon icon={"arrowLeft"} color={'#000000'} />
                             </NeoButton>
                         </div>
                         <div className="col-col-center">
@@ -851,8 +851,8 @@ class Calendar extends React.Component<any, any> {
                         </div>
                         <div className="col col-end" >
                             <NeoButton type={'link'} onClick={this.nextMonth}
-                            style={{marginLeft:'16px'}}>
-                                <NeoIcon icon={"arrowRight"} size={'s'} color={'#000000'} />
+                            style={{marginLeft:'20px', marginTop: "3px"}}>
+                                <NeoIcon icon={"arrowRight"} color={'#000000'} />
                             </NeoButton>
                         </div>
 
@@ -873,6 +873,7 @@ class Calendar extends React.Component<any, any> {
                     >
                             <div style={{flexGrow: 1, marginLeft: '21px', marginTop: this.state.fullScreenOn ? '1px' : '0px'}}>
                                 <NeoInput
+                                    style={{width: "188px", height: "32px"}}
                                     type={'search'}
                                     onChange={(e: any) => {
                                         this.changeSearchValue(e.target.value)
@@ -884,7 +885,7 @@ class Calendar extends React.Component<any, any> {
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById('selectInFullScreen') as HTMLElement}
                                 value={this.state.selectedValueInGrid}
-                                style={{width: '180px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px'}}
+                                style={{width: '182px', marginRight: '-2px', fontWeight: "normal", marginTop: this.state.fullScreenOn ?'8px' : '1px', height: "32px"}}
                                 onChange={(e: any) => {
                                     this.handleChange(e, 'select')
                                 }}
@@ -909,7 +910,7 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 }
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '18px', height: '40px'}}/>
 
                     <NeoButton
                         title={t('add event')}
@@ -918,14 +919,14 @@ class Calendar extends React.Component<any, any> {
                         <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'} />
                     </NeoButton>
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '10px', marginRight: '10px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '16px', height: '40px'}}/>
                 <NeoButton
                     title={t('calendar')}
                     type={this.state.calendarVisible ? 'disabled' : "link"}
                     // disabled={this.state.calendarVisible}
                     className="calendarAlt"
                     style={{
-                        marginRight: '10px',
+                        marginRight: '8px',
                         width: '24px',
                         height: '24px',
                         padding: '3px',
@@ -953,7 +954,7 @@ class Calendar extends React.Component<any, any> {
                     <NeoIcon icon={"table"} style={{margin:'auto'}} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
                 </NeoButton>
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #858585', marginLeft: '13px', height: '34px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', height: '40px'}}/>
                 {this.state.calendarVisible ?
                     <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                         overlay={menu} placement="bottomLeft">

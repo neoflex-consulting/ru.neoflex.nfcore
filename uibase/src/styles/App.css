@@ -35,6 +35,7 @@
 }
 
 .app-logo-settings {
+  margin: auto auto auto 30px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
@@ -46,6 +47,9 @@
 
 @media screen and (max-width: 1100px) {
   .app-logo img {
+    display: none;
+  }
+  .app-logo-settings img{
     display: none;
   }
 }
@@ -1129,6 +1133,265 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   }
 }
 
+@media screen and (min-width: 1441px) and (max-width: 3900px){
+
+
+  .app-logo {
+     margin-top: 8px!important;
+  }
+  .app-logo-settings {
+    margin-top: 8px!important;
+  }
+
+  .nameOfAppFirstWord{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: 500!important;
+    font-size: 22px!important;
+    line-height: 26px!important;
+    color: #FFFFFF!important;
+  }
+.nameOfAppSecondWord{
+  font-family: Roboto!important;
+  font-style: normal!important;
+  font-weight: normal!important;
+  font-size: 22px!important;
+  line-height: 26px!important;
+  color: #FFFFFF!important;
+}
+
+.applicationName{
+  font-family: Roboto!important;
+  font-style: normal!important;
+  font-weight: normal!important;
+  font-size: 16px!important;
+  line-height: 19px!important;
+
+}
+  .applicationName:hover{
+    color: white!important;
+  }
+  .appMoreWord:hover{
+    color: white!important;
+  }
+
+.appMoreWord{
+  font-family: Roboto!important;
+  font-style: normal!important;
+  font-weight: normal!important;
+  font-size: 16px!important;
+  line-height: 19px!important;
+}
+
+.lang-label{
+  font-family: Roboto!important;
+  font-style: normal!important;
+  font-weight: normal!important;
+  font-size: 14px!important;
+  line-height: 16px!important;
+  color: #B3B3B3!important;
+  margin-top: 0.5px!important;
+}
+
+.NameOfUser{
+  font-family: Roboto!important;
+  font-style: normal!important;
+  font-weight: normal!important;
+  font-size: 14px!important;
+  line-height: 16px!important;
+  color: #FFFFFF!important;
+}
+  .HeaderWithNamesSmallScreen{
+    display: none!important;
+  }
+
+  .namesOfDevMenu{
+    font-family: Roboto!important;
+    font-style: normal!important;;
+    font-weight: normal!important;;
+    font-size: 16px!important;;
+    line-height: 19px!important;;
+  }
+
+  .namesOfDevMenu:hover{
+    color: white!important;
+  }
+  .devMenuSmallWidth{
+    display: none;
+  }
+
+}
+
+@media screen and (min-width: 1025px) and (max-width: 1440px){
+
+  .nameOfAppFirstWord{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: 500!important;
+    font-size: 16px!important;
+    line-height: 19px!important;
+    color: #FFFFFF!important;
+  }
+  .nameOfAppSecondWord{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    font-size: 16px!important;
+    line-height: 19px!important;
+    color: #FFFFFF!important;
+  }
+
+  .applicationName{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    font-size: 12px!important;
+    line-height: 14px!important;
+
+  }
+  .applicationName:hover{
+    color: white!important;
+  }
+  .appMoreWord:hover{
+    color: white!important;
+  }
+
+  .appMoreWord{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    font-size: 12px!important;
+    line-height: 14px!important;
+  }
+  .lang-label{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    font-size: 12px!important;
+    line-height: 14px!important;
+    color: #B3B3B3!important;
+    margin-top: 2px!important;
+  }
+  .NameOfUser{
+    font-family: Roboto!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    font-size: 12px!important;
+    line-height: 14px!important;
+    color: #FFFFFF!important;
+  }
+  .namesOfDevMenu{
+    font-family: Roboto!important;
+    font-style: normal!important;;
+    font-weight: normal!important;;
+    font-size: 12px!important;;
+    line-height: 14px!important;;
+  }
+
+  .HeaderWithNames{
+    margin-right: 40px!important;
+  }
+  .HeaderWithNamesSmallScreen{
+    display: none!important;
+  }
+
+  .devMenuSmallWidth{
+    display: none!important;
+  }
+  .app-logo {
+    margin-top: 7px!important;
+  }
+
+  .app-logo-settings {
+    margin-top: 6px!important;
+  }
+  .header-menu{
+    margin-bottom: 7px!important;
+  }
+
+}
+
+@media screen and (min-width: 400px) and (max-width: 1024px) {
+
+
+  .nameOfAppFirstWord {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    font-size: 18px !important;
+    line-height: 21px !important;
+    color: #FFFFFF !important;
+  }
+
+  .nameOfAppSecondWord {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-size: 18px !important;
+    line-height: 21px !important;
+    color: #FFFFFF !important;
+  }
+
+  .app-header {
+    height: 64px !important;
+  }
+
+  .HeaderWithNamesSmallScreen {
+    margin-bottom: 15px !important;
+    margin-right: 10px;
+  }
+
+
+  .headerRightSide {
+    padding-bottom: 15px;
+  }
+
+  .app-logo {
+    margin-right: 20px;
+  }
+
+  .HeaderWithNames {
+    display: none !important;
+  }
+
+  .lang-label {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    color: #B3B3B3 !important;
+    margin-top: 1px !important;
+  }
+
+  .HeaderWithNamesSmallScreen {
+    display: inline-block !important;
+    float: left;
+  }
+
+  .devMenuSmallWidth {
+    display: inline-block !important;
+    float: left;
+  }
+
+  .ant-col.ant-col-14.col {
+    justify-content: unset !important;
+  }
+
+  .headerDev-menu{
+    display: none!important;
+  }
+
+  .app-logo-settings{
+    margin: auto auto 15px 30px;
+  }
+  .ant-dropdown-menu-item-selected, .ant-dropdown-menu-submenu-title-selected, .ant-dropdown-menu-item-selected > a, .ant-dropdown-menu-submenu-title-selected > a{
+    background-color: unset!important;
+  }
+
+
+}
+
 
 
 
@@ -1286,8 +1549,10 @@ button.btn.edit-button-right{
 }
 
 .ant-dropdown.ant-dropdown-placement-bottomCenter{
-  /*height: 1500px!important;*/
-  top: 120px!important;
+  height: 200px!important;
+  top: 70px!important;
+  list-style-type: unset!important;
+  position: fixed!important;
 }
 
 li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item:hover {
@@ -1303,6 +1568,31 @@ li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item {
   margin-top: 16px;
   margin-bottom: 16px;
 }
+
+.lisOfAppNames{
+  justifyContent: space-between!important;
+  width: 100%!important;
+  margin-left: 70px!important;
+}
+.HeaderWithNames .col{
+  justify-content: unset!important;
+}
+
+a.limksInMoreWord{
+  padding-top: 15px;
+  padding-left: 16px;
+}
+
+a.linksInMoreWord:hover{
+  text-decoration: none!important;
+}
+
+
+
+
+
+
+
 
 /*Notification message*/
 .ant-notification {

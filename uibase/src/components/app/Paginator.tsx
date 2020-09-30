@@ -23,8 +23,8 @@ class Paginator extends React.Component<any, any> {
     }
 
 
-    onSomePage = (e : any) =>{
-        this.props.grid.current.api.paginationGoToPage(e-1);
+    onSomePage = (e : any) => {
+        this.props.grid.current.api.paginationGoToPage(e - 1);
     }
 
     paginationSetPageSize = (pageSize : any) =>{
