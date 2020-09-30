@@ -109,10 +109,9 @@
 
 .tools-branch-region {
     position: relative;
-    width: 92vw;
+    /*width: 92vw;*/
     min-height: 115px;
-    margin-top: 32px;
-    margin-bottom: 12px;
+    margin: 32px 56px 12px !important;
     background: #FFFFFF;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
@@ -125,8 +124,9 @@
 
 .tools-tabs-region {
     position: relative;
-    width: 92vw;
+    /*width: 92vw;*/
     height: 76px;
+    margin: auto 56px !important;
 }
 
 .tools-export-region {
