@@ -138,18 +138,62 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
-    //TODO обработка leaf и многоярусных ззаголовков
+    calcExportSpans(columnDefs:any[]) {
+        function findDepth(node:{children:any[]}){
+            let maxDepth=0;
+            if (node.children !== undefined){
+                let depth =0;
+                node.children.forEach((child:any) => {
+                    depth = findDepth(child) + 1;
+                    maxDepth = depth > maxDepth ? depth: maxDepth;
+                })
+            }
+            return maxDepth;
+        }
+        let headerArr = [];
+        let headerRow = [];
+        let childrenToVisit = columnDefs.map(c=>c);
+        let levelSize = columnDefs.length;
+        let index = 0;
+        let maxDepth = 0;
+        childrenToVisit.forEach(ch=>{
+            maxDepth = (findDepth(ch) + 1 > maxDepth) ? findDepth(ch) + 1 : maxDepth
+        });
+        while (childrenToVisit.length != 0) {
+            const current = childrenToVisit.shift();
+            if (!current.hide) {
+                headerRow.push({
+                    headerName: current.headerName,
+                    columnSpan: current.children ? this.getLeafColumns(current.children).length : 1,
+                    rowSpan: childrenToVisit.filter(ct=>ct.children).length !== 0
+                        ? maxDepth - headerArr.length
+                        : 1
+                });
+            }
+            if (current.children) {
+                childrenToVisit = childrenToVisit.concat(current.children)
+            }
+            index += 1;
+            if (index >= levelSize) {
+                levelSize += childrenToVisit.length;
+                headerArr.push(headerRow);
+                headerRow = [];
+            }
+        }
+        return headerArr;
+    }
+
     private getDocxData() : docxExportObject {
         let header = [];
         const visible = [];
+        let gridHeader = this.calcExportSpans(this.state.columnDefs);
         for (const elem of this.getLeafColumns(this.state.columnDefs)) {
             if (!elem.hide) {
-                header.push(elem.headerName);
-                visible.push(elem.field);
+                header.push({name: elem.headerName, filterButton: true});
+                visible.push(elem.field)
             }
         }
         let tableData = [];
-        tableData.push(header);
         for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
             for (const el of visible) {
@@ -173,7 +217,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return  {
             hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
-            gridData:(tableData.length === 0) ? [[]] : tableData
+            gridData:(tableData.length === 0) ? [[]] : tableData,
+            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
     }
 
@@ -229,7 +274,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         });
         return leafColumnDefs;
     }
-
+    
     componentDidMount(): void {
         if (this.props.context) {
             this.props.context.addDocxHandler(this.getDocxData.bind(this));
