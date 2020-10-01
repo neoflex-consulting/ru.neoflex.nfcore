@@ -764,7 +764,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     resizable: colDef.get('resizable') || false,
                     sortable: colDef.get('sortable') || false,
                     suppressMenu: colDef.get('suppressMenu') || false,
-                    cellStyle: this.state.cellStyle,
+                    cellStyle: this.state ? this.state.cellStyle : undefined,
                     cellRendererParams: (colDef.get('component')) ? {
                         ...this.props,
                         viewObject: colDef.get('component'),
