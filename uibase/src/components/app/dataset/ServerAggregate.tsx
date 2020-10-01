@@ -291,7 +291,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('total')}</div>

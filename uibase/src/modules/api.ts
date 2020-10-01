@@ -581,23 +581,20 @@ export class API implements IErrorHandler {
                 return new WebSocket('ws://' + window.location.host + '/socket-registry')
             },
             onConnect: () => {
-                console.log('onConnect');
-
                 this.stompClient.subscribe('/topic/afterSave', message => {
-                    console.log(JSON.parse(message.body));
+                    console.log('ON CONNECT: ', JSON.parse(message.body));
                 });
             },
             debug: (str) => {
-                console.log(new Date(), str);
+                console.log('DEBUG:', new Date(), str);
             },
             onWebSocketError: (evt: Event) => {
                 if (this.onServerDown) {
                     this.onServerDown();
-                    this.stompClient.deactivate()
+                    this.stompClient.deactivate();
                 }
             }
         });
-
         this.stompClient.activate();
     };
 

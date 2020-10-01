@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
-import {Col, Form, Row, Typography} from 'antd';
+import {Form, Typography} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoSwitch} from "neo-design/lib";
 
 const { Paragraph } = Typography;
 
@@ -35,23 +35,10 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
-const SortableItem = SortableElement(({value}:any) => <div className="SortableHiddenColumnItem">
-    <Row gutter={[8, 0]}>
-        <Col span={20}>
-            <Form.Item style={{ display: 'inline-block' }}>
-                <Paragraph
-                    key={`Paragraph ${value}`}
-                    editable={false}>
-                    {
-                        value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
-                            ? value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn).get('headerName')
-                            : value.datasetColumn
-                    }
-                </Paragraph>
-            </Form.Item>
-        </Col>
-        <Col span={2}>
-            <Form.Item style={{ display: 'inline-block' }}>
+const SortableItem = SortableElement(({value}:any) => <div className="SortableItem">
+    <NeoRow style={{height:'100%'}}>
+        <NeoCol span={2}>
+            <Form.Item style={{ margin: 'auto' }}>
                 <NeoSwitch
                     defaultChecked={value.enable !== undefined ? value.enable : true}
                     onChange={(e: any) => {
@@ -59,8 +46,22 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableHi
                         value.handleChange(event, true)
                     }}/>
             </Form.Item>
-        </Col>
-    </Row>
+        </NeoCol>
+        <NeoCol span={22}>
+            <Form.Item style={{ margin: 'auto auto auto 25px'}}>
+                <Paragraph
+                    key={`Paragraph ${value}`}
+                    editable={false}
+                    style={{marginBottom:'unset'}}>
+                    {
+                        value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
+                            ? value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn).get('headerName')
+                            : value.datasetColumn
+                    }
+                </Paragraph>
+            </Form.Item>
+        </NeoCol>
+    </NeoRow>
 </div>);
 
 class HiddenColumn extends DrawerParameterComponent<Props, State> {
@@ -82,8 +83,21 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleOnSubmit}>
-                <Form.Item>
+            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
+                <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+                    <NeoCol span={18} style={{justifyContent: "flex-start"}}>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите колонки, которые вы хотите скрыть</div>
+                    </NeoCol>
+                    <NeoCol span={6} style={{justifyContent: "flex-end"}}>
+                        <NeoButton type={'link'}
+                                   title={t("reset")}
+                                   id={'resetButton'}
+                                   onClick={this.reset}>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Сбросить</span>
+                        </NeoButton>
+                    </NeoCol>
+                </Form.Item>
+                <Form.Item style={{ marginBottom: '0' }}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((serverSort: any) => (
@@ -101,24 +115,6 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
                                       helperClass="SortableHelper"/>
                     }
                 </Form.Item>
-                <div style={{
-                    position: 'absolute',
-                    right: 0,
-                    bottom: '80px',
-                    width: '100%',
-                    borderTop: '1px solid #e9e9e9',
-                    padding: '16px 40px',
-                    background: '#F2F2F2',
-                    textAlign: 'left',
-                }}>
-                    <NeoButton
-                        id={'runQueryButton'}
-                        title={t('apply')}
-                        style={{width: '144px'}}
-                        onClick={this.handleOnSubmit}>
-                        {t('apply')}
-                    </NeoButton>
-                </div>
             </Form>
         )
     }
