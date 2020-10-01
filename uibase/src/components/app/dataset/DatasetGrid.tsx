@@ -711,7 +711,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     style={{
-                        height: this.props.height ? this.props.height : 535,
+                        height: this.props.height ? this.props.height : 470,
                         width: this.props.width ? this.props.width : "99,5%",
                     minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
