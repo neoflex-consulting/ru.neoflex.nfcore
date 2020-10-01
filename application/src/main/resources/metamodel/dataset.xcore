@@ -124,30 +124,28 @@ class DatasetColumn {
 abstract class DatasetColumnView {
     String name
     contains Typography headerName //название столбца
-    refers FormatMask formatMask//Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
-    String headerTooltip
     boolean hide
+    String headerTooltip
+    boolean showTooltipField
     Pinned pinned = "Undefined"
-    Filter filter = "TextColumnFilter"
-    Sort sort //тип клиентской сортировки
+    boolean resizable
+}
+
+class RdbmsColumn extends DatasetColumnView {
+    refers FormatMask formatMask //Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     boolean editable
     boolean sortable
     boolean suppressMenu
-    boolean resizable
     boolean isPrimaryKey
     TextAlign textAlign = "Undefined"
     String componentRenderCondition
     contains GridComponent component
-    boolean showTooltipField
-}
-
-class RdbmsColumn extends DatasetColumnView {
     refers DatasetColumn datasetColumn
 }
 
-class CustomColumn extends DatasetColumnView {
-    String customColumnExpression //выражение в вычисляемом столбце
+class ColumnGroup extends DatasetColumnView {
+    contains DatasetColumnView[] column
 }
 
 class FormatMask {
