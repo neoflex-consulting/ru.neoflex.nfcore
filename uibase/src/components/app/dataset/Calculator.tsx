@@ -291,6 +291,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                 });
                 this.setState({parametersArray});
                 this.props.onChangeParameters!(parametersArray!, this.props.componentType)
+                this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
             }
         });
     };
@@ -304,16 +305,11 @@ class Calculator extends DrawerParameterComponent<Props, State> {
         });
     };
 
-    handleOnSubmit=(e:any)=>{
-        this.handleSubmit(e);
-        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-    }
-
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form >
-                <Form.Item style={{marginBottom:'0px', lineHeight:'19px'}}>
+            <Form style={{ marginTop: '15px' }}>
+                <Form.Item style={{marginTop: '-28px', marginBottom:'0px', lineHeight:'19px'}}>
                         <div style={{ display: "inherit", fontSize: '16px', fontWeight: 500, color: '#333333'}}>
                             {this.t('calculatableExpressions')}
                         </div>
@@ -470,7 +466,7 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                                 title={this.t("run query")}
                                 style={{width: '127px'}}
                                 id={'runQueryButton'}
-                                onClick={this.handleOnSubmit}
+                                onClick={this.handleSubmit}
                             >
                             {this.props.t('apply')}
                         </NeoButton>
