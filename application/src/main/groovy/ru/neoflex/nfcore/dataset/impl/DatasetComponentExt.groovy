@@ -117,6 +117,17 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
+    List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
+        for (col in column) {
+            if (col instanceof ColumnGroup && col.column != null) {
+                getLeafColumns(col.column as EList<DatasetColumnView>, leafColumns)
+            } else {
+                leafColumns.push(col)
+            }
+        }
+        return leafColumns
+    }
+
     List<Map> connectionToDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryFilterDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn, ResourceSet resource) {
         NamedParameterStatement p;
         ResultSet rs;
@@ -136,30 +147,15 @@ class DatasetComponentExt extends DatasetComponentImpl {
             def serverCalculatedExpression = []
             def namesOfOperationsInServerAggregations = []
             def datasetOperations = []
+            def leafColumns = getLeafColumns(column, [])
 
-            if (column != []) {
-                for (int i = 0; i <= column.size() - 1; ++i) {
-                    if (column[i].class.toString().toLowerCase().contains('rdbms')) {
-                        if (queryColumns.size() != 0 && queryColumns.contains("${column[i].name}")) {
+            if (leafColumns != []) {
+                for (int i = 0; i <= leafColumns.size() - 1; ++i) {
+                    if (leafColumns[i].class.toString().toLowerCase().contains('rdbms')) {
+                        if (queryColumns.size() != 0 && queryColumns.contains("${leafColumns[i].name}")) {
                             throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
                         } else {
-                            queryColumns.add("t.\"${column[i].name}\"")
-                        }
-                    } else {
-                        def valueCustomColumn
-                        def customColumn = column[i] as CustomColumn
-                        if (customColumn.customColumnExpression == null || customColumn.customColumnExpression == "" && column[i].defaultValue != null && column[i].defaultValue != "") {
-                            valueCustomColumn = column[i].defaultValue
-                        } else if (customColumn.customColumnExpression == null || customColumn.customColumnExpression == "" && column[i].defaultValue == null || column[i].defaultValue == "") {
-                            valueCustomColumn = null
-                        } else {
-                            valueCustomColumn = customColumn.customColumnExpression
-                        }
-
-                        if (queryColumns.contains(" \"${column[i].headerName.name}\"")) {
-                            throw new IllegalArgumentException("Please, change headerNames in this object. It has similar names")
-                        } else {
-                            queryColumns.add(valueCustomColumn + " \"${column[i].headerName.name}\"")
+                            queryColumns.add("t.\"${leafColumns[i].name}\"")
                         }
                     }
                 }
@@ -180,14 +176,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 }
             } else {
                 def calcColumns =  (calculatedExpression ? calculatedExpression.datasetColumn : [])
-                allColumns = column.name  + calcColumns
+                allColumns = leafColumns.name  + calcColumns
             }
 
             //Filter
             if (filters) {
                 for (int i = 0; i <= filters.size() - 1; ++i) {
                     if (allColumns.contains(filters[i].datasetColumn) && filters[i].enable) {
-                        def currentColumn = column.find { column -> column.name.toLowerCase() == filters[i].datasetColumn.toLowerCase() }
+                        def currentColumn = leafColumns.find { column -> column.name.toLowerCase() == filters[i].datasetColumn.toLowerCase() }
                         def type;
                         //TODO добавить определение типа для вычисляемых полей
                         if (currentColumn) {
