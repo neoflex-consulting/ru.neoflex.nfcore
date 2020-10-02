@@ -176,7 +176,7 @@ public abstract class SessionFactory {
                 .put(ORIENTDB, new ResourceFactoryImpl() {
                     @Override
                     public Resource createResource(URI uri) {
-                        return new OrientDBResource(uri, SessionFactory.this);
+                        return new OrientDBResource(uri);
                     }
                 });
         return resourceSet;
