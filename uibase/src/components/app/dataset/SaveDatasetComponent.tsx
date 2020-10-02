@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {withTranslation} from 'react-i18next';
-import {Button, Checkbox, Input} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
 
 interface Props {
     closeModal?: () => void;
@@ -205,32 +203,49 @@ class SaveDatasetComponent extends React.Component<any, State> {
 
         return (
             <div>
-                <Input
-                    placeholder={'new report name'}
-                    disabled={this.state.changeCurrent}
-                    style={{ width: '200px', marginRight: '10px', marginBottom: '20px'}}
-                    allowClear={true}
-                    onChange={(e: any) => this.onChangeName(e.target.value)}
-                />
-                <Checkbox
-                    checked={this.state.changeCurrent}
-                    disabled={false}
-                    onChange={() => this.onChangeCurrent()}
-                >
-                    Change current
-                </Checkbox>
-                <Checkbox
-                    checked={this.state.accessPublic}
-                    disabled={false}
-                    onChange={() => this.onChangeAccess()}
-                >
-                    Public
-                </Checkbox>
-                <div>
-                    <Button title={t('save')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.onClick()}>
-                        <FontAwesomeIcon icon={faSave} size='1x'/>
-                    </Button>
-                </div>
+                <NeoRow>
+                    <NeoCol span={24} style={{alignItems:'start', marginBottom:'12px', flexDirection:'column'}}>
+                        <NeoTypography type={"capture-regular"} style={{marginBottom:'4px'}}>Наименование отчета</NeoTypography>
+                        <NeoInput
+                            width={'100%'}
+                            placeholder={'new report name'}
+                            disabled={this.state.changeCurrent}
+                            style={{ marginBottom: '20px'}}
+                            allowClear={true}
+                            onChange={(e: any) => this.onChangeName(e.target.value)}
+                        />
+                    </NeoCol>
+                </NeoRow>
+<NeoRow>
+    <NeoCol span={12} style={{alignItems:'start', justifyContent:'start'}}>
+        <NeoInput
+            type={'checkbox'}
+            checked={this.state.changeCurrent}
+            disabled={false}
+            onChange={() => this.onChangeCurrent()}
+        >
+            Change current
+        </NeoInput>
+    </NeoCol>
+    <NeoCol span={12} style={{alignItems:'start'}}>
+        <NeoInput
+            type={'checkbox'}
+            checked={this.state.accessPublic}
+            disabled={false}
+            onChange={() => this.onChangeAccess()}
+        >
+            Public
+        </NeoInput>
+    </NeoCol>
+</NeoRow>
+                <NeoRow style={{marginTop:'15px', justifyContent:'flex-end'}}>
+                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff', marginRight:'16px'}} onClick={() => this.props.closeModal}>
+                        {t('cancel')}
+                    </NeoButton>
+                    <NeoButton title={t('save')} style={{width:'120px'}} onClick={() => this.onClick()}>
+                        {t('save')}
+                    </NeoButton>
+                </NeoRow>
             </div>
 
         )
