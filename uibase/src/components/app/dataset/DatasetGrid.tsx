@@ -222,13 +222,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
         };
     }
 
-    //TODO обработка leaf и многоярусных ззаголовков
     private getExcelData() : excelExportObject {
         let header = [];
         const visible = [];
+        let gridHeader = this.calcExportSpans(this.state.columnDefs);
         for (const elem of this.getLeafColumns(this.state.columnDefs)) {
             if (!elem.hide) {
-                header.push({name: elem.headerName, filterButton: true});
+                header.push({name: elem.headerName, filterButton: false});
                 visible.push(elem.field)
             }
         }
@@ -255,12 +255,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
         return  {
             hidden: this.props.hidden,
-            excelComponentType : excelElementExportType.grid,
+            excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),
                 columns: header,
                 rows: (tableData.length === 0) ? [[]] : tableData
-            }
+            },
+            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
     }
 
