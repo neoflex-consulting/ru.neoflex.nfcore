@@ -556,21 +556,19 @@ class EcoreApp extends React.Component<any, State> {
 
     startPageSelection(applicationName: string) {
         let application: any = undefined;
-
         if (this.state.context.userProfilePromise !== undefined) {
             this.state.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
                 application = userProfile.eContents()[0].get('params').array()
                     .filter((u: any) => u.get('key') === 'startApp')
+                if (this.props.history.location.pathname === "/") {
+                    if (application !== undefined && application.length !== 0 && application[0].get('value') !== undefined) {
+                        this.changeURL(JSON.parse(application[0].get('value')), false)
+                    }
+                    else {
+                        this.changeURL(applicationName, false)
+                    }
+                }
             })
-        }
-
-        if (this.props.history.location.pathname === "/") {
-            if (application !== undefined && application.length !== 0 && application[0].get('value') !== undefined) {
-                this.changeURL(JSON.parse(application[0].get('value')), false)
-            }
-            else {
-                this.changeURL(applicationName, false)
-            }
         }
     }
 

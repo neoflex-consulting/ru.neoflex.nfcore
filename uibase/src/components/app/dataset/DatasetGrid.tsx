@@ -1,5 +1,5 @@
 import React from 'react';
-import {AgGridColumn, AgGridReact} from '@ag-grid-community/react';
+import {AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import {ConfigProvider} from 'antd';
 import {withTranslation} from 'react-i18next';
@@ -24,8 +24,7 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent,
-    ValueGetterParams
+    GridReadyEvent
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
@@ -44,6 +43,7 @@ interface Props {
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
     columnDefs: Map<String,any>[],
+    leafColumnDefs: Map<String,any>[],
     paginationCurrentPage?: number,
     paginationTotalPage?: number,
     paginationPageSize?: number,
@@ -59,11 +59,6 @@ interface Props {
     width?: number;
     highlightClassFunction?: ()=>{};
     valueFormatter?: any;
-}
-
-function isFirstColumn (params:ValueGetterParams) {
-    let displayedColumns = params.columnApi!.getAllDisplayedColumns();
-    return displayedColumns[0].getColId() === params.column.getColId();
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -83,7 +78,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: 10,
             isGridReady: false,
-            columnDefs: this.props.columnDefs,
+            columnDefs: this.colDefsToObject(this.props.columnDefs),
             rowData: this.props.rowData,
             highlights: [],
             locale: switchAntdLocale(this.props.i18n, this.props.t),
@@ -143,31 +138,78 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     };
 
+    calcExportSpans(columnDefs:any[]) {
+        function findDepth(node:{children:any[]}){
+            let maxDepth=0;
+            if (node.children !== undefined){
+                let depth =0;
+                node.children.forEach((child:any) => {
+                    depth = findDepth(child) + 1;
+                    maxDepth = depth > maxDepth ? depth: maxDepth;
+                })
+            }
+            return maxDepth;
+        }
+        let headerArr = [];
+        let headerRow = [];
+        let childrenToVisit = columnDefs.map(c=>c);
+        let levelSize = columnDefs.length;
+        let index = 0;
+        let maxDepth = 0;
+        childrenToVisit.forEach(ch=>{
+            maxDepth = (findDepth(ch) + 1 > maxDepth) ? findDepth(ch) + 1 : maxDepth
+        });
+        while (childrenToVisit.length != 0) {
+            const current = childrenToVisit.shift();
+            if (!current.hide) {
+                headerRow.push({
+                    headerName: current.headerName,
+                    columnSpan: current.children ? this.getLeafColumns(current.children).length : 1,
+                    rowSpan: childrenToVisit.filter(ct=>ct.children).length !== 0
+                        ? maxDepth - headerArr.length
+                        : 1
+                });
+            }
+            if (current.children) {
+                childrenToVisit = childrenToVisit.concat(current.children)
+            }
+            index += 1;
+            if (index >= levelSize) {
+                levelSize += childrenToVisit.length;
+                headerArr.push(headerRow);
+                headerRow = [];
+            }
+        }
+        return headerArr;
+    }
+
     private getDocxData() : docxExportObject {
         let header = [];
         const visible = [];
-        for (const elem of this.state.columnDefs) {
-            if (!elem.get('hide')) {
-                header.push(elem.get("headerName"))
-                visible.push(elem.get("field"))
+        let gridHeader = this.calcExportSpans(this.state.columnDefs);
+        for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+            if (!elem.hide) {
+                header.push({name: elem.headerName, filterButton: true});
+                visible.push(elem.field)
             }
         }
         let tableData = [];
-        tableData.push(header);
         for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
-            for (const prop in elem) {
-                if (visible.includes(prop) && this.props.valueFormatter) {
-                    let params = {
-                        value: elem[prop],
-                        data: elem,
-                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
-                        node: this.gridOptions.api?.getRowNode(index)
-                    };
-                    const formatted = this.props.valueFormatter(params);
-                    dataRow.push(formatted)
-                } else if (visible.includes(prop)) {
-                    dataRow.push(elem[prop])
+            for (const el of visible) {
+                for (const prop in elem) {
+                    if (el === prop && this.props.valueFormatter) {
+                        let params = {
+                            value: elem[prop],
+                            data: elem,
+                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
+                            node: this.gridOptions.api?.getRowNode(index)
+                        };
+                        const formatted = this.props.valueFormatter(params);
+                        dataRow.push(formatted)
+                    } else if (el === prop) {
+                        dataRow.push(elem[prop])
+                    }
                 }
             }
             tableData.push(dataRow)
@@ -175,49 +217,65 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return  {
             hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
-            gridData:(tableData.length === 0) ? [[]] : tableData
+            gridData:(tableData.length === 0) ? [[]] : tableData,
+            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
     }
 
     private getExcelData() : excelExportObject {
         let header = [];
         const visible = [];
-        for (const elem of this.state.columnDefs) {
-            if (!elem.get('hide')) {
-                header.push({name: elem.get("headerName"), filterButton: true})
-                visible.push(elem.get("field"))
+        let gridHeader = this.calcExportSpans(this.state.columnDefs);
+        for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+            if (!elem.hide) {
+                header.push({name: elem.headerName, filterButton: false});
+                visible.push(elem.field)
             }
         }
         let tableData = [];
         for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
-            for (const prop in elem) {
-                if (visible.includes(prop) && this.props.valueFormatter) {
-                    let params = {
-                        value: elem[prop],
-                        data: elem,
-                        colDef: this.gridOptions.columnDefs!.find((c:any)=>c.field === prop),
-                        node: this.gridOptions.api?.getRowNode(index)
-                    };
-                    const formatted = this.props.valueFormatter(params);
-                    dataRow.push(formatted)
-                } else if (visible.includes(prop)) {
-                    dataRow.push(elem[prop])
+            for (const el of visible) {
+                for (const prop in elem) {
+                    if (el === prop && this.props.valueFormatter) {
+                        let params = {
+                            value: elem[prop],
+                            data: elem,
+                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
+                            node: this.gridOptions.api?.getRowNode(index)
+                        };
+                        const formatted = this.props.valueFormatter(params);
+                        dataRow.push(formatted)
+                    } else if (el === prop) {
+                        dataRow.push(elem[prop])
+                    }
                 }
             }
             tableData.push(dataRow)
         }
         return  {
             hidden: this.props.hidden,
-            excelComponentType : excelElementExportType.grid,
+            excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),
                 columns: header,
                 rows: (tableData.length === 0) ? [[]] : tableData
-            }
+            },
+            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
     }
 
+    getLeafColumns(columnDefs: any[], leafColumnDefs: any[] = []) {
+        columnDefs.forEach( (c: any) => {
+            if (c.children) {
+                this.getLeafColumns(c.children, leafColumnDefs)
+            } else {
+                leafColumnDefs.push(c)
+            }
+        });
+        return leafColumnDefs;
+    }
+    
     componentDidMount(): void {
         if (this.props.context) {
             this.props.context.addDocxHandler(this.getDocxData.bind(this));
@@ -239,15 +297,24 @@ class DatasetGrid extends React.Component<Props & any, any> {
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
             this.setState({rowData: this.props.rowData})
         }
-        if (!_.isEqual(this.state.columnDefs, this.props.columnDefs)
-            && !this.props.isEditMode) {
-            this.setState({columnDefs: this.props.columnDefs})
+        if (!_.isEqual(prevProps.columnDefs, this.props.columnDefs)) {
+            this.setState({
+                columnDefs: this.colDefsToObject(this.props.columnDefs)
+            }, ()=> {
+                //Для вычисляемых выражений type и mask не отслеживаются ag-grid
+                //Поэтому при их смене приходится вызывать вручную redraw
+                this.props.columnDefs.forEach((cd:any)=>{
+                    const found = prevProps.columnDefs.find((c:any)=> c.get('field') === cd.get('field'))
+                    if (found && (found.get('mask') !== cd.get('mask') || found.get('type') !== cd.get('type')))
+                        this.grid.current.api.redrawRows()
+                });
+            })
         }
         if (prevProps.t !== this.props.t) {
             this.setState({
-                locale:switchAntdLocale(this.props.i18n.language, this.props.t),
-                overlayNoRowsTemplate: `<span>${this.props.t("no rows to show")}</span>`
-            },()=> !this.state.rowData || this.state.rowData.length === 0 ? this.grid.current.api.showNoRowsOverlay() : undefined
+                    locale:switchAntdLocale(this.props.i18n.language, this.props.t),
+                    overlayNoRowsTemplate: `<span>${this.props.t("no rows to show")}</span>`
+                },()=> !this.state.rowData || this.state.rowData.length === 0 ? this.grid.current.api.showNoRowsOverlay() : undefined
             )
         }
         if (this.props.aggregatedRows && this.props.aggregatedRows.length > 0 && this.props.highlightClassFunction){
@@ -259,7 +326,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const {gridOptions} = this.state;
         this.setState({highlights: this.props.highlights});
         const newCellStyle = (params: any) => {
-            const columnDef = this.state.columnDefs.find((c:any) => c.get('field') === params.colDef.field);
+            const columnDef = this.props.leafColumnDefs.find((c:any) => c.get('field') === params.colDef.field);
             const textAlign = columnDef && columnDef.get('textAlign')
                 ? columnDef.get('textAlign')
                 : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
@@ -534,29 +601,47 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     return 'grid-update-highlight';
                 return ""
             };
-            let rowData;
             let newColumnDefs:any[] = [];
-            rowData = new Map();
-            rowData.set('field', this.props.t('data menu'));
-            rowData.set('headerName', this.props.t('data menu'));
-            rowData.set('headerTooltip', 'type : String');
-            rowData.set('component','menu');
-            newColumnDefs.push(rowData);
-            newColumnDefs = newColumnDefs.concat(this.state.columnDefs);
+            newColumnDefs.push({
+                field: this.props.t('data menu'),
+                headerName: this.props.t('data menu'),
+                checkboxSelection: true,
+                headerCheckboxSelection: true,
+                headerCheckboxSelectionFilteredOnly: this.props.isEditMode,
+                cellRenderer: 'menu',
+                cellStyle: this.state ? this.state.cellStyle : undefined,
+                cellRendererParams: {
+                    t: this.props.t,
+                    onDelete: this.onDelete,
+                    editGrid: this,
+                    showMenuCopyButton: this.props.showMenuCopyButton,
+                }
+            });
+            newColumnDefs = newColumnDefs.concat(this.state.columnDefs.map((c:any)=>c));
             if (this.props.showEditDeleteButton) {
-                rowData = new Map();
-                rowData.set('field', this.props.t('delete row'));
-                rowData.set('headerName', this.props.t('delete row'));
-                rowData.set('headerTooltip', 'type : String');
-                rowData.set('component','deleteButton');
-                rowData.set('textAlign','center');
-                newColumnDefs.push(rowData);
+                newColumnDefs.push({
+                    field: this.props.t('delete row'),
+                    headerName: this.props.t('delete row'),
+                    cellRenderer: 'deleteButton',
+                    cellStyle: {
+                        textAlign: 'center',
+                        marginTop: 'auto',
+                        marginBottom: 'auto'
+                    },
+                    cellRendererParams: {
+                        t: this.props.t,
+                        onDelete: this.onDelete,
+                        editGrid: this,
+                        showMenuCopyButton: this.props.showMenuCopyButton,
+                    }
+                });
             }
             this.setState({columnDefs : newColumnDefs},()=>{
+                this.grid.current.columnApi.moveColumn(this.props.t('data menu'),0);
                 this.grid.current.api.redrawRows();
             });
         } else {
-            let newColumnDefs = this.state.columnDefs.filter((c:any) => c.get('field') !== this.props.t('data menu') && c.get('field') !== this.props.t('delete row'));
+            let newColumnDefs = this.state.columnDefs.filter((c:any) => c.field !== this.props.t('data menu') && c.field !== this.props.t('delete row'));
             this.gridOptions.getRowClass = undefined;
             this.grid.current.api.setQuickFilter(undefined);
             this.disableSelection();
@@ -596,15 +681,15 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     data.prevOperationMark__ = undefined;
                 }
             })
-        //Если отмечена как удалённая
+            //Если отмечена как удалённая
         } else if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete) {
             this.buffer = this.buffer.filter(el => !Object.is(el, data));
             data.operationMark__ = undefined;
-        //Если новая вставленная запись удаляем
+            //Если новая вставленная запись удаляем
         } else if (data.operationMark__ === dmlOperation.insert) {
             this.buffer = this.buffer.filter(el => !Object.is(el, data));
             this.grid.current.api.applyTransaction({remove: [data]})
-        //Если это существующая запись которая была обновлена и её нет в буфере
+            //Если это существующая запись которая была обновлена и её нет в буфере
         } else if (data.operationMark__ === dmlOperation.update) {
             data.operationMark__ = dmlOperation.delete;
             data.prevOperationMark__ = dmlOperation.update;
@@ -642,9 +727,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
             //Частный случай когда ячейка не заполнена
             && !(params.newValue === undefined && params.oldValue === null)) {
             if (params.node.data.operationMark__ !== dmlOperation.insert) {
-                    //Если ниразу не записывали в историю
-                    if (params.node.data[`${params.column.getColDef().field}__`] === undefined)
-                        params.node.data[`${params.column.getColDef().field}__`] = params.oldValue ? params.oldValue : null;
+                //Если ниразу не записывали в историю
+                if (params.node.data[`${params.column.getColDef().field}__`] === undefined)
+                    params.node.data[`${params.column.getColDef().field}__`] = params.oldValue ? params.oldValue : null;
                 params.node.data.operationMark__ = dmlOperation.update;
                 if (!this.buffer.find(el=> Object.is(el, params.node.data)))
                     this.buffer.push(params.node.data)
@@ -701,6 +786,69 @@ class DatasetGrid extends React.Component<Props & any, any> {
         this.gridOptions.api?.setHeaderHeight(minHeight)
     };
 
+    colDefsToObject = (colDefs: Map<String,any>[], newColDef: {}[] = []) => {
+        for (const colDef of colDefs) {
+            if (colDef.get('children')) {
+                newColDef.push({
+                    headerName: colDef.get('headerName'),
+                    children: this.colDefsToObject(colDef.get('children')),
+                    hide: colDef.get('hide') || false
+                })
+            } else {
+                newColDef.push({
+                    onCellValueChanged: this.props.isEditMode ? this.onUpdate : undefined,
+                    onCellClicked: this.props.isEditMode ? colDef.get('onCellDoubleClicked') : undefined,
+                    width: colDef.get('width'),
+                    type: colDef.get('type'),
+                    key: colDef.get('field'),
+                    field: colDef.get('field'),
+                    headerName: colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
+                    headerTooltip: colDef.get('headerTooltip'),
+                    hide: colDef.get('hide') || false,
+                    editable: colDef.get('editable') || false,
+                    pinned: colDef.get('pinned') === 'Left' ? 'left' : colDef.get('pinned') === 'Right' ? 'right' : false,
+                    resizable: colDef.get('resizable') || false,
+                    sortable: colDef.get('sortable') || false,
+                    suppressMenu: colDef.get('suppressMenu') || false,
+                    cellStyle: this.state ? this.state.cellStyle : undefined,
+                    cellRendererParams: (colDef.get('component')) ? {
+                        ...this.props,
+                        viewObject: colDef.get('component'),
+                        componentRenderCondition: colDef.get('componentRenderCondition'),
+                        onDelete: this.onDelete,
+                        editGrid: this,
+                        showMenuCopyButton: this.props.showMenuCopyButton,
+                        isAgComponent: true
+                    } : undefined,
+                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass._id : colDef.get('component')) : function (params: any) {
+                        return params.valueFormatted? params.valueFormatted : params.value;
+                    },
+                    cellEditor: (colDef.get('editComponent'))
+                        ? this.getComponent(colDef.get('editComponent').eClass
+                            ? colDef.get('editComponent').eClass._id
+                            : colDef.get('editComponent'))
+                        : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
+                            ? 'DateEditor'
+                            : undefined,
+                    cellEditorParams: (colDef.get('editComponent'))
+                        ? {
+                            ...this.props,
+                            viewObject: colDef.get('editComponent'),
+                            isAgComponent: true,
+                            isAgEdit: true,
+                            colData: colDef.get('field')
+                        }
+                        : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
+                            ? {mask: colDef.get('mask'), type: colDef.get('type')}
+                            : undefined,
+                    valueFormatter: colDef.get('valueFormatter'),
+                    tooltipField: colDef.get('tooltipField')
+                });
+            }
+        }
+        return newColDef;
+    };
+
     render() {
         const {gridOptions} = this.state;
         return (
@@ -714,12 +862,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     style={{
-                        height: this.props.height ? this.props.height : 535,
+                        height: this.props.height ? this.props.height : 460 ,
                         width: this.props.width ? this.props.width : "99,5%",
                     minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
+                            columnDefs={this.state.columnDefs}
                             columnTypes={agGridColumnTypes}
                             ref={this.grid}
                             rowData={this.state.rowData}
@@ -746,61 +895,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
                             tooltipShowDelay = {1000}
                             {...gridOptions}
-                        >
-                            {this.state.columnDefs.map((col: any) =>
-                                <AgGridColumn
-                                    onCellValueChanged={this.props.isEditMode ? this.onUpdate : undefined}
-                                    onCellClicked={this.props.isEditMode ? col.get('onCellDoubleClicked') : undefined}
-                                    width={col.get('width')}
-                                    type={col.get('type')}
-                                    key={col.get('field')}
-                                    field={col.get('field')}
-                                    headerName={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
-                                    headerTooltip={col.get('headerName').toString().substring(0, 1).toUpperCase() + col.get('headerName').toString().substring(1)}
-                                    hide={col.get('hide') || false}
-                                    editable={col.get('editable') || false}
-                                    pinned={col.get('pinned') === 'Left' ? 'left' : col.get('pinned') === 'Right' ? 'right' : false}
-                                    // filter={col.get('filter') === 'NumberColumnFilter'
-                                    //     ? 'agNumberColumnFilter' : col.get('filter') === 'DateColumnFilter' ?
-                                    //         'agDateColumnFilter' : 'agTextColumnFilter'}
-                                    checkboxSelection={this.props.isEditMode ? isFirstColumn : false}
-                                    headerCheckboxSelection={this.props.isEditMode ? isFirstColumn : false}
-                                    headerCheckboxSelectionFilteredOnly={this.props.isEditMode}
-                                    resizable={col.get('resizable') || false}
-                                    sortable={col.get('sortable') || false}
-                                    suppressMenu={col.get('suppressMenu') || false}
-                                    cellStyle = {this.state.cellStyle}
-                                    cellRendererParams = {(col.get('component')) ? {
-                                        ...this.props,
-                                        viewObject: col.get('component'),
-                                        componentRenderCondition: col.get('componentRenderCondition'),
-                                        onDelete: this.onDelete,
-                                        editGrid: this,
-                                        showMenuCopyButton: this.props.showMenuCopyButton,
-                                        isAgComponent: true
-                                    } : undefined}
-                                    cellRenderer = {
-                                        (col.get('component')) ? this.getComponent(col.get('component').eClass ? col.get('component').eClass._id : col.get('component')) : function (params: any) {
-                                            return params.valueFormatted? params.valueFormatted : params.value;
-                                        }
-                                    }
-                                    cellEditor = {(col.get('editComponent')) ? this.getComponent(col.get('editComponent').eClass ? col.get('editComponent').eClass._id : col.get('editComponent')) : [appTypes.Date,appTypes.Timestamp].includes(col.get('type')) ? 'DateEditor' : undefined }
-                                    cellEditorParams = {(col.get('editComponent'))
-                                        ? {
-                                        ...this.props,
-                                        viewObject: col.get('editComponent'),
-                                        isAgComponent: true,
-                                        isAgEdit: true,
-                                        colData: col.get('field')
-                                        }
-                                        : [appTypes.Date,appTypes.Timestamp].includes(col.get('type'))
-                                            ? {mask: col.get('mask'), type: col.get('type')}
-                                            : undefined}
-                                    valueFormatter = {col.get('valueFormatter')}
-                                    tooltipField = {col.get('tooltipField')}
-                                />
-                            )}
-                        </AgGridReact>
+                        />
                     </ConfigProvider>
                     }
                     <div id="datasetPaginator"
