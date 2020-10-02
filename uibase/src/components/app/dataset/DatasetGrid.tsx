@@ -804,8 +804,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 })
             } else {
                 newColDef.push({
-                    onCellValueChanged: this.props.isEditMode ? this.onUpdate : undefined,
-                    onCellClicked: this.props.isEditMode ? colDef.get('onCellDoubleClicked') : undefined,
+                    onCellValueChanged: this.onUpdate,
+                    onCellClicked: colDef.get('onCellDoubleClicked'),
                     width: colDef.get('width'),
                     type: colDef.get('type'),
                     key: colDef.get('field'),

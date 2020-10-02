@@ -342,7 +342,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('formatMask', c.get('formatMask'));
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
                 rowData.set('onCellDoubleClicked', (params: any) => {
-                    if (params.colDef.editable) {
+                    if (params.colDef.editable && this.state.isEditMode) {
                         if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
                             const startEditingParams = {
                                 rowIndex: params.rowIndex,
