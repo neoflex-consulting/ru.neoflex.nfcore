@@ -162,13 +162,18 @@ class DatasetGrid extends React.Component<Props & any, any> {
         while (childrenToVisit.length != 0) {
             const current = childrenToVisit.shift();
             if (!current.hide) {
-                headerRow.push({
-                    headerName: current.headerName,
-                    columnSpan: current.children ? this.getLeafColumns(current.children).length : 1,
-                    rowSpan: childrenToVisit.filter(ct=>ct.children).length !== 0
-                        ? maxDepth - headerArr.length
-                        : 1
-                });
+                if (current.children && this.getLeafColumns(current.children).filter(c=>!c.hide).length > 0
+                    || !current.children) {
+                    headerRow.push({
+                        headerName: current.headerName,
+                        columnSpan: current.children ? this.getLeafColumns(current.children).filter(c=>!c.hide).length : 1,
+                        rowSpan: current.children
+                            ? maxDepth - findDepth(current)
+                            : (maxDepth - headerArr.length) > 0
+                                ? maxDepth - headerArr.length
+                                : 1
+                    });
+                }
             }
             if (current.children) {
                 childrenToVisit = childrenToVisit.concat(current.children)
@@ -217,8 +222,8 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return  {
             hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
-            gridData:(tableData.length === 0) ? [[]] : tableData,
-            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
+            gridData:(tableData.length === 0) ? [] : tableData,
+            gridHeader:(gridHeader.length === 0) ? [] : gridHeader
         };
     }
 
@@ -228,7 +233,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         let gridHeader = this.calcExportSpans(this.state.columnDefs);
         for (const elem of this.getLeafColumns(this.state.columnDefs)) {
             if (!elem.hide) {
-                header.push({name: elem.headerName, filterButton: false});
+                header.push({
+                    name: elem.headerName,
+                    filterButton: gridHeader.length <= 1
+                });
                 visible.push(elem.field)
             }
         }
