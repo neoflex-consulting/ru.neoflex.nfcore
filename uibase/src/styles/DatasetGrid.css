@@ -21,6 +21,21 @@
     font-size: 14px;
 }
 
+#datasetGrid * .ag-header-group-cell-label {
+    justify-content: center;
+    font-size: 14px;
+}
+
+#datasetGrid * .ag-header-group-cell-label:after {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 100%;
+    width: 1px;
+    height: 100%;
+    background-color: #E6E6E6;
+}
+
 .functionalBar__header {
     background: #F2F2F2 !important;
     box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
