@@ -142,6 +142,9 @@ async function handleExportExcel(handlers: any[], withTable: any, isDownloadFrom
             }
             offset += 1;
         }
+        worksheet.columns.forEach(c=>{
+            c.width = 20
+        })
     }
     }
     return workbook.xlsx.writeBuffer()
