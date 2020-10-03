@@ -35,7 +35,7 @@ public class Session implements Closeable {
     public static final String EPROXY = "EProxy";
     public static final String ORIENTDB_SOURCE = "http://orientdb.com/meta";
     public static final String ANN_O_CLASS_NAME = "oClassName";
-    final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
+    final Map<Resource, List<OVertex>> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
     private final ODatabaseDocumentInternal currentDB;
@@ -337,7 +337,19 @@ public class Session implements Closeable {
 
     private void deleteRecursive(OVertex oElement) {
         clearContents(oElement);
+        deleteLinks(oElement);
         oElement.delete();
+    }
+
+    private static void deleteLinks(OVertex delegate) {
+        Iterable<OEdge> allEdges = delegate.getEdges(ODirection.BOTH, EREFERS);
+        Set<OEdge> items = new HashSet<>();
+        for (OEdge edge : allEdges) {
+            items.add(edge);
+        }
+        for (OEdge edge : items) {
+            edge.delete();
+        }
     }
 
     private void populateOElement(EObject eObject, OElement oElement) {
@@ -488,75 +500,86 @@ public class Session implements Closeable {
     }
 
     public void delete(URI uri) {
-        ORID orid = factory.getORID(uri);
-        OVertex oVertex = db.load(orid);
-        if (oVertex == null) {
-            return;
-        }
-        checkVersion(uri, oVertex);
-        List<Resource> dependent = getDependentResources(orid);
-        if (dependent.size() > 0) {
-            String ids = dependent.stream().map(resource -> factory.getORID(resource.getURI()).toString()).collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
-                    oVertex.getIdentity(), ids));
-        }
         ResourceSet rs = createResourceSet();
         Resource resource = rs.createResource(uri);
-        EObject eObject = createEObject(rs, oVertex);
-        resource.getContents().add(eObject);
-        populateEObject(resource.getResourceSet(), oVertex, eObject);
+        List<Resource> dependent = getDependentResources(resource);
+        if (dependent.size() > 0) {
+            String ids = dependent.stream().flatMap(r -> factory.getORIDs(r.getURI()).map(Object::toString)).collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
+                    factory.getORIDs(uri).map(Object::toString).collect(Collectors.joining(", ")), ids));
+        }
+        List<Integer> versions = factory.getVersions(uri).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(uri).collect(Collectors.toList());
+        List<OVertex> vertices = new ArrayList<>();
+        for (int i = 0; i < orids.size(); ++i) {
+            ORID orid = orids.get(i);
+            OVertex oVertex = db.load(orid);
+            if (oVertex == null) {
+                throw new IllegalArgumentException(String.format("Can't delete element with @rid %s (element not found)", orid.toString()));
+            }
+            checkVersion(versions.get(i), oVertex);
+            vertices.add(oVertex);
+            EObject eObject = createEObject(rs, oVertex);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), oVertex, eObject);
+        }
         getFactory().getEvents().fireBeforeDelete(resource);
-        deleteRecursive(oVertex);
+        for (OVertex oVertex: vertices) {
+            deleteRecursive(oVertex);
+        }
     }
 
     public void save(Resource resource) {
-        Resource oldResource = null;
-        ORecord firstRecord = null;
-        for (EObject eObject: resource.getContents()) {
-            OVertex oVertex = loadElement(eObject);
-            if (oVertex == null) {
+        ResourceSet rs = createResourceSet();
+        Resource oldResource = rs.createResource(resource.getURI());
+        List<Integer> versions = factory.getVersions(resource.getURI()).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(resource.getURI()).collect(Collectors.toList());
+        List<OVertex> vertexes = new ArrayList<>();
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex;
+            if (i >= orids.size() || orids.get(i) == null) {
                 oVertex = createOVertex(eObject);
             } else {
-                checkVersion(resource.getURI(), oVertex);
-                ResourceSet rs = createResourceSet();
-                oldResource = rs.createResource(resource.getURI());
+                oVertex = db.load(orids.get(i));
+                checkVersion(versions.get(i), oVertex);
                 EObject oldObject = createEObject(rs, oVertex);
                 oldResource.getContents().add(oldObject);
                 populateEObject(rs, oVertex, oldObject);
             }
-            if (firstRecord == null) {
-                getFactory().getEvents().fireBeforeSave(oldResource, resource);
-            }
+            vertexes.add(oVertex);
+        }
+        getFactory().getEvents().fireBeforeSave(oldResource, resource);
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex = vertexes.get(i);
             populateOElement(eObject, oVertex);
-            ORecord oRecord = oVertex.save();
-            if (firstRecord == null) {
-                firstRecord = oRecord;
-            }
+            OVertex oRecord = oVertex.save();
+            vertexes.set(i, oRecord);
         }
-        if (firstRecord != null) {
-            resource.setURI(factory.createResourceURI(firstRecord));
-            getFactory().getEvents().fireAfterSave(oldResource, resource);
-            savedResourcesMap.put(resource, firstRecord);
-        }
+        getFactory().getEvents().fireAfterSave(oldResource, resource);
+        resource.setURI(factory.createResourceURI(vertexes));
+        savedResourcesMap.put(resource, vertexes);
     }
 
-    public void checkVersion(URI uri, OVertex oElement) {
-        if (oElement.getVersion() != factory.getVersion(uri)) {
-            throw new ConcurrentModificationException("OElement " + factory.getORID(uri) +
+    public void checkVersion(int version, OVertex oElement) {
+        if (oElement.getVersion() != version) {
+            throw new ConcurrentModificationException("OElement " + oElement.getIdentity() +
                     " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
-                    factory.getVersion(uri));
+                    version);
         }
     }
 
     public void load(Resource resource) {
-        OVertex oElement = loadElementOrThrow(resource.getURI());
-        EObject eObject = createEObject(resource.getResourceSet(), oElement);
         resource.getContents().clear();
-        resource.getContents().add(eObject);
-        resource.setURI(factory.createResourceURI(oElement));
-        populateEObject(resource.getResourceSet(), oElement, eObject);
-// Не нужно резолвить здесь! Это ведёт к лишним запросам и ломает Export With Dependencies
-//        EcoreUtil.resolveAll(resource);
+        List<OElement> elements = factory.getORIDs(resource.getURI())
+                .map(orid -> (OElement) db.load(orid)).collect(Collectors.toList());
+        elements.forEach(oElement -> {
+            EObject eObject = createEObject(resource.getResourceSet(), oElement);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), (OVertex) oElement, eObject);
+        });
+        resource.setURI(factory.createResourceURI(elements));
         getFactory().getEvents().fireAfterLoad(resource);
     }
 
@@ -812,15 +835,16 @@ public class Session implements Closeable {
         return savedResourcesMap.keySet();
     }
 
-    public void getDependentResources(ORID orid, Consumer<Supplier<Resource>> consumer) {
+    public void getDependentResources(List<ORID> orids, Consumer<Supplier<Resource>> consumer) {
+        String oset = "[" + orids.stream().map(Object::toString).collect(Collectors.joining(","))+ "]";
         query("select distinct * from (\n" +
                 "  traverse in('EContains') from (\n" +
                 "    select expand(in('ERefers')) from (\n" +
-                "      traverse out('EContains') from ?\n" +
+                "      traverse out('EContains') from " + oset + "\n" +
                 "    )\n" +
                 "  )\n" +
                 ")\n" +
-                "where in('EContains').size() == 0 and @rid != ?", consumer, orid, orid);
+                "where in('EContains').size() == 0 and @rid not in " + oset, consumer);
     }
 
     public void getDependentResources(Resource resource, Consumer<Supplier<Resource>> consumer) {
@@ -828,19 +852,19 @@ public class Session implements Closeable {
     }
 
     public void getDependentResources(URI uri, Consumer<Supplier<Resource>> consumer) {
-        getDependentResources(factory.getORID(uri), consumer);
+        getDependentResources(factory.getORIDs(uri).collect(Collectors.toList()), consumer);
     }
 
-    public List<Resource> getDependentResources(ORID orid) {
+    public List<Resource> getDependentResources(List<ORID> orids) {
         List<Resource> resources = new ArrayList<>();
-        getDependentResources(orid, resourceSupplier -> {
+        getDependentResources(orids, resourceSupplier -> {
             resources.add(resourceSupplier.get());
         });
         return resources;
     }
 
     public List<Resource> getDependentResources(Resource resource) {
-        return getDependentResources(factory.getORID(resource.getURI()));
+        return getDependentResources(factory.getORIDs(resource.getURI()).collect(Collectors.toList()));
     }
 
     public void getAll(Consumer<Supplier<Resource>> consumer) {
