@@ -102,10 +102,6 @@ public class Session implements Closeable {
         return ePackage.getNsPrefix() + "_" + eClass.getName();
     }
 
-    private String getEdgeName(EReference sf) {
-        return getOClassName(sf.getEContainingClass()) + "_" + sf.getName();
-    }
-
     private OClass getOrCreateOClass(EClass eClass) {
         String oClassName = getOClassName(eClass);
         OClass oClass = db.getClass(oClassName);
@@ -468,19 +464,29 @@ public class Session implements Closeable {
                                 if (orid == null) {
                                     crVertex = createProxyOElement(crObject.eClass(), crURI);
                                     crVertex.save();
-                                    OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, getEdgeName((EReference) sf));
+                                    OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, EREFERS);
+                                    oEdge.setProperty("feature", sf.getName());
+                                    oEdge.setProperty("index", i);
                                     oEdge.save();
                                 }
                                 else {
                                     crVertex = db.load(orid);
+                                    if (crVertex == null) {
+                                        throw new IllegalArgumentException(String.format("Can't refer to element with @rid %s (element not found)", orid.toString()));
+                                    }
+                                    int index = i;
                                     Optional<OEdge> oEdgeOpt = references.stream().filter(e ->
-                                                    e.getTo().equals(crVertex)
+                                            e.getProperty("feature").equals(sf.getName())
+                                            && e.getProperty("index").equals(index)
+                                            && e.getTo().equals(crVertex)
                                     ).findFirst();
                                     if (oEdgeOpt.isPresent()) {
                                         references.remove(oEdgeOpt.get());
                                     }
                                     else {
-                                        OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, getEdgeName((EReference) sf));
+                                        OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, EREFERS);
+                                        oEdge.setProperty("feature", sf.getName());
+                                        oEdge.setProperty("index", index);
                                         oEdge.save();
                                     }
                                 }
@@ -646,7 +652,9 @@ public class Session implements Closeable {
                     populateEObjectRefers(rs, crVertex, crObject);
                 }
             }
-            for (OEdge oEdge : ((OVertex) oElement).getEdges(ODirection.OUT, EREFERS)) {
+            List<OEdge> edges = StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, EREFERS).spliterator(), false).collect(Collectors.toList());
+            edges.sort(Comparator.comparing(e->e.getProperty("index")));
+            for (OEdge oEdge : edges) {
                 EReference sf = getEReference(eObject, oEdge);
                 if (sf == null || sf.isContainment()) {
                     continue;
@@ -761,7 +769,9 @@ public class Session implements Closeable {
             }
         }
         if (oElement instanceof OVertex) {
-            for (OEdge oEdge : ((OVertex) oElement).getEdges(ODirection.OUT, ECONTAINS)) {
+            List<OEdge> edges = StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, ECONTAINS).spliterator(), false).collect(Collectors.toList());
+            edges.sort(Comparator.comparing(e->e.getProperty("index")));
+            for (OEdge oEdge : edges) {
                 EReference sf = getEReference(eObject, oEdge);
                 if (sf == null || !sf.isContainment()) {
                     continue;
@@ -789,11 +799,7 @@ public class Session implements Closeable {
     }
 
     private EReference getEReference(EObject eObject, OEdge oEdge) {
-        if (!oEdge.getSchemaType().isPresent()) {
-            return null;
-        }
-        OClass oClass = oEdge.getSchemaType().get();
-        String feature = oClass.getCustom("feature");
+        String feature = oEdge.getProperty("feature");
         if (feature == null) {
             return null;
         }
