@@ -83,15 +83,14 @@ public class EmfJson {
                 .with(attributes)
                 .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
-//        if (resource instanceof XMLResourceImpl) {
-//            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
-//            for (Iterator<EObject> it = jsonResource.getAllContents(); it.hasNext();) {
-//                EObject eObject = it.next();
-//                xmlResource.setID(eObject, jsonResource.getID(eObject));
-//            }
-//        }
-//        EcoreUtil.resolveAll(jsonResource);
-        resource.getContents().addAll(EcoreUtil.copyAll(jsonResource.getContents()));
+        if (resource instanceof XMLResourceImpl) {
+            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
+            for (Iterator<EObject> it = jsonResource.getAllContents(); it.hasNext();) {
+                EObject eObject = it.next();
+                xmlResource.setID(eObject, jsonResource.getID(eObject));
+            }
+        }
+        resource.getContents().addAll(jsonResource.getContents());
         return resource;
     }
 
