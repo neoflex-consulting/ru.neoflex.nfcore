@@ -553,7 +553,12 @@ public class Session implements Closeable {
         for (int i = 0; i < resource.getContents().size(); ++i) {
             EObject eObject = resource.getContents().get(i);
             OVertex oVertex = vertexes.get(i);
-            populateOElement(eObject, oVertex);
+            populateOElementContainment(eObject, oVertex);
+        }
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex = vertexes.get(i);
+            populateOElementCross(eObject, oVertex);
             OVertex oRecord = oVertex.save();
             vertexes.set(i, oRecord);
         }
