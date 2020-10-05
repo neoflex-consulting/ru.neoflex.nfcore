@@ -99,10 +99,25 @@ public class SysController {
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
             try {
-                context.inContext(()->store.inTransaction(true, tx -> {
-                    new Exporter(store).zipAll(pipedOutputStream);
-                    return null;
-                }));
+                try (ZipOutputStream zipOutputStream = new ZipOutputStream(pipedOutputStream);) {
+                    store.inTransaction(true, tx -> {
+                        List<Resource> all = DocFinder.create(store).getAllResources();
+                        new Exporter(store).zip(all, zipOutputStream);
+                        return null;
+                    });
+                    workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.READ, tx -> {
+                        for (Iterator<Path> it = Files.walk(tx.getFileSystem().getRootPath()).filter(Files::isRegularFile).iterator(); it.hasNext(); ) {
+                            Path path = it.next();
+                            logger.info("Export " + path.getFileName().toString());
+                            byte[] bytes = Files.readAllBytes(path);
+                            ZipEntry refsEntry = new ZipEntry(path.toString().substring(1));
+                            zipOutputStream.putNextEntry(refsEntry);
+                            zipOutputStream.write(bytes);
+                            zipOutputStream.closeEntry();
+                        }
+                        return null;
+                    });
+                }
             } catch (Exception e) {
                 logger.error("Export DB", e);
             }
