@@ -278,7 +278,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         return (
             <div id={"meta-browser"}>
                 <Helmet>
-                    <title>{this.props.t('metadata')}</title>
+                    <title>{t('metadata')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
                 <div style={{top:'-100px', height:'0'}} className={"meta-browser-tabs-region meta-browser-center-element"}>
@@ -326,8 +326,8 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                       tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                        return <NeoTabs.NeoTabPane tab={t(eObj.name)}
-                                        key={t(eObj.name)}>
+                        return <NeoTabs.NeoTabPane tab={eObj.name}
+                                        key={eObj.name}>
                             <DatasetGrid
                                 ref={(ref:any)=> {
                                     eObj.gridRef = ref;

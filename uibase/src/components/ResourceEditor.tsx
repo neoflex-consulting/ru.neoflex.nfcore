@@ -439,9 +439,7 @@ class ResourceEditor extends React.Component<any, State> {
                 !node.isArray && !node.headline && <Menu.Item key="moveDown">{this.props.t("move down")}</Menu.Item>}
 
                 {!node.isArray && !node.headline && <Menu.Item key="delete">{this.props.t("delete")}</Menu.Item>}
-                //TODO
-                //Временно отключил, слишком много критичных багов при копировании ссылок
-                {/*{!node.isArray && !node.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}*/}
+                {!node.isArray && !node.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
             </Menu>
         </div>
     }
