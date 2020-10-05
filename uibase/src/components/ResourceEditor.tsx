@@ -421,7 +421,10 @@ class ResourceEditor extends React.Component<any, State> {
                             type.get('abstract') ?
                                 undefined
                                 :
-                                <Menu.Item key={type.get('name')}>
+                                <Menu.Item
+                                    style={{marginTop: idx === 0 && allSubTypes.length > 5 ? '80px' : '-13px'}}
+                                    key={type.get('name')}
+                                >
                                     {type.get('name')}
                                 </Menu.Item>)}
                 </Menu.SubMenu>}
