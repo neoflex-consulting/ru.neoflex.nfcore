@@ -27,15 +27,17 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class Session implements Closeable {
+    public static final String EREFERENCE = "EReference";
     public static final String EREFERS = "ERefers";
     public static final String ECONTAINS = "EContains";
     public static final String EOBJECT = "EObject";
     public static final String EPROXY = "EProxy";
     public static final String ORIENTDB_SOURCE = "http://orientdb.com/meta";
     public static final String ANN_O_CLASS_NAME = "oClassName";
-    final Map<Resource, ORecord> savedResourcesMap = new HashMap<>();
+    final Map<Resource, List<OVertex>> savedResourcesMap = new HashMap<>();
     private final SessionFactory factory;
     private final ODatabaseDocument db;
     private final ODatabaseDocumentInternal currentDB;
@@ -62,10 +64,22 @@ public class Session implements Closeable {
         return factory;
     }
 
+    private OClass getOrCreateEReferenceEdge() {
+        OClass oClass = db.getClass(EREFERENCE);
+        if (oClass == null) {
+            oClass = db.createEdgeClass(EREFERENCE);
+            oClass.setAbstract(true);
+            oClass.createProperty("feature", OType.STRING);
+            oClass.createProperty("index", OType.INTEGER);
+        }
+        return oClass;
+    }
+
     private OClass getOrCreateERefersEdge() {
         OClass oClass = db.getClass(EREFERS);
         if (oClass == null) {
             oClass = db.createEdgeClass(EREFERS);
+            oClass.addSuperClass(getOrCreateEReferenceEdge());
         }
         return oClass;
     }
@@ -74,6 +88,7 @@ public class Session implements Closeable {
         OClass oClass = db.getClass(ECONTAINS);
         if (oClass == null) {
             oClass = db.createEdgeClass(ECONTAINS);
+            oClass.addSuperClass(getOrCreateEReferenceEdge());
         }
         return oClass;
     }
@@ -85,10 +100,6 @@ public class Session implements Closeable {
         }
         EPackage ePackage = eClass.getEPackage();
         return ePackage.getNsPrefix() + "_" + eClass.getName();
-    }
-
-    private String getEdgeName(EReference sf) {
-        return getOClassName(sf.getEContainingClass()) + "_" + sf.getName();
     }
 
     private OClass getOrCreateOClass(EClass eClass) {
@@ -210,8 +221,8 @@ public class Session implements Closeable {
     }
 
     public void createSchema() {
-        ((ODatabaseDocumentInternal) db).setUseLightweightEdges(true);
         getOrCreateEProxyClass();
+        getOrCreateEReferenceEdge();
         getOrCreateEContainsEdge();
         getOrCreateERefersEdge();
         for (EClass eClass : factory.getEClasses()) {
@@ -248,14 +259,8 @@ public class Session implements Closeable {
                         if (oClass.getProperty(sf.getName()) == null) {
                             createProperty(oClass, sf);
                         }
-                    } else {
-                        String edgeName = getEdgeName(sf);
-                        if (db.getClass(edgeName) == null) {
-                            OClass edgeClass = db.createClass(edgeName, sf.isContainment() ? ECONTAINS : EREFERS);
-                            edgeClass.setCustom("feature", sf.getName());
-                        }
+                        createIndexIfRequired(oClass, sf);
                     }
-                    createIndexIfRequired(oClass, sf);
                 }
             }
         }
@@ -302,14 +307,6 @@ public class Session implements Closeable {
         return db.load(orid);
     }
 
-    private OVertex loadElementOrThrow(URI uri) {
-        OVertex oElement = loadElement(uri);
-        if (oElement == null) {
-            throw new RuntimeException("Can not load element with uri: " + uri);
-        }
-        return oElement;
-    }
-
     private Object objectToOObject(EDataType eDataType, Object value) {
         OType oType = convertEDataType(eDataType);
         if (oType == OType.STRING) {
@@ -337,21 +334,25 @@ public class Session implements Closeable {
 
     private void deleteRecursive(OVertex oElement) {
         clearContents(oElement);
+        deleteLinks(oElement);
         oElement.delete();
     }
 
-    private void populateOElement(EObject eObject, OElement oElement) {
-        populateOElementContainment(eObject, oElement);
-        populateOElementCross(eObject, oElement);
+    private static void deleteLinks(OVertex delegate) {
+        Iterable<OEdge> allEdges = delegate.getEdges(ODirection.BOTH);
+        Set<OEdge> items = new HashSet<>();
+        for (OEdge edge : allEdges) {
+            items.add(edge);
+        }
+        for (OEdge edge : items) {
+            edge.delete();
+        }
     }
 
     private void populateOElementContainment(EObject eObject, OElement oElement) {
-        Set<OVertex> toDelete = new HashSet<>();
-        if (oElement instanceof OVertex) {
-            for (OVertex oVertex : ((OVertex) oElement).getVertices(ODirection.OUT, ECONTAINS)) {
-                toDelete.add(oVertex);
-            }
-        }
+        Set<OEdge> references = (oElement instanceof OVertex) ?
+                StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, ECONTAINS).spliterator(), false).collect(Collectors.toSet())
+                : Collections.EMPTY_SET;
         EClass eClass = eObject.eClass();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient()) {
@@ -360,7 +361,8 @@ public class Session implements Closeable {
                     if (sf instanceof EReference && ((EReference) sf).isContainment()) {
                         List<EObject> eObjects = sf.isMany() ? (List<EObject>) value : Collections.singletonList((EObject) value);
                         List<OElement> embedded = new ArrayList<>();
-                        for (EObject cObject : eObjects) {
+                        for (int index = 0; index < eObjects.size(); ++index) {
+                            EObject cObject = eObjects.get(index);
                             OElement cElement = loadElement(cObject);
                             if (cElement == null) {
                                 if (isEmbedded((EReference) sf)) {
@@ -369,20 +371,31 @@ public class Session implements Closeable {
                                 } else {
                                     cElement = createOVertex(cObject);
                                 }
-                            } else if (cElement instanceof OVertex) {
-                                toDelete.remove(cElement);
-                                for (OEdge oEdge : ((OVertex) cElement).getEdges(ODirection.IN, ECONTAINS)) {
-                                    oEdge.delete();
-                                }
                             }
                             populateOElementContainment(cObject, cElement);
-                            if (!isEmbedded((EReference) sf)) {
-                                if (!(oElement instanceof OVertex)) {
-                                    throw new IllegalArgumentException("Can't reference from embedded element " +
-                                            oElement + " with edge");
+                            if (cElement instanceof OVertex) {
+                                OVertex to = (OVertex) cElement;
+                                Optional<OEdge> optEdge = references.stream().filter(
+                                        e->e.getProperty("feature").equals(sf.getName())
+                                        && e.getTo().equals(to)
+                                ).findFirst();
+                                if (optEdge.isPresent()) {
+                                    if (!optEdge.get().getProperty("index").equals(index)) {
+                                        optEdge.get().setProperty("index", index);
+                                        optEdge.get().save();
+                                    }
+                                    references.remove(optEdge.get());
                                 }
-                                ((OVertex) oElement).addEdge((OVertex) cElement, getEdgeName((EReference) sf));
-                                cElement.save();
+                                else {
+                                    if (!(oElement instanceof OVertex)) {
+                                        throw new IllegalArgumentException("Can't reference from embedded element " +
+                                                oElement + " with edge");
+                                    }
+                                    OEdge oEdge = ((OVertex) oElement).addEdge((OVertex) cElement, ECONTAINS);
+                                    oEdge.setProperty("feature", sf.getName());
+                                    oEdge.setProperty("index", index);
+                                    oEdge.save();
+                                }
                                 ((OrientDBResource) cObject.eResource()).setID(cObject, factory.getId(cElement.getIdentity()));
                             }
                         }
@@ -407,20 +420,15 @@ public class Session implements Closeable {
                 oElement.removeProperty(sf.getName());
             }
         }
-        for (OVertex oVertex : toDelete) {
-            deleteRecursive(oVertex);
+        for (OEdge oEdge : references) {
+            deleteRecursive(oEdge.getTo());
         }
     }
 
     private void populateOElementCross(EObject eObject, OElement oElement) {
-        if (oElement instanceof OVertex) {
-            for (OEdge oEdge : ((OVertex) oElement).getEdges(ODirection.OUT, EREFERS)) {
-                if (oEdge.getTo().getSchemaType().get().isSubClassOf(EPROXY)) {
-                    oEdge.getTo().delete();
-                }
-                oEdge.delete();
-            }
-        }
+        Set<OEdge> references = (oElement instanceof OVertex) ?
+                StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, EREFERS).spliterator(), false).collect(Collectors.toSet())
+                : Collections.EMPTY_SET;
         EClass eClass = eObject.eClass();
         for (EStructuralFeature sf : eClass.getEAllStructuralFeatures()) {
             if (!sf.isDerived() && !sf.isTransient() && eObject.eIsSet(sf)) {
@@ -452,9 +460,36 @@ public class Session implements Closeable {
                                 if (!(oElement instanceof OVertex)) {
                                     throw new IllegalArgumentException("References from embedded element can only be embedded: " + oElement);
                                 }
-                                OVertex crVertex = orid != null ? db.load(orid) : createProxyOElement(crObject.eClass(), crURI);
-                                ((OVertex) oElement).addEdge(crVertex, getEdgeName((EReference) sf));
-                                crVertex.save();
+                                OVertex crVertex;
+                                if (orid == null) {
+                                    crVertex = createProxyOElement(crObject.eClass(), crURI);
+                                    crVertex.save();
+                                    OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, EREFERS);
+                                    oEdge.setProperty("feature", sf.getName());
+                                    oEdge.setProperty("index", i);
+                                    oEdge.save();
+                                }
+                                else {
+                                    crVertex = db.load(orid);
+                                    if (crVertex == null) {
+                                        throw new IllegalArgumentException(String.format("Can't refer to element with @rid %s (element not found)", orid.toString()));
+                                    }
+                                    int index = i;
+                                    Optional<OEdge> oEdgeOpt = references.stream().filter(e ->
+                                            e.getProperty("feature").equals(sf.getName())
+                                            && e.getProperty("index").equals(index)
+                                            && e.getTo().equals(crVertex)
+                                    ).findFirst();
+                                    if (oEdgeOpt.isPresent()) {
+                                        references.remove(oEdgeOpt.get());
+                                    }
+                                    else {
+                                        OEdge oEdge = ((OVertex) oElement).addEdge(crVertex, EREFERS);
+                                        oEdge.setProperty("feature", sf.getName());
+                                        oEdge.setProperty("index", index);
+                                        oEdge.save();
+                                    }
+                                }
                             } else {
                                 embedded.add(orid);
                             }
@@ -465,6 +500,12 @@ public class Session implements Closeable {
                     }
                 }
             }
+        }
+        for (OEdge oEdge : references) {
+            if (oEdge.getTo().getSchemaType().get().isSubClassOf(EPROXY)) {
+                oEdge.getTo().delete();
+            }
+            oEdge.delete();
         }
     }
 
@@ -488,75 +529,91 @@ public class Session implements Closeable {
     }
 
     public void delete(URI uri) {
-        ORID orid = factory.getORID(uri);
-        OVertex oVertex = db.load(orid);
-        if (oVertex == null) {
-            return;
-        }
-        checkVersion(uri, oVertex);
-        List<Resource> dependent = getDependentResources(orid);
-        if (dependent.size() > 0) {
-            String ids = dependent.stream().map(resource -> factory.getORID(resource.getURI()).toString()).collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
-                    oVertex.getIdentity(), ids));
-        }
         ResourceSet rs = createResourceSet();
         Resource resource = rs.createResource(uri);
-        EObject eObject = createEObject(rs, oVertex);
-        resource.getContents().add(eObject);
-        populateEObject(resource.getResourceSet(), oVertex, eObject);
+        List<Resource> dependent = getDependentResources(resource);
+        if (dependent.size() > 0) {
+            String ids = dependent.stream().flatMap(r -> factory.getORIDs(r.getURI()).map(Object::toString)).collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format("Can not delete element %s with references from [%s]",
+                    factory.getORIDs(uri).map(Object::toString).collect(Collectors.joining(", ")), ids));
+        }
+        List<Integer> versions = factory.getVersions(uri).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(uri).collect(Collectors.toList());
+        List<OVertex> vertices = new ArrayList<>();
+        for (int i = 0; i < orids.size(); ++i) {
+            ORID orid = orids.get(i);
+            OVertex oVertex = db.load(orid);
+            if (oVertex == null) {
+                throw new IllegalArgumentException(String.format("Can't delete element with @rid %s (element not found)", orid.toString()));
+            }
+            checkVersion(versions.get(i), oVertex);
+            vertices.add(oVertex);
+            EObject eObject = createEObject(rs, oVertex);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), oVertex, eObject);
+        }
         getFactory().getEvents().fireBeforeDelete(resource);
-        deleteRecursive(oVertex);
+        for (OVertex oVertex: vertices) {
+            deleteRecursive(oVertex);
+        }
     }
 
     public void save(Resource resource) {
-        Resource oldResource = null;
-        ORecord firstRecord = null;
-        for (EObject eObject: resource.getContents()) {
-            OVertex oVertex = loadElement(eObject);
-            if (oVertex == null) {
+        ResourceSet rs = createResourceSet();
+        Resource oldResource = rs.createResource(resource.getURI());
+        List<Integer> versions = factory.getVersions(resource.getURI()).collect(Collectors.toList());
+        List<ORID> orids = factory.getORIDs(resource.getURI()).collect(Collectors.toList());
+        List<OVertex> vertexes = new ArrayList<>();
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex;
+            if (i >= orids.size() || orids.get(i) == null) {
                 oVertex = createOVertex(eObject);
             } else {
-                checkVersion(resource.getURI(), oVertex);
-                ResourceSet rs = createResourceSet();
-                oldResource = rs.createResource(resource.getURI());
+                oVertex = db.load(orids.get(i));
+                checkVersion(versions.get(i), oVertex);
                 EObject oldObject = createEObject(rs, oVertex);
                 oldResource.getContents().add(oldObject);
                 populateEObject(rs, oVertex, oldObject);
             }
-            if (firstRecord == null) {
-                getFactory().getEvents().fireBeforeSave(oldResource, resource);
-            }
-            populateOElement(eObject, oVertex);
-            ORecord oRecord = oVertex.save();
-            if (firstRecord == null) {
-                firstRecord = oRecord;
-            }
+            vertexes.add(oVertex);
         }
-        if (firstRecord != null) {
-            resource.setURI(factory.createResourceURI(firstRecord));
-            getFactory().getEvents().fireAfterSave(oldResource, resource);
-            savedResourcesMap.put(resource, firstRecord);
+        getFactory().getEvents().fireBeforeSave(oldResource, resource);
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex = vertexes.get(i);
+            populateOElementContainment(eObject, oVertex);
         }
+        for (int i = 0; i < resource.getContents().size(); ++i) {
+            EObject eObject = resource.getContents().get(i);
+            OVertex oVertex = vertexes.get(i);
+            populateOElementCross(eObject, oVertex);
+            OVertex oRecord = oVertex.save();
+            vertexes.set(i, oRecord);
+        }
+        getFactory().getEvents().fireAfterSave(oldResource, resource);
+        resource.setURI(factory.createResourceURI(vertexes));
+        savedResourcesMap.put(resource, vertexes);
     }
 
-    public void checkVersion(URI uri, OVertex oElement) {
-        if (oElement.getVersion() != factory.getVersion(uri)) {
-            throw new ConcurrentModificationException("OElement " + factory.getORID(uri) +
+    public void checkVersion(int version, OVertex oElement) {
+        if (oElement.getVersion() != version) {
+            throw new ConcurrentModificationException("OElement " + oElement.getIdentity() +
                     " has modified.\nDatabase version is " + oElement.getVersion() + ", record version is " +
-                    factory.getVersion(uri));
+                    version);
         }
     }
 
     public void load(Resource resource) {
-        OVertex oElement = loadElementOrThrow(resource.getURI());
-        EObject eObject = createEObject(resource.getResourceSet(), oElement);
         resource.getContents().clear();
-        resource.getContents().add(eObject);
-        resource.setURI(factory.createResourceURI(oElement));
-        populateEObject(resource.getResourceSet(), oElement, eObject);
-// Не нужно резолвить здесь! Это ведёт к лишним запросам и ломает Export With Dependencies
-//        EcoreUtil.resolveAll(resource);
+        List<OElement> elements = factory.getORIDs(resource.getURI())
+                .map(orid -> (OElement) db.load(orid)).collect(Collectors.toList());
+        elements.forEach(oElement -> {
+            EObject eObject = createEObject(resource.getResourceSet(), oElement);
+            resource.getContents().add(eObject);
+            populateEObject(resource.getResourceSet(), (OVertex) oElement, eObject);
+        });
+        resource.setURI(factory.createResourceURI(elements));
         getFactory().getEvents().fireAfterLoad(resource);
     }
 
@@ -595,7 +652,9 @@ public class Session implements Closeable {
                     populateEObjectRefers(rs, crVertex, crObject);
                 }
             }
-            for (OEdge oEdge : ((OVertex) oElement).getEdges(ODirection.OUT, EREFERS)) {
+            List<OEdge> edges = StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, EREFERS).spliterator(), false).collect(Collectors.toList());
+            edges.sort(Comparator.comparing(e->e.getProperty("index")));
+            for (OEdge oEdge : edges) {
                 EReference sf = getEReference(eObject, oEdge);
                 if (sf == null || sf.isContainment()) {
                     continue;
@@ -710,7 +769,9 @@ public class Session implements Closeable {
             }
         }
         if (oElement instanceof OVertex) {
-            for (OEdge oEdge : ((OVertex) oElement).getEdges(ODirection.OUT, ECONTAINS)) {
+            List<OEdge> edges = StreamSupport.stream(((OVertex) oElement).getEdges(ODirection.OUT, ECONTAINS).spliterator(), false).collect(Collectors.toList());
+            edges.sort(Comparator.comparing(e->e.getProperty("index")));
+            for (OEdge oEdge : edges) {
                 EReference sf = getEReference(eObject, oEdge);
                 if (sf == null || !sf.isContainment()) {
                     continue;
@@ -738,11 +799,7 @@ public class Session implements Closeable {
     }
 
     private EReference getEReference(EObject eObject, OEdge oEdge) {
-        if (!oEdge.getSchemaType().isPresent()) {
-            return null;
-        }
-        OClass oClass = oEdge.getSchemaType().get();
-        String feature = oClass.getCustom("feature");
+        String feature = oEdge.getProperty("feature");
         if (feature == null) {
             return null;
         }
@@ -812,15 +869,16 @@ public class Session implements Closeable {
         return savedResourcesMap.keySet();
     }
 
-    public void getDependentResources(ORID orid, Consumer<Supplier<Resource>> consumer) {
+    public void getDependentResources(List<ORID> orids, Consumer<Supplier<Resource>> consumer) {
+        String oset = "[" + orids.stream().map(Object::toString).collect(Collectors.joining(","))+ "]";
         query("select distinct * from (\n" +
                 "  traverse in('EContains') from (\n" +
                 "    select expand(in('ERefers')) from (\n" +
-                "      traverse out('EContains') from ?\n" +
+                "      traverse out('EContains') from " + oset + "\n" +
                 "    )\n" +
                 "  )\n" +
                 ")\n" +
-                "where in('EContains').size() == 0 and @rid != ?", consumer, orid, orid);
+                "where in('EContains').size() == 0 and @rid not in " + oset, consumer);
     }
 
     public void getDependentResources(Resource resource, Consumer<Supplier<Resource>> consumer) {
@@ -828,19 +886,19 @@ public class Session implements Closeable {
     }
 
     public void getDependentResources(URI uri, Consumer<Supplier<Resource>> consumer) {
-        getDependentResources(factory.getORID(uri), consumer);
+        getDependentResources(factory.getORIDs(uri).collect(Collectors.toList()), consumer);
     }
 
-    public List<Resource> getDependentResources(ORID orid) {
+    public List<Resource> getDependentResources(List<ORID> orids) {
         List<Resource> resources = new ArrayList<>();
-        getDependentResources(orid, resourceSupplier -> {
+        getDependentResources(orids, resourceSupplier -> {
             resources.add(resourceSupplier.get());
         });
         return resources;
     }
 
     public List<Resource> getDependentResources(Resource resource) {
-        return getDependentResources(factory.getORID(resource.getURI()));
+        return getDependentResources(factory.getORIDs(resource.getURI()).collect(Collectors.toList()));
     }
 
     public void getAll(Consumer<Supplier<Resource>> consumer) {

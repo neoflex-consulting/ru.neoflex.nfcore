@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>ru.neoflex.meta</groupId>
-            <artifactId>emf-orientdb2</artifactId>
+            <artifactId>emf-orientdb</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
