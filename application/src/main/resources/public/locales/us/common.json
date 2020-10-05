@@ -300,6 +300,8 @@
         "export to docx": "Export to docx",
         "export to excel": "Export to excel",
 
+        "public": "Public",
+        "change current": "Change current",
         "delete selected": "Delete selected",
         "apply changes": "Apply changes",
         "edit buffer": "Edit buffer",
