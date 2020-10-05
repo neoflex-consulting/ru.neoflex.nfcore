@@ -261,12 +261,12 @@ export class API implements IErrorHandler {
                object.$ref = rootId + '#' + ref;
             }
         }
-        let id = object._id;
-        if (id) {
-            if (!id.includes("#")) {
-                object._id = rootId + '#' + id;
-            }
-        }
+        // let id = object._id;
+        // if (id) {
+        //     if (!id.includes("#")) {
+        //         object._id = rootId + '#' + id;
+        //     }
+        // }
         for (var i in object) {
             if (object.hasOwnProperty(i)) {
                 API.fixReferences(object[i], rootId);
