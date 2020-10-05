@@ -13,6 +13,8 @@ import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import org.eclipse.emf.ecore.util.EcoreUtil
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 class Audit {
     String createdBy
     Timestamp created
@@ -109,6 +111,7 @@ class Group extends Authority {
 }
 
 // User Profile (to save ui settings)
+@NFCore(internal="true", documentation="Пользовательский профиль - в нём хранится информация о текущих параметрах выбранных пользователем (аналог cookies)")
 class UserProfile {
     QName name
     String userName
