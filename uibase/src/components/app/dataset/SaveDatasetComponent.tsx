@@ -205,10 +205,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
             <div>
                 <NeoRow>
                     <NeoCol span={24} style={{alignItems:'start', marginBottom:'17px', flexDirection:'column'}}>
-                        <NeoTypography type={"capture-regular"} style={{marginBottom:'4px'}}>Наименование отчета</NeoTypography>
                         <NeoInput
                             width={'100%'}
-                            placeholder={'new report name'}
+                            placeholder={t('label')}
                             disabled={this.state.changeCurrent}
                             style={{ marginBottom: '20px'}}
                             allowClear={true}
@@ -224,7 +223,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeCurrent()}
                         >
-                            Change current
+                            {t('change current')}
                         </NeoInput>
                         <NeoInput
                             type={'checkbox'}
@@ -232,7 +231,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeAccess()}
                         >
-                            Public
+                            {t('public')}
                         </NeoInput>
                     </NeoCol>
                 </NeoRow>

@@ -289,6 +289,8 @@
         "export to docx": "卸貨中docx",
         "export to excel": "卸貨中excel",
 
+        "public": "上市",
+        "change current": "改变电流",
         "delete selected": "刪除所選內容",
         "apply changes": "應用更改",
         "edit buffer": "編輯緩衝區",
