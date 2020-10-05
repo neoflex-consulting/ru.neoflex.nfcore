@@ -76,7 +76,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             operations: [],
             showUniqRow: this.props.showUniqRow,
             numberOfNewLines: this.props.numberOfNewLines,
-            paginationPageSize: 10,
+            paginationPageSize: this.props.paginationPageSize ? this.props.paginationPageSize : 10,
             isGridReady: false,
             columnDefs: this.colDefsToObject(this.props.columnDefs),
             rowData: this.props.rowData,

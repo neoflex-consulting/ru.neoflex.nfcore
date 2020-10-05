@@ -333,6 +333,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                     eObj.gridRef = ref;
                                     this.gridRef = ref;
                                 }}
+                                paginationPageSize={40}
                                 height={460}
                                 rowData = {eObj.children}
                                 columnDefs = {this.getColDefs()}
