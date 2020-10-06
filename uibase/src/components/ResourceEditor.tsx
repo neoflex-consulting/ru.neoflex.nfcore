@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Icon, Input, Layout, Menu, Modal, Row, Select, Table, Tree} from 'antd';
+import {Button, Col, Icon, Input, Layout, Menu, Modal, notification, Row, Select, Table, Tree} from 'antd';
 import Ecore, {EObject} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -49,7 +49,8 @@ interface State {
     searchResources: String,
     isModified: boolean,
     modalApplyChangesVisible: Boolean,
-    clipboardObject: ITargetObject
+    clipboardObject: ITargetObject,
+    edit: boolean
 }
 
 class ResourceEditor extends React.Component<any, State> {
@@ -86,7 +87,8 @@ class ResourceEditor extends React.Component<any, State> {
         isModified: false,
         modalApplyChangesVisible: false,
         isClipboardValidObject: false,
-        clipboardObject: { eClass: "" }
+        clipboardObject: { eClass: "" },
+        edit: false
     };
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -255,7 +257,21 @@ class ResourceEditor extends React.Component<any, State> {
         }
     };
 
+    notification = (title: string, description: string) => {
+        const {t} = this.props;
+        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+            {t("closeall")}
+        </Button>);
+        let key = title + description;
+
+        return (
+            notification.info({
+                message: title, description: description, duration: 3, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+            }))
+    };
+
     onTreeRightClick = (e: any) => {
+        const {t} = this.props;
         const posX = e.event.clientX;
         const posY = e.event.clientY;
         const nodeProps = e.node.props;
@@ -266,8 +282,10 @@ class ResourceEditor extends React.Component<any, State> {
             } catch (err) {
                 //Do nothing
             }
+            this.state.edit ?
+                this.setState({rightClickMenuVisible: true}) :
+                this.notification(t('notification'), t('editing is not available'));
             this.setState({
-                rightClickMenuVisible: true,
                 rightMenuPosition: { x: posX, y: posY },
                 treeRightClickNode: nodeProps,
                 clipboardObject: eObject
@@ -325,7 +343,8 @@ class ResourceEditor extends React.Component<any, State> {
                         handleDeleteRef: this.handleDeleteRef,
                         onEClassBrowse: this.onEClassBrowse,
                         onBrowse: this.onBrowse,
-                        mainEObject: mainEObject
+                        mainEObject: mainEObject,
+                        edit: this.state.edit
                     }),
                     key: feature.get('name') + idx
                 })
@@ -388,22 +407,23 @@ class ResourceEditor extends React.Component<any, State> {
         const allSubTypes = eClassObject.get('eAllSubTypes');
         node.isArray && eClassObject && allSubTypes.push(eClassObject);
         const allParentChildren = node.propertyName ? node.parentUpdater(null, undefined, node.propertyName, { operation: "getAllParentChildren" }) : undefined;
-        return (node.upperBound === undefined || node.upperBound === -1 || (node.upperBound === 1 && node.children.length === 0)) && node.propertyName !== undefined && <div style={{
-            position: "absolute",
-            display: "grid",
-            boxShadow: "2px 2px 8px -1px #cacaca",
-            borderRadius: "4px",
-            minHeight: "10px",
-            maxHeight: "100%",
-            minWidth: "100px",
-            maxWidth: "300px",
-            left: this.state.rightMenuPosition.x,
-            top: this.state.rightMenuPosition.y,
-            backgroundColor: "#fff",
-            padding: "1px",
-            lineHeight: 2,
-            zIndex: 100
-        }}>
+        return (node.upperBound === undefined || node.upperBound === -1 || (node.upperBound === 1 && node.children.length === 0)) && node.propertyName !== undefined &&
+            <div style={{
+                position: "absolute",
+                display: "grid",
+                boxShadow: "2px 2px 8px -1px #cacaca",
+                borderRadius: "4px",
+                minHeight: "10px",
+                maxHeight: "100%",
+                minWidth: "100px",
+                maxWidth: "300px",
+                left: this.state.rightMenuPosition.x,
+                top: this.state.rightMenuPosition.y,
+                backgroundColor: "#fff",
+                padding: "1px",
+                lineHeight: 2,
+                zIndex: 100
+            }}>
             <Menu onClick={this.handleRightMenuSelect} style={{ width: 150, border: "none" }} mode="vertical">
                 {allSubTypes.length > 0 && (node.upperBound === 1 && node.arrayLength > 0 ? false : true) && <Menu.SubMenu
                     key="add"
@@ -553,7 +573,7 @@ class ResourceEditor extends React.Component<any, State> {
                 }
                 //Change inner _id
                 if (key === "_id") {
-                    obj[key] = (obj[key] as string).replace(pattern,id)
+                    obj[key] = (id + obj[key] as string)
                 }
                 //Change same page ref for children
                 if (key === "$ref" && level !== 1) {
@@ -680,6 +700,11 @@ class ResourceEditor extends React.Component<any, State> {
         }
     };
 
+    changeEdit = () => {
+        this.state.edit ? this.setState({edit: false}) : this.setState({edit: true})
+        this.refresh(true)
+    };
+
     save = (redirectAfterSave:boolean = false) => {
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
@@ -768,10 +793,11 @@ class ResourceEditor extends React.Component<any, State> {
                 </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
+                    <Button className="panel-button" icon="edit" onClick={ ()=> this.changeEdit()} title={this.props.t("edit")} />
                     {
-                        this.state.isSaving
-                        ? <Icon className="panel-icon" type="loading"/>
-                        : <Button className="panel-button" icon="save" onClick={()=>this.save(false)} title={this.props.t("save")}/>
+                        this.state.edit && (this.state.isSaving
+                            ? <Icon className="panel-icon" type="loading"/>
+                            : <Button className="panel-button" icon="save" onClick={()=>this.save(false)} title={this.props.t("save")}/>)
                     }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
