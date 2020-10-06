@@ -946,6 +946,12 @@ class ResourceEditor extends React.Component<any, State> {
                                 .map((eObject: Ecore.EObject, index: number) => {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes;
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
+                                    let isExcluded = false;
+                                    for (const [key, value] of Object.entries(this.state.targetObject)) {
+                                        if (key === this.state.addRefPropertyName) {
+                                            isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
+                                        }
+                                    }
                                     return isEObjectType ?
                                         <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
@@ -956,6 +962,7 @@ class ResourceEditor extends React.Component<any, State> {
                                         </Select.Option>
                                         :
                                         possibleTypes.includes(eObject.eClass.get('name')) &&
+                                        !isExcluded &&
                                         <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
