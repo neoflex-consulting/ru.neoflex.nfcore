@@ -1,17 +1,11 @@
 import * as React from "react";
-import {
-    Tree, Icon, Table, Modal,
-    Button, Select, Row, Col,
-    Menu, Layout, Input
-} from 'antd';
+import {Button, Col, Icon, Input, Layout, Menu, Modal, Row, Select, Table, Tree} from 'antd';
 import Ecore, {EObject} from "ecore";
-import { withTranslation, WithTranslation } from "react-i18next";
+import {withTranslation, WithTranslation} from "react-i18next";
 
-import { API } from "../modules/api";
+import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {
-    nestUpdaters, findObjectById, getPrimitiveType, traverseEObject
-} from '../utils/resourceEditorUtils'
+import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -421,7 +415,13 @@ class ResourceEditor extends React.Component<any, State> {
                             type.get('abstract') ?
                                 undefined
                                 :
-                                <Menu.Item key={type.get('name')}>
+                                <Menu.Item
+                                    style={{
+                                        marginTop: idx === 0 && allSubTypes.length > 5
+                                            ? '80px' : allSubTypes.length > 5 ? '-20px' : '0px'
+                                    }}
+                                    key={type.get('name')}
+                                >
                                     {type.get('name')}
                                 </Menu.Item>)}
                 </Menu.SubMenu>}
