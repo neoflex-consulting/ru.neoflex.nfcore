@@ -397,8 +397,8 @@ public class Session implements Closeable {
                                     oEdge.save();
                                 }
                                 ((OrientDBResource) cObject.eResource()).setID(cObject, factory.getId(cElement.getIdentity()));
+                                cElement.save();
                             }
-                            cElement.save();
                         }
                         if (isEmbedded((EReference) sf)) {
                             oElement.setProperty(sf.getName(), sf.isMany() ? embedded : embedded.get(0), sf.isMany() ? OType.EMBEDDEDLIST : OType.EMBEDDED);
