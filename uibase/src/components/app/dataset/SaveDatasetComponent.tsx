@@ -204,11 +204,10 @@ class SaveDatasetComponent extends React.Component<any, State> {
         return (
             <div>
                 <NeoRow>
-                    <NeoCol span={24} style={{alignItems:'start', marginBottom:'12px', flexDirection:'column'}}>
-                        <NeoTypography type={"capture-regular"} style={{marginBottom:'4px'}}>Наименование отчета</NeoTypography>
+                    <NeoCol span={24} style={{alignItems:'start', marginBottom:'17px', flexDirection:'column'}}>
                         <NeoInput
                             width={'100%'}
-                            placeholder={'new report name'}
+                            placeholder={t('label')}
                             disabled={this.state.changeCurrent}
                             style={{ marginBottom: '20px'}}
                             allowClear={true}
@@ -216,34 +215,32 @@ class SaveDatasetComponent extends React.Component<any, State> {
                         />
                     </NeoCol>
                 </NeoRow>
-<NeoRow>
-    <NeoCol span={12} style={{alignItems:'start', justifyContent:'start'}}>
-        <NeoInput
-            type={'checkbox'}
-            checked={this.state.changeCurrent}
-            disabled={false}
-            onChange={() => this.onChangeCurrent()}
-        >
-            Change current
-        </NeoInput>
-    </NeoCol>
-    <NeoCol span={12} style={{alignItems:'start'}}>
-        <NeoInput
-            type={'checkbox'}
-            checked={this.state.accessPublic}
-            disabled={false}
-            onChange={() => this.onChangeAccess()}
-        >
-            Public
-        </NeoInput>
-    </NeoCol>
-</NeoRow>
-                <NeoRow style={{marginTop:'15px', justifyContent:'flex-end'}}>
-                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff', marginRight:'16px'}} onClick={() => this.props.closeModal}>
-                        {t('cancel')}
-                    </NeoButton>
-                    <NeoButton title={t('save')} style={{width:'120px'}} onClick={() => this.onClick()}>
+                <NeoRow style={{justifyContent:'flex-start'}}>
+                    <NeoCol span={12} style={{alignItems:'start', flexDirection:'column'}}>
+                        <NeoInput
+                            type={'checkbox'}
+                            checked={this.state.changeCurrent}
+                            disabled={false}
+                            onChange={() => this.onChangeCurrent()}
+                        >
+                            {t('change current')}
+                        </NeoInput>
+                        <NeoInput
+                            type={'checkbox'}
+                            checked={this.state.accessPublic}
+                            disabled={false}
+                            onChange={() => this.onChangeAccess()}
+                        >
+                            {t('public')}
+                        </NeoInput>
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow style={{marginTop:'15px', justifyContent:'flex-start'}}>
+                    <NeoButton title={t('save')} style={{width:'120px', marginRight:'16px'}} onClick={() => this.onClick()}>
                         {t('save')}
+                    </NeoButton>
+                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.closeModal}>
+                        {t('cancel')}
                     </NeoButton>
                 </NeoRow>
             </div>
