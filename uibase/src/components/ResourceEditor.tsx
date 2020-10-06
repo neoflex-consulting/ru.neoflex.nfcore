@@ -793,7 +793,7 @@ class ResourceEditor extends React.Component<any, State> {
                 </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
-                    <Button className="panel-button" icon="edit" onClick={ ()=> this.changeEdit()} title={this.props.t("refresh")} />
+                    <Button className="panel-button" icon="edit" onClick={ ()=> this.changeEdit()} title={this.props.t("edit")} />
                     {
                         this.state.edit && (this.state.isSaving
                             ? <Icon className="panel-icon" type="loading"/>
