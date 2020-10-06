@@ -4,6 +4,7 @@ import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
+import _ from "lodash"
 
 interface Props {
     closeModal?: () => void;
@@ -118,8 +119,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         let objectId = this.props.viewObject.eURI();
         let params: any = {};
         this.props.context.changeUserProfile(objectId, params);
-        //TODO надо переделать копию props на clone
-        let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
+        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent.eContents()[0])
         currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
         if (!this.state.changeCurrent) {
             currentDatasetComponent.get('audit').get('createdBy', null);
@@ -170,9 +170,6 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
                 this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave(newDatasetComponent.eContents()[0].get('name')));
-            }).catch(()=>{
-                //делаем рестор т.к. поменяли через props currentDatasetComponent
-                this.props.onSave(this.props.viewObject.get('datasetComponent').get('name'))
             });
     }
 
