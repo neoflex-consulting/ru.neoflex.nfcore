@@ -234,8 +234,7 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
-    //TODO нужна оптимизация
-    getAllDatasetComponents(findColumn: boolean) {
+    getAllDatasetComponents(findColumn: boolean, datasetComponentName: string|undefined = undefined) {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//DatasetComponent');
             let allDatasetComponents: any[] = [];
@@ -264,7 +263,22 @@ class DatasetView extends React.Component<any, State> {
                                 }
                             });
                             if (allDatasetComponents.length !== 0) {
-                                this.setState({allDatasetComponents})
+                                this.setState({allDatasetComponents}, () => {
+                                    if (datasetComponentName) {
+                                        this.onChangeDatasetComponent(datasetComponentName);
+                                        this.saveDatasetComponentToUrl(datasetComponentName);
+                                    } else {
+                                        const found = this.props.pathFull[this.props.pathFull.length - 1].params
+                                            ? this.props.pathFull[this.props.pathFull.length - 1].params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+                                            : undefined;
+                                        //TODO нужна проверка на private версию данных, чтобы не отображать приватную
+                                        if (found && allDatasetComponents.find(obj => {
+                                                return obj.eContents()[0].get('name') === found.parameterValue}
+                                            )) {
+                                            this.onChangeDatasetComponent(found.parameterValue);
+                                        }
+                                    }
+                                })
                             }
                             if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
                                 this.setState({isGroovyDataset: true})
@@ -1087,7 +1101,7 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleChange(e: any): void {
+    onChangeDatasetComponent(e: any): void {
         let params: any = {name: e};
         this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
@@ -1269,6 +1283,23 @@ class DatasetView extends React.Component<any, State> {
         return restrictOperation
     };
 
+    saveDatasetComponentToUrl = (datasetComponentName: string) => {
+        const urlParams = this.props.pathFull[this.props.pathFull.length - 1];
+        const found = urlParams.params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+        if (found) {
+            found.parameterValue = datasetComponentName
+        } else {
+            urlParams.params = urlParams.params.concat({
+                parameterName: this.props.viewObject.get('name')+this.props.viewObject.eURI(),
+                parameterValue: datasetComponentName
+            })
+        }
+        this.props.context.changeURL(urlParams.appModule,
+            urlParams.useParentReferenceTree,
+            undefined,
+            urlParams.params);
+    };
+
     getGridPanel = () => {
         const { t } = this.props;
         const menu = (<Menu
@@ -1374,7 +1405,8 @@ class DatasetView extends React.Component<any, State> {
                          width={'250px'}
                          value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
-                             this.handleChange(e)
+                             this.onChangeDatasetComponent(e);
+                             this.saveDatasetComponentToUrl(e);
                          }}
                      >
                     <OptGroup
@@ -1679,7 +1711,7 @@ class DatasetView extends React.Component<any, State> {
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
-                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'));
+                    this.onChangeDatasetComponent(this.state.allDatasetComponents[i].eContents()[0].get('name'));
                     this.getAllDatasetComponents(true)
 
                 }
@@ -1748,9 +1780,7 @@ class DatasetView extends React.Component<any, State> {
                     //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
-                        /*this.refresh()*/
                         this.gridRef.resetBuffer();
-                        /*this.refresh();*/
                     });
                 }
             ).finally(()=>{
@@ -2153,7 +2183,9 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <SaveDatasetComponent
                             closeModal={this.handleSaveMenu}
-                            onSave={()=>this.getAllDatasetComponents(false)}
+                            onSave={(name:string)=>{
+                                this.getAllDatasetComponents(false, name);
+                            }}
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             {...this.props}
                         />
