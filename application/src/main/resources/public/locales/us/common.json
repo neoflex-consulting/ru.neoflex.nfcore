@@ -378,5 +378,8 @@
         "calendar": "Calendar",
         "list": "List",
         "system notes": "System notes",
-        "component name is empty": "Component name is empty"
+        "component name is empty": "Component name is empty",
+
+        "notification": "Notification",
+        "editing is not available": "Editing is not available. Take the class for editing"
 }

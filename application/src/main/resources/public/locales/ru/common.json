@@ -379,7 +379,10 @@
         "calendar": "Календарь",
         "list": "Список",
         "system notes": "Системные заметки",
-        "component name is empty": "Название профиля не задано"
+        "component name is empty": "Название профиля не задано",
+
+        "notification": "Уведомление",
+        "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование"
 
 }
 
