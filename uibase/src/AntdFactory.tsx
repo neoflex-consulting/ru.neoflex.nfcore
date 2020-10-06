@@ -1372,7 +1372,7 @@ class Drawer_ extends ViewContainer {
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
-                visible={!this.state.isHidden || !this.props.isParentHidden}
+                visible={!this.state.isHidden && !this.props.isParentHidden}
                 onClose={()=>{this.setState({isHidden:true})}}
                 mask={false}
                 maskClosable={false}
@@ -1381,7 +1381,7 @@ class Drawer_ extends ViewContainer {
                     position: 'absolute',
                 }}
             >
-                {this.renderChildren(isReadOnly, !this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Drawer>
         )
     }
