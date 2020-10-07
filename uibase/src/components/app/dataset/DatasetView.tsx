@@ -730,17 +730,17 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
+    getColumnDefGroupBy = () => {
         let newColumnDefs: any[] = [];
-        for (const prop in rowDataShow[0]) {
-            if (rowDataShow[0][prop] !== undefined) {
+        const newColumns = this.state.groupByColumn.concat(this.state.serverGroupBy).filter(c=>c.enable && c.datasetColumn)
+        for (const obj of newColumns) {
                 let aggByColumn = this.state.serverGroupBy
-                    .find((s: any) => s.value === prop);
+                    .find((s: any) => s.value === obj.value);
                 let colDef = this.state.defaultLeafColumnDefs
-                    .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
+                    .find((s: any) => s.get('field') === obj.datasetColumn || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
-                rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
-                rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
+                rowData.set('field', aggByColumn && aggByColumn.value ? aggByColumn.value : colDef.get('field'));
+                rowData.set('headerName', aggByColumn && aggByColumn.operation ? `${this.props.t(aggByColumn.operation)}: ${aggByColumn.value}` : colDef.get('headerName'));
                 rowData.set('headerTooltip', colDef.get('headerTooltip'));
                 rowData.set('hide', colDef.get('hide'));
                 rowData.set('pinned', colDef.get('pinned'));
@@ -764,8 +764,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
-
-            }
         }
         return newColumnDefs
     };
@@ -954,8 +952,8 @@ class DatasetView extends React.Component<any, State> {
                 let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
-                if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result, this.getLeafColumns(newColumnDef))
+                if (filter(groupByParams).length !== 0) {
+                    newColumnDef = this.getColumnDefGroupBy()
                 }
                 const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
