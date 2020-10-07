@@ -77,7 +77,7 @@
 
 .leftSplitter .ant-tree li span.ant-tree-switcher, .leftSplitter .ant-tree li span.ant-tree-iconEle {
     left: 90%;
-
+    top: 6px;
 }
 
 .leftSplitter .ant-tree li span.ant-tree-switcher.ant-tree-switcher_open .ant-tree-switcher-icon:hover{
@@ -94,7 +94,8 @@
     color: unset!important;
 }
 
-.leftSplitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper:hover>::before, .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper:hover>::before{
+.leftSplitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper:hover>::before,
+.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper:hover>::before{
     background: #FFF8E0 !important;
 }
 .leftSplitter :hover>::before{
@@ -105,11 +106,42 @@
 .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
 .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
 .leftSplitter .ant-tree-treenode-switcher-close:hover>::before,
-.leftSplitter .ant-tree-content-wrapper-normal:hover>::before {
+.leftSplitter .ant-tree-content-wrapper-normal:hover>::before,
+.leftSplitter .ant-tree-node-content-wrapper-open:hover>::before{
     background: #FFF8E0 !important;
+    border-right: 2px solid orange !important;
+    height: 40px !important;
 }
 
 
-.leftSplitter.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
+.leftSplitter.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected,
+.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
     color: rgba(0, 0, 0, 0.65);
+}
+
+.leftSplitter .ant-tree-child-tree li,
+.leftSplitter .ant-tree-treenode-switcher-close,
+.leftSplitter .ant-tree-node-content-wrapper-open::before {
+    height: 40px !important;
+}
+
+.leftSplitter .ant-tree-treenode-switcher-close span,
+.ant-tree-child-tree li span,
+.leftSplitter .ant-tree-node-content-wrapper-open span{
+    top: 8px;
+
+}
+
+.leftsplitter .ant-tree-child-tree > li:first-child {
+    padding: unset;
+    margin-top: 8px;
+}
+
+.leftSplitter .ant-tree-node-content-wrapper-open {
+    margin-bottom: 10px !important;
+    font-weight: 700;
+}
+
+.leftSplitter .ant-tree > li:first-child {
+    padding-top: unset;
 }
