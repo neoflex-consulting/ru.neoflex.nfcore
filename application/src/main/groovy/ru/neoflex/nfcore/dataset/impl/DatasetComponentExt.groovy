@@ -42,10 +42,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                                 rdbmsColumn.sortable = true
                                 rdbmsColumn.resizable = true
-                                rdbmsColumn.filter = columns[i].convertDataType == DataType.DATE || columns[i].convertDataType == DataType.TIMESTAMP
-                                        ? Filter.DATE_COLUMN_FILTER :
-                                        columns[i].convertDataType == DataType.INTEGER || columns[i].convertDataType == DataType.DECIMAL
-                                                ? Filter.NUMBER_COLUMN_FILTER : Filter.TEXT_COLUMN_FILTER
                                 datasetComponent.column.each { c->
                                     if (c.name == columns[i].name.toString()) {
                                         throw new IllegalArgumentException("Please modify your query in the 'dataset'. Has a similar column name")

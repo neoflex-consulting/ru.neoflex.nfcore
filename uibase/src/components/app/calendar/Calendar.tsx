@@ -959,7 +959,7 @@ class Calendar extends React.Component<any, any> {
                     <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                         overlay={menu} placement="bottomLeft">
                         <div>
-                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginRight: "10px"}}/>
+                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginLeft: '16px'}}/>
                         </div>
                     </Dropdown>
                     :
@@ -970,6 +970,7 @@ class Calendar extends React.Component<any, any> {
             type="link"
             style={{
                 marginRight: '18px',
+                marginLeft: this.state.calendarVisible ? '8px' : '16px'
             }}
             onClick={this.onFullScreen}
         >
