@@ -126,7 +126,7 @@ class HeaderMenu extends React.Component<any, any> {
                                 onClick={() => this.selectApplication(app.eContents()[0].get('name'))}
                             >
                                 <NeoTypography className='applicationName'
-                                               style={{color: flag ? this.props.context.getURL(app.eContents()[0].get('name'), false) === this.props.location.pathname ? "#FFFFFF" : "#B3B3B3" : app.eContents()[0].get('name') === selectedApp ? "#FFFFFF"  : "#B3B3B3"}}
+                                               style={{color: /*flag ? this.props.context.getURL(app.eContents()[0].get('name'), false) === this.props.location.pathname ? "#FFFFFF" : "#B3B3B3" : */app.eContents()[0].get('name') === selectedApp ? "#FFFFFF"  : "#B3B3B3"}}
                                                type={this.props.context.getURL(app.eContents()[0].get('name'), false) === this.props.location.pathname ? 'h4-regular' : 'h4-light'}>{app.eContents()[0].get('name')}</NeoTypography>
                             </NeoButton>
                         </Link>

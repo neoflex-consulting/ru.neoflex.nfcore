@@ -1311,7 +1311,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
 }
 
-@media screen and (min-width: 400px) and (max-width: 1024px) {
+@media screen and (min-width: 950px) and (max-width: 1024px) {
 
 
   .nameOfAppFirstWord {
@@ -1389,6 +1389,94 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     background-color: unset!important;
   }
 
+}
+
+@media screen and (min-width: 500px) and (max-width: 949px) {
+
+
+  .nameOfAppFirstWord {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    font-size: 18px !important;
+    line-height: 21px !important;
+    color: #FFFFFF !important;
+    display: none!important;
+  }
+
+  .nameOfAppSecondWord {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-size: 18px !important;
+    line-height: 21px !important;
+    color: #FFFFFF !important;
+    display: none!important;
+  }
+
+  .headerRightSide{
+    width: unset!important;
+  }
+
+  .app-header {
+    height: 64px !important;
+  }
+  .ant-col.ant-col-5.headerAppNameSpanLarge{
+    display: none!important;
+  }
+
+  .HeaderWithNamesSmallScreen {
+    margin-bottom: 15px !important;
+    margin-right: 10px;
+  }
+
+
+  .headerRightSide {
+    padding-bottom: 15px;
+  }
+
+  .app-logo {
+    margin-right: 20px;
+  }
+
+  .HeaderWithNames {
+    display: none !important;
+  }
+
+  .lang-label {
+    font-family: Roboto !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    color: #B3B3B3 !important;
+    margin-top: 1px !important;
+  }
+
+  .HeaderWithNamesSmallScreen {
+    display: inline-block !important;
+    float: left;
+  }
+
+  .devMenuSmallWidth {
+    display: inline-block !important;
+    float: left;
+  }
+
+  .ant-col.ant-col-14.col {
+    justify-content: unset !important;
+  }
+
+  .headerDev-menu{
+    display: none!important;
+  }
+
+  .app-logo-settings{
+    margin: auto auto 15px 30px;
+  }
+  .ant-dropdown-menu-item-selected, .ant-dropdown-menu-submenu-title-selected, .ant-dropdown-menu-item-selected > a, .ant-dropdown-menu-submenu-title-selected > a{
+    background-color: unset!important;
+  }
 
 }
 
