@@ -402,6 +402,9 @@ class ResourceEditor extends React.Component<any, State> {
 
     renderRightMenu(): any {
         const node: { [key: string]: any } = this.state.treeRightClickNode;
+        if (!node.eClass) {
+            return null
+        }
         const eClass = node.eClass;
         const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
         const allSubTypes = eClassObject.get('eAllSubTypes');
@@ -599,7 +602,11 @@ class ResourceEditor extends React.Component<any, State> {
 
     handleAddNewResource = (resources: Ecore.Resource[]): void => {
         const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources');
-        resourceList.addAll(resources);
+        resources.forEach(r=>{
+            if (!resourceList.find(rl=>r.eContents()[0].eURI() === rl.eContents()[0].eURI())) {
+                resourceList.add(r)
+            }
+        });
         this.setState({ modalResourceVisible: false })
     };
 
