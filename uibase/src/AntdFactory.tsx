@@ -150,11 +150,12 @@ function createCssClass(viewObject: any){
 }
 
 abstract class ViewContainer extends View {
-    renderChildren = (isParentDisabled:boolean = false) => {
+    renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false) => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
         const props = {
             ...this.props,
-            isParentDisabled: isParentDisabled
+            isParentDisabled: isParentDisabled,
+            isParentHidden: isParentHidden,
         };
         let childrenView = children.map(
             (c: Ecore.EObject) => {
@@ -195,10 +196,10 @@ class Col_ extends ViewContainer {
         return (
             <Col span={Number(this.viewObject.get('span')) || 24}
                  key={this.viewObject._id}
-                 hidden={this.state.isHidden}
+                 hidden={this.state.isHidden || this.props.isParentHidden}
                  className={cssClass}
             >
-                {this.renderChildren(isReadOnly)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Col>
         )
     }
@@ -226,11 +227,11 @@ class Form_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <Form style={{marginBottom: marginBottom}}
-                  hidden={this.state.isHidden}
+                  hidden={this.state.isHidden || this.props.isParentHidden}
                   key={this.viewObject._id.toString() + '_4'}
                   className={cssClass}
             >
-                {this.renderChildren(isReadOnly)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Form>
         )
     }
@@ -262,7 +263,7 @@ class TabsViewReport_ extends ViewContainer {
         };
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <NeoTabs
                     className={cssClass}
                     defaultActiveKey={children[0] ? children[0]._id : undefined}
@@ -313,11 +314,11 @@ class Row_ extends ViewContainer {
         return (
             <Row
                 key={this.viewObject._id.toString() + '_7'}
-                hidden={this.state.isHidden}
+                hidden={this.state.isHidden || this.props.isParentHidden}
                 className={cssClass}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
-                {this.renderChildren(isReadOnly)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Row>
         )
     }
@@ -345,7 +346,7 @@ class Region_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <Row
-                hidden={this.state.isHidden}
+                hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{
                     background: '#FFFFFF',
                     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
@@ -354,7 +355,7 @@ class Region_ extends ViewContainer {
                     margin: '16px'}}
                 className={cssClass}
             >
-                {this.renderChildren(isReadOnly)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Row>
         )
     }
@@ -383,7 +384,7 @@ export class Href_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return componentRenderCondition ? <a
             className={cssClass}
-            hidden={this.state.isHidden}
+            hidden={this.state.isHidden || this.props.isParentHidden}
             style={{justifyContent: this.props.getValue ?  "inherit" : undefined}}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
@@ -422,7 +423,7 @@ export class Button_ extends ViewContainer {
         const label = t(this.viewObject.get('label'));
         const componentRenderCondition = getRenderConditionResult.bind(this)("Button.componentRenderCondition");
         return componentRenderCondition ? <div
-            hidden={this.state.isHidden}
+            hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
                 className={cssClass}
@@ -474,7 +475,7 @@ export class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -482,7 +483,7 @@ export class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -612,7 +613,7 @@ export class Select_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             componentRenderCondition ? <div
-                hidden={this.state.isHidden}
+                hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
                 <Select
                     key={this.viewObject._id}
@@ -691,7 +692,7 @@ export class DatePicker_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -699,7 +700,7 @@ export class DatePicker_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -728,7 +729,7 @@ export class DatePicker_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden}
+            <div hidden={this.state.isHidden || this.props.isParentHidden}
                  style={{marginBottom: marginBottom}}>
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
@@ -798,7 +799,7 @@ class HtmlContent_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden}
+            <div hidden={this.state.isHidden || this.props.isParentHidden}
                  aria-disabled={isReadOnly}
                  style={{marginBottom: marginBottom}}
                  className={`${cssClass} content`}
@@ -984,7 +985,7 @@ class Input_ extends ViewContainer {
                     key={this.viewObject._id}
                     style={{marginBottom: marginBottom}}>
                     <InputNumber
-                        hidden={this.state.isHidden}
+                        hidden={this.state.isHidden || this.props.isParentHidden}
                         className={cssClass}
                         style={{width: width}}
                         disabled={isReadOnly}
@@ -1095,7 +1096,7 @@ export class Checkbox_ extends ViewContainer {
         return(
             <div
                 key={this.viewObject._id}
-                hidden={this.state.isHidden}
+                hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
                 <NeoInput
                     className={cssClass}
@@ -1132,7 +1133,7 @@ class Typography_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -1140,7 +1141,7 @@ class Typography_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden
+            hidden: this.state.isHidden || this.props.isParentHidden
         };
     }
 
@@ -1167,7 +1168,7 @@ class Typography_ extends ViewContainer {
             })
         }
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <Paragraph
                     key={this.viewObject._id}
                     className={cssClass}
@@ -1371,7 +1372,7 @@ class Drawer_ extends ViewContainer {
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
-                visible={!this.state.isHidden}
+                visible={!this.state.isHidden && !this.props.isParentHidden}
                 onClose={()=>{this.setState({isHidden:true})}}
                 mask={false}
                 maskClosable={false}
@@ -1380,7 +1381,7 @@ class Drawer_ extends ViewContainer {
                     position: 'absolute',
                 }}
             >
-                {this.renderChildren(isReadOnly)}
+                {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Drawer>
         )
     }
@@ -1431,7 +1432,7 @@ class DatasetView_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden,
+            hidden: hidden || this.props.isParentHidden,
             grantType: grantType,
         };
         return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
@@ -1446,7 +1447,7 @@ class Calendar_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden,
+            hidden: hidden || this.props.isParentHidden,
             grantType: grantType,
         };
         return <Calendar {...props} key={this.viewObject._id}/>
@@ -1461,7 +1462,7 @@ class MasterdataView_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden,
+            hidden: hidden || this.props.isParentHidden,
             grantType: grantType,
         };
         return <MasterdataEditor {...props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>

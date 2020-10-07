@@ -1,15 +1,14 @@
 import * as React from 'react';
 import {withTranslation} from 'react-i18next';
-import {Button, Checkbox, Input} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSave} from "@fortawesome/free-regular-svg-icons";
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
+import _ from "lodash"
 
 interface Props {
     closeModal?: () => void;
-    onSave?: () => void;
+    onSave?: (name: string) => void;
     currentDatasetComponent?: any;
 }
 
@@ -120,7 +119,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         let objectId = this.props.viewObject.eURI();
         let params: any = {};
         this.props.context.changeUserProfile(objectId, params);
-        let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
+        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent.eContents()[0])
         currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
         if (!this.state.changeCurrent) {
             currentDatasetComponent.get('audit').get('createdBy', null);
@@ -165,13 +164,12 @@ class SaveDatasetComponent extends React.Component<any, State> {
         API.instance().saveResource(resource)
             .then((newDatasetComponent: any) => {
                 this.props.closeModal!();
-                this.props.viewObject.set('datasetComponent', newDatasetComponent.eContents()[0]);
                 const newResourceSet: Ecore.ResourceSet = this.props.viewObject.eResource().eContainer as Ecore.ResourceSet;
                 const newViewObject: Ecore.EObject[] = newResourceSet.elements()
                     .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave());
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave(newDatasetComponent.eContents()[0].get('name')));
             });
     }
 
@@ -205,32 +203,46 @@ class SaveDatasetComponent extends React.Component<any, State> {
 
         return (
             <div>
-                <Input
-                    placeholder={'new report name'}
-                    disabled={this.state.changeCurrent}
-                    style={{ width: '200px', marginRight: '10px', marginBottom: '20px'}}
-                    allowClear={true}
-                    onChange={(e: any) => this.onChangeName(e.target.value)}
-                />
-                <Checkbox
-                    checked={this.state.changeCurrent}
-                    disabled={false}
-                    onChange={() => this.onChangeCurrent()}
-                >
-                    Change current
-                </Checkbox>
-                <Checkbox
-                    checked={this.state.accessPublic}
-                    disabled={false}
-                    onChange={() => this.onChangeAccess()}
-                >
-                    Public
-                </Checkbox>
-                <div>
-                    <Button title={t('save')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.onClick()}>
-                        <FontAwesomeIcon icon={faSave} size='1x'/>
-                    </Button>
-                </div>
+                <NeoRow>
+                    <NeoCol span={24} style={{alignItems:'start', marginBottom:'17px', flexDirection:'column'}}>
+                        <NeoInput
+                            width={'100%'}
+                            placeholder={t('label')}
+                            disabled={this.state.changeCurrent}
+                            style={{ marginBottom: '20px'}}
+                            allowClear={true}
+                            onChange={(e: any) => this.onChangeName(e.target.value)}
+                        />
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow style={{justifyContent:'flex-start'}}>
+                    <NeoCol span={12} style={{alignItems:'start', flexDirection:'column'}}>
+                        <NeoInput
+                            type={'checkbox'}
+                            checked={this.state.changeCurrent}
+                            disabled={false}
+                            onChange={() => this.onChangeCurrent()}
+                        >
+                            {t('change current')}
+                        </NeoInput>
+                        <NeoInput
+                            type={'checkbox'}
+                            checked={this.state.accessPublic}
+                            disabled={false}
+                            onChange={() => this.onChangeAccess()}
+                        >
+                            {t('public')}
+                        </NeoInput>
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow style={{marginTop:'15px', justifyContent:'flex-start'}}>
+                    <NeoButton title={t('save')} style={{width:'120px', marginRight:'16px'}} onClick={() => this.onClick()}>
+                        {t('save')}
+                    </NeoButton>
+                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.closeModal}>
+                        {t('cancel')}
+                    </NeoButton>
+                </NeoRow>
             </div>
 
         )

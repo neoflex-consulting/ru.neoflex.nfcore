@@ -82,7 +82,9 @@ interface State {
     currentDatasetComponent: Ecore.Resource;
     currentDiagram?: IDiagram;
     columnDefs: Map<String,any>[];
+    leafColumnDefs: Map<String,any>[];
     defaultColumnDefs: Map<String,any>[];
+    defaultLeafColumnDefs: Map<String,any>[];
     fullScreenOn: boolean;
     rowData: {[key: string]: unknown}[];
     highlights: IServerQueryParam[];
@@ -157,7 +159,9 @@ class DatasetView extends React.Component<any, State> {
             currentDatasetComponent: {} as Ecore.Resource,
             currentDiagram: undefined,
             columnDefs: [],
+            leafColumnDefs: [],
             defaultColumnDefs: [],
+            defaultLeafColumnDefs: [],
             deleteMenuVisible: false,
             hiddenColumnsMenuVisible: false,
             rowData: [],
@@ -230,8 +234,7 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
-    //TODO нужна оптимизация
-    getAllDatasetComponents(findColumn: boolean) {
+    getAllDatasetComponents(findColumn: boolean, datasetComponentName: string|undefined = undefined) {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//DatasetComponent');
             let allDatasetComponents: any[] = [];
@@ -260,7 +263,22 @@ class DatasetView extends React.Component<any, State> {
                                 }
                             });
                             if (allDatasetComponents.length !== 0) {
-                                this.setState({allDatasetComponents})
+                                this.setState({allDatasetComponents}, () => {
+                                    if (datasetComponentName) {
+                                        this.onChangeDatasetComponent(datasetComponentName);
+                                        this.saveDatasetComponentToUrl(datasetComponentName);
+                                    } else {
+                                        const found = this.props.pathFull[this.props.pathFull.length - 1].params
+                                            ? this.props.pathFull[this.props.pathFull.length - 1].params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+                                            : undefined;
+                                        //TODO нужна проверка на private версию данных, чтобы не отображать приватную
+                                        if (found && allDatasetComponents.find(obj => {
+                                                return obj.eContents()[0].get('name') === found.parameterValue}
+                                            )) {
+                                            this.onChangeDatasetComponent(found.parameterValue);
+                                        }
+                                    }
+                                })
                             }
                             if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
                                 this.setState({isGroovyDataset: true})
@@ -305,70 +323,143 @@ class DatasetView extends React.Component<any, State> {
         return mask;
     }
 
-    findColumnDefs(resource: Ecore.Resource){
-        let columnDefs: any = [];
-        resource.eContents()[0].get('column').each( (c: Ecore.EObject) => {
-            let rowData = new Map();
-            const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
-            const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
-            let componentRenderCondition = c.get('componentRenderCondition');
-            if (componentRenderCondition) {
-                const repArr = resource.eContents()[0].get('column').map((cn: Ecore.EObject)=> {
-                    const regxType = cn.get('datasetColumn') !== null ? cn.get('datasetColumn').get('convertDataType') : null;
-                    return {
-                        name:cn.get('name'),
-                        replacement:(regxType === appTypes.Integer)
-                            ? `parseInt(this.props.data.${cn.get('name')})`
-                            : (regxType === appTypes.Decimal)
-                                ? `parseFloat(this.props.data.${cn.get('name')})`
-                                : `this.props.data.${cn.get('name')}`
+    getChildrenColumns(column: any, resource: Ecore.Resource) {
+        let columnDefs:any[] = [];
+        column.each( (c: Ecore.EObject) => {
+            if (c.get('column')) {
+                let rowData = new Map();
+                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
+                rowData.set('children', this.getChildrenColumns(c.get('column'), resource));
+                columnDefs.push(rowData);
+            } else {
+                let rowData = new Map();
+                const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
+                const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
+                rowData.set('field', c.get('name'));
+                rowData.set('headerName', c.get('headerName').get('name'));
+                rowData.set('headerTooltip', c.get('headerTooltip'));
+                rowData.set('hide', c.get('hide'));
+                rowData.set('pinned', c.get('pinned'));
+                rowData.set('filter', c.get('filter'));
+                rowData.set('sort', c.get('sort'));
+                rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
+                rowData.set('checkboxSelection', c.get('checkboxSelection'));
+                rowData.set('sortable', false);
+                rowData.set('suppressMenu', c.get('suppressMenu'));
+                rowData.set('resizable', c.get('resizable'));
+                rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
+                rowData.set('type', type);
+                rowData.set('component', !isEditGridComponent ? c.get('component') : undefined);
+                rowData.set('editComponent', isEditGridComponent ? c.get('component') : undefined);
+                rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
+                rowData.set('textAlign', textAlignMap_[c.get('textAlign') || "Undefined"]);
+                rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('onCellDoubleClicked', (params: any) => {
+                    if (params.colDef.editable && this.state.isEditMode) {
+                        if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
+                            const startEditingParams = {
+                                rowIndex: params.rowIndex,
+                                colKey: params.column.getId(),
+                            };
+                            params.api.startEditingCell(startEditingParams);
+                        }
                     }
                 });
-                componentRenderCondition = replaceAllCollisionless(componentRenderCondition, repArr);
+                rowData.set('valueFormatter', this.valueFormatter);
+                rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
+                rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined)
+                columnDefs.push(rowData);
             }
-            rowData.set('field', c.get('name'));
-            rowData.set('headerName', c.get('headerName').get('name'));
-            rowData.set('headerTooltip', c.get('headerTooltip'));
-            rowData.set('hide', c.get('hide'));
-            rowData.set('pinned', c.get('pinned'));
-            rowData.set('filter', c.get('filter'));
-            rowData.set('sort', c.get('sort'));
-            rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
-            rowData.set('checkboxSelection', c.get('checkboxSelection'));
-            rowData.set('sortable', false);
-            rowData.set('suppressMenu', c.get('suppressMenu'));
-            rowData.set('resizable', c.get('resizable'));
-            rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
-            rowData.set('type', type);
-            rowData.set('component', !isEditGridComponent ? c.get('component') : undefined);
-            rowData.set('editComponent', isEditGridComponent ? c.get('component') : undefined);
-            rowData.set('componentRenderCondition', componentRenderCondition);
-            rowData.set('textAlign', textAlignMap_[c.get('textAlign')||"Undefined"]);
-            rowData.set('formatMask', c.get('formatMask'));
-            rowData.set('mask', this.evalMask(c.get('formatMask')));
-            rowData.set('onCellDoubleClicked', (params:any)=>{
-                if (params.colDef.editable) {
-                    if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
-                        const startEditingParams = {
-                            rowIndex: params.rowIndex,
-                            colKey: params.column.getId(),
-                        };
-                        params.api.startEditingCell(startEditingParams);
-                    }
-                }
-            });
-            rowData.set('valueFormatter', this.valueFormatter);
-            rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
-            columnDefs.push(rowData);
         });
-        this.setState({columnDefs: columnDefs, defaultColumnDefs: columnDefs},()=>{
+        return columnDefs;
+    }
+
+    getLeafColumns(column: Map<String,any>[], columnDefs:Map<String,any>[] = []) {
+        column.forEach( (c) => {
+            if (c.get('children')) {
+                this.getLeafColumns(c.get('children'), columnDefs)
+            } else {
+                columnDefs.push(c)
+            }
+        });
+        return columnDefs
+    }
+
+    hideLeafColumns(hiddenColumns: IServerQueryParam[], columnDefs:Map<String,any>[]) {
+        columnDefs.forEach(c=>{
+            if (c.get('children')) {
+                this.hideLeafColumns(hiddenColumns, c.get('children'))
+            } else {
+                hiddenColumns.forEach(hc=>{
+                    if (hc.datasetColumn === c.get('field'))
+                        c.set('hide', hc ? !hc.enable : c.get('hide'))
+                });
+            }
+        })
+    }
+
+    replaceComponentRenderCondition(columnDefs:Map<String,any>[], leafColumnDefs:Map<String,any>[]) {
+        columnDefs.forEach(c=>{
+            if (c.get('children')) {
+                this.replaceComponentRenderCondition(c.get('children'), leafColumnDefs)
+            } else {
+                if (c.get('componentRenderCondition')) {
+                    const repArr = leafColumnDefs.map((cn) => {
+                        const regxType = cn.get('convertDataType') !== null ? cn.get('convertDataType') : null;
+                        return {
+                            name: cn.get('field'),
+                            replacement: (regxType === appTypes.Integer)
+                                ? `parseInt(this.props.data.${cn.get('field')})`
+                                : (regxType === appTypes.Decimal)
+                                    ? `parseFloat(this.props.data.${cn.get('field')})`
+                                    : `this.props.data.${cn.get('field')}`
+                        }
+                    });
+                    c.set('componentRenderCondition', replaceAllCollisionless(c.get('componentRenderCondition'), repArr));
+                }
+            }
+        })
+    }
+
+    deepCloneColumnDefs(columnDefs:Map<String,any>[], newColumnDefs:Map<String,any>[] = []) {
+        columnDefs.forEach(cd=>{
+            if (cd.get('children')) {
+                let rowData = new Map();
+                cd.forEach((value, key) => {
+                    if (key !== 'children')
+                        rowData.set(key,value)
+                });
+                rowData.set('children', this.deepCloneColumnDefs(cd.get('children')));
+                newColumnDefs.push(rowData);
+            } else {
+                let rowData = new Map();
+                cd.forEach((value, key) => {
+                    rowData.set(key,value)
+                });
+                newColumnDefs.push(rowData);
+            }
+        });
+        return newColumnDefs;
+    }
+
+    findColumnDefs(resource: Ecore.Resource){
+        let columnDefs = this.getChildrenColumns(resource.eContents()[0].get('column'), resource);
+        const leafColumnDefs = this.getLeafColumns(columnDefs);
+        this.replaceComponentRenderCondition(columnDefs, leafColumnDefs);
+        this.setState({
+            columnDefs: columnDefs,
+            defaultColumnDefs: this.deepCloneColumnDefs(columnDefs),
+            leafColumnDefs: leafColumnDefs,
+            defaultLeafColumnDefs: this.deepCloneColumnDefs(leafColumnDefs),
+        },()=>{
             this.setState({
                 isUpdateAllowed: this.props.viewObject.get('datasetComponent').get('updateQuery') ? !this.validateEditOptions('updateQuery') : false,
                 isInsertAllowed: this.props.viewObject.get('datasetComponent').get('insertQuery') ? !this.validateEditOptions('insertQuery') : false,
                 isDeleteAllowed: this.props.viewObject.get('datasetComponent').get('deleteQuery') ? !this.validateEditOptions('deleteQuery') : false,
             });
         });
-        this.findParams(resource as Ecore.Resource, columnDefs);
+        this.findParams(resource as Ecore.Resource, leafColumnDefs);
         this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
     }
 
@@ -574,7 +665,7 @@ class DatasetView extends React.Component<any, State> {
             addEmpty(groupByColumn);
             addEmpty(highlights);
             addEmpty(serverCalculatedExpression);
-            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.state.columnDefs.map(c => {
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs).map(c => {
                 return {
                     datasetColumn: c.get('field'),
                     enable: c.get('hide') ? !c.get('hide') : true
@@ -610,7 +701,7 @@ class DatasetView extends React.Component<any, State> {
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.state.currentDatasetComponent.rev !== undefined) {
             if (prevProps.location.pathname !== this.props.location.pathname) {
-                this.findParams(this.state.currentDatasetComponent, this.state.columnDefs);
+                this.findParams(this.state.currentDatasetComponent, this.state.leafColumnDefs);
             }
         }
         if (prevProps.t !== this.props.t && this.state.serverCalculatedExpression) {
@@ -630,18 +721,12 @@ class DatasetView extends React.Component<any, State> {
         }
         if (JSON.stringify(prevState.hiddenColumns) !== JSON.stringify(this.state.hiddenColumns)
             && this.state.hiddenColumns.length > 0) {
-            let columnDefs = this.state.columnDefs.map(c => {
-                const rowData = new Map();
-                c.forEach((value, key) => {
-                    rowData.set(key,value)
-                });
-                return rowData
-            });
-            columnDefs.forEach(c=>{
-                const hiddenColumn = this.state.hiddenColumns.find(hc => hc.datasetColumn === c.get('field'));
-                c.set('hide', hiddenColumn ? !hiddenColumn.enable : c.get('hide'))
-            });
-            this.setState({columnDefs: columnDefs})
+            let columnDefs = this.deepCloneColumnDefs(this.state.columnDefs);
+            this.hideLeafColumns(this.state.hiddenColumns, columnDefs);
+            this.setState({
+                columnDefs: columnDefs,
+                leafColumnDefs: this.getLeafColumns(columnDefs)
+            })
         }
     }
 
@@ -651,7 +736,7 @@ class DatasetView extends React.Component<any, State> {
             if (rowDataShow[0][prop] !== undefined) {
                 let aggByColumn = this.state.serverGroupBy
                     .find((s: any) => s.value === prop);
-                let colDef = this.state.defaultColumnDefs
+                let colDef = this.state.defaultLeafColumnDefs
                     .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
                 rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
@@ -677,7 +762,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('formatMask', colDef.get('formatMask'));
                 rowData.set('mask', this.evalMask(colDef.get('formatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
-                rowData.set('tooltipField', colDef.get('valueFormatter'));
+                rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
 
             }
@@ -699,9 +784,7 @@ class DatasetView extends React.Component<any, State> {
                 let rowData = new Map();
                 rowData.set('field', element.datasetColumn);
                 rowData.set('headerName', element.datasetColumn);
-                //workaround иначе при смене маски (без смены типа)
-                //ag-grid не видит изменений и не форматирует
-                rowData.set('headerTooltip', `type : String, mask :${element.mask}`);
+                rowData.set('headerTooltip', element.datasetColumn);
                 rowData.set('hide', false);
                 rowData.set('pinned', false);
                 rowData.set('filter', true);
@@ -725,7 +808,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
-        const found = this.state.columnDefs.find(c=> params.colDef.field === c.get('field'));
+        const found = this.state.leafColumnDefs.find(c=> params.colDef.field === c.get('field'));
         let mask = found ? found.get('mask') : undefined;
         let formattedParam, splitted;
         if (this.state.aggregatedRows.length > 0
@@ -735,10 +818,10 @@ class DatasetView extends React.Component<any, State> {
             params.value = splitted[1];
         }
 
-        if (mask && this.state.columnDefs.find(c => mask.includes(c.get('field')))) {
+        if (mask && this.state.leafColumnDefs.find(c => mask.includes(c.get('field')))) {
             try {
                 // eslint-disable-next-line
-                mask = eval(replaceAllCollisionless(mask, this.state.columnDefs.map(c=>{
+                mask = eval(replaceAllCollisionless(mask, this.state.leafColumnDefs.map(c=>{
                     return {
                         name: c.get('field'),
                         replacement: `params.data.${c.get('field')}`
@@ -778,7 +861,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     translateExpression(calculatedExpression: IServerQueryParam[]) {
-        let sortMap = this.state.defaultColumnDefs
+        let sortMap = this.state.defaultLeafColumnDefs
             .filter((def:any) => !def.get("hide"))
             .map((colDef, index) => {
             return {
@@ -814,7 +897,6 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getNewHiddenColumns(newColumnDef: Map<String, any>[]) {
-        newColumnDef = newColumnDef.filter(c => !c.get('hide'));
         let newHiddenColumns = this.state.hiddenColumns.map((e)=> e);
         //Удаляем
         this.state.hiddenColumns.forEach(c => {
@@ -873,15 +955,11 @@ class DatasetView extends React.Component<any, State> {
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
                 if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result, newColumnDef)
+                    newColumnDef = this.getColumnDefGroupBy(result, this.getLeafColumns(newColumnDef))
                 }
-                const hiddenColumns = this.getNewHiddenColumns(newColumnDef);
+                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
-                newColumnDef.forEach(c =>{
-                    const column = hiddenColumns.find(hc => c.get('field') === hc.datasetColumn);
-                    if (column)
-                        c.set('hide', !column.enable)
-                });
+                this.hideLeafColumns(hiddenColumns, newColumnDef);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
                 if (aggregationParams.length !== 0 && this.state.columnDefs.length > 0 && result.length !== 0) {
                     this.props.context.runQuery(resource
@@ -897,6 +975,7 @@ class DatasetView extends React.Component<any, State> {
                             this.setState({
                                 rowData: result,
                                 columnDefs: newColumnDef,
+                                leafColumnDefs: this.getLeafColumns(newColumnDef),
                                 isAggregations: true,
                                 aggregatedRows: this.getAggregatedRows(aggregationParams, result),
                                 hiddenColumns: hiddenColumns},callback);
@@ -906,7 +985,13 @@ class DatasetView extends React.Component<any, State> {
                                 itemId:this.props.viewObject.get('name')+this.props.viewObject._id
                             })
                 } else {
-                    this.setState({rowData: result, columnDefs: newColumnDef , isAggregations: false, aggregatedRows: [], hiddenColumns: hiddenColumns},callback);
+                    this.setState({
+                        rowData: result,
+                        columnDefs: newColumnDef,
+                        leafColumnDefs: this.getLeafColumns(newColumnDef),
+                        isAggregations: false,
+                        aggregatedRows: [],
+                        hiddenColumns: hiddenColumns},callback);
                     this.updatedDatasetComponents(newColumnDef, result, datasetComponentName);
                     this.props.context.notifyAllEventHandlers({
                         type:eventType.change,
@@ -1016,7 +1101,7 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleChange(e: any): void {
+    onChangeDatasetComponent(e: any): void {
         let params: any = {name: e};
         this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
@@ -1173,7 +1258,7 @@ class DatasetView extends React.Component<any, State> {
                 this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('query is not specified'), "error")
             }
         }
-        if (!this.state.columnDefs.find(cd => cd.get('isPrimaryKey'))) {
+        if (!this.state.leafColumnDefs.find(cd => cd.get('isPrimaryKey'))) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('primary key column is not specified') ,"error")
         }
@@ -1196,6 +1281,23 @@ class DatasetView extends React.Component<any, State> {
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('querytext is not specified') ,"error")
         }
         return restrictOperation
+    };
+
+    saveDatasetComponentToUrl = (datasetComponentName: string) => {
+        const urlParams = this.props.pathFull[this.props.pathFull.length - 1];
+        const found = urlParams.params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+        if (found) {
+            found.parameterValue = datasetComponentName
+        } else {
+            urlParams.params = urlParams.params.concat({
+                parameterName: this.props.viewObject.get('name')+this.props.viewObject.eURI(),
+                parameterValue: datasetComponentName
+            })
+        }
+        this.props.context.changeURL(urlParams.appModule,
+            urlParams.useParentReferenceTree,
+            undefined,
+            urlParams.params);
     };
 
     getGridPanel = () => {
@@ -1306,7 +1408,8 @@ class DatasetView extends React.Component<any, State> {
                          style={{marginTop:'6px'}}
                          value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
-                             this.handleChange(e)
+                             this.onChangeDatasetComponent(e);
+                             this.saveDatasetComponentToUrl(e);
                          }}
                      >
                     <OptGroup
@@ -1616,7 +1719,7 @@ class DatasetView extends React.Component<any, State> {
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
-                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'));
+                    this.onChangeDatasetComponent(this.state.allDatasetComponents[i].eContents()[0].get('name'));
                     this.getAllDatasetComponents(true)
 
                 }
@@ -1656,7 +1759,7 @@ class DatasetView extends React.Component<any, State> {
             return 0
         });
         buffer.forEach(d => {
-            const primaryKey = this.state.columnDefs
+            const primaryKey = this.state.leafColumnDefs
                 .filter(c => c.get('isPrimaryKey'))
                 .map(c => {
                     return {
@@ -1667,7 +1770,7 @@ class DatasetView extends React.Component<any, State> {
                         isPrimaryKey: true
                     }
                 });
-            const values = this.state.columnDefs
+            const values = this.state.leafColumnDefs
                 .filter(c => c.get('editable') || c.get('isPrimaryKey'))
                 .map(c => {
                     return {
@@ -1685,9 +1788,7 @@ class DatasetView extends React.Component<any, State> {
                     //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
-                        /*this.refresh()*/
                         this.gridRef.resetBuffer();
-                        /*this.refresh();*/
                     });
                 }
             ).finally(()=>{
@@ -1725,6 +1826,7 @@ class DatasetView extends React.Component<any, State> {
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
                     columnDefs = {this.state.columnDefs}
+                    leafColumnDefs = {this.state.leafColumnDefs}
                     currentTheme = {this.state.currentTheme}
                     showUniqRow = {this.state.showUniqRow}
                     saveChanges = {this.changeDatasetViewState}
@@ -1763,7 +1865,7 @@ class DatasetView extends React.Component<any, State> {
                             <ServerFilter
                                 {...this.props}
                                 parametersArray={this.state.serverFilters}
-                                columnDefs={this.state.columnDefs}
+                                columnDefs={this.state.leafColumnDefs}
                                 allOperations={this.state.allOperations}
                                 onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
@@ -1780,7 +1882,7 @@ class DatasetView extends React.Component<any, State> {
                             <Highlight
                                 {...this.props}
                                 parametersArray={this.state.highlights}
-                                columnDefs={this.state.columnDefs}
+                                columnDefs={this.state.leafColumnDefs}
                                 allOperations={this.state.allOperations}
                                 allHighlightType={this.state.allHighlightType}
                                 onChangeParameters={this.onChangeParams}
@@ -1808,7 +1910,7 @@ class DatasetView extends React.Component<any, State> {
                             <ServerAggregate
                                 {...this.props}
                                 parametersArray={this.state.serverAggregates}
-                                columnDefs={this.state.columnDefs}
+                                columnDefs={this.state.leafColumnDefs}
                                 allAggregates={this.state.allAggregates}
                                 onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
@@ -1836,7 +1938,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupByColumn
                                     {...this.props}
                                     parametersArray={this.state.groupByColumn}
-                                    columnDefs={this.state.defaultColumnDefs}
+                                    columnDefs={this.state.defaultLeafColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
@@ -1853,7 +1955,7 @@ class DatasetView extends React.Component<any, State> {
                                 <ServerGroupBy
                                     {...this.props}
                                     parametersArray={this.state.serverGroupBy}
-                                    columnDefs={this.state.defaultColumnDefs}
+                                    columnDefs={this.state.defaultLeafColumnDefs}
                                     allAggregates={this.state.allAggregates}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
@@ -1881,7 +1983,7 @@ class DatasetView extends React.Component<any, State> {
                             <ServerSort
                                 {...this.props}
                                 parametersArray={this.state.serverSorts}
-                                columnDefs={this.state.columnDefs}
+                                columnDefs={this.state.leafColumnDefs}
                                 allSorts={this.state.allSorts}
                                 onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
@@ -1909,7 +2011,7 @@ class DatasetView extends React.Component<any, State> {
                                 <HiddenColumn
                                     {...this.props}
                                     parametersArray={this.state.hiddenColumns}
-                                    columnDefs={this.state.columnDefs}
+                                    columnDefs={this.state.leafColumnDefs}
                                     onChangeParameters={this.onChangeParams}
                                     saveChanges={this.changeDatasetViewState}
                                     isVisible={this.state.hiddenColumnsMenuVisible}
@@ -1936,13 +2038,15 @@ class DatasetView extends React.Component<any, State> {
                             <Calculator
                                 {...this.props}
                                 parametersArray={this.state.serverCalculatedExpression}
-                                columnDefs={this.state.columnDefs}
+                                //Можно в зависимости от видимости columnDef регулировать видимость стольцов
+                                //но тогда нужна доработка для трансляции выражений
+                                columnDefs={this.state.defaultLeafColumnDefs}
                                 onChangeParameters={this.onChangeParams}
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.calculationsMenuVisible}
                                 componentType={paramType.calculations}
                                 onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
-                                defaultColumnDefs={this.state.defaultColumnDefs}
+                                defaultColumnDefs={this.state.defaultLeafColumnDefs}
                                 formatMasks={this.state.formatMasks}
                                 handleDrawerVisability={this.handleDrawerVisibility}
                             />
@@ -1964,7 +2068,7 @@ class DatasetView extends React.Component<any, State> {
                     {
                         <DrawerDiagram
                             {...this.props}
-                            columnDefs={this.state.columnDefs}
+                            columnDefs={this.state.leafColumnDefs}
                             allAxisXPosition={this.state.allAxisXPosition}
                             allAxisYPosition={this.state.allAxisYPosition}
                             allLegendPosition={this.state.allLegendPosition}
@@ -1990,7 +2094,7 @@ class DatasetView extends React.Component<any, State> {
                     {
                         <DrawerDiagram
                             {...this.props}
-                            columnDefs={this.state.columnDefs}
+                            columnDefs={this.state.leafColumnDefs}
                             allAxisXPosition={this.state.allAxisXPosition}
                             allAxisYPosition={this.state.allAxisYPosition}
                             allLegendPosition={this.state.allLegendPosition}
@@ -2087,7 +2191,9 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <SaveDatasetComponent
                             closeModal={this.handleSaveMenu}
-                            onSave={()=>this.getAllDatasetComponents(false)}
+                            onSave={(name:string)=>{
+                                this.getAllDatasetComponents(false, name);
+                            }}
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             {...this.props}
                         />

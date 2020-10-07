@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.impl.XMLResourceImpl;
 import org.emfjson.jackson.annotations.EcoreIdentityInfo;
 import org.emfjson.jackson.annotations.EcoreTypeInfo;
 import org.emfjson.jackson.databind.EMFContext;
@@ -24,6 +25,7 @@ import ru.neoflex.nfcore.base.services.Store;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,15 +83,14 @@ public class EmfJson {
                 .with(attributes)
                 .withValueToUpdate(jsonResource)
                 .treeToValue(contents, Resource.class);
-//        if (resource instanceof XMLResourceImpl) {
-//            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
-//            for (Iterator<EObject> it = jsonResource.getAllContents(); it.hasNext();) {
-//                EObject eObject = it.next();
-//                xmlResource.setID(eObject, jsonResource.getID(eObject));
-//            }
-//        }
-//        EcoreUtil.resolveAll(jsonResource);
-        resource.getContents().addAll(EcoreUtil.copyAll(jsonResource.getContents()));
+        if (resource instanceof XMLResourceImpl) {
+            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
+            for (Iterator<EObject> it = jsonResource.getAllContents(); it.hasNext();) {
+                EObject eObject = it.next();
+                xmlResource.setID(eObject, jsonResource.getID(eObject));
+            }
+        }
+        resource.getContents().addAll(jsonResource.getContents());
         return resource;
     }
 
@@ -98,17 +99,18 @@ public class EmfJson {
         ObjectNode result = mapper.createObjectNode();
         result.put("uri", store.getRef(resource));
         JsonResource jsonResource = (JsonResource) new JsonResourceFactory(mapper).createResource(resource.getURI());
-//        if (resource instanceof OrientDBResource) {
-//            OrientDBResource orientDBResource = (OrientDBResource) resource;
-//            for (Iterator<EObject> it = orientDBResource.getAllContents();it.hasNext();) {
-//                EObject eObject = it.next();
-//                jsonResource.setID(eObject, orientDBResource.getID(eObject));
-//            }
-//        }
-        jsonResource.getContents().addAll(EcoreUtil.copyAll(resource.getContents()));
+        if (resource instanceof XMLResourceImpl) {
+            XMLResourceImpl xmlResource = (XMLResourceImpl) resource;
+            for (Iterator<EObject> it = xmlResource.getAllContents(); it.hasNext();) {
+                EObject eObject = it.next();
+                jsonResource.setID(eObject, xmlResource.getID(eObject));
+            }
+        }
+        jsonResource.getContents().addAll(resource.getContents());
         result.withArray("contents").addAll(
                 jsonResource.getContents().stream().map(mapper::<JsonNode>valueToTree).collect(Collectors.toList())
         );
+        resource.getContents().addAll(jsonResource.getContents());
         return result;
     }
 

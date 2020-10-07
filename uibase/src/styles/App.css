@@ -1480,8 +1480,12 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
 }
 
-
-
+.ant-modal{
+  top: 30% !important;
+}
+.ant-modal-body {
+  padding: 0 24px 20px !important;
+}
 
 .ant-modal-content{
   height: auto !important;

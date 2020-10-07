@@ -16,6 +16,11 @@ export interface docxExportObject {
         height: number
     },
     gridData?: string[][],
+    gridHeader?: {
+        headerName: string,
+        columnSpan: number
+        rowSpan: number
+    }[][],
     textData?: string
 }
 async function handleExportDocx(this: any, handlers: any[], withTable: any, isDownloadFromDiagramPanel: any) {
@@ -41,6 +46,21 @@ async function handleExportDocx(this: any, handlers: any[], withTable: any, isDo
                 if (docxData.docxComponentType === docxElementExportType.grid && docxData.gridData !== undefined) {
                     //Добавление таблицы
                     let tableRows: TableRow[] = [];
+                    //header
+                    for (const row of docxData.gridHeader!) {
+                        let tableRow: TableCell[] = [];
+                        for (const cell of row) {
+                            tableRow.push(new TableCell({
+                                children: [new Paragraph((cell === null) ? "" : cell.headerName)],
+                                columnSpan:cell.columnSpan,
+                                rowSpan:cell.rowSpan
+                            }));
+                        }
+                        tableRows.push(new TableRow({
+                            children: tableRow
+                        }))
+                    }
+                    //data
                     for (const row of docxData.gridData) {
                         let tableRow: TableCell[] = [];
                         for (const cell of row) {
