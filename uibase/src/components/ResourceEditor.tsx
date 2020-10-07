@@ -50,16 +50,45 @@ interface State {
     isModified: boolean,
     modalApplyChangesVisible: Boolean,
     clipboardObject: ITargetObject,
-    edit: boolean
+    edit: boolean,
+    expandedKeys: string[]
 }
+
+
+const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
+    children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
+        if (c.props.children.filter((ch:any)=>ch !== null).length != 0) {
+            expandedKeys.push(c.key);
+            getAllChildrenKeys(c.props.children, expandedKeys)
+        }
+    });
+    return expandedKeys
+};
+
+const getChildNode = (children: any[], nodeKey:string) => {
+    let retVal:any;
+    for (const c of children.filter((ch: any) => ch !== null)) {
+        if (c.props.children.filter((ch: any) => ch !== null).length != 0) {
+            if (c.key === nodeKey) {
+                return c
+            } else {
+                retVal = getChildNode(c.props.children, nodeKey);
+                if (retVal) { break }
+            }
+        }
+    }
+    return retVal
+};
 
 class ResourceEditor extends React.Component<any, State> {
 
     private splitterRef: React.RefObject<any>;
+    private treeRef: React.RefObject<any>;
 
     constructor(props: any) {
         super(props);
         this.splitterRef = React.createRef();
+        this.treeRef = React.createRef();
     }
 
     state = {
@@ -88,7 +117,8 @@ class ResourceEditor extends React.Component<any, State> {
         modalApplyChangesVisible: false,
         isClipboardValidObject: false,
         clipboardObject: { eClass: "" },
-        edit: false
+        edit: false,
+        expandedKeys: []
     };
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -221,13 +251,18 @@ class ResourceEditor extends React.Component<any, State> {
 
         return (
             <Tree
+                ref={this.treeRef}
                 showIcon
-                defaultExpandAll
                 key="mainTree"
                 switcherIcon={<Icon type="down" />}
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
+                expandedKeys={[...this.state.expandedKeys]}
+                onExpand={expanded => {
+                    this.setState({
+                        expandedKeys: [...expanded]
+                    })}}
             >
                 <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={this.state.mainEObject._id}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
@@ -410,7 +445,10 @@ class ResourceEditor extends React.Component<any, State> {
         const allSubTypes = eClassObject.get('eAllSubTypes');
         node.isArray && eClassObject && allSubTypes.push(eClassObject);
         const allParentChildren = node.propertyName ? node.parentUpdater(null, undefined, node.propertyName, { operation: "getAllParentChildren" }) : undefined;
-        return (node.upperBound === undefined || node.upperBound === -1 || (node.upperBound === 1 && node.children.length === 0)) && node.propertyName !== undefined &&
+        return (node.upperBound === undefined || node.upperBound === -1
+            || (node.upperBound === 1))
+            && node.propertyName !== undefined
+            &&
             <div style={{
                 position: "absolute",
                 display: "grid",
@@ -463,6 +501,15 @@ class ResourceEditor extends React.Component<any, State> {
 
                 {!node.isArray && !node.headline && <Menu.Item key="delete">{this.props.t("delete")}</Menu.Item>}
                 {!node.isArray && !node.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
+                {(node.children && node.children.filter((c:any)=>c).length>0)
+                    //exists expandable elements
+                    && !(this.state.expandedKeys.filter(e=>getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).includes(e)).length ===
+                        getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).length)
+                    && <Menu.Item key="expandAll">{this.props.t("expand all")}</Menu.Item>}
+                {(node.children && node.children.filter((c:any)=>c).length>0)
+                    //exists collapsible elements
+                    && this.state.expandedKeys.filter(e=>getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).includes(e)).length > 0
+                    && <Menu.Item key="collapseAll">{this.props.t("collapse all")}</Menu.Item>}
             </Menu>
         </div>
     }
@@ -597,6 +644,16 @@ class ResourceEditor extends React.Component<any, State> {
                 mainEObject: resource.eContents()[0],
                 isModified: true
             }))
+        }
+        if (e.key === "expandAll") {
+            const childToExpand = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
+            const expandedKeys = getAllChildrenKeys([childToExpand]);
+            this.setState({expandedKeys: [...new Set(expandedKeys.concat(this.state.expandedKeys))]})
+        }
+        if (e.key === "collapseAll") {
+            const childToCollapse = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
+            const collapsedKeys = getAllChildrenKeys([childToCollapse]);
+            this.setState({expandedKeys: this.state.expandedKeys.filter(k=>!collapsedKeys.includes(k))})
         }
     };
 
@@ -774,6 +831,10 @@ class ResourceEditor extends React.Component<any, State> {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
             this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
+        }
+        //Initial expand all elements
+        if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
+            this.setState({expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children])})
         }
     }
 
