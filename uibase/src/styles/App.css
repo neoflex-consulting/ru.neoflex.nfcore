@@ -353,6 +353,9 @@
 }
 /* Paginator ! */
 
+.ant-pagination.mini .ant-pagination-prev, .ant-pagination.mini .ant-pagination-next {
+  line-height: 22px !important;
+}
 
 .ant-select-sm .ant-select-selection--single {
   height: 20px;
