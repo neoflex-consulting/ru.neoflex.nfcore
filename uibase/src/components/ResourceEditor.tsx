@@ -57,7 +57,7 @@ interface State {
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
     children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
-        if (c.props.children.filter((ch:any)=>ch !== null).length != 0) {
+        if (c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
             expandedKeys.push(c.key);
             getAllChildrenKeys(c.props.children, expandedKeys)
         }
@@ -68,7 +68,7 @@ const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
 const getChildNode = (children: any[], nodeKey:string) => {
     let retVal:any;
     for (const c of children.filter((ch: any) => ch !== null)) {
-        if (c.props.children.filter((ch: any) => ch !== null).length != 0) {
+        if (c.props.children.filter((ch: any) => ch !== null).length !== 0) {
             if (c.key === nodeKey) {
                 return c
             } else {

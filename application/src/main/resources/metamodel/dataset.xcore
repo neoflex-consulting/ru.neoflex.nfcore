@@ -133,6 +133,7 @@ abstract class DatasetColumnView {
 
 class RdbmsColumn extends DatasetColumnView {
     refers FormatMask formatMask //Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
+    refers FormatMask excelFormatMask
     String defaultValue //Если пришло значение null, то что отображать в ячейке
     boolean editable
     boolean sortable

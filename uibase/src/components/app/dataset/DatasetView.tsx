@@ -354,7 +354,9 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', textAlignMap_[c.get('textAlign') || "Undefined"]);
                 rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('excelFormatMask', c.get('excelFormatMask'));
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('excelMask', this.evalMask(c.get('excelFormatMask')));
                 rowData.set('onCellDoubleClicked', (params: any) => {
                     if (params.colDef.editable && this.state.isEditMode) {
                         if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
@@ -422,7 +424,7 @@ class DatasetView extends React.Component<any, State> {
         })
     }
 
-    deepCloneColumnDefs(columnDefs:Map<String,any>[], newColumnDefs:Map<String,any>[] = []) {
+    deepCloneColumnDefs(columnDefs:Map<String,any>[], evalMasks = false, newColumnDefs:Map<String,any>[] = []) {
         columnDefs.forEach(cd=>{
             if (cd.get('children')) {
                 let rowData = new Map();
@@ -430,12 +432,17 @@ class DatasetView extends React.Component<any, State> {
                     if (key !== 'children')
                         rowData.set(key,value)
                 });
-                rowData.set('children', this.deepCloneColumnDefs(cd.get('children')));
+                rowData.set('children', this.deepCloneColumnDefs(cd.get('children'), evalMasks));
                 newColumnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 cd.forEach((value, key) => {
-                    rowData.set(key,value)
+                    if (key === 'mask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('formatMask')));
+                    else if (key === 'excelMask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('excelFormatMask')));
+                    else
+                        rowData.set(key,value)
                 });
                 newColumnDefs.push(rowData);
             }
@@ -761,6 +768,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
                 rowData.set('formatMask', colDef.get('formatMask'));
                 rowData.set('mask', this.evalMask(colDef.get('formatMask')));
+                rowData.set('excelMask', this.evalMask(colDef.get('excelFormatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
@@ -769,14 +777,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map(c => {
-            const rowData = new Map();
-            const mask = this.evalMask(c.get('formatMask'));
-            c.forEach((value, key) => {
-                key === 'mask' ? rowData.set(key, mask) : rowData.set(key,value)
-            });
-            return rowData
-        });
+        let columnDefs = this.deepCloneColumnDefs(this.state.defaultColumnDefs, true);
         parametersArray.forEach(element => {
             if (element.enable && element.datasetColumn) {
                 let rowData = new Map();
@@ -803,6 +804,27 @@ class DatasetView extends React.Component<any, State> {
             }
         });
         return columnDefs
+    };
+
+    getExcelMask = (params: ValueFormatterParams) => {
+        const found = this.state.leafColumnDefs.find(c=> params.colDef.field === c.get('field'));
+        let mask = found ? found.get('excelMask') : undefined;
+        if (mask && this.state.leafColumnDefs.find(c => mask.includes(c.get('field')))) {
+            try {
+                // eslint-disable-next-line
+                mask = eval(replaceAllCollisionless(mask, this.state.leafColumnDefs.map(c=>{
+                    return {
+                        name: c.get('field'),
+                        replacement: `params.data.${c.get('field')}`
+                    }
+                })))
+            } catch (e) {
+                this.props.context.notification("ExcelFormatMask",
+                    this.props.t("exception while evaluating") + ` ${mask}`,
+                    "warning")
+            }
+        }
+        return mask
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
@@ -1845,6 +1867,7 @@ class DatasetView extends React.Component<any, State> {
                         return ""
                     }}
                     valueFormatter={this.valueFormatter}
+                    excelCellMask={this.getExcelMask}
                     {...this.props}
                 />
                 <div id="filterButton">

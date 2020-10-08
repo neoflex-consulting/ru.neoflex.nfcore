@@ -10,7 +10,11 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Checkbox_, Href_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
+import {
+    agGridColumnTypes,
+    appTypes,
+    dmlOperation
+} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -24,7 +28,7 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent
+    GridReadyEvent, ValueFormatterParams
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
@@ -58,7 +62,8 @@ interface Props {
     height?: number;
     width?: number;
     highlightClassFunction?: ()=>{};
-    valueFormatter?: any;
+    valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
+    excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -159,10 +164,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         childrenToVisit.forEach(ch=>{
             maxDepth = (findDepth(ch) + 1 > maxDepth) ? findDepth(ch) + 1 : maxDepth
         });
-        while (childrenToVisit.length != 0) {
+        while (childrenToVisit.length !== 0) {
             const current = childrenToVisit.shift();
             if (!current.hide) {
-                if (current.children && this.getLeafColumns(current.children).filter(c=>!c.hide).length > 0
+                if ((current.children && this.getLeafColumns(current.children).filter(c=>!c.hide).length > 0)
                     || !current.children) {
                     headerRow.push({
                         headerName: current.headerName,
@@ -241,8 +246,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             }
         }
         let tableData = [];
+        let tableMaskData = [];
         for (const [index, elem] of this.state.rowData.entries()) {
             let dataRow = [];
+            let maskRow = [];
             for (const el of visible) {
                 for (const prop in elem) {
                     if (el === prop && this.props.valueFormatter) {
@@ -252,20 +259,39 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
                             node: this.gridOptions.api?.getRowNode(index)
                         };
-                        const formatted = this.props.valueFormatter(params);
-                        dataRow.push(formatted)
+                        let dateTZ = undefined;
+                        if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
+                            dateTZ = new Date(params.value);
+                        }
+                        dataRow.push(params.colDef.type === appTypes.String ? params.value
+                                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
+                                        : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                        : params.value);
+                        if (this.props.excelCellMask) {
+                            let mask = this.props.excelCellMask(params);
+                            mask = params.colDef.type === appTypes.Timestamp && !mask
+                                ? "dd.mm.yyyy hh:mm:ss"
+                                : params.colDef.type === appTypes.Date && !mask
+                                    ? "dd.mm.yyyy"
+                                    : mask;
+                            maskRow.push(mask)
+                        }
                     } else if (el === prop) {
                         dataRow.push(elem[prop])
                     }
                 }
             }
-            tableData.push(dataRow)
+            tableData.push(dataRow);
+            if (this.props.excelCellMask) {
+                tableMaskData.push(maskRow)
+            }
         }
         return  {
             hidden: this.props.hidden,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),
+                cellsMasks: tableMaskData,
                 columns: header,
                 rows: (tableData.length === 0) ? [[]] : tableData
             },
