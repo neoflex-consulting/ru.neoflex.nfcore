@@ -63,6 +63,7 @@ class AppModule {
 class Application extends AppModule {
 	boolean checkRights
     GrantType grantType = "Write"
+    Integer headerOrder
 }
 
 /* Views */
