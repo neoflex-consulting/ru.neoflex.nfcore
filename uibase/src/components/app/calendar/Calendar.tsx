@@ -858,7 +858,7 @@ class Calendar extends React.Component<any, any> {
 
                         <NeoButton
                             title={t('legend')}
-                            style={{width: '24px', height: '24px', color: '#6e6e6e'}}
+                            style={{width: '24px', height: '24px', color: '#6e6e6e',marginTop: "4px"}}
                             type="link"
                             onClick={this.handleLegendMenu}>
                             <NeoIcon icon={'legend'} size={'m'} />
@@ -910,16 +910,17 @@ class Calendar extends React.Component<any, any> {
                     </div>
                 }
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '18px', height: '40px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', marginRight: '16px', height: '40px'}}/>
 
                     <NeoButton
+                        style={{ marginTop: "4px",}}
                         title={t('add event')}
                         type="link"
                         onClick={this.handleCreateMenu}>
                         <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'} />
                     </NeoButton>
 
-                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '18px', marginRight: '16px', height: '40px'}}/>
+                <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', marginRight: '16px', height: '40px'}}/>
                 <NeoButton
                     title={t('calendar')}
                     type={this.state.calendarVisible ? 'disabled' : "link"}
@@ -959,7 +960,7 @@ class Calendar extends React.Component<any, any> {
                     <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                         overlay={menu} placement="bottomLeft">
                         <div>
-                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginRight: "10px"}}/>
+                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginLeft: '16px'}}/>
                         </div>
                     </Dropdown>
                     :
@@ -970,6 +971,7 @@ class Calendar extends React.Component<any, any> {
             type="link"
             style={{
                 marginRight: '18px',
+                marginLeft: this.state.calendarVisible ? '8px' : '16px'
             }}
             onClick={this.onFullScreen}
         >

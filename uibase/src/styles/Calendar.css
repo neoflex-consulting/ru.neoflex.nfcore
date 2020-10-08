@@ -371,7 +371,6 @@
 .verticalLine {
     border-left: 1px solid #B3B3B3;
     height: 32px;
-    margin: auto 10px;
 }
 
 .ant-select-item-option-content {
