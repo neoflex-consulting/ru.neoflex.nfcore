@@ -3,7 +3,7 @@ import {withTranslation} from 'react-i18next';
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import _ from "lodash"
 
 interface Props {
