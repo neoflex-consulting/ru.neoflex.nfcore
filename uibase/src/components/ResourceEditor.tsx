@@ -121,8 +121,6 @@ class ResourceEditor extends React.Component<any, State> {
         expandedKeys: []
     };
 
-    //      = (resources : Ecore.Resource[]): void => {
-
     refresh = (refresh: boolean): void => {
         if (refresh) {
             this.getEObject()
@@ -301,7 +299,7 @@ class ResourceEditor extends React.Component<any, State> {
 
         return (
             notification.info({
-                message: title, description: description, duration: 3, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
             }))
     };
 
@@ -765,8 +763,23 @@ class ResourceEditor extends React.Component<any, State> {
     };
 
     changeEdit = () => {
-        this.state.edit ? this.setState({edit: false}) : this.setState({edit: true})
-        this.refresh(true)
+        if (this.state.edit) {
+            API.instance().deleteLock(this.state.mainEObject._id)
+                .then(() => {
+                    this.setState({edit: false});
+                    this.refresh(true)
+                })
+                .catch(() => {
+                    this.setState({edit: false});
+                    this.refresh(true)
+                })
+        }
+        else {
+            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id)
+                .then(() => {});
+            this.setState({edit: true});
+            this.refresh(true)
+        }
     };
 
     save = (redirectAfterSave:boolean = false) => {
@@ -841,8 +854,26 @@ class ResourceEditor extends React.Component<any, State> {
     componentDidMount(): void {
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
-        window.addEventListener("keydown", this.saveOnCtrlS)
+        window.addEventListener("keydown", this.saveOnCtrlS);
+        this.checkLock('auth','CurrentLock', 'currentLockPattern');
     }
+
+    checkLock(ePackageName: string, className: string, paramName: string) {
+        API.instance().findClass(ePackageName, className)
+            .then((result: EObject) => {
+                if (paramName === 'currentLockPattern') {
+                    API.instance().findByKind(result,  {contents: {eClass: result.eURI()}})
+                        .then((result: Ecore.Resource[]) => {
+                            if (result.length !== 0) {
+                                let currentLockFile = result.filter( (r: EObject) => r.eContents()[0].get('name') === this.state.mainEObject._id);
+                                if (currentLockFile.length !== 0) {
+                                    this.setState({edit: true});
+                                }
+                            }
+                        })
+                }
+            })
+    };
 
     private saveOnCtrlS = (event: any) => {
         if (event.ctrlKey && event.code === 'KeyS') {
