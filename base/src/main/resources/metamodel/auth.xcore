@@ -123,3 +123,14 @@ class Parameter {
     String value
 }
 
+class CurrentLock {
+    QName name
+    contains Audit audit
+}
+
+class EditHistory {
+    QName name
+    refers User user
+    Timestamp lockDate
+    Timestamp unlockDate
+}

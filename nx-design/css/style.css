@@ -126,7 +126,7 @@ display: inline-block;
 
 .verticalLine {
   border-left: 1px solid #B3B3B3;
-  height: 32px;
+  height: 40px!important;
   margin: auto 10px;
 }
 

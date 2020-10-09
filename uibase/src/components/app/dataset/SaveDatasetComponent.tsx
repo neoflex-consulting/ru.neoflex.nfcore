@@ -3,11 +3,12 @@ import {withTranslation} from 'react-i18next';
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
+import _ from "lodash"
 
 interface Props {
     closeModal?: () => void;
-    onSave?: () => void;
+    onSave?: (name: string) => void;
     currentDatasetComponent?: any;
 }
 
@@ -118,7 +119,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
         let objectId = this.props.viewObject.eURI();
         let params: any = {};
         this.props.context.changeUserProfile(objectId, params);
-        let currentDatasetComponent = this.props.currentDatasetComponent.eContents()[0];
+        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent.eContents()[0])
         currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
         if (!this.state.changeCurrent) {
             currentDatasetComponent.get('audit').get('createdBy', null);
@@ -163,13 +164,12 @@ class SaveDatasetComponent extends React.Component<any, State> {
         API.instance().saveResource(resource)
             .then((newDatasetComponent: any) => {
                 this.props.closeModal!();
-                this.props.viewObject.set('datasetComponent', newDatasetComponent.eContents()[0]);
                 const newResourceSet: Ecore.ResourceSet = this.props.viewObject.eResource().eContainer as Ecore.ResourceSet;
                 const newViewObject: Ecore.EObject[] = newResourceSet.elements()
                     .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave());
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave(newDatasetComponent.eContents()[0].get('name')));
             });
     }
 
@@ -205,10 +205,9 @@ class SaveDatasetComponent extends React.Component<any, State> {
             <div>
                 <NeoRow>
                     <NeoCol span={24} style={{alignItems:'start', marginBottom:'17px', flexDirection:'column'}}>
-                        <NeoTypography type={"capture-regular"} style={{marginBottom:'4px'}}>Наименование отчета</NeoTypography>
                         <NeoInput
                             width={'100%'}
-                            placeholder={'new report name'}
+                            placeholder={t('label')}
                             disabled={this.state.changeCurrent}
                             style={{ marginBottom: '20px'}}
                             allowClear={true}
@@ -224,7 +223,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeCurrent()}
                         >
-                            Change current
+                            {t('change current')}
                         </NeoInput>
                         <NeoInput
                             type={'checkbox'}
@@ -232,7 +231,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeAccess()}
                         >
-                            Public
+                            {t('public')}
                         </NeoInput>
                     </NeoCol>
                 </NeoRow>

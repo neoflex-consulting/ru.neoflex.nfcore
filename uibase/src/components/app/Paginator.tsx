@@ -36,7 +36,7 @@ class Paginator extends React.Component<any, any> {
     render() {
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
-                <div style={{marginTop: "21.33px", marginBottom: "21.33px", float: "right"}}>
+                <div style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
                     <Pagination
                         size="small"
                         current={this.props.currentPage}

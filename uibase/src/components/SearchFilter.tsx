@@ -25,7 +25,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
 
     sortColumns = (a: any, b: any, name: string, type: string): number => {
         if (b !== undefined) {
-            if (type === "stringType") {
+            if (type === "stringType" && typeof a[name] === "string" && typeof b[name] === "string") {
                 if (a[name] !== undefined && b[name] !== undefined) {
                     if (a[name].toLowerCase() < b[name].toLowerCase()) return -1;
                     else if(a[name].toLowerCase() > b[name].toLowerCase()) return 1;

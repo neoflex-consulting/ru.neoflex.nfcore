@@ -234,8 +234,7 @@ class DatasetView extends React.Component<any, State> {
 
     }
 
-    //TODO нужна оптимизация
-    getAllDatasetComponents(findColumn: boolean) {
+    getAllDatasetComponents(findColumn: boolean, datasetComponentName: string|undefined = undefined) {
         API.instance().fetchAllClasses(false).then(classes => {
             const temp = classes.find((c: Ecore.EObject) => c.eURI() === 'ru.neoflex.nfcore.dataset#//DatasetComponent');
             let allDatasetComponents: any[] = [];
@@ -264,7 +263,22 @@ class DatasetView extends React.Component<any, State> {
                                 }
                             });
                             if (allDatasetComponents.length !== 0) {
-                                this.setState({allDatasetComponents})
+                                this.setState({allDatasetComponents}, () => {
+                                    if (datasetComponentName) {
+                                        this.onChangeDatasetComponent(datasetComponentName);
+                                        this.saveDatasetComponentToUrl(datasetComponentName);
+                                    } else {
+                                        const found = this.props.pathFull[this.props.pathFull.length - 1].params
+                                            ? this.props.pathFull[this.props.pathFull.length - 1].params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+                                            : undefined;
+                                        //TODO нужна проверка на private версию данных, чтобы не отображать приватную
+                                        if (found && allDatasetComponents.find(obj => {
+                                                return obj.eContents()[0].get('name') === found.parameterValue}
+                                            )) {
+                                            this.onChangeDatasetComponent(found.parameterValue);
+                                        }
+                                    }
+                                })
                             }
                             if (currentDatasetComponent && currentDatasetComponent.eContents()[0].get('dataset').eClass.get('name') === "GroovyDataset") {
                                 this.setState({isGroovyDataset: true})
@@ -340,7 +354,9 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', textAlignMap_[c.get('textAlign') || "Undefined"]);
                 rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('excelFormatMask', c.get('excelFormatMask'));
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('excelMask', this.evalMask(c.get('excelFormatMask')));
                 rowData.set('onCellDoubleClicked', (params: any) => {
                     if (params.colDef.editable && this.state.isEditMode) {
                         if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
@@ -408,7 +424,7 @@ class DatasetView extends React.Component<any, State> {
         })
     }
 
-    deepCloneColumnDefs(columnDefs:Map<String,any>[], newColumnDefs:Map<String,any>[] = []) {
+    deepCloneColumnDefs(columnDefs:Map<String,any>[], evalMasks = false, newColumnDefs:Map<String,any>[] = []) {
         columnDefs.forEach(cd=>{
             if (cd.get('children')) {
                 let rowData = new Map();
@@ -416,12 +432,17 @@ class DatasetView extends React.Component<any, State> {
                     if (key !== 'children')
                         rowData.set(key,value)
                 });
-                rowData.set('children', this.deepCloneColumnDefs(cd.get('children')));
+                rowData.set('children', this.deepCloneColumnDefs(cd.get('children'), evalMasks));
                 newColumnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 cd.forEach((value, key) => {
-                    rowData.set(key,value)
+                    if (key === 'mask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('formatMask')));
+                    else if (key === 'excelMask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('excelFormatMask')));
+                    else
+                        rowData.set(key,value)
                 });
                 newColumnDefs.push(rowData);
             }
@@ -716,17 +737,17 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
+    getColumnDefGroupBy = () => {
         let newColumnDefs: any[] = [];
-        for (const prop in rowDataShow[0]) {
-            if (rowDataShow[0][prop] !== undefined) {
+        const newColumns = this.state.groupByColumn.concat(this.state.serverGroupBy).filter(c=>c.enable && c.datasetColumn)
+        for (const obj of newColumns) {
                 let aggByColumn = this.state.serverGroupBy
-                    .find((s: any) => s.value === prop);
+                    .find((s: any) => s.value === obj.value);
                 let colDef = this.state.defaultLeafColumnDefs
-                    .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
+                    .find((s: any) => s.get('field') === obj.datasetColumn || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
-                rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
-                rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
+                rowData.set('field', aggByColumn && aggByColumn.value ? aggByColumn.value : colDef.get('field'));
+                rowData.set('headerName', aggByColumn && aggByColumn.operation ? `${this.props.t(aggByColumn.operation)}: ${aggByColumn.value}` : colDef.get('headerName'));
                 rowData.set('headerTooltip', colDef.get('headerTooltip'));
                 rowData.set('hide', colDef.get('hide'));
                 rowData.set('pinned', colDef.get('pinned'));
@@ -747,24 +768,16 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
                 rowData.set('formatMask', colDef.get('formatMask'));
                 rowData.set('mask', this.evalMask(colDef.get('formatMask')));
+                rowData.set('excelMask', this.evalMask(colDef.get('excelFormatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
-
-            }
         }
         return newColumnDefs
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map(c => {
-            const rowData = new Map();
-            const mask = this.evalMask(c.get('formatMask'));
-            c.forEach((value, key) => {
-                key === 'mask' ? rowData.set(key, mask) : rowData.set(key,value)
-            });
-            return rowData
-        });
+        let columnDefs = this.deepCloneColumnDefs(this.state.defaultColumnDefs, true);
         parametersArray.forEach(element => {
             if (element.enable && element.datasetColumn) {
                 let rowData = new Map();
@@ -791,6 +804,27 @@ class DatasetView extends React.Component<any, State> {
             }
         });
         return columnDefs
+    };
+
+    getExcelMask = (params: ValueFormatterParams) => {
+        const found = this.state.leafColumnDefs.find(c=> params.colDef.field === c.get('field'));
+        let mask = found ? found.get('excelMask') : undefined;
+        if (mask && this.state.leafColumnDefs.find(c => mask.includes(c.get('field')))) {
+            try {
+                // eslint-disable-next-line
+                mask = eval(replaceAllCollisionless(mask, this.state.leafColumnDefs.map(c=>{
+                    return {
+                        name: c.get('field'),
+                        replacement: `params.data.${c.get('field')}`
+                    }
+                })))
+            } catch (e) {
+                this.props.context.notification("ExcelFormatMask",
+                    this.props.t("exception while evaluating") + ` ${mask}`,
+                    "warning")
+            }
+        }
+        return mask
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
@@ -940,8 +974,8 @@ class DatasetView extends React.Component<any, State> {
                 let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
-                if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result, this.getLeafColumns(newColumnDef))
+                if (filter(groupByParams).length !== 0) {
+                    newColumnDef = this.getColumnDefGroupBy()
                 }
                 const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
@@ -1087,7 +1121,7 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    handleChange(e: any): void {
+    onChangeDatasetComponent(e: any): void {
         let params: any = {name: e};
         this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
@@ -1269,6 +1303,23 @@ class DatasetView extends React.Component<any, State> {
         return restrictOperation
     };
 
+    saveDatasetComponentToUrl = (datasetComponentName: string) => {
+        const urlParams = this.props.pathFull[this.props.pathFull.length - 1];
+        const found = urlParams.params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
+        if (found) {
+            found.parameterValue = datasetComponentName
+        } else {
+            urlParams.params = urlParams.params.concat({
+                parameterName: this.props.viewObject.get('name')+this.props.viewObject.eURI(),
+                parameterValue: datasetComponentName
+            })
+        }
+        this.props.context.changeURL(urlParams.appModule,
+            urlParams.useParentReferenceTree,
+            undefined,
+            urlParams.params);
+    };
+
     getGridPanel = () => {
         const { t } = this.props;
         const menu = (<Menu
@@ -1287,56 +1338,63 @@ class DatasetView extends React.Component<any, State> {
 
                 <div className='block'>
                     <NeoInput
-                        style={{width:'192px'}}
+                        style={{width:'184px', height: "32px", marginTop: "4px"}}
                         type="search"
                         onChange={() => this.gridRef.onQuickFilterChanged()}
                         id={"quickFilter"}
                         placeholder={t("quick filter")}
                     />
-                    <div className='verticalLine' />
+                    <div className='verticalLine' style={{height: '40px', marginLeft: "24px"}}/>
                         <NeoButton type={'link'} title={t('filters')}
-                                   style={{marginRight:'5px'}}
+                                   style={{marginTop:'7px', marginLeft: "16px"}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>
                             <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
-                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('sorts')}
+                        {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('sorts')} style={{marginTop:'7px', marginLeft: "11px"}}
                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
                             <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
-                    <div className='verticalLine' />
+                    <div className='verticalLine'  style={{height: '40px', marginLeft: "16px"}}/>
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('calculator')}
-                                                                  style={{marginRight:'8px'}}
+                                                                  style={{marginLeft:'16px', marginTop:'7px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}>
                             <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('aggregations')}
-                                                                  style={{marginRight:'8px'}}
+                                                                  style={{marginLeft:'8px', marginTop:'7px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}>
                             <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                         <NeoButton type={'link'} title={t('diagram')}
-                                   style={{marginRight:'8px'}}
+                                   style={{marginLeft:'8px', marginTop:'7px'}}
                                    onClick={()=> {
                                        this.DiagramButton()
                                    }}>
                             <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('grouping')}
-                                                                  style={{marginRight:'8px'}}
+                                                                  style={{marginLeft:'8px', marginTop:'7px'}}
                                                                   onClick={()=>{this.handleDrawerVisibility(paramType.group,!this.state.aggregatesGroupsMenuVisible)}}>
                             <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
                         </NeoButton> : null}
                     <NeoButton type={'link'} title={t('hiddencolumns')}
-                               style={{color: 'rgb(151, 151, 151)', marginRight:'8px'}}
+                               style={{color: 'rgb(151, 151, 151)', marginLeft:'8px', marginTop:'7px'}}
                                onClick={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                     >
                         <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
+
+                    <div className='verticalLine'  style={{marginLeft:'16px', height: '40px'}}/>
+                        <NeoButton type={'link'} title={t('save')}  style={{marginLeft:'16px', marginTop:'7px'}}
+                                   onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
+                            <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
+                        </NeoButton>
+                    <div className='verticalLine' style={{marginLeft:'16px', height: '40px'}}/>
                     {(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed) ?
                         <NeoButton
                             type={'link'}
                             title={t('edit')}
-                            style={{color: 'rgb(151, 151, 151)', background: '#F2F2F2'}}
+                            style={{color: 'rgb(151, 151, 151)', background: '#F2F2F2', marginTop:'7px', marginLeft: "20px"}}
                             onClick={() => {
                                 if (this.state.groupByColumn.filter(c => c.enable && c.datasetColumn).length > 0
                                     || this.state.serverGroupBy.filter(c => c.enable && c.datasetColumn).length > 0
@@ -1355,12 +1413,7 @@ class DatasetView extends React.Component<any, State> {
                         :
                         null
                     }
-                    <div className='verticalLine' />
-                        <NeoButton type={'link'} title={t('save')}
-                                   onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
-                            <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
-                        </NeoButton>
-                    <div className='verticalLine' />
+
                 </div>
 
             <div className='block'>
@@ -1371,10 +1424,17 @@ class DatasetView extends React.Component<any, State> {
             <div id="selectsInFullScreen" style={{display: 'inline-block'}}>
                 <NeoSelect
                          getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
-                         width={'250px'}
+                         width={'184px'}
+                         allowClear={this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
+                         style={{marginTop:'6px'}}
                          value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
-                             this.handleChange(e)
+                             if (e) {
+                                 this.onChangeDatasetComponent(e);
+                                 this.saveDatasetComponentToUrl(e);
+                             } else {
+                                 this.setState({deleteMenuVisible:true})
+                             }
                          }}
                      >
                     <OptGroup
@@ -1417,17 +1477,17 @@ class DatasetView extends React.Component<any, State> {
                 </NeoSelect>
             </div>
             }
-                <div className='verticalLine'/>
+                <div className='verticalLine' style={{height: '40px', marginLeft: "17px"}}/>
 
                  <Dropdown overlay={menu} placement="bottomRight"
                            getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}>
                      <div>
-                         <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginRight: "10px", marginTop: "1px"}}/>
+                         <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginLeft: "16px", marginTop:'8px'}}/>
                      </div>
                  </Dropdown>
                 <NeoButton
                     title={t('fullscreen')}
-                    type={'link'} style={{marginRight: "5px"}}
+                    type={'link'} style={{marginLeft: "10px", marginTop:'7px'}}
                            onClick={this.onFullScreen}>
                     {this.state.fullScreenOn  ?
                         <NeoIcon icon={'fullScreenUnDo'} color={'#5E6785'} size={'m'}/>
@@ -1469,38 +1529,38 @@ class DatasetView extends React.Component<any, State> {
                 >
                     <span style={{marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("back to table")}</span>
                 </NeoButton>
-            <div className='verticalLine' style={{marginTop: "4px"}}/>
-            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'8px', marginLeft:'8px'}}
+            <div className='verticalLine' style={{height: '40px', marginLeft: "40px"}}/>
+            <NeoButton type={'link'} title={t('add')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft:'16px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible);
                     }}
             >
                 <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
             </NeoButton>
-            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'8px'}}
+            <NeoButton type={'link'} title={t('edit')} style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft:'10px'}}
                     onClick={()=>{
                         this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible);
                     }}
             >
                 <NeoIcon icon={"edit"} size={"m"} color={'#5E6785'}/>
             </NeoButton>
-                <div className='verticalLine' style={{marginTop: "4px"}}/>
+                <div className='verticalLine' style={{height: '40px', marginLeft: "16px"}}/>
 
-            <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "6px", background: '#F2F2F2'}}
+            <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"  }}
                     onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}
             >
                 <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
             </NeoButton>
-                <div className='verticalLine' style={{marginTop: "4px"}}/>
+                <div className='verticalLine' style={{height: '40px', marginLeft: "16px" }}/>
             </div>
 
             <div className='block'>
 
-                <span className={"caption"} style={{marginTop: "12px", color: 'black', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal"}}>{t("version")}</span>
-                <div id="selectInGetDiagramPanel" style={{display: 'inline-block', marginTop: "6px"}}>
+
+                <div id="selectInGetDiagramPanel" style={{display: 'inline-block', marginTop: "5px"}}>
                 <NeoSelect
                     getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
-                    style={{ width: '250px', marginLeft: "12px"}}
+                    style={{ width: '192x'}}
                     showSearch={true}
                     value={this.state.currentDiagram?.diagramName}
                     onChange={(e: string) => {
@@ -1521,18 +1581,23 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </NeoSelect>
             </div>
-                <div id={"dropdownInGridPanel"}   className='verticalLine' style={{marginTop: "6px"}}/>
+                <div id={"dropdownInGridPanel"}   className='verticalLine' style={{height: '40px', marginLeft: "16px" }}/>
 
-            <Dropdown overlay={menu} placement="bottomLeft"
-                      getPopupContainer={() => document.getElementById ("dropdownInGridPanel") as HTMLElement}>
-                <div style={{marginRight: "5px"}}>
-                <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "7px"}}/>
-                </div>
-            </Dropdown>
-                <span className={"checkboxDiagram"} style={{marginTop: "8px"}}>
+
+                <span className={"checkboxDiagram"} style={{marginTop: "10px", marginLeft: "16px"}}>
                     <NeoInput type={'checkbox'} onChange={this.withTable.bind(this)} style={{marginTop: "6px", background: '#F2F2F2'}}/>
                   <span style={{display: 'inline-block', marginBottom: "5px", fontSize: "14px", lineHeight: "16px", fontWeight: "normal", fontStyle: "normal", marginLeft: "30px"}}>{t("download with table")}</span>
                 </span>
+
+
+                <Dropdown overlay={menu} placement="bottomLeft"
+                          getPopupContainer={() => document.getElementById ("dropdownInGridPanel") as HTMLElement}>
+                    <div style={{marginRight: "5px"}}>
+                        <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginTop: "7px", marginLeft: "16px"}}/>
+                    </div>
+                </Dropdown>
+
+                <div id={"dropdownInGridPanel"}   className='verticalLine' style={{height: '40px', marginLeft: "16px" }}/>
 
 
             <NeoButton
@@ -1541,7 +1606,7 @@ class DatasetView extends React.Component<any, State> {
                 type="link"
                 style={{
                     float: "right",
-                    marginLeft: '10px',
+                    marginLeft: '16px',
                     color: 'rgb(151, 151, 151)',
                     marginTop: "6px",
                     background: '#F2F2F2'
@@ -1587,22 +1652,22 @@ class DatasetView extends React.Component<any, State> {
             >
                 <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
             </NeoButton>
-            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <div className='verticalLine' style={{height: '40px', marginLeft: "24px"}}/>
             <NeoButton
                 type={'link'}
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("add row")}
-                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"}}
                 onClick={() => this.gridRef.onInsert()}
             >
                 <NeoIcon icon={"plus"}  size={'m'}/>
             </NeoButton>
-            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <div className='verticalLine' style={{height: '40px', marginLeft: "16px"}}/>
                 <NeoButton
                     type={'link'}
                     hidden={!this.state.isEditMode}
                     title={t("apply changes")}
-                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"}}
                     onClick={() => {
                         //Убрал т.к. есть подсветки
                         /*this.gridRef.removeRowsFromGrid();*/
@@ -1619,17 +1684,17 @@ class DatasetView extends React.Component<any, State> {
                     type={'link'}
                     hidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
                     title={t("delete selected")}
-                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                    style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft: "8px"}}
                     onClick={() => this.gridRef.onDeleteSelected()}
                 >
                     <NeoIcon icon={"rubbish"} size={'m'}/>
                 </NeoButton>
-            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <div className='verticalLine' style={{height: '40px', marginLeft: "16px"}}/>
             <NeoButton
                 type={'link'}
                 hidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                 title={t("copy selected")}
-                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginRight:'5px'}}
+                style={{color: 'rgb(151, 151, 151)', marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"}}
                 onClick={() => {
                     this.gridRef.copySelected();
                 }}
@@ -1640,13 +1705,13 @@ class DatasetView extends React.Component<any, State> {
             <div className='block' style={{margin: "auto 16px", display: "flex"}}>
             <NeoInput
                 hidden={!this.state.isEditMode}
-                style={{width:'250px'}}
+                style={{width:'184px', height: "32px", marginTop: "5px"}}
                 type={"search"}
                 onChange={() => this.gridRef.onQuickFilterChanged()}
                 id={"quickFilter"}
                 placeholder={t("quick filter")}
             />
-            <div className='verticalLine' style={{marginTop: "4px"}}/>
+            <div className='verticalLine' style={{height: '40px', marginLeft: "24px"}}/>
 
                 <NeoButton
                     title={t('fullscreen')}
@@ -1654,7 +1719,7 @@ class DatasetView extends React.Component<any, State> {
                     type="link"
                     style={{
                         float: "right",
-                        marginLeft: '10px',
+                        marginLeft: '16px',
                         color: 'rgb(151, 151, 151)',
                         marginTop: "6px",
                         background: '#F2F2F2'
@@ -1679,7 +1744,7 @@ class DatasetView extends React.Component<any, State> {
         if(this.state.deleteMenuVisible) {
             for (let i = 0; i < this.state.allDatasetComponents.length; i++) {
                 if (this.state.allDatasetComponents[i].eContents()[0].get('access') === 'Default') {
-                    this.handleChange(this.state.allDatasetComponents[i].eContents()[0].get('name'));
+                    this.onChangeDatasetComponent(this.state.allDatasetComponents[i].eContents()[0].get('name'));
                     this.getAllDatasetComponents(true)
 
                 }
@@ -1748,9 +1813,7 @@ class DatasetView extends React.Component<any, State> {
                     //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
-                        /*this.refresh()*/
                         this.gridRef.resetBuffer();
-                        /*this.refresh();*/
                     });
                 }
             ).finally(()=>{
@@ -1809,6 +1872,7 @@ class DatasetView extends React.Component<any, State> {
                         return ""
                     }}
                     valueFormatter={this.valueFormatter}
+                    excelCellMask={this.getExcelMask}
                     {...this.props}
                 />
                 <div id="filterButton">
@@ -2153,7 +2217,9 @@ class DatasetView extends React.Component<any, State> {
                     >
                         <SaveDatasetComponent
                             closeModal={this.handleSaveMenu}
-                            onSave={()=>this.getAllDatasetComponents(false)}
+                            onSave={(name:string)=>{
+                                this.getAllDatasetComponents(false, name);
+                            }}
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             {...this.props}
                         />
