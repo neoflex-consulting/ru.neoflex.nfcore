@@ -185,6 +185,7 @@ public class EMFController {
                 store.commit("Delete " + ref);
                 return mapper.createObjectNode().put("result", "ok");
             } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
 //                throw new RuntimeException("The file was unlocked by another user");
             }
         });
