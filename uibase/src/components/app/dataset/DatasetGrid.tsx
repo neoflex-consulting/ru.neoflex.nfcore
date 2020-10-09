@@ -64,6 +64,7 @@ interface Props {
     highlightClassFunction?: ()=>{};
     valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
+    className?: any;
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -895,6 +896,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                  className={'ag-theme-material'}
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
+                    className={this.props.className}
                     style={{
                         height: this.props.height ? this.props.height : 460 ,
                         width: this.props.width ? this.props.width : "99,5%",

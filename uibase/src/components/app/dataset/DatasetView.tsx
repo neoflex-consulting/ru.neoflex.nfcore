@@ -1832,7 +1832,7 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{padding:'16px'}}>
+            <div style={{margin:'16px'}} className={this.props.className}>
                 {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
                 <DatasetDiagram
                     {...this.props}
@@ -1871,6 +1871,7 @@ class DatasetView extends React.Component<any, State> {
                     }}
                     valueFormatter={this.valueFormatter}
                     excelCellMask={this.getExcelMask}
+                    className={this.props.className}
                     {...this.props}
                 />
                 <div id="filterButton">
