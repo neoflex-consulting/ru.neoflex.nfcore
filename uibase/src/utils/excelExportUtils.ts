@@ -25,6 +25,7 @@ export interface excelExportObject {
     },
     gridData?: {
         tableName:string,
+        cellsMasks:string[][],
         columns:any[],
         rows:string[][]
     },
@@ -75,6 +76,14 @@ async function handleExportExcel(handlers: any[], withTable: any, isDownloadFrom
                     columns: excelData.gridData.columns,
                     rows: excelData.gridData.rows,
                 });
+                //Formatting
+                // eslint-disable-next-line
+                excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
+                    row.forEach((cell,cellIndex)=>{
+                        if (cell)
+                            worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset+1}`).numFmt = cell
+                    })
+                });
                 offset += 1 + excelData.gridData.rows.length;
             }
             if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
@@ -91,7 +100,7 @@ async function handleExportExcel(handlers: any[], withTable: any, isDownloadFrom
                 //Header
                 for (const headerRow of excelData.gridHeader) {
                     let columnSpan = 0;
-                    for (const [index, headerCell] of headerRow.entries()) {
+                    for (const headerCell of headerRow) {
                         if (headerCell.columnSpan > 1) {
                             worksheet.mergeCells(encode(columnSpan) + offset +
                                                     ':' +
@@ -137,6 +146,14 @@ async function handleExportExcel(handlers: any[], withTable: any, isDownloadFrom
                     },
                     columns: excelData.gridData.columns,
                     rows: excelData.gridData.rows,
+                });
+                //Formatting
+                // eslint-disable-next-line
+                excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
+                    row.forEach((cell,cellIndex)=>{
+                        if (cell)
+                            worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset}`).numFmt = cell
+                    })
                 });
                 offset += 1 + excelData.gridData.rows.length;
             }

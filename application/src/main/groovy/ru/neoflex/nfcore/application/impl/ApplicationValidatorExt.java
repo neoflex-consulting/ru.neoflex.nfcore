@@ -2,9 +2,12 @@ package ru.neoflex.nfcore.application.impl;
 
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import ru.neoflex.nfcore.application.*;
 import ru.neoflex.nfcore.application.util.ApplicationValidator;
+import ru.neoflex.nfcore.utils.Utils;
 
 import java.util.Map;
 
@@ -32,12 +35,21 @@ public class ApplicationValidatorExt extends ApplicationValidator {
 
     @Override
     public boolean validateApplication_IsValid(Application application, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        boolean testResult = false;
+        EList<Resource> allApplications = (EList<Resource>) Utils.findAllEClass(ApplicationPackage.Literals.APPLICATION);
+        for (Resource resource : allApplications) {
+            EList<Application> apps = (EList<Application>) (EList<?>) resource.getContents();
+            if (application.getHeaderOrder() != null
+                    && apps.get(0).getHeaderOrder() != null
+                    && !apps.get(0).getName().equals(application.getName())
+                    && apps.get(0).getHeaderOrder().equals(application.getHeaderOrder())) {
+                testResult = validate(application, diagnostics, context, "two applications cant have same headerOrder application " + apps.get(0).getName() + " and " + application.getName());
+            }
+        }
         if (application.isUseParentReferenceTree() && application.getReferenceTree() != null) {
             return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
         }
-        else {
-            return false;
-        }
+        return testResult;
     }
 
     @Override
