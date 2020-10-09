@@ -672,10 +672,13 @@ class DatasetView extends React.Component<any, State> {
             addEmpty(groupByColumn);
             addEmpty(highlights);
             addEmpty(serverCalculatedExpression);
-            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs).map(c => {
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs)
+                //Если поле hide в developer'е то оно никак не должно отображаться в UI пользователя
+                .filter(c=> !c.get('hide'))
+                .map(c => {
                 return {
                     datasetColumn: c.get('field'),
-                    enable: c.get('hide') ? !c.get('hide') : true
+                    enable: true
                 } as IServerQueryParam
             }).concat(serverCalculatedExpression).map((c,index)=>{
                 return {
@@ -975,7 +978,18 @@ class DatasetView extends React.Component<any, State> {
                 if (filter(groupByParams).length !== 0) {
                     newColumnDef = this.getColumnDefGroupBy()
                 }
-                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
+                //Отфильтровать столбцы которые hide в developer'е
+                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef)
+                    .filter(cn=> {
+                        let isReturned = true;
+                        this.state.defaultLeafColumnDefs.forEach(dl=>{
+                            if (dl.get('field') === cn.get('field') && dl.get('hide')) {
+                                isReturned = false;
+                            }
+                        });
+                        return isReturned
+                    })
+                );
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
                 this.hideLeafColumns(hiddenColumns, newColumnDef);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
