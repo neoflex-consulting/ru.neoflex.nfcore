@@ -543,14 +543,8 @@ class EcoreApp extends React.Component<any, State> {
                             a.eContents()[0].get('name')
                         );
                         applications = applications.sort((a, b) => {
-                            if (a.eContents()[0].get('headerOrder') === null
-                                || b.eContents()[0].get('headerOrder') === null)
-                                return 1;
-                            if (a.eContents()[0].get('headerOrder') > b.eContents()[0].get('headerOrder'))
-                                return 1;
-                            if (a.eContents()[0].get('headerOrder') < b.eContents()[0].get('headerOrder'))
-                                return -1;
-                            return 0
+                            return (a.eContents()[0].get('headerOrder') === null ? Number.MAX_VALUE : a.eContents()[0].get('headerOrder'))
+                                - (b.eContents()[0].get('headerOrder') === null ? Number.MAX_VALUE : b.eContents()[0].get('headerOrder'))
                         });
                         this.setState({applicationNames, applications});
                         if (applicationNames.length !== 0) {
