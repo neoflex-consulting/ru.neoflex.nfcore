@@ -44,6 +44,7 @@ class Paginator extends React.Component<any, any> {
                         onChange={(e : any) => this.onSomePage(e)}
                         showSizeChanger
                         showQuickJumper
+                        pageSize={this.state.paginationPageSize}
                         pageSizeOptions={['10', '20', '30', '40', '100']}
                         onShowSizeChange={(p: any, pageSize : any) => this.paginationSetPageSize(pageSize)}
                     />
