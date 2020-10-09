@@ -767,8 +767,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('textAlign', colDef.get('textAlign'));
                 rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
                 rowData.set('formatMask', colDef.get('formatMask'));
-                rowData.set('mask', this.evalMask(colDef.get('formatMask')));
-                rowData.set('excelMask', this.evalMask(colDef.get('excelFormatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
