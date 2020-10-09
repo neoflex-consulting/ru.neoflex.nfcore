@@ -1425,11 +1425,16 @@ class DatasetView extends React.Component<any, State> {
                 <NeoSelect
                          getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                          width={'184px'}
+                         allowClear={this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
                          style={{marginTop:'6px'}}
                          value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
-                             this.onChangeDatasetComponent(e);
-                             this.saveDatasetComponentToUrl(e);
+                             if (e) {
+                                 this.onChangeDatasetComponent(e);
+                                 this.saveDatasetComponentToUrl(e);
+                             } else {
+                                 this.setState({deleteMenuVisible:true})
+                             }
                          }}
                      >
                     <OptGroup
