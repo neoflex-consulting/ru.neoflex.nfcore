@@ -9,6 +9,7 @@ package ru.neoflex.nfcore.base.supply
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.auth.Audit
+import ru.neoflex.nfcore.base.tag.Tag
 
 annotation "ru.neoflex.nfcore" as NFCore
 
@@ -19,4 +20,5 @@ class Supply {
     Timestamp date
     String description
     contains Audit audit
+    refers Tag[] tags
 }

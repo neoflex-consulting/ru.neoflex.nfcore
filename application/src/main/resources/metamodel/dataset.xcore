@@ -12,6 +12,7 @@ import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.User
+import ru.neoflex.nfcore.base.tag.Tag
 import ru.neoflex.nfcore.application.Typography
 import ru.neoflex.nfcore.application.GridComponent
 
@@ -22,6 +23,7 @@ class JdbcDriver {
     String driverClassName
 	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
+    refers Tag[] tags
 }
 
 /*JdbcConnection*/
@@ -32,6 +34,7 @@ class JdbcConnection {
     String url
     String userName
     Password password
+    refers Tag[] tags
 }
 
 /*Dataset*/
@@ -39,6 +42,7 @@ abstract class Dataset {
     QName name
     op JSON deleteAllColumns()
     contains DatasetColumn[] datasetColumn
+    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -108,6 +112,7 @@ class DatasetComponent {
      op void executeInsert(QueryParameter[] parameters)
      op void executeUpdate(QueryParameter[] parameters)
      op void executeDelete(QueryParameter[] parameters)
+     refers Tag[] tags
 }
 
 class DMLQuery {
@@ -153,6 +158,7 @@ class FormatMask {
     QName name
     String value
     boolean isDynamic
+    refers Tag[] tags
 }
 
 class QueryParameter {

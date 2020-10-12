@@ -12,6 +12,7 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import org.eclipse.emf.ecore.util.EcoreUtil
+import ru.neoflex.nfcore.base.tag.Tag
 
 annotation "ru.neoflex.nfcore" as NFCore
 
@@ -43,6 +44,7 @@ class Role {
         }
         return i
     }
+    refers Tag[] tags
 }
 
 enum GrantType {
@@ -75,6 +77,7 @@ class ObjectPermission extends Permission {
 
 class Resource {
     QName name
+    refers Tag[] tags
 }
 
 class ResourcePermission extends Permission {
@@ -90,6 +93,7 @@ abstract class Authority {
     Text description
     refers Role[] roles
     contains Audit audit
+    refers Tag[] tags
 }
 
 abstract class Authenticator {
@@ -116,6 +120,7 @@ class UserProfile {
     QName name
     String userName
     contains Parameter[] params
+    refers Tag[] tags
 }
 
 class Parameter {
@@ -126,6 +131,7 @@ class Parameter {
 class CurrentLock {
     QName name
     contains Audit audit
+    refers Tag[] tags
 }
 
 class EditHistory {
@@ -133,4 +139,5 @@ class EditHistory {
     refers User user
     Timestamp lockDate
     Timestamp unlockDate
+    refers Tag[] tags
 }
