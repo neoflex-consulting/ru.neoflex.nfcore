@@ -128,8 +128,8 @@ function handleClick(this: any, currentValue: string, contextValue: string|undef
         globalValues.set(this.viewObject.get('name'), parameterObj)
     }
     this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-        ()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.click,
+        ()=>    this.props.context.notifyAllEventHandlers({
+            type: eventType.click,
             itemId:this.viewObject.get('name')+this.viewObject._id,
             value:contextValue
         }));
