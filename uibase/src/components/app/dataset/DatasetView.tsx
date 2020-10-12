@@ -1407,7 +1407,7 @@ class DatasetView extends React.Component<any, State> {
                         &&
                         <div>
                         <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"  }}
-                               onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}}>
+                               onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}>
 
                         <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
                     </NeoButton>
