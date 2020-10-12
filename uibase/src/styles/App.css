@@ -3,6 +3,18 @@
   width: 8px; /* ширина для вертикального скролла */
   height: 8px; /* высота для горизонтального скролла */
   background-color: #f2f2f2;
+  overflow-x: scroll!important;
+}
+
+.ag-body-horizontal-scroll{
+height: 8px!important;
+  min-height: 8px!important;
+  max-height: 8px!important;
+}
+.ag-body-horizontal-scroll-viewport{
+  height: 8px!important;
+  min-height: 8px!important;
+  max-height: 8px!important;
 }
 
 /* ползунок скроллбара */
