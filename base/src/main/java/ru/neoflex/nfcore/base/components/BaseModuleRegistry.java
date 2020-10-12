@@ -7,6 +7,7 @@ import ru.neoflex.nfcore.base.scheduler.SchedulerPackage;
 import ru.neoflex.nfcore.base.scheduler.impl.SchedulerFactoryExt;
 import ru.neoflex.nfcore.base.supply.SupplyPackage;
 import ru.neoflex.nfcore.base.types.TypesPackage;
+import ru.neoflex.nfcore.base.tag.TagPackage;
 
 import javax.annotation.PostConstruct;
 
@@ -18,5 +19,6 @@ public class BaseModuleRegistry extends ModuleRegistryImpl {
         registerEPackage(AuthPackage.eNS_URI, ()->AuthPackage.eINSTANCE, new AuthFactoryExt());
         registerEPackage(SchedulerPackage.eNS_URI, ()->SchedulerPackage.eINSTANCE, new SchedulerFactoryExt());
         registerEPackage(SupplyPackage.eINSTANCE);
+        registerEPackage(TagPackage.eINSTANCE);
     }
 }
