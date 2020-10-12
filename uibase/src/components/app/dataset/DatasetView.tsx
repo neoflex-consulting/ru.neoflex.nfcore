@@ -1439,7 +1439,7 @@ class DatasetView extends React.Component<any, State> {
                     </OptGroup>
                     <OptGroup label='Private'>
                         {
-                            this.state.allDatasetComponents
+                             this.state.allDatasetComponents
                                 .filter((c: any) => c.eContents()[0].get('access') === 'Private')
                                 .map((c: any) =>
                                     <Option
