@@ -886,7 +886,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 if (currentLockFile.length !== 0) {
                                     this.setState({edit: true});
                                 }
-                                else {
+                                else if (this.props.match.params.id !== 'new') {
                                     this.setState({edit: false});
                                 }
                             }
