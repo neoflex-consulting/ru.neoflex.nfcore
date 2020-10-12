@@ -672,10 +672,13 @@ class DatasetView extends React.Component<any, State> {
             addEmpty(groupByColumn);
             addEmpty(highlights);
             addEmpty(serverCalculatedExpression);
-            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs).map(c => {
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs)
+                //Если поле hide в developer'е то оно никак не должно отображаться в UI пользователя
+                .filter(c=> !c.get('hide'))
+                .map(c => {
                 return {
                     datasetColumn: c.get('field'),
-                    enable: c.get('hide') ? !c.get('hide') : true
+                    enable: true
                 } as IServerQueryParam
             }).concat(serverCalculatedExpression).map((c,index)=>{
                 return {
@@ -975,7 +978,18 @@ class DatasetView extends React.Component<any, State> {
                 if (filter(groupByParams).length !== 0) {
                     newColumnDef = this.getColumnDefGroupBy()
                 }
-                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
+                //Отфильтровать столбцы которые hide в developer'е
+                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef)
+                    .filter(cn=> {
+                        let isReturned = true;
+                        this.state.defaultLeafColumnDefs.forEach(dl=>{
+                            if (dl.get('field') === cn.get('field') && dl.get('hide')) {
+                                isReturned = false;
+                            }
+                        });
+                        return isReturned
+                    })
+                );
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
                 this.hideLeafColumns(hiddenColumns, newColumnDef);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
@@ -1387,6 +1401,18 @@ class DatasetView extends React.Component<any, State> {
                                    onClick={()=>{this.setState({saveMenuVisible:!this.state.saveMenuVisible})}}>
                             <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
                         </NeoButton>
+                    {this.state.allDatasetComponents.length !== 0
+                    && this.state.currentDatasetComponent !== undefined
+                    && this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"
+                        &&
+                        <div>
+                        <NeoButton type={'link'} title={t('delete')} style={{color: 'rgb(151, 151, 151)',  marginTop: "6px", background: '#F2F2F2', marginLeft: "16px"  }}
+                               onClick={()=>{this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})}}>
+
+                        <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+                    </NeoButton>
+                        </div>
+                        }
                     <div className='verticalLine' style={{marginLeft:'16px', height: '40px'}}/>
                     {(this.state.isUpdateAllowed || this.state.isDeleteAllowed || this.state.isInsertAllowed) ?
                         <NeoButton
@@ -1450,7 +1476,7 @@ class DatasetView extends React.Component<any, State> {
                     </OptGroup>
                     <OptGroup label='Private'>
                         {
-                            this.state.allDatasetComponents
+                             this.state.allDatasetComponents
                                 .filter((c: any) => c.eContents()[0].get('access') === 'Private')
                                 .map((c: any) =>
                                     <Option

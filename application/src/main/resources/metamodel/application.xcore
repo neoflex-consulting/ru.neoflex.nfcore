@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.base.types.Text
+import ru.neoflex.nfcore.base.tag.Tag
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
@@ -23,6 +24,7 @@ import ru.neoflex.nfcore.base.auth.GrantType
 /* Components */
 abstract class Component {
     QName name
+    refers Tag[] tags
 }
 
 abstract class ViewComponent {
@@ -49,6 +51,7 @@ class GlobalSettings {
     refers YearBook holidayCalendar
     refers YearBook workingDaysCalendar
     refers AppModule dashboard
+    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -57,6 +60,7 @@ class AppModule {
     contains ViewElement view
     contains CatalogNode referenceTree
     boolean useParentReferenceTree
+    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -108,6 +112,7 @@ class YearBook {
     op JSON recreateWeekend(String year)
     op JSON copyHolidays(String yearFrom, String yearTo)
     op JSON recreateWorkingDays(String year)
+    refers Tag[] tags
 }
 
 class Day {
@@ -237,6 +242,7 @@ class Button extends ViewElement, GridComponent {
 /* Style */
 abstract class Style {
     QName name
+    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -323,6 +329,7 @@ class Message extends DynamicActionElement {
     MessageType messageType
     String header
     String message
+    refers Tag[] tags
 }
 
 enum TextAlign {
