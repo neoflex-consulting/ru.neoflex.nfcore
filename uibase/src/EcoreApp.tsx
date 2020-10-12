@@ -542,6 +542,10 @@ class EcoreApp extends React.Component<any, State> {
                         let applicationNames = applications.map( (a:any) =>
                             a.eContents()[0].get('name')
                         );
+                        applications = applications.sort((a, b) => {
+                            return (a.eContents()[0].get('headerOrder') === null ? Number.MAX_VALUE : a.eContents()[0].get('headerOrder'))
+                                - (b.eContents()[0].get('headerOrder') === null ? Number.MAX_VALUE : b.eContents()[0].get('headerOrder'))
+                        });
                         this.setState({applicationNames, applications});
                         if (applicationNames.length !== 0) {
                             this.startPageSelection(applicationNames[0])

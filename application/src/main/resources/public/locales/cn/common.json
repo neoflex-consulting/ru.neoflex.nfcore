@@ -367,6 +367,9 @@
         "calendar": "日曆",
         "list": "列表",
         "system notes": "系統說明",
-        "component name is empty": "配置文件名稱未設置"
+        "component name is empty": "配置文件名稱未設置",
+
+        "expand all": "展開嵌套",
+        "collapse all": "隱藏嵌套"
 
 }

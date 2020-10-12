@@ -126,7 +126,7 @@
 }
 
 .leftSplitter .ant-tree-treenode-switcher-close span,
-.ant-tree-child-tree li span,
+.leftSplitter .ant-tree-child-tree li span,
 .leftSplitter .ant-tree-node-content-wrapper-open span{
     top: 8px;
 

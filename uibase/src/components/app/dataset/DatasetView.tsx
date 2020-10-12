@@ -354,7 +354,9 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('componentRenderCondition', c.get('componentRenderCondition'));
                 rowData.set('textAlign', textAlignMap_[c.get('textAlign') || "Undefined"]);
                 rowData.set('formatMask', c.get('formatMask'));
+                rowData.set('excelFormatMask', c.get('excelFormatMask'));
                 rowData.set('mask', this.evalMask(c.get('formatMask')));
+                rowData.set('excelMask', this.evalMask(c.get('excelFormatMask')));
                 rowData.set('onCellDoubleClicked', (params: any) => {
                     if (params.colDef.editable && this.state.isEditMode) {
                         if (params.data.operationMark__ === dmlOperation.insert || !this.validateEditOptions('updateQuery')) {
@@ -422,7 +424,7 @@ class DatasetView extends React.Component<any, State> {
         })
     }
 
-    deepCloneColumnDefs(columnDefs:Map<String,any>[], newColumnDefs:Map<String,any>[] = []) {
+    deepCloneColumnDefs(columnDefs:Map<String,any>[], evalMasks = false, newColumnDefs:Map<String,any>[] = []) {
         columnDefs.forEach(cd=>{
             if (cd.get('children')) {
                 let rowData = new Map();
@@ -430,12 +432,17 @@ class DatasetView extends React.Component<any, State> {
                     if (key !== 'children')
                         rowData.set(key,value)
                 });
-                rowData.set('children', this.deepCloneColumnDefs(cd.get('children')));
+                rowData.set('children', this.deepCloneColumnDefs(cd.get('children'), evalMasks));
                 newColumnDefs.push(rowData);
             } else {
                 let rowData = new Map();
                 cd.forEach((value, key) => {
-                    rowData.set(key,value)
+                    if (key === 'mask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('formatMask')));
+                    else if (key === 'excelMask' && evalMasks)
+                        rowData.set(key, this.evalMask(cd.get('excelFormatMask')));
+                    else
+                        rowData.set(key,value)
                 });
                 newColumnDefs.push(rowData);
             }
@@ -665,10 +672,13 @@ class DatasetView extends React.Component<any, State> {
             addEmpty(groupByColumn);
             addEmpty(highlights);
             addEmpty(serverCalculatedExpression);
-            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs).map(c => {
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs)
+                //Если поле hide в developer'е то оно никак не должно отображаться в UI пользователя
+                .filter(c=> !c.get('hide'))
+                .map(c => {
                 return {
                     datasetColumn: c.get('field'),
-                    enable: c.get('hide') ? !c.get('hide') : true
+                    enable: true
                 } as IServerQueryParam
             }).concat(serverCalculatedExpression).map((c,index)=>{
                 return {
@@ -730,17 +740,17 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    getColumnDefGroupBy = (rowDataShow: any, columnDefs: Map<String,any>[]) => {
+    getColumnDefGroupBy = () => {
         let newColumnDefs: any[] = [];
-        for (const prop in rowDataShow[0]) {
-            if (rowDataShow[0][prop] !== undefined) {
+        const newColumns = this.state.groupByColumn.concat(this.state.serverGroupBy).filter(c=>c.enable && c.datasetColumn)
+        for (const obj of newColumns) {
                 let aggByColumn = this.state.serverGroupBy
-                    .find((s: any) => s.value === prop);
+                    .find((s: any) => s.value === obj.value);
                 let colDef = this.state.defaultLeafColumnDefs
-                    .find((s: any) => s.get('field') === prop || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
+                    .find((s: any) => s.get('field') === obj.datasetColumn || s.get('field') === (aggByColumn ? aggByColumn.datasetColumn : ""))!;
                 let rowData = new Map();
-                rowData.set('field', aggByColumn ? aggByColumn.value : colDef.get('field'));
-                rowData.set('headerName', aggByColumn ? aggByColumn.value : colDef.get('headerName'));
+                rowData.set('field', aggByColumn && aggByColumn.value ? aggByColumn.value : colDef.get('field'));
+                rowData.set('headerName', aggByColumn && aggByColumn.operation ? `${this.props.t(aggByColumn.operation)}: ${aggByColumn.value}` : colDef.get('headerName'));
                 rowData.set('headerTooltip', colDef.get('headerTooltip'));
                 rowData.set('hide', colDef.get('hide'));
                 rowData.set('pinned', colDef.get('pinned'));
@@ -760,25 +770,15 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('textAlign', colDef.get('textAlign'));
                 rowData.set('isPrimaryKey', colDef.get('isPrimaryKey'));
                 rowData.set('formatMask', colDef.get('formatMask'));
-                rowData.set('mask', this.evalMask(colDef.get('formatMask')));
                 rowData.set('valueFormatter', colDef.get('valueFormatter'));
                 rowData.set('tooltipField', colDef.get('tooltipField'));
                 newColumnDefs.push(rowData);
-
-            }
         }
         return newColumnDefs
     };
 
     getNewColumnDef = (parametersArray: IServerQueryParam[]) => {
-        let columnDefs = this.state.defaultColumnDefs.map(c => {
-            const rowData = new Map();
-            const mask = this.evalMask(c.get('formatMask'));
-            c.forEach((value, key) => {
-                key === 'mask' ? rowData.set(key, mask) : rowData.set(key,value)
-            });
-            return rowData
-        });
+        let columnDefs = this.deepCloneColumnDefs(this.state.defaultColumnDefs, true);
         parametersArray.forEach(element => {
             if (element.enable && element.datasetColumn) {
                 let rowData = new Map();
@@ -805,6 +805,27 @@ class DatasetView extends React.Component<any, State> {
             }
         });
         return columnDefs
+    };
+
+    getExcelMask = (params: ValueFormatterParams) => {
+        const found = this.state.leafColumnDefs.find(c=> params.colDef.field === c.get('field'));
+        let mask = found ? found.get('excelMask') : undefined;
+        if (mask && this.state.leafColumnDefs.find(c => mask.includes(c.get('field')))) {
+            try {
+                // eslint-disable-next-line
+                mask = eval(replaceAllCollisionless(mask, this.state.leafColumnDefs.map(c=>{
+                    return {
+                        name: c.get('field'),
+                        replacement: `params.data.${c.get('field')}`
+                    }
+                })))
+            } catch (e) {
+                this.props.context.notification("ExcelFormatMask",
+                    this.props.t("exception while evaluating") + ` ${mask}`,
+                    "warning")
+            }
+        }
+        return mask
     };
 
     valueFormatter = (params: ValueFormatterParams) => {
@@ -954,10 +975,21 @@ class DatasetView extends React.Component<any, State> {
                 let result: {[key: string]: unknown}[] = JSON.parse(json);
                 let newColumnDef: any[];
                 newColumnDef = this.getNewColumnDef(calculatedExpression);
-                if (filter(groupByParams).length !== 0 && result.length !== 0) {
-                    newColumnDef = this.getColumnDefGroupBy(result, this.getLeafColumns(newColumnDef))
+                if (filter(groupByParams).length !== 0) {
+                    newColumnDef = this.getColumnDefGroupBy()
                 }
-                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef));
+                //Отфильтровать столбцы которые hide в developer'е
+                const hiddenColumns = this.getNewHiddenColumns(this.getLeafColumns(newColumnDef)
+                    .filter(cn=> {
+                        let isReturned = true;
+                        this.state.defaultLeafColumnDefs.forEach(dl=>{
+                            if (dl.get('field') === cn.get('field') && dl.get('hide')) {
+                                isReturned = false;
+                            }
+                        });
+                        return isReturned
+                    })
+                );
                 //Восстанавливем признак скрытой если она отмечена в hiddenColumns
                 this.hideLeafColumns(hiddenColumns, newColumnDef);
                 aggregationParams = aggregationParams.filter((f: any) => f.datasetColumn && f.enable);
@@ -1417,11 +1449,16 @@ class DatasetView extends React.Component<any, State> {
                 <NeoSelect
                          getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                          width={'184px'}
+                         allowClear={this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
                          style={{marginTop:'6px'}}
                          value={this.state.currentDatasetComponent.eContents()[0].get('name')}
                          onChange={(e: any) => {
-                             this.onChangeDatasetComponent(e);
-                             this.saveDatasetComponentToUrl(e);
+                             if (e) {
+                                 this.onChangeDatasetComponent(e);
+                                 this.saveDatasetComponentToUrl(e);
+                             } else {
+                                 this.setState({deleteMenuVisible:true})
+                             }
                          }}
                      >
                     <OptGroup
@@ -1821,7 +1858,7 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{padding:'16px'}}>
+            <div style={{margin:'16px'}} className={this.props.className}>
                 {(this.state.isEditMode) ? this.getEditPanel() : (this.state.currentDiagram)? this.getDiagramPanel(): this.getGridPanel()}
                 <DatasetDiagram
                     {...this.props}
@@ -1859,6 +1896,8 @@ class DatasetView extends React.Component<any, State> {
                         return ""
                     }}
                     valueFormatter={this.valueFormatter}
+                    excelCellMask={this.getExcelMask}
+                    className={this.props.className}
                     {...this.props}
                 />
                 <div id="filterButton">

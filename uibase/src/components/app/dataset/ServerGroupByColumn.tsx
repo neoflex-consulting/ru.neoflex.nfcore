@@ -117,7 +117,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, State> {
     handleOnSubmit=(e:any)=>{
         this.handleSubmit(e);
         this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-    }
+    };
 
     render() {
         const {t} = this.props;

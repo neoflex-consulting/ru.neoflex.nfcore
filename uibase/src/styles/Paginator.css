@@ -1,0 +1,70 @@
+#paginator {
+    display: flex;
+}
+
+#paginator #pageView {
+    position: absolute;
+    bottom: 3px;
+    right: 256px;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    color: #8C8C8C;
+}
+
+.single-page >  #pageView {
+    right: 128px !important;
+}
+
+#paginator .ant-pagination-next {
+    margin-right: 119px;
+}
+
+.single-page .ant-pagination-next {
+    margin-right: 90px !important;
+}
+
+#paginator #toFirst {
+    width: 16px;
+    height: 24px;
+    background: transparent;
+    padding: 0;
+}
+
+#paginator #toFirst svg{
+    margin-top: 2px;
+    width: 16px;
+    height: 13px;
+    fill: #333333;
+}
+
+#paginator #toFirst svg:hover {
+    fill: #022af7;
+}
+
+#paginator #toLast {
+    position: absolute;
+    right: 356px;
+    width: 16px;
+    height: 24px;
+    background: transparent;
+    padding: 0;
+}
+
+.single-page > #toLast{
+    right: 200px !important;
+}
+
+#paginator #toLast svg{
+    margin-top: 2px;
+    width: 16px;
+    height: 13px;
+    fill: #333333;
+}
+
+#paginator #toLast svg:hover {
+    fill: #022af7;
+}
+
+#paginator {
+    position: relative;
+}

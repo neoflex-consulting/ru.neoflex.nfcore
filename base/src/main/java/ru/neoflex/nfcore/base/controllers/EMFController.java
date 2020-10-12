@@ -15,6 +15,9 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.neoflex.nfcore.base.auth.AuthFactory;
+import ru.neoflex.nfcore.base.auth.CurrentLock;
+import ru.neoflex.nfcore.base.auth.impl.AuditImpl;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
@@ -121,6 +124,71 @@ public class EMFController {
     @PostMapping("/calltx")
     JsonNode callTx(@RequestParam String ref, @RequestParam String method, @RequestBody List<Object> args) throws Exception {
         return callImpl(false, ref, method, args);
+    }
+
+    @PostMapping("/currentLock")
+    JsonNode createCurrentLock(@RequestParam String name) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode selector = objectMapper.createObjectNode();
+            selector
+                    .with("contents")
+                    .put("eClass", "ru.neoflex.nfcore.base.auth#//CurrentLock")
+                    .put("name", name);
+            try {
+                docFinder
+                        .executionStats(true)
+                        .selector(selector)
+                        .execute();
+                EList<Resource> resources = docFinder.getResourceSet().getResources();
+                if (resources.size() != 0) {
+                    throw new RuntimeException(
+                            "Editing is not available. The object is taken for editing by the user: " +
+                                    ((AuditImpl)resources.get(0).getContents().get(0).eContents().get(0)).getCreatedBy() +
+                                    " " +
+                                    ((AuditImpl)resources.get(0).getContents().get(0).eContents().get(0)).getCreated()
+                            );
+                }
+                else {
+                    CurrentLock currentLock = AuthFactory.eINSTANCE.createCurrentLock();
+                    currentLock.setName(name);
+                    store.createEObject(currentLock);
+                    store.commit("Create currentLock " + name);
+                    return mapper.createObjectNode().put("result", "ok");
+                }
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        });
+    }
+
+    @PostMapping("/deleteLock")
+    JsonNode deleteLock(@RequestParam String name) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode selector = objectMapper.createObjectNode();
+            selector
+                    .with("contents")
+                    .put("eClass", "ru.neoflex.nfcore.base.auth#//CurrentLock")
+                    .put("name", name);
+            try {
+                docFinder
+                        .executionStats(true)
+                        .selector(selector)
+                        .execute();
+                EList<Resource> resources = docFinder.getResourceSet().getResources();
+
+                String ref = resources.get(0).getURI().segment(0) + "?" + resources.get(0).getURI().query();
+                store.deleteResource(ref);
+                store.commit("Delete " + ref);
+                return mapper.createObjectNode().put("result", "ok");
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
+//                throw new RuntimeException("The file was unlocked by another user");
+            }
+        });
     }
 
     private JsonNode callImpl(boolean readOnly, String ref, String method, List<Object> args) throws Exception {

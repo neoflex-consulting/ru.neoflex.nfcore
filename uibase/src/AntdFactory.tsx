@@ -1429,11 +1429,13 @@ class DatasetView_ extends ViewContainer {
         const hidden = this.viewObject.get('hidden') || false;
         const disabled = this.viewObject.get('disabled') || false;
         const grantType = this.viewObject.get('grantType');
+        const cssClass = createCssClass(this.viewObject);
         const props = {
             ...this.props,
             disabled: disabled,
             hidden: hidden || this.props.isParentHidden,
             grantType: grantType,
+            className: cssClass
         };
         return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
     }

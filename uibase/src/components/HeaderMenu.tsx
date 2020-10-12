@@ -23,7 +23,6 @@ class HeaderMenu extends React.Component<any, any> {
     }
 
     sliceApp(applicationName: string): any{
-        const {t} = this.props;
         const {applications} = this.state;
         for (let i = 3; i < applications.length; i++) {
             if (this.props.context.getURL(applications[i].eContents()[0].get('name'), false) === this.props.location.pathname) {

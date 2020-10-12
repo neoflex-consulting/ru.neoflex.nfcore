@@ -381,5 +381,7 @@
         "component name is empty": "Component name is empty",
 
         "notification": "Notification",
-        "editing is not available": "Editing is not available. Take the class for editing"
+        "editing is not available": "Editing is not available. Take the class for editing",
+        "expand all": "Expand all",
+        "collapse all": "Collapse all"
 }
