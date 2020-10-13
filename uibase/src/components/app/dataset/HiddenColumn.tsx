@@ -83,7 +83,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите колонки, которые вы хотите скрыть</div>
@@ -93,7 +93,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Сбросить</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>

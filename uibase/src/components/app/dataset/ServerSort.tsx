@@ -93,7 +93,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                                 }]
                             })(
                             <NeoSelect
-                                width={'208px'}
+                                width={'259px'}
                                 getPopupContainer={() => document.getElementById ('sortButton') as HTMLElement}
                                 placeholder={value.t('columnname')}
                                 style={{ marginRight: '10px', marginLeft: '10px' }}
@@ -130,7 +130,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                                 }]
                             })(
                             <NeoSelect
-                                width={'208px'}
+                                width={'239px'}
                                 getPopupContainer={() => document.getElementById ('sortButton') as HTMLElement}
                                 placeholder={value.t('operation')}
                                 style={{ marginLeft: '5px' }}
@@ -190,7 +190,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('sorting')}</div>
@@ -200,7 +200,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Фильтры по умолчанию</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
