@@ -21,7 +21,6 @@ import ru.neoflex.nfcore.application.GridComponent
 class JdbcDriver {
     QName name
     String driverClassName
-	String[] extLibraries /*доп. jar файлы*/
 	String urlPattern
     refers Tag[] tags
 }
