@@ -51,7 +51,8 @@ interface State {
     modalApplyChangesVisible: Boolean,
     clipboardObject: ITargetObject,
     edit: boolean,
-    expandedKeys: string[]
+    expandedKeys: string[],
+    gData?:any,
 }
 
 
@@ -79,6 +80,34 @@ const getChildNode = (children: any[], nodeKey:string) => {
     }
     return retVal
 };
+
+    const x = 3;
+    const y = 2;
+    const z = 1;
+    const gData:any = [];
+
+    const generateData = (_level:any, _preKey?:any, _tns?:any) => {
+    const preKey = _preKey || '0';
+    const tns = _tns || gData;
+
+    const children = [];
+    for (let i = 0; i < x; i++) {
+        const key = `${preKey}-${i}`;
+        tns.push({ title: key, key });
+        if (i < y) {
+            children.push(key);
+        }
+    }
+    if (_level < 0) {
+        return tns;
+    }
+    const level = _level - 1;
+    children.forEach((key, index) => {
+        tns[index].children = [];
+        return generateData(level, key, tns[index].children);
+    });
+};
+generateData(z);
 
 class ResourceEditor extends React.Component<any, State> {
 
@@ -118,7 +147,8 @@ class ResourceEditor extends React.Component<any, State> {
         isClipboardValidObject: false,
         clipboardObject: { eClass: "" },
         edit: false,
-        expandedKeys: []
+        expandedKeys: [],
+        gData: [],
     };
 
     //      = (resources : Ecore.Resource[]): void => {
@@ -249,9 +279,86 @@ class ResourceEditor extends React.Component<any, State> {
             )
         };
 
+        const onDragEnter = (info: any) => {
+            // console.log('onDragEnter____', info);
+            // expandedKeys 需要受控时设置
+            // this.setState({
+            //     expandedKeys: info.expandedKeys,
+            //     });
+        };
+
+
+        const onDrop = (e: any) => {
+            console.log('currentID__________', e.dragNode.props.eventKey)
+            console.log('targetID______', e.node.props.eventKey)
+
+            console.log('ONDROP__________', e)
+            console.log('targetObject__________', this.state.resourceJSON)
+
+
+                const targetObject: { [key: string]: any } = this.state.targetObject
+                const node: { [key: string]: any } = this.state.treeRightClickNode
+
+                let updatedJSON;
+
+                const index = e.dragNode.props.pos ? e.dragNode.props.pos.split('-')[e.dragNode.props.pos.split('-').length - 1] : undefined;
+                updatedJSON = e.node.props.parentUpdater(null, undefined, e.node.props.propertyName, {
+                    operation: "drag",
+                    oldIndex: index,
+                    newIndex: (e.dropPosition - 1),
+                    targetID: e.node.props.eventKey,
+                    currentID: e.dragNode.props.eventKey
+
+                })
+                const nestedJSON = nestUpdaters(updatedJSON, null);
+                const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState({
+                    mainEObject: resource.eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                    tableData: updatedTargetObject ? this.state.tableData : [],
+                    selectedKeys: this.state.selectedKeys.filter(key => key !== node.eventKey)
+                })
+        }
+
+        // const onDrop = (e: any) => {
+        //     // console.log('ONDROP__________', e)
+        //     if (e.dragNode.props.pos.substr(0, e.dragNode.props.pos.length-1 ) == e.node.props.pos.substr(0, e.dragNode.props.pos.length-1)) {
+        //         console.log('OLD_INDEX', e.dragNode.props.pos)
+        //         console.log('NEW_INDEX', e.node.props.pos)
+        //
+        //         const targetObject: { [key: string]: any } = this.state.targetObject
+        //         const node: { [key: string]: any } = this.state.treeRightClickNode
+        //
+        //         let updatedJSON;
+        //
+        //         const index = e.dragNode.props.pos ? e.dragNode.props.pos.split('-')[e.dragNode.props.pos.split('-').length - 1] : undefined;
+        //         updatedJSON = e.node.props.parentUpdater(null, undefined, e.node.props.propertyName, {
+        //             operation: "drag",
+        //             oldIndex: index,
+        //             newIndex: (e.dropPosition - 1).toString()
+        //         })
+        //         const nestedJSON = nestUpdaters(updatedJSON, null);
+        //         const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+        //         const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+        //         this.setState({
+        //             mainEObject: resource.eContents()[0],
+        //             resourceJSON: nestedJSON,
+        //             targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+        //             tableData: updatedTargetObject ? this.state.tableData : [],
+        //             selectedKeys: this.state.selectedKeys.filter(key => key !== node.eventKey)
+        //         })
+        //     }
+        // }
+
         return (
             <Tree
                 ref={this.treeRef}
+                // draggable
+                // onDragEnter={onDragEnter}
+                // onDrop={onDrop}
+                blockNode
                 showIcon
                 key="mainTree"
                 switcherIcon={<Icon type="down" />}
