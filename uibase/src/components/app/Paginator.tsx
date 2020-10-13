@@ -4,15 +4,41 @@ import {withTranslation} from "react-i18next";
 import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
 import Ch from 'antd/es/locale/zh_TW';
+import NeoIcon from "neo-icon/lib/icon";
+import {NeoButton} from "neo-design/lib";
+import '../../styles/Paginator.css';
 
 interface Props {
     paginationPageSize: number,
     currentPage: number,
     totalNumberOfPage: number;
+    totalNumberOfRows: number;
+    i18n: any;
+    grid: any;
+    t: any;
+    tReady: any;
 }
 
+class PagesView extends React.Component<any, any> {
+    render() {
+        const from = (this.props.currentPage-1)*this.props.paginationPageSize+1;
+        const to = this.props.currentPage*this.props.paginationPageSize <= this.props.totalNumberOfRows
+            ? this.props.currentPage*this.props.paginationPageSize
+            : this.props.totalNumberOfRows;
+        const overAll = this.props.totalNumberOfRows;
 
-class Paginator extends React.Component<any, any> {
+        return (
+            this.props.totalNumberOfRows === 0
+                ? null
+                : <div id={"pageView"}>
+                        {`${from}-${to} из ${overAll}`}
+                  </div>
+        )
+    }
+
+}
+
+class Paginator extends React.Component<Props, any> {
 
     constructor(props: any) {
         super(props);
@@ -25,18 +51,29 @@ class Paginator extends React.Component<any, any> {
 
     onSomePage = (e : any) => {
         this.props.grid.current.api.paginationGoToPage(e - 1);
-    }
+    };
 
     paginationSetPageSize = (pageSize : any) =>{
         this.props.grid.current.api.paginationSetPageSize(pageSize);
         this.setState({ paginationPageSize: pageSize});
 
-    }
+    };
 
     render() {
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
-                <div style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
+                <div id={"paginator"} className={this.props.totalNumberOfPage === 1 ? "single-page" : undefined}
+                    style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
+                    {this.props.totalNumberOfRows !== 0 ? <NeoButton id={"toFirst"} type={this.props.currentPage === 1 ? "disabled" : undefined} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton> : null}
+                    {this.props.totalNumberOfRows !== 0 ? <NeoButton id={"toLast"} type={this.props.currentPage === this.props.totalNumberOfPage ? "disabled" : undefined} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton> : null}
+                    {this.props.totalNumberOfRows
+                        ?
+                          <PagesView
+                              currentPage={this.props.currentPage}
+                              paginationPageSize={this.state.paginationPageSize}
+                              totalNumberOfRows={this.props.totalNumberOfRows}
+                          />
+                        : null}
                     <Pagination
                         size="small"
                         current={this.props.currentPage}
@@ -44,6 +81,7 @@ class Paginator extends React.Component<any, any> {
                         onChange={(e : any) => this.onSomePage(e)}
                         showSizeChanger
                         showQuickJumper
+                        pageSize={this.state.paginationPageSize}
                         pageSizeOptions={['10', '20', '30', '40', '100']}
                         onShowSizeChange={(p: any, pageSize : any) => this.paginationSetPageSize(pageSize)}
                     />

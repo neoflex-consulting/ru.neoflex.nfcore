@@ -18,7 +18,7 @@ class DeleteDatasetComponent extends React.Component<any, any> {
 
     onClick(): void {
 
-        if (this.props.IsGrid){
+        if (!this.props.IsGrid){
             this.props.closeModalGrid();
         }
         else {

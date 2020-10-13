@@ -128,8 +128,8 @@ function handleClick(this: any, currentValue: string, contextValue: string|undef
         globalValues.set(this.viewObject.get('name'), parameterObj)
     }
     this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-        ()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.click,
+        ()=>    this.props.context.notifyAllEventHandlers({
+            type: eventType.click,
             itemId:this.viewObject.get('name')+this.viewObject._id,
             value:contextValue
         }));
@@ -1429,11 +1429,13 @@ class DatasetView_ extends ViewContainer {
         const hidden = this.viewObject.get('hidden') || false;
         const disabled = this.viewObject.get('disabled') || false;
         const grantType = this.viewObject.get('grantType');
+        const cssClass = createCssClass(this.viewObject);
         const props = {
             ...this.props,
             disabled: disabled,
             hidden: hidden || this.props.isParentHidden,
             grantType: grantType,
+            className: cssClass
         };
         return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
     }

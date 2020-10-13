@@ -547,6 +547,26 @@ export class API implements IErrorHandler {
         }))
     }
 
+    deleteLock(name: string): Promise<any> {
+        return this.fetchJson(`/emf/deleteLock?name=${name}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+    }
+
+    createLock(name: string): Promise<any> {
+        return this.fetchJson(`/emf/currentLock?name=${name}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+    }
+
     download(input: RequestInfo, init?: RequestInit, filename?: string) {
         let download = filename || "download"
         return this.fetch(input, init).then(response => {
@@ -597,5 +617,4 @@ export class API implements IErrorHandler {
         });
         this.stompClient.activate();
     };
-
 }

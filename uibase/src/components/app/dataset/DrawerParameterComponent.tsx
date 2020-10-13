@@ -141,7 +141,7 @@ export class DrawerParameterComponent<T extends Props, V extends State> extends 
         });
 
         sortMap.some(colDef => {
-            if (field.includes(colDef.fieldName)) {
+            if (field === colDef.fieldName) {
                 field = field.replace(colDef.fieldName, colDef.fieldHeader);
                 return true
             }

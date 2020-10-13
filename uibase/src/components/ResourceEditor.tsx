@@ -21,6 +21,7 @@ interface ITargetObject {
 }
 
 export interface Props {
+    principal: any
 }
 
 interface State {
@@ -52,7 +53,7 @@ interface State {
     clipboardObject: ITargetObject,
     edit: boolean,
     expandedKeys: string[],
-    gData?:any,
+    saveMenuVisible: boolean
 }
 
 
@@ -81,35 +82,7 @@ const getChildNode = (children: any[], nodeKey:string) => {
     return retVal
 };
 
-    const x = 3;
-    const y = 2;
-    const z = 1;
-    const gData:any = [];
-
-    const generateData = (_level:any, _preKey?:any, _tns?:any) => {
-    const preKey = _preKey || '0';
-    const tns = _tns || gData;
-
-    const children = [];
-    for (let i = 0; i < x; i++) {
-        const key = `${preKey}-${i}`;
-        tns.push({ title: key, key });
-        if (i < y) {
-            children.push(key);
-        }
-    }
-    if (_level < 0) {
-        return tns;
-    }
-    const level = _level - 1;
-    children.forEach((key, index) => {
-        tns[index].children = [];
-        return generateData(level, key, tns[index].children);
-    });
-};
-generateData(z);
-
-class ResourceEditor extends React.Component<any, State> {
+class ResourceEditor extends React.Component<Props & WithTranslation & any, State> {
 
     private splitterRef: React.RefObject<any>;
     private treeRef: React.RefObject<any>;
@@ -148,10 +121,8 @@ class ResourceEditor extends React.Component<any, State> {
         clipboardObject: { eClass: "" },
         edit: false,
         expandedKeys: [],
-        gData: [],
+        saveMenuVisible: false
     };
-
-    //      = (resources : Ecore.Resource[]): void => {
 
     refresh = (refresh: boolean): void => {
         if (refresh) {
@@ -187,7 +158,8 @@ class ResourceEditor extends React.Component<any, State> {
             mainEObject: mainEObject,
             resourceJSON: nestedJSON,
             targetObject: findObjectById(nestedJSON, '/'),
-            resource: resource
+            resource: resource,
+            edit: true
         })
     }
 
@@ -207,7 +179,7 @@ class ResourceEditor extends React.Component<any, State> {
                     //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
                     targetObject: { eClass: "" },
                     tableData: []
-                }))
+                }));
             })
             :
             this.generateEObject()
@@ -408,7 +380,7 @@ class ResourceEditor extends React.Component<any, State> {
 
         return (
             notification.info({
-                message: title, description: description, duration: 3, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
             }))
     };
 
@@ -871,12 +843,31 @@ class ResourceEditor extends React.Component<any, State> {
         }
     };
 
-    changeEdit = () => {
-        this.state.edit ? this.setState({edit: false}) : this.setState({edit: true})
-        this.refresh(true)
+    changeEdit = (redirect: boolean) => {
+        if (this.state.edit) {
+            API.instance().deleteLock(this.state.mainEObject._id)
+                .then(() => {
+                    this.save(false, redirect);
+                    this.setState({edit: false});
+                })
+                .catch(() => {
+                    this.save(false, redirect);
+                    this.setState({edit: false});
+                })
+        }
+        else {
+            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id)
+                .then(() => {
+                    this.setState({edit: true});
+                    this.refresh(true)
+                })
+        }
     };
 
-    save = (redirectAfterSave:boolean = false) => {
+    save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false) => {
+        if (this.state.targetObject === undefined) {
+            this.setState({edit: false})
+        }
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
@@ -891,9 +882,13 @@ class ResourceEditor extends React.Component<any, State> {
                     targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
                     resource: resource
                 });
-                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
-                if (redirectAfterSave)
-                    this.redirect()
+                if (!saveAndExit) {
+                    this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                    this.refresh(true)
+                }
+                if (redirectAfterSave) {
+                    this.redirect();
+                }
             }).catch(() => {
                 this.setState({ isSaving: false, isModified: true })
             })
@@ -926,6 +921,7 @@ class ResourceEditor extends React.Component<any, State> {
     };
 
     componentWillUnmount() {
+        this.changeEdit(true);
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
     }
@@ -948,12 +944,37 @@ class ResourceEditor extends React.Component<any, State> {
     componentDidMount(): void {
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
-        window.addEventListener("keydown", this.saveOnCtrlS)
+        window.addEventListener("keydown", this.saveOnCtrlS);
+        this.checkLock('auth','CurrentLock', 'currentLockPattern');
     }
+
+    checkLock(ePackageName: string, className: string, paramName: string) {
+        API.instance().findClass(ePackageName, className)
+            .then((result: EObject) => {
+                if (paramName === 'currentLockPattern') {
+                    API.instance().findByKind(result,  {contents: {eClass: result.eURI()}})
+                        .then((result: Ecore.Resource[]) => {
+                            if (result.length !== 0) {
+                                let currentLockFile = result
+                                    .filter( (r: EObject) =>
+                                        (r.eContents()[0].get('name') === this.state.mainEObject._id &&
+                                            r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
+                                    );
+                                if (currentLockFile.length !== 0) {
+                                    this.setState({edit: true});
+                                }
+                                else if (this.props.match.params.id !== 'new') {
+                                    this.setState({edit: false});
+                                }
+                            }
+                        })
+                }
+            })
+    };
 
     private saveOnCtrlS = (event: any) => {
         if (event.ctrlKey && event.code === 'KeyS') {
-            this.save();
+            this.save(false, false);
             event.preventDefault();
         }
     };
@@ -968,11 +989,16 @@ class ResourceEditor extends React.Component<any, State> {
                 </Helmet>
                 <FetchSpinner/>
                 <Layout.Header className="head-panel">
-                    <Button className="panel-button" icon="edit" onClick={ ()=> this.changeEdit()} title={this.props.t("edit")} />
                     {
-                        this.state.edit && (this.state.isSaving
+                        this.state.mainEObject._id !== undefined && (this.state.edit ?
+                            <Button className="panel-button" icon="arrow-left" onClick={ ()=> this.changeEdit(false)} title={this.props.t("apply and quit")} />
+                            :
+                            <Button className="panel-button" icon="edit" onClick={ ()=> this.changeEdit(false)} title={this.props.t("edit")} />)
+                    }
+                    {
+                        (this.state.edit || this.state.mainEObject._id === undefined) && (this.state.isSaving
                             ? <Icon className="panel-icon" type="loading"/>
-                            : <Button className="panel-button" icon="save" onClick={()=>this.save(false)} title={this.props.t("save")}/>)
+                            : <Button className="panel-button" icon="save" onClick={()=>this.save(false, false)} title={this.props.t("save")}/>)
                     }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
                     {this.state.resource.get && this.state.resource.get('uri') &&
@@ -1172,7 +1198,7 @@ class ResourceEditor extends React.Component<any, State> {
                         <br/>
                         <br/>
                         <div>
-                            <Button onClick={()=>this.save(true)}>
+                            <Button onClick={()=>this.save(true, false)}>
                                 {t("apply and run")}
                             </Button>
                             <Button onClick={this.handleApplyChangesModalCancel}>
