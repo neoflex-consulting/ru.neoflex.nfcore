@@ -865,14 +865,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false) => {
-        if (this.state.targetObject === undefined) {
-            this.setState({edit: false})
-        }
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
             this.setState({ isSaving: true });
             API.instance().saveResource(resource, 99999).then((resource: any) => {
+                if (this.props.match.params.id === 'new') {
+                    this.setState({edit: false})
+                }
                 const updatedTargetObject = findObjectById(this.state.resourceJSON, resource.get('uri'));
                 this.setState({
                     isSaving: false,
