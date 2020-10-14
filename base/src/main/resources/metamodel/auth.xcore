@@ -12,7 +12,7 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 import ru.neoflex.nfcore.base.types.Password
 import org.eclipse.emf.ecore.util.EcoreUtil
-import ru.neoflex.nfcore.base.tag.Tag
+import ru.neoflex.nfcore.base.tag.Tagged
 
 annotation "ru.neoflex.nfcore" as NFCore
 
@@ -23,7 +23,7 @@ class Audit {
     Timestamp modified
 }
 
-class Role {
+class Role extends Tagged {
     QName name
     Text description
     contains Permission[] grants opposite role
@@ -44,7 +44,6 @@ class Role {
         }
         return i
     }
-    refers Tag[] tags
 }
 
 enum GrantType {
@@ -75,9 +74,8 @@ class ObjectPermission extends Permission {
     }
 }
 
-class Resource {
+class Resource extends Tagged {
     QName name
-    refers Tag[] tags
 }
 
 class ResourcePermission extends Permission {
@@ -88,12 +86,11 @@ class ResourcePermission extends Permission {
     }
 }
 
-abstract class Authority {
+abstract class Authority extends Tagged {
     QName name
     Text description
     refers Role[] roles
     contains Audit audit
-    refers Tag[] tags
 }
 
 abstract class Authenticator {
@@ -116,11 +113,10 @@ class Group extends Authority {
 
 // User Profile (to save ui settings)
 @NFCore(internal="true", documentation="Пользовательский профиль - в нём хранится информация о текущих параметрах выбранных пользователем (аналог cookies)")
-class UserProfile {
+class UserProfile extends Tagged {
     QName name
     String userName
     contains Parameter[] params
-    refers Tag[] tags
 }
 
 class Parameter {
@@ -128,16 +124,14 @@ class Parameter {
     String value
 }
 
-class CurrentLock {
+class CurrentLock extends Tagged {
     QName name
     contains Audit audit
-    refers Tag[] tags
 }
 
-class EditHistory {
+class EditHistory extends Tagged {
     QName name
     refers User user
     Timestamp lockDate
     Timestamp unlockDate
-    refers Tag[] tags
 }

@@ -435,8 +435,9 @@ export class API implements IErrorHandler {
         })
     }
 
-    find(selection: any, level: number = 1): Promise<QueryResult> {
-        return this.fetchJson("/emf/find", {
+    find(selection: any, level: number = 1, tags?: string): Promise<QueryResult> {
+
+        return this.fetchJson(`/emf/find${tags ? "?tags="+tags : ""}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -461,38 +462,38 @@ export class API implements IErrorHandler {
         })
     }
 
-    findByKindAndName(eClass: Ecore.EClass, objectName?: string, level: number = 1) {
+    findByKindAndName(eClass: Ecore.EClass, objectName?: string, level: number = 1, tags?: string) {
         if (objectName) {
-            return this.findByKind(eClass, {contents: {name: objectName}}, level)
+            return this.findByKind(eClass, {contents: {name: objectName}}, level, tags)
+        }
+        return this.findByKind(eClass, {contents: {eClass: eClass.eURI()}}, level, tags)
+    }
+
+    findByKindAndRegexp(eClass: Ecore.EClass, objectName?: string, level: number = 1, tags?: string) {
+        if (objectName) {
+            return this.findByKind(eClass, {contents: {name: {"$regex": objectName}}}, level, tags)
         }
         return this.findByKind(eClass, {contents: {eClass: eClass.eURI()}}, level)
     }
 
-    findByKindAndRegexp(eClass: Ecore.EClass, objectName?: string, level: number = 1) {
-        if (objectName) {
-            return this.findByKind(eClass, {contents: {name: {"$regex": objectName}}}, level)
-        }
-        return this.findByKind(eClass, {contents: {eClass: eClass.eURI()}}, level)
-    }
-
-    findByKind(eClass: Ecore.EClass, selector: any, level: number = 1): Promise<Ecore.Resource[]> {
+    findByKind(eClass: Ecore.EClass, selector: any, level: number = 1, tags?: string): Promise<Ecore.Resource[]> {
         // const eAllSubTypes: Ecore.EClass[] = (eClass.get('eAllSubTypes') as Ecore.EClass[]);
         const promises: Promise<Ecore.Resource[]>[] = [eClass/*, ...eAllSubTypes*/]
             // .filter(c => !c.get('abstract'))
-            .map(c => this.findByClass(c, selector, level));
+            .map(c => this.findByClass(c, selector, level, tags));
         return Promise.all(promises).then((resources: Ecore.Resource[][]) => {
             return resources.flat();
         })
     }
 
-    findByClass(eClass: Ecore.EClass, selector: any, level: number = 1): Promise<Ecore.Resource[]> {
-        return this.findByClassURI(eClass.eURI(), selector, level);
+    findByClass(eClass: Ecore.EClass, selector: any, level: number = 1, tags?: string): Promise<Ecore.Resource[]> {
+        return this.findByClassURI(eClass.eURI(), selector, level, tags);
     }
 
-    findByClassURI(classURI: string, selector: any, level: number = 1): Promise<Ecore.Resource[]> {
+    findByClassURI(classURI: string, selector: any, level: number = 1, tags?: string): Promise<Ecore.Resource[]> {
         let selection: any = {contents: {eClass: classURI}};
         selection = _.merge(selector, selection);
-        return this.find(selection, level).then(r=>r.resources);
+        return this.find(selection, level, tags).then(r=>r.resources);
     }
 
     deleteResource(ref: string): Promise<any> {
