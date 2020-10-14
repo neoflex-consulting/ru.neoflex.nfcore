@@ -1,0 +1,11 @@
+.barButtonsMedium {
+    display: none ;
+}
+
+.adaptiveBarMenuHidden {
+    display: none;
+}
+
+.adaptiveBarMenuVisible {
+    display: flex;
+}
