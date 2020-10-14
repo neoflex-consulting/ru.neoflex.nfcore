@@ -856,7 +856,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/metadata' component={MetaBrowser}/>
                     <Route path='/developer/query' component={QueryRunner}/>
                     <Route exact={true} path='/developer/data' component={DataBrowser}/>
-                    <Route path='/developer/data/editor/:id/:ref' component={ResourceEditor}/>
+                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => <ResourceEditor principal={this.state.principal} {...props}/>}/>
                     <Route path='/developer/tools' component={Tools}/>
                     <Route path='/developer/masterdata' component={MasterdataBrowser}/>
                     <Route path='/developer/filesystem' component={FilesystemBrowser}/>
@@ -901,7 +901,6 @@ class EcoreApp extends React.Component<any, State> {
             </div>
     )};
 
-
     renderApplication = ()=>{
         return (
             <MainContext.Consumer>
@@ -931,7 +930,6 @@ class EcoreApp extends React.Component<any, State> {
                 this.setState({userProfilePattern})
             })
     };
-
 
     getEobjectByClass(ePackageName:string, className:string, paramName:string) {
         API.instance().findClass(ePackageName, className)

@@ -125,10 +125,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <NeoSelect
-                            width={'208px'}
+                            width={'259px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
                             placeholder={value.t('columnname')}
-                            style={{ marginRight: '10px'}}
                             showSearch={true}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -177,10 +176,9 @@ const SortableItem = SortableElement(({value}: any) => {
                         }]
                             })(
                             <NeoSelect
-                                width={'208px'}
+                                width={'239px'}
                                 getPopupContainer={() => document.getElementById('aggregationButton') as HTMLElement}
                                 placeholder={value.t('operation')}
-                                style={{ marginRight: '10px'}}
                                 allowClear={true}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({
@@ -291,7 +289,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>{t('total')}</div>
@@ -301,7 +299,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Фильтры по умолчанию</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
@@ -323,6 +321,17 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                                     parametersArray: this.state.parametersArray
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
+                </Form.Item>
+                <Form.Item>
+                    <NeoButton
+                        type={'link'}
+                        title={t("add row")}
+                        id={'createNewRowButton'}
+                        onClick={this.createNewRow}
+                    >
+                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
+                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
+                    </NeoButton>
                 </Form.Item>
                 <div style={{
                     position: 'absolute',
