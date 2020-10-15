@@ -81,7 +81,7 @@
         "sorts": "Sort options",
         "submit": "Submit",
         "sysfilters": "System filters",
-        "total": "Select columns to combine",
+        "total": "Select columns",
         "today": "Today",
         "theme": "Theme",
         "true": "true",
@@ -126,6 +126,7 @@
 
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
+        "New column name": "New column name",
         "Expression": "Expression",
 
         "createNotification": "Create Notification",

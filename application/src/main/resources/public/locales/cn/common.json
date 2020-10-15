@@ -73,6 +73,7 @@
         "submit": "提交",
         "highlight": "Highlight",
         "taxreporting": "稅務申報",
+        "total": "选择列",
         "today": "今天",
         "theme": "主題",
         "true": "真正",
@@ -114,6 +115,7 @@
 
         "Enter new column name": "輸入新的列名",
         "Select calculated column": "選擇計算列",
+        "New column name": "新列名称",
         "Expression": "表達",
 
         "createNotification": "創建通知",

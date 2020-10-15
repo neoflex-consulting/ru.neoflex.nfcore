@@ -8,7 +8,7 @@
 package ru.neoflex.nfcore.notification
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Date
-import ru.neoflex.nfcore.base.tag.Tag
+import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.AppModule
 
 class ReportingDateOn {
@@ -16,7 +16,7 @@ class ReportingDateOn {
 }
 
 @Ecore(constraints="IsValid")
-class Notification {
+class Notification extends Tagged {
 	QName name
 	String shortName
 	refers AppModule AppModule
@@ -27,16 +27,14 @@ class Notification {
 	String deadlineDay
 	String deadlineTime
 	CalculationInterval calculationInterval
-    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
-class NotificationInstance {
+class NotificationInstance extends Tagged {
     QName name
     refers Notification notification
 	Date calendarDate
 	refers NotificationStatus[] status
-    refers Tag[] tags
 }
 
 class NotificationInstanceDTO {
@@ -51,11 +49,10 @@ class NotificationInstanceDTO {
 }
 
 @Ecore(constraints="IsValid", documentation="some documentation")
-class NotificationStatus {
+class NotificationStatus extends Tagged {
 	QName name
 	String[1] color
 	String description
-    refers Tag[] tags
 }
 
 enum Periodicity {

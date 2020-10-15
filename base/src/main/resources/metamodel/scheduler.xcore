@@ -14,7 +14,7 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import org.springframework.scheduling.TaskScheduler
 import java.util.concurrent.ScheduledFuture
-import ru.neoflex.nfcore.base.tag.Tag
+import ru.neoflex.nfcore.base.tag.Tagged
 
 type Exception wraps java.lang.Exception
 type TaskScheduler wraps org.springframework.scheduling.TaskScheduler
@@ -103,7 +103,7 @@ class Parameter {
 	String value
 }
 
-class ScheduledTask {
+class ScheduledTask extends Tagged {
   QName name
   boolean enabled
   String branch
@@ -126,5 +126,4 @@ class ScheduledTask {
   op Object refreshScheduler() throws Exception
   op Object debugRescheduleAll() throws Exception
   op Object debugExecute() throws Exception
-  refers Tag[] tags
 }

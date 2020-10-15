@@ -8,6 +8,11 @@
 package ru.neoflex.nfcore.base.tag
 import ru.neoflex.nfcore.base.types.QName
 
-class Tag {
+@Ecore(constraints="IsValid")
+class Tag extends Tagged {
     QName name
+}
+
+abstract class Tagged {
+    refers Tag[] tags
 }
