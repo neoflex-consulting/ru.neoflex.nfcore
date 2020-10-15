@@ -1,11 +1,60 @@
-.barButtonsMedium {
-    display: none ;
+.functionalBar__header {
+    background: #F2F2F2 !important;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
 }
 
-.adaptiveBarMenuHidden {
-    display: none;
+.adaptiveBarHidden {
+    display: none !important;
+    margin: 0;
+    padding: 0;
+}
+
+.horizontalLine {
+    border-top: 1px solid #D9D9D9;
+}
+
+.menuHorizontalLine {
+    border-top: 1px solid #D9D9D9;
+    margin: 0 16px 4px 16px;
+}
+
+.adaptiveBarFlex {
+    display: flex;
+    flex-direction: row;
+}
+
+.adaptiveBarColumnFlex {
+    display: flex;
+    flex-direction: column;
+    height: 104px !important;
+    min-width: 375px !important;
 }
 
 .adaptiveBarMenuVisible {
     display: flex;
+    flex-direction: row;
+}
+
+.fillSpace {
+    width: 100% !important;
+}
+
+.caption {
+    margin-left: 0 !important;
+}
+
+#searchTransformer > span {
+    margin-left: 0 !important;
+    margin-right: 16px !important;
+    width: 100% !important;
+}
+
+#searchTransformer > button {
+    margin-left: 0 !important;
+}
+
+.actionMenuItem {
+    display: flex;
+    flex-direction: row;
 }

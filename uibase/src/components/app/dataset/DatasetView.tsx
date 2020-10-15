@@ -1471,7 +1471,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                     }}
                     onExportMenuClick={(e:any)=>this.onActionMenu(e)}
-                    isShortSize={/*!!this.state.isGroovyDataset*/false}
+                    isServerFunctionsHidden={this.state.isGroovyDataset}
                     isDeleteButtonVisible={this.state.allDatasetComponents.length !== 0
                                             && this.state.currentDatasetComponent !== undefined
                                             && this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
