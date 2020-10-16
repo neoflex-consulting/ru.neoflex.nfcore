@@ -864,6 +864,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     void executeDML(EList<QueryParameter> parameters, DMLQueryType queryType, DMLQuery dmlQuery) {
+        def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
+
         logger.info("execute${queryType}", "execute${queryType} parameters = " + parameters)
         String query;
         def jdbcDataset = this.dataset as JdbcDataset
@@ -954,13 +957,20 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if (parameters && parameters.size() > 0 && dmlQuery && !dmlQuery.generateFromModel) {
                 p = JdbcUtils.getNamedParameterStatement(parameters, p, query)
             }
+            currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
+            if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
+                ODatabaseRecordThreadLocal.instance().set(currentDb);
+            }
             try {
                 p.execute()
             } finally {
                 (p) ? p.close() : null
             }
         } finally {
-            (jdbcConnection) ? jdbcConnection.close() : null
+            if (currentDb != null && currentDbNew != null && currentDbNew.getURL() == currentDb.getURL()) {
+                (jdbcConnection) ? jdbcConnection.close() : null
+            }
+            ODatabaseRecordThreadLocal.instance().set(currentDb);
         }
     }
 

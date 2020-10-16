@@ -558,8 +558,8 @@ export class API implements IErrorHandler {
         })
     }
 
-    createLock(name: string): Promise<any> {
-        return this.fetchJson(`/emf/currentLock?name=${name}`, {
+    createLock(name: string, objectName: string): Promise<any> {
+        return this.fetchJson(`/emf/currentLock?name=${name}&objectName=${objectName}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
