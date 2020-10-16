@@ -4,39 +4,34 @@
     border-radius: 4px;
 }
 
-.adaptiveBarHidden {
+.adaptive-bar-hidden {
     display: none !important;
     margin: 0;
     padding: 0;
 }
 
-.horizontalLine {
+.horizontal-line {
     border-top: 1px solid #D9D9D9;
 }
 
-.menuHorizontalLine {
+.menu-horizontal-line {
     border-top: 1px solid #D9D9D9;
     margin: 0 16px 4px 16px;
 }
 
-.adaptiveBarFlex {
+.flex-bar-item {
     display: flex;
     flex-direction: row;
 }
 
-.adaptiveBarColumnFlex {
+.adaptive-bar-column-flex {
     display: flex;
     flex-direction: column;
     height: 104px !important;
     min-width: 375px !important;
 }
 
-.adaptiveBarMenuVisible {
-    display: flex;
-    flex-direction: row;
-}
-
-.fillSpace {
+.fill-space {
     width: 100% !important;
 }
 
@@ -54,7 +49,105 @@
     margin-left: 0 !important;
 }
 
-.actionMenuItem {
+.action-menu-item {
     display: flex;
     flex-direction: row;
+}
+
+.action-menu-item > .checkboxDiagram > label {
+    margin-left: 6px;
+}
+
+.action-menu-item > .checkboxDiagram > span {
+    margin-left: 38px;
+}
+
+.action-menu-item > div > svg {
+    margin-left: 4px;
+    margin-right: 16px;
+}
+
+.action-menu-item:first-child {
+    margin-top: 6px;
+}
+
+.action-menu-item:last-child {
+}
+
+.adaptive-dropdown {
+    margin-left: 16px;
+    margin-top: 9px;
+    width: 100%;
+}
+
+.export-dropdown {
+    margin-top: 3px;
+}
+
+.search-button {
+    margin-left: 16px;
+    margin-top: 8px;
+}
+
+.search-input {
+    margin-left: 16px;
+    height: 32px;
+}
+
+.element-top-margin {
+    margin-top: 4px !important;
+}
+
+.back-button {
+    margin-left: 0 !important;
+}
+
+.verticalLine {
+    border-left: 1px solid;
+    height: 40px !important;
+    margin-left: 16px;
+}
+
+.margin-top {
+    margin-top: 8px;
+}
+
+.margin-left {
+    margin-left: 16px;
+}
+
+.inter-button-margin {
+    margin-left: 8px;
+}
+
+.export-menu {
+    width: 245px;
+}
+
+.diagram-select {
+    width: 200px;
+    margin-top: 4px
+}
+
+.space-between {
+    display: flex;
+    justify-content: space-between;
+}
+
+.back-span-text {
+    margin-bottom: 5px;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: normal;
+    font-style: normal;
+}
+
+.checkbox-span-text {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: normal;
+    font-style: normal;
+    margin-left: 30px
 }
