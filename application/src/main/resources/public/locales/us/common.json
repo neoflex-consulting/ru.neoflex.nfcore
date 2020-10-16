@@ -387,5 +387,6 @@
         "collapse all": "Collapse all",
         "developer menu": "Developer menu",
         "auto-close notification": "Auto-close notification",
-        "back to applications": "Back to applications"
+        "back to applications": "Back to applications",
+        "new group by column name": "New group by column name"
 }

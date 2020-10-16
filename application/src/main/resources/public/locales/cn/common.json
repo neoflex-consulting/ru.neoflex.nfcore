@@ -375,6 +375,7 @@
         "collapse all": "隱藏嵌套",
         "developer menu": "開髮菜單",
         "auto-close notification": "自動隱藏通知",
-        "back to applications": "返回應用"
+        "back to applications": "返回應用",
+        "new group by column name": "分組列名"
 
 }

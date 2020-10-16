@@ -20,7 +20,7 @@
         "cancel": "Отменить",
         "choose diagram type": "Выберите тип диаграммы",
         "clear": "Очистить",
-        "columnname": "Наименование столбца",
+        "columnname": "Название столбца",
         "clone": "Скопировать",
         "closeall": "Закрыть все",
         "create": "Создать",
@@ -389,7 +389,8 @@
         "collapse all": "Скрыть вложенные",
         "developer menu": "Меню разработки",
         "auto-close notification": "Автоматически скрывать уведомления",
-        "back to applications": "Назад к приложениям"
+        "back to applications": "Назад к приложениям",
+        "new group by column name": "Название сгруппированного столбца"
 
 }
 
