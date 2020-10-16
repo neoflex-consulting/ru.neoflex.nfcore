@@ -804,6 +804,7 @@ class EcoreApp extends React.Component<any, State> {
                                         ?
                                         <NeoButton
                                             style={{marginRight: '10px'}}
+                                            title={this.props.t('back to applications')}
                                             type={"link"}
                                                 onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
@@ -814,6 +815,7 @@ class EcoreApp extends React.Component<any, State> {
                                         :
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
+                                                   title={this.props.t('developer menu')}
                                         >
                                             <Link to={`/developer/data`}>
                                                 <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
@@ -822,6 +824,7 @@ class EcoreApp extends React.Component<any, State> {
                                 }
                             <NeoButton
                                 type="link"
+                                title={this.props.t('auto-close notification')}
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
@@ -841,6 +844,7 @@ class EcoreApp extends React.Component<any, State> {
                                     </span>
                             <NeoButton
                                 style={{marginRight: "10px"}}
+                                title={this.props.t('logout')}
                                 onClick={this.logOut}
                                 type="link"
                             >

@@ -1121,7 +1121,7 @@ class DatasetView extends React.Component<any, State> {
             datasetComponents[datasetComponentName] = {
                 columnDefs: columnDefs ? columnDefs : this.state.columnDefs.length !== 0 ? this.state.columnDefs : [],
                 rowData: rowData ? rowData : this.state.rowData.length !== 0 ? this.state.rowData : [],
-                getBuffer: this.gridRef ? this.gridRef.current.getBuffer : () => {return []},
+                getBuffer: this.gridRef && this.gridRef.current ? this.gridRef.current.getBuffer : () => {return []},
                 showModal: () => {this.setState({isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible})}
             };
             this.props.context.updateContext({datasetComponents: datasetComponents})
@@ -1471,7 +1471,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                     }}
                     onExportMenuClick={(e:any)=>this.onActionMenu(e)}
-                    isShortSize={/*!!this.state.isGroovyDataset*/false}
+                    isServerFunctionsHidden={this.state.isGroovyDataset}
                     isDeleteButtonVisible={this.state.allDatasetComponents.length !== 0
                                             && this.state.currentDatasetComponent !== undefined
                                             && this.state.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
