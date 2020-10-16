@@ -135,7 +135,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <NeoSelect
                             width={'250px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('column')}
+                            placeholder={value.t("Column")}
                             // style={{ marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
@@ -191,7 +191,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoInput
                             width={'525px'}
-                            placeholder={value.t('New column name')}
+                            placeholder={value.t("new group by column name")}
                             allowClear={true}
                             onChange={(e: any) => value.handleChange(
                                 JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
