@@ -856,7 +856,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 })
         }
         else {
-            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id)
+            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'))
                 .then(() => {
                     this.setState({edit: true});
                     this.refresh(true)
@@ -1038,7 +1038,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </Col>
                                 <Col span={5} style={{ position: 'sticky', top: '0' }}>
-                                    <Button title={t('additem')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}></Button>
+                                    <Button title={t('additem')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}/>
                                         <Input
                                             style={{ width: '99%'}}
                                             onChange={(e)=>{

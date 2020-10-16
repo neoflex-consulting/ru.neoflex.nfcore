@@ -143,7 +143,7 @@ public class EMFController {
     }
 
     @PostMapping("/currentLock")
-    JsonNode createCurrentLock(@RequestParam String name) throws Exception {
+    JsonNode createCurrentLock(@RequestParam String name, String objectName) throws Exception {
         return store.inTransaction(true, tx -> {
             DocFinder docFinder = DocFinder.create(store);
             ObjectMapper objectMapper = new ObjectMapper();
@@ -169,6 +169,7 @@ public class EMFController {
                 else {
                     CurrentLock currentLock = AuthFactory.eINSTANCE.createCurrentLock();
                     currentLock.setName(name);
+                    currentLock.setObjectName(objectName);
                     store.createEObject(currentLock);
                     store.commit("Create currentLock " + name);
                     return mapper.createObjectNode().put("result", "ok");

@@ -124,11 +124,14 @@ class Parameter {
     String value
 }
 
+@NFCore(internal="true", documentation="Экземпляр класса, взятый раз редактирование, на текущий момент")
 class CurrentLock extends Tagged {
     QName name
+    String objectName
     contains Audit audit
 }
 
+@NFCore(internal="true", documentation="История радактирования экземпляра класса")
 class EditHistory extends Tagged {
     QName name
     refers User user
