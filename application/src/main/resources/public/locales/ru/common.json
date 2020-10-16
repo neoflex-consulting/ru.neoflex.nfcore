@@ -386,7 +386,10 @@
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
 
         "expand all": "Раскрыть вложенные",
-        "collapse all": "Скрыть вложенные"
+        "collapse all": "Скрыть вложенные",
+        "developer menu": "Меню разработки",
+        "auto-close notification": "Автоматически скрывать уведомления",
+        "back to applications": "Назад к приложениям"
 
 }
 

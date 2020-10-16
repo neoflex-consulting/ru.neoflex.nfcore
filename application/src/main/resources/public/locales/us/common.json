@@ -384,5 +384,8 @@
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
         "expand all": "Expand all",
-        "collapse all": "Collapse all"
+        "collapse all": "Collapse all",
+        "developer menu": "Developer menu",
+        "auto-close notification": "Auto-close notification",
+        "back to applications": "Back to applications"
 }
