@@ -23,7 +23,7 @@ export interface docxExportObject {
     }[][],
     textData?: string
 }
-async function handleExportDocx(this: any, handlers: any[], withTable: any, isDownloadFromDiagramPanel: any) {
+async function handleExportDocx(this: any, handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: boolean) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
 
@@ -33,10 +33,11 @@ async function handleExportDocx(this: any, handlers: any[], withTable: any, isDo
         const docxData: docxExportObject = handlers[i]();
 
         if (!docxData.hidden) {
-            if((!(isDownloadFromDiagramPanel && !withTable && docxData.docxComponentType === 1)) ||
-                (isDownloadFromDiagramPanel === false && withTable === false && docxData.docxComponentType === 0)) {
-
-                if (docxData.docxComponentType === docxElementExportType.diagram && docxData.diagramData !== undefined) {
+            if (docxData.docxComponentType === docxElementExportType.diagram
+                && docxData.diagramData !== undefined
+                && withTable
+                && isDownloadFromDiagramPanel
+            ) {
                     //Добавление диаграммы в png
                     //cast to ArrayBuffer
                     const arrayBuffer = await new Response(await docxData.diagramData.blob).arrayBuffer();
@@ -89,9 +90,7 @@ async function handleExportDocx(this: any, handlers: any[], withTable: any, isDo
                         new TextRun("")
                     ]
                 }))
-
             }
-    }
         }
         doc.addSection({
             properties: {},

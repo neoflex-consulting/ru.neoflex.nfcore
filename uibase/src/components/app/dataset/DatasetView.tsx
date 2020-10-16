@@ -1249,22 +1249,6 @@ class DatasetView extends React.Component<any, State> {
             , newDiagrams);
     };
 
-    onActionMenu(e : any) {
-        if (e.key === 'exportToDocx') {
-            handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
-                saveAs(new Blob([blob]), "example.docx");
-                console.log("Document created successfully");
-            });
-        }
-        if (e.key === 'exportToExcel') {
-            handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
-                    saveAs(new Blob([blob]), 'example.xlsx');
-                    console.log("Document created successfully");
-                }
-            );
-        }
-
-    }
     DiagramButton = () => {
         this.setState({isDownloadFromDiagramPanel: !this.state.isDownloadFromDiagramPanel});
         if (this.state.diagrams.length > 0)
@@ -1273,9 +1257,8 @@ class DatasetView extends React.Component<any, State> {
             this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)
     };
 
-    withTable(e: any) {
-        let ee: any = e.target.checked;
-        this.setState({isWithTable: ee})
+    withTable(isWithTable: boolean) {
+        this.setState({isWithTable: isWithTable})
     }
 
     validateEditOptions = (operationType:"updateQuery"|"insertQuery"|"deleteQuery") => {
@@ -1470,7 +1453,6 @@ class DatasetView extends React.Component<any, State> {
                             this.setState({deleteMenuVisible:true})
                         }
                     }}
-                    onExportMenuClick={(e:any)=>this.onActionMenu(e)}
                     isServerFunctionsHidden={this.state.isGroovyDataset}
                     isDeleteButtonVisible={this.state.allDatasetComponents.length !== 0
                                             && this.state.currentDatasetComponent !== undefined
@@ -1493,7 +1475,7 @@ class DatasetView extends React.Component<any, State> {
                             })
                         });
                     }}
-                    onWithTableCheck={(e:any)=>this.withTable(e)}
+                    onWithTableCheck={(isWithTable:boolean)=>this.withTable(isWithTable)}
                     diagrams={this.state.diagrams}
                     currentDiagram={this.state.currentDiagram}
                     onBackFromEditClick={() => {
@@ -1528,6 +1510,15 @@ class DatasetView extends React.Component<any, State> {
                     isInsertRowHidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                     isDeleteRowsHidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
                     isCopySelectedHidden={!this.state.isEditMode || !this.state.isInsertAllowed}
+                    onDocExportClick={()=>handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
+                        saveAs(new Blob([blob]), "example.docx");
+                        console.log("Document created successfully");
+                    })}
+                    onExcelExportClick={()=>handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
+                            saveAs(new Blob([blob]), 'example.xlsx');
+                            console.log("Document created successfully");
+                        }
+                    )}
                     {...this.props}
                 />
                 <DatasetDiagram

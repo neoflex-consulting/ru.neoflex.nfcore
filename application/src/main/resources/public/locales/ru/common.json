@@ -298,8 +298,8 @@
         "add row": "Добавить строку",
         "run query": "Применить",
         "print": "Печать",
-        "export to docx": "Выгрузка в docx",
-        "export to excel": "Выгрузка в excel",
+        "export to docx": "Выгрузка в .doc",
+        "export to excel": "Выгрузка в .excel",
 
         "public": "Опубликовать",
         "change current": "Изменить текущий",

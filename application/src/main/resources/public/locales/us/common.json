@@ -298,8 +298,8 @@
         "add row": "Delete row",
         "run query": "Run query",
         "print": "Print",
-        "export to docx": "Export to docx",
-        "export to excel": "Export to excel",
+        "export to docx": "Export .doc",
+        "export to excel": "Export .excel",
 
         "public": "Public",
         "change current": "Change current",
