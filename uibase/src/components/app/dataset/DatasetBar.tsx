@@ -135,7 +135,7 @@ class SearchTransformer extends React.Component<transformerProps, transformerSta
 //adaptive break point px xs/s/m/l
 const breakPoints = {
     diagram: [375, 400, 638, 878],
-    edit: [375, 510, 630, 900],
+    edit: [375, 375, 522, 750],
     normal: [375, 510, 630, 900]
 };
 

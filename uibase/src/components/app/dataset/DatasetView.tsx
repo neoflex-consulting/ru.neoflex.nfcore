@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoDrawer, NeoModal} from "neo-design/lib";
+import {NeoDrawer, NeoModal, NeoTypography} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 
 const textAlignMap_: any = textAlignMap;
