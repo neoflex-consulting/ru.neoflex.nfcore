@@ -83,7 +83,7 @@
         "sorts": "Sort options",
         "submit": "Submit",
         "sysfilters": "System filters",
-        "total": "Select columns to combine",
+        "total": "Select columns",
         "today": "Today",
         "theme": "Theme",
         "true": "true",
@@ -128,6 +128,7 @@
 
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
+        "New column name": "New column name",
         "Expression": "Expression",
 
         "createNotification": "Create Notification",
@@ -299,8 +300,8 @@
         "add row": "Delete row",
         "run query": "Run query",
         "print": "Print",
-        "export to docx": "Export to docx",
-        "export to excel": "Export to excel",
+        "export to docx": "Export .doc",
+        "export to excel": "Export .excel",
 
         "public": "Public",
         "change current": "Change current",
@@ -385,5 +386,9 @@
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
         "expand all": "Expand all",
-        "collapse all": "Collapse all"
+        "collapse all": "Collapse all",
+        "developer menu": "Developer menu",
+        "auto-close notification": "Auto-close notification",
+        "back to applications": "Back to applications",
+        "new group by column name": "New group by column name"
 }

@@ -15,16 +15,15 @@ import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.JSON
 import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.base.types.Text
-import ru.neoflex.nfcore.base.tag.Tag
+import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.notification.Notification
 import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
 import ru.neoflex.nfcore.base.auth.GrantType
 
 /* Components */
-abstract class Component {
+abstract class Component extends Tagged {
     QName name
-    refers Tag[] tags
 }
 
 abstract class ViewComponent {
@@ -45,22 +44,20 @@ class UserComponent extends Component {
     String componentClassName
 }
 
-class GlobalSettings {
+class GlobalSettings extends Tagged {
     QName name
     refers YearBook weekendCalendar
     refers YearBook holidayCalendar
     refers YearBook workingDaysCalendar
     refers AppModule dashboard
-    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
-class AppModule {
+class AppModule extends Tagged {
     QName name
     contains ViewElement view
     contains CatalogNode referenceTree
     boolean useParentReferenceTree
-    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -106,13 +103,12 @@ class Collapse extends ViewContainer{
 
 }
 
-class YearBook {
+class YearBook extends Tagged {
     QName name
     contains Day[] days
     op JSON recreateWeekend(String year)
     op JSON copyHolidays(String yearFrom, String yearTo)
     op JSON recreateWorkingDays(String year)
-    refers Tag[] tags
 }
 
 class Day {
@@ -240,9 +236,8 @@ class Button extends ViewElement, GridComponent {
 }
 
 /* Style */
-abstract class Style {
+abstract class Style extends Tagged {
     QName name
-    refers Tag[] tags
 }
 
 @Ecore(constraints="IsValid")
@@ -324,12 +319,11 @@ class Href extends ViewElement, GridComponent {
     String ref
 }
 
-class Message extends DynamicActionElement {
+class Message extends DynamicActionElement, Tagged {
     QName name
     MessageType messageType
     String header
     String message
-    refers Tag[] tags
 }
 
 enum TextAlign {

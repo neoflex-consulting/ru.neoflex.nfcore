@@ -835,7 +835,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     onCellClicked: colDef.get('onCellDoubleClicked'),
                     width: colDef.get('width'),
                     type: colDef.get('type'),
-                    key: colDef.get('field'),
                     field: colDef.get('field'),
                     headerName: colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
                     headerTooltip: colDef.get('headerTooltip'),

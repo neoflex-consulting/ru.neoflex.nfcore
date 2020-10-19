@@ -20,7 +20,7 @@
         "cancel": "Отменить",
         "choose diagram type": "Выберите тип диаграммы",
         "clear": "Очистить",
-        "columnname": "Наименование столбца",
+        "columnname": "Название столбца",
         "clone": "Скопировать",
         "closeall": "Закрыть все",
         "create": "Создать",
@@ -84,7 +84,7 @@
         "submit": "Выполнить",
         "sysfilters": "Системные фильтры",
         "text": "Текст",
-        "total": "Выберите столбцы для объединения",
+        "total": "Выберите столбцы",
         "today": "Сегодня",
         "theme": "Тема",
         "true": "истина",
@@ -122,11 +122,12 @@
         "FromZtoA": "от Я до А",
 
         "Cell": "ячейка",
-        "Column": "колонка",
+        "Column": "Столбец",
         "Row": "строка",
 
         "Enter new column name": "Введите название столбца",
         "Select calculated column": "Выберите вычисляемый столбец",
+        "New column name": "Название нового столбца",
         "Expression": "Выражение",
 
         "createNotification": "Создание события",
@@ -299,8 +300,8 @@
         "add row": "Добавить строку",
         "run query": "Применить",
         "print": "Печать",
-        "export to docx": "Выгрузка в docx",
-        "export to excel": "Выгрузка в excel",
+        "export to docx": "Выгрузка в .doc",
+        "export to excel": "Выгрузка в .excel",
 
         "public": "Опубликовать",
         "change current": "Изменить текущий",
@@ -387,7 +388,11 @@
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
 
         "expand all": "Раскрыть вложенные",
-        "collapse all": "Скрыть вложенные"
+        "collapse all": "Скрыть вложенные",
+        "developer menu": "Меню разработки",
+        "auto-close notification": "Автоматически скрывать уведомления",
+        "back to applications": "Назад к приложениям",
+        "new group by column name": "Название сгруппированного столбца"
 
 }
 

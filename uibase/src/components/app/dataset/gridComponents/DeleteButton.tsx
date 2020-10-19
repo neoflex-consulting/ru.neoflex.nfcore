@@ -2,8 +2,11 @@ import React from 'react';
 import {faTrash} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Button} from "antd";
+import { NeoButton } from 'neo-design';
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
+    t: any,
     node: any,
     editGrid: any,
 }
@@ -18,12 +21,14 @@ export default class DeleteButton extends React.Component<Props, State> {
 
     render() {
         return (
-            <Button
-                style={{color: 'rgb(151, 151, 151)'}}
+            <NeoButton
+                type={"link"}
+                title={this.props.t('delete row')}
+                style={{marginTop: "12px"}}
                 onClick={this.onButtonClick}
             >
-                <FontAwesomeIcon icon={faTrash} size='lg' color="#7b7979"/>
-            </Button>
+                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+            </NeoButton>
         );
     }
 }

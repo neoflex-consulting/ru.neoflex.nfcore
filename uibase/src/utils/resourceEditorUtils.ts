@@ -38,6 +38,52 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {
                         return currentObject.children ? currentObject.children : undefined
+                    } else if (options && options.operation === "drag") {
+
+                        // console.log('JSOOOON_____', json)
+                        // console.log('optionscurrentObject_____', currentObject[updaterProperty])
+
+                        // console.log('OPTIONS_____', options)
+                        // console.log('NEW_INDEX', options.newIndex)
+                        console.log('CURRENTOBJECT', currentObject)
+
+                        let oldIndexValue
+                        if (currentObject.children !== undefined) {
+                            oldIndexValue = currentObject.children[options.oldIndex]
+                        } else {
+                            oldIndexValue = currentObject[updaterProperty][options.oldIndex]
+                        }
+                        let targetParent
+                        for(let i = 0; i < json.length-1; i++){
+                            if(json[i].children && json[i].children.filter((e:any) => e._id === options.targetID)){
+                                targetParent = json[i]
+                                break;
+                            }
+                        }
+                        console.log('oldIndexValue!!!', oldIndexValue)
+                        console.log('PARENT!!!', targetParent)
+
+                        let dragElementIndex:any
+                        for(let i = 0; i < json.length-1; i++){
+                            if(json[i].children && json[i].children.filter((e:any) => e._id === options.targetID)){
+                                dragElementIndex = i
+                                break;
+                            }
+                        }
+                        console.log('dragElementIndex_____', dragElementIndex)
+
+                        let newIndex = currentObject.children.indexOf(currentObject.children.filter((e:any) => e._id === options.targetID))
+                        let oldElement = targetParent.children && targetParent.children.filter((e:any) => e._id === options.currentID)[0]
+
+                        console.log('oldElement_____', oldElement)
+
+                        console.log('NEWINDEX_____', newIndex)
+                        let temp = update(targetParent as any, {[updaterProperty]: {$splice: [[dragElementIndex, 1]]}});
+                        console.log('TEMP!!!!',temp)
+                        updatedData = update(currentObject as any, {[updaterProperty]: {$splice: [[newIndex, 0, oldElement]]}})
+                        console.log('updatedData!!!!',updatedData)
+
+
                     } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })

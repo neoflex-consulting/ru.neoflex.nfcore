@@ -35,7 +35,6 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
         <Fragment key="editableTextArea">
             {edit ?
                 <InputComponent
-                    autoFocus
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
                     autosize={{ maxRows: 15 }}

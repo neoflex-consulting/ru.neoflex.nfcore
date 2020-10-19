@@ -135,7 +135,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <NeoSelect
                             width={'250px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('columnname')}
+                            placeholder={value.t("Column")}
                             // style={{ marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}
@@ -191,7 +191,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoInput
                             width={'525px'}
-                            placeholder={value.t('label')}
+                            placeholder={value.t("new group by column name")}
                             allowClear={true}
                             onChange={(e: any) => value.handleChange(
                                 JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
@@ -235,9 +235,13 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
     }
 
     render() {
+        const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }} onSubmit={this.handleOnSubmit}>
+            <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите операцию</div>
+                    </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>
                     {
@@ -266,7 +270,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
                     onClick={this.createNewRow}
                 >
                     <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                    <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
+                    <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
                 </NeoButton>
             </Form>
         )

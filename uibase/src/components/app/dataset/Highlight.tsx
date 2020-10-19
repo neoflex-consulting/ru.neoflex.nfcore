@@ -452,7 +452,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }} onSubmit={this.handleSubmit}>
+            <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('highlight')}</div>
@@ -462,7 +462,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>Заливка по умолчанию</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
@@ -505,7 +505,7 @@ class Highlight extends DrawerParameterComponent<Props, State> {
                         onClick={this.createNewRow}
                     >
                         <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
+                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
                     </NeoButton>
                 </Form.Item>
             </Form>

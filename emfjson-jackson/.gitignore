@@ -5,3 +5,5 @@ lib
 .project
 .classpath
 java-gen
+
+emfjson-jackson.iml

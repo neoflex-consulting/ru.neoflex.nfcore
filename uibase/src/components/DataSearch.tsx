@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+    tags: Ecore.EObject[];
     classes: Ecore.EObject[];
     indicatorError: boolean;
     createResModalVisible: boolean;
@@ -27,6 +28,7 @@ interface State {
 class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
 
     state = {
+        tags: [],
         classes: [],
         indicatorError: false,
         createResModalVisible: false
@@ -55,12 +57,12 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                     :
                     values.regular_expression
                         ?
-                        (selectedClassObject && API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name)
+                        (selectedClassObject && API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
                             .then((resources) => {
                                 this.props.onSearch(resources)
                             }))
                         :
-                        (selectedClassObject && API.instance().findByKindAndName(selectedClassObject as Ecore.EClass, values.name)
+                        (selectedClassObject && API.instance().findByKindAndName(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
                             .then((resources) => {
                                 this.props.onSearch(resources)
                             }))
@@ -76,6 +78,16 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         })
     }
 
+    getAllTags() : void {
+        API.instance().findClass("tag","Tag").then((eClass) => {
+            API.instance().findByKind(eClass, {contents: {eClass: eClass.eURI()}}).then((result: Ecore.Resource[]) => {
+                this.setState({tags: result.map(eObj=>{
+                        return eObj.eContents()[0]
+                    })});
+            });
+        })
+    }
+
     sortEClasses = (a: any, b: any): number => {
         if (a.eContainer.get('name') + a._id < b.eContainer.get('name') + b._id) return -1;
         if (a.eContainer.get('name') + a._id > b.eContainer.get('name') + b._id) return 0;
@@ -87,7 +99,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     componentDidMount(): void {
-        this.getEClasses()
+        this.getEClasses();
+        this.getAllTags();
     }
 
     render() {
@@ -154,6 +167,26 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 }]
                                             })(
                                                 <Input placeholder={t("name")} style={{ width: '270px' }} type="text" />
+                                            )}
+                                        </FormItem>
+                                        <FormItem style={{ display: 'inline-block' }}>
+                                            {getFieldDecorator('tags', {
+                                                rules: []
+                                            })(
+                                                <Select
+                                                    allowClear={true}
+                                                    mode={"tags"}
+                                                    style={{ width: '270px' }}
+                                                    defaultValue={""}
+                                                    placeholder={this.props.t("tags")}>
+                                                    {
+                                                        this.state.tags.map((tag: Ecore.EObject) =>
+                                                                <Select.Option key={tag.get('name')}
+                                                                               value={tag.get('name')}>
+                                                                    {tag.get('name')}
+                                                                </Select.Option>)
+                                                    }
+                                                </Select>
                                             )}
                                         </FormItem>
                                         <FormItem style={{ display: 'inline-block' }}>
