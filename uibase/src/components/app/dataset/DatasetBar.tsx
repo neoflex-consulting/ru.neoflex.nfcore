@@ -256,7 +256,7 @@ class DatasetBar extends React.Component<props, State> {
                 this.props.onAddDiagramClick();
                 break;
             case 'edit':
-                this.props.onEditClick();
+                this.props.onEditDiagramClick();
                 break;
             case 'delete':
                 this.props.onDeleteClick();
