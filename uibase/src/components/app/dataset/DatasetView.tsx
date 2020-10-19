@@ -1353,6 +1353,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
         onApplyEditChanges = (buffer:any[]) => {
+            //delete, update, insert
         buffer.sort(function compare(a:any,b:any) {
             if (a.operationMark__ === dmlOperation.delete && b.operationMark__ !== dmlOperation.delete)
                 return -1;
@@ -1371,6 +1372,7 @@ class DatasetView extends React.Component<any, State> {
                     return {
                         parameterName: d.operationMark__ === dmlOperation.update
                             && !this.props.viewObject.get('datasetComponent').get("updateQuery").get('generateFromModel') ? `${c.get('field')}_pk` : c.get('field'),
+                        //Достаём значение из PK для update
                         parameterValue: d.operationMark__ === dmlOperation.update && d[`${c.get('field')}__`] !== undefined ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
@@ -1381,6 +1383,7 @@ class DatasetView extends React.Component<any, State> {
                 .map(c => {
                     return {
                         parameterName: c.get('field'),
+                        //вставляемые значения оставляем как есть
                         parameterValue: d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: false
