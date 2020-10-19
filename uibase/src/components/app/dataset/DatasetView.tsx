@@ -96,7 +96,7 @@ interface State {
     groupByColumn: IServerQueryParam[];
     serverCalculatedExpression: IServerQueryParam[];
     hiddenColumns: IServerQueryParam[];
-    queryParams: IServerNamedParam[]
+    queryParams: IServerNamedParam[];
     useServerFilter: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
@@ -1360,7 +1360,7 @@ class DatasetView extends React.Component<any, State> {
                         <NeoButton type={'link'} title={t('filters')}
                                    style={{marginTop:'7px', marginLeft: "16px"}}
                                    onClick={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}>
-                            <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
+                            <NeoIcon icon={'filter'} size={'m'}/>
                         </NeoButton>
                         {!this.state.isGroovyDataset ? <NeoButton type={'link'} title={t('sorts')} style={{marginTop:'7px', marginLeft: "11px"}}
                                                                  onClick={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}>
@@ -1760,7 +1760,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleSaveMenu = () => {
-        this.setState({saveMenuVisible:!this.state.saveMenuVisible, IsGrid:!this.state.IsGrid})
+        this.setState({saveMenuVisible:!this.state.saveMenuVisible})
     };
 
     handleDeleteMenu = () => {
@@ -1782,7 +1782,10 @@ class DatasetView extends React.Component<any, State> {
     };
 
     handleDeleteMenuForCancel = () => {
-        this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})
+        this.setState({deleteMenuVisible:!this.state.deleteMenuVisible})
+        if (this.props.IsGrid){
+            this.setState({IsGrid:!this.state.IsGrid})
+        }
 
     };
 
@@ -2164,20 +2167,19 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
                         key="delete_menu"
                         width={'250px'}
-                        title={t('delete report')}
+                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
                         visible={this.state.deleteMenuVisible}
                         footer={null}
                         onCancel={this.handleDeleteMenuForCancel}
                     >
                         <DeleteDatasetComponent
-                            {...this.props}
+                            currentDiagram={this.state.currentDiagram}
+                            context={this.props.context}
                             closeModal={this.handleDeleteMenu}
                             closeModalGrid={this.handleDeleteGridMenu}
                             handleDeleteMenuForCancel={this.handleDeleteMenuForCancel}
-                            allDatasetComponent={this.state.allDatasetComponents}
                             currentDatasetComponent={this.state.currentDatasetComponent}
-                            IsGrid = {this.state.IsGrid}
-
+                            isGrid = {this.state.IsGrid}
                         />
                     </Modal>
                 </div>
@@ -2186,7 +2188,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
                         key="save_menu"
                         width={'500px'}
-                        title={t('saveReport')}
+                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
                         visible={this.state.saveMenuVisible}
                         footer={null}
                         onCancel={this.handleSaveMenu}
