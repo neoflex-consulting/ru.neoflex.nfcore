@@ -468,13 +468,11 @@ class DatasetBar extends React.Component<props, State> {
             {this.props.barMode === "diagram"
             && this.state.barSize <= barSize.small
             && <div className={"menu-horizontal-line"}/>}
-            {/*//TODO add doc icon*/}
             <Menu.Item className={"action-menu-item"} key='exportToDocx'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("export to docx")}
+                <NeoIcon icon={'fileWord'} color={'#5E6785'} size={'m'}/>{this.props.t("export to docx")}
             </Menu.Item>
-            {/*//TODO add excel icon*/}
             <Menu.Item className={"action-menu-item"} key='exportToExcel'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("export to excel")}
+                <NeoIcon icon={'fileExcel'} color={'#5E6785'} size={'m'}/>{this.props.t("export to excel")}
             </Menu.Item>
         </Menu>
     };
@@ -690,7 +688,6 @@ class DatasetBar extends React.Component<props, State> {
                     </NeoButton>
                     <div className='verticalLine'/>
                     {this.state.barSize < barSize.medium && <Dropdown
-                        visible={true}
                         className={"adaptive-dropdown"}
                         overlay={this.getEditAdaptiveMenu()} placement="bottomRight">
                         <div
