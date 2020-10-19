@@ -3,7 +3,7 @@ import {withTranslation} from 'react-i18next';
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
-import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
 import _ from "lodash"
 
 interface Props {
@@ -223,7 +223,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeCurrent()}
                         >
-                            {t('change current')}
+                            <NeoTypography type={'capture-regular'} style={{color : "#333333", marginTop: "5px"}}>{t('change current')}</NeoTypography>
                         </NeoInput>
                         <NeoInput
                             type={'checkbox'}
@@ -231,7 +231,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeAccess()}
                         >
-                            {t('public')}
+                            <NeoTypography type={'capture-regular'} style={{color : "#333333", marginTop: "5px"}}> {t('public')}</NeoTypography>
                         </NeoInput>
                     </NeoCol>
                 </NeoRow>
