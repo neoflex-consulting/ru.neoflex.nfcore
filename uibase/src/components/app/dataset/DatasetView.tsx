@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Dropdown, Menu, Modal, Select} from 'antd';
+import {Modal} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -42,7 +42,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoDrawer, NeoModal} from "neo-design/lib";
+import {NeoDrawer, NeoModal, NeoTypography} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 
 const textAlignMap_: any = textAlignMap;
