@@ -6,6 +6,7 @@ import './../../../styles/DatasetBar.css';
 import {NeoButton, NeoColor, NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {IDiagram, paramType} from "./DatasetView";
+import {IServerQueryParam} from "../../../MainContext";
 
 const { Option, OptGroup } = Select;
 
@@ -48,6 +49,12 @@ interface props {
     allDatasetComponents: any,
     currentDiagram?: IDiagram,
     diagrams: IDiagram[],
+    serverFilters: IServerQueryParam[],
+    serverAggregates: IServerQueryParam[],
+    serverSorts: IServerQueryParam[],
+    serverGroupBy: IServerQueryParam[],
+    groupByColumn: IServerQueryParam[],
+    serverCalculatedExpression: IServerQueryParam[],
     barMode: "edit"|"diagram"|"normal",
     t: any,
     i18n: any,
@@ -344,6 +351,37 @@ class DatasetBar extends React.Component<props, State> {
     };
 
     getActionButtons = () => {
+        let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy  = false;
+        this.props.serverFilters.forEach(element => {
+            if (element.datasetColumn !== undefined && element.value !== undefined && element.operation !== undefined){
+                isFilter = true;
+            }
+        })
+        this.props.serverSorts.forEach(element => {
+            if (element.datasetColumn !== undefined  && element.operation !== undefined){
+                isSort = true;
+            }
+        })
+        this.props.serverCalculatedExpression.forEach(element => {
+            if (element.datasetColumn !== undefined  && element.operation !== undefined){
+                isCalculator = true;
+            }
+        })
+        this.props.serverAggregates.forEach(element => {
+            if (element.datasetColumn !== undefined  && element.operation !== undefined){
+                serverAggregates = true;
+            }
+        })
+        if (this.props.diagrams.length > 0){
+            isDiagramms = true
+        }
+        this.props.serverGroupBy.forEach(element => {
+            if (element.datasetColumn !== undefined  && element.operation !== undefined && element.value !== undefined) {
+                serverGroupBy = true;
+            }
+        })
+
+
         return !this.props.isServerFunctionsHidden
             ?
             <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
@@ -351,11 +389,11 @@ class DatasetBar extends React.Component<props, State> {
                     <div className='verticalLine'/>
                     <NeoButton type={'link'} title={this.props.t('filters')} className={"margin-top margin-left"}
                                onClick={this.props.onFiltersClick}>
-                        <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isFilter ? 'filterCheck' : 'filter'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <NeoButton type={'link'} title={this.props.t('sorts')} className={"margin-top inter-button-margin"}
                                onClick={this.props.onSortsClick}>
-                        <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isSort ? 'sortCheck' : 'sort'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <div className='verticalLine'/>
                 </div>
@@ -363,22 +401,22 @@ class DatasetBar extends React.Component<props, State> {
                     <NeoButton type={'link'} title={this.props.t('calculator')}
                                className={"margin-top margin-left"}
                                onClick={this.props.onCalculatorClick}>
-                        <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isCalculator ? 'calculatorCheck' : 'calculator'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <NeoButton type={'link'} title={this.props.t('aggregations')}
                                className={"margin-top inter-button-margin"}
                                onClick={this.props.onAggregationsClick}>
-                        <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={serverAggregates ?  'plusBlockCheck' : 'plusBlock'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <NeoButton type={'link'} title={this.props.t('diagram')}
                                className={"margin-top inter-button-margin"}
                                onClick={this.props.onDiagramsClick}>
-                        <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isDiagramms ? 'barChartCheck' : 'barChart'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <NeoButton type={'link'} title={this.props.t('grouping')}
                                className={"margin-top inter-button-margin"}
                                onClick={this.props.onGroupingClick}>
-                        <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={serverGroupBy ? 'addCheck' : 'add'} color={'#5E6785'} size={'m'}/>
                     </NeoButton>
                     <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
                                className={"margin-top inter-button-margin"}

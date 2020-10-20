@@ -300,8 +300,8 @@
         "add row": "Добавить строку",
         "run query": "Применить",
         "print": "Печать",
-        "export to docx": "Выгрузка в .doc",
-        "export to excel": "Выгрузка в .excel",
+        "export to docx": "Выгрузка в docx",
+        "export to excel": "Выгрузка в excel",
 
         "public": "Опубликовать",
         "change current": "Изменить текущий",
@@ -382,6 +382,7 @@
         "calendar": "Календарь",
         "list": "Список",
         "system notes": "Системные заметки",
+        "personal notes": "Личные заметки",
         "component name is empty": "Название профиля не задано",
 
         "notification": "Уведомление",

@@ -300,8 +300,8 @@
         "add row": "Delete row",
         "run query": "Run query",
         "print": "Print",
-        "export to docx": "Export .doc",
-        "export to excel": "Export .excel",
+        "export to docx": "Export in docx",
+        "export to excel": "Export in excel",
 
         "public": "Public",
         "change current": "Change current",
@@ -381,6 +381,7 @@
         "calendar": "Calendar",
         "list": "List",
         "system notes": "System notes",
+        "personal notes": "Personal notes",
         "component name is empty": "Component name is empty",
 
         "notification": "Notification",
