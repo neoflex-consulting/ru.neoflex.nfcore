@@ -223,7 +223,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeCurrent()}
                         >
-                            <NeoTypography type={'capture-regular'} style={{color : "#333333", marginTop: "5px"}}>{t('change current')}</NeoTypography>
+                            <NeoTypography type={'capture_regular'} style={{color : "#333333", marginTop: "5px"}}>{t('change current')}</NeoTypography>
                         </NeoInput>
                         <NeoInput
                             type={'checkbox'}
@@ -231,7 +231,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                             disabled={false}
                             onChange={() => this.onChangeAccess()}
                         >
-                            <NeoTypography type={'capture-regular'} style={{color : "#333333", marginTop: "5px"}}> {t('public')}</NeoTypography>
+                            <NeoTypography type={'capture_regular'} style={{color : "#333333", marginTop: "5px"}}> {t('public')}</NeoTypography>
                         </NeoInput>
                     </NeoCol>
                 </NeoRow>

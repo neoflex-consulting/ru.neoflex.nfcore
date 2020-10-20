@@ -303,7 +303,7 @@
         "export to docx": "Выгрузка в docx",
         "export to excel": "Выгрузка в excel",
 
-        "public": "Опубликовать",
+        "public": "Сделать версию публичной",
         "change current": "Изменить текущий",
         "delete selected": "Удалить выбранные",
         "apply changes": "Применить изменения",

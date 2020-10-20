@@ -142,7 +142,7 @@ class SearchTransformer extends React.Component<transformerProps, transformerSta
 //adaptive break point px xs/s/m/l
 const breakPoints = {
     diagram: [375, 400, 638, 878],
-    edit: [375, 510, 630, 900],
+    edit: [375, 375, 522, 750],
     normal: [375, 510, 630, 900]
 };
 
@@ -263,7 +263,7 @@ class DatasetBar extends React.Component<props, State> {
                 this.props.onAddDiagramClick();
                 break;
             case 'edit':
-                this.props.onEditClick();
+                this.props.onEditDiagramClick();
                 break;
             case 'delete':
                 this.props.onDeleteClick();
@@ -453,18 +453,47 @@ class DatasetBar extends React.Component<props, State> {
                 </div>
             </div>
             :
-            <div>
-                <div className='verticalLine'/>
-                <NeoButton type={'link'} title={this.props.t('diagram')}
-                           className={"margin-top margin-left"}
-                           onClick={this.props.onDiagramsClick}>
-                    <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
-                <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
-                           className={"margin-top inter-button-margin"}
-                           onClick={this.props.onHiddenClick}>
-                    <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
+            <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
+                <div className={this.state.barSize < barSize.large ? "adaptive-bar-hidden"  : "flex-bar-item"}>
+                    <div className='verticalLine'/>
+                    <NeoButton type={'link'} title={this.props.t('diagram')}
+                               className={"margin-top margin-left"}
+                               onClick={this.props.onDiagramsClick}>
+                        <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
+                               className={"margin-top inter-button-margin"}
+                               onClick={this.props.onHiddenClick}>
+                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    <div className='verticalLine'/>
+                    <NeoButton type={'link'} title={this.props.t('save')}
+                               className={"margin-top margin-left"}
+                               onClick={this.props.onSaveClick}>
+                        <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    {
+                        this.props.isDeleteButtonVisible &&
+                        <div>
+                            <NeoButton type={'link'} title={this.props.t('delete')}
+                                       className={"margin-top inter-button-margin"}
+                                       onClick={this.props.onDeleteClick}>
+                                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+                            </NeoButton>
+                        </div>
+                    }
+                    <div className='verticalLine'/>
+                    {
+                        this.props.isEditButtonVisible &&
+                        <NeoButton
+                            type={'link'}
+                            title={this.props.t('edit')}
+                            className={"margin-top margin-left"}
+                            onClick={this.props.onEditClick}>
+                            <NeoIcon icon={"edit"} color={'#5E6785'} size={'m'}/>
+                        </NeoButton>
+                    }
+                </div>
             </div>
     };
 
@@ -506,13 +535,11 @@ class DatasetBar extends React.Component<props, State> {
             {this.props.barMode === "diagram"
             && this.state.barSize <= barSize.small
             && <div className={"menu-horizontal-line"}/>}
-            {/*//TODO add doc icon*/}
             <Menu.Item className={"action-menu-item"} key='exportToDocx'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("export to docx")}
+                <NeoIcon icon={'fileWord'} color={'#5E6785'} size={'m'}/>{this.props.t("export to docx")}
             </Menu.Item>
-            {/*//TODO add excel icon*/}
             <Menu.Item className={"action-menu-item"} key='exportToExcel'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("export to excel")}
+                <NeoIcon icon={'fileExcel'} color={'#5E6785'} size={'m'}/>{this.props.t("export to excel")}
             </Menu.Item>
         </Menu>
     };
@@ -724,11 +751,10 @@ class DatasetBar extends React.Component<props, State> {
                         suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                         onClick={this.props.onBackFromEditClick}
                     >
-                        {this.state.barSize === barSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
+                        {this.state.barSize === barSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
                     </NeoButton>
                     <div className='verticalLine'/>
                     {this.state.barSize < barSize.medium && <Dropdown
-                        visible={true}
                         className={"adaptive-dropdown"}
                         overlay={this.getEditAdaptiveMenu()} placement="bottomRight">
                         <div

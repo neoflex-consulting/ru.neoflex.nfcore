@@ -2,7 +2,7 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Dropdown, Menu, Modal, Select} from 'antd';
+import {Modal} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -1353,6 +1353,7 @@ class DatasetView extends React.Component<any, State> {
     };
 
         onApplyEditChanges = (buffer:any[]) => {
+            //delete, update, insert
         buffer.sort(function compare(a:any,b:any) {
             if (a.operationMark__ === dmlOperation.delete && b.operationMark__ !== dmlOperation.delete)
                 return -1;
@@ -1371,6 +1372,7 @@ class DatasetView extends React.Component<any, State> {
                     return {
                         parameterName: d.operationMark__ === dmlOperation.update
                             && !this.props.viewObject.get('datasetComponent').get("updateQuery").get('generateFromModel') ? `${c.get('field')}_pk` : c.get('field'),
+                        //Достаём значение из PK для update
                         parameterValue: d.operationMark__ === dmlOperation.update && d[`${c.get('field')}__`] !== undefined ? d[`${c.get('field')}__`] : d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: true
@@ -1381,6 +1383,7 @@ class DatasetView extends React.Component<any, State> {
                 .map(c => {
                     return {
                         parameterName: c.get('field'),
+                        //вставляемые значения оставляем как есть
                         parameterValue: d[c.get('field')],
                         parameterDataType: c.get('type'),
                         isPrimaryKey: false
@@ -1832,7 +1835,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
                         key="delete_menu"
                         width={'250px'}
-                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
+                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
                         visible={this.state.deleteMenuVisible}
                         footer={null}
                         onCancel={this.handleDeleteMenuForCancel}
@@ -1853,7 +1856,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
                         key="save_menu"
                         width={'500px'}
-                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
+                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
                         visible={this.state.saveMenuVisible}
                         footer={null}
                         onCancel={this.handleSaveMenu}
