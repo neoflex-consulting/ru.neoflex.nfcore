@@ -26,7 +26,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoDatePicker, NeoInput, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 
 const { Paragraph } = Typography;
@@ -1157,42 +1157,17 @@ class Typography_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         let drawObject = this.viewObject;
-        if (this.viewObject.get('typographyStyle') !== null) {
-            drawObject = this.viewObject.get('typographyStyle')
+        let typographyType = drawObject.get('typographyType')
+        if (typographyType === null) {
+            typographyType = 'capture_regular'
         }
-        let gradients: string = "";
-        if (drawObject.get('gradientStyle') !== null) {
-            drawObject.get('gradientStyle').get('colors').array().forEach( (c: any) => {
-                if (gradients === "") {gradients = c.get('name')}
-                else {gradients = gradients + ',' + c.get('name')}
-            })
-        }
+        console.log('drawObject', drawObject)
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}>
-                <Paragraph
+                <NeoParagraph
                     key={this.viewObject._id}
+                    type={typographyType}
                     className={cssClass}
-                    style={{
-                        marginTop: drawObject.get('marginTop') === null ? '0px' : `${drawObject.get('marginTop')}`,
-                        marginBottom: drawObject.get('marginBottom') === null ? '0px' : `${drawObject.get('marginBottom')}`,
-                        fontSize: drawObject.get('fontSize') === null ? 'inherit' : `${drawObject.get('fontSize')}`,
-                        textIndent: drawObject.get('textIndent') === null ? '0px' : `${drawObject.get('textIndent')}`,
-                        height: drawObject.get('height') === null ? 'auto' : `${drawObject.get('height')}`,
-                        fontWeight: drawObject.get('fontWeight') || "inherit",
-                        textAlign: drawObject.get('textAlign') || "left",
-                        color: drawObject.get('color') !== null && drawObject.get('gradientStyle') === null ?
-                            drawObject.get('color') : undefined,
-                        background: drawObject.get('backgroundColor') !== null && drawObject.get('gradientStyle') === null
-                            ?
-                            drawObject.get('backgroundColor')
-                            :
-                            drawObject.get('gradientStyle') !== null
-                                ? `linear-gradient(${drawObject.get('gradientStyle').get('position')}, ${gradients})`
-                                : undefined,
-                        WebkitBackgroundClip: gradients !== "" ? "text" : "unset",
-                        WebkitTextFillColor: gradients !== "" ? "transparent" : "unset",
-                        display: (this.state.isHidden) ? 'none' : undefined
-                    }}
                     copyable={drawObject.get('buttonCopyable')}
                     editable={drawObject.get('buttonEditable') === true ? {onChange: this.onChange} : false} //boolean | { editing: boolean, onStart: Function, onChange: Function(string) }
                     code={drawObject.get('codeStyle')}
@@ -1204,7 +1179,7 @@ class Typography_ extends ViewContainer {
                     strong={drawObject.get('strongStyle')}
                 >
                     {(this.state.label) ? this.state.label : this.viewObject.get('name')}
-                </Paragraph>
+                </NeoParagraph>
             </div>
         )
     }

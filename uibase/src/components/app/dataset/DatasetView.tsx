@@ -1829,7 +1829,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
                         key="delete_menu"
                         width={'250px'}
-                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
+                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
                         visible={this.state.deleteMenuVisible}
                         footer={null}
                         onCancel={this.handleDeleteMenuForCancel}
@@ -1850,7 +1850,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
                         key="save_menu"
                         width={'500px'}
-                        title={<NeoTypography type={'h4-medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
+                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
                         visible={this.state.saveMenuVisible}
                         footer={null}
                         onCancel={this.handleSaveMenu}

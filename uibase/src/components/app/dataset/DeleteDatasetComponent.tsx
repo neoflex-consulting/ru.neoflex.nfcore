@@ -38,7 +38,7 @@ class DeleteDatasetComponent extends React.Component<Props & WithTranslation, an
         let nameOfDiagram = this.props.currentDiagram?.diagramName
         return (
             <div>
-                <NeoTypography type={'capture-regular'} style={{color : "#333333"}}>{this.props.isGrid ? (t('diagram') + " " + nameOfDiagram) : (t('version') + " " + name )} {t('deleteVersionMessage')}</NeoTypography>
+                <NeoTypography type={'capture_regular'} style={{color : "#333333"}}>{this.props.isGrid ? (t('diagram') + " " + nameOfDiagram) : (t('version') + " " + name )} {t('deleteVersionMessage')}</NeoTypography>
                 <NeoRow style={{marginTop:'32px', justifyContent:'flex-start'}}>
                     <NeoButton title={t('save')} style={{width:'111px', marginRight:'20px'}} onClick={() => this.onClick()}>
                         {t('delete')}

@@ -713,7 +713,7 @@ class DatasetBar extends React.Component<props, State> {
                         suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                         onClick={this.props.onBackFromEditClick}
                     >
-                        {this.state.barSize === barSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
+                        {this.state.barSize === barSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
                     </NeoButton>
                     <div className='verticalLine'/>
                     {this.state.barSize < barSize.medium && <Dropdown
