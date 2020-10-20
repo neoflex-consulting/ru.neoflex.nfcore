@@ -415,18 +415,47 @@ class DatasetBar extends React.Component<props, State> {
                 </div>
             </div>
             :
-            <div>
-                <div className='verticalLine'/>
-                <NeoButton type={'link'} title={this.props.t('diagram')}
-                           className={"margin-top margin-left"}
-                           onClick={this.props.onDiagramsClick}>
-                    <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
-                <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
-                           className={"margin-top inter-button-margin"}
-                           onClick={this.props.onHiddenClick}>
-                    <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
+            <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
+                <div className={this.state.barSize < barSize.large ? "adaptive-bar-hidden"  : "flex-bar-item"}>
+                    <div className='verticalLine'/>
+                    <NeoButton type={'link'} title={this.props.t('diagram')}
+                               className={"margin-top margin-left"}
+                               onClick={this.props.onDiagramsClick}>
+                        <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
+                               className={"margin-top inter-button-margin"}
+                               onClick={this.props.onHiddenClick}>
+                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    <div className='verticalLine'/>
+                    <NeoButton type={'link'} title={this.props.t('save')}
+                               className={"margin-top margin-left"}
+                               onClick={this.props.onSaveClick}>
+                        <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
+                    </NeoButton>
+                    {
+                        this.props.isDeleteButtonVisible &&
+                        <div>
+                            <NeoButton type={'link'} title={this.props.t('delete')}
+                                       className={"margin-top inter-button-margin"}
+                                       onClick={this.props.onDeleteClick}>
+                                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+                            </NeoButton>
+                        </div>
+                    }
+                    <div className='verticalLine'/>
+                    {
+                        this.props.isEditButtonVisible &&
+                        <NeoButton
+                            type={'link'}
+                            title={this.props.t('edit')}
+                            className={"margin-top margin-left"}
+                            onClick={this.props.onEditClick}>
+                            <NeoIcon icon={"edit"} color={'#5E6785'} size={'m'}/>
+                        </NeoButton>
+                    }
+                </div>
             </div>
     };
 
