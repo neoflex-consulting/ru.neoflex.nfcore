@@ -7,11 +7,10 @@
 )
 package ru.neoflex.nfcore.masterdata
 import ru.neoflex.nfcore.base.types.QName
-import ru.neoflex.nfcore.base.tag.Tag
+import ru.neoflex.nfcore.base.tag.Tagged
 
-abstract class Classifier {
+abstract class Classifier extends Tagged {
     QName name
-    refers Tag[] tags
 }
 
 class PlainType extends Classifier {

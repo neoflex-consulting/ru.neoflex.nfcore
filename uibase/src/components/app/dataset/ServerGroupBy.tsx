@@ -191,7 +191,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoInput
                             width={'525px'}
-                            placeholder={value.t('New column name')}
+                            placeholder={value.t("new group by column name")}
                             allowClear={true}
                             onChange={(e: any) => value.handleChange(
                                 JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})

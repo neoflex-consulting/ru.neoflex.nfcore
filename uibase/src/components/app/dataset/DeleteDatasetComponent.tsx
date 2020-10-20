@@ -1,24 +1,23 @@
 import * as React from 'react';
-import {withTranslation} from 'react-i18next';
-import {Button} from "antd";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSave} from "@fortawesome/free-regular-svg-icons";
-import {faBan} from "@fortawesome/free-solid-svg-icons";
+import {WithTranslation, withTranslation} from 'react-i18next';
 import {API} from "../../../modules/api";
+import {NeoButton, NeoRow, NeoTypography} from "neo-design/lib";
 
 interface Props {
     closeModal?: () => void;
     closeModalGrid: () => void;
     handleDeleteMenuForCancel: () => void;
     currentDatasetComponent: any;
-    IsGrid: any;
+    isGrid: boolean;
+    context: any;
+    currentDiagram: any;
 }
 
-class DeleteDatasetComponent extends React.Component<any, any> {
+class DeleteDatasetComponent extends React.Component<Props & WithTranslation, any> {
 
     onClick(): void {
 
-        if (!this.props.IsGrid){
+        if (this.props.isGrid){
             this.props.closeModalGrid();
         }
         else {
@@ -35,20 +34,26 @@ class DeleteDatasetComponent extends React.Component<any, any> {
 
     render() {
         const { t } = this.props;
+        let name = this.props.currentDatasetComponent.eContents()[0].get('name');
+        let nameOfDiagram = this.props.currentDiagram?.diagramName
         return (
             <div>
-                    <Button title={t('delete')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.onClick()}>
-                        <FontAwesomeIcon icon={faSave} size='1x'/>
-                    </Button>
-                    <Button title={t('cancel')} style={{ width: '100px', color: 'rgb(151, 151, 151)'}} onClick={() => this.props.handleDeleteMenuForCancel()}>
-                        <FontAwesomeIcon icon={faBan} size='1x'/>
-                    </Button>
-
+                <NeoTypography type={'capture-regular'} style={{color : "#333333"}}>{this.props.isGrid ? (t('diagram') + " " + nameOfDiagram) : (t('version') + " " + name )} {t('deleteVersionMessage')}</NeoTypography>
+                <NeoRow style={{marginTop:'32px', justifyContent:'flex-start'}}>
+                    <NeoButton title={t('save')} style={{width:'111px', marginRight:'20px'}} onClick={() => this.onClick()}>
+                        {t('delete')}
+                    </NeoButton>
+                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.handleDeleteMenuForCancel()}>
+                        {t('cancel')}
+                    </NeoButton>
+                </NeoRow>
             </div>
-
 
         )
     }
 }
 
+
 export default withTranslation()(DeleteDatasetComponent)
+
+

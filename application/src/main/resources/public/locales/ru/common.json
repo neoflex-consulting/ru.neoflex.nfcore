@@ -20,7 +20,7 @@
         "cancel": "Отменить",
         "choose diagram type": "Выберите тип диаграммы",
         "clear": "Очистить",
-        "columnname": "Наименование столбца",
+        "columnname": "Название столбца",
         "clone": "Скопировать",
         "closeall": "Закрыть все",
         "create": "Создать",
@@ -32,10 +32,12 @@
         "download": "Выгрузить",
         "data": "Данные",
         "datatype": "Тип данных",
-        "delete report": "Удаление",
+        "deleteVersion": "Удаление версии",
+        "deleteVersionMessage": "будет удаленна безвозвратно",
         "delete": "Удалить",
         "developer": "Разработчик",
-        "diagram": "Диаграммы",
+        "diagrams": "Диаграммы",
+        "diagram": "Диаграмма",
         "diagram name": "Название диаграммы",
         "diagram legend": "Легенда",
         "dynamiccomponent": " компонента не может быть загружена из ",
@@ -298,10 +300,10 @@
         "add row": "Добавить строку",
         "run query": "Применить",
         "print": "Печать",
-        "export to docx": "Выгрузка в docx",
-        "export to excel": "Выгрузка в excel",
+        "export to docx": "Выгрузка в .doc",
+        "export to excel": "Выгрузка в .excel",
 
-        "public": "Опубликовать",
+        "public": "Сделать версию публичной",
         "change current": "Изменить текущий",
         "delete selected": "Удалить выбранные",
         "apply changes": "Применить изменения",
@@ -386,7 +388,11 @@
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
 
         "expand all": "Раскрыть вложенные",
-        "collapse all": "Скрыть вложенные"
+        "collapse all": "Скрыть вложенные",
+        "developer menu": "Меню разработки",
+        "auto-close notification": "Автоматически скрывать уведомления",
+        "back to applications": "Назад к приложениям",
+        "new group by column name": "Название сгруппированного столбца"
 
 }
 

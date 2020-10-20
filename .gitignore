@@ -9,6 +9,7 @@ base/workspace
 **/java-gen/**
 **test/java-gen/**
 .mvn/
+parent.iml
 
 
 /.metadata/

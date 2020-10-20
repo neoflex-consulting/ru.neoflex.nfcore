@@ -169,6 +169,10 @@ export class MainApp extends React.Component<any, State> {
         if (prevProps.location.pathname !== this.props.location.pathname) {
             this.loadObject()
         }
+        if (this.props.context !== prevProps.context) {
+            //В момент инициализации даем понять барам, что нужно пересчитать размеры
+            window.dispatchEvent(new Event('appAdaptiveResize'));
+        }
     }
 
     componentDidMount(): void {
