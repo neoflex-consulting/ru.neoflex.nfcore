@@ -1674,7 +1674,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 }}
             >
-                <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body-regular'}>{t("exitFromEditMode")}</NeoTypography></span>
+                <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{t("exitFromEditMode")}</NeoTypography></span>
             </NeoButton>
             <div className='verticalLine' style={{height: '40px', marginLeft: "24px"}}/>
             <NeoButton

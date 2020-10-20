@@ -790,7 +790,7 @@ class Calendar extends React.Component<any, any> {
                             type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
-                            <NeoTypography style={{color: "#424D78", margin: "0px 10px"}} type={'capture-regular'}>{t('today')}</NeoTypography>
+                            <NeoTypography style={{color: "#424D78", margin: "0px 10px"}} type={'capture_regular'}>{t('today')}</NeoTypography>
                         </NeoButton>
 
                         <NeoSelect className='selectYear'
@@ -798,7 +798,7 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
-                            value={<NeoTypography style={{marginTop: "9px", color: NeoColor.grey_9}} type={'capture-regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
+                            value={<NeoTypography style={{marginTop: "9px", color: NeoColor.grey_9}} type={'capture_regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
                             width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
@@ -806,7 +806,7 @@ class Calendar extends React.Component<any, any> {
                                         key={y}
                                         value={y}
                                     >
-                                        <NeoTypography style={{marginTop: "10px", color: NeoColor.grey_9}} type={'capture-regular'}>{y}</NeoTypography>
+                                        <NeoTypography style={{marginTop: "10px", color: NeoColor.grey_9}} type={'capture_regular'}>{y}</NeoTypography>
                                     </option>
                                 )
                             }
@@ -815,10 +815,10 @@ class Calendar extends React.Component<any, any> {
                         <NeoSelect
                             /*className='selectMonth'*/
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            defaultValue={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            defaultValue={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture_regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
-                            value={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture-regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            value={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture_regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
                             width={'124px'}
                         >
                             {
@@ -828,7 +828,7 @@ class Calendar extends React.Component<any, any> {
                                         key={m}
                                         value={m}
                                     >
-                                        <NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture-regular'}>
+                                        <NeoTypography style={{marginTop: "10px", color: "#333333"}} type={'capture_regular'}>
                                         {
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
@@ -847,7 +847,7 @@ class Calendar extends React.Component<any, any> {
                         </div>
                         <div className="col-col-center">
                     <span className="col-text" style={{fontSize: "120%"}}>
-                        <NeoTypography style={{color: NeoColor.grey_9}} type={'h3-medium'}>{dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}</NeoTypography>
+                        <NeoTypography style={{color: NeoColor.grey_9}} type={'h3_medium'}>{dateFns.format(this.state.currentMonth, dateFormat, {locale: this.getLocale(i18n)})}</NeoTypography>
                     </span>
                         </div>
                         <div className="col col-end" >

@@ -135,7 +135,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <NeoSelect
                             width={'250px'}
                             getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
-                            placeholder={value.t('column')}
+                            placeholder={value.t('Column')}
                             // style={{ marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
                             allowClear={true}

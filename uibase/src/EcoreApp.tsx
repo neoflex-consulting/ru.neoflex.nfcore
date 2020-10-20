@@ -625,35 +625,35 @@ class EcoreApp extends React.Component<any, State> {
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
                     <Link to={`/developer/metadata`}>
 
-                                                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('metadata')}</NeoTypography>
+                                                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'data'}>
                     <Link to={`/developer/data`}>
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/data') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('data')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/data') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('data')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'query'}>
                     <Link to={`/developer/query`}>
-                                                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('query')}</NeoTypography>
+                                                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('query')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'tools'}>
                     <Link to={`/developer/tools`}>
 
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('tools')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('tools')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'masterdata'}>
                     <Link to={`/developer/masterdata`}>
 
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('masterdata')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('masterdata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'filesystem'}>
                     <Link to={`/developer/filesystem`}>
 
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture-regular'}>{t('filesystem')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('filesystem')}</NeoTypography>
                     </Link>
                 </Menu.Item>
             </Menu>
@@ -702,9 +702,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/metadata`}>
                                                     <span>
                                                         {this.props.location.pathname.includes('/developer/metadata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('metadata')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('metadata')}</NeoTypography>
                                                         :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('metadata')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('metadata')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -713,9 +713,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/data`}>
                                                     <span>
                                                         {this.props.location.pathname.includes('/developer/data') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('data')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('data')}</NeoTypography>
                                                             :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('data')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('data')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -724,9 +724,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/query`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/query') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('query')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('query')}</NeoTypography>
                                                             :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('query')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('query')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -735,9 +735,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/tools`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/tools') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('tools')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
                                                             :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('tools')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -746,9 +746,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/masterdata`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/masterdata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('masterdata')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
                                                             :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('masterdata')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -757,9 +757,9 @@ class EcoreApp extends React.Component<any, State> {
                                                 <Link to={`/developer/filesystem`}>
                                                      <span>
                                                         {this.props.location.pathname.includes('/developer/filesystem') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4-regular'}>{t('filesystem')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('filesystem')}</NeoTypography>
                                                             :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4-light'}>{t('filesystem')}</NeoTypography>
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('filesystem')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>

@@ -176,7 +176,7 @@ class Tools extends React.Component<any, State> {
         const branchRegion = <div className={"tools-branch-region tools-vertical-center-element"}>
             <div>
                 <p className={"tools-header tools-padding-top tools-margin-left"}>
-                    <NeoTypography type={"body-medium"}>{t("branch parameters")}</NeoTypography>
+                    <NeoTypography type={"body_medium"}>{t("branch parameters")}</NeoTypography>
                 </p>
                 <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{t("branch")}</NeoTypography></p>
                 <NeoSelect
@@ -195,7 +195,7 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture-regular"}>{t("is default")}</NeoTypography>
+                    <NeoTypography type={"capture_regular"}>{t("is default")}</NeoTypography>
                 </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
@@ -206,7 +206,7 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture-regular"}>{t("is current")}</NeoTypography>
+                    <NeoTypography type={"capture_regular"}>{t("is current")}</NeoTypography>
                 </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
@@ -228,7 +228,7 @@ class Tools extends React.Component<any, State> {
         const exportAllObjectsRegion = <div
             className={"tools-region-element tools-export-all-objects"}>
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
-                <NeoTypography type={"body-medium"}>{t("export parameters")}</NeoTypography>
+                <NeoTypography type={"body_medium"}>{t("export parameters")}</NeoTypography>
             </p>
             <NeoButton
                 type={'link'}
@@ -236,7 +236,7 @@ class Tools extends React.Component<any, State> {
                 className={"tools-href tools-horizontal-center-element tools-margin-right"}
                 onClick={() => {this.downloadAll()}}
             >
-                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>
+                <NeoTypography type={"body_link"} style={{color:'#B38136'}}>
                     {t("export all objects")}
                 </NeoTypography>
             </NeoButton>
@@ -254,7 +254,7 @@ class Tools extends React.Component<any, State> {
                         this.fileSystemLookupRef.current.showDrawer()
                     }}
                 >
-                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>{this.props.t("select export scripts")}</NeoTypography>
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture_regular"}>{this.props.t("select export scripts")}</NeoTypography>
                 </NeoButton>
             </div>
             <div className={"tools-horizontal-center-element"}>
@@ -268,28 +268,28 @@ class Tools extends React.Component<any, State> {
         const exportObjectsRegion = <div
             className={"tools-region-element tools-export-objects-region"}>
             <p className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}}>
-                <NeoTypography type={"body-regular"}>{t("export metadata")}</NeoTypography>
+                <NeoTypography type={"body_regular"}>{t("export metadata")}</NeoTypography>
             </p>
             <p className={"tools-text tools-margin-left"} style={{marginBottom:'13px'}}>
-                <NeoTypography type={"capture-regular"}>{t("select metadata parameters")}</NeoTypography>
+                <NeoTypography type={"capture_regular"}>{t("select metadata parameters")}</NeoTypography>
             </p>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.withReferences}
                       onChange={(e:any) => this.setState({withReferences: e.target.checked})}>
-                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("with references")}</NeoTypography>
+                <NeoTypography type={"capture_regular"} style={{marginTop: '3px'}}>{t("with references")}</NeoTypography>
             </NeoInput>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.withDependents}
                       onChange={(e:any) => this.setState({withDependents: e.target.checked})}>
-                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("with dependents")}</NeoTypography>
+                <NeoTypography type={"capture_regular"} style={{marginTop: '3px'}}>{t("with dependents")}</NeoTypography>
             </NeoInput>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.recursiveDependents}
                       onChange={(e:any) => this.setState({recursiveDependents: e.target.checked})}>
-                <NeoTypography type={"capture-regular"} style={{marginTop: '3px'}}>{t("recursive dependents")}</NeoTypography>
+                <NeoTypography type={"capture_regular"} style={{marginTop: '3px'}}>{t("recursive dependents")}</NeoTypography>
             </NeoInput>
             <div className={"tools-horizontal-center-element tools-export-files"}>
                 <div className={"tools-horizontal-center-element tools-icon-container tools-margin-left"}>
@@ -302,7 +302,7 @@ class Tools extends React.Component<any, State> {
                             this.setState({drawerResourceVisible: true})
                         }}
                     >
-                        <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>{t("select metadata for export")}</NeoTypography>
+                        <NeoTypography style={{color: NeoColor.violete_5}} type={"capture_regular"}>{t("select metadata for export")}</NeoTypography>
                     </NeoButton>
                 </div>
                 <div className={"tools-horizontal-center-element"}>
@@ -330,7 +330,7 @@ class Tools extends React.Component<any, State> {
 
         const exportSQL = <div
             className={"tools-export-sql"}>
-            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}><NeoTypography type={"capture-regular"} style={{color:'#5E6785'}}>{t("export master data")}</NeoTypography></p>
+            <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}><NeoTypography type={"capture_regular"} style={{color:'#5E6785'}}>{t("export master data")}</NeoTypography></p>
             <NeoInput
                 type={"textArea"}
                 width={'90%'}
@@ -392,7 +392,7 @@ class Tools extends React.Component<any, State> {
 
         const importParametersRegion = <div className={"tools-import-parameters tools-region-element"}>
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
-                <NeoTypography type={"body-medium"}>{t("import parameters")}</NeoTypography>
+                <NeoTypography type={"body_medium"}>{t("import parameters")}</NeoTypography>
             </p>
             <NeoButton
                 type={'link'}
@@ -402,7 +402,7 @@ class Tools extends React.Component<any, State> {
                     this.deploySupplyInputRef.current!.click()
                 }}
             >
-                <NeoTypography type={"body-link"} style={{color:'#B38136'}}>
+                <NeoTypography type={"body_link"} style={{color:'#B38136'}}>
                     {t("deploy supply")}
                 </NeoTypography>
             </NeoButton>
@@ -430,7 +430,7 @@ class Tools extends React.Component<any, State> {
                         this.importObjectInputRef.current!.click()
                     }}
                 >
-                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture_regular"}>
                         {this.props.t("select files")}
                     </NeoTypography>
                 </NeoButton>
@@ -470,7 +470,7 @@ class Tools extends React.Component<any, State> {
                         this.importMDInputRef.current!.click()
                     }}
                 >
-                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture-regular"}>
+                    <NeoTypography style={{color: NeoColor.violete_5}} type={"capture_regular"}>
                         {this.props.t("select masterdata")}
                     </NeoTypography>
                 </NeoButton>

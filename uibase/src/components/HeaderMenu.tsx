@@ -67,7 +67,7 @@ class HeaderMenu extends React.Component<any, any> {
                                 <NeoTypography
                                     className='appNameInMenu'
                                     style={{color: app.eContents()[0].get('name') === this.state.selectedApp ? "#2A356C"  : "#8C8C8C"}}
-                                    type={'capture-regular'}
+                                    type={'capture_regular'}
                                 >
                                     {app.eContents()[0].get('name')}
                                 </NeoTypography>
@@ -94,7 +94,7 @@ class HeaderMenu extends React.Component<any, any> {
                             <NeoTypography
                                 className='appNameInMenu'
                                 style={{color: app.eContents()[0].get('name') === this.state.selectedApp ? "#2A356C"  : "#8C8C8C"}}
-                                type={'capture-regular'}
+                                type={'capture_regular'}
                             >
                                 {app.eContents()[0].get('name')}
                             </NeoTypography>
@@ -122,7 +122,7 @@ class HeaderMenu extends React.Component<any, any> {
                                     <NeoTypography
                                         className='applicationName'
                                         style={{color: app.eContents()[0].get('name') === this.state.selectedApp ? "#FFFFFF"  : "#B3B3B3"}}
-                                        type={app.eContents()[0].get('name') === this.state.selectedApp ? 'h4-regular' : 'h4-light'}
+                                        type={app.eContents()[0].get('name') === this.state.selectedApp ? 'h4_regular' : 'h4_light'}
                                     >
                                         {app.eContents()[0].get('name')}
                                     </NeoTypography>
@@ -145,7 +145,7 @@ class HeaderMenu extends React.Component<any, any> {
                                             <NeoTypography
                                                 className='appMoreWord'
                                                 style={{color: "#B3B3B3"}}
-                                                type={'h4-light'}
+                                                type={'h4_light'}
                                             >
                                                 {t('more')}
                                             </NeoTypography>
