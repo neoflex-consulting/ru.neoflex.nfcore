@@ -1161,7 +1161,6 @@ class Typography_ extends ViewContainer {
         if (typographyType === null) {
             typographyType = 'capture_regular'
         }
-        console.log('drawObject', drawObject)
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <NeoParagraph
