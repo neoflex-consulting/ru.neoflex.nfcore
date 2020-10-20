@@ -227,10 +227,9 @@ class Button extends ViewElement, GridComponent {
 }
 
 @Ecore(constraints="IsValid")
-class CssClass {
+class CssClass extends Tagged {
     QName name
     String style
-    refers Tag[] tags
 }
 
 /* Trees */
