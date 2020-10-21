@@ -1835,7 +1835,7 @@ class DatasetView extends React.Component<any, State> {
                         getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
                         key="delete_menu"
                         width={'250px'}
-                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleteVersion')}</NeoTypography>}
+                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleting')}</NeoTypography>}
                         visible={this.state.deleteMenuVisible}
                         footer={null}
                         onCancel={this.handleDeleteMenuForCancel}
