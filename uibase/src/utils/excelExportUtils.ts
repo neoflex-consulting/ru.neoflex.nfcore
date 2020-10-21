@@ -73,7 +73,7 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                 ref: 'A' + offset, //Позиция
                 headerRow: true,
                 style: {
-                    theme: 'TableStyleDark3',
+                    theme: 'TableStyleLight11',
                     showRowStripes: true,
                 },
                 columns: excelData.gridData.columns,
@@ -128,7 +128,7 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                     cell.fill = {
                         type: 'pattern',
                         pattern:"solid",
-                        fgColor:{argb:'000000'}
+                        fgColor:{argb:'9bbb59'}
                     };
                     cell.font = {
                         color: { argb: 'FFFFFF' }
@@ -144,7 +144,7 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                 ref: 'A' + offset, //Позиция
                 headerRow: false,
                 style: {
-                    theme: 'TableStyleDark3',
+                    theme: "TableStyleLight11",
                     showRowStripes: true,
                 },
                 columns: excelData.gridData.columns,
