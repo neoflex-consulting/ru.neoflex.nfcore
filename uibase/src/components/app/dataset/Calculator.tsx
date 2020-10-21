@@ -388,8 +388,8 @@ class Calculator extends DrawerParameterComponent<Props, State> {
                 </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0px'}}>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>Вычислительное выражение</div>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>Создайте вычисление, используя псевдонимы столбцов</div>
+                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
+                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
                 </Form.Item>
                     <Form.Item>
                     <NeoRow style={{marginBottom: '12px'}}>

@@ -240,7 +240,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, State> {
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите операцию</div>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('select operation')}</div>
                     </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>

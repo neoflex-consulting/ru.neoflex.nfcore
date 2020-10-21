@@ -234,7 +234,7 @@ class ServerSort extends DrawerParameterComponent<Props, State> {
                         onClick={this.createNewRow}
                     >
                         <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>Добавить</h4>
+                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
                     </NeoButton>
                 </Form.Item>
                     <div style={{

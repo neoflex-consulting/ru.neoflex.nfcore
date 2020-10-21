@@ -674,7 +674,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         if (e.key === "copy") {
             const json = JSON.stringify(node.targetObject);
-            copyToClipboard(json).catch((err:any) => {
+            copyToClipboard(json)
+                .catch((err:any) => {
                 console.error('Failed to copy: ', err);
             })
         }
@@ -821,11 +822,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     cloneResource = () => {
+        const {t} = this.props
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
         contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
-        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone}`);
         resource.set('uri', null);
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
@@ -839,6 +841,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     resource: resource
                 });
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
+                this.notification(t('notification'), t('success'))
             })
         }
     };

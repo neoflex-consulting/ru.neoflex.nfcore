@@ -32,7 +32,7 @@
         "download": "Выгрузить",
         "data": "Данные",
         "datatype": "Тип данных",
-        "deleteVersion": "Удаление версии",
+        "deleting": "Удаление",
         "deleteVersionMessage": "будет удаленна безвозвратно",
         "delete": "Удалить",
         "developer": "Разработчик",
@@ -383,10 +383,18 @@
         "list": "Список",
         "system notes": "Системные заметки",
         "personal notes": "Личные заметки",
+        "computational expression": "Вычислительное выражение",
+        "create a calculation using column aliases": "Создайте вычисление, используя псевдонимы столбцов",
+        "select the columns you want to hide": "Выберите колонки, которые вы хотите скрыть",
+        "bar chart": "Линейчатая",
+        "pie chart": "Круговая",
+        "graph": "График",
+        "select operation": "Выберите операцию",
         "component name is empty": "Название профиля не задано",
 
         "notification": "Уведомление",
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
+        "success": "Успешно",
 
         "expand all": "Раскрыть вложенные",
         "collapse all": "Скрыть вложенные",
@@ -394,7 +402,6 @@
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
         "new group by column name": "Название сгруппированного столбца"
-
 }
 
 
