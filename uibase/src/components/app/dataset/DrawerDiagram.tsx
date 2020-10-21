@@ -220,21 +220,21 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                                        onClick={()=>{this.setState({diagramType:"Bar"})}}>
                                 <NeoIcon icon={"barChart"} color={'#424D78'} style={{marginTop: "4px"}}/>
                             </NeoButton>
-                            <h4 className={'types'}>Линейчатая</h4>
+                            <h4 className={'types'}>{this.props.t("bar chart")}</h4>
                         </NeoCol>
                         <NeoCol span={6} className={'chooseCol'}>
                             <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Pie" ? "#FFF8E0" : "white", border: this.state.diagramType === "Pie" ? "1px solid #FFCC66": "1px solid #424D78"}}
                                        onClick={()=>{this.setState({diagramType:"Pie"})}}>
                                 <NeoIcon icon={"diagramCircle"} color={'#424D78'} style={{marginTop: "4px"}}/>
                             </NeoButton>
-                            <h4 className={'types'}>Круговая</h4>
+                            <h4 className={'types'}>{this.props.t("pie chart")}</h4>
                         </NeoCol>
                         <NeoCol span={4} className={'chooseCol'}>
                             <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Line" ? "#FFF8E0" : "white", border: this.state.diagramType === "Line" ? "1px solid #FFCC66": "1px solid #424D78"}}
                                        onClick={()=>{this.setState({diagramType:"Line"})}}>
                                 <NeoIcon icon={"diagram"} color={'#424D78'} style={{marginTop: "4px"}}/>
                             </NeoButton>
-                            <h4 className={'types'}>График</h4>
+                            <h4 className={'types'}>{this.props.t("Graph")}</h4>
                         </NeoCol>
                     </NeoRow>
                 </div>
