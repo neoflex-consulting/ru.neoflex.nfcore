@@ -1425,6 +1425,12 @@ class DatasetView extends React.Component<any, State> {
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}} className={this.props.className}>
                 <DatasetBar
+                    serverFilters={this.state.serverFilters}
+                    serverAggregates={this.state.serverAggregates}
+                    serverSorts={this.state.serverSorts}
+                    serverGroupBy={this.state.serverGroupBy}
+                    groupByColumn={this.state.groupByColumn}
+                    serverCalculatedExpression={this.state.serverCalculatedExpression}
                     barMode={barMode}
                     currentDatasetComponent={this.state.currentDatasetComponent}
                     allDatasetComponents={this.state.allDatasetComponents}

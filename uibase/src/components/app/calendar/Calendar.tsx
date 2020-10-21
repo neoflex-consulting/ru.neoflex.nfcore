@@ -876,6 +876,7 @@ class Calendar extends React.Component<any, any> {
                                 <NeoInput
                                     style={{width: "188px", height: "32px"}}
                                     type={'search'}
+                                    placeholder={this.props.t("quick filter")}
                                     onChange={(e: any) => {
                                         this.changeSearchValue(e.target.value)
                                     }}
@@ -895,14 +896,20 @@ class Calendar extends React.Component<any, any> {
                                     key={this.props.viewObject.get('defaultStatus').get('name')}
                                     value={this.props.viewObject.get('defaultStatus').get('name')}
                                 >
-                                    {this.props.viewObject.get('defaultStatus').get('name')}
+
+                                   {this.props.viewObject.get('defaultStatus').get('name') === "Личные Заметка" ?
+                                        t('personal notes')
+                                        :
+                                        this.props.viewObject.get('defaultStatus').get('name')
+
+                                    }
                                 </option>
 
                                 <option
                                     key={'Системные заметки'}
                                     value={'Системные заметки'}
                                 >
-                                    {t('Системные заметки')}
+                                    {t('system notes')}
                                 </option>
                             </NeoSelect>
                         </div>
