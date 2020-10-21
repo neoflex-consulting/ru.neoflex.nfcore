@@ -143,7 +143,7 @@ class YearBookExt extends YearBookImpl {
                     def d2 = dateFormat.parse(date2) as java.util.Date
 
                     def titleNumber = 1
-                    while( d1.before(d2) ){
+                    while( d1.before(d2) || d1.equals(d2) ){
                         def day = ApplicationFactory.eINSTANCE.createDay()
                         day.date = d1
                         day.setTitle(titleNumber + ' рабочий день')

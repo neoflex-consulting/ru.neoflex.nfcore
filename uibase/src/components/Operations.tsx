@@ -168,6 +168,7 @@ export default function Operations(props: Props): JSX.Element {
                     onEClassBrowse: onBrowse,
                     handleDeleteSingleRef: handleDeleteSingleRef,
                     handleDeleteRef: handleDeleteRef,
+                    edit: true
                 })
                 return (
                     <div style={{ marginBottom: '5px' }}>
