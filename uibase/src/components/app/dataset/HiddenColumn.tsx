@@ -86,7 +86,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>Выберите колонки, которые вы хотите скрыть</div>
+                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('select the columns you want to hide')}</div>
                     </NeoCol>
                     <NeoCol span={6} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}

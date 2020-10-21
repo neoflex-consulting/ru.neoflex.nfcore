@@ -897,7 +897,7 @@ class Calendar extends React.Component<any, any> {
                                     value={this.props.viewObject.get('defaultStatus').get('name')}
                                 >
 
-                                   {this.props.viewObject.get('defaultStatus').get('name') === "Личные Заметка" ?
+                                   {this.props.viewObject.get('defaultStatus').get('name') === "Личная заметка" ?
                                         t('personal notes')
                                         :
                                         this.props.viewObject.get('defaultStatus').get('name')
