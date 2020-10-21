@@ -394,6 +394,7 @@
 
         "notification": "Уведомление",
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
+        "success": "Успешно",
 
         "expand all": "Раскрыть вложенные",
         "collapse all": "Скрыть вложенные",
@@ -401,7 +402,6 @@
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
         "new group by column name": "Название сгруппированного столбца"
-
 }
 
 

@@ -394,6 +394,8 @@
 
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
+        "success": "Успешно",
+
         "expand all": "Expand all",
         "collapse all": "Collapse all",
         "developer menu": "Developer menu",
