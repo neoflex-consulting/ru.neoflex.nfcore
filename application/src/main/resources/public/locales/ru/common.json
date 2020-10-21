@@ -395,13 +395,17 @@
         "notification": "Уведомление",
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
         "success": "Успешно",
+        "the name is not unique": "Наименование не уникально. Попробуйте еще раз",
+        "server is not available": "Сервер недоступен",
 
         "expand all": "Раскрыть вложенные",
         "collapse all": "Скрыть вложенные",
         "developer menu": "Меню разработки",
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
-        "new group by column name": "Название сгруппированного столбца"
+        "new group by column name": "Название сгруппированного столбца",
+        "tags": "Теги"
+
 }
 
 

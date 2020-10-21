@@ -148,7 +148,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         const resource = resourceSet.create({ uri: ' ' }).parse(newResourceJSON as Ecore.EObject);
 
-        resource.set('uri', null);
+        resource.set('uri', "");
 
         const mainEObject = resource.eResource().eContents()[0];
         const json = mainEObject.eResource().to();
@@ -828,7 +828,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
         contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone}`);
-        resource.set('uri', null);
+        resource.set('uri', "");
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
                 const targetObject: { [key: string]: any } = this.state.targetObject;

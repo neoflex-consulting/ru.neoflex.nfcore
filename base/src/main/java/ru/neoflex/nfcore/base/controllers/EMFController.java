@@ -21,6 +21,7 @@ import ru.neoflex.nfcore.base.auth.impl.AuditImpl;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
+import ru.neoflex.nfcore.base.tag.Tag;
 import ru.neoflex.nfcore.base.tag.Tagged;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.EmfJson;
@@ -108,23 +109,21 @@ public class EMFController {
             ResourceSet resourceSet = docFinder.getResourceSet();
             int size = resourceSet.getResources().size();
             if (tags != null && !tags.equals("")) {
+                int tagsSize = (int) resourceSet.getResources().stream().filter(resource -> resource.getContents().get(0) instanceof Tag).count();
                 List<Resource> filtered = new ArrayList<>();
-                List<Resource> tagsResource = new ArrayList<>();
                 new ArrayList<>(resourceSet.getResources()).forEach(resource -> {
-                    if (resource.getContents().get(0).eClass().getName().equals("Tag")) {
-                        tagsResource.add(resource);
-                    }
-                    if (((Tagged) resource.getContents().get(0)).getTags()
+                    if (((resource.getContents().get(0) instanceof Tagged && ((Tagged) resource.getContents().get(0)).getTags()
                             .stream()
                             .filter(resourceTag -> ("," + tags + ",").contains("," + resourceTag.getName() + ","))
                             .findAny()
-                            .orElse(null) == null) {
+                            .orElse(null) == null) ||
+                        !(resource.getContents().get(0) instanceof Tagged)) &&
+                        !(resource.getContents().get(0) instanceof Tag)) {
                         filtered.add(resource);
                     }
                 });
-                size = size - filtered.size();
                 filtered.forEach(resource -> resourceSet.getResources().remove(resource));
-                tagsResource.forEach(resource -> resourceSet.getResources().addAll(tagsResource));
+                size = size - filtered.size() - tagsSize;
             }
             EcoreUtil.resolveAll(resourceSet);
             ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resourceSet.getResources());

@@ -395,11 +395,14 @@
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
         "success": "Успешно",
+        "the name is not unique": "The name is not unique. Try again",
+        "server is not available": "Server is not available",
 
         "expand all": "Expand all",
         "collapse all": "Collapse all",
         "developer menu": "Developer menu",
         "auto-close notification": "Auto-close notification",
         "back to applications": "Back to applications",
-        "new group by column name": "New group by column name"
+        "new group by column name": "New group by column name",
+        "tags": "Tags"
 }

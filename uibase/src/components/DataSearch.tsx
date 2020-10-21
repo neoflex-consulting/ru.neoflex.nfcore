@@ -111,6 +111,27 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         this.getAllTags();
     }
 
+    checkEClass = () => {
+        const checkRecursive = (cls:Ecore.EClass ) => {
+            let retVal = false;
+            if (cls.get('name') === 'Tagged') {
+                return true;
+            } else {
+                cls.get('eSuperTypes').each((cl:any)=>{
+                    retVal = checkRecursive(cl)
+                })
+            }
+            return retVal
+        };
+        const className = this.props.form.getFieldValue('selectEClass');
+        if (className === "" || !className) {
+            return false
+        }
+        const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
+        return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
+    };
+
+
     render() {
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
@@ -139,10 +160,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 initialValue: this.props.specialEClass === undefined
                                                     ? undefined :
                                                     this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                                /*rules: [{
-                                                    required: getFieldValue('key') === 'data_search',
-                                                    message: 'Please select eClass',
-                                                }],*/
                                             })(
                                                 <Select
                                                     notFoundContent={t('notfound')}
@@ -184,8 +201,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 <Select
                                                     allowClear={true}
                                                     mode={"tags"}
+                                                    disabled={this.checkEClass()}
                                                     style={{ width: '270px' }}
-                                                    defaultValue={""}
                                                     placeholder={this.props.t("tags")}>
                                                     {
                                                         this.state.tags.map((tag: Ecore.EObject) =>
