@@ -981,6 +981,7 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     componentDidMount(): void {
+        const {t} = this.props
         API.instance().onServerDown = ()=> {
             this.setState({principal: undefined})
         };
@@ -1001,7 +1002,10 @@ class EcoreApp extends React.Component<any, State> {
                     _this.setState({principal: undefined});
                 }
                 if (error.status === 504 || error.error === "Unknown error") {
-                    _this.notification("Уведомление", "Сервер недоступен","info")
+                    _this.notification(t('notification'), t('server is not available'),"info")
+                }
+                if ((error.status === 500 && error.message !== undefined) && error.message.includes('duplicated key')) {
+                    _this.notification(t('notification'), t('the name is not unique'),"error")
                 }
                 else {
                     _this.notification("Error: " + error.status + " (" + error.error + ")", error.message!,"error")

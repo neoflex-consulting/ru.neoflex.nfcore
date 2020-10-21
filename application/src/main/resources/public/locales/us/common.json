@@ -395,6 +395,8 @@
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
         "success": "Успешно",
+        "the name is not unique": "The name is not unique. Try again",
+        "server is not available": "Server is not available",
 
         "expand all": "Expand all",
         "collapse all": "Collapse all",
