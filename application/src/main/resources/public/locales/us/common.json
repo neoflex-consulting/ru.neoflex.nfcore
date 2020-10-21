@@ -399,5 +399,6 @@
         "developer menu": "Developer menu",
         "auto-close notification": "Auto-close notification",
         "back to applications": "Back to applications",
-        "new group by column name": "New group by column name"
+        "new group by column name": "New group by column name",
+        "tags": "Tags"
 }

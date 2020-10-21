@@ -400,7 +400,8 @@
         "developer menu": "Меню разработки",
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
-        "new group by column name": "Название сгруппированного столбца"
+        "new group by column name": "Название сгруппированного столбца",
+        "tags": "Теги"
 
 }
 
