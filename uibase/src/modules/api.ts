@@ -490,6 +490,22 @@ export class API implements IErrorHandler {
         return this.findByClassURI(eClass.eURI(), selector, level, tags);
     }
 
+    findByTagsAndRegex(tags: string, objectName?: string, level: number = 1): Promise<Ecore.Resource[]> {
+        let selection: any = {contents: {eClass: undefined}};
+        if (objectName) {
+            selection = {contents: {name: {"$regex": objectName}}}
+        }
+        return this.find(selection, level, tags).then(r=>r.resources);
+    }
+
+    findByTagsAndName(tags: string, objectName?: string, level: number = 1): Promise<Ecore.Resource[]> {
+        let selection: any = {contents: {eClass: undefined}};
+        if (objectName) {
+            selection = {contents: {name: objectName}}
+        }
+        return this.find(selection, level, tags).then(r=>r.resources);
+    }
+
     findByClassURI(classURI: string, selector: any, level: number = 1, tags?: string): Promise<Ecore.Resource[]> {
         let selection: any = {contents: {eClass: classURI}};
         selection = _.merge(selector, selection);
