@@ -109,21 +109,21 @@ public class EMFController {
             ResourceSet resourceSet = docFinder.getResourceSet();
             int size = resourceSet.getResources().size();
             if (tags != null && !tags.equals("")) {
-                int tagsSize = (int) resourceSet.getResources().stream().filter(resource -> resource.getContents().get(0) instanceof Tag).count();
                 List<Resource> filtered = new ArrayList<>();
                 new ArrayList<>(resourceSet.getResources()).forEach(resource -> {
-                    if (((resource.getContents().get(0) instanceof Tagged && ((Tagged) resource.getContents().get(0)).getTags()
+                    if (resource.getContents().get(0) instanceof Tagged && ((Tagged) resource.getContents().get(0)).getTags()
                             .stream()
                             .filter(resourceTag -> ("," + tags + ",").contains("," + resourceTag.getName() + ","))
                             .findAny()
-                            .orElse(null) == null) ||
-                        !(resource.getContents().get(0) instanceof Tagged)) &&
-                        !(resource.getContents().get(0) instanceof Tag)) {
+                            .orElse(null) != null) {
                         filtered.add(resource);
                     }
                 });
-                filtered.forEach(resource -> resourceSet.getResources().remove(resource));
-                size = size - filtered.size() - tagsSize;
+                size = filtered.size();
+                //Add missing tags
+                filtered.addAll(resourceSet.getResources().stream().filter(resource -> resource.getContents().get(0) instanceof Tag).collect(Collectors.toList()));
+                resourceSet.getResources().clear();
+                resourceSet.getResources().addAll(filtered);
             }
             EcoreUtil.resolveAll(resourceSet);
             ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resourceSet.getResources());
