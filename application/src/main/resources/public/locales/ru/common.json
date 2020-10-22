@@ -295,7 +295,7 @@
         "dateTimeMask": "дд.мм.гггг чч:мм:cc",
 
         "exception while evaluating": "Ошибка во время вычисления выражения",
-        "hiddencolumns": "Скрыть столбцы",
+        "hiddencolumns": "Скрыть/показать столбцы",
         "delete row": "Удалить строку",
         "add row": "Добавить строку",
         "run query": "Применить",
@@ -404,7 +404,10 @@
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
         "new group by column name": "Название сгруппированного столбца",
-        "tags": "Теги"
+        "tags": "Теги",
+        "back to version": "Возврат к шаблону отчёта",
+        "move top": "Переместить в начало",
+        "move bottom": "Переместить в конец"
 
 }
 

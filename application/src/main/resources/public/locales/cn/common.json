@@ -377,6 +377,9 @@
         "auto-close notification": "自動隱藏通知",
         "back to applications": "返回應用",
         "new group by column name": "分組列名",
-        "tags": "標籤"
+        "tags": "標籤",
+        "back to version": "返回報告模板",
+        "move top": "移動頂部",
+        "move bottom": "移至結尾"
 
 }

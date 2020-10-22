@@ -20,7 +20,7 @@ interface Props {
     componentType?: paramType;
 }
 
-interface State {
+export interface DrawerState {
     parametersArray: IServerQueryParam[] | undefined;
     backgroundColorVisible?: boolean;
     textColorVisible?: boolean;
@@ -31,7 +31,7 @@ interface State {
     calculatorFunction?: EObject[];
 }
 
-export class DrawerParameterComponent<T extends Props, V extends State> extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+export class DrawerParameterComponent<T extends Props, V extends DrawerState> extends React.Component<Props & FormComponentProps & WithTranslation & any, DrawerState> {
     t: any;
     getFieldDecorator: any;
     setFieldsValue: any;

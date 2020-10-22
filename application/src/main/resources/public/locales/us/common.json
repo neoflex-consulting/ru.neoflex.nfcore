@@ -404,5 +404,8 @@
         "auto-close notification": "Auto-close notification",
         "back to applications": "Back to applications",
         "new group by column name": "New group by column name",
-        "tags": "Tags"
+        "tags": "Tags",
+        "back to version": "Back to version",
+        "move top": "Move top",
+        "move bottom": "Move bottom"
 }

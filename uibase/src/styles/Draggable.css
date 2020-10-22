@@ -146,3 +146,7 @@
     color: #333;
     font-weight: 500;
 }
+
+.search-column {
+    width: 100% !important;
+}

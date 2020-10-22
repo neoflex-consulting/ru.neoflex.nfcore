@@ -4,7 +4,7 @@ import {Form, List} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
-import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
 import {EObject} from "ecore";
@@ -30,13 +30,6 @@ interface Props {
     defaultColumnDefs?: Array<any>;
     formatMasks?: {key:string,value:string}[]
     handleDrawerVisability?: any;
-}
-
-interface State {
-    parametersArray: IServerQueryParam[] | undefined;
-    expression: string;
-    currentIndex: number;
-    calculatorFunction: EObject[];
 }
 
 interface CalculatorEventHandlerProps {
@@ -140,7 +133,7 @@ function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
             </List>
 }
 
-class Calculator extends DrawerParameterComponent<Props, State> {
+class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     caretLastPosition: number;
     expressionRef = React.createRef<any>();
     previousText: string;

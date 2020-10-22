@@ -670,7 +670,7 @@ class DatasetView extends React.Component<any, State> {
             addEmpty(groupByColumn);
             addEmpty(highlights);
             addEmpty(serverCalculatedExpression);
-            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(columnDefs)
+            hiddenColumns = hiddenColumns.length > 0 ? hiddenColumns : this.getLeafColumns(this.state.defaultColumnDefs ? this.state.defaultColumnDefs : columnDefs)
                 //Если поле hide в developer'е то оно никак не должно отображаться в UI пользователя
                 .filter(c=> !c.get('hide'))
                 .map(c => {
@@ -684,7 +684,7 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: c.datasetColumn,
                     enable: c.enable
                 }
-            });
+            }).filter(hiddenColumn => hiddenColumn.datasetColumn);
             this.setState({
                 serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
                 serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
@@ -1739,6 +1739,7 @@ class DatasetView extends React.Component<any, State> {
                                     isVisible={this.state.hiddenColumnsMenuVisible}
                                     componentType={paramType.hiddenColumns}
                                     handleDrawerVisability={this.handleDrawerVisibility}
+                                    datasetComponentVersion={this.state.currentDatasetComponent.eContents && this.state.currentDatasetComponent.eContents()[0].get('name')}
                                 />
                                 :
                                 <HiddenColumn/>
