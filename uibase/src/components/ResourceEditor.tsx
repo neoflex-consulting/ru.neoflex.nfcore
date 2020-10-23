@@ -15,6 +15,7 @@ import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 
+
 interface ITargetObject {
     eClass: string,
     [key: string]: any
@@ -53,7 +54,8 @@ interface State {
     clipboardObject: ITargetObject,
     edit: boolean,
     expandedKeys: string[],
-    saveMenuVisible: boolean
+    saveMenuVisible: boolean,
+    dragNode: { [key: string]: any }
 }
 
 
@@ -121,7 +123,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         clipboardObject: { eClass: "" },
         edit: false,
         expandedKeys: [],
-        saveMenuVisible: false
+        saveMenuVisible: false,
+        dragNode: {}
     };
 
     refresh = (refresh: boolean): void => {
@@ -251,85 +254,84 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             )
         };
 
-        const onDragEnter = (info: any) => {
-            // console.log('onDragEnter____', info);
-            // expandedKeys 需要受控时设置
-            // this.setState({
-            //     expandedKeys: info.expandedKeys,
-            //     });
-        };
+        const onDrop = (event: any) => {
+            const dropKey = event.node.props.eventKey;
+            const dragKey = event.dragNode.props.eventKey;
+            const dropPos = event.node.props.pos.split('-');
+            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
+            const targetObject: { [key: string]: any } = this.state.targetObject;
+            const node: { [key: string]: any } = event.node.props;
+            const dragNode: { [key: string]: any } = event.dragNode.props;
 
-        const onDrop = (e: any) => {
-            console.log('currentID__________', e.dragNode.props.eventKey)
-            console.log('targetID______', e.node.props.eventKey)
+            const oldIndex = dragNode.pos ? dragNode.pos.split('-')[dragNode.pos.split('-').length - 1] : undefined;
+            const nodePos = Number(node.pos.split('-')[node.pos.split('-').length - 1]);
+            let newIndex = undefined;
 
-            console.log('ONDROP__________', e)
-            console.log('targetObject__________', this.state.resourceJSON)
+            if (node.pos.split('-').length === dragNode.pos.split('-').length) {
+                if (dropPosition === 1 && nodePos < oldIndex) {
+                    newIndex = nodePos + dropPosition
+                } else if (dropPosition === -1 && nodePos > oldIndex) {
+                    newIndex = nodePos + dropPosition
+                } else {
+                    newIndex = nodePos
+                }
+            } else {
+                if (dropPosition === 1 && nodePos < oldIndex) {
+                    newIndex = newIndex = nodePos
+                } else if (dropPosition === -1 && nodePos > oldIndex) {
+                    newIndex = nodePos + dropPosition
+                } else {
+                    newIndex = nodePos
+                }
+            }
 
-
-                const targetObject: { [key: string]: any } = this.state.targetObject
-                const node: { [key: string]: any } = this.state.treeRightClickNode
-
-                let updatedJSON;
-
-                const index = e.dragNode.props.pos ? e.dragNode.props.pos.split('-')[e.dragNode.props.pos.split('-').length - 1] : undefined;
-                updatedJSON = e.node.props.parentUpdater(null, undefined, e.node.props.propertyName, {
-                    operation: "drag",
-                    oldIndex: index,
-                    newIndex: (e.dropPosition - 1),
-                    targetID: e.node.props.eventKey,
-                    currentID: e.dragNode.props.eventKey
-
+            let updatedJSON
+            if (node.pos.split('-').length === dragNode.pos.split('-').length) {
+                updatedJSON = node.parentUpdater(null, undefined, node.propertyName, {
+                    operation: "d&dOneLevel",
+                    oldIndex: oldIndex,
+                    newIndex: newIndex,
+                    event: event
                 })
-                const nestedJSON = nestUpdaters(updatedJSON, null);
-                const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-                const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-                this.setState({
-                    mainEObject: resource.eContents()[0],
-                    resourceJSON: nestedJSON,
-                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-                    tableData: updatedTargetObject ? this.state.tableData : [],
-                    selectedKeys: this.state.selectedKeys.filter(key => key !== node.eventKey)
+
+            } else if (node.pos.split('-').length > dragNode.pos.split('-').length) {
+
+                updatedJSON = dragNode.parentUpdater(null, undefined, dragNode.propertyName, {
+                    operation: "d&dDown",
+                    oldIndex: oldIndex,
+                    newIndex: newIndex,
+                    event: event
                 })
+            } else if (node.pos.split('-').length < dragNode.pos.split('-').length) {
+
+                updatedJSON = node.parentUpdater(null, undefined, dragNode.propertyName, {
+                    operation: "d&dDown",
+                    oldIndex: oldIndex,
+                    newIndex: newIndex,
+                    event: event
+                })
+            }
+
+            let nestedJSON = nestUpdaters(updatedJSON, null);
+            let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                mainEObject: resource.eContents()[0],
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
+                tableData: updatedTargetObject ? state.tableData : [],
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                isModified: true
+            }))
+
         }
-
-        // const onDrop = (e: any) => {
-        //     // console.log('ONDROP__________', e)
-        //     if (e.dragNode.props.pos.substr(0, e.dragNode.props.pos.length-1 ) == e.node.props.pos.substr(0, e.dragNode.props.pos.length-1)) {
-        //         console.log('OLD_INDEX', e.dragNode.props.pos)
-        //         console.log('NEW_INDEX', e.node.props.pos)
-        //
-        //         const targetObject: { [key: string]: any } = this.state.targetObject
-        //         const node: { [key: string]: any } = this.state.treeRightClickNode
-        //
-        //         let updatedJSON;
-        //
-        //         const index = e.dragNode.props.pos ? e.dragNode.props.pos.split('-')[e.dragNode.props.pos.split('-').length - 1] : undefined;
-        //         updatedJSON = e.node.props.parentUpdater(null, undefined, e.node.props.propertyName, {
-        //             operation: "drag",
-        //             oldIndex: index,
-        //             newIndex: (e.dropPosition - 1).toString()
-        //         })
-        //         const nestedJSON = nestUpdaters(updatedJSON, null);
-        //         const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-        //         const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-        //         this.setState({
-        //             mainEObject: resource.eContents()[0],
-        //             resourceJSON: nestedJSON,
-        //             targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-        //             tableData: updatedTargetObject ? this.state.tableData : [],
-        //             selectedKeys: this.state.selectedKeys.filter(key => key !== node.eventKey)
-        //         })
-        //     }
-        // }
 
         return (
             <Tree
                 ref={this.treeRef}
-                // draggable
-                // onDragEnter={onDragEnter}
-                // onDrop={onDrop}
+                draggable
+                onDrop={onDrop}
                 blockNode
                 showIcon
                 key="mainTree"
@@ -942,13 +944,15 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
             this.setState({expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children])})
         }
+        if (prevState.mainEObject._id === undefined && this.state.mainEObject._id !== undefined) {
+            this.checkLock('auth','CurrentLock', 'currentLockPattern');
+        }
     }
 
     componentDidMount(): void {
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
-        this.checkLock('auth','CurrentLock', 'currentLockPattern');
     }
 
     checkLock(ePackageName: string, className: string, paramName: string) {
