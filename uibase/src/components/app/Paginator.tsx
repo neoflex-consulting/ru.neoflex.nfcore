@@ -7,6 +7,7 @@ import Ch from 'antd/es/locale/zh_TW';
 import NeoIcon from "neo-icon/lib/icon";
 import {NeoButton} from "neo-design/lib";
 import '../../styles/Paginator.css';
+import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
 
 interface Props {
     paginationPageSize: number,
@@ -40,11 +41,14 @@ class PagesView extends React.Component<any, any> {
 
 class Paginator extends React.Component<Props, any> {
 
+    paginatorRef = React.createRef<HTMLDivElement>();
+
     constructor(props: any) {
         super(props);
 
         this.state = {
             paginationPageSize: this.props.paginationPageSize,
+            paginatorSize: 0
         };
     }
 
@@ -59,14 +63,30 @@ class Paginator extends React.Component<Props, any> {
 
     };
 
+    handleResize = () => {
+        this.setState({paginatorSize: getAdaptiveSize(this.paginatorRef.current ? this.paginatorRef.current.offsetWidth : 0, "paginator")})
+    };
+
+    componentDidMount(): void {
+        window.addEventListener("appAdaptiveResize", this.handleResize);
+        window.addEventListener("resize", this.handleResize);
+        this.handleResize();
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("appAdaptiveResize", this.handleResize);
+        window.removeEventListener("resize", this.handleResize);
+    }
+
     render() {
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
-                <div id={"paginator"} className={this.props.totalNumberOfPage === 1 ? "single-page" : undefined}
+                <div ref={this.paginatorRef}
+                    id={"paginator"} className={`${this.props.totalNumberOfPage === 1 && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
                     style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
                     {this.props.totalNumberOfRows !== 0 ? <NeoButton id={"toFirst"} type={this.props.currentPage === 1 ? "disabled" : undefined} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton> : null}
                     {this.props.totalNumberOfRows !== 0 ? <NeoButton id={"toLast"} type={this.props.currentPage === this.props.totalNumberOfPage ? "disabled" : undefined} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton> : null}
-                    {this.props.totalNumberOfRows
+                    {this.props.totalNumberOfRows && (this.state.paginatorSize >= adaptiveElementSize.medium)
                         ?
                           <PagesView
                               currentPage={this.props.currentPage}

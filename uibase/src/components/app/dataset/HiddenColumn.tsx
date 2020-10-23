@@ -6,8 +6,10 @@ import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoRow, NeoSwitch} from "neo-design/lib";
+import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSwitch} from "neo-design/lib";
+import NeoIcon from "neo-icon/lib/icon";
+import arrayMove from "array-move";
 
 const { Paragraph } = Typography;
 
@@ -19,10 +21,7 @@ interface Props {
     isVisible?: boolean;
     componentType?: paramType;
     handleDrawerVisability?:any;
-}
-
-interface State {
-    parametersArray: IServerQueryParam[] | undefined;
+    datasetComponentVersion?: string;
 }
 
 const SortableList = SortableContainer(({items}:any) => {
@@ -35,42 +34,43 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
-const SortableItem = SortableElement(({value}:any) => <div className="SortableItem">
+const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
-        <NeoCol span={2}>
-            <Form.Item style={{ margin: 'auto' }}>
-                <NeoSwitch
-                    defaultChecked={value.enable !== undefined ? value.enable : true}
-                    onChange={(e: any) => {
-                        const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                        value.handleChange(event, true)
-                    }}/>
-            </Form.Item>
-        </NeoCol>
-        <NeoCol span={22}>
-            <Form.Item style={{ margin: 'auto auto auto 25px'}}>
-                <Paragraph
-                    key={`Paragraph ${value}`}
-                    editable={false}
-                    style={{marginBottom:'unset'}}>
-                    {
-                        value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
-                            ? value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn).get('headerName')
-                            : value.datasetColumn
-                    }
-                </Paragraph>
-            </Form.Item>
-        </NeoCol>
+        <NeoIcon style={{ marginTop: '16px' }} icon={"more"} size={"m"}/>
+        <Form.Item style={{ margin: 'auto 0 auto 20px' }}>
+            <NeoSwitch
+                checked={value.enable}
+                onChange={(e: any) => {
+                    const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
+                    value.handleChange(event, true)
+                }}/>
+        </Form.Item>
+        <Form.Item style={{ margin: value.parametersArray.length === 1 ? 'auto auto auto 24px' : 'auto 0 auto 24px'}}>
+            <Paragraph
+                key={`Paragraph ${value}`}
+                editable={false}
+                style={{marginBottom:'unset'}}>
+                {
+                    value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
+                        ? value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn).get('headerName')
+                        : value.datasetColumn
+                }
+            </Paragraph>
+        </Form.Item>
+        <NeoButton title={value.t("move top")} type={"link"} style={{ margin: value.index === value.parametersArray.length ? 'auto 24px auto auto' : 'auto 0 auto auto'}} onClick={()=>value.onToTopClick(value.index)} hidden={value.index === 1}>
+            <NeoIcon icon={"moveUp"} style={{ marginTop: '16px'}} size={"m"}/>
+        </NeoButton>
+        <NeoButton title={value.t("move bottom")} type={"link"} style={{ marginLeft: value.index === 1 && 'auto'}} onClick={()=>value.onToBottomClick(value.index)} hidden={value.index === value.parametersArray.length}>
+            <NeoIcon icon={"moveDown"} style={{ marginTop: '16px'}} size={"m"}/>
+        </NeoButton>
     </NeoRow>
 </div>);
 
-class HiddenColumn extends DrawerParameterComponent<Props, State> {
+class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
+    filter:string = "";
 
     constructor(props: any) {
         super(props);
-        this.state = {
-            parametersArray: this.props.parametersArray,
-        };
         this.handleChange = this.handleChange.bind(this);
         this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
@@ -78,37 +78,81 @@ class HiddenColumn extends DrawerParameterComponent<Props, State> {
     handleOnSubmit=(e:any)=>{
         this.handleSubmit(e);
         this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-    }
+    };
+
+    onSortEnd = ({oldIndex, newIndex}:any) => {
+        let newState: IServerQueryParam[] = arrayMove(this.state.parametersArray!, oldIndex, newIndex);
+        newState.forEach( (serverParam, index) => serverParam.index = index+1 );
+        this.setState({parametersArray: newState});
+        this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType);
+    };
+
+    reset = () => {
+        this.props.onChangeParameters!(undefined, this.props.componentType);
+        this.filter = "";
+    };
 
     render() {
-        const {t} = this.props
+        const {t} = this.props;
         return (
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={18} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('select the columns you want to hide')}</div>
+                    <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
+                        <NeoInput className={"search-column"} value={this.filter} type={"search"} onChange={(event: any)=>{
+                            this.filter = event.currentTarget.value;
+                            this.setState({parametersArray:this.state.parametersArray!
+                                    .map(p=>{
+                                        return {
+                                            ...p,
+                                            isHidden: !(event.currentTarget.value === ""  || this.translate(p.datasetColumn as string).includes(event.currentTarget.value))
+                                        }
+                                    })});
+                        }}/>
                     </NeoCol>
                     <NeoCol span={6} style={{justifyContent: "flex-end"}}>
-                        <NeoButton type={'link'}
-                                   title={t("reset")}
+                        <NeoButton title={t("back to version") + " " + this.props.datasetComponentVersion}
+                                   type={'link'}
                                    id={'resetButton'}
                                    onClick={this.reset}>
-                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
+                            <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('reset')}</span>
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
                 <Form.Item style={{ marginBottom: '0' }}>
                     {
                         <SortableList items={this.state.parametersArray!
-                            .map((serverSort: any) => (
+                            .map(hiddenColumn => (
                                 {
-                                    ...serverSort,
-                                    idDatasetColumn : `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`,
-                                    idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
+                                    ...hiddenColumn,
+                                    t : t,
+                                    idDatasetColumn : `${JSON.stringify({index: hiddenColumn.index, columnName: 'datasetColumn', value: hiddenColumn.datasetColumn})}`,
+                                    idOperation : `${JSON.stringify({index: hiddenColumn.index, columnName: 'operation', value: hiddenColumn.operation})}`,
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
                                     handleChange: this.handleChange,
-                                    parametersArray: this.state.parametersArray
+                                    parametersArray: this.state.parametersArray,
+                                    onToBottomClick: (index:number)=>{
+                                        if (this.state.parametersArray) {
+                                            const item = this.state.parametersArray.splice(index-1,1);
+                                            this.setState({parametersArray: this.state.parametersArray.concat(item).map((p, i)=>{
+                                                    return {
+                                                        ...p,
+                                                        index: i+1
+                                                    }
+                                                })}, ()=> this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType))
+                                        }
+                                    },
+                                    onToTopClick: (index:number)=>{
+                                        if (this.state.parametersArray) {
+                                            const item = this.state.parametersArray.splice(index-1,1);
+                                            this.setState({parametersArray: item.concat(this.state.parametersArray).map((p, i)=>{
+                                                    return {
+                                                        ...p,
+                                                        index: i+1
+                                                    }
+                                                })}, ()=>this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType))
+                                        }
+                                    }
                                 }))}
                                       distance={3}
                                       onSortEnd={this.onSortEnd}

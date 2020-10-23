@@ -8,9 +8,8 @@
 package ru.neoflex.nfcore.locales
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
-import ru.neoflex.nfcore.base.tag.Tagged
 
-class Lang extends Tagged {
+class Lang {
 	QName name
 }
 
@@ -32,7 +31,7 @@ class LocNS extends LocContainer {
     }
 }
 
-class LocModule extends LocContainer, Tagged {
+class LocModule extends LocContainer {
 	QName name
 	op QName getFullPath() {name}
 }

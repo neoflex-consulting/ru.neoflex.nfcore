@@ -14,7 +14,6 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import org.springframework.scheduling.TaskScheduler
 import java.util.concurrent.ScheduledFuture
-import ru.neoflex.nfcore.base.tag.Tagged
 
 type Exception wraps java.lang.Exception
 type TaskScheduler wraps org.springframework.scheduling.TaskScheduler
@@ -103,7 +102,7 @@ class Parameter {
 	String value
 }
 
-class ScheduledTask extends Tagged {
+class ScheduledTask {
   QName name
   boolean enabled
   String branch
