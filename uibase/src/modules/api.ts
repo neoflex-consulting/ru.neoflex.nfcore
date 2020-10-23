@@ -337,19 +337,10 @@ export class API implements IErrorHandler {
     }
 
     loadResourceSet(resourceSet: Ecore.ResourceSet, jsonResources: any[]): Ecore.Resource[] {
-        function removeDuplicates(prepared:any[]) {
-            let unique:{[key: string] :any} = {};
-            prepared.forEach((k,i)=>{
-                if (unique[k.id] === undefined)
-                    unique[k.id] = i
-            });
-            const ids = Object.values(unique);
-            return prepared.filter((p,i)=> ids.includes(i))
-        }
-        const prepared = removeDuplicates(jsonResources.map(jr=>{
+        const prepared = jsonResources.map(jr=>{
             const {id, rev} = API.parseRef(jr.uri)
             return {id, rev, jObject: jr.contents[0]}
-        }));
+        })
         const db: any = {}
         prepared.forEach(p => {db[p.id] = p})
         function create(id: any) {
