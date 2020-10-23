@@ -7,7 +7,7 @@ import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
@@ -20,10 +20,6 @@ interface Props {
     allSorts?: Array<EObject>;
     componentType?: paramType;
     handleDrawerVisability?:any;
-}
-
-interface State {
-    parametersArray: IServerQueryParam[] | undefined;
 }
 
 const SortableList = SortableContainer(({items}:any) => {
@@ -170,13 +166,10 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
             </NeoRow>
 </div>);
 
-class ServerSort extends DrawerParameterComponent<Props, State> {
+class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
 
     constructor(props: any) {
         super(props);
-        this.state = {
-            parametersArray: this.props.parametersArray,
-        };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
         this.getFieldDecorator = this.props.form.getFieldDecorator;

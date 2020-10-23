@@ -1,5 +1,8 @@
 #paginator {
     display: flex;
+    position: relative;
+    width: 100%;
+    justify-content: flex-end;
 }
 
 #paginator #pageView {
@@ -13,10 +16,6 @@
 
 .single-page >  #pageView {
     right: 128px !important;
-}
-
-#paginator .ant-pagination-next {
-    margin-right: 119px;
 }
 
 .single-page .ant-pagination-next {
@@ -43,7 +42,6 @@
 
 #paginator #toLast {
     position: absolute;
-    right: 356px;
     width: 16px;
     height: 24px;
     background: transparent;
@@ -65,6 +63,36 @@
     fill: #022af7;
 }
 
-#paginator {
-    position: relative;
+/*Positioning*/
+#paginator.paginator-large .ant-pagination-next {
+    margin-right: 119px;
+}
+
+#paginator.paginator-large #toLast {
+    right: 356px;
+}
+
+#paginator.paginator-small .ant-pagination-options{
+    display: none;
+}
+
+#paginator.paginator-small #toLast {
+    right: 16px;
+}
+
+#paginator.paginator-small .ant-pagination-next {
+    margin-right: 32px;
+}
+
+#paginator .ant-pagination-next {
+    margin-right: 20px;
+}
+
+#paginator #toLast {
+    right: 256px;
+}
+
+.ant-pagination-item-link {
+    margin-left: 0 ;
+    margin-right: 0;
 }
