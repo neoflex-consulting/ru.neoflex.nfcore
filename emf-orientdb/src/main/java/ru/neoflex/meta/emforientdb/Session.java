@@ -609,12 +609,12 @@ public class Session implements Closeable {
         resource.getContents().clear();
         List<OElement> elements = factory.getORIDs(resource.getURI())
                 .map(orid -> (OElement) db.load(orid)).collect(Collectors.toList());
+        resource.setURI(factory.createResourceURI(elements));
         elements.forEach(oElement -> {
             EObject eObject = createEObject(resource.getResourceSet(), oElement);
             resource.getContents().add(eObject);
             populateEObject(resource.getResourceSet(), (OVertex) oElement, eObject);
         });
-        resource.setURI(factory.createResourceURI(elements));
         getFactory().getEvents().fireAfterLoad(resource);
     }
 
