@@ -8,7 +8,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 
@@ -37,7 +37,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div>
-        <div className="SortableItem">
+        <div className="SortableItem" style={{borderBottom:'none'}}>
         <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
                 {value.index}
@@ -168,7 +168,7 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
         </NeoRow>
         </div>
-            <div className="SortableItem">
+            <div className="SortableItem"  style={{borderTop:'none'}}>
 
             <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
@@ -263,7 +263,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                     onClick={this.createNewRow}
                 >
                     <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                    <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
+                    <NeoTypography type={'body_link'}>{t('add')}</NeoTypography>
                 </NeoButton>
             </Form>
         )
