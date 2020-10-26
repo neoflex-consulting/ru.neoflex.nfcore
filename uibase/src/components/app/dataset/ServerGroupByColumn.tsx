@@ -8,7 +8,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -122,7 +122,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('total')}</div>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}
@@ -151,17 +151,15 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
-                <Form.Item>
-                    <NeoButton
-                        type={'link'}
-                        title={t("add row")}
-                        id={'createNewRowButton'}
-                        onClick={this.createNewRow}
-                    >
-                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
-                    </NeoButton>
-                </Form.Item>
+                <NeoButton
+                    type={'link'}
+                    title={t("add row")}
+                    id={'createNewRowButton'}
+                    onClick={this.createNewRow}
+                >
+                    <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                    <NeoTypography type={'body_link'} style={{color:'#B38136'}}>{t('add')}</NeoTypography>
+                </NeoButton>
                 <div style={{
                     position: 'absolute',
                     right: 0,

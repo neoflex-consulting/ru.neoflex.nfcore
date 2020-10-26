@@ -230,10 +230,10 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }}>
+            <Form style={{ marginTop: '40px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('select operation')}</div>
+                        <NeoTypography type={'h4_medium'} style={{marginBottom:'15px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
                     </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>
@@ -262,8 +262,8 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                     id={'createNewRowButton'}
                     onClick={this.createNewRow}
                 >
-                    <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                    <NeoTypography type={'body_link'}>{t('add')}</NeoTypography>
+                    <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                    <NeoTypography type={'body_link'} style={{color:'#B38136'}}>{t('add')}</NeoTypography>
                 </NeoButton>
             </Form>
         )

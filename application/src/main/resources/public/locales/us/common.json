@@ -126,6 +126,9 @@
         "Column": "column",
         "Row": "row",
 
+        "Range": "Range",
+
+
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
         "New column name": "New column name",

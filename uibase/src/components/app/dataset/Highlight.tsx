@@ -9,7 +9,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -165,7 +165,9 @@ const SortableItem = SortableElement(({value}: any) => {
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
                                 allowClear={true}
+                                placeholder={value.t('Range')}
                                 width={'208px'}
+                                style={{ marginLeft: '5px' }}
                                 onChange={(e: any) => {
                                     const event = e ? e : JSON.stringify({
                                         index: value.index,
@@ -214,6 +216,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 placeholder={value.t('value')}
                                 disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty' || value.highlightType === 'Column'}
                                 width={'208px'}
+                                style={{ marginLeft: '5px' }}
                                 allowClear={true}
                                 onChange={(e: any) => value.handleChange(
                                     JSON.stringify({
@@ -229,7 +232,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         </NeoRow>
                     </Form.Item>
             </NeoCol>
-            <NeoCol span={2} style={{alignItems:'flex-start'}}>
+            <NeoCol span={4} style={{alignItems:'flex-start', padding:'0 20px', justifyContent:'space-between'}}>
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('background', value.index)}
@@ -280,8 +283,8 @@ const SortableItem = SortableElement(({value}: any) => {
                         <SketchColorPicker value={value} type={'background'} />
                     )}
                 </Modal>
-            </NeoCol>
-            <NeoCol span={2} style={{alignItems:'flex-start'}}>
+            {/*</NeoCol>*/}
+            {/*<NeoCol span={2} style={{alignItems:'flex-start'}}>*/}
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('text', value.index)}
@@ -444,10 +447,10 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }}>
-                <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
+            <Form style={{ marginTop: '29px' }}>
+                <Form.Item style={{ marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('highlight')}</div>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('highlight')}</NeoTypography>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}
@@ -496,8 +499,8 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                         id={'createNewRowButton'}
                         onClick={this.createNewRow}
                     >
-                        <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                        <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
+                        <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                        <NeoTypography type={'body_link'} style={{color:'#B38136'}}>{t('add')}</NeoTypography>
                     </NeoButton>
                 </Form.Item>
             </Form>

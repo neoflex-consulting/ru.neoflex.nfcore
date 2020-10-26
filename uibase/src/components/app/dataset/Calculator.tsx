@@ -11,7 +11,7 @@ import {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
 import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
 
 const inputOperationKey: string = "_inputOperationKey";
 const selectTypeKey: string = "_selectTypeKey";
@@ -302,12 +302,12 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     return (
         <div id={"selectsInCalculator"}>
             <Form style={{ marginTop: '15px' }}>
-                <Form.Item style={{marginTop: '-28px', marginBottom:'0px', lineHeight:'19px'}}>
-                        <div style={{ display: "inherit", fontSize: '16px', fontWeight: 500, color: '#333333'}}>
+                <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
-                        </div>
+                        </NeoTypography>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item style={{marginBottom:'15px'}}>
                         {
                             this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
@@ -346,7 +346,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         }
                     </NeoCol>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item style={{marginBottom:'32px'}}>
                 <NeoCol span={12} style={{justifyContent:'flex-start'}}>
                     {
                         this.getFieldDecorator(selectTypeKey,{
@@ -408,9 +408,9 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                     <NeoRow>
                         <NeoCol span={8} style={{justifyContent: 'flex-start'}}>
                             <div className={'calc-block'}>
-                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
                                     {this.t("columns")}
-                                </div>
+                                </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto"}}>
                                     <CreateColumnButtons
                                         onClick={this.handleCalculate}
@@ -420,9 +420,9 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoCol>
                         <NeoCol span={8}>
                             <div className={'calc-block'}>
-                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
                                     {this.t("keypad")}
-                                </div>
+                                </NeoTypography>
                                 <CreateCalculator
                                     onButtonClick={this.handleCalculate}
                                     onClearClick={this.handleClear}
@@ -431,9 +431,9 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoCol>
                         <NeoCol span={8} style={{justifyContent: 'flex-end'}}>
                             <div className={'calc-block'}>
-                                <div style={{fontSize: '12px', fontWeight: 500, marginLeft:'10px', height: '30px'}}>
+                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px', marginBottom:'10px'}}>
                                     {this.t("functions/operators")}
-                                </div>
+                                </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto" }}>
                                     <CreateFunctions
                                         onButtonClick={this.handleCalculate}
