@@ -26,7 +26,7 @@ import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const backgroundColor = "#2a356c";

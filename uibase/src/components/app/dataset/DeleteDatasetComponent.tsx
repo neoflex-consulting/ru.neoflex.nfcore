@@ -40,7 +40,7 @@ class DeleteDatasetComponent extends React.Component<Props & WithTranslation, an
             <div>
                 <NeoTypography type={'capture_regular'} style={{color : "#333333"}}>{this.props.isGrid ? (t('diagram') + " " + nameOfDiagram) : (t('version') + " " + name )} {t('deleteVersionMessage')}</NeoTypography>
                 <NeoRow style={{marginTop:'32px', justifyContent:'flex-start'}}>
-                    <NeoButton title={t('save')} style={{width:'111px', marginRight:'20px'}} onClick={() => this.onClick()}>
+                    <NeoButton title={t('delete')} style={{width:'111px', marginRight:'20px'}} onClick={() => this.onClick()}>
                         {t('delete')}
                     </NeoButton>
                     <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.handleDeleteMenuForCancel()}>

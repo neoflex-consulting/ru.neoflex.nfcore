@@ -45,7 +45,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
                             const event = JSON.stringify({index: value.index, columnName: 'enable', value: e});
-                            value.handleChange(event)
+                            value.handleChange(event, true)
                         }}/>
                 </Form.Item>
             </NeoCol>
@@ -75,7 +75,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     columnName: 'datasetColumn',
                                     value: undefined
                                 });
-                                value.handleChange(event)
+                                value.handleChange(event, true)
                             }}
                         >
                             {
@@ -125,7 +125,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                         columnName: 'operation',
                                         value: undefined
                                     })
-                                    value.handleChange(event)
+                                    value.handleChange(event, true)
                                 }}
                             >
                                 {
@@ -174,7 +174,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                         columnName: 'highlightType',
                                         value: undefined
                                     })
-                                    value.handleChange(event)
+                                    value.handleChange(event, true)
                                 }}
                             >
                                 {
@@ -224,7 +224,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                         columnName: 'value',
                                         value: e.target.value === "" ? undefined : e.target.value
                                     })
-                                )}
+                                    , true)}
                                 title={value.value}
                                 id={value.index.toString()}
                             />
@@ -262,7 +262,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     index: value.index,
                                     columnName: 'backgroundColor',
                                     value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
-                                }))
+                                }), true)
                             }}>
                             ОК
                         </NeoButton></Form>,
@@ -313,7 +313,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 index: value.index,
                                 columnName: 'color',
                                 value: value.stateColor !== undefined ? value.stateColor : value.color
-                            }))}>
+                            }), true)}>
                             ОК
                         </NeoButton></Form>,
                     ]}
@@ -392,7 +392,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         this.setState({color: e})
     }
 
-    handleChange(e: any) {
+    handleChange(e: any, saveParameter: boolean = false) {
         const target = JSON.parse(e);
         let parametersArray = this.state.parametersArray!.map((f: any) => {
             if (f.index.toString() === target['index'].toString()) {
@@ -414,7 +414,16 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                 return f
             }
         });
-        this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined})
+        this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined},
+            ()=> {
+                if (saveParameter) {
+                    this.props.form.validateFields((err: any, values: any) => {
+                        if (!err) {
+                            this.props.onChangeParameters!(parametersArray, this.props.componentType);
+                        }
+                    })
+                }
+            })
     }
 
     reset = () => {
@@ -475,7 +484,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allOperations: this.props.allOperations,
-                                    handleChange: this.handleChange,
+                                    handleChange: this.handleChange.bind(this),
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
                                     parametersArray: this.state.parametersArray,

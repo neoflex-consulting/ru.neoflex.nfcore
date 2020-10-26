@@ -54,14 +54,13 @@ interface State {
     clipboardObject: ITargetObject,
     edit: boolean,
     expandedKeys: string[],
-    saveMenuVisible: boolean,
-    dragNode: { [key: string]: any }
+    saveMenuVisible: boolean
 }
 
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
     children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
-        if (c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
+        if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
             expandedKeys.push(c.key);
             getAllChildrenKeys(c.props.children, expandedKeys)
         }
@@ -123,8 +122,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         clipboardObject: { eClass: "" },
         edit: false,
         expandedKeys: [],
-        saveMenuVisible: false,
-        dragNode: {}
+        saveMenuVisible: false
     };
 
     refresh = (refresh: boolean): void => {
@@ -255,8 +253,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         };
 
         const onDrop = (event: any) => {
-            const dropKey = event.node.props.eventKey;
-            const dragKey = event.dragNode.props.eventKey;
             const dropPos = event.node.props.pos.split('-');
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
@@ -264,7 +260,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const node: { [key: string]: any } = event.node.props;
             const dragNode: { [key: string]: any } = event.dragNode.props;
 
-            const oldIndex = dragNode.pos ? dragNode.pos.split('-')[dragNode.pos.split('-').length - 1] : undefined;
+            const oldIndex = Number(dragNode.pos.split('-')[dragNode.pos.split('-').length - 1]);
             const nodePos = Number(node.pos.split('-')[node.pos.split('-').length - 1]);
             let newIndex = undefined;
 
@@ -276,55 +272,60 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 } else {
                     newIndex = nodePos
                 }
-            } else {
+            }
+            // else if (node.pos.split('-').length + 1 === dragNode.pos.split('-').length) {
+            //     newIndex = nodePos
+            // }
+
+            else {
                 if (dropPosition === 1 && nodePos < oldIndex) {
-                    newIndex = newIndex = nodePos
+                    newIndex = nodePos + dropPosition //1
                 } else if (dropPosition === -1 && nodePos > oldIndex) {
-                    newIndex = nodePos + dropPosition
+                    newIndex = nodePos + dropPosition //2
+                } else if (dropPosition === 1) {
+                    newIndex = nodePos + dropPosition //3
                 } else {
-                    newIndex = nodePos
+                    newIndex = nodePos //4
                 }
             }
 
             let updatedJSON
-            if (node.pos.split('-').length === dragNode.pos.split('-').length) {
-                updatedJSON = node.parentUpdater(null, undefined, node.propertyName, {
-                    operation: "d&dOneLevel",
-                    oldIndex: oldIndex,
-                    newIndex: newIndex,
-                    event: event
-                })
+            if (node.parentUpdater !== undefined && node.propertyName !== 'view') {
+                if (node.pos.split('-').length === dragNode.pos.split('-').length) {
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, {
+                        operation: "d&dOneLevel",
+                        oldIndex: oldIndex,
+                        newIndex: newIndex,
+                        event: event
+                    })
 
-            } else if (node.pos.split('-').length > dragNode.pos.split('-').length) {
-
-                updatedJSON = dragNode.parentUpdater(null, undefined, dragNode.propertyName, {
-                    operation: "d&dDown",
-                    oldIndex: oldIndex,
-                    newIndex: newIndex,
-                    event: event
-                })
-            } else if (node.pos.split('-').length < dragNode.pos.split('-').length) {
-
-                updatedJSON = node.parentUpdater(null, undefined, dragNode.propertyName, {
-                    operation: "d&dDown",
-                    oldIndex: oldIndex,
-                    newIndex: newIndex,
-                    event: event
-                })
+                } else if (node.pos.split('-').length > dragNode.pos.split('-').length) {
+                    updatedJSON = dragNode.parentUpdater(null, undefined, dragNode.propertyName, {
+                        operation: "d&dDown",
+                        oldIndex: oldIndex,
+                        newIndex: newIndex,
+                        event: event
+                    })
+                } else if (node.pos.split('-').length < dragNode.pos.split('-').length) {
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, {
+                        operation: "d&dUp",
+                        oldIndex: oldIndex,
+                        newIndex: newIndex,
+                        event: event
+                    })
+                }
+                let nestedJSON = nestUpdaters(updatedJSON, null);
+                let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState((state, props) => ({
+                    mainEObject: resource.eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
+                    tableData: updatedTargetObject ? state.tableData : [],
+                    selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                    isModified: true
+                }))
             }
-
-            let nestedJSON = nestUpdaters(updatedJSON, null);
-            let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-            let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-            this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
-                resourceJSON: nestedJSON,
-                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
-                tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
-                isModified: true
-            }))
-
         }
 
         return (
