@@ -121,9 +121,11 @@
         "FromAtoZ": "от А до Я",
         "FromZtoA": "от Я до А",
 
-        "Cell": "ячейка",
+        "Cell": "Ячейка",
         "Column": "Столбец",
-        "Row": "строка",
+        "Row": "Строка",
+
+        "Range": "Диапазон",
 
         "Enter new column name": "Введите название столбца",
         "Select calculated column": "Выберите вычисляемый столбец",

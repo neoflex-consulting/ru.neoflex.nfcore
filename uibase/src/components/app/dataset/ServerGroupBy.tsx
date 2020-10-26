@@ -8,7 +8,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 
@@ -37,7 +37,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div>
-        <div className="SortableItem">
+        <div className="SortableItem" style={{borderBottom:'none'}}>
         <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
                 {value.index}
@@ -168,7 +168,7 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
         </NeoRow>
         </div>
-            <div className="SortableItem">
+            <div className="SortableItem"  style={{borderTop:'none'}}>
 
             <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
@@ -230,10 +230,10 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '15px' }}>
+            <Form style={{ marginTop: '40px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <div style={{display: "inherit", fontSize: '16px', fontWeight: 500, color: '#878787'}}>{t('select operation')}</div>
+                        <NeoTypography type={'h4_medium'} style={{marginBottom:'15px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
                     </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>
@@ -262,8 +262,8 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                     id={'createNewRowButton'}
                     onClick={this.createNewRow}
                 >
-                    <NeoIcon icon={"plus"} color={'#B38136'} size={'m'} style={{margin:'auto 5px auto auto'}}/>
-                    <h4 style={{color: '#B38136', textDecorationLine:'underline'}}>{t('add')}</h4>
+                    <NeoIcon icon={"plus"} color={'#B38136'} style={{margin:'auto 5px auto auto'}}/>
+                    <NeoTypography type={'body_link'} style={{color:'#B38136'}}>{t('add')}</NeoTypography>
                 </NeoButton>
             </Form>
         )
