@@ -7,9 +7,8 @@
 )
 package ru.neoflex.nfcore.masterdata
 import ru.neoflex.nfcore.base.types.QName
-import ru.neoflex.nfcore.base.tag.Tagged
 
-abstract class Classifier extends Tagged {
+abstract class Classifier {
     QName name
 }
 

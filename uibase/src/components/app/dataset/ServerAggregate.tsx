@@ -273,9 +273,6 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
 
     constructor(props: any) {
         super(props);
-        this.state = {
-            parametersArray: this.props.parametersArray,
-        };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
         this.getFieldDecorator = this.props.form.getFieldDecorator;

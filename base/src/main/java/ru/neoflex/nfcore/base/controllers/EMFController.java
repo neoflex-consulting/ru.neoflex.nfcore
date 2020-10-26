@@ -21,7 +21,8 @@ import ru.neoflex.nfcore.base.auth.impl.AuditImpl;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.Store;
-import ru.neoflex.nfcore.base.tag.impl.TaggedImpl;
+import ru.neoflex.nfcore.base.tag.Tag;
+import ru.neoflex.nfcore.base.tag.Tagged;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.EmfJson;
 
@@ -106,22 +107,24 @@ public class EMFController {
                     .selector(selector)
                     .execute();
             ResourceSet resourceSet = docFinder.getResourceSet();
-            Integer size = resourceSet.getResources().size();
+            int size = resourceSet.getResources().size();
             if (tags != null && !tags.equals("")) {
                 List<Resource> filtered = new ArrayList<>();
                 new ArrayList<>(resourceSet.getResources()).forEach(resource -> {
-                    if (((TaggedImpl) resource.getContents().get(0)).getTags()
+                    if (resource.getContents().get(0) instanceof Tagged && ((Tagged) resource.getContents().get(0)).getTags()
                             .stream()
                             .filter(resourceTag -> ("," + tags + ",").contains("," + resourceTag.getName() + ","))
                             .findAny()
-                            .orElse(null) == null) {
+                            .orElse(null) != null) {
                         filtered.add(resource);
                     }
                 });
-                size = size - filtered.size();
-                filtered.forEach(resource -> resourceSet.getResources().remove(resource));
+                size = filtered.size();
+                //Add missing tags
+                filtered.addAll(resourceSet.getResources().stream().filter(resource -> resource.getContents().get(0) instanceof Tag).collect(Collectors.toList()));
+                resourceSet.getResources().clear();
+                resourceSet.getResources().addAll(filtered);
             }
-            List<Resource> resources = new ArrayList<>(resourceSet.getResources());
             EcoreUtil.resolveAll(resourceSet);
             ObjectNode resourceSetNode = EmfJson.resourceSetToTree(store, resourceSet.getResources());
             resourceSetNode.set("executionStats", docFinder.getExecutionStats());

@@ -49,23 +49,31 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                 } else {
                     selectedClassObject = this.props.specialEClass
                 }
-                values.key === 'json_search'
-                    ?
+                if (values.key === 'json_search') {
                     API.instance().find(JSON.parse(values.json_field)).then(results => {
                         this.props.onSearch(results.resources)
                     })
-                    :
-                    values.regular_expression
-                        ?
-                        (selectedClassObject && API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-                            .then((resources) => {
-                                this.props.onSearch(resources)
-                            }))
-                        :
-                        (selectedClassObject && API.instance().findByKindAndName(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-                            .then((resources) => {
-                                this.props.onSearch(resources)
-                            }))
+                } else if (selectedClassObject && values.regular_expression) {
+                    (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
+                        .then((resources) => {
+                            this.props.onSearch(resources)
+                        }))
+                } else if (selectedClassObject) {
+                    (API.instance().findByKindAndName(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
+                        .then((resources) => {
+                            this.props.onSearch(resources)
+                        }))
+                } else if (values.regular_expression) {
+                    (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
+                        .then((resources) => {
+                            this.props.onSearch(resources)
+                        }))
+                } else {
+                    (API.instance().findByTagsAndName( values.tags ? values.tags.join(",") : undefined, values.name,1)
+                        .then((resources) => {
+                            this.props.onSearch(resources)
+                        }))
+                }
             } else this.setState({ indicatorError: true })
         });
     };
@@ -103,6 +111,27 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         this.getAllTags();
     }
 
+    checkEClass = () => {
+        const checkRecursive = (cls:Ecore.EClass ) => {
+            let retVal = false;
+            if (cls.get('name') === 'Tagged') {
+                return true;
+            } else {
+                cls.get('eSuperTypes').each((cl:any)=>{
+                    retVal = checkRecursive(cl)
+                })
+            }
+            return retVal
+        };
+        const className = this.props.form.getFieldValue('selectEClass');
+        if (className === "" || !className) {
+            return false
+        }
+        const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
+        return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
+    };
+
+
     render() {
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
@@ -131,10 +160,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 initialValue: this.props.specialEClass === undefined
                                                     ? undefined :
                                                     this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                                rules: [{
-                                                    required: getFieldValue('key') === 'data_search',
-                                                    message: 'Please select eClass',
-                                                }],
                                             })(
                                                 <Select
                                                     notFoundContent={t('notfound')}
@@ -176,8 +201,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 <Select
                                                     allowClear={true}
                                                     mode={"tags"}
+                                                    disabled={this.checkEClass()}
                                                     style={{ width: '270px' }}
-                                                    defaultValue={""}
                                                     placeholder={this.props.t("tags")}>
                                                     {
                                                         this.state.tags.map((tag: Ecore.EObject) =>

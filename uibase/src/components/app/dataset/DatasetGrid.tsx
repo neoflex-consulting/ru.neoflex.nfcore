@@ -899,7 +899,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     style={{
                         height: this.props.height ? this.props.height : 460 ,
                         width: this.props.width ? this.props.width : "99,5%",
-                    minWidth: this.props.minWidth ? this.props.minWidth : "unset"}}>
+                        minWidth: "375px"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -934,7 +934,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     </ConfigProvider>
                     }
                     <div id="datasetPaginator"
-                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", backgroundColor: "#E6E6E6"}}>
+                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", minWidth: "375px", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}

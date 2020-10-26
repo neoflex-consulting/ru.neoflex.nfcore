@@ -295,7 +295,7 @@
         "dateTimeMask": "дд.мм.гггг чч:мм:cc",
 
         "exception while evaluating": "Ошибка во время вычисления выражения",
-        "hiddencolumns": "Скрыть столбцы",
+        "hiddencolumns": "Скрыть/показать столбцы",
         "delete row": "Удалить строку",
         "add row": "Добавить строку",
         "run query": "Применить",
@@ -394,13 +394,20 @@
 
         "notification": "Уведомление",
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
+        "success": "Успешно",
+        "the name is not unique": "Наименование не уникально. Попробуйте еще раз",
+        "server is not available": "Сервер недоступен",
 
         "expand all": "Раскрыть вложенные",
         "collapse all": "Скрыть вложенные",
         "developer menu": "Меню разработки",
         "auto-close notification": "Автоматически скрывать уведомления",
         "back to applications": "Назад к приложениям",
-        "new group by column name": "Название сгруппированного столбца"
+        "new group by column name": "Название сгруппированного столбца",
+        "tags": "Теги",
+        "back to version": "Возврат к шаблону отчёта",
+        "move top": "Переместить в начало",
+        "move bottom": "Переместить в конец"
 
 }
 

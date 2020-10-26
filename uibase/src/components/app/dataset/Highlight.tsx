@@ -7,7 +7,7 @@ import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
@@ -21,14 +21,6 @@ interface Props {
     allOperations?: Array<EObject>;
     componentType?: paramType;
     allHighlightType?: Array<EObject>;
-}
-
-interface State {
-    parametersArray: IServerQueryParam[] | undefined;
-    backgroundColorVisible: boolean;
-    textColorVisible: boolean;
-    colorIndex: any;
-    color: any;
 }
 
 const SortableList = SortableContainer(({items}:any) => {
@@ -358,7 +350,7 @@ const SortableItem = SortableElement(({value}: any) => {
 
 
 
-class Highlight extends DrawerParameterComponent<Props, State> {
+class Highlight extends DrawerParameterComponent<Props, DrawerState> {
 
     constructor(props: any) {
         super(props);

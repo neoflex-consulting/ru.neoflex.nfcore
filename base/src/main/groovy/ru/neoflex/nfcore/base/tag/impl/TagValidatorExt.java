@@ -15,6 +15,9 @@ public class TagValidatorExt extends TagValidator {
             return validate(tag, diagnostics, context, "Tag name - must be set");
         } else if (tag.getName().contains(",")) {
             return validate(tag, diagnostics, context, "Tag name - shouldn't contain ','");
+        } else if (!tag.getTags().contains(tag)) {
+            tag.getTags().add(tag);
+            return false;
         }
         else {
             return false;

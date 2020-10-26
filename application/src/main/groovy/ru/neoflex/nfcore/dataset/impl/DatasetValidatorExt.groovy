@@ -69,24 +69,6 @@ class DatasetValidatorExt extends DatasetValidator {
                 }
             }
         }
-        else if (datasetComponent.dataset != null && datasetComponent.access == Access.DEFAULT) {
-            def allDatasetComponent = Utils.findAllEClass(DatasetPackage.Literals.DATASET_COMPONENT);
-            if (allDatasetComponent != null && allDatasetComponent.size() != 0) {
-                def currentDatasetComponent = []
-                try {
-                    for (int i = 0; i < allDatasetComponent.size(); i++) {
-                        if (allDatasetComponent[i].contents[0].metaClass.getTheClass().name.indexOf('DatasetComponent') != -1
-                                && allDatasetComponent[i].contents[0].dataset.name == datasetComponent.dataset.name) {
-                            currentDatasetComponent.add(allDatasetComponent[i])
-                        }
-                    }
-                }
-                catch (Throwable e) {}
-                if (currentDatasetComponent.size() > 1) {
-                    return validate(datasetComponent, diagnostics, context, "access - must be set not 'Default' ")
-                }
-            }
-        }
     }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {

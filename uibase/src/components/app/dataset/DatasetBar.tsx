@@ -7,6 +7,7 @@ import {NeoButton, NeoColor, NeoInput, NeoSelect, NeoTypography} from "neo-desig
 import {NeoIcon} from "neo-icon/lib";
 import {IDiagram, paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
+import {adaptiveElementSize, getAdaptiveSize} from "../../../utils/adaptiveResizeUtils";
 
 const { Option, OptGroup } = Select;
 
@@ -70,7 +71,7 @@ interface props {
 }
 
 interface State {
-    barSize: barSize;
+    barSize: adaptiveElementSize;
     isQuickSearchExpanded: boolean;
     isExportChecked: boolean;
 }
@@ -139,13 +140,6 @@ class SearchTransformer extends React.Component<transformerProps, transformerSta
     }
 }
 
-//adaptive break point px xs/s/m/l
-const breakPoints = {
-    diagram: [375, 400, 638, 878],
-    edit: [375, 375, 522, 750],
-    normal: [375, 510, 630, 900]
-};
-
 class DatasetBar extends React.Component<props, State> {
 
     barRef = React.createRef<HTMLDivElement>();
@@ -153,21 +147,18 @@ class DatasetBar extends React.Component<props, State> {
     constructor(props: any) {
         super(props);
         this.state = {
-            barSize: barSize.large,
+            barSize: adaptiveElementSize.large,
             isQuickSearchExpanded: false,
             isExportChecked: false
         };
     }
 
     handleResize = () => {
-        if ((this.barRef.current ? this.barRef.current.offsetWidth : 0) > breakPoints[this.props.barMode][barSize.large]) {
-            this.setState({barSize:barSize.large, isQuickSearchExpanded: false})
-        } else if ((this.barRef.current ? this.barRef.current.offsetWidth : 0) > breakPoints[this.props.barMode][barSize.medium]) {
-            this.setState({barSize:barSize.medium})
-        } else if ((this.barRef.current ? this.barRef.current.offsetWidth : 0) > breakPoints[this.props.barMode][barSize.small]) {
-            this.setState({barSize:barSize.small})
+        const barSize = getAdaptiveSize(this.barRef.current ? this.barRef.current.offsetWidth : 0, this.props.barMode);
+        if (barSize >= adaptiveElementSize.large) {
+            this.setState({barSize, isQuickSearchExpanded: false})
         } else {
-            this.setState({barSize:barSize.extraSmall})
+            this.setState({barSize})
         }
     };
 
@@ -356,22 +347,22 @@ class DatasetBar extends React.Component<props, State> {
             if (element.datasetColumn !== undefined && element.value !== undefined && element.operation !== undefined){
                 isFilter = true;
             }
-        })
+        });
         this.props.serverSorts.forEach(element => {
             if (element.datasetColumn !== undefined  && element.operation !== undefined){
                 isSort = true;
             }
-        })
+        });
         this.props.serverCalculatedExpression.forEach(element => {
             if (element.datasetColumn !== undefined  && element.operation !== undefined){
                 isCalculator = true;
             }
-        })
+        });
         this.props.serverAggregates.forEach(element => {
             if (element.datasetColumn !== undefined  && element.operation !== undefined){
                 serverAggregates = true;
             }
-        })
+        });
         if (this.props.diagrams.length > 0){
             isDiagramms = true
         }
@@ -379,7 +370,7 @@ class DatasetBar extends React.Component<props, State> {
             if (element.datasetColumn !== undefined  && element.operation !== undefined && element.value !== undefined) {
                 serverGroupBy = true;
             }
-        })
+        });
 
 
         return !this.props.isServerFunctionsHidden
@@ -569,7 +560,7 @@ class DatasetBar extends React.Component<props, State> {
         return <div
             ref={this.barRef}
             className={this.state.barSize <= barSize.extraSmall ? "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
-            <div className={"block flex-bar-item " + (this.state.barSize !== barSize.extraSmall && "fill-space")}>
+            <div className={"block flex-bar-item " + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                 {this.getSearch()}
                 {!this.state.isQuickSearchExpanded && <div className={this.state.barSize <= barSize.medium ? "verticalLine" : "adaptive-bar-hidden"}/>}
                 {!this.state.isQuickSearchExpanded && <Dropdown
@@ -591,7 +582,7 @@ class DatasetBar extends React.Component<props, State> {
                 && (!this.state.isQuickSearchExpanded || this.state.barSize <= barSize.extraSmall)
                 &&
                 <NeoSelect
-                    className={this.state.barSize === barSize.extraSmall ? "fill-space element-top-margin" : "element-top-margin"}
+                    className={this.state.barSize === adaptiveElementSize.extraSmall ? "fill-space element-top-margin" : "element-top-margin"}
                     getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                     width={'184px'}
                     value={this.props.currentDatasetComponent.eContents()[0].get('name')}
@@ -645,7 +636,7 @@ class DatasetBar extends React.Component<props, State> {
         return (
             <div ref={this.barRef} className={this.state.barSize <= barSize.extraSmall ?
                 "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
-                <div className={'block space-between ' + (this.state.barSize !== barSize.extraSmall && "fill-space")}>
+                <div className={'block space-between ' + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                     <div className='flex-bar-item'>
                         <NeoButton
                             type={'link'}
@@ -655,27 +646,27 @@ class DatasetBar extends React.Component<props, State> {
                             suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                             onClick={this.props.onBackToTableClick}
                         >
-                            {this.state.barSize === barSize.large && <span className={"back-span-text"}>{this.props.t("back to table")}</span>}
+                            {this.state.barSize === adaptiveElementSize.large && <span className={"back-span-text"}>{this.props.t("back to table")}</span>}
                         </NeoButton>
                         <div className='verticalLine'/>
-                        {this.state.barSize === barSize.large && <NeoButton type={'link'} title={this.props.t('add')} className={"margin-top margin-left"}
+                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('add')} className={"margin-top margin-left"}
                                    onClick={this.props.onAddDiagramClick}
                         >
                             <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
                         </NeoButton>}
-                        {this.state.barSize === barSize.large && <NeoButton type={'link'} title={this.props.t('edit')} className={"margin-top inter-button-margin"}
+                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('edit')} className={"margin-top inter-button-margin"}
                                    onClick={this.props.onEditDiagramClick}
                         >
                             <NeoIcon icon={"edit"} size={"m"} color={'#5E6785'}/>
                         </NeoButton>}
-                        {this.state.barSize === barSize.large && <div className='verticalLine'/>}
+                        {this.state.barSize === adaptiveElementSize.large && <div className='verticalLine'/>}
 
-                        {this.state.barSize === barSize.large && <NeoButton type={'link'} title={this.props.t('delete')} className={"margin-top margin-left"}
+                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('delete')} className={"margin-top margin-left"}
                                                                             onClick={this.props.onDeleteDiagramClick}
                         >
                             <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
                         </NeoButton>}
-                        {this.state.barSize === barSize.large && <div className='verticalLine'/>}
+                        {this.state.barSize === adaptiveElementSize.large && <div className='verticalLine'/>}
                         {this.state.barSize <= barSize.medium && <Dropdown
                             className={"adaptive-dropdown"}
                             overlay={this.getDiagramAdaptiveMenu()} placement="bottomRight">
@@ -740,7 +731,7 @@ class DatasetBar extends React.Component<props, State> {
     getEditPanel = () => {
         return <div ref={this.barRef} className={this.state.barSize <= barSize.extraSmall ?
             "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
-            <div className={'block space-between ' + (this.state.barSize !== barSize.extraSmall && "fill-space")}>
+            <div className={'block space-between ' + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                 <div className='flex-bar-item'>
                     <NeoButton
                         type={'link'}
@@ -750,7 +741,7 @@ class DatasetBar extends React.Component<props, State> {
                         suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                         onClick={this.props.onBackFromEditClick}
                     >
-                        {this.state.barSize === barSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
+                        {this.state.barSize === adaptiveElementSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
                     </NeoButton>
                     <div className='verticalLine'/>
                     {this.state.barSize < barSize.medium && <Dropdown

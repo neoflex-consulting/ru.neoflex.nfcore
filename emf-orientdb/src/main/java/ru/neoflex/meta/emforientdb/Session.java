@@ -584,16 +584,16 @@ public class Session implements Closeable {
             EObject eObject = resource.getContents().get(i);
             OVertex oVertex = vertexes.get(i);
             populateOElementContainment(eObject, oVertex);
+            OVertex oRecord = oVertex.save();
+            vertexes.set(i, oRecord);
         }
+        resource.setURI(factory.createResourceURI(vertexes));
         for (int i = 0; i < resource.getContents().size(); ++i) {
             EObject eObject = resource.getContents().get(i);
             OVertex oVertex = vertexes.get(i);
             populateOElementCross(eObject, oVertex);
-            OVertex oRecord = oVertex.save();
-            vertexes.set(i, oRecord);
         }
         getFactory().getEvents().fireAfterSave(oldResource, resource);
-        resource.setURI(factory.createResourceURI(vertexes));
         savedResourcesMap.put(resource, vertexes);
     }
 
@@ -609,12 +609,12 @@ public class Session implements Closeable {
         resource.getContents().clear();
         List<OElement> elements = factory.getORIDs(resource.getURI())
                 .map(orid -> (OElement) db.load(orid)).collect(Collectors.toList());
+        resource.setURI(factory.createResourceURI(elements));
         elements.forEach(oElement -> {
             EObject eObject = createEObject(resource.getResourceSet(), oElement);
             resource.getContents().add(eObject);
             populateEObject(resource.getResourceSet(), (OVertex) oElement, eObject);
         });
-        resource.setURI(factory.createResourceURI(elements));
         getFactory().getEvents().fireAfterLoad(resource);
     }
 
