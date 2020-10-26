@@ -1479,7 +1479,7 @@ class DatasetView extends React.Component<any, State> {
                     }}
                     onAddDiagramClick={()=>this.handleDrawerVisibility(paramType.diagramsAdd,!this.state.diagramAddMenuVisible)}
                     onEditDiagramClick={()=>this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}
-                    onDeleteDiagramClick={()=>this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid:!this.state.IsGrid})}
+                    onDeleteDiagramClick={()=>this.setState({deleteMenuVisible:!this.state.deleteMenuVisible, IsGrid: true})}
                     onDiagramChange={(e: string) => {
                         this.setState({
                             currentDiagram: this.state.diagrams.find(function(el) {

@@ -594,7 +594,6 @@ class DatasetBar extends React.Component<props, State> {
                     className={this.state.barSize === barSize.extraSmall ? "fill-space element-top-margin" : "element-top-margin"}
                     getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                     width={'184px'}
-                    allowClear={this.props.currentDatasetComponent.eContents()[0].get('access') !== "Default"}
                     value={this.props.currentDatasetComponent.eContents()[0].get('name')}
                     onChange={this.props.onChangeDatasetComponent}
                 >

@@ -19,7 +19,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoColor, NeoDrawer, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoColor, NeoDrawer, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoHint} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -856,14 +856,16 @@ class Calendar extends React.Component<any, any> {
                                 <NeoIcon icon={"arrowRight"} color={'#000000'} />
                             </NeoButton>
                         </div>
-
                         <NeoButton
-                            title={t('legend')}
+                            /*title={t('legend')}*/
                             style={{width: '24px', height: '24px', color: '#6e6e6e',marginTop: "4px"}}
                             type="link"
                             onClick={this.handleLegendMenu}>
                             <NeoIcon icon={'legend'} size={'m'} />
+                            <NeoHint title={t('legend')}>
+                            </NeoHint>
                         </NeoButton>
+
                     </div>
                 }
 
