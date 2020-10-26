@@ -48,24 +48,41 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         }
                         let temp = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } });
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
-                    }
+                    } else if (options && options.operation === "d&dUp") {
 
-                    else if (options && options.operation === "updateNode") {
+                        let oldIndexValue_ = findObjectById(currentObject, options.event.dragNode.props.eventKey)
+                        // let oldIndexValue_
+                        // if (dragNode.children !== undefined) {
+                        //     oldIndexValue_ = dragNode.children[options.oldIndex]
+                        // }
+                        // else {
+                        //     oldIndexValue_ = dragNode[updaterProperty][options.oldIndex]
+                        // }
+                        let oldIndexValue
+                        if (oldIndexValue_ !== undefined) {
+                            oldIndexValue = update(oldIndexValue_ as any, { '_id': { $set: null } })
+                        } else {
+                            alert('oldIndexValue = undefuind')
+                        }
+
+
+                        let updatedJSON = options.event.dragNode.props.parentUpdater(null, undefined, options.event.dragNode.props.propertyName, {
+                            operation: "deleteNode",
+                            oldIndex: options.oldIndex,
+                            newIndex: options.newIndex
+                        })
+                        let withDeletedObject = findObjectById(updatedJSON, currentObject._id)
                         if (currentObject.children !== undefined) {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, options.oldIndexValue]] } })
+                            updatedData = update(withDeletedObject as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                         }
                         else {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: [options.oldIndexValue] } })
+                            updatedData = update(withDeletedObject as any, { [updaterProperty]: { $set: [options.oldIndexValue] } })
                         }
-                    }
-
-                    else if (options && options.operation === "d&dDown") {
-
+                    } else if (options && options.operation === "d&dDown") {
                         let oldIndexValue_
                         if (currentObject.children !== undefined) {
                             oldIndexValue_ = currentObject.children[options.oldIndex]
-                        }
-                        else {
+                        } else {
                             oldIndexValue_ = currentObject[updaterProperty][options.oldIndex]
                         }
                         let oldIndexValue = update(oldIndexValue_ as any, { '_id': { $set: null } })
@@ -78,12 +95,21 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         })
                         let withAddedObject = findObjectById(updatedJSON, currentObject._id)
                         updatedData = update(withAddedObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
-
-
+                    } else if (options && options.operation === "updateNode") {
+                        if (currentObject.children !== undefined) {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, options.oldIndexValue]] } })
+                        }
+                        else {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: [options.oldIndexValue] } })
+                        }
                     } else if (options && options.operation === "deleteNode") {
-                        updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
-                    }
-                    else {
+                        if (currentObject.children !== undefined) {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
+                        }
+                        else {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
+                        }
+                    } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
                     }
