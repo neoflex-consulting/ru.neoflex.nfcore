@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
-import {Layout, Tooltip, Tree} from "antd";
+import {Layout, Menu, Tooltip, Tree} from "antd";
 import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
@@ -9,6 +9,7 @@ import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
+import SubMenu from "antd/es/menu/SubMenu";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
@@ -222,17 +223,22 @@ export class MainApp extends React.Component<any, State> {
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
         const cbs = new Map<string, () => void>();
-        const onSelect = (keys: string[], event: any) => {
-            const cb = cbs.get(keys[keys.length - 1]);
-            if (cb) cb();
-        };
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
         const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') /*currentAppModule.tree[currentAppModule.tree.length - 1]*/ : this.appModuleMap.get(currentAppModule.appModule);
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
-                <Tree.DirectoryTree selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined} defaultExpandAll onSelect={onSelect}>
+                <Menu
+                    id={"referenceTree"}
+                    defaultOpenKeys={pathReferenceTree ? [pathReferenceTree.split("/").slice(0,-1).join("/")] : undefined}
+                    selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
+                    onSelect={params => {
+                        const cb = cbs.get(params.key);
+                        if (cb) cb();
+                    }}
+                    mode="inline"
+                >
                     {referenceTree.get('children').map((c: Ecore.EObject) => this.renderTreeNode(c, cbs))}
-                </Tree.DirectoryTree>
+                </Menu>
             </Layout>
         )
     };
@@ -280,7 +286,9 @@ export class MainApp extends React.Component<any, State> {
             })
         }
         return eObject.get('grantType') === grantType.denied ? undefined : (
-            <Tree.TreeNode title={code} key={key} isLeaf={isLeaf}>{children}</Tree.TreeNode>
+            isLeaf
+                ? <Menu.Item key={key}>{code}</Menu.Item>
+                : <SubMenu key={key} title={code}>{children}</SubMenu>
         )
     };
 

@@ -145,3 +145,42 @@
 .leftSplitter .ant-tree > li:first-child {
     padding-top: unset;
 }
+
+#referenceTree .ant-menu-item,
+#referenceTree .ant-menu-submenu-popup,
+#referenceTree .ant-menu-submenu > .ant-menu {
+    background-color: unset;
+}
+
+#referenceTree .ant-menu-item-selected {
+    background-color: #FFF8E0;
+    color: #333333;
+}
+
+#referenceTree li.ant-menu-item,
+#referenceTree .ant-menu-item>a,
+#referenceTree .ant-menu,
+#referenceTree .header-menu {
+    color: #333333;
+}
+
+#referenceTree li.ant-menu-submenu-selected > div {
+    background-color: #FFF8E0;
+    border-right: 3px solid #FFCC66 !important;
+}
+
+#referenceTree .ant-menu-vertical .ant-menu-item::after,
+#referenceTree .ant-menu-vertical-left .ant-menu-item::after,
+#referenceTree .ant-menu-vertical-right .ant-menu-item::after,
+#referenceTree .ant-menu-inline .ant-menu-item::after  {
+    border-right: 3px solid #FFCC66
+}
+
+#referenceTree .ant-menu-submenu-title:hover {
+    color: #333333;
+}
+
+#referenceTree .ant-menu-submenu-title:hover .ant-menu-submenu-arrow::before,
+#referenceTree .ant-menu-submenu-title:hover .ant-menu-submenu-arrow::after {
+    background: #333333 !important;
+}
