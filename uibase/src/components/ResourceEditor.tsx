@@ -258,73 +258,90 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const dropPos = event.node.props.pos.split('-');
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
-            const loop = (data: any, _id: any, callback: any) => {
-                for (let i = 0; i < data.length; i++) {
-                    if (data[i]._id === _id) {
-                        return callback(data[i], i, data);
-                    }
-                    if (data[i].children) {
-                        loop(data[i].children, _id, callback);
-                    }
-                    else if (data[i].view) {
-                        loop(data[i].view.children, _id, callback);
-                    }
-                }
-            };
-            let data: any = [this.state.resourceJSON];
-
-            // Find dragObject
-            let dragObj: any;
-            loop(data, dragKey, (item: any, index: any, arr: any) => {
-                arr.splice(index, 1);
-                dragObj = item
-            });
-
-            if (!event.dropToGap) {
-                // Drop on the content
-                loop(data, dropKey, (item: any) => {
-                    item.children = item.children || [];
-                    // where to insert 示例添加到尾部，可以是随意位置
-                    item.children.push(dragObj);
-                });
-            } else if (
-                (event.node.props.children || []).length > 0 && // Has children
-                event.node.props.expanded && // Is expanded
-                dropPosition === 1 // On the bottom gap
+            if ( (dropKey === "null" && event.node.props.children.length !== 0) ||
+                (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === 1 || event.node.props.upperBound === 1)) ||
+                    (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === undefined && event.node.props.upperBound === undefined))
             ) {
-                loop(data, dropKey, (item: any) => {
-                    item.children = item.children || [];
-                    // where to insert 示例添加到头部，可以是随意位置
-                    item.children.unshift(dragObj);
-                });
-            } else {
-                let ar: any;
-                let i: any;
-                loop(data, dropKey, (item: any, index: any, arr: any) => {
-                    ar = arr;
-                    i = index;
-                });
-                if (ar !== undefined && dropPosition === -1) {
-                    ar.splice(i, 0, dragObj);
-                } else if (ar !== undefined) {
-                    ar.splice(i + 1, 0, dragObj);
-                }
+                alert('Опрация заблокирована')
             }
-            const node: { [key: string]: any } = event.node.props;
-            const targetObject: { [key: string]: any } = this.state.targetObject;
-            let updatedJSON = data[0];
-            let nestedJSON = nestUpdaters(updatedJSON, null);
-            let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-            let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-            this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
-                resourceJSON: nestedJSON,
-                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-                tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
-                isModified: true
-            }))
-        }
+            else {
+                const loop = (data: any, _id: any, callback: any) => {
+                    if (data.length === undefined) {
+                        if (data._id === _id) {
+                            return callback(data, 0, data);
+                        }
+                        else if (data.children) {
+                            loop(data.children, _id, callback);
+                        }
+                        else if (data.view) {
+                            loop(data.view, _id, callback);
+                        }
+                    } else {
+                        for (let i = 0; i < data.length; i++) {
+                            if (data[i]._id === _id) {
+                                return callback(data[i], i, data);
+                            }
+                            else if (data[i].children) {
+                                loop(data[i].children, _id, callback);
+                            }
+                        }
+                    }
+                };
+                let data: any = this.state.resourceJSON;
+
+                let dragObj: any;
+                loop(data, dragKey, (item: any, index: any, arr: any) => {
+                    arr.splice(index, 1);
+                    dragObj = item
+                });
+
+                    if (!event.dropToGap) {
+                        loop(data, dropKey, (item: any) => {
+                            item.children = item.children || [];
+                            item.children.push(dragObj);
+                        });
+                    } else if (
+                        (event.node.props.children || []).length > 0 &&
+                        event.node.props.expanded &&
+                        dropPosition === 1
+                    ) {
+                        loop(data, dropKey, (item: any) => {
+                            item.children = item.children || [];
+                            item.children.unshift(dragObj);
+                        });
+                    } else {
+                        let ar: any;
+                        let i: any;
+                        loop(data, dropKey, (item: any, index: any, arr: any) => {
+                            ar = arr.children || arr;
+                            i = index;
+                        });
+                        if (ar !== undefined) {
+                            if (dropPosition === -1) {
+                                ar.splice(i, 0, dragObj);
+                            } else {
+                                ar.splice(i + 1, 0, dragObj);
+                            }
+                        }
+                    }
+                    const node: { [key: string]: any } = event.node.props;
+                    const targetObject: { [key: string]: any } = this.state.targetObject;
+                    let updatedJSON = data;
+                    let nestedJSON = nestUpdaters(updatedJSON, null);
+                    let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                    this.state.mainEObject.eResource().clear();
+                    let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                    this.setState((state, props) => ({
+                        mainEObject: resource.eContents()[0],
+                        resourceJSON: nestedJSON,
+                        targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                        tableData: updatedTargetObject ? state.tableData : [],
+                        selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                        isModified: true
+                    }))
+
+            }
+        };
 
 
         return (
