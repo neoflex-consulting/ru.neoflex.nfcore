@@ -234,7 +234,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                                        onClick={()=>{this.setState({diagramType:"Line"})}}>
                                 <NeoIcon icon={"diagram"} color={'#424D78'} style={{marginTop: "4px"}}/>
                             </NeoButton>
-                            <h4 className={'types'}>{this.props.t("Graph")}</h4>
+                            <h4 className={'types'}>{this.props.t("graph")}</h4>
                         </NeoCol>
                     </NeoRow>
                 </div>

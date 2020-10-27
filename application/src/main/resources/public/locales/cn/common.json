@@ -113,6 +113,8 @@
         "Column": "柱",
         "Row": "行",
 
+        "Range": "範圍",
+
         "Enter new column name": "輸入新的列名",
         "Select calculated column": "選擇計算列",
         "New column name": "新列名称",
@@ -380,6 +382,10 @@
         "tags": "標籤",
         "back to version": "返回報告模板",
         "move top": "移動頂部",
-        "move bottom": "移至結尾"
+        "move bottom": "移至結尾",
+
+        "bar chart": "條形圖",
+        "pie chart": "餅形圖",
+        "graph": "時間表"
 
 }
