@@ -165,12 +165,12 @@
 }
 
 #referenceTree li.ant-menu-submenu > div {
-    border-right: 3px transparent !important;
+    border-right: 3px transparent;
 }
 
 #referenceTree li.ant-menu-submenu-selected > div {
     background-color: #FFF8E0;
-    border-right: 3px solid #FFCC66 !important;
+    border-right: 3px solid #FFCC66;
 }
 
 #referenceTree .ant-menu-vertical .ant-menu-item::after,
@@ -178,6 +178,14 @@
 #referenceTree .ant-menu-vertical-right .ant-menu-item::after,
 #referenceTree .ant-menu-inline .ant-menu-item::after  {
     border-right: 3px solid #FFCC66
+}
+
+#referenceTree .ant-menu-item::after {
+    border-right: 3px transparent;
+}
+
+#referenceTree .ant-menu-item-selected::after {
+    border-right: 3px solid #FFCC66;
 }
 
 #referenceTree .ant-menu-submenu-title:hover {
