@@ -138,8 +138,50 @@ function traverseEObject(obj: any, func: (obj: any, key: string, level: number)=
     }
 }
 
+function findObjectByIdCallback(data: any, id: String, callback: any): any {
+    const walkThroughArray = (array: Array<any>): any => {
+        for (var el of array) {
+            if (el._id && el._id === id) {
+                return el
+            } else {
+                const result = findObjectById(el, id);
+                if (result) return result
+            }
+        }
+    };
+
+    const walkThroughObject = (obj: any): any => {
+        let result;
+        let prop_;
+
+        for (let prop in obj) {
+            if (result) {
+                break
+            }
+            if (Array.isArray(obj[prop])) {
+                result = findObjectById(obj[prop], id)
+                prop_ = prop
+            } else {
+                if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
+                    result = findObjectById(obj[prop], id)
+                    prop_ = prop
+                }
+            }
+        }
+        if (result) callback(data, result, prop_)
+    };
+
+    if (data._id === id) return callback(data, 0, data);
+
+    if (Array.isArray(data)) {
+        return walkThroughArray(data)
+    } else {
+        return walkThroughObject(data)
+    }
+}
+
 const boolSelectionOption: { [key: string]: any } = { "false": false, "undefined": false, "null": false, "true": true }
 const getPrimitiveType = (value: string): any => boolSelectionOption[value]
 const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
-export { nestUpdaters, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString, traverseEObject };
+export { nestUpdaters, findObjectByIdCallback, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString, traverseEObject };
