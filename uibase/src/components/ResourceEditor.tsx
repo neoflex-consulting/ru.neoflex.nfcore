@@ -5,7 +5,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject} from '../utils/resourceEditorUtils'
+import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject, findObjectByIdCallback} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -14,6 +14,7 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
+import update from "immutability-helper";
 
 
 interface ITargetObject {
@@ -257,70 +258,58 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const dragKey = event.dragNode.props.eventKey;
             const dropPos = event.node.props.pos.split('-');
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+            const nodePos = dropPos[dropPos.length - 1];
+            const propertyName = event.node.props.propertyName
 
-            if ( (dropKey === "null" && event.node.props.children.length !== 0) ||
+            if ( (dropKey === "null" && event.node.props.children.length !== 0 && event.node.props.upperBound !== -1) ||
                 (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === 1 || event.node.props.upperBound === 1)) ||
                     (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === undefined && event.node.props.upperBound === undefined))
             ) {
                 alert('Опрация заблокирована')
             }
             else {
-                const loop = (data: any, _id: any, callback: any) => {
-                    if (data.length === undefined) {
-                        if (data._id === _id) {
-                            return callback(data, 0, data);
-                        }
-                        else if (data.children) {
-                            loop(data.children, _id, callback);
-                        }
-                        else if (data.view) {
-                            loop(data.view, _id, callback);
-                        }
-                    } else {
-                        for (let i = 0; i < data.length; i++) {
-                            if (data[i]._id === _id) {
-                                return callback(data[i], i, data);
-                            }
-                            else if (data[i].children) {
-                                loop(data[i].children, _id, callback);
-                            }
-                        }
-                    }
-                };
                 let data: any = this.state.resourceJSON;
 
-                let dragObj: any;
-                loop(data, dragKey, (item: any, index: any, arr: any) => {
-                    arr.splice(index, 1);
-                    dragObj = item
-                });
+                let dragObj: any = findObjectById(data, dragKey);
 
                     if (!event.dropToGap) {
-                        loop(data, dropKey, (item: any) => {
-                            item.children = item.children || [];
-                            item.children.push(dragObj);
+                        findObjectByIdCallback(data, dropKey, (data: any, item: any) => {
+                            if (item[propertyName] === undefined) {
+                                item[propertyName] = dragObj
+                            }
+                            else if (item[propertyName].length !== undefined) {
+                                item[propertyName].push(dragObj)
+                            }
                         });
+
+                        // loop(data, dropKey, (item: any) => {
+                        //     item.children = item.children || [];
+                        //     item.children.push(dragObj);
+                        // });
                     } else if (
                         (event.node.props.children || []).length > 0 &&
                         event.node.props.expanded &&
                         dropPosition === 1
                     ) {
-                        loop(data, dropKey, (item: any) => {
-                            item.children = item.children || [];
-                            item.children.unshift(dragObj);
+                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
+                            // item[prop] = item[prop] || [];
+                            item[prop].unshift(dragObj);
                         });
+                        // loop(data, dropKey, (item: any) => {
+                        //     item.children = item.children || [];
+                        //     item.children.unshift(dragObj);
+                        // });
                     } else {
                         let ar: any;
                         let i: any;
-                        loop(data, dropKey, (item: any, index: any, arr: any) => {
-                            ar = arr.children || arr;
-                            i = index;
+                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
+                            ar = data[prop] || data;
                         });
                         if (ar !== undefined) {
                             if (dropPosition === -1) {
-                                ar.splice(i, 0, dragObj);
+                                ar.splice(nodePos, 0, dragObj);
                             } else {
-                                ar.splice(i + 1, 0, dragObj);
+                                ar.splice(nodePos + 1, 0, dragObj);
                             }
                         }
                     }
