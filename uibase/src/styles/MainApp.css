@@ -201,3 +201,11 @@
 #referenceTree .ant-menu-submenu-arrow::after {
     background: #333333 !important;
 }
+
+#referenceTree .menu-content {
+    display: inline-flex;
+}
+
+#referenceTree .menu-content > div > svg {
+    margin: 12px 12px 12px 0;
+}

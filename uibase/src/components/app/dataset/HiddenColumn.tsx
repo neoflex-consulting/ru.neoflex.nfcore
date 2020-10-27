@@ -36,7 +36,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
-        <NeoIcon style={{ marginTop: '16px' }} icon={"more"} size={"m"}/>
+        <NeoIcon style={{ marginTop: '16px' }} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{ margin: 'auto 0 auto 20px' }}>
             <NeoSwitch
                 checked={value.enable}

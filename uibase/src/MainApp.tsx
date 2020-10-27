@@ -10,6 +10,7 @@ import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
+import {NeoIcon_} from "./AntdFactory";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
@@ -246,6 +247,7 @@ export class MainApp extends React.Component<any, State> {
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string) => {
         const code = eObject.get('name');
         const key = parentKey ? parentKey + '/' + code : code;
+        const icon = eObject.get('icon') && <NeoIcon_ {...this.props} viewObject={eObject.get('icon')}/>;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')
@@ -287,8 +289,8 @@ export class MainApp extends React.Component<any, State> {
         }
         return eObject.get('grantType') === grantType.denied ? undefined : (
             isLeaf
-                ? <Menu.Item key={key}>{code}</Menu.Item>
-                : <SubMenu key={key} title={code}>{children}</SubMenu>
+                ? <Menu.Item key={key}><div className={"menu-content"}>{icon}{code}</div></Menu.Item>
+                : <SubMenu key={key} title={<div className={"menu-content"}>{icon}{code}</div>}>{children}</SubMenu>
         )
     };
 

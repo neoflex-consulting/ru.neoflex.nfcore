@@ -125,8 +125,8 @@ class ComponentElement extends ViewElement {
 	refers Component component
 }
 
-class FAIcon extends Icon {
-	String iconCode
+class NeoIcon extends Icon {
+	NeoIconCodes iconCode
 }
 
 class Form extends ViewContainer {
@@ -239,6 +239,7 @@ abstract class TreeNode {
     String name
 	boolean checkRights
     GrantType grantType = "Write"
+    contains Icon icon
 }
 
 class AppModuleNode extends TreeNode {
@@ -378,4 +379,95 @@ enum TypographyType {
     capture_medium
     capture_link
     capture_light
+}
+
+enum NeoIconCodes {
+    notification,
+    notificationOff,
+    question,
+    person,
+    exit,
+    settings,
+    filter,
+    plusBlock,
+    calculator,
+    barChart,
+    updateClock,
+    mark,
+    update,
+    fullScreen,
+    fullScreenUnDo,
+    filterCheck,
+    plusBlockCheck,
+    barChartCheck,
+    sortCheck,
+    addCheck,
+    diagram,
+    diagramCircle,
+    diagramBlock,
+    arrowUp,
+    arrowDown,
+    arrowVerticalRight,
+    arrowLeft,
+    arrowRight,
+    arrowVerticalLeft,
+    moveDown,
+    moveUp,
+    more,
+    table,
+    tableUp,
+    alert,
+    success,
+    info,
+    warning,
+    fileExcel,
+    fileWord,
+    delete,
+    plus,
+    close,
+    calendar,
+    calendarFull,
+    rubbish,
+    fill,
+    letter,
+    gear,
+    download,
+    print,
+    list,
+    arrowLong,
+    edit,
+    menuOpen,
+    search,
+    tiles,
+    play,
+    show,
+    hide,
+    journal,
+    star,
+    starFull,
+    addFile,
+    attachedFile,
+    duplicate,
+    exportFile,
+    importFile,
+    undo,
+    checkbox,
+    checkboxFill,
+    cloudServer,
+    code,
+    radioButton,
+    radioButtonFill,
+    switchOff,
+    switchOn,
+    legend,
+    dragAndDrop,
+    file,
+    compose,
+    tools,
+    updateTwoLine,
+    checkStatus,
+    form,
+    cloudDownload,
+    directory,
+    team
 }

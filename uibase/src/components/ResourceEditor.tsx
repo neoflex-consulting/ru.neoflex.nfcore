@@ -569,7 +569,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 </Menu.SubMenu>}
 
                 {allSubTypes.length > 0
-                && (node.upperBound === 1 && node.arrayLength > 0 ? false : true)
+                && (!(node.upperBound === 1 && node.arrayLength > 0))
+                && this.state.clipboardObject.eClass
                 && allSubTypes.find((el: any) => el.get('name') === this.state.clipboardObject.eClass.split("//")[1])
                 && <Menu.Item key="paste">{this.props.t("paste")}</Menu.Item>}
 
