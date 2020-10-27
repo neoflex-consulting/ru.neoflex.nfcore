@@ -196,3 +196,8 @@
 #referenceTree .ant-menu-submenu-title:hover .ant-menu-submenu-arrow::after {
     background: #333333 !important;
 }
+
+#referenceTree .ant-menu-submenu-arrow::before,
+#referenceTree .ant-menu-submenu-arrow::after {
+    background: #333333 !important;
+}
