@@ -1702,7 +1702,9 @@ a.linksInMoreWord:hover{
   text-decoration: none!important;
 }
 
-
+.href img{
+  display: none;
+}
 
 
 
