@@ -1435,7 +1435,8 @@ class DatasetView_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden || this.props.isParentHidden,
+            hidden: hidden,
+            isParentHidden: this.props.isParentHidden,
             grantType: grantType,
             className: cssClass
         };
