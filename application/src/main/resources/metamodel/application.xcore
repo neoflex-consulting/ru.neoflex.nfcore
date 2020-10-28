@@ -206,7 +206,7 @@ class DatePicker extends ViewElement, ValueItem {
 
 class HtmlContent extends ViewElement, CommandElement {
     String htmlContent
-
+    boolean isError
 }
 
 //add TextArea
