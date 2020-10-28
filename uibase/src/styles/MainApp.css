@@ -209,3 +209,18 @@
 #referenceTree .menu-content > div > svg {
     margin: 12px 12px 12px 0;
 }
+
+#referenceTree.ant-menu-vertical .ant-menu-item,
+#referenceTree.ant-menu-vertical-left .ant-menu-item,
+#referenceTree.ant-menu-vertical-right .ant-menu-item,
+#referenceTree.ant-menu-inline .ant-menu-item,
+#referenceTree.ant-menu-vertical .ant-menu-submenu-title,
+#referenceTree.ant-menu-vertical-left .ant-menu-submenu-title,
+#referenceTree.ant-menu-vertical-right .ant-menu-submenu-title,
+#referenceTree.ant-menu-inline .ant-menu-submenu-title {
+    overflow: unset
+}
+
+#referenceTree.short-size > li > div > i {
+    display: none;
+}
