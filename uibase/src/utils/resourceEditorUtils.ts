@@ -153,22 +153,25 @@ function findObjectByIdCallback(data: any, id: String, callback: any): any {
     const walkThroughObject = (obj: any): any => {
         let result;
         let prop_;
+        let arr;
 
         for (let prop in obj) {
             if (result) {
                 break
             }
             if (Array.isArray(obj[prop])) {
-                result = findObjectById(obj[prop], id)
+                result = findObjectByIdCallback(obj[prop], id, callback)
                 prop_ = prop
+                arr = obj[prop]
             } else {
                 if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
-                    result = findObjectById(obj[prop], id)
+                    result = findObjectByIdCallback(obj[prop], id, callback);
                     prop_ = prop
+                    arr = obj[prop]
                 }
             }
         }
-        if (result) callback(data, result, prop_)
+        if (result) callback(result, arr, data, prop_)
     };
 
     if (data._id === id) return callback(data, 0, data);

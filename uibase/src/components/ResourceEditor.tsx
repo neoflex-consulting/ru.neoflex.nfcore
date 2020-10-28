@@ -254,12 +254,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         };
 
         const onDrop = (event: any) => {
-            const dropKey = event.node.props.eventKey.split('.')[0];
             const dragKey = event.dragNode.props.eventKey;
+            // const dragKeyContain = event.dragNode.props.eventKey.split('.')[1];
+
+            const dropKey = event.node.props.eventKey.split('.')[0];
+            // const dropKeyContain = event.node.props.eventKey.split('.')[1];
+
+            const dragPos = event.dragNode.props.pos.split('-');
             const dropPos = event.node.props.pos.split('-');
+
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePos = dragPos[dragPos.length - 1];
+            const dragNodeParentPos = dragPos[dragPos.length - 2];
+
             const nodePos = dropPos[dropPos.length - 1];
-            const propertyName = event.node.props.propertyName
+            const nodeParentPos = dropPos[dropPos.length - 2];
+
+            const dragNodePropertyName = event.dragNode.props.propertyName
+            const nodePropertyName = event.node.props.propertyName
 
             if ( (dropKey === "null" && event.node.props.children.length !== 0 && event.node.props.upperBound !== -1) ||
                 (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === 1 || event.node.props.upperBound === 1)) ||
@@ -270,28 +283,31 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             else {
                 let data: any = this.state.resourceJSON;
 
-                let dragObj: any = findObjectById(data, dragKey);
+                let dragObj: any = undefined;
 
-                    if (!event.dropToGap) {
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any) => {
-                            if (item[propertyName] === undefined) {
-                                item[propertyName] = dragObj
-                            }
-                            else if (item[propertyName].length !== undefined) {
-                                item[propertyName].push(dragObj)
-                            }
-                        });
+                findObjectByIdCallback(data, dragKey, (item: any, arr: any, data: any, prop: any) => {
+                    dragObj = item
+                    arr.splice(dragNodePos, 1);
+                    // dragNodePropertyName !== undefined ?
+                    //     arr[dragNodeParentPos][dragNodePropertyName] = null :
+                    //     arr.splice(dragNodePos, 1);
+                });
 
-                        // loop(data, dropKey, (item: any) => {
-                        //     item.children = item.children || [];
-                        //     item.children.push(dragObj);
-                        // });
+                if (!event.dropToGap) {
+                    findObjectByIdCallback(data, dropKey, (item: any, arr: any) => {
+                        arr.push(dragObj);
+                        // nodePropertyName !== undefined ?
+                        //     arr[nodeParentPos][nodePropertyName] = dragObj :
+                        //     arr.push(dragObj);
+                    });
+
+
                     } else if (
                         (event.node.props.children || []).length > 0 &&
                         event.node.props.expanded &&
                         dropPosition === 1
                     ) {
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
+                        findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any) => {
                             // item[prop] = item[prop] || [];
                             item[prop].unshift(dragObj);
                         });
@@ -302,7 +318,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     } else {
                         let ar: any;
                         let i: any;
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
+                        findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any) => {
                             ar = data[prop] || data;
                         });
                         if (ar !== undefined) {
