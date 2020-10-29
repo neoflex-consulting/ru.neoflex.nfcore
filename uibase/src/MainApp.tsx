@@ -222,6 +222,16 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderReferences = (isShortSize = false) => {
+        function splitPath(path:string|undefined) {
+            let arr:string[] = [];
+            if (path) {
+                while (path.split("/").length > 1) {
+                    path = path.split("/").slice(0,-1).join("/");
+                    arr.push(path)
+                }
+            }
+            return arr;
+        }
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
@@ -233,8 +243,7 @@ export class MainApp extends React.Component<any, State> {
                 <Menu
                     id={"referenceTree"}
                     className={`${isShortSize && "short-size"}`}
-                    defaultOpenKeys={pathReferenceTree ? [pathReferenceTree.split("/").slice(0,-1).join("/")] : undefined}
-                    openKeys={this.state.hideReferences ? [] : this.state.openKeys}
+                    openKeys={this.state.hideReferences ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
                     onSelect={params => {
                         const cb = cbs.get(params.key);
