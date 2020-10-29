@@ -38,77 +38,6 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {
                         return currentObject.children ? currentObject.children : undefined
-                    } else if (options && options.operation === "d&dOneLevel") {
-                        let oldIndexValue = undefined
-                        if (currentObject.children !== undefined) {
-                            oldIndexValue = currentObject.children[options.oldIndex]
-                        }
-                        else {
-                            oldIndexValue = currentObject[updaterProperty][options.oldIndex]
-                        }
-                        let temp = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } });
-                        updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
-                    } else if (options && options.operation === "d&dUp") {
-
-                        let oldIndexValue_ = findObjectById(currentObject, options.event.dragNode.props.eventKey)
-                        // let oldIndexValue_
-                        // if (dragNode.children !== undefined) {
-                        //     oldIndexValue_ = dragNode.children[options.oldIndex]
-                        // }
-                        // else {
-                        //     oldIndexValue_ = dragNode[updaterProperty][options.oldIndex]
-                        // }
-                        let oldIndexValue
-                        if (oldIndexValue_ !== undefined) {
-                            oldIndexValue = update(oldIndexValue_ as any, { '_id': { $set: null } })
-                        } else {
-                            alert('oldIndexValue = undefuind')
-                        }
-
-
-                        let updatedJSON = options.event.dragNode.props.parentUpdater(null, undefined, options.event.dragNode.props.propertyName, {
-                            operation: "deleteNode",
-                            oldIndex: options.oldIndex,
-                            newIndex: options.newIndex
-                        })
-                        let withDeletedObject = findObjectById(updatedJSON, currentObject._id)
-                        if (currentObject.children !== undefined) {
-                            updatedData = update(withDeletedObject as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
-                        }
-                        else {
-                            updatedData = update(withDeletedObject as any, { [updaterProperty]: { $set: [options.oldIndexValue] } })
-                        }
-                    } else if (options && options.operation === "d&dDown") {
-                        let oldIndexValue_
-                        if (currentObject.children !== undefined) {
-                            oldIndexValue_ = currentObject.children[options.oldIndex]
-                        } else {
-                            oldIndexValue_ = currentObject[updaterProperty][options.oldIndex]
-                        }
-                        let oldIndexValue = update(oldIndexValue_ as any, { '_id': { $set: null } })
-
-                        let updatedJSON = options.event.node.props.parentUpdater(null, undefined, options.event.node.props.propertyName, {
-                            operation: "updateNode",
-                            oldIndex: options.oldIndex,
-                            newIndex: options.newIndex,
-                            oldIndexValue: oldIndexValue
-                        })
-                        let withAddedObject = findObjectById(updatedJSON, currentObject._id)
-                        updatedData = update(withAddedObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
-                    } else if (options && options.operation === "updateNode") {
-                        if (currentObject.children !== undefined) {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, options.oldIndexValue]] } })
-                        }
-                        else {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: [options.oldIndexValue] } })
-                        }
-                    } else if (options && options.operation === "deleteNode") {
-                        if (currentObject.children !== undefined) {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
-                        }
-                        else {
-                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } })
-                        }
                     } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
@@ -209,8 +138,50 @@ function traverseEObject(obj: any, func: (obj: any, key: string, level: number)=
     }
 }
 
+function findObjectByIdCallback(data: any, id: String, callback: any): any {
+    const walkThroughArray = (array: Array<any>): any => {
+        for (var el of array) {
+            if (el._id && el._id === id) {
+                return el
+            } else {
+                const result = findObjectById(el, id);
+                if (result) return result
+            }
+        }
+    };
+
+    const walkThroughObject = (obj: any): any => {
+        let result;
+        let prop_;
+
+        for (let prop in obj) {
+            if (result) {
+                break
+            }
+            if (Array.isArray(obj[prop])) {
+                result = findObjectById(obj[prop], id)
+                prop_ = prop
+            } else {
+                if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
+                    result = findObjectById(obj[prop], id)
+                    prop_ = prop
+                }
+            }
+        }
+        if (result) callback(data, result, prop_)
+    };
+
+    if (data._id === id) return callback(data, 0, data);
+
+    if (Array.isArray(data)) {
+        return walkThroughArray(data)
+    } else {
+        return walkThroughObject(data)
+    }
+}
+
 const boolSelectionOption: { [key: string]: any } = { "false": false, "undefined": false, "null": false, "true": true }
 const getPrimitiveType = (value: string): any => boolSelectionOption[value]
 const convertPrimitiveToString = (value: string): any => String(boolSelectionOption[value])
 
-export { nestUpdaters, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString, traverseEObject };
+export { nestUpdaters, findObjectByIdCallback, findObjectById, boolSelectionOption, getPrimitiveType, convertPrimitiveToString, traverseEObject };

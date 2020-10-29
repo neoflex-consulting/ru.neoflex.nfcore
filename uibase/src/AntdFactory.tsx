@@ -28,6 +28,8 @@ import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
 import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
+import {NeoIcon} from "neo-icon/lib";
+import {SvgName} from "neo-icon/lib/icon/icon";
 
 const { Paragraph } = Typography;
 const marginBottom = '20px';
@@ -809,15 +811,21 @@ class HtmlContent_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden || this.props.isParentHidden}
-                 aria-disabled={isReadOnly}
-                 style={{marginBottom: marginBottom}}
-                 className={`${cssClass} content`}
-                 onClick={isReadOnly ? ()=>{} : () => {
-                     const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                     handleClick.bind(this)(value);
-                 }}
-                 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            <div hidden={false}
+                     aria-disabled={isReadOnly}
+                     style={{backgroundColor:`${this.viewObject.get('isError')? '#F8F1F3': '#F0FEFF'}`,
+                     color:`${this.viewObject.get('isError')? '#AD1457': '#0E5A7D'}`}}
+                     className={`${cssClass} content`}
+                     onClick={isReadOnly ? ()=>{} : () => {
+                         const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                         handleClick.bind(this)(value);
+                     }}
+            >
+                {this.viewObject.get('isError')?<NeoIcon icon={'info'} color={'#AD1457'} style={{margin:'5px 12px 0 0'}}/>
+                    :
+                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin:'5px 12px 0 0'}}/>}
+                <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            </div>
             </div>
         )
     }
@@ -1372,6 +1380,31 @@ class Drawer_ extends ViewContainer {
     }
 }
 
+export class NeoIcon_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+        };
+    }
+
+    componentDidMount(): void {
+        mountComponent.bind(this)();
+    }
+
+    componentWillUnmount(): void {
+        unmountComponent.bind(this)()
+    }
+
+    render = () => {
+        const cssClass = createCssClass(this.viewObject);
+        const icon = ((this.viewObject.get('iconCode') || 'notification') as string).replace('updateClock','update-clock');
+        return (
+             <NeoIcon style={{display: this.state.isHidden && 'none'}} className={cssClass} icon={icon as SvgName}/>
+        )
+    }
+}
+
 class Collapse_ extends ViewContainer {
 
     constructor(props: any) {
@@ -1418,7 +1451,8 @@ class DatasetView_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden || this.props.isParentHidden,
+            hidden: hidden,
+            isParentHidden: this.props.isParentHidden,
             grantType: grantType,
             className: cssClass
         };
@@ -1483,6 +1517,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
         this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
         this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
+        this.components.set('ru.neoflex.nfcore.application#//NeoIcon', NeoIcon_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

@@ -286,29 +286,29 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         className={"meta-browser-input"}
                         type={"search"}
                         onSearch={(str:string)=>{
-                                this.state.data.forEach(el=>{
-                                    el.isVisible__ = str === "";
-                                    el.children.forEach((c1:any)=>{
-                                        if (str !== "") {
-                                            if (c1.name.match(new RegExp(str,'gi'))) {
-                                                c1.isVisible__ = true;
-                                                el.isVisible__ = true;
-                                                if (c1.showParent)
-                                                    c1.showParent();
-                                            } else {
-                                                c1.isVisible__ = false;
-                                            }
+                            this.state.data.forEach(el=>{
+                                el.isVisible__ = str === "";
+                                el.children.forEach((c1:any)=>{
+                                    if (str !== "") {
+                                        if (c1.name.match(new RegExp(str,'gi'))) {
+                                            c1.isVisible__ = true;
+                                            el.isVisible__ = true;
+                                            if (c1.showParent)
+                                                c1.showParent();
                                         } else {
-                                            if (c1.depth === 0) {
-                                                el.isVisible__ = true;
-                                                c1.isVisible__ = true;
-                                                c1.isExpanded = false;
-                                            } else {
-                                                c1.isVisible__ = false;
-                                            }
+                                            c1.isVisible__ = false;
                                         }
-                                    })
-                                });
+                                    } else {
+                                        if (c1.depth === 0) {
+                                            el.isVisible__ = true;
+                                            c1.isVisible__ = true;
+                                            c1.isExpanded = false;
+                                        } else {
+                                            c1.isVisible__ = false;
+                                        }
+                                    }
+                                })
+                            });
                             if (this.state.data.filter((el:any)=>el.isVisible__).length > 0) {
                                 this.state.data.forEach(e=>{
                                     if (e.isVisible__ && e.gridRef) {
@@ -322,30 +322,30 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     />
                 </div>
                 <NeoTabs className={"meta-browser-tabs-region meta-browser-center-element"}
-                      defaultActiveKey={"ecore"}
-                      tabPosition={'top'}>
+                         defaultActiveKey={"ecore"}
+                         tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                        return <NeoTabs.NeoTabPane tab={eObj.name}
-                                        key={eObj.name}>
-                            <DatasetGrid
-                                ref={(ref:any)=> {
-                                    eObj.gridRef = ref;
-                                    this.gridRef = ref;
-                                }}
-                                paginationPageSize={40}
-                                height={460}
-                                rowData = {eObj.children}
-                                columnDefs = {this.getColDefs()}
-                                highlightClassFunction = {(params: any) => {
-                                    if (params.data.depth > 0 && params.data.index % 2 === 0)
-                                        return "meta-browser-highlight-even";
-                                    if (params.data.depth > 0 && params.data.index % 2 !== 0)
-                                        return "meta-browser-highlight-odd";
-                                    return ""
-                                }}
-                            />
-                        </NeoTabs.NeoTabPane>}
+                            return <NeoTabs.NeoTabPane tab={eObj.name}
+                                                       key={eObj.name}>
+                                <DatasetGrid
+                                    ref={(ref:any)=> {
+                                        eObj.gridRef = ref;
+                                        this.gridRef = ref;
+                                    }}
+                                    paginationPageSize={40}
+                                    height={460}
+                                    rowData = {eObj.children}
+                                    columnDefs = {this.getColDefs()}
+                                    highlightClassFunction = {(params: any) => {
+                                        if (params.data.depth > 0 && params.data.index % 2 === 0)
+                                            return "meta-browser-highlight-even";
+                                        if (params.data.depth > 0 && params.data.index % 2 !== 0)
+                                            return "meta-browser-highlight-odd";
+                                        return ""
+                                    }}
+                                />
+                            </NeoTabs.NeoTabPane>}
                         else{
                             return null
                         }

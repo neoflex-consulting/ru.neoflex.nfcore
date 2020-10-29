@@ -268,6 +268,14 @@ height: 8px!important;
   z-index: 900 !important;
 }
 
+.ant-drawer-title {
+  font-family: Roboto;
+  font-size: 20px !important;
+  font-style: normal;
+  font-weight: 400 !important;
+  color: #333333 !important;
+}
+
 .diagram .ant-drawer-body {
   padding: 0 0 80px 0 !important;
 }
@@ -1511,7 +1519,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
 /*Calculator button*/
 .calc-block {
-  width: 194px;
+  width: 207px;
   height: 219px;
   display: flex;
   flex-direction: column;
@@ -1692,6 +1700,10 @@ a.limksInMoreWord{
 
 a.linksInMoreWord:hover{
   text-decoration: none!important;
+}
+
+.href img{
+  display: none;
 }
 
 

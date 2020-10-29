@@ -7,7 +7,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSwitch} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSwitch} from "neo-design/lib";
 import NeoIcon from "neo-icon/lib/icon";
 import arrayMove from "array-move";
 
@@ -24,6 +24,10 @@ interface Props {
     datasetComponentVersion?: string;
 }
 
+function trimHeader(header: string) {
+    return header.length > 60 ? header.substring(0,60) + "..." : header
+}
+
 const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
@@ -36,7 +40,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
-        <NeoIcon style={{ marginTop: '16px' }} icon={"more"} size={"m"}/>
+        <NeoIcon style={{ marginTop: '16px'}} color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{ margin: 'auto 0 auto 20px' }}>
             <NeoSwitch
                 checked={value.enable}
@@ -51,17 +55,17 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                 editable={false}
                 style={{marginBottom:'unset'}}>
                 {
-                    value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
+                    trimHeader(value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn)
                         ? value.columnDefs.find((c:Map<String,any>) => c.get('field') === value.datasetColumn).get('headerName')
-                        : value.datasetColumn
+                        : value.datasetColumn)
                 }
             </Paragraph>
         </Form.Item>
         <NeoButton title={value.t("move top")} type={"link"} style={{ margin: value.index === value.parametersArray.length ? 'auto 24px auto auto' : 'auto 0 auto auto'}} onClick={()=>value.onToTopClick(value.index)} hidden={value.index === 1}>
-            <NeoIcon icon={"moveUp"} style={{ marginTop: '16px'}} size={"m"}/>
+            <NeoIcon icon={"moveUp"} color={NeoColor.grey_7} style={{ marginTop: '16px'}} size={"m"}/>
         </NeoButton>
         <NeoButton title={value.t("move bottom")} type={"link"} style={{ marginLeft: value.index === 1 && 'auto'}} onClick={()=>value.onToBottomClick(value.index)} hidden={value.index === value.parametersArray.length}>
-            <NeoIcon icon={"moveDown"} style={{ marginTop: '16px'}} size={"m"}/>
+            <NeoIcon icon={"moveDown"} color={NeoColor.grey_7} style={{ marginTop: '16px'}} size={"m"}/>
         </NeoButton>
     </NeoRow>
 </div>);
