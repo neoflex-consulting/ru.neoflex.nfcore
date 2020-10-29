@@ -254,7 +254,7 @@ class DatasetView extends React.Component<any, State> {
                                 if (findColumn) {this.findColumnDefs(currentDatasetComponent)}
                             }
                             result.forEach( (d: Ecore.Resource) => {
-                                if (d.eContents()[0].get('dataset')) {
+                                if (d.eContents()[0].get('dataset') && this.props.viewObject.get('datasetComponent').get('dataset')) {
                                     if (d.eContents()[0].get('dataset').get('name') === this.props.viewObject.get('datasetComponent').get('dataset').get('name')) {
                                         allDatasetComponents.push(d);
                                     }
@@ -735,6 +735,9 @@ class DatasetView extends React.Component<any, State> {
                 columnDefs: columnDefs,
                 leafColumnDefs: this.getLeafColumns(columnDefs)
             })
+        }
+        if (prevProps.isParentHidden !== this.props.isParentHidden || prevState.isHidden !== this.state.isHidden) {
+            window.dispatchEvent(new Event("appAdaptiveResize"));
         }
     }
 
@@ -1419,7 +1422,7 @@ class DatasetView extends React.Component<any, State> {
                 ? "diagram"
                 : "normal";
         return (
-        <div hidden={this.state.isHidden}>
+        <div hidden={this.state.isHidden || this.props.isParentHidden}>
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>

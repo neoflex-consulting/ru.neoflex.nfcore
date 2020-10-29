@@ -32,6 +32,7 @@ import {
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
+import { NeoHint } from 'neo-design';
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
@@ -836,7 +837,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     width: colDef.get('width'),
                     type: colDef.get('type'),
                     field: colDef.get('field'),
-                    headerName: colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
+                    headerName:  colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
                     headerTooltip: colDef.get('headerTooltip'),
                     hide: colDef.get('hide') || false,
                     editable: colDef.get('editable') || false,
@@ -876,7 +877,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             ? {mask: colDef.get('mask'), type: colDef.get('type')}
                             : undefined,
                     valueFormatter: colDef.get('valueFormatter'),
-                    tooltipField: colDef.get('tooltipField')
+                    tooltipField: colDef.get('tooltipField'),
                 });
             }
         }

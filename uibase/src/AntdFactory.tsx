@@ -407,6 +407,7 @@ export class Button_ extends ViewContainer {
         this.state = {
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
+            isEnter: false,
         };
     }
 
@@ -417,8 +418,15 @@ export class Button_ extends ViewContainer {
     componentWillUnmount(): void {
         unmountComponent.bind(this)()
     }
+    enterCheck(e: KeyboardEvent): void{
+        if (e.key === "Enter" || e.key.endsWith("0") || e.key.endsWith("1") || e.key.endsWith("2") || e.key.endsWith("3") || e.key.endsWith("4") || e.key.endsWith("5") || e.key.endsWith("6") || e.key.endsWith("7") || e.key.endsWith("8") || e.key.endsWith("9")) {
+            this.setState({isEnter: true})
+        }
+    }
+
 
     render = () => {
+        window.addEventListener('keydown', this.enterCheck.bind(this))
         const cssClass = createCssClass(this.viewObject);
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
@@ -428,10 +436,12 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
-                className={cssClass}
-                onClick={isReadOnly ? ()=>{} : () => {
-                    const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                    handleClick.bind(this)(value);
+                onClick={isReadOnly ? ()=>{} : (e) => {
+                        if (!this.state.isEnter) {
+                            const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                            handleClick.bind(this)(value);
+                        }
+                    this.setState({isEnter: false})
                 }}>
                 {(label)? label: t('submit')}
             </NeoButton>
@@ -801,15 +811,21 @@ class HtmlContent_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden || this.props.isParentHidden}
-                 aria-disabled={isReadOnly}
-                 style={{marginBottom: marginBottom}}
-                 className={`${cssClass} content`}
-                 onClick={isReadOnly ? ()=>{} : () => {
-                     const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                     handleClick.bind(this)(value);
-                 }}
-                 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            <div hidden={false}
+                     aria-disabled={isReadOnly}
+                     style={{backgroundColor:`${this.viewObject.get('isError')? '#F8F1F3': '#F0FEFF'}`,
+                     color:`${this.viewObject.get('isError')? '#AD1457': '#0E5A7D'}`}}
+                     className={`${cssClass} content`}
+                     onClick={isReadOnly ? ()=>{} : () => {
+                         const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                         handleClick.bind(this)(value);
+                     }}
+            >
+                {this.viewObject.get('isError')?<NeoIcon icon={'info'} color={'#AD1457'} style={{margin:'5px 12px 0 0'}}/>
+                    :
+                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin:'5px 12px 0 0'}}/>}
+                <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
+            </div>
             </div>
         )
     }
@@ -1435,7 +1451,8 @@ class DatasetView_ extends ViewContainer {
         const props = {
             ...this.props,
             disabled: disabled,
-            hidden: hidden || this.props.isParentHidden,
+            hidden: hidden,
+            isParentHidden: this.props.isParentHidden,
             grantType: grantType,
             className: cssClass
         };
