@@ -5,7 +5,13 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject, findObjectByIdCallback} from '../utils/resourceEditorUtils'
+import {
+    findObjectById,
+    findObjectByIdCallback,
+    getPrimitiveType,
+    nestUpdaters,
+    traverseEObject
+} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -14,7 +20,6 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
-import update from "immutability-helper";
 
 
 interface ITargetObject {
@@ -264,9 +269,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
-            const dragNodePos = dragPos[dragPos.length - 1];
+            const dragNodePos = Number(dragPos[dragPos.length - 1]);
 
-            const nodePos = dropPos[dropPos.length - 1];
+            const nodePos = Number(dropPos[dropPos.length - 1]);
 
             const dragNodePropertyName = event.dragNode.props.propertyName
             const nodePropertyName = event.node.props.propertyName
@@ -290,85 +295,43 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 this.notification(t('notification'), 'Опрация заблокирована');
             }
             else {
-
-                // let dragObj: any = undefined;
-                // findObjectByIdCallback(data, dragKey, (item: any, arr: any, data: any, prop: any, index: any) => {
-                //     dragObj = item
-                //
-                //     // if (arr[dragNodePropertyName] !== undefined) {
-                //     //     arr[dragNodePropertyName] = null
-                //     // } else {
-                //     //     dragNodePropertyName !== undefined && index !== undefined ?
-                //     //         arr[index][dragNodePropertyName] = null :
-                //     //         arr.splice(dragNodePos, 1);
-                //     // }
-                // });
-
                 let updatedJSON = this.state.resourceJSON;
                 let dragObj = findObjectById(updatedJSON, dragKey);
 
                 //Delete dragObj from updatedJSON
                 updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
 
-
-
+                // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
                 if (!event.dropToGap) {
-                    // updatedJSON = event.node.props.parentUpdater(null, nodePos, nodePropertyName, { operation: "addNode", index: nodePos, dragObj: dragObj})
-                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, arr: any, data: any, prop: any) => {
-                        let upperBound = event.node.props.upperBound
-                        if (upperBound === 1) {
-                            if (prop !== undefined && Array.isArray(arr)) {
-                                if (arr[arr.indexOf(item)][nodePropertyName] === undefined) {
-                                    arr[arr.indexOf(item)][nodePropertyName] = dragObj
-                                    this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
-                                }
-                            } else {
-                                if (arr[nodePropertyName] === undefined || arr[nodePropertyName] === null) {
-                                    arr[nodePropertyName] = dragObj
-                                    this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
-                                }
-                            }
-                        } else if (upperBound === -1) {
-                            if (!Array.isArray(arr) || prop === undefined) {
-                                if (arr[nodePropertyName] === null || arr[nodePropertyName] === undefined) {
-                                    arr[nodePropertyName] = []
-                                }
-                                arr[nodePropertyName].push(dragObj)
-                                this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
-                            } else {
-                                if (arr[arr.indexOf(item)][nodePropertyName] === null || arr[arr.indexOf(item)][nodePropertyName] === undefined) {
-                                    arr[arr.indexOf(item)][nodePropertyName] = []
-                                }
-                                arr[arr.indexOf(item)][nodePropertyName].push(dragObj)
-                                this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
-                            }
-                        }
+                    let item: any;
+                     findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                         item = dropObj
                     });
+                    let upperBound = event.node.props.upperBound
+                    if (upperBound === 1) {
+                        item[nodePropertyName] = dragObj
+                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+
+                    } else if (upperBound === -1) {
+                        if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
+                            item[nodePropertyName] = []
+                        }
+                        item[nodePropertyName].push(dragObj)
+                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                    }
                 }
-
-                    //
-                    // } else if (
-                    //     (event.node.props.children || []).length > 0 &&
-                    //     event.node.props.expanded &&
-                    //     dropPosition === 1
-                    // ) {
-                    //     findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any, index: any) => {
-                    //         // item[prop] = item[prop] || [];
-                    //         item[prop].unshift(dragObj);
-                    //     });
-                    // }
-
                 else {
                         let ar: any;
-                        let i: any;
-                        findObjectByIdCallback(updatedJSON, dropKey, (item: any, arr: any, data: any, prop: any, index: any) => {
-                            ar = data[prop] || data;
+                        findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
+                            ar = data;
                         });
                         if (ar !== undefined) {
                             if (dropPosition === -1) {
                                 ar.splice(nodePos, 0, dragObj);
-                            } else {
+                            } else if (nodePos < dragNodePos) {
                                 ar.splice(nodePos + 1, 0, dragObj);
+                            } else if (nodePos > dragNodePos) {
+                                ar.splice(nodePos, 0, dragObj);
                             }
                         }
                     }
@@ -939,6 +902,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
+            const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+            contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
             this.setState({ isSaving: true });
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 if (this.props.match.params.id === 'new') {
