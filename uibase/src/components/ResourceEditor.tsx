@@ -254,11 +254,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         };
 
         const onDrop = (event: any) => {
+            const {t} = this.props;
             const dragKey = event.dragNode.props.eventKey;
-            // const dragKeyContain = event.dragNode.props.eventKey.split('.')[1];
 
             const dropKey = event.node.props.eventKey.split('.')[0];
-            // const dropKeyContain = event.node.props.eventKey.split('.')[1];
 
             const dragPos = event.dragNode.props.pos.split('-');
             const dropPos = event.node.props.pos.split('-');
@@ -266,59 +265,103 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
             const dragNodePos = dragPos[dragPos.length - 1];
-            const dragNodeParentPos = dragPos[dragPos.length - 2];
 
             const nodePos = dropPos[dropPos.length - 1];
-            const nodeParentPos = dropPos[dropPos.length - 2];
 
             const dragNodePropertyName = event.dragNode.props.propertyName
             const nodePropertyName = event.node.props.propertyName
 
-            if ( (dropKey === "null" && event.node.props.children.length !== 0 && event.node.props.upperBound !== -1) ||
-                (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === 1 || event.node.props.upperBound === 1)) ||
-                    (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === undefined && event.node.props.upperBound === undefined))
+            const eClass = event.node.props.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+
+            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
+
+            if (!this.state.edit) {
+                this.notification(t('notification'), t('editing is not available'));
+            }
+            else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
+                this.notification(t('notification'), 'Опрация заблокирована');
+            }
+            else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
+                (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
+                (dropKey === 'null' && event.node.props.arrayLength !== 0)
             ) {
-                alert('Опрация заблокирована')
+                this.notification(t('notification'), 'Опрация заблокирована');
             }
             else {
-                let data: any = this.state.resourceJSON;
 
-                let dragObj: any = undefined;
+                // let dragObj: any = undefined;
+                // findObjectByIdCallback(data, dragKey, (item: any, arr: any, data: any, prop: any, index: any) => {
+                //     dragObj = item
+                //
+                //     // if (arr[dragNodePropertyName] !== undefined) {
+                //     //     arr[dragNodePropertyName] = null
+                //     // } else {
+                //     //     dragNodePropertyName !== undefined && index !== undefined ?
+                //     //         arr[index][dragNodePropertyName] = null :
+                //     //         arr.splice(dragNodePos, 1);
+                //     // }
+                // });
 
-                findObjectByIdCallback(data, dragKey, (item: any, arr: any, data: any, prop: any) => {
-                    dragObj = item
-                    arr.splice(dragNodePos, 1);
-                    // dragNodePropertyName !== undefined ?
-                    //     arr[dragNodeParentPos][dragNodePropertyName] = null :
-                    //     arr.splice(dragNodePos, 1);
-                });
+                let updatedJSON = this.state.resourceJSON;
+                let dragObj = findObjectById(updatedJSON, dragKey);
+
+                //Delete dragObj from updatedJSON
+                updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
+
+
 
                 if (!event.dropToGap) {
-                    findObjectByIdCallback(data, dropKey, (item: any, arr: any) => {
-                        arr.push(dragObj);
-                        // nodePropertyName !== undefined ?
-                        //     arr[nodeParentPos][nodePropertyName] = dragObj :
-                        //     arr.push(dragObj);
+                    // updatedJSON = event.node.props.parentUpdater(null, nodePos, nodePropertyName, { operation: "addNode", index: nodePos, dragObj: dragObj})
+                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, arr: any, data: any, prop: any) => {
+                        let upperBound = event.node.props.upperBound
+                        if (upperBound === 1) {
+                            if (prop !== undefined && Array.isArray(arr)) {
+                                if (arr[arr.indexOf(item)][nodePropertyName] === undefined) {
+                                    arr[arr.indexOf(item)][nodePropertyName] = dragObj
+                                    this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                                }
+                            } else {
+                                if (arr[nodePropertyName] === undefined || arr[nodePropertyName] === null) {
+                                    arr[nodePropertyName] = dragObj
+                                    this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                                }
+                            }
+                        } else if (upperBound === -1) {
+                            if (!Array.isArray(arr) || prop === undefined) {
+                                if (arr[nodePropertyName] === null || arr[nodePropertyName] === undefined) {
+                                    arr[nodePropertyName] = []
+                                }
+                                arr[nodePropertyName].push(dragObj)
+                                this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                            } else {
+                                if (arr[arr.indexOf(item)][nodePropertyName] === null || arr[arr.indexOf(item)][nodePropertyName] === undefined) {
+                                    arr[arr.indexOf(item)][nodePropertyName] = []
+                                }
+                                arr[arr.indexOf(item)][nodePropertyName].push(dragObj)
+                                this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                            }
+                        }
                     });
+                }
 
+                    //
+                    // } else if (
+                    //     (event.node.props.children || []).length > 0 &&
+                    //     event.node.props.expanded &&
+                    //     dropPosition === 1
+                    // ) {
+                    //     findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any, index: any) => {
+                    //         // item[prop] = item[prop] || [];
+                    //         item[prop].unshift(dragObj);
+                    //     });
+                    // }
 
-                    } else if (
-                        (event.node.props.children || []).length > 0 &&
-                        event.node.props.expanded &&
-                        dropPosition === 1
-                    ) {
-                        findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any) => {
-                            // item[prop] = item[prop] || [];
-                            item[prop].unshift(dragObj);
-                        });
-                        // loop(data, dropKey, (item: any) => {
-                        //     item.children = item.children || [];
-                        //     item.children.unshift(dragObj);
-                        // });
-                    } else {
+                else {
                         let ar: any;
                         let i: any;
-                        findObjectByIdCallback(data, dropKey, (item: any, arr: any, data: any, prop: any) => {
+                        findObjectByIdCallback(updatedJSON, dropKey, (item: any, arr: any, data: any, prop: any, index: any) => {
                             ar = data[prop] || data;
                         });
                         if (ar !== undefined) {
@@ -331,7 +374,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     }
                     const node: { [key: string]: any } = event.node.props;
                     const targetObject: { [key: string]: any } = this.state.targetObject;
-                    let updatedJSON = data;
                     let nestedJSON = nestUpdaters(updatedJSON, null);
                     let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
                     this.state.mainEObject.eResource().clear();
@@ -414,6 +456,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const posY = e.event.clientY;
         const nodeProps = e.node.props;
         getClipboardContents().then(json => {
+            console.log(json)
             let eObject = {eClass: ""} as ITargetObject;
             try {
                 eObject = JSON.parse(json);

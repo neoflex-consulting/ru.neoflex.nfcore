@@ -38,6 +38,18 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {
                         return currentObject.children ? currentObject.children : undefined
+                    } else if (options && options.operation === "deleteNode") {
+                        if (Array.isArray(currentObject[updaterProperty])) {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
+                        } else { //DatasetComponent (component -> component)
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: null } })
+                        }
+                    } else if (options && options.operation === "addNode") {
+                        if (Array.isArray(currentObject[updaterProperty])) {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 0, options.dragObj]] } })
+                        } else { //DatasetComponent (component -> component)
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: options.dragObj } })
+                        }
                     } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
@@ -140,12 +152,14 @@ function traverseEObject(obj: any, func: (obj: any, key: string, level: number)=
 
 function findObjectByIdCallback(data: any, id: String, callback: any): any {
     const walkThroughArray = (array: Array<any>): any => {
+        let index = undefined
         for (var el of array) {
+            index === undefined ? index = 0 : index = index + 1
             if (el._id && el._id === id) {
                 return el
             } else {
                 const result = findObjectById(el, id);
-                if (result) return result
+                if (result) return callback(result, array, data, undefined, index)
             }
         }
     };
@@ -154,27 +168,28 @@ function findObjectByIdCallback(data: any, id: String, callback: any): any {
         let result;
         let prop_;
         let arr;
+        let index = undefined
 
         for (let prop in obj) {
             if (result) {
                 break
             }
             if (Array.isArray(obj[prop])) {
-                result = findObjectByIdCallback(obj[prop], id, callback)
                 prop_ = prop
                 arr = obj[prop]
+                result = findObjectByIdCallback(obj[prop], id, callback)
             } else {
                 if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
-                    result = findObjectByIdCallback(obj[prop], id, callback);
                     prop_ = prop
                     arr = obj[prop]
+                    result = findObjectByIdCallback(obj[prop], id, callback)
                 }
             }
         }
-        if (result) callback(result, arr, data, prop_)
+        if (result) callback(result, arr, data, prop_, index)
     };
 
-    if (data._id === id) return callback(data, 0, data);
+    if (data._id === id) return callback(data, data, data, undefined, 0);
 
     if (Array.isArray(data)) {
         return walkThroughArray(data)
