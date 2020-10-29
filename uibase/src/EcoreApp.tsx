@@ -802,9 +802,9 @@ class EcoreApp extends React.Component<any, State> {
                                 {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
+                                        <NeoHint  title={this.props.t('back to applications')}>
                                         <NeoButton
                                             style={{marginRight: '10px'}}
-                                            title={this.props.t('back to applications')}
                                             type={"link"}
                                                 onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
@@ -812,19 +812,21 @@ class EcoreApp extends React.Component<any, State> {
                                             <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
                                             </a>
                                         </NeoButton>
+                                        </NeoHint>
                                         :
+                                        <NeoHint  title={this.props.t('developer menu')}>
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
-                                                   title={this.props.t('developer menu')}
                                         >
                                             <Link to={`/developer/data`}>
                                                 <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
                                             </Link>
                                         </NeoButton>
+                                        </NeoHint>
                                 }
+                                <NeoHint title={this.props.t('auto-close notification')}>
                             <NeoButton
                                 type="link"
-                                title={this.props.t('auto-close notification')}
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
@@ -832,6 +834,7 @@ class EcoreApp extends React.Component<any, State> {
                                     :
                                         <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
                             </NeoButton>
+                                </NeoHint>
                                     <span style={{
                                         textTransform: "capitalize",
                                         fontSize: '15px',
@@ -842,14 +845,16 @@ class EcoreApp extends React.Component<any, State> {
                                     }}>
                                         <span className={'NameOfUser'}>{principal.name}</span>
                                     </span>
+                                <NeoHint title={this.props.t('logout')}>
                             <NeoButton
                                 style={{marginRight: "10px"}}
-                                title={this.props.t('logout')}
+
                                 onClick={this.logOut}
                                 type="link"
                             >
                                 <NeoIcon icon={'exit'} color={'white'} />
                             </NeoButton>
+                                </NeoHint>
                             </div>
                         </NeoCol>
                     </NeoRow>
