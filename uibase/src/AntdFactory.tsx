@@ -821,9 +821,10 @@ class HtmlContent_ extends ViewContainer {
                          handleClick.bind(this)(value);
                      }}
             >
-                {this.viewObject.get('isError')?<NeoIcon icon={'info'} color={'#AD1457'} style={{margin:'5px 12px 0 0'}}/>
+                {this.viewObject.get('isError') ?
+                    <NeoIcon icon={'info'} color={'#AD1457'} style={{margin: '5px 12px 0 0'}}/>
                     :
-                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin:'5px 12px 0 0'}}/>}
+                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin: '0 12px 0 0'}}/>}
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
             </div>
