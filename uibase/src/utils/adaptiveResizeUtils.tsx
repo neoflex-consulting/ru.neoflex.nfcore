@@ -6,7 +6,7 @@ export enum adaptiveElementSize {
     extraLarge
 }
 
-const breakPointsSizePx = {
+export const breakPointsSizePx = {
     paginator: [375, 540, 857, 857, 857],
     diagram: [375, 400, 638, 878, 878],
     edit: [375, 375, 522, 750, 750],

@@ -11,7 +11,7 @@ import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
 import {NeoIcon_} from "./AntdFactory";
-import {adaptiveElementSize, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
+import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
@@ -23,6 +23,17 @@ interface State {
     currentTool?: string
     objectApp?: Ecore.EObject
     eClassAppModule?: Ecore.EObject
+}
+
+const defaultVerticalSplitterSize = "233px";
+const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[0]}px`;
+
+function getStoredSize() {
+    return localStorage.getItem('mainapp_refsplitter_pos') || defaultVerticalSplitterSize;
+}
+
+function setStoredSize(size = defaultVerticalSplitterSize) {
+    localStorage.setItem('mainapp_refsplitter_pos', size)
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -53,7 +64,6 @@ export class MainApp extends React.Component<any, State> {
         let name: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
-
             if (this.state.eClassAppModule) {
                 API.instance().findByKindAndName(this.state.eClassAppModule, name, 999).then(resources => {
                     if (resources.length > 0) {
@@ -86,7 +96,7 @@ export class MainApp extends React.Component<any, State> {
                                         })
                                     );
                                     if (this.props.pathFull.length !== 1) {
-                                        this.setState({hideReferences: false});
+                                        this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)});
                                     }
                                 }
                             })
@@ -143,7 +153,7 @@ export class MainApp extends React.Component<any, State> {
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
-                            this.setState({hideReferences: false})
+                            this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)})
                         }
                     }
                 })
@@ -159,7 +169,7 @@ export class MainApp extends React.Component<any, State> {
                     this.props.context.updateContext!(
                         ({applicationReferenceTree: objectApp.get('referenceTree')})
                     );
-                    this.setState({hideReferences: false})
+                    this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)})
                 }
             })
         }
@@ -224,8 +234,8 @@ export class MainApp extends React.Component<any, State> {
                 <Tooltip title={this.state.hideReferences ? this.props.t("show") : this.props.t("hide")}>
                     <span className="references-button" onClick={() => {
                         if (this.state.hideReferences) {
-                            const size = localStorage.getItem('mainapp_refsplitter_pos');
-                            this.setVerticalSplitterWidth(size && (parseInt(size) < 233) ? "233px" : size!)
+                            const size = getStoredSize();
+                            this.setVerticalSplitterWidth(size && (parseInt(size) < 233) ? defaultVerticalSplitterSize : size!)
                         } else {
                             this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                         }
@@ -276,7 +286,7 @@ export class MainApp extends React.Component<any, State> {
                 <Menu
                     id={"referenceTree"}
                     className={`${isShortSize && "short-size"}`}
-                    openKeys={this.state.hideReferences ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
+                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
                     onSelect={params => {
                         const cb = cbs.get(params.key);
@@ -286,8 +296,8 @@ export class MainApp extends React.Component<any, State> {
                         this.setState({openKeys:openKeys});
                         //Восстанавливаем ширину если были в свернутом виде
                         if (this.state.hideReferences) {
-                            localStorage.setItem('mainapp_refsplitter_pos', "233px");
-                            this.setVerticalSplitterWidth(localStorage.getItem('mainapp_refsplitter_pos')!)
+                            setStoredSize(defaultVerticalSplitterSize);
+                            this.setVerticalSplitterWidth(getStoredSize())
                         }
                     }}
                     mode="inline"
@@ -380,18 +390,17 @@ export class MainApp extends React.Component<any, State> {
                     ref={this.refSplitterRef}
                     position="vertical"
                     primaryPaneMaxWidth="50%"
-                    primaryPaneMinWidth={hasIcons ? "62px" : "0px"}
+                    primaryPaneMinWidth={hasIcons ? verticalSplitterShortSize : "0px"}
                     primaryPaneWidth={hasIcons && this.state.hideReferences
-                        ? "62px"
+                        ? verticalSplitterShortSize
                         : this.state.hideReferences
                             ? 0
-                            : localStorage.getItem('mainapp_refsplitter_pos') || "233px"}
+                            : getStoredSize()}
                     dispatchResize={true}
                     postPoned={false}
                     onDragFinished={() => {
                         if (this.refSplitterRef.current) {
-                            const size: string = this.refSplitterRef.current.panePrimary.props.style.width;
-                            localStorage.setItem('mainapp_refsplitter_pos', size)
+                            setStoredSize(this.refSplitterRef.current.panePrimary.props.style.width)
                         }
                     }}
                 >
