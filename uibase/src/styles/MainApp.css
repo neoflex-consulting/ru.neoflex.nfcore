@@ -224,3 +224,32 @@
 #referenceTree.short-size > li > div > i {
     display: none;
 }
+
+.application-footer  {
+    display: inline-flex;
+    border-top: 1px #F2F2F2 solid;
+    width: 100%
+}
+
+.footer-item {
+    margin: 8px 0 0 16px;
+}
+
+#verticalLine {
+    border-left: 1px solid #E6E6E6;
+    height: 20px;
+    margin: auto 0 auto 16px;
+
+}
+
+.pane.horizontal.primary {
+    overflow: auto;
+}
+
+#logContent > p {
+    margin: 0 0 0 0;
+}
+
+#logContent > p:nth-child(odd) {
+    background-color: #F2F2F2;
+}

@@ -9,4 +9,5 @@ module.exports = function(app) {
     app.use(proxy('/script/**', { target: 'http://localhost:8080/', ws: true }));
     app.use(proxy('/masterdata/**', { target: 'http://localhost:8080/', ws: true }));
     app.use(proxy('/socket-registry/**', { target: 'http://localhost:8080/', ws: true }));
+    app.use(proxy('/actuator/logfile/**', { target: 'http://localhost:8080/', ws: true }));
 };

@@ -386,6 +386,11 @@
 
         "bar chart": "條形圖",
         "pie chart": "餅形圖",
-        "graph": "時間表"
+        "graph": "時間表",
+
+        "show log": "顯示服務器日誌",
+        "hide log": "隱藏服務器日誌",
+        "show url decode": "顯示解碼的URL",
+        "hide url decode": "隱藏解碼的URL"
 
 }
