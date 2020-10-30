@@ -248,7 +248,6 @@ class Tools extends React.Component<any, State> {
                 <NeoButton
                     type={'link'}
                     className={"tools-highlighted-text"}
-                    style={{marginTop: "4px"}}
                     suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
                     onClick={(event) => {
                         this.fileSystemLookupRef.current.showDrawer()
@@ -296,7 +295,6 @@ class Tools extends React.Component<any, State> {
                     <NeoButton
                         type={'link'}
                         className={"tools-highlighted-text"}
-                        style={{marginTop: "4px"}}
                         suffixIcon={<NeoIcon icon={"exportFile"} size={'m'}/>}
                         onClick={() => {
                             this.setState({drawerResourceVisible: true})
