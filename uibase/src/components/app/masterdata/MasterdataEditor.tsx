@@ -241,7 +241,8 @@ class MasterdataEditor extends React.Component<Props&WithTranslation, any> {
         return (
             <React.Fragment>
                 <div>
-                    <NeoButton type={'link'} title={t('refresh')} style={{color: 'rgb(151, 151, 151)', marginTop: "15px"}} onClick={this.refresh}>
+                    <NeoButton type={'link'} title={t('refresh')} style={{color: 'rgb(151, 151, 151)'}}
+                               onClick={this.refresh}>
                         <NeoIcon icon={"update-clock"} size={'m'}/>
                     </NeoButton>
                     <div style={{

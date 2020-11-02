@@ -234,15 +234,6 @@ export class MainApp extends React.Component<any, State> {
         window.removeEventListener("resize", this.handleResize);
     }
 
-
-    renderToolButton = (name: string, label: string, icon: string) => {
-        return <span className={this.state.currentTool === name ? "tool-button-selected" : "tool-button"}
-                     onClick={() => {
-                         this.setState({currentTool: this.state.currentTool === name ? undefined : name})
-                     }}><IconFA className="magnify" name={icon}><span
-            style={{paddingLeft: 5}}>{label}</span></IconFA></span>
-    };
-
     setVerticalSplitterWidth = (width:string, minWidth?:string, maxWidth: string = "50%") => {
         if (!minWidth) {
             minWidth = this.refSplitterRef.current.panePrimary.props.style.minWidth;

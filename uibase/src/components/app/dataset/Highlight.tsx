@@ -40,7 +40,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <span>{value.index}</span>
             </NeoCol>
             <NeoCol span={2} style={{alignItems:'flex-start'}}>
-                <Form.Item style={{ display: 'inline-block' }}>
+                <Form.Item style={{display: 'inline-block', marginTop: '3px'}}>
                     <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
@@ -236,9 +236,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('background', value.index)}
-                    style={{
-                    marginTop:'15px'
-                    }}
+                    style={{marginTop: '7px'}}
                 >
                     <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
                 </NeoButton>
@@ -283,14 +281,10 @@ const SortableItem = SortableElement(({value}: any) => {
                         <SketchColorPicker value={value} type={'background'} />
                     )}
                 </Modal>
-            {/*</NeoCol>*/}
-            {/*<NeoCol span={2} style={{alignItems:'flex-start'}}>*/}
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('text', value.index)}
-                    style={{
-                        marginTop:'15px'
-                    }}
+                    style={{marginTop: '7px'}}
                 >
                     <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
                 </NeoButton>
@@ -336,12 +330,14 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Modal>
             </NeoCol>
             <NeoCol span={1} style={{alignItems:'flex-start'}}>
-                <Form.Item style={{ display: 'inline-block', marginTop: '10px' }}>
+                <Form.Item style={{display: 'inline-block', marginTop: '7px'}}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
                         id={'deleteRowButton'}
-                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
+                        onClick={(e: any) => {
+                            value.deleteRow({index: value.index})
+                        }}
                     >
                         <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
                     </NeoButton>

@@ -740,7 +740,6 @@ class EcoreApp extends React.Component<any, State> {
                                         <NeoButton
                                             style={{marginRight: '10px'}}
                                             type={"link"}
-                                                onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
                                             <a href={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
                                             <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />

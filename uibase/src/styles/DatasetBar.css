@@ -76,17 +76,12 @@
 
 .adaptive-dropdown {
     margin-left: 16px;
-    margin-top: 9px;
     width: 100%;
-}
-
-.export-dropdown {
-    margin-top: 3px;
 }
 
 .search-button {
     margin-left: 16px;
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 .search-input {
@@ -110,6 +105,14 @@
 
 .margin-top {
     margin-top: 8px;
+}
+
+.margin-top-fullscreen {
+    margin-top: 4px;
+}
+
+.margin-top-button {
+    margin-top: 4px;
 }
 
 .margin-left {
