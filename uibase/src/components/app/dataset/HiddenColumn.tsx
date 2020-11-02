@@ -40,8 +40,8 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
-        <NeoIcon style={{ marginTop: '16px'}} color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
-        <Form.Item style={{ margin: 'auto 0 auto 20px' }}>
+        <NeoIcon color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
+        <Form.Item style={{margin: 'auto 0 auto 20px'}}>
             <NeoSwitch
                 checked={value.enable}
                 onChange={(e: any) => {
@@ -62,10 +62,10 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
             </Paragraph>
         </Form.Item>
         <NeoButton title={value.t("move top")} type={"link"} style={{ margin: value.index === value.parametersArray.length ? 'auto 24px auto auto' : 'auto 0 auto auto'}} onClick={()=>value.onToTopClick(value.index)} hidden={value.index === 1}>
-            <NeoIcon icon={"moveUp"} color={NeoColor.grey_7} style={{ marginTop: '16px'}} size={"m"}/>
+            <NeoIcon icon={"moveUp"} color={NeoColor.grey_7} size={"m"}/>
         </NeoButton>
         <NeoButton title={value.t("move bottom")} type={"link"} style={{ marginLeft: value.index === 1 && 'auto'}} onClick={()=>value.onToBottomClick(value.index)} hidden={value.index === value.parametersArray.length}>
-            <NeoIcon icon={"moveDown"} color={NeoColor.grey_7} style={{ marginTop: '16px'}} size={"m"}/>
+            <NeoIcon icon={"moveDown"} color={NeoColor.grey_7} size={"m"}/>
         </NeoButton>
     </NeoRow>
 </div>);
