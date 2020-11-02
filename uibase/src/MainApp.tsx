@@ -12,7 +12,7 @@ import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
 import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const FooterHeight = '2em';
@@ -31,6 +31,7 @@ interface State {
 }
 
 const defaultVerticalSplitterSize = "233px";
+const defaultHorizontalSplitterSize = "400px";
 const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[0]}px`;
 
 function getStoredSize() {
@@ -76,7 +77,7 @@ export class MainApp extends React.Component<any, State> {
     getEClassAppModule(): void {
         API.instance().fetchAllClasses(false).then(classes => {
             const eClass = classes.find((c: Ecore.EObject) => c._id === "//AppModule") as Ecore.EClass;
-            this.setState({eClassAppModule: eClass})
+            this.setState({eClassAppModule: eClass});
             this.loadObject()
         })
     }
@@ -142,10 +143,10 @@ export class MainApp extends React.Component<any, State> {
                             }
                             else {
                                 let treeChildren = objectApp.get('referenceTree').eContents();
-                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1]
+                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
 
                                 if (objectApp.get('name') === currentAppModule.appModule) {
-                                    let currentTree: any[] = currentAppModule['tree']
+                                    let currentTree: any[] = currentAppModule['tree'];
                                     for (let i = 0; i <= currentTree.length - 1; i++) {
                                         for (let t of treeChildren
                                             .filter((t: any) => t.get('name') === currentTree[i])) {
@@ -223,7 +224,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
-        this.getEClassAppModule()
+        this.getEClassAppModule();
         window.addEventListener("appAdaptiveResize", this.handleResize);
         window.addEventListener("resize", this.handleResize);
     }
@@ -248,7 +249,7 @@ export class MainApp extends React.Component<any, State> {
         }
         this.refSplitterRef.current.panePrimary.div.setAttribute("style",
             `width: ${width}; min-width: ${minWidth}; max-width: ${maxWidth}`);
-    }
+    };
 
     renderFooter = () => {
         return (
@@ -269,9 +270,9 @@ export class MainApp extends React.Component<any, State> {
                     <NeoIcon icon={"table"} />
                 </NeoButton>
                 <div id={"verticalLine"}/>
-                <div id={"debugMenu"}>
-                    <NeoButton
-                        className={"footer-item"}
+                <NeoTabs className={"debug-tabs-pane"}>
+                    <NeoTabs.NeoTabPane key={"log"} tab={<NeoButton
+                        className={"debug-item"}
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
                         onClick={()=>{
@@ -286,36 +287,42 @@ export class MainApp extends React.Component<any, State> {
                         }}
                         type={"link"}>
                         <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("logs")}
-                    </NeoButton>
-                    <NeoButton
-                        className={"footer-item"}
+                    </NeoButton>}/>
+                    <NeoTabs.NeoTabPane key={"url"} tab={<NeoButton
+                        className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideURL ? this.props.t("show url") : this.props.t("hide url")}
                         onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL })}
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
-                    </NeoButton>
-                </div>
-
-                <div style={{
-                    display: "inline-block",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    alignContent: "center"
-                }}>
-                </div>
+                    </NeoButton>}/>
+                </NeoTabs>
             </div>
         )
     };
 
     renderDebugContent = () => {
+        let children = null;
         let content = null;
         if (!this.state.hideLog) {
-            content = <div id={"logContent"} ref={this.debugRef}>{splitLog(this.state.log).map(str=>{
-                return <p>{str}</p>
-            })}</div>
+            children = <div id={"logContent"} ref={this.debugRef}>
+                {splitLog(this.state.log).map(str=>{
+                    return <div>{str}</div>
+                })}
+                </div>
+            content = <div id={"debugContainer"}>
+                <div id={"debugInnerBar"} >
+                    <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({hideLog:true})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
+                    <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({log:""})}><NeoIcon color={NeoColor.violete_4} icon={"rubbish"}/></NeoButton>
+                </div>
+                {children}
+            </div>
         } else if (!this.state.hideURL) {
-
+            content = <div id={"debugContainer"}>
+                <div id={"debugInnerBar"} >
+                    <NeoButton type={"link"} onClick={()=>!this.state.hideURL && this.setState({hideURL:true})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
+                </div>
+            </div>
         }
         return content
     };
@@ -470,14 +477,14 @@ export class MainApp extends React.Component<any, State> {
                     <div className={'leftSplitter'} style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%', overflow: "auto"}}>
                         {this.renderReferences(this.state.hideReferences)}
                     </div>
-                    <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
+                    <div style={{backgroundColor: backgroundColor, height: '100%'}}>
                         <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                             <Splitter
                                 ref={this.toolsSplitterRef}
                                 position="horizontal"
                                 primaryPaneMaxHeight="100%"
                                 primaryPaneMinHeight="0%"
-                                primaryPaneHeight={localStorage.getItem('mainapp_toolssplitter_pos') || "400px"}
+                                primaryPaneHeight={localStorage.getItem('mainapp_toolssplitter_pos') || defaultHorizontalSplitterSize}
                                 dispatchResize={true}
                                 postPoned={false}
                                 maximizedPrimaryPane={this.state.hideLog && this.state.hideURL}
@@ -509,7 +516,6 @@ export class MainApp extends React.Component<any, State> {
                                 <div style={{
                                     height: '100%',
                                     width: '100%',
-                                    overflow: 'auto',
                                     backgroundColor: backgroundColor
                                 }}>
                                     {this.renderDebugContent()}

@@ -231,14 +231,18 @@
     width: 100%
 }
 
+.debug-item {
+    margin: -4px 0 0 0;
+}
+
 .footer-item {
-    margin: 8px 0 0 16px;
+    margin: 4px 0 0 16px;
 }
 
 #verticalLine {
     border-left: 1px solid #E6E6E6;
     height: 20px;
-    margin: auto 0 auto 16px;
+    margin: 10px 16px 0 16px;
 
 }
 
@@ -246,10 +250,53 @@
     overflow: auto;
 }
 
-#logContent > p {
+#logContent {
+    overflow-y:scroll;
+}
+
+#logContent > div {
+    padding: 0 0 0 16px;
+    display: inline-flex;
+}
+
+#logContent > div:nth-child(odd) {
+    background-color: #FAFAFA;
+}
+
+.debug-tabs-pane .ant-tabs-ink-bar {
+    bottom: unset;
+    top: 0;
+}
+
+.debug-tabs-pane .ant-tabs-bar {
+    border-bottom: unset;
+}
+
+.debug-tabs-pane .ant-tabs-bar {
     margin: 0 0 0 0;
 }
 
-#logContent > p:nth-child(odd) {
+.debug-tabs-pane .ant-tabs-tab {
+    padding: 6px 0 6px 0;
+}
+
+.debug-item > div  {
+    margin: 0 16px 0 0
+}
+
+#debugContainer {
+    display: inline-flex;
+    height: 100%;
+}
+
+#debugInnerBar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    top: 0;
     background-color: #F2F2F2;
+    padding: 12px 16px 4px 16px;
+    font-size: 20px;
+    height: 100%;
+    border-right: 1px #D9D9D9 solid;
 }
