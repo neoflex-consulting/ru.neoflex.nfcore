@@ -902,9 +902,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
-            contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
-            this.setState({ isSaving: true });
+            // const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+            // contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
+            this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 if (this.props.match.params.id === 'new') {
                     this.setState({edit: false})
