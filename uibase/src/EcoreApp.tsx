@@ -63,7 +63,7 @@ export function encodeAppURL(path?: any[]) {
             )
         )
     }` : ""
-};
+}
 
 class EcoreApp extends React.Component<any, State> {
 
@@ -98,6 +98,7 @@ class EcoreApp extends React.Component<any, State> {
             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
+            getFullPath: this.getFullPath,
         };
         this.state = {
             principal: undefined,
@@ -364,9 +365,9 @@ class EcoreApp extends React.Component<any, State> {
         return true
     };
 
-    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
-            const path = this.getURL(appModuleName, useParentReferenceTree, treeValue, params, true);
+            const path = this.getURL(appModuleName, useParentReferenceTree, treeValue, params);
             if (path) {
                 this.setState({pathFull: path});
                 this.props.history.push(encodeAppURL(path));
@@ -374,7 +375,7 @@ class EcoreApp extends React.Component<any, State> {
         }
     };
 
-    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[], changeState = false) => {
+    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
             let path: any[] = [];
             let urlElement: ConfigUrlElement = {
@@ -412,9 +413,6 @@ class EcoreApp extends React.Component<any, State> {
                 });
             } else if (appModuleName !== this.state.appModuleName) {
                 let splitPathFull: any = [];
-                /*this.state.pathFull.forEach((p: any, index: any) => {
-                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                });*/
                 if (splitPathFull.length === 0) {
                     this.state.pathFull.forEach( (p:any, index: any) => {
                         path.push(p);
@@ -425,15 +423,6 @@ class EcoreApp extends React.Component<any, State> {
                     this.state.context.globalValues?.forEach(obj => {
                         urlElement.params = urlElement.params!.concat(obj)
                     });
-
-                    /*const nextPath = path[path.length - 1];
-                    if (
-                        nextPath &&
-                        nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
-                        path.length !== 1
-                    ) {
-                        path.pop()
-                    }*/
                     //Ограничить переходы
                     if (path.length >= 50) {
                         path.shift()
@@ -445,14 +434,13 @@ class EcoreApp extends React.Component<any, State> {
             } else if (appModuleName === this.state.appModuleName) {
                 path = this.state.pathFull
             }
-            if (changeState) {
-                this.setState({pathFull: path});
-            }
             return path
         }
     };
 
-
+    getFullPath = () => {
+        return this.state.pathFull
+    };
 
     logOut = () => {
         API.instance().logout().then(() => {

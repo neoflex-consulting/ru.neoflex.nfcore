@@ -1,6 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore"
 import {actionType, dmlOperation, eventType} from "./utils/consts";
+import ConfigUrlElement from "./ConfigUrlElement";
 
 export const MainContext: React.Context<IMainContext> = React.createContext<IMainContext>({});
 
@@ -52,8 +53,8 @@ export interface IMainContext {
     applicationReferenceTree?: Ecore.EObject
     viewReferenceTree?: Ecore.EObject
     viewObject?: Ecore.EObject
-    changeURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: Object[] | undefined) => void;
-    getURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: Object[] | undefined) => any;
+    changeURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: IServerNamedParam[] | undefined) => void;
+    getURL?: (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: undefined, params?: IServerNamedParam[] | undefined) => any;
     runQuery?: (
         resource: Ecore.Resource,
         queryParams: IServerNamedParam[],
@@ -88,4 +89,5 @@ export interface IMainContext {
     addEventHandler?: (eventHandler: IEventHandler)=>void;
     removeEventHandler?: (name: string)=>void;
     notifyAllEventHandlers?: (event: IEvent)=>void;
+    getFullPath?: ()=>ConfigUrlElement[];
 }

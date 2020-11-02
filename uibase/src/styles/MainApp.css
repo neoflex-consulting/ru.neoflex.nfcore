@@ -251,7 +251,7 @@
 }
 
 #logContent {
-    overflow-y:scroll;
+    height: fit-content;
 }
 
 #logContent > div {
@@ -287,6 +287,8 @@
 #debugContainer {
     display: inline-flex;
     height: 100%;
+    width: 100%;
+    overflow-y:scroll;
 }
 
 #debugInnerBar {
@@ -294,9 +296,25 @@
     flex-direction: column;
     justify-content: space-between;
     top: 0;
+    position: sticky;
     background-color: #F2F2F2;
     padding: 12px 16px 4px 16px;
     font-size: 20px;
     height: 100%;
     border-right: 1px #D9D9D9 solid;
+}
+
+#urlContent {
+    display: flex;
+    flex-direction: column-reverse;
+    width: 100%;
+    height: fit-content;
+}
+
+#urlContent > div {
+    padding: 0 0 0 16px;
+}
+
+#urlContent > div:nth-child(odd) {
+    background-color: #FAFAFA;
 }

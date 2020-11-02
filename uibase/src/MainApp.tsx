@@ -14,6 +14,7 @@ import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
 import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import ConfigUrlElement from "./ConfigUrlElement";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
@@ -283,7 +284,11 @@ export class MainApp extends React.Component<any, State> {
                         className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideURL ? this.props.t("show url") : this.props.t("hide url")}
-                        onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL })}
+                        onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL }, ()=>{
+                            if (this.debugRef.current) {
+                                this.debugRef.current.scrollIntoView(true)
+                            }
+                        })}
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
                     </NeoButton>}/>
@@ -302,16 +307,33 @@ export class MainApp extends React.Component<any, State> {
                 })}
                 </div>
             content = <div id={"debugContainer"}>
-                <div id={"debugInnerBar"} >
+                <div id={"debugInnerBar"}>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({hideLog:true})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({log:""})}><NeoIcon color={NeoColor.violete_4} icon={"rubbish"}/></NeoButton>
                 </div>
                 {children}
             </div>
         } else if (!this.state.hideURL) {
+            const urlParams:ConfigUrlElement[] = this.props.context.getFullPath();
             content = <div id={"debugContainer"}>
                 <div id={"debugInnerBar"} >
                     <NeoButton type={"link"} onClick={()=>!this.state.hideURL && this.setState({hideURL:true})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
+                </div>
+                <div id={"urlContent"} ref={this.debugRef}>
+                    {urlParams.map(up=>{
+                        return <div className={"url-history"}>
+                            App module name - {up.appModule ? up.appModule : "null"},<br/>
+                            Tree node - {up.tree.length > 0 ? up.tree.join("/") : "null"},<br/>
+                            Use parent reference tree - {up.useParentReferenceTree.toString()},<br/>
+                            Parameters{up.params && up.params.length > 0 ? ":" : " - null"} <br/> {up.params && up.params.length > 0 && up.params.map(p=>{
+                                return <div className={"url-history-parameter"}>
+                                    Parameter name - {p.parameterName},<br/>
+                                    Parameter value - {p.parameterValue},<br/>
+                                    Parameter data type - {p.parameterDataType ? p.parameterDataType : "String"},<br/>
+                                </div>
+                            })}
+                        </div>
+                    })}
                 </div>
             </div>
         }
