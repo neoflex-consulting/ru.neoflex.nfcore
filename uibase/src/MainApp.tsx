@@ -47,7 +47,7 @@ function splitLog(log:string) {
     let pos = 1;
     while (pos !== -1) {
         //Делим по тайм коду сообщений
-        pos = log.search(new RegExp("\n[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}[ ]+[a-zA-Z]+ "));
+        pos = log.search(new RegExp("\\n[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}[ ]+[a-zA-Z]+ "));
         arr.push(log.substring(0, pos));
         log = log.substring(pos+1);
     }
