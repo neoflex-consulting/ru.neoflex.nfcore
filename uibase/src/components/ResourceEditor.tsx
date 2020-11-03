@@ -20,10 +20,13 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
+import {NeoIcon} from "neo-icon/lib";
+import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
 
 
 interface ITargetObject {
     eClass: string,
+
     [key: string]: any
 }
 
@@ -472,8 +475,28 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
+                let description = undefined;
+                if (feature.get('eAnnotations').array().length !== 0) {
+                    feature.get('eAnnotations').array()[0].get('details').array()
+                        .forEach((e: any) => {
+                            if (e.get('key') === 'documentation') {
+                                description = e.get('value');
+                            }
+                        });
+                }
                 if (!isContainment && !isContainer) preparedData.push({
-                    property: feature.get('name'),
+                    property: description !== undefined ?
+                        <div style={{display: "inline-flex"}}>
+                            <span style={{margin: "5px 10px 0 0"}}>
+                                {feature.get('name')}
+                            </span>
+                            <NeoHint title={description}>
+                                <NeoButton type={'link'}>
+                                    <NeoIcon icon={'question'} color={NeoColor.violete_4}/>
+                                </NeoButton>
+                            </NeoHint>
+                        </div>
+                        : feature.get('name'),
                     value: FormComponentMapper.getComponent({
                         value: targetObject[feature.get('name')],
                         targetObject: targetObject,
@@ -1133,7 +1156,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     {
                                         title: 'Property',
                                         dataIndex: 'property',
-                                        width: 300
+                                        width: '49%'
                                     },
                                     {
                                         title: 'Value',
