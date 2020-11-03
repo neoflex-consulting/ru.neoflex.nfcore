@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.dataset.impl
 
+import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.EList
 import ru.neoflex.nfcore.base.services.Context
@@ -29,6 +30,7 @@ class GroovyDatasetExt extends GroovyDatasetImpl {
                 }
                 code = code.replace(":${param.parameterName}","${paramValue}")
             }
+            logger.info("runQueryDataset", "evaluating groovy dataset ${code}")
             rowData = Context.current.groovy.eval(this.getRunQueryGroovyCode(), [:])
             return JsonOutput.toJson(rowData)
         } else {
@@ -80,4 +82,6 @@ class GroovyDatasetExt extends GroovyDatasetImpl {
         })
     }
 
+    private static final ClassLogger logger =
+            new ClassLogger("javax.management.remote.misc", "EnvHelp")
 }

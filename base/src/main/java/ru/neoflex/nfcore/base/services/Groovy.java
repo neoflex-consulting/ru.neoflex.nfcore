@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.base.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sun.jmx.remote.util.ClassLogger;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
@@ -38,6 +39,7 @@ public class Groovy {
         b.setVariable("method", method);
         b.setVariable("args", args);
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        logger.info(String.format("evaluate groovy script %s;args=%s", method, args.toString()));
         Object result =  sh.evaluate("instance.\"$method\"(*args)");
         return result;
     }
@@ -48,6 +50,7 @@ public class Groovy {
             b.setVariable("args", args);
         }
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        logger.info(String.format("evaluate groovy script %s;args=%s", code, args.toString()));
         Object result =  sh.evaluate(code);
         return result;
     }
@@ -55,6 +58,7 @@ public class Groovy {
     public Object eval(String code, Map<String, Object> args) throws Exception {
         Binding b = new Binding(args);
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        logger.info(String.format("evaluate groovy script %s;args=%s", code, args.toString()));
         Object result =  sh.evaluate(code);
         return result;
     }
@@ -62,6 +66,7 @@ public class Groovy {
     public Object eval(String scriptName, String code, Map<String, Object> args) throws Exception {
         Binding b = new Binding(args);
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
+        logger.info(String.format("evaluate groovy script %s;args=%s", code, args.toString()));
         Object result =  sh.evaluate(code, scriptName);
         return result;
     }
@@ -69,12 +74,14 @@ public class Groovy {
     public Object evalScript(String scriptName, List<String> args) throws Exception {
         URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
         GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        logger.info(String.format("evalScript: evaluate groovy script %s;args=%s", scriptName, args.toString()));
         return groovyScriptEngine.run(scriptName, new Binding(args.toArray(new String[0])));
     }
 
     public Object evalScript(String scriptName, Map<String, Object> args) throws Exception {
         URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
         GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
+        logger.info(String.format("evalScript: evaluate groovy script %s;args=%s", scriptName, args.toString()));
         return groovyScriptEngine.run(scriptName, new Binding(args));
     }
 
@@ -82,6 +89,7 @@ public class Groovy {
         URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
         GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
         Class scriptClass = groovyScriptEngine.loadScriptByName(fullClassName.replace(".", "/") + ".groovy");
+        logger.info(String.format("evalStatic: evaluate groovy script %s;args=%s", method, args.toString()));
         return InvokerHelper.invokeMethod(scriptClass, method, args.toArray());
     }
 
@@ -89,6 +97,7 @@ public class Groovy {
         URL gitRootURL = Transaction.getCurrent().getFileSystem().getRootPath().toUri().toURL();
         GroovyScriptEngine groovyScriptEngine = new GroovyScriptEngine(new URL[] {gitRootURL}, Thread.currentThread().getContextClassLoader());
         Class scriptClass = groovyScriptEngine.loadScriptByName(fullClassName.replace(".", "/") + ".groovy");
+        logger.info(String.format("evalMethod: evaluate groovy script %s;args=%s", method, args.toString()));
         return InvokerHelper.invokeMethod(scriptClass.newInstance(), method, args.toArray());
     }
 

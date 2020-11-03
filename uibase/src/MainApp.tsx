@@ -303,7 +303,14 @@ export class MainApp extends React.Component<any, State> {
         if (!this.state.hideLog) {
             children = <div id={"logContent"} ref={this.debugRef}>
                 {splitLog(this.state.log).map(str=>{
-                    return <div>{str}</div>
+                    str = str.replace("  "," ");
+                    let arr = str.slice(24).split(" ");
+                    arr.splice(1,0, str.substring(0,23));
+                    return <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : undefined, display: "inline-flex"}}>
+                        <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.violete_5, minWidth: "60px"}}>{arr[0]}</div>
+                        <div style={{whiteSpace: "nowrap"}}>{arr[1]}</div>
+                        <div style={{whiteSpace: "pre-wrap"}}>{arr.splice(2).join(" ")}</div>
+                    </div>
                 })}
                 </div>
             content = <div id={"debugContainer"}>

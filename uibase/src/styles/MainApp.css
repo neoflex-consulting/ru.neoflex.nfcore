@@ -252,11 +252,18 @@
 
 #logContent {
     height: fit-content;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 #logContent > div {
     padding: 0 0 0 16px;
     display: inline-flex;
+}
+
+#logContent > div > div {
+    margin: 0 16px 0 0;
 }
 
 #logContent > div:nth-child(odd) {
