@@ -10,6 +10,7 @@ import ponyCat from '../icons/ponyCat.png';
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
+import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 
 const FormItem = Form.Item;
 
@@ -136,7 +137,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
         const { t } = this.props;
-
         return (
             <React.Fragment>
                 {this.state.createResModalVisible && <ResourceCreateFrom 
@@ -147,85 +147,109 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                     translate={ t }
                     setModalVisible={this.setModalVisible}
                 />}
-                <Row>
-                    <Col span={23}>
-                        <Form onSubmit={this.handleSubmit}>
+                <NeoRow style={{padding:'10px 36px'}}>
+                        <Form onSubmit={this.handleSubmit} className={'datasearch'} style={{width:'100%'}}>
+                            <Button
+                                title={t("createitem")}
+                                icon="plus"
+                                type="primary"
+                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'37px', zIndex:100}}
+                                size="large"
+                                onClick={()=>this.setModalVisible(true)}
+                            />
                             {getFieldDecorator('key', { initialValue: 'data_search' })(
                                 <Tabs onChange={(key: string) => {
                                     setFields({ key: { value: key } });
                                 }}>
-                                    <TabPane tab={this.props.t('data search')} key='data_search'>
-                                        <FormItem>
-                                            {getFieldDecorator('selectEClass', {
-                                                initialValue: this.props.specialEClass === undefined
-                                                    ? undefined :
-                                                    this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                            })(
-                                                <Select
-                                                    notFoundContent={t('notfound')}
-                                                    allowClear={true}
-                                                    showSearch={true}
-                                                    disabled={!!this.props.specialEClass}
-                                                    style={{ width: '270px' }}
-                                                    autoFocus
-                                                    placeholder="EClass">
-                                                    {
-                                                        this.state.classes
-                                                            .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')
-                                                                && */eclass.get('eAllStructuralFeatures')
-                                                                    .find((feature: Ecore.EStructuralFeature) =>
-                                                                        feature.get('eType').get('name') === 'QName'))
-                                                            .map((eclass: Ecore.EObject) =>
-                                                                <Select.Option key={eclass.get('name')}
-                                                                               value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
-                                                                    {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-                                            )}
-                                        </FormItem>
-                                        <FormItem style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator('name', {
-                                                rules: [{
-                                                    required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
-                                                    message: 'Please enter name'
-                                                }]
-                                            })(
-                                                <Input placeholder={t("name")} style={{ width: '270px' }} type="text" />
-                                            )}
-                                        </FormItem>
-                                        <FormItem style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator('tags', {
-                                                rules: []
-                                            })(
-                                                <Select
-                                                    allowClear={true}
-                                                    mode={"tags"}
-                                                    disabled={this.checkEClass()}
-                                                    style={{ width: '270px' }}
-                                                    placeholder={this.props.t("tags")}>
-                                                    {
-                                                        this.state.tags.map((tag: Ecore.EObject) =>
-                                                                <Select.Option key={tag.get('name')}
-                                                                               value={tag.get('name')}>
-                                                                    {tag.get('name')}
-                                                                </Select.Option>)
-                                                    }
-                                                </Select>
-                                            )}
-                                        </FormItem>
-                                        <FormItem style={{ display: 'inline-block' }}>
-                                            {getFieldDecorator('regular_expression', {
-                                                valuePropName: 'checked'
-                                            })(
-                                                <Checkbox style={{ marginLeft: '10px' }}>{t("regularexpression")}</Checkbox>
-                                            )}
-                                        </FormItem>
+
+                                    <TabPane className={'datasearch_region'} tab={this.props.t('data search')} key='data_search'>
+
+                                        <NeoRow style={{justifyContent:'flex-start'}}>
+
+                                            <FormItem>
+
+                                                {getFieldDecorator('selectEClass', {
+                                                    initialValue: this.props.specialEClass === undefined
+                                                        ? undefined :
+                                                        this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
+                                                })(<>
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>
+                                                    <NeoSelect
+                                                        className={'EClass_select'}
+                                                        width={'670px'}
+                                                        allowClear={true}
+                                                        showSearch={true}
+                                                        disabled={!!this.props.specialEClass}
+                                                        placeholder="EClass">
+                                                        {
+                                                            this.state.classes
+                                                                .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')
+                                                                    && */eclass.get('eAllStructuralFeatures')
+                                                                        .find((feature: Ecore.EStructuralFeature) =>
+                                                                            feature.get('eType').get('name') === 'QName'))
+                                                                .map((eclass: Ecore.EObject) =>
+                                                                    <option key={eclass.get('name')}
+                                                                                   value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
+                                                                        {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
+                                                                    </option>)
+                                                        }
+                                                    </NeoSelect>
+                                                    </>
+                                                )}
+                                            </FormItem>
+                                        </NeoRow>
+                                        <NeoRow style={{justifyContent:'flex-start'}}>
+                                            <FormItem>
+                                                {getFieldDecorator('name', {
+                                                    rules: [{
+                                                        required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
+                                                        message: 'Please enter name'
+                                                    }]
+                                                })(<>
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>Наименование</div>
+                                                    <NeoInput width={'421px'} />
+                                                    </>
+                                                )}
+                                            </FormItem>
+                                            <FormItem style={{ display: 'inline-block' }}>
+                                                {getFieldDecorator('regular_expression', {
+                                                    valuePropName: 'checked'
+                                                })(
+                                                    <NeoInput type={'checkbox'} style={{ marginLeft: '10px', marginTop:'25px' }}>{t("regularexpression")}</NeoInput>
+                                                )}
+                                            </FormItem>
+                                        </NeoRow>
+                                        <NeoRow style={{justifyContent:'flex-start'}}>
+                                            <FormItem style={{ display: 'inline-block' }}>
+                                                {getFieldDecorator('tags', {
+                                                    rules: []
+                                                })(<>
+                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>Теги</div>
+                                                    <NeoSelect
+                                                        allowClear={true}
+                                                        mode={"tags"}
+                                                        disabled={this.checkEClass()}
+                                                        width={'670px'}
+                                                        placeholder={"Выберите из списка"}>
+                                                        {
+                                                            this.state.tags.map((tag: Ecore.EObject) =>
+                                                                    <Select.Option key={tag.get('name')}
+                                                                                   value={tag.get('name')}>
+                                                                        {tag.get('name')}
+                                                                    </Select.Option>)
+                                                        }
+                                                    </NeoSelect>
+                                                </>
+                                                )}
+                                            </FormItem>
+                                        </NeoRow>
                                         {this.state.indicatorError ?
                                             <img alt={t('notfound')} src={ponyCat} className="error" />
                                             :
                                             undefined
                                         }
+
+
                                     </TabPane>
                                     <TabPane tab={this.props.t('json search')} key='json_search'>
                                         <FormItem>
@@ -259,25 +283,15 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                     </TabPane>
                                 </Tabs>
                             )}
-                            <FormItem>
-                                <Button title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
+                            <FormItem style={{marginBottom:'20px'}}>
+
+                                <Button disabled={getFieldValue('selectEClass') === undefined} title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
                                     <Icon type="search" />
                                 </Button>
+
                             </FormItem>
                         </Form>
-                    </Col>
-                    <Col span={1}>
-                        <Button
-                            title={t("createitem")}
-                            icon="plus" 
-                            type="primary" 
-                            style={{ display: 'block', margin: '0px 0px 10px auto' }} 
-                            shape="circle" 
-                            size="large"
-                            onClick={()=>this.setModalVisible(true)} 
-                        />
-                    </Col>
-                </Row>
+                </NeoRow>
                
             </React.Fragment>
         );
