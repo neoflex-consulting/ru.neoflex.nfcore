@@ -21,6 +21,8 @@ import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
 import ru.neoflex.nfcore.base.auth.GrantType
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 /* Components */
 abstract class Component extends Tagged {
     QName name
@@ -39,31 +41,41 @@ abstract class GridComponent {
     boolean isEditGridComponent
 }
 
-@Ecore(constraints="IsValid")
+@Ecore(constraints="IsValid", documentation="Компоненты, написанные на typeScript")
 class UserComponent extends Component {
     String componentClassName
 }
 
+@NFCore(documentation="Глобальные настройки приложения")
 class GlobalSettings extends Tagged {
     QName name
+        @NFCore(documentation="Календарь со всеми выходными днями в году")
     refers YearBook weekendCalendar
+        @NFCore(documentation="Календарь со всеми праздничными днями в году")
     refers YearBook holidayCalendar
+        @NFCore(documentation="Календарь со всеми рабочими днями в году")
     refers YearBook workingDaysCalendar
+        @NFCore(documentation="Календарь со всеми выходными днями в году")
     refers AppModule dashboard
 }
 
-@Ecore(constraints="IsValid")
+@Ecore(constraints="IsValid", documentation="Модуль - составная часть глобального приложения")
 class AppModule extends Tagged {
     QName name
+        @NFCore(documentation="Стартовая страница приложения или модуля")
     contains ViewElement view
+        @NFCore(documentation="Меню с модулями - область слева в пользовательском режиме")
     contains CatalogNode referenceTree
+        @NFCore(documentation="Использование "Меню с модулями" от родительского приложения или модуля")
     boolean useParentReferenceTree
 }
 
-@Ecore(constraints="IsValid")
+@Ecore(constraints="IsValid", documentation="Глобальное приложение - отображается в верхнем меню")
 class Application extends AppModule {
 	boolean checkRights
+	    @Ecore(documentation="Права доступа: чтение, запись, чтение и запись, отказано")
     GrantType grantType = "Write"
+        @Ecore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
     Integer headerOrder
 }
 
