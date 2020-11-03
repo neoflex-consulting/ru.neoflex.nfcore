@@ -7,13 +7,11 @@ import {NeoButton, NeoCol, NeoInput, NeoInputNumber, NeoRow, NeoSelect} from "ne
 interface Props {
     onCreateNotification?: (notificationStatus: any[]) => void;
     periodicity: EObject[];
-    spinnerVisible: boolean;
 }
 
 interface State {
     newNotification: Object;
     periodicity: EObject[];
-    spinnerVisible: boolean;
 }
 
 class CreateNotification extends React.Component<Props & WithTranslation & any, State> {
@@ -28,14 +26,7 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
             'deadlineTime': 9
         },
         periodicity: this.props.periodicity,
-        spinnerVisible: this.props.spinnerVisible
     };
-
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
-        if (this.state.spinnerVisible !== this.props.spinnerVisible && this.state.spinnerVisible) {
-            this.setState({spinnerVisible: false})
-        }
-    }
 
     handleChange(e: any): void {
         const target = JSON.parse(e);
@@ -63,7 +54,6 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
     }
 
     apply(newNotification: any): void {
-        this.setState({spinnerVisible: true});
         this.props.onCreateNotification(newNotification);
         this.props.handleCreateMenu()
     }
@@ -174,9 +164,12 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                                 defaultValue={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
                                 parser={value => value !== undefined ? value.replace(':00', '') : 1}
-                                style={{ width: '200px'}}
+                                style={{width: '200px'}}
                                 onChange={(e: any) => {
-                                    const event = JSON.stringify({row: 'deadlineTime', value: e === "" ? undefined : e > 23 ? e/100 : e});
+                                    const event = JSON.stringify({
+                                        row: 'deadlineTime',
+                                        value: e === "" ? undefined : e > 23 ? e / 100 : e
+                                    });
                                     this.handleChange(event)
                                 }}
                             >
@@ -184,54 +177,33 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                         </NeoCol>
                     </NeoRow>
                 </NeoRow>
+                <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: '80px',
+                    width: '100%',
+                    borderTop: '1px solid #e9e9e9',
+                    padding: '16px 40px',
+                    background: '#F2F2F2',
+                    textAlign: 'left',
+                }}>
+                    <NeoButton
+                        title={t('create')}
+                        style={{width: '100px', right: '6px',}}
+                        onClick={() => this.apply(this.state.newNotification)}
+                    >
+                        {t('create')}
+                    </NeoButton>
 
-
-                <NeoRow style={{marginTop: '15px'}}>
-                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
-                    </NeoCol>
-                    <NeoCol span={13}>
-
-                        {
-                            this.state.spinnerVisible &&
-                            <div className="small_loader">
-                                <div className="small_inner one"/>
-                                <div className="small_inner two"/>
-                                <div className="small_inner three"/>
-                            </div>
-                        }
-
-                    </NeoCol>
-
-                </NeoRow>
-                        <div style={{
-                            position: 'absolute',
-                            right: 0,
-                            bottom: '80px',
-                            width: '100%',
-                            borderTop: '1px solid #e9e9e9',
-                            padding: '16px 40px',
-                            background: '#F2F2F2',
-                            textAlign: 'left',
-                        }}>
-                            <NeoButton
-                                title={t('create')}
-                                style={{ width: '100px', right: '6px', }}
-                                onClick={()=> this.apply(this.state.newNotification)}
-                            >
-                                {t('create')}
-                            </NeoButton>
-
-                            <NeoButton
-                                type={'secondary'}
-                                title={t('clear')}
-                                style={{ marginLeft: '10px', width: '100px', right: '6px', }}
-                                onClick={()=> this.clear()}
-                            >
-                                {t('clear')}
-                            </NeoButton>
-                        </div>
-
-
+                    <NeoButton
+                        type={'secondary'}
+                        title={t('clear')}
+                        style={{marginLeft: '10px', width: '100px', right: '6px',}}
+                        onClick={() => this.clear()}
+                    >
+                        {t('clear')}
+                    </NeoButton>
+                </div>
             </div>
         )
     }
