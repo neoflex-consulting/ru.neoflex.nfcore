@@ -1,8 +1,9 @@
+import {IServerNamedParam} from "./MainContext";
 
 interface ConfigUrlElement {
     appModule: string | undefined
     tree: string[]
-    params: Object[] | undefined
+    params: IServerNamedParam[] | undefined
     useParentReferenceTree: boolean
 }
 

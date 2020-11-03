@@ -387,7 +387,7 @@ export class Href_ extends ViewContainer {
         return componentRenderCondition ? <a
             className={cssClass}
             hidden={this.state.isHidden || this.props.isParentHidden}
-            style={{justifyContent: this.props.getValue ?  "inherit" : undefined}}
+            style={{justifyContent: this.props.getValue ?  "inherit" : undefined, textDecorationLine: "underline"}}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
                       //this.props.data/this.props.getValue props из ag-grid

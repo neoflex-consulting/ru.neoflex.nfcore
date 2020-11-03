@@ -112,6 +112,10 @@ export class API implements IErrorHandler {
         return this.fetch(input, this.getOpts(init)).then(response => response.json());
     }
 
+    fetchText(input: RequestInfo, init?: RequestInit): Promise<any> {
+        return this.fetch(input, this.getOpts(init)).then(response => response.text());
+    }
+
     newProcess(type: string, props: any) {
         const id = indexer()
         this.processes.push({id, type, props})
@@ -607,6 +611,10 @@ export class API implements IErrorHandler {
             URL.revokeObjectURL(objectURL)
             document.body.removeChild(a)
         })
+    }
+
+    fetchLog(): Promise<any> {
+        return this.fetchText("/actuator/logfile")
     }
 
     stompConnect = () => {
