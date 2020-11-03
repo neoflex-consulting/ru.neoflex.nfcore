@@ -501,7 +501,8 @@ export class Select_ extends ViewContainer {
 
     onChange = (currentValue: string|string[]) => {
         if (typeof currentValue === 'string') {
-            this.selected = this.state.selectData.find((d: { value: string }) => d.value === currentValue)!.key
+            const found = this.state.selectData.find((d: { value: string }) => d.value === currentValue)
+            this.selected = found && found.key
         } else if (Array.isArray(currentValue)) {
             let temp = this.state.selectData.filter((el:{key:string,value:string})=>{
                 return currentValue.includes(el.value)
