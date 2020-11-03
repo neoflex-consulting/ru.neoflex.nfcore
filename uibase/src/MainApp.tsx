@@ -308,8 +308,8 @@ export class MainApp extends React.Component<any, State> {
                     arr.splice(1,0, str.substring(0,23));
                     return <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : undefined, display: "inline-flex"}}>
                         <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.violete_5, minWidth: "60px"}}>{arr[0]}</div>
-                        <div style={{whiteSpace: "nowrap"}}>{arr[1]}</div>
-                        <div style={{whiteSpace: "pre-wrap"}}>{arr.splice(2).join(" ")}</div>
+                        <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.grey_8, whiteSpace: "nowrap"}}>{arr[1]}</div>
+                        <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.grey_8, whiteSpace: "pre-wrap"}}>{arr.splice(2).join(" ")}</div>
                     </div>
                 })}
                 </div>
