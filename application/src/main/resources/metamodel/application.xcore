@@ -70,6 +70,7 @@ class AppModule extends Tagged {
     boolean useParentReferenceTree
 }
 
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid", documentation="Глобальное приложение - отображается в верхнем меню")
 class Application extends AppModule {
 	boolean checkRights
@@ -80,6 +81,7 @@ class Application extends AppModule {
 }
 
 /* Views */
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
 	String name
@@ -246,6 +248,7 @@ class CssClass extends Tagged {
 }
 
 /* Trees */
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
     String name

@@ -7,6 +7,7 @@ import {NeoInput, NeoTabs} from "neo-design/lib";
 //CSS
 import './../styles/MetaBrowser.css';
 import DatasetGrid from "./app/dataset/DatasetGrid";
+import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
 
 export interface Props {
 }
@@ -167,15 +168,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             data.push(parent);
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
-                let description = undefined;
-                if (eClassifier.get('eAnnotations').array().length !== 0) {
-                    eClassifier.get('eAnnotations').array()[0].get('details').array()
-                        .forEach((e: any)=> {
-                            if (e.get('key') === 'documentation') {
-                                description = e.get('value');
-                            }
-                        });
-                }
+                let description = getClassAnnotationByClassAndKey(eClassifier,'documentation');
                 let child = {
                     key: eClassifier.eURI(),
                     name: this.getName(eClassifier),
