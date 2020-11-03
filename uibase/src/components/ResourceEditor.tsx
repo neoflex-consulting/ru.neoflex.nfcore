@@ -20,12 +20,14 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
+import {NeoIcon} from "neo-icon/lib";
+import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
 import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 
-
 interface ITargetObject {
     eClass: string,
+
     [key: string]: any
 }
 
@@ -483,7 +485,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
-                if (!isContainment && !isContainer && !invisibleFields.includes(`,${feature.get('name')},`)) preparedData.push({
+                if (!isContainment && !isContainer) preparedData.push({
                     property: feature.get('name'),
                     value: FormComponentMapper.getComponent({
                         value: targetObject[feature.get('name')],
@@ -1144,7 +1146,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     {
                                         title: 'Property',
                                         dataIndex: 'property',
-                                        width: 300
+                                        width: '49%'
                                     },
                                     {
                                         title: 'Value',
