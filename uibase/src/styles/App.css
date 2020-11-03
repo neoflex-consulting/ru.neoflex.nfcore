@@ -69,7 +69,7 @@ height: 8px!important;
 .app-header {
   background-color: #2a356c;
   border-bottom: 1px solid #e8e8e8;
-  z-index: 100000;
+  z-index: 100;
 }
 
 .head-panel {
@@ -1704,6 +1704,33 @@ a.linksInMoreWord:hover{
 
 .href img{
   display: none;
+}
+
+
+.ag-tooltip{
+  background-color: #2A356C!important;
+  color: #FFFFFF!important;
+  border-radius: 4px!important;
+  padding: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #545454;
+}
+
+.ag-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -29%;
+  left: 15%;
+  transform: rotate(180deg)!important;
+  border: 5px solid #2A356C;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: #2A356C;
+  border-bottom-color: transparent;
+  width: 0;
+  height: 0;
+  margin: 0 auto;
 }
 
 

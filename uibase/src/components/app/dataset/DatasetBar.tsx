@@ -3,7 +3,7 @@ import {withTranslation} from 'react-i18next';
 import {Dropdown, Menu, Select} from 'antd';
 import './../../../styles/DatasetBar.css';
 
-import {NeoButton, NeoColor, NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoHint, NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {IDiagram, paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
@@ -112,29 +112,33 @@ class SearchTransformer extends React.Component<transformerProps, transformerSta
                     id={"quickFilter"}
                     placeholder={this.props.t(this.props.placeholder)}
                 />
+                <NeoHint title={this.props.t('close')}>
                 <NeoButton
                     className={"search-button"}
-                    type={'link'} title={this.props.t('close')}
+                    type={'link'}
                     onClick={()=>{
                         this.setState({isExpanded: false});
                         this.props.onCollapse && this.props.onCollapse()
                     }}
                     id={"quickFilter"}>
-                    <NeoIcon  icon={"close"} color={'#8C8C8C'} />
+                    <NeoIcon icon={"close"} color={NeoColor.grey_6}/>
                 </NeoButton>
+                </NeoHint>
             </div>
             :
             <div id={this.props.id} className={this.props.className}>
-                <NeoButton
-                    className={"search-button"}
-                    type={'link'} title={this.props.t(this.props.placeholder)}
-                    onClick={()=>{
-                        this.setState({isExpanded: true});
-                        this.props.onExpand && this.props.onExpand()
-                    }}
-                    id={"quickFilter"}>
-                    <NeoIcon  icon={"search"} color={'#5E6785'} size={'m'}/>
-                </NeoButton>
+                <NeoHint title={this.props.t(this.props.placeholder)}>
+                    <NeoButton
+                        className={"search-button"}
+                        type={'link'}
+                        onClick={() => {
+                            this.setState({isExpanded: true});
+                            this.props.onExpand && this.props.onExpand()
+                        }}
+                        id={"quickFilter"}>
+                        <NeoIcon icon={"search"} color={NeoColor.violete_4} size={'m'}/>
+                    </NeoButton>
+                </NeoHint>
             </div>
 
     }
@@ -212,38 +216,41 @@ class DatasetBar extends React.Component<props, State> {
 
     getAdaptiveMenu = () => {
         return <Menu onClick={(e: any) => this.onAdaptiveMenuClick(e)}>
-            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.filter}>
-                <NeoIcon icon={'filter'} color={'#5E6785'} size={'m'}/>{this.props.t("filters")}
+            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden &&
+            <Menu.Item className={"action-menu-item"} key={paramType.filter}>
+                <NeoIcon icon={'filter'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("filters")}
             </Menu.Item>}
-            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.sort}>
-                <NeoIcon icon={'sort'} color={'#5E6785'} size={'m'}/>{this.props.t("sorts")}
+            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden &&
+            <Menu.Item className={"action-menu-item"} key={paramType.sort}>
+                <NeoIcon icon={'sort'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("sorts")}
             </Menu.Item>}
             {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden && <div className={"menu-horizontal-line"}/>}
-            {!this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.calculations}>
-                <NeoIcon icon={'calculator'} color={'#5E6785'} size={'m'}/>{this.props.t("calculator")}
+            {!this.props.isServerFunctionsHidden &&
+            <Menu.Item className={"action-menu-item"} key={paramType.calculations}>
+                <NeoIcon icon={'calculator'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("calculator")}
             </Menu.Item>}
             {!this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.aggregate}>
-                <NeoIcon icon={'plusBlock'} color={'#5E6785'} size={'m'}/>{this.props.t("aggregations")}
+                <NeoIcon icon={'plusBlock'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("aggregations")}
             </Menu.Item>}
             <Menu.Item className={"action-menu-item"} key={'diagram'}>
-                <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>{this.props.t("diagram")}
+                <NeoIcon icon={'barChart'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("diagram")}
             </Menu.Item>
             {!this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.group}>
-                <NeoIcon icon={'add'} color={'#5E6785'} size={'m'}/>{this.props.t("grouping")}
+                <NeoIcon icon={'add'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("grouping")}
             </Menu.Item>}
             <Menu.Item className={"action-menu-item"} key={paramType.hiddenColumns}>
-                <NeoIcon icon={'hide'} color={'#5E6785'} size={'m'}/>{this.props.t("hiddencolumns")}
+                <NeoIcon icon={'hide'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("hiddencolumns")}
             </Menu.Item>
             <div className={"menu-horizontal-line"}/>
             <Menu.Item className={"action-menu-item"} key='save'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("save")}
+                <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("save")}
             </Menu.Item>
             {this.props.isDeleteButtonVisible && <Menu.Item className={"action-menu-item"} key='delete'>
-                <NeoIcon icon={'rubbish'} color={'#5E6785'} size={'m'}/>{this.props.t("delete")}
+                <NeoIcon icon={'rubbish'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("delete")}
             </Menu.Item>}
             {this.props.isEditButtonVisible && <div className={"menu-horizontal-line"}/>}
             {this.props.isEditButtonVisible && <Menu.Item className={"action-menu-item"} key='edit'>
-                <NeoIcon icon={'edit'} color={'#5E6785'} size={'m'}/>{this.props.t("edit")}
+                <NeoIcon icon={'edit'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("edit")}
             </Menu.Item>}
         </Menu>
     };
@@ -267,14 +274,14 @@ class DatasetBar extends React.Component<props, State> {
     getDiagramAdaptiveMenu = () => {
         return <Menu onClick={(e: any) => this.onDiagramAdaptiveMenuClick(e)}>
             <Menu.Item className={"action-menu-item"} key='add'>
-                <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'}/>{this.props.t("add")}
+                <NeoIcon icon={'plus'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("add")}
             </Menu.Item>
             <Menu.Item className={"action-menu-item"} key='edit'>
-                <NeoIcon icon={'edit'} color={'#5E6785'} size={'m'}/>{this.props.t("edit")}
+                <NeoIcon icon={'edit'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("edit")}
             </Menu.Item>
             <div className={"menu-horizontal-line"}/>
             <Menu.Item className={"action-menu-item"} key='delete'>
-                <NeoIcon icon={'rubbish'} color={'#5E6785'} size={'m'}/>{this.props.t("delete")}
+                <NeoIcon icon={'rubbish'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("delete")}
             </Menu.Item>
         </Menu>
     };
@@ -301,18 +308,18 @@ class DatasetBar extends React.Component<props, State> {
     getEditAdaptiveMenu = () => {
         return <Menu onClick={(e: any) => this.onEditAdaptiveMenuClick(e)}>
             <Menu.Item className={"action-menu-item"} key='add row'>
-                <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'}/>{this.props.t("add row")}
+                <NeoIcon icon={'plus'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("add row")}
             </Menu.Item>
             <div className={"menu-horizontal-line"}/>
             <Menu.Item className={"action-menu-item"} key='apply changes'>
-                <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>{this.props.t("apply changes")}
+                <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("apply changes")}
             </Menu.Item>
             <Menu.Item className={"action-menu-item"} key='delete selected'>
-                <NeoIcon icon={'rubbish'} color={'#5E6785'} size={'m'}/>{this.props.t("delete selected")}
+                <NeoIcon icon={'rubbish'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("delete selected")}
             </Menu.Item>
             <div className={"menu-horizontal-line"}/>
             <Menu.Item className={"action-menu-item"} key='copy selected'>
-                <NeoIcon icon={'duplicate'} color={'#5E6785'} size={'m'}/>{this.props.t("copy selected")}
+                <NeoIcon icon={'duplicate'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("copy selected")}
             </Menu.Item>
         </Menu>
     };
@@ -378,68 +385,90 @@ class DatasetBar extends React.Component<props, State> {
             <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                 <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                     <div className='verticalLine'/>
-                    <NeoButton type={'link'} title={this.props.t('filters')} className={"margin-top margin-left"}
+                    <NeoHint  title={this.props.t('filters')}>
+                    <NeoButton type={'link'} className={"margin-top-button margin-left"}
                                onClick={this.props.onFiltersClick}>
-                        <NeoIcon icon={isFilter ? 'filterCheck' : 'filter'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isFilter ? 'filterCheck' : 'filter'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('sorts')} className={"margin-top inter-button-margin"}
-                               onClick={this.props.onSortsClick}>
-                        <NeoIcon icon={isSort ? 'sortCheck' : 'sort'} color={'#5E6785'} size={'m'}/>
-                    </NeoButton>
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('sorts')}>
+                        <NeoButton type={'link'} className={"margin-top-button inter-button-margin"}
+                                   onClick={this.props.onSortsClick}>
+                            <NeoIcon icon={isSort ? 'sortCheck' : 'sort'} color={NeoColor.violete_4} size={'m'}/>
+                        </NeoButton>
+                    </NeoHint>
                     <div className='verticalLine'/>
                 </div>
                 <div className={this.state.barSize <= barSize.medium ? 'adaptive-bar-hidden' : 'flex-bar-item'}>
-                    <NeoButton type={'link'} title={this.props.t('calculator')}
-                               className={"margin-top margin-left"}
+                    <NeoHint  title={this.props.t('calculator')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button margin-left"}
                                onClick={this.props.onCalculatorClick}>
-                        <NeoIcon icon={isCalculator ? 'calculatorCheck' : 'calculator'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isCalculator ? 'calculatorCheck' : 'calculator'} color={NeoColor.violete_4}
+                                 size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('aggregations')}
-                               className={"margin-top inter-button-margin"}
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('aggregations')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button inter-button-margin"}
                                onClick={this.props.onAggregationsClick}>
-                        <NeoIcon icon={serverAggregates ?  'plusBlockCheck' : 'plusBlock'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={serverAggregates ? 'plusBlockCheck' : 'plusBlock'} color={NeoColor.violete_4}
+                                 size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('diagram')}
-                               className={"margin-top inter-button-margin"}
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('diagram')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button inter-button-margin"}
                                onClick={this.props.onDiagramsClick}>
-                        <NeoIcon icon={isDiagramms ? 'barChartCheck' : 'barChart'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={isDiagramms ? 'barChartCheck' : 'barChart'} color={NeoColor.violete_4}
+                                 size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('grouping')}
-                               className={"margin-top inter-button-margin"}
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('grouping')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button inter-button-margin"}
                                onClick={this.props.onGroupingClick}>
-                        <NeoIcon icon={serverGroupBy ? 'addCheck' : 'add'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={serverGroupBy ? 'addCheck' : 'add'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
-                               className={"margin-top inter-button-margin"}
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('hiddencolumns')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button inter-button-margin"}
                                onClick={this.props.onHiddenClick}>
-                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={"hide"} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
+                    </NeoHint>
                     <div className='verticalLine'/>
-                    <NeoButton type={'link'} title={this.props.t('save')}
-                               className={"margin-top margin-left"}
+                    <NeoHint  title={this.props.t('save')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button margin-left"}
                                onClick={this.props.onSaveClick}>
-                        <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
+                    </NeoHint>
                     {
                         this.props.isDeleteButtonVisible &&
                         <div>
-                            <NeoButton type={'link'} title={this.props.t('delete')}
-                                       className={"margin-top inter-button-margin"}
+                            <NeoHint  title={this.props.t('delete')}>
+                            <NeoButton type={'link'}
+                                       className={"margin-top-button inter-button-margin"}
                                        onClick={this.props.onDeleteClick}>
-                                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+                                <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
                             </NeoButton>
+                            </NeoHint>
                         </div>
                     }
                     <div className='verticalLine'/>
                     {
                         this.props.isEditButtonVisible &&
+                        <NeoHint  title={this.props.t('edit')}>
                         <NeoButton
                             type={'link'}
-                            title={this.props.t('edit')}
-                            className={"margin-top margin-left"}
+                            className={"margin-top-button margin-left"}
                             onClick={this.props.onEditClick}>
-                            <NeoIcon icon={"edit"} color={'#5E6785'} size={'m'}/>
+                            <NeoIcon icon={"edit"} color={NeoColor.violete_4} size={'m'}/>
                         </NeoButton>
+                        </NeoHint>
                     }
                 </div>
             </div>
@@ -447,42 +476,51 @@ class DatasetBar extends React.Component<props, State> {
             <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                 <div className={this.state.barSize < barSize.large ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                     <div className='verticalLine'/>
-                    <NeoButton type={'link'} title={this.props.t('diagram')}
-                               className={"margin-top margin-left"}
+                    <NeoHint  title={this.props.t('diagram')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button margin-left"}
                                onClick={this.props.onDiagramsClick}>
-                        <NeoIcon icon={'barChart'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={'barChart'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
-                    <NeoButton type={'link'} title={this.props.t('hiddencolumns')}
-                               className={"margin-top inter-button-margin"}
+                    </NeoHint>
+                    <NeoHint  title={this.props.t('hiddencolumns')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button inter-button-margin"}
                                onClick={this.props.onHiddenClick}>
-                        <NeoIcon icon={"hide"} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={"hide"} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
+                    </NeoHint>
                     <div className='verticalLine'/>
-                    <NeoButton type={'link'} title={this.props.t('save')}
-                               className={"margin-top margin-left"}
+                    <NeoHint  title={this.props.t('save')}>
+                    <NeoButton type={'link'}
+                               className={"margin-top-button margin-left"}
                                onClick={this.props.onSaveClick}>
-                        <NeoIcon icon={'mark'} color={'#5E6785'} size={'m'}/>
+                        <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
+                    </NeoHint>
                     {
                         this.props.isDeleteButtonVisible &&
                         <div>
-                            <NeoButton type={'link'} title={this.props.t('delete')}
-                                       className={"margin-top inter-button-margin"}
+                            <NeoHint  title={this.props.t('delete')}>
+                            <NeoButton type={'link'}
+                                       className={"margin-top-button inter-button-margin"}
                                        onClick={this.props.onDeleteClick}>
-                                <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
+                                <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
                             </NeoButton>
+                            </NeoHint>
                         </div>
                     }
                     <div className='verticalLine'/>
                     {
                         this.props.isEditButtonVisible &&
+                        <NeoHint  title={this.props.t('edit')}>
                         <NeoButton
                             type={'link'}
-                            title={this.props.t('edit')}
-                            className={"margin-top margin-left"}
+                            className={"margin-top-button margin-left"}
                             onClick={this.props.onEditClick}>
-                            <NeoIcon icon={"edit"} color={'#5E6785'} size={'m'}/>
+                            <NeoIcon icon={"edit"} color={NeoColor.violete_4} size={'m'}/>
                         </NeoButton>
+                        </NeoHint>
                     }
                 </div>
             </div>
@@ -527,10 +565,10 @@ class DatasetBar extends React.Component<props, State> {
             && this.state.barSize <= barSize.small
             && <div className={"menu-horizontal-line"}/>}
             <Menu.Item className={"action-menu-item"} key='exportToDocx'>
-                <NeoIcon icon={'fileWord'} color={'#5E6785'} size={'m'}/>{this.props.t("export to docx")}
+                <NeoIcon icon={'fileWord'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("export to docx")}
             </Menu.Item>
             <Menu.Item className={"action-menu-item"} key='exportToExcel'>
-                <NeoIcon icon={'fileExcel'} color={'#5E6785'} size={'m'}/>{this.props.t("export to excel")}
+                <NeoIcon icon={'fileExcel'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("export to excel")}
             </Menu.Item>
         </Menu>
     };
@@ -538,21 +576,23 @@ class DatasetBar extends React.Component<props, State> {
     getExportButtons = () => {
         return <div className={"flex-bar-item"}>
             <div className='verticalLine'/>
-            <Dropdown overlay={this.getExportMenu()} placement="bottomRight" className={"export-dropdown"}>
+            <Dropdown overlay={this.getExportMenu()} placement="bottomRight">
                 <div>
-                    <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} className={"margin-top margin-left"}/>
+                    <NeoIcon icon={"download"} size={"m"} color={NeoColor.violete_4}
+                             className={"margin-top margin-left"}/>
                 </div>
             </Dropdown>
-            <NeoButton
-                title={this.props.t('fullscreen')}
-                type={'link'} className={"margin-top inter-button-margin"}
-                onClick={this.props.onFullscreenClick}>
-                {this.props.isFullScreenOn  ?
-                    <NeoIcon icon={'fullScreenUnDo'} color={'#5E6785'} size={'m'}/>
-                    :
-                    <NeoIcon icon={'fullScreen'} color={'#5E6785'} size={'m'}/>
-                }
-            </NeoButton>
+            <NeoHint title={this.props.t('fullscreen')}>
+                <NeoButton
+                    type={'link'} className={"margin-top-fullscreen inter-button-margin"}
+                    onClick={this.props.onFullscreenClick}>
+                    {this.props.isFullScreenOn ?
+                        <NeoIcon icon={'fullScreenUnDo'} color={NeoColor.violete_4} size={'m'}/>
+                        :
+                        <NeoIcon icon={'fullScreen'} color={NeoColor.violete_4} size={'m'}/>
+                    }
+                </NeoButton>
+            </NeoHint>
         </div>
     };
 
@@ -568,7 +608,7 @@ class DatasetBar extends React.Component<props, State> {
                     overlay={this.getAdaptiveMenu()} placement="bottomRight">
                     <div
                         className={this.state.barSize <= barSize.medium ? "flex-bar-item" : "adaptive-bar-hidden"}>
-                        <NeoIcon icon={"more"} size={"m"} color={'#5E6785'}/>
+                        <NeoIcon icon={"more"} size={"m"} color={NeoColor.violete_4}/>
                     </div>
                 </Dropdown>}
                 {!this.state.isQuickSearchExpanded && this.getActionButtons()}
@@ -638,41 +678,51 @@ class DatasetBar extends React.Component<props, State> {
                 "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
                 <div className={'block space-between ' + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                     <div className='flex-bar-item'>
+                        <NeoHint  title={this.props.t("back to table")}>
                         <NeoButton
                             type={'link'}
-                            title={this.props.t("back to table")}
                             className={"element-top-margin"}
                             style={{color: NeoColor.grey_9}}
                             suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                             onClick={this.props.onBackToTableClick}
                         >
-                            {this.state.barSize === adaptiveElementSize.large && <span className={"back-span-text"}>{this.props.t("back to table")}</span>}
+                            {this.state.barSize - 1 === adaptiveElementSize.large && <span className={"back-span-text"}>{this.props.t("back to table")}</span>}
                         </NeoButton>
+                        </NeoHint>
                         <div className='verticalLine'/>
-                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('add')} className={"margin-top margin-left"}
-                                   onClick={this.props.onAddDiagramClick}
-                        >
-                            <NeoIcon icon={"plus"} size={"m"} color={'#5E6785'}/>
-                        </NeoButton>}
-                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('edit')} className={"margin-top inter-button-margin"}
-                                   onClick={this.props.onEditDiagramClick}
-                        >
-                            <NeoIcon icon={"edit"} size={"m"} color={'#5E6785'}/>
-                        </NeoButton>}
-                        {this.state.barSize === adaptiveElementSize.large && <div className='verticalLine'/>}
+                        {this.state.barSize - 1 === adaptiveElementSize.large &&
+                        <NeoHint  title={this.props.t('add')}>
+                            <NeoButton type={'link'} className={"margin-top-button margin-left"}
+                                       onClick={this.props.onAddDiagramClick}
+                            >
+                                <NeoIcon icon={"plus"} size={"m"} color={NeoColor.violete_4}/>
+                            </NeoButton>
+                        </NeoHint>}
+                        {this.state.barSize - 1 === adaptiveElementSize.large &&
+                        <NeoHint  title={this.props.t('edit')}>
+                            <NeoButton type={'link'} className={"margin-top-button inter-button-margin"}
+                                       onClick={this.props.onEditDiagramClick}
+                            >
+                                <NeoIcon icon={"edit"} size={"m"} color={NeoColor.violete_4}/>
+                            </NeoButton>
+                        </NeoHint>}
+                        {this.state.barSize - 1 === adaptiveElementSize.large && <div className='verticalLine'/>}
 
-                        {this.state.barSize === adaptiveElementSize.large && <NeoButton type={'link'} title={this.props.t('delete')} className={"margin-top margin-left"}
-                                                                            onClick={this.props.onDeleteDiagramClick}
-                        >
-                            <NeoIcon icon={"rubbish"} size={"m"} color={'#5E6785'}/>
-                        </NeoButton>}
-                        {this.state.barSize === adaptiveElementSize.large && <div className='verticalLine'/>}
+                        {this.state.barSize - 1 === adaptiveElementSize.large &&
+                        <NeoHint  title={this.props.t('delete')}>
+                            <NeoButton type={'link'} className={"margin-top-button margin-left"}
+                                       onClick={this.props.onDeleteDiagramClick}
+                            >
+                                <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
+                            </NeoButton>
+                        </NeoHint>}
+                        {this.state.barSize - 1 === adaptiveElementSize.large && <div className='verticalLine'/>}
                         {this.state.barSize <= barSize.medium && <Dropdown
                             className={"adaptive-dropdown"}
                             overlay={this.getDiagramAdaptiveMenu()} placement="bottomRight">
                             <div
                                 className={this.state.barSize <= barSize.medium ? "flex-bar-item" : "adaptive-bar-hidden"}>
-                                <NeoIcon icon={"more"} size={"m"} color={'#5E6785'}/>
+                                <NeoIcon icon={"more"} size={"m"} color={NeoColor.violete_4}/>
                             </div>
                         </Dropdown>}
                     </div>
@@ -733,63 +783,72 @@ class DatasetBar extends React.Component<props, State> {
             "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
             <div className={'block space-between ' + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                 <div className='flex-bar-item'>
+                    <NeoHint  title={this.props.t('edit')}>
                     <NeoButton
                         type={'link'}
                         className={'element-top-margin'}
-                        title={this.props.t('edit')}
                         style={{color: NeoColor.grey_9}}
                         suffixIcon={<NeoIcon icon={"arrowLong"} color={NeoColor.grey_9}/>}
                         onClick={this.props.onBackFromEditClick}
                     >
                         {this.state.barSize === adaptiveElementSize.large && <span><NeoTypography style={{color: NeoColor.grey_9}} type={'body_regular'}>{this.props.t("exitFromEditMode")}</NeoTypography></span>}
                     </NeoButton>
+                    </NeoHint>
                     <div className='verticalLine'/>
                     {this.state.barSize < barSize.medium && <Dropdown
                         className={"adaptive-dropdown"}
                         overlay={this.getEditAdaptiveMenu()} placement="bottomRight">
                         <div
                             className={this.state.barSize <= barSize.medium ? "flex-bar-item" : "adaptive-bar-hidden"}>
-                            <NeoIcon icon={"more"} size={"m"} color={'#5E6785'}/>
+                            <NeoIcon icon={"more"} size={"m"} color={NeoColor.violete_4}/>
                         </div>
                     </Dropdown>}
-                    {this.state.barSize >= barSize.medium && <NeoButton
+                    {this.state.barSize >= barSize.medium &&
+                    <NeoHint  title={this.props.t("add row")}>
+                    <NeoButton
                         type={'link'}
                         hidden={this.props.isInsertRowHidden}
-                        title={this.props.t("add row")}
-                        className={"margin-left margin-top"}
+                        className={"margin-left margin-top-button"}
                         onClick={this.props.onInsertRowClick}
                     >
                         <NeoIcon icon={"plus"}  size={'m'}/>
-                    </NeoButton>}
+                    </NeoButton>
+                    </NeoHint>}
                     {this.state.barSize >= barSize.medium && <div className='verticalLine'/>}
-                    {this.state.barSize >= barSize.medium && <NeoButton
+                    {this.state.barSize >= barSize.medium &&
+                    <NeoHint  title={this.props.t("apply changes")}>
+                    <NeoButton
                         type={'link'}
                         hidden={false}
-                        title={this.props.t("apply changes")}
-                        className={"margin-left margin-top"}
+                        className={"margin-left margin-top-button"}
                         onClick={this.props.onApplyEditChangesClick}
                     >
                         <NeoIcon icon={"mark"} size={'m'}/>
-                    </NeoButton>}
-                    {this.state.barSize>= barSize.medium && <NeoButton
+                    </NeoButton>
+                    </NeoHint>}
+                    {this.state.barSize>= barSize.medium &&
+                    <NeoHint  title={this.props.t("delete selected")}>
+                    <NeoButton
                         type={'link'}
                         hidden={this.props.isDeleteRowsHidden}
-                        title={this.props.t("delete selected")}
-                        className={"margin-top inter-button-margin"}
+                        className={"margin-top-button inter-button-margin"}
                         onClick={this.props.onDeleteSelectedRowsClick}
                     >
                         <NeoIcon icon={"rubbish"} size={'m'}/>
-                    </NeoButton>}
+                    </NeoButton>
+                    </NeoHint>}
                     {this.state.barSize >= barSize.medium && <div className='verticalLine'/>}
-                    {this.state.barSize >= barSize.medium && <NeoButton
+                    {this.state.barSize >= barSize.medium &&
+                    <NeoHint  title={this.props.t("copy selected")}>
+                    <NeoButton
                         type={'link'}
                         hidden={this.props.isCopySelectedHidden}
-                        title={this.props.t("copy selected")}
-                        className={"margin-top margin-left"}
+                        className={"margin-top-button margin-left"}
                         onClick={this.props.onCopySelectedRowsClick}
                     >
                         <NeoIcon icon={"duplicate"} size={'m'}/>
-                    </NeoButton>}
+                    </NeoButton>
+                    </NeoHint>}
                 </div>
                 <div className='flex-bar-item'>
                     {this.state.barSize > barSize.extraSmall && <NeoInput
@@ -801,17 +860,18 @@ class DatasetBar extends React.Component<props, State> {
                         placeholder={this.props.t("quick filter")}
                     />}
                     <div className='verticalLine'/>
+                    <NeoHint  title={this.props.t('fullscreen')}>
                     <NeoButton
-                        title={this.props.t('fullscreen')}
-                        className="buttonFullScreen margin-top margin-left"
+                        className="buttonFullScreen margin-top-button margin-left"
                         type="link"
                         onClick={this.props.onFullscreenClick}
                     >
-                        {this.props.isFullScreenOn  ?
-                            <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+                        {this.props.isFullScreenOn ?
+                            <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={NeoColor.violete_4}/>
                             :
-                            <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
+                            <NeoIcon icon={"fullScreen"} size={"m"} color={NeoColor.violete_4}/>}
                     </NeoButton>
+                    </NeoHint>
                 </div>
             </div>
             {this.state.barSize <= barSize.extraSmall && <div className={"horizontal-line"}/>}

@@ -10,11 +10,7 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Checkbox_, Href_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {
-    agGridColumnTypes,
-    appTypes,
-    dmlOperation
-} from "../../../utils/consts";
+import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -28,7 +24,8 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent, ValueFormatterParams
+    GridReadyEvent,
+    ValueFormatterParams
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
@@ -836,7 +833,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     width: colDef.get('width'),
                     type: colDef.get('type'),
                     field: colDef.get('field'),
-                    headerName: colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
+                    headerName:  colDef.get('headerName').toString().substring(0, 1).toUpperCase() + colDef.get('headerName').toString().substring(1),
                     headerTooltip: colDef.get('headerTooltip'),
                     hide: colDef.get('hide') || false,
                     editable: colDef.get('editable') || false,
@@ -876,7 +873,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             ? {mask: colDef.get('mask'), type: colDef.get('type')}
                             : undefined,
                     valueFormatter: colDef.get('valueFormatter'),
-                    tooltipField: colDef.get('tooltipField')
+                    tooltipField: colDef.get('tooltipField'),
                 });
             }
         }

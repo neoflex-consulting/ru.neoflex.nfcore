@@ -315,7 +315,7 @@
         "apply and quit": "Apply and quit",
         "back to edit": "Back to edit",
         "reset changes": "Reset changes",
-        "quick filter": "Quick filter",
+        "quick filter": "Search",
         "copy selected": "Copy selected",
         "edit is prohibited" : "Edit is prohibited",
         "undo changes": "Undo changes",
@@ -410,5 +410,10 @@
         "tags": "Tags",
         "back to version": "Back to version",
         "move top": "Move top",
-        "move bottom": "Move bottom"
+        "move bottom": "Move bottom",
+
+        "show log": "Show log",
+        "hide log": "Hide log",
+        "show url decode": "Show url decode",
+        "hide url decode": "Hide url decode"
 }

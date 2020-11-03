@@ -52,6 +52,19 @@ interface State {
     globalSettings?: EObject;
 }
 
+
+export function encodeAppURL(path?: any[]) {
+    return path ? `/app/${
+        btoa(
+            encodeURIComponent(
+                JSON.stringify(
+                    path
+                )
+            )
+        )
+    }` : ""
+}
+
 class EcoreApp extends React.Component<any, State> {
 
     private docxHandlers: any[] = [];
@@ -85,6 +98,7 @@ class EcoreApp extends React.Component<any, State> {
             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
+            getFullPath: this.getFullPath,
         };
         this.state = {
             principal: undefined,
@@ -351,7 +365,17 @@ class EcoreApp extends React.Component<any, State> {
         return true
     };
 
-    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
+        if (this.isDatasetComponentsBufferEmpty()) {
+            const path = this.getURL(appModuleName, useParentReferenceTree, treeValue, params);
+            if (path) {
+                this.setState({pathFull: path});
+                this.props.history.push(encodeAppURL(path));
+            }
+        }
+    };
+
+    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
             let path: any[] = [];
             let urlElement: ConfigUrlElement = {
@@ -389,9 +413,6 @@ class EcoreApp extends React.Component<any, State> {
                 });
             } else if (appModuleName !== this.state.appModuleName) {
                 let splitPathFull: any = [];
-                /*this.state.pathFull.forEach((p: any, index: any) => {
-                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                });*/
                 if (splitPathFull.length === 0) {
                     this.state.pathFull.forEach( (p:any, index: any) => {
                         path.push(p);
@@ -402,15 +423,6 @@ class EcoreApp extends React.Component<any, State> {
                     this.state.context.globalValues?.forEach(obj => {
                         urlElement.params = urlElement.params!.concat(obj)
                     });
-
-                    /*const nextPath = path[path.length - 1];
-                    if (
-                        nextPath &&
-                        nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
-                        path.length !== 1
-                    ) {
-                        path.pop()
-                    }*/
                     //Ограничить переходы
                     if (path.length >= 50) {
                         path.shift()
@@ -422,103 +434,13 @@ class EcoreApp extends React.Component<any, State> {
             } else if (appModuleName === this.state.appModuleName) {
                 path = this.state.pathFull
             }
-            this.setState({pathFull: path});
-            this.props.history.push(`/app/${
-                btoa(
-                    encodeURIComponent(
-                        JSON.stringify(
-                            path
-                        )
-                    )
-                )
-            }`);
+            return path
         }
     };
 
-    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: Object[]) => {
-        if (this.isDatasetComponentsBufferEmpty()) {
-            let path: any[] = [];
-            let urlElement: ConfigUrlElement = {
-                appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
-                params: params,
-                useParentReferenceTree: useParentReferenceTree || false
-            };
-            let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
-                path.push(urlElement)
-            }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = treeValue.split('/');
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = [];
-                /*this.state.pathFull.forEach((p: any, index: any) => {
-                    if (p.appModule === appModuleName) {splitPathFull.push(index)}
-                });*/
-                if (splitPathFull.length === 0) {
-                    this.state.pathFull.forEach( (p:any, index: any) => {
-                        path.push(p);
-                    });
-                    urlElement.appModule = appModuleName;
-                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
-                    urlElement.params = params ? params : [];
-                    this.state.context.globalValues?.forEach(obj => {
-                        urlElement.params = urlElement.params!.concat(obj)
-                    });
-
-                    /*const nextPath = path[path.length - 1];
-                    if (
-                        nextPath &&
-                        nextPath.useParentReferenceTree && nextPath.tree.length !== 0 &&
-                        path.length !== 1
-                    ) {
-                        path.pop()
-                    }*/
-                    //Ограничить переходы
-                    if (path.length >= 50) {
-                        path.shift()
-                    }
-                    path.push(urlElement)
-                } else {
-                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
-                }
-            } else if (appModuleName === this.state.appModuleName) {
-                path = this.state.pathFull
-            }
-            return `/app/${
-                btoa(
-                    encodeURIComponent(
-                        JSON.stringify(
-                            path
-                        )
-                    )
-                )
-            }`
-        }
+    getFullPath = () => {
+        return this.state.pathFull
     };
-
-
 
     logOut = () => {
         API.instance().logout().then(() => {
@@ -802,29 +724,30 @@ class EcoreApp extends React.Component<any, State> {
                                 {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
+                                        <NeoHint  title={this.props.t('back to applications')}>
                                         <NeoButton
                                             style={{marginRight: '10px'}}
-                                            title={this.props.t('back to applications')}
                                             type={"link"}
-                                                onClick={()=> this.changeURL(this.state.applicationNames[0], false)}
                                         >
-                                            <a href={this.getURL(this.state.applicationNames[0], false)}>
+                                            <a href={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
                                             <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
                                             </a>
                                         </NeoButton>
+                                        </NeoHint>
                                         :
+                                        <NeoHint  title={this.props.t('developer menu')}>
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
-                                                   title={this.props.t('developer menu')}
                                         >
                                             <Link to={`/developer/data`}>
                                                 <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
                                             </Link>
                                         </NeoButton>
+                                        </NeoHint>
                                 }
+                                <NeoHint title={this.props.t('auto-close notification')}>
                             <NeoButton
                                 type="link"
-                                title={this.props.t('auto-close notification')}
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
                                     {localStorage.getItem('notifierDuration') === '3'  ?
@@ -832,6 +755,7 @@ class EcoreApp extends React.Component<any, State> {
                                     :
                                         <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
                             </NeoButton>
+                                </NeoHint>
                                     <span style={{
                                         textTransform: "capitalize",
                                         fontSize: '15px',
@@ -842,14 +766,16 @@ class EcoreApp extends React.Component<any, State> {
                                     }}>
                                         <span className={'NameOfUser'}>{principal.name}</span>
                                     </span>
+                                <NeoHint title={this.props.t('logout')}>
                             <NeoButton
                                 style={{marginRight: "10px"}}
-                                title={this.props.t('logout')}
+
                                 onClick={this.logOut}
                                 type="link"
                             >
                                 <NeoIcon icon={'exit'} color={'white'} />
                             </NeoButton>
+                                </NeoHint>
                             </div>
                         </NeoCol>
                     </NeoRow>

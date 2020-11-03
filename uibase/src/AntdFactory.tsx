@@ -387,7 +387,7 @@ export class Href_ extends ViewContainer {
         return componentRenderCondition ? <a
             className={cssClass}
             hidden={this.state.isHidden || this.props.isParentHidden}
-            style={{justifyContent: this.props.getValue ?  "inherit" : undefined}}
+            style={{justifyContent: this.props.getValue ?  "inherit" : undefined, textDecorationLine: "underline"}}
             href={this.viewObject.get('ref') ? this.viewObject.get('ref') : "#"}
                   onClick={isReadOnly ? ()=>{} : ()=>{
                       //this.props.data/this.props.getValue props из ag-grid
@@ -407,6 +407,7 @@ export class Button_ extends ViewContainer {
         this.state = {
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
+            isEnter: false,
         };
     }
 
@@ -417,8 +418,15 @@ export class Button_ extends ViewContainer {
     componentWillUnmount(): void {
         unmountComponent.bind(this)()
     }
+    enterCheck(e: KeyboardEvent): void{
+        if (e.key && e.key === "Enter" || e.key.endsWith("0") || e.key.endsWith("1") || e.key.endsWith("2") || e.key.endsWith("3") || e.key.endsWith("4") || e.key.endsWith("5") || e.key.endsWith("6") || e.key.endsWith("7") || e.key.endsWith("8") || e.key.endsWith("9")) {
+            this.setState({isEnter: true})
+        }
+    }
+
 
     render = () => {
+        window.addEventListener('keydown', this.enterCheck.bind(this))
         const cssClass = createCssClass(this.viewObject);
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
@@ -428,10 +436,12 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
-                className={cssClass}
-                onClick={isReadOnly ? ()=>{} : () => {
-                    const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                    handleClick.bind(this)(value);
+                onClick={isReadOnly ? ()=>{} : (e) => {
+                        if (!this.state.isEnter) {
+                            const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                            handleClick.bind(this)(value);
+                        }
+                    this.setState({isEnter: false})
                 }}>
                 {(label)? label: t('submit')}
             </NeoButton>
@@ -491,7 +501,8 @@ export class Select_ extends ViewContainer {
 
     onChange = (currentValue: string|string[]) => {
         if (typeof currentValue === 'string') {
-            this.selected = currentValue
+            const found = this.state.selectData.find((d: { value: string }) => d.value === currentValue)
+            this.selected = found && found.key
         } else if (Array.isArray(currentValue)) {
             let temp = this.state.selectData.filter((el:{key:string,value:string})=>{
                 return currentValue.includes(el.value)
@@ -811,9 +822,10 @@ class HtmlContent_ extends ViewContainer {
                          handleClick.bind(this)(value);
                      }}
             >
-                {this.viewObject.get('isError')?<NeoIcon icon={'info'} color={'#AD1457'} style={{margin:'5px 12px 0 0'}}/>
+                {this.viewObject.get('isError') ?
+                    <NeoIcon icon={'info'} color={'#AD1457'} style={{margin: '5px 12px 0 0'}}/>
                     :
-                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin:'5px 12px 0 0'}}/>}
+                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin: '0 12px 0 0'}}/>}
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
             </div>

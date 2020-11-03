@@ -71,7 +71,6 @@ class Calendar extends React.Component<any, any> {
             columnDefs: [],
             rowData: [],
             filteredRowData: undefined,
-            spinnerVisible: false,
             selectedValueInGrid: 'Системные заметки',
             frameworkComponents: {
                 'actionMenu': this.actionMenu
@@ -90,22 +89,22 @@ class Calendar extends React.Component<any, any> {
     }
 
     actionMenu = (params: any) => (
-        <div style={{marginLeft: '-32px'}}>
+        <div style={{marginLeft: '-32px', marginTop: '6px'}}>
             <NeoButton
                 type="link"
-                style={{width: '35px', marginTop: "12px"}}
+                style={{width: '35px'}}
                 onClick={() => this.handleEditMenu(params)}
             >
-                <NeoIcon icon={"gear"}  color={'#515151'}/>
+                <NeoIcon icon={"gear"} color={NeoColor.violete_5}/>
             </NeoButton>
             {
                 this.state.myNotificationVisible &&
                 <NeoButton
                     type="link"
-                    style={{width: '35px', marginTop: "5px"}}
+                    style={{width: '35px'}}
                     onClick={() => this.deleteNotification(params)}
                 >
-                    <NeoIcon icon={"rubbish"} color={'#515151'}/>
+                    <NeoIcon icon={"rubbish"} color={NeoColor.violete_5}/>
                 </NeoButton>
             }
         </div>
@@ -141,12 +140,12 @@ class Calendar extends React.Component<any, any> {
                     .then((result) => {
                         this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
                     })
+            } else if (!updateViewObject) {
+                API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
+                    let notificationInstancesDTO = JSON.parse(result).resources;
+                    this.setState({notificationInstancesDTO});
+                });
             }
-
-            API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
-                let notificationInstancesDTO = JSON.parse(result).resources;
-                this.setState({notificationInstancesDTO, spinnerVisible: false});
-            });
         }
     };
 
@@ -190,24 +189,49 @@ class Calendar extends React.Component<any, any> {
     };
 
     createNotification = (newNotification: any) => {
-        this.setState({spinnerVisible: true});
         const ref: string = this.props.viewObject.eURI();
         const methodName: string = 'createNotification';
 
-        return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then((result: any) => {
+        return API.instance().call(ref, methodName, [JSON.stringify(newNotification)]).then(() => {
             this.getAllNotificationInstances(this.state.currentMonth, true);
             this.setGridData(this.state.myNotificationVisible, newNotification);
         })
     };
 
+    deleteNotification = (params: any) => {
+        if (!this.state.deletedItem) {
+            this.setState({deletedItem: true})
+        }
+        const oldNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) =>
+                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
+                ||
+                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
+            );
+        const deleteNotification = oldNotifications[params.node.id];
+        const newNotifications = this.props.viewObject.get('notifications').array()
+            .filter((n: EObject) => n.get('name') !== deleteNotification.get('name'));
+        this.props.viewObject.get('notifications').clear();
+        this.props.viewObject.get('notifications').addAll(newNotifications);
+
+        const resource = this.props.viewObject.eResource();
+        API.instance().saveResource(resource, 99999).then((newResource: Ecore.Resource) => {
+            const newViewObject: Ecore.EObject[] = (newResource.eContainer as Ecore.ResourceSet).elements()
+                .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
+                .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
+                .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
+            this.props.context.updateContext!(({viewObject: newViewObject[0]}))
+            this.setGridData(this.state.myNotificationVisible);
+        })
+    };
+
     editNotification = (editableNotification: any) => {
-        this.setState({spinnerVisible: true});
         const notifications = this.props.viewObject.get('notifications').array()
-                .filter((n: EObject) =>
-                    (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
-                    ||
-                    (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
-                );
+            .filter((n: EObject) =>
+                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
+                ||
+                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
+            );
         const newEditableNotification = notifications[editableNotification['id']];
         const resource = newEditableNotification.eResource();
         if (resource) {
@@ -249,7 +273,6 @@ class Calendar extends React.Component<any, any> {
                 .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'));
             this.props.context.updateContext!(({viewObject: newViewObject[0]}))
             this.setGridData(this.state.myNotificationVisible);
-            this.setState({spinnerVisible: false})
         })
     };
 
@@ -328,24 +351,6 @@ class Calendar extends React.Component<any, any> {
         })
     };
 
-    deleteNotification = (params: any) => {
-        if (!this.state.deletedItem) {this.setState({deletedItem: true})}
-        this.setState({spinnerVisible: true});
-        const oldNotifications = this.props.viewObject.get('notifications').array()
-            .filter((n: EObject) =>
-                (this.state.myNotificationVisible && n.get('defaultStatus').get('name') === myNote)
-                ||
-                (!this.state.myNotificationVisible && n.get('defaultStatus').get('name') !== myNote)
-            );
-        const deleteNotification = oldNotifications[params.node.id];
-        const newNotifications = this.props.viewObject.get('notifications').array()
-            .filter((n: EObject) => n.get('name') !== deleteNotification.get('name'));
-        this.props.viewObject.get('notifications').clear();
-        this.props.viewObject.get('notifications').addAll(newNotifications);
-
-        this.setGridData(this.state.myNotificationVisible);
-    };
-
     handleEditMenu = (params: any) => {
         const {t} = this.props;
         if (params.data !== undefined) {
@@ -389,9 +394,9 @@ class Calendar extends React.Component<any, any> {
                 this.updateViewObject();
                 this.getAllNotificationInstances(this.state.currentMonth, false)
             } else {
+
                 this.getAllNotificationInstances(this.state.currentMonth, true)
             }
-
         }
     };
 
@@ -643,7 +648,6 @@ class Calendar extends React.Component<any, any> {
                         {...this.props}
                         onCreateNotification={this.createNotification}
                         periodicity={this.state.periodicity}
-                        spinnerVisible={this.state.spinnerVisible}
                         handleCreateMenu={this.handleCreateMenu}
                     />
                 }
@@ -669,7 +673,6 @@ class Calendar extends React.Component<any, any> {
                         {...this.props}
                         onEditNotification={this.editNotification}
                         periodicity={this.state.periodicity}
-                        spinnerVisible={this.state.spinnerVisible}
                         editableNotification={this.state.editableNotification}
                         myNotificationVisible={this.state.myNotificationVisible}
                         handleEditMenu={this.handleEditMenu}
@@ -790,7 +793,8 @@ class Calendar extends React.Component<any, any> {
                             type={'secondary'}
                                 onClick={(e: any) => {this.handleChange(e, 'today')}}
                         >
-                            <NeoTypography style={{color: "#424D78", margin: "0px 10px"}} type={'capture_regular'}>{t('today')}</NeoTypography>
+                            <NeoTypography style={{color: NeoColor.violete_5, margin: "0px 10px"}}
+                                           type={'capture_regular'}>{t('today')}</NeoTypography>
                         </NeoButton>
 
                         <NeoSelect className='selectYear'
@@ -841,8 +845,8 @@ class Calendar extends React.Component<any, any> {
 
                         <div className="col col-start">
                             <NeoButton type={'link'} onClick={this.prevMonth}
-                                       style={{marginRight:'20px', marginTop: "3px"}}>
-                                <NeoIcon icon={"arrowLeft"} color={'#000000'} />
+                                       style={{marginRight: '20px'}}>
+                                <NeoIcon icon={"arrowLeft"} color={NeoColor.violete_8}/>
                             </NeoButton>
                         </div>
                         <div className="col-col-center">
@@ -852,19 +856,18 @@ class Calendar extends React.Component<any, any> {
                         </div>
                         <div className="col col-end" >
                             <NeoButton type={'link'} onClick={this.nextMonth}
-                            style={{marginLeft:'20px', marginTop: "3px"}}>
-                                <NeoIcon icon={"arrowRight"} color={'#000000'} />
+                                       style={{marginLeft: '20px'}}>
+                                <NeoIcon icon={"arrowRight"} color={NeoColor.violete_8}/>
                             </NeoButton>
                         </div>
+                        <NeoHint title={t('legend')}>
                         <NeoButton
-                            /*title={t('legend')}*/
-                            style={{width: '24px', height: '24px', color: '#6e6e6e',marginTop: "4px"}}
+                            style={{width: '24px'}}
                             type="link"
                             onClick={this.handleLegendMenu}>
                             <NeoIcon icon={'legend'} size={'m'} />
-                            <NeoHint title={t('legend')}>
-                            </NeoHint>
                         </NeoButton>
+                    </NeoHint>
 
                     </div>
                 }
@@ -922,34 +925,35 @@ class Calendar extends React.Component<any, any> {
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', marginRight: '16px', height: '40px'}}/>
 
+                <NeoHint title={t('add event')}>
                     <NeoButton
-                        style={{ marginTop: "4px",}}
-                        title={t('add event')}
                         type="link"
                         onClick={this.handleCreateMenu}>
-                        <NeoIcon icon={'plus'} color={'#5E6785'} size={'m'} />
+                        <NeoIcon icon={'plus'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
+                </NeoHint>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', marginRight: '16px', height: '40px'}}/>
+                <NeoHint  title={t('calendar')}>
                 <NeoButton
-                    title={t('calendar')}
-                    type={this.state.calendarVisible ? 'disabled' : "link"}
-                    // disabled={this.state.calendarVisible}
+                    type={this.state.calendarVisible ? 'disabled' : 'link'}
                     className="calendarAlt"
                     style={{
                         marginRight: '8px',
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: this.state.calendarVisible ? '#FFFFFF' : '#FFF8E0',
+                        backgroundColor: this.state.calendarVisible ? '#FFFFFF' : NeoColor.yellow_2,
                         border: this.state.calendarVisible ? '1px solid #424D78' : '1px solid #FFCC66'
                     }}
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"calendarFull"} style={{margin:'auto'}} color={!this.state.calendarVisible ? "#333333" : "#5E6785"}/>
+                    <NeoIcon icon={"calendarFull"}
+                             color={!this.state.calendarVisible ? NeoColor.grey_9 : NeoColor.violete_4}/>
                 </NeoButton>
+                </NeoHint>
+                <NeoHint title={t('list')}>
                 <NeoButton
-                    title={t('list')}
                     type={!this.state.calendarVisible ? 'disabled' : "link"}
                     // disabled={!this.state.calendarVisible}
                     className="alignJustify"
@@ -957,27 +961,29 @@ class Calendar extends React.Component<any, any> {
                         width: '24px',
                         height: '24px',
                         padding: '3px',
-                        backgroundColor: this.state.calendarVisible ? '#FFF8E0' : '#FFFFFF',
+                        backgroundColor: this.state.calendarVisible ? NeoColor.yellow_2 : '#FFFFFF',
                         border: this.state.calendarVisible ? '1px solid #FFCC66' : '1px solid #424D78'
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} style={{margin:'auto'}} color={this.state.calendarVisible ? '#333333' : '#5E6785'} />
+                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? NeoColor.grey_9 : NeoColor.violete_4}/>
                 </NeoButton>
+                </NeoHint>
 
                 <div className="verticalLine" style={{borderLeft: '1px solid #B3B3B3', marginLeft: '16px', height: '40px'}}/>
                 {this.state.calendarVisible ?
                     <Dropdown getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
                         overlay={menu} placement="bottomLeft">
                         <div>
-                            <NeoIcon icon={"download"} size={"m"} color={'#5E6785'} style={{marginLeft: '16px'}}/>
+                            <NeoIcon icon={"download"} size={"m"} color={NeoColor.violete_4}
+                                     style={{marginLeft: '16px'}}/>
                         </div>
                     </Dropdown>
                     :
                     null
                 }
+                <NeoHint  title={t('fullscreen')}>
         <NeoButton
-            title={t('fullscreen')}
             type="link"
             style={{
                 marginRight: '18px',
@@ -985,11 +991,12 @@ class Calendar extends React.Component<any, any> {
             }}
             onClick={this.onFullScreen}
         >
-            {this.state.fullScreenOn  ?
-                <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={'#5E6785'}/>
+            {this.state.fullScreenOn ?
+                <NeoIcon icon={"fullScreenUnDo"} size={"m"} color={NeoColor.violete_4}/>
                 :
-                <NeoIcon icon={"fullScreen"} size={"m"} color={'#5E6785'}/>}
+                <NeoIcon icon={"fullScreen"} size={"m"} color={NeoColor.violete_4}/>}
         </NeoButton>
+                </NeoHint>
             </div>
 
 

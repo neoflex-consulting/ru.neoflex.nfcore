@@ -6,6 +6,7 @@ import './../styles/BreadcrumbApp.css';
 import Ecore from "ecore"
 import {NeoIcon} from "neo-icon/lib";
 import {Link} from "react-router-dom";
+import {encodeAppURL} from "../EcoreApp";
 
 interface State {
     selectedApp: string;
@@ -25,7 +26,7 @@ class HeaderMenu extends React.Component<any, any> {
     sliceApp(applicationName: string): any{
         const {applications} = this.state;
         for (let i = 3; i < applications.length; i++) {
-            if (this.props.context.getURL(applications[i].eContents()[0].get('name'), false) === this.props.location.pathname) {
+            if (encodeAppURL(this.props.context.getURL(applications[i].eContents()[0].get('name'), false)) === this.props.location.pathname) {
                 if (applications[i].eContents()[0].get('name') === applicationName) {
                     let temp: any = applications[0].eContents()[0];
                     applications[0].eContents()[0] = applications[i].eContents()[0];
@@ -41,7 +42,7 @@ class HeaderMenu extends React.Component<any, any> {
                 }
             }
         }
-        return this.props.context.getURL(applicationName, false);
+        return encodeAppURL(this.props.context.getURL(applicationName, false));
     }
 
     appsMenu() {
@@ -88,7 +89,7 @@ class HeaderMenu extends React.Component<any, any> {
                     >
                         <Link
                             key={app.eContents()[0].get('name')}
-                            to={this.props.context.getURL(app.eContents()[0].get('name'), false)}
+                            to={encodeAppURL(this.props.context.getURL(app.eContents()[0].get('name'), false))}
                             className={'limksInMoreWord'}
                         >
                             <NeoTypography
@@ -115,7 +116,7 @@ class HeaderMenu extends React.Component<any, any> {
                             >
                                 <Link
                                     key={app.eContents()[0].get('name')}
-                                    to={this.props.context.getURL(app.eContents()[0].get('name'), false)}
+                                    to={encodeAppURL(this.props.context.getURL(app.eContents()[0].get('name'), false))}
                                     className={'linksInMoreWord'}
                                     onClick={() => this.setSelectedApp(app.eContents()[0].get('name'))}
                                 >
