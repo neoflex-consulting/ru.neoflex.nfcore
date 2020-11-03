@@ -401,10 +401,8 @@ class Calendar extends React.Component<any, any> {
                 this.updateViewObject();
                 this.getAllNotificationInstances(this.state.currentMonth, false)
             } else {
-                API.instance().findByKindAndName(this.state.classAppModule, this.props.context.viewObject.eContainer.get('name'), 999)
-                    .then((result) => {
-                        this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
-                    })
+
+                this.getAllNotificationInstances(this.state.currentMonth, false)
             }
         }
     };
