@@ -22,7 +22,8 @@ import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
-
+import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
+import './../styles/ResouceEditor.css'
 
 interface ITargetObject {
     eClass: string,
@@ -220,12 +221,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
+                    const invisibleFields = `,${getClassAnnotationByClassAndKey(feature.eContainer && feature.eContainer, 'invisible', true)},`;
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
                             :
                             json[feature.get('name')] ? [json[feature.get('name')]] : [];
                         return <Tree.TreeNode
+                            className={invisibleFields.includes(`,${feature.get('name')},`) ? "hidden-leaf" : ""}
                             parentUpdater={json.updater}
                             upperBound={upperBound}
                             isArray={true}
@@ -465,38 +468,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
         const preparedData: Array<Object> = [];
         let featureList: any = undefined;
+        let invisibleFields = "";
+        let disableFields = "";
+        let test = "";
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
-            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
-        }
+            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
+            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'invisible', true)},`;
+            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'disabled', true)},`;
+                    }
         else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
-            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures')
+            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures');
+            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'invisible', true)},`;
+            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'disabled', true)},`;
         }
         if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
-                let description = undefined;
-                if (feature.get('eAnnotations').array().length !== 0) {
-                    feature.get('eAnnotations').array()[0].get('details').array()
-                        .forEach((e: any) => {
-                            if (e.get('key') === 'documentation') {
-                                description = e.get('value');
-                            }
-                        });
-                }
                 if (!isContainment && !isContainer) preparedData.push({
-                    property: description !== undefined ?
-                        <div style={{display: "inline-flex"}}>
-                            <span style={{margin: "5px 10px 0 0"}}>
-                                {feature.get('name')}
-                            </span>
-                            <NeoHint title={description}>
-                                <NeoButton type={'link'}>
-                                    <NeoIcon icon={'question'} color={NeoColor.violete_4}/>
-                                </NeoButton>
-                            </NeoHint>
-                        </div>
-                        : feature.get('name'),
+                    property: feature.get('name'),
                     value: FormComponentMapper.getComponent({
                         value: targetObject[feature.get('name')],
                         targetObject: targetObject,
@@ -511,7 +501,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         onEClassBrowse: this.onEClassBrowse,
                         onBrowse: this.onBrowse,
                         mainEObject: mainEObject,
-                        edit: this.state.edit
+                        edit: this.state.edit && !disableFields.includes(`,${feature.get('name')},`)
                     }),
                     key: feature.get('name') + idx
                 })

@@ -21,6 +21,8 @@ import ru.neoflex.nfcore.notification.NotificationStatus
 import ru.neoflex.nfcore.masterdata.EntityType
 import ru.neoflex.nfcore.base.auth.GrantType
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 /* Components */
 abstract class Component extends Tagged {
     QName name
@@ -60,6 +62,7 @@ class AppModule extends Tagged {
     boolean useParentReferenceTree
 }
 
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
 	boolean checkRights
@@ -68,6 +71,7 @@ class Application extends AppModule {
 }
 
 /* Views */
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
 	String name
@@ -234,6 +238,7 @@ class CssClass extends Tagged {
 }
 
 /* Trees */
+@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
     String name
