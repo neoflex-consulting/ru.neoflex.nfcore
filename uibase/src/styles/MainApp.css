@@ -327,3 +327,7 @@
 #urlContent > div:nth-child(odd) {
     background-color: #FAFAFA;
 }
+
+.pane.horizontal.primary {
+    overflow-x:hidden;
+}

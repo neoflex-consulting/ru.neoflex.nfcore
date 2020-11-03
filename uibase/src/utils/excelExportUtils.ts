@@ -68,17 +68,21 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
             }
         if (excelData.excelComponentType === excelElementExportType.grid && excelData.gridData !== undefined) {
             //Добавление таблицы
-            worksheet.addTable({
-                name: excelData.gridData.tableName,
-                ref: 'A' + offset, //Позиция
-                headerRow: true,
-                style: {
-                    theme: 'TableStyleLight11',
-                    showRowStripes: true,
-                },
-                columns: excelData.gridData.columns,
-                rows: excelData.gridData.rows,
+            excelData.gridData.columns.forEach((header,columnIndex)=>{
+                worksheet.getCell(`${encode(columnIndex)}:${offset}`).value = header.name;
+                worksheet.getCell(`${encode(columnIndex)}:${offset}`).fill = {
+                    type: 'pattern',
+                    pattern:"solid",
+                    fgColor:{argb:'9bbb59'}
+                }
             });
+            excelData.gridData.rows.forEach((row,rowIndex)=>{
+                row.forEach((cell,columnIndex)=>{
+                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex+ 1}`).value = cell
+                })
+            });
+            worksheet.autoFilter = `A${offset}:${encode(excelData.gridData.columns.length-1)}${offset}`;
+
             //Formatting
             // eslint-disable-next-line
             excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
@@ -87,14 +91,13 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                         worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset+1}`).numFmt = cell
                 })
             });
-            offset += 1 + excelData.gridData.rows.length;
+            offset += excelData.gridData.rows.length;
         }
         if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
             //Добавление текста
             let cell = worksheet.getCell('A' + offset);
             // Modify/Add individual cell
             cell.value = excelData.textData;
-            offset += 1;
         }
         if (excelData.excelComponentType === excelElementExportType.complexGrid
             && excelData.gridHeader !== undefined
@@ -131,24 +134,17 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                         fgColor:{argb:'9bbb59'}
                     };
                     cell.font = {
-                        color: { argb: 'FFFFFF' }
+                        color: { argb: '000000' }
                     };
                     cell.alignment = { vertical: 'middle', horizontal: 'center' }
                 }
                 offset += 1;
             }
             //Data
-            //https://github.com/exceljs/exceljs/issues/970 - auto-filter bug
-            worksheet.addTable({
-                name: excelData.gridData.tableName,
-                ref: 'A' + offset, //Позиция
-                headerRow: false,
-                style: {
-                    theme: "TableStyleLight11",
-                    showRowStripes: true,
-                },
-                columns: excelData.gridData.columns,
-                rows: excelData.gridData.rows,
+            excelData.gridData.rows.forEach((row,rowIndex)=>{
+                row.forEach((cell,columnIndex)=>{
+                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).value = cell
+                })
             });
             //Formatting
             // eslint-disable-next-line
