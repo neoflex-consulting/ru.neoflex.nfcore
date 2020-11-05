@@ -1,7 +1,8 @@
 import * as React from "react";
-import {Button, Form, Input, Table} from 'antd';
+import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {withTranslation, WithTranslation} from "react-i18next";
+import {NeoButton, NeoInput, NeoTable} from "neo-design/lib";
 
 interface Props {
     onName: any;
@@ -90,35 +91,46 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                 selectedRowKeys,
                 onChange: this.onSelectChange
             };
+            console.log('LENGTH', this.filterDataSource(this.props.onName, this.state.selectedKeys[0]))
             return (
-                <Form style={{ padding: 9 }} >
-                    <Input
+                <Form style={{ padding: '9px 16px' }} >
+                    <NeoInput
+                        type={'search'}
                         placeholder={`${t('search')} ${columnsT}`}
                         value={this.state.selectedKeys[0]}
-                        onChange={e => this.setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onChange={(e:any) => this.setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
-                        style={{ width: 188, marginBottom: 8, display: "block"}}
+                        width={'492px'}
+                        style={{ width: 188, marginBottom: 8, marginRight:'24px', display: "inline-block"}}
                         defaultChecked={true}
                         allowClear={true}
                     />
-                    <Table
+                    <NeoTable
                         size={"small"}
-                        style={{whiteSpace: "pre", maxWidth: "300px", maxHeight: "400px", marginTop: "15px" }}
-                        scroll={{x: 200}}
-                        columns={[{title: columnsT, dataIndex: this.props.onName, key: this.props.onName}]}
+                        pagination={{pageSize: this.filterDataSource(this.props.onName, this.state.selectedKeys[0]).length}}
+                        style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", maxHeight: "664px", marginTop: "15px", overflow:'scroll' }}
+                        columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName}]}
                         dataSource={this.filterDataSource(this.props.onName, this.state.selectedKeys[0])}
                         rowSelection={rowSelection}
-                        pagination={false}
                     />
-                    <Button
-                        title={t('searchsimple')}
-                        type="primary"
+                    <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        bottom: '80px',
+                        width: '100%',
+                        borderTop: '1px solid #e9e9e9',
+                        padding: '16px 40px',
+                        background: '#F2F2F2',
+                        textAlign: 'left',
+                    }}>
+                    <NeoButton
+                        title={t('run query')}
                         onClick={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
-                        icon="search"
-                        size="small"
-                        style={{ width: 90, marginRight: 8, marginTop: 15 }}
-                    />
-                    <Button
+                        style={{marginRight:'16px'}}
+                    >
+                        {t('run query')}
+                    </NeoButton>
+                    <NeoButton
                         onClick={() => {
 
                             this.setState({selectedKeys: [], selectedRowKeys: []});
@@ -126,11 +138,12 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                                 this.props.tableDataFilter(this.props.tableData);
                             }
                         }}
-                        title={t('clear')}
-                        size="small"
-                        style={{ width: 90 }}
-                        icon="rest"
-                    />
+                        type={"secondary"}
+                        title={t('reset')}
+                    >
+                        {t('reset')}
+                    </NeoButton>
+                    </div>
                 </Form>
             );
         }}

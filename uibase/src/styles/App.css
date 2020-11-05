@@ -1706,6 +1706,17 @@ a.linksInMoreWord:hover{
   display: none;
 }
 
+.datasearch .ant-tabs-top-bar {
+  width: 80%
+}
+
+.datasearch_region {
+  background: white;
+  /*max-width: 1808px !important;*/
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 20px 16px 0;
+}
 
 .ag-tooltip{
   background-color: #2A356C!important;
@@ -1733,6 +1744,13 @@ a.linksInMoreWord:hover{
   margin: 0 auto;
 }
 
+.datasearch_region .input-checkbox {
+  margin: 18px 0 0 16px;
+}
+
+.datasearch_region .ant-form-item {
+  margin-bottom: 15px;
+}
 
 
 
@@ -1741,4 +1759,28 @@ a.linksInMoreWord:hover{
 /*Notification message*/
 .ant-notification {
   z-index: 100000 !important;
+}
+
+
+.ant-select-selection--multiple .ant-select-selection__choice {
+  border: 1px solid #424D78 !important;
+  color: #424D78 !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice__content {
+  margin-right: 10px;
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice__remove .ant-select-remove-icon {
+  margin-left: 5px;
+  color: #424D78;
+  border-radius: 100px;
+  border: 1.5px solid #424D78;
+}
+
+.datasearch__filter__drawer .ant-drawer-close,
+.datasearch__filter__drawer .ant-pagination {
+  display: none;
 }
