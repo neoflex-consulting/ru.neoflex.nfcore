@@ -289,7 +289,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333', marginTop:'4px'}}>{t('total')}</NeoTypography>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}
