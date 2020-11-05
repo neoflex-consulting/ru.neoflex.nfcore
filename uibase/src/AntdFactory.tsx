@@ -814,18 +814,12 @@ class HtmlContent_ extends ViewContainer {
         return (
             <div hidden={false}
                      aria-disabled={isReadOnly}
-                     style={{backgroundColor:`${this.viewObject.get('isError')? '#F8F1F3': '#F0FEFF'}`,
-                     color:`${this.viewObject.get('isError')? '#AD1457': '#0E5A7D'}`}}
                      className={`${cssClass} content`}
                      onClick={isReadOnly ? ()=>{} : () => {
                          const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                          handleClick.bind(this)(value);
                      }}
             >
-                {this.viewObject.get('isError') ?
-                    <NeoIcon icon={'info'} color={'#AD1457'} style={{margin: '5px 12px 0 0'}}/>
-                    :
-                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin: '0 12px 0 0'}}/>}
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
             </div>
