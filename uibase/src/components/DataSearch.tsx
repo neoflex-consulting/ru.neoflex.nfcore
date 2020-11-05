@@ -281,7 +281,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
 
                                             <NeoButton
                                                 title={t("searchsimple")}
-                                                type={(getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
                                                 >
                                                 {t('searchsimple')}
                                             </NeoButton>
