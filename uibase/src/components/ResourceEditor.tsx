@@ -20,14 +20,11 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
-import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
 import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 
 interface ITargetObject {
     eClass: string,
-
     [key: string]: any
 }
 
@@ -1200,7 +1197,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
                                     let isExcluded = false;
                                     for (const [key, value] of Object.entries(this.state.targetObject)) {
-                                        if (key === this.state.addRefPropertyName) {
+                                        if (key === this.state.addRefPropertyName && (value as any).find) {
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
