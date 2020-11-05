@@ -302,11 +302,11 @@ export class MainApp extends React.Component<any, State> {
         let content = null;
         if (!this.state.hideLog) {
             children = <div id={"logContent"} ref={this.debugRef}>
-                {splitLog(this.state.log).map(str=>{
+                {splitLog(this.state.log).map((str, index)=>{
                     str = str.replace("  "," ");
                     let arr = str.slice(24).split(" ");
                     arr.splice(1,0, str.substring(0,23));
-                    return <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : undefined, display: "inline-flex"}}>
+                    return <div key={`logEntry${index}`} style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : undefined, display: "inline-flex"}}>
                         <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.violete_5, minWidth: "60px"}}>{arr[0]}</div>
                         <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.grey_8, whiteSpace: "nowrap"}}>{arr[1]}</div>
                         <div style={{color: arr[0] === "ERROR" ? NeoColor.magenta_4 : NeoColor.grey_8, whiteSpace: "pre-wrap"}}>{arr.splice(2).join(" ")}</div>
@@ -327,8 +327,8 @@ export class MainApp extends React.Component<any, State> {
                     <NeoButton type={"link"} onClick={()=>!this.state.hideURL && this.setState({hideURL:true})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
                 </div>
                 <div id={"urlContent"} ref={this.debugRef}>
-                    {urlParams.map(up=>{
-                        return <div className={"url-history"}>
+                    {urlParams.map((up,index)=>{
+                        return <div key={`urlEntry${index}`}  className={"url-history"}>
                             App module name - {up.appModule ? up.appModule : "null"},<br/>
                             Tree node - {up.tree.length > 0 ? up.tree.join("/") : "null"},<br/>
                             Use parent reference tree - {up.useParentReferenceTree.toString()},<br/>
