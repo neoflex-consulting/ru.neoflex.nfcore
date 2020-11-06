@@ -68,29 +68,29 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
             }
         if (excelData.excelComponentType === excelElementExportType.grid && excelData.gridData !== undefined) {
             //Добавление таблицы
-            excelData.gridData.columns.forEach((header,columnIndex)=>{
+            for (const [columnIndex,header] of excelData.gridData.columns.entries()) {
                 worksheet.getCell(`${encode(columnIndex)}:${offset}`).value = header.name;
                 worksheet.getCell(`${encode(columnIndex)}:${offset}`).fill = {
                     type: 'pattern',
                     pattern:"solid",
                     fgColor:{argb:'9bbb59'}
                 }
-            });
-            excelData.gridData.rows.forEach((row,rowIndex)=>{
-                row.forEach((cell,columnIndex)=>{
+            }
+            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
+                for (const [columnIndex, cell] of row.entries()) {
                     worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex+ 1}`).value = cell
-                })
-            });
+                }
+            }
             worksheet.autoFilter = `A${offset}:${encode(excelData.gridData.columns.length-1)}${offset}`;
 
             //Formatting
-            // eslint-disable-next-line
-            excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
-                row.forEach((cell,cellIndex)=>{
-                    if (cell)
+            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
+                for (const [cellIndex, cell] of row.entries()) {
+                    if (cell) {
                         worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset+1}`).numFmt = cell
-                })
-            });
+                    }
+                }
+            }
             offset += excelData.gridData.rows.length;
         }
         if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
@@ -141,23 +141,23 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                 offset += 1;
             }
             //Data
-            excelData.gridData.rows.forEach((row,rowIndex)=>{
-                row.forEach((cell,columnIndex)=>{
+            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
+                for (const [columnIndex, cell] of row.entries()) {
                     worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).value = cell
-                })
-            });
+                }
+            }
             //Formatting
-            // eslint-disable-next-line
-            excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
-                row.forEach((cell,cellIndex)=>{
-                    if (cell)
+            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
+                for (const [cellIndex, cell] of row.entries()) {
+                    if (cell) {
                         worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset}`).numFmt = cell
-                })
-            });
+                    }
+                }
+            }
             offset += 1 + excelData.gridData.rows.length;
         }
         offset += 1;
-        worksheet.columns.forEach(c=>{
+        worksheet.columns && worksheet.columns.forEach(c=>{
             c.width = 20
         })
     }
