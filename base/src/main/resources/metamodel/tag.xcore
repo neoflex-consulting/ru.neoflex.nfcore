@@ -8,7 +8,10 @@
 package ru.neoflex.nfcore.base.tag
 import ru.neoflex.nfcore.base.types.QName
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 @Ecore(constraints="IsValid")
+@NFCore(documentation="Тег - используется для пометки элементов приложения, для упрощения дальнейшего поиска",invisible="tags")
 class Tag extends Tagged {
     QName name
 }

@@ -21,6 +21,7 @@ import ru.neoflex.nfcore.application.GridComponent
 class JdbcDriver extends Tagged {
     QName name
     String driverClassName
+    String[] extLibraries
 	String urlPattern
 }
 

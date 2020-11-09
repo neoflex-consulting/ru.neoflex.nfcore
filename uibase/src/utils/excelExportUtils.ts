@@ -68,33 +68,36 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
             }
         if (excelData.excelComponentType === excelElementExportType.grid && excelData.gridData !== undefined) {
             //Добавление таблицы
-            worksheet.addTable({
-                name: excelData.gridData.tableName,
-                ref: 'A' + offset, //Позиция
-                headerRow: true,
-                style: {
-                    theme: 'TableStyleLight11',
-                    showRowStripes: true,
-                },
-                columns: excelData.gridData.columns,
-                rows: excelData.gridData.rows,
-            });
+            for (const [columnIndex,header] of excelData.gridData.columns.entries()) {
+                worksheet.getCell(`${encode(columnIndex)}:${offset}`).value = header.name;
+                worksheet.getCell(`${encode(columnIndex)}:${offset}`).fill = {
+                    type: 'pattern',
+                    pattern:"solid",
+                    fgColor:{argb:'9bbb59'}
+                }
+            }
+            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
+                for (const [columnIndex, cell] of row.entries()) {
+                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex+ 1}`).value = cell
+                }
+            }
+            worksheet.autoFilter = `A${offset}:${encode(excelData.gridData.columns.length-1)}${offset}`;
+
             //Formatting
-            // eslint-disable-next-line
-            excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
-                row.forEach((cell,cellIndex)=>{
-                    if (cell)
+            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
+                for (const [cellIndex, cell] of row.entries()) {
+                    if (cell) {
                         worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset+1}`).numFmt = cell
-                })
-            });
-            offset += 1 + excelData.gridData.rows.length;
+                    }
+                }
+            }
+            offset += excelData.gridData.rows.length;
         }
         if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
             //Добавление текста
             let cell = worksheet.getCell('A' + offset);
             // Modify/Add individual cell
             cell.value = excelData.textData;
-            offset += 1;
         }
         if (excelData.excelComponentType === excelElementExportType.complexGrid
             && excelData.gridHeader !== undefined
@@ -131,37 +134,30 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                         fgColor:{argb:'9bbb59'}
                     };
                     cell.font = {
-                        color: { argb: 'FFFFFF' }
+                        color: { argb: '000000' }
                     };
                     cell.alignment = { vertical: 'middle', horizontal: 'center' }
                 }
                 offset += 1;
             }
             //Data
-            //https://github.com/exceljs/exceljs/issues/970 - auto-filter bug
-            worksheet.addTable({
-                name: excelData.gridData.tableName,
-                ref: 'A' + offset, //Позиция
-                headerRow: false,
-                style: {
-                    theme: "TableStyleLight11",
-                    showRowStripes: true,
-                },
-                columns: excelData.gridData.columns,
-                rows: excelData.gridData.rows,
-            });
+            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
+                for (const [columnIndex, cell] of row.entries()) {
+                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).value = cell
+                }
+            }
             //Formatting
-            // eslint-disable-next-line
-            excelData.gridData.cellsMasks.forEach((row,rowIndex)=>{
-                row.forEach((cell,cellIndex)=>{
-                    if (cell)
+            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
+                for (const [cellIndex, cell] of row.entries()) {
+                    if (cell) {
                         worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset}`).numFmt = cell
-                })
-            });
+                    }
+                }
+            }
             offset += 1 + excelData.gridData.rows.length;
         }
         offset += 1;
-        worksheet.columns.forEach(c=>{
+        worksheet.columns && worksheet.columns.forEach(c=>{
             c.width = 20
         })
     }

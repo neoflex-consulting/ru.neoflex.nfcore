@@ -70,12 +70,13 @@ class CalendarExt extends CalendarImpl {
                         def appModuleRef = Context.current.store.getRef(appModule.eResource())
                         Context.current.store.updateEObject(appModuleRef, appModule)
                     }
+
                     return JsonOutput.toJson("Notification created")
                 }
             })
         }
         catch (Throwable e) {
-            logger.error("Full name ${notificationDTO.fullName} already exists")
+            logger.error("Name already exists")
         }
     }
 

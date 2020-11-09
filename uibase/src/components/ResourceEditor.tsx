@@ -5,7 +5,13 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject, findObjectByIdCallback} from '../utils/resourceEditorUtils'
+import {
+    findObjectById,
+    findObjectByIdCallback,
+    getPrimitiveType,
+    nestUpdaters,
+    traverseEObject
+} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -14,11 +20,14 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
-import update from "immutability-helper";
-
+import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
+import './../styles/ResouceEditor.css'
+import {NeoIcon} from "neo-icon/lib";
+import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
 
 interface ITargetObject {
     eClass: string,
+
     [key: string]: any
 }
 
@@ -212,12 +221,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
+                    const invisibleFields = `,${getClassAnnotationByClassAndKey(feature.eContainer && feature.eContainer, 'invisible', true)},`;
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
                             :
                             json[feature.get('name')] ? [json[feature.get('name')]] : [];
                         return <Tree.TreeNode
+                            className={invisibleFields.includes(`,${feature.get('name')},`) ? "hidden-leaf" : ""}
                             parentUpdater={json.updater}
                             upperBound={upperBound}
                             isArray={true}
@@ -254,68 +265,84 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         };
 
         const onDrop = (event: any) => {
-            const dropKey = event.node.props.eventKey.split('.')[0];
+            const {t} = this.props;
             const dragKey = event.dragNode.props.eventKey;
-            const dropPos = event.node.props.pos.split('-');
-            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
-            const nodePos = dropPos[dropPos.length - 1];
-            const propertyName = event.node.props.propertyName
 
-            if ( (dropKey === "null" && event.node.props.children.length !== 0 && event.node.props.upperBound !== -1) ||
-                (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === 1 || event.node.props.upperBound === 1)) ||
-                    (event.node.props.children.length !== 0 && (event.node.props.featureUpperBound === undefined && event.node.props.upperBound === undefined))
+            const dropKey = event.node.props.eventKey.split('.')[0];
+
+            const dragPos = event.dragNode.props.pos.split('-');
+            const dropPos = event.node.props.pos.split('-');
+
+            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePos = Number(dragPos[dragPos.length - 1]);
+
+            const nodePos = Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePropertyName = event.dragNode.props.propertyName
+            const nodePropertyName = event.node.props.propertyName
+
+            const eClass = event.node.props.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+
+            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
+
+            if (!this.state.edit) {
+                this.notification(t('notification'), t('editing is not available'));
+            }
+            else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
+                this.notification(t('notification'), 'Опрация заблокирована');
+            }
+            else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
+                (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
+                (dropKey === 'null' && event.node.props.arrayLength !== 0)
             ) {
-                alert('Опрация заблокирована')
+                this.notification(t('notification'), 'Опрация заблокирована');
             }
             else {
-                let data: any = this.state.resourceJSON;
+                let updatedJSON = this.state.resourceJSON;
+                let dragObj = findObjectById(updatedJSON, dragKey);
 
-                let dragObj: any = findObjectById(data, dragKey);
+                //Delete dragObj from updatedJSON
+                updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
 
-                    if (!event.dropToGap) {
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any) => {
-                            if (item[propertyName] === undefined) {
-                                item[propertyName] = dragObj
-                            }
-                            else if (item[propertyName].length !== undefined) {
-                                item[propertyName].push(dragObj)
-                            }
-                        });
+                // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
+                if (!event.dropToGap) {
+                    let item: any;
+                     findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                         item = dropObj
+                    });
+                    let upperBound = event.node.props.upperBound
+                    if (upperBound === 1) {
+                        item[nodePropertyName] = dragObj
+                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
 
-                        // loop(data, dropKey, (item: any) => {
-                        //     item.children = item.children || [];
-                        //     item.children.push(dragObj);
-                        // });
-                    } else if (
-                        (event.node.props.children || []).length > 0 &&
-                        event.node.props.expanded &&
-                        dropPosition === 1
-                    ) {
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
-                            // item[prop] = item[prop] || [];
-                            item[prop].unshift(dragObj);
-                        });
-                        // loop(data, dropKey, (item: any) => {
-                        //     item.children = item.children || [];
-                        //     item.children.unshift(dragObj);
-                        // });
-                    } else {
+                    } else if (upperBound === -1) {
+                        if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
+                            item[nodePropertyName] = []
+                        }
+                        item[nodePropertyName].push(dragObj)
+                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                    }
+                }
+                else {
                         let ar: any;
-                        let i: any;
-                        findObjectByIdCallback(data, dropKey, (data: any, item: any, prop: any) => {
-                            ar = data[prop] || data;
+                        findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
+                            ar = data;
                         });
                         if (ar !== undefined) {
                             if (dropPosition === -1) {
                                 ar.splice(nodePos, 0, dragObj);
-                            } else {
+                            } else if (nodePos < dragNodePos) {
                                 ar.splice(nodePos + 1, 0, dragObj);
+                            } else if (nodePos > dragNodePos) {
+                                ar.splice(nodePos, 0, dragObj);
                             }
                         }
                     }
                     const node: { [key: string]: any } = event.node.props;
                     const targetObject: { [key: string]: any } = this.state.targetObject;
-                    let updatedJSON = data;
                     let nestedJSON = nestUpdaters(updatedJSON, null);
                     let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
                     this.state.mainEObject.eResource().clear();
@@ -398,6 +425,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const posY = e.event.clientY;
         const nodeProps = e.node.props;
         getClipboardContents().then(json => {
+            console.log(json)
             let eObject = {eClass: ""} as ITargetObject;
             try {
                 eObject = JSON.parse(json);
@@ -440,18 +468,36 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
         const preparedData: Array<Object> = [];
         let featureList: any = undefined;
+        let invisibleFields = "";
+        let disableFields = "";
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
-            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures')
-        }
+            featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
+            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'invisible', true)},`;
+            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'disabled', true)},`;
+                    }
         else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
-            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures')
+            featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures');
+            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'invisible', true)},`;
+            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'disabled', true)},`;
         }
         if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
+                let description = getClassAnnotationByClassAndKey(feature, 'documentation');
                 if (!isContainment && !isContainer) preparedData.push({
-                    property: feature.get('name'),
+                    property: description !== "" ?
+                        <div style={{display: "inline-flex"}}>
+                            <span style={{margin: "5px 10px 0 0"}}>
+                                {feature.get('name')}
+                            </span>
+                            <NeoHint title={description}>
+                                <NeoButton type={'link'}>
+                                    <NeoIcon icon={'question'} color={NeoColor.violete_4}/>
+                                </NeoButton>
+                            </NeoHint>
+                        </div>
+                        : feature.get('name'),
                     value: FormComponentMapper.getComponent({
                         value: targetObject[feature.get('name')],
                         targetObject: targetObject,
@@ -466,7 +512,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         onEClassBrowse: this.onEClassBrowse,
                         onBrowse: this.onBrowse,
                         mainEObject: mainEObject,
-                        edit: this.state.edit
+                        edit: this.state.edit && !disableFields.includes(`,${feature.get('name')},`)
                     }),
                     key: feature.get('name') + idx
                 })
@@ -880,7 +926,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            this.setState({ isSaving: true });
+            // const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+            // contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
+            this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 if (this.props.match.params.id === 'new') {
                     this.setState({edit: false})
@@ -1109,7 +1157,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     {
                                         title: 'Property',
                                         dataIndex: 'property',
-                                        width: 300
+                                        width: '49%'
                                     },
                                     {
                                         title: 'Value',
@@ -1163,7 +1211,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
                                     let isExcluded = false;
                                     for (const [key, value] of Object.entries(this.state.targetObject)) {
-                                        if (key === this.state.addRefPropertyName) {
+                                        if (key === this.state.addRefPropertyName && (value as any).find) {
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }

@@ -233,7 +233,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
             <Form style={{ marginTop: '40px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <NeoTypography type={'h4_medium'} style={{marginBottom:'15px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
+                        <NeoTypography type={'h4_medium'} style={{marginBottom:'10px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
                     </NeoCol>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'0'}}>

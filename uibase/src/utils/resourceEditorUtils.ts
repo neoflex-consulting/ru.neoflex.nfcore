@@ -38,6 +38,12 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {
                         return currentObject.children ? currentObject.children : undefined
+                    } else if (options && options.operation === "deleteNode") {
+                        if (Array.isArray(currentObject[updaterProperty])) {
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
+                        } else { //DatasetComponent (component -> component)
+                            updatedData = update(currentObject as any, { [updaterProperty]: { $set: null } })
+                        }
                     } else {
                         //if nothing from listed above, then merge updating the object by a property name
                         updatedData = update(currentObject as any, { [updaterProperty]: { $merge: newValues } })
@@ -142,36 +148,31 @@ function findObjectByIdCallback(data: any, id: String, callback: any): any {
     const walkThroughArray = (array: Array<any>): any => {
         for (var el of array) {
             if (el._id && el._id === id) {
-                return el
+                return callback(el, data)
             } else {
-                const result = findObjectById(el, id);
-                if (result) return result
+                findObjectByIdCallback(el, id, callback);
             }
         }
     };
 
     const walkThroughObject = (obj: any): any => {
         let result;
-        let prop_;
-
         for (let prop in obj) {
             if (result) {
                 break
             }
             if (Array.isArray(obj[prop])) {
-                result = findObjectById(obj[prop], id)
-                prop_ = prop
+                result = findObjectByIdCallback(obj[prop], id, callback)
             } else {
                 if (obj[prop] instanceof Object && typeof obj[prop] === "object") {
-                    result = findObjectById(obj[prop], id)
-                    prop_ = prop
+                    result = findObjectByIdCallback(obj[prop], id, callback)
                 }
             }
         }
-        if (result) callback(data, result, prop_)
+        if (result) callback(result, data)
     };
 
-    if (data._id === id) return callback(data, 0, data);
+    if (data._id === id) return callback(data, data);
 
     if (Array.isArray(data)) {
         return walkThroughArray(data)

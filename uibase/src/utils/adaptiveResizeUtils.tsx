@@ -6,14 +6,15 @@ export enum adaptiveElementSize {
     extraLarge
 }
 
-const breakPointsSizePx = {
+export const breakPointsSizePx = {
     paginator: [375, 540, 857, 857, 857],
     diagram: [375, 400, 638, 878, 878],
     edit: [375, 375, 522, 750, 750],
-    normal: [375, 510, 630, 900, 900]
+    normal: [375, 510, 630, 900, 900],
+    referenceMenu: [62, 62, 62, 62, 62]
 };
 
-export type adaptiveElementType = "edit"|"diagram"|"normal"|"paginator";
+export type adaptiveElementType = "edit"|"diagram"|"normal"|"paginator"|"referenceMenu";
 
 export function getAdaptiveSize(sizePx: number, et:adaptiveElementType) {
     if (sizePx > breakPointsSizePx[et][adaptiveElementSize.extraLarge]) {

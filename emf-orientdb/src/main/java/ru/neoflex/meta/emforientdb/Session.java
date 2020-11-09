@@ -422,7 +422,11 @@ public class Session implements Closeable {
             }
         }
         for (OEdge oEdge : references) {
-            deleteRecursive(oEdge.getTo());
+            OVertex to = oEdge.getTo();
+            oEdge.delete();
+            if(!to.getEdges(ODirection.IN, ECONTAINS).iterator().hasNext()) {
+                deleteRecursive(to);
+            }
         }
     }
 

@@ -67,6 +67,7 @@
         "search": "搜索",
         "searchsimple": "搜索",
         "select": "選擇",
+        "selectAll": "全選",
         "showrows": "顯示行",
         "sorting": "分類",
         "sorts": "排序",
@@ -386,6 +387,11 @@
 
         "bar chart": "條形圖",
         "pie chart": "餅形圖",
-        "graph": "時間表"
+        "graph": "時間表",
+
+        "show log": "顯示服務器日誌",
+        "hide log": "隱藏服務器日誌",
+        "show url decode": "顯示解碼的URL",
+        "hide url decode": "隱藏解碼的URL"
 
 }

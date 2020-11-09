@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Form, Icon, Table} from 'antd';
+import {Button, Form, Icon} from 'antd';
 import Ecore from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
@@ -10,6 +10,8 @@ import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import './../styles/Data.css'
+import {NeoDrawer, NeoTable} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 
 interface Props {
@@ -26,6 +28,7 @@ interface State {
     notFoundActivator: boolean;
     result: string;
     selectedRowKeys: any[];
+    filterMenuVisible:any;
 }
 
 class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
@@ -38,7 +41,8 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         tableDataFilter: [],
         notFoundActivator: false,
         result: '',
-        selectedRowKeys: []
+        selectedRowKeys: [],
+        filterMenuVisible:false
     };
 
     handleSearch = (resources : Ecore.Resource[]): void => {
@@ -49,6 +53,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         this.setState({ resources: resources, columns: columns});
         this.setState({notFoundActivator: true});
         this.setState({tableDataFilter: []});
+
     };
 
     prepareColumns(resources:Ecore.Resource[]):Array<Ecore.EStructuralFeature>{
@@ -61,7 +66,6 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 }
             }
         });
-
         let name: string = 'eClass';
         let title: string = 'eClass';
         let type: string = 'stringType';
@@ -72,6 +76,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 <Icon type="search" style={{ color: filtered ? "#1890ff" : undefined }} />
             ),
             onFilter: (value: any, record: any) => record.eClass.toLowerCase() === value.toLowerCase(),
+            onFilterDropdownVisibleChange: () => {
+                this.state.filterMenuVisible ? this.setState({filterMenuVisible: false})
+                    : this.setState({filterMenuVisible: true})
+            },
         }];
 
         for (let column of AllFeatures){
@@ -94,7 +102,11 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                     <Icon type="search" style={{ color: filtered ? "#1890ff" : undefined }} />
                 ),
                 onFilter: (value: any, record: any) => record.name !== undefined ?
-                    record.name.toString().toLowerCase() === value.toString().toLowerCase() : undefined
+                    record.name.toString().toLowerCase() === value.toString().toLowerCase() : undefined,
+                onFilterDropdownVisibleChange: () => {
+                    this.state.filterMenuVisible ? this.setState({ filterMenuVisible: false})
+                        : this.setState({ filterMenuVisible: true});
+                },
             })
         }
         return AllColumns;
@@ -190,9 +202,16 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     //for FilterMenu
     getColumnSearchProps = (name: any, title: any) => ({
         filterDropdown: () =>
+            <NeoDrawer
+                className={'datasearch__filter__drawer'}
+                mask={false}
+                title={`Поиск по ${name}`}
+                visible={this.state.filterMenuVisible}
+                width={711}>
                 <SearchFilter onName={name} onTitle={title} tableData={this.filteredData()}
-                                     tableDataFilter={this.changeTableData}/>
-    });
+                              tableDataFilter={this.changeTableData}/>
+            </NeoDrawer>})
+
 
     changeTableData = (tableDataFilter: Array<any>) => {
         this.setState({tableDataFilter})
@@ -211,10 +230,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 fixed: 'right',
                 width: 100,
                 render: (text:string, record:any) => {
-                    const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`}>
-                        <span id="edit">{t('edit')}</span>
+                    const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                        <NeoIcon icon={"edit"}/>
                     </Link>;
-                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>{t('delete')}</span>;
+                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}><NeoIcon icon={"rubbish"}/></span>;
                     return [editButton, deleteButton]
                 }
             }];
@@ -252,7 +271,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                          <Icon type="select" />
                                     </Button>
                                  </div>
-                                 <Table
+                                 <NeoTable
                                      scroll={{x: columnsWidth}}
                                      columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                      dataSource={this.filteredData()}
@@ -262,12 +281,12 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                  />
                              </div>
                              :
-                             <Table
+                             <NeoTable
                                  scroll={{x: columnsWidth}}
                                  columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                  dataSource={this.filteredData()}
                                  bordered={true}
-                                 style={{whiteSpace: "pre"}}
+                                 style={{whiteSpace: "pre", padding:'6px 35px'}}
                              />
                      }
                  </div>
