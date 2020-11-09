@@ -470,7 +470,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         let featureList: any = undefined;
         let invisibleFields = "";
         let disableFields = "";
-        let test = "";
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
             featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
             invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'invisible', true)},`;

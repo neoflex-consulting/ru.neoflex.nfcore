@@ -1,16 +1,15 @@
 import * as React from "react";
 import Ecore from "ecore";
-import { API } from "../modules/api";
-import { Tabs, Button, Form } from "antd";
-import { FormComponentProps } from 'antd/lib/form/Form';
-import Checkbox from "antd/lib/checkbox";
+import {API} from "../modules/api";
+import {Button, Form, Tabs} from "antd";
+import {FormComponentProps} from 'antd/lib/form/Form';
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
 import ponyCat from '../icons/ponyCat.png';
-import { withTranslation, WithTranslation } from "react-i18next";
+import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 
 const FormItem = Form.Item;
 
