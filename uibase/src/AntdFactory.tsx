@@ -419,11 +419,10 @@ export class Button_ extends ViewContainer {
         unmountComponent.bind(this)()
     }
     enterCheck(e: KeyboardEvent): void{
-        if (e.key === "Enter" || e.key.endsWith("0") || e.key.endsWith("1") || e.key.endsWith("2") || e.key.endsWith("3") || e.key.endsWith("4") || e.key.endsWith("5") || e.key.endsWith("6") || e.key.endsWith("7") || e.key.endsWith("8") || e.key.endsWith("9")) {
+        if (e.key === "Enter") {
             this.setState({isEnter: true})
         }
     }
-
 
     render = () => {
         window.addEventListener('keydown', this.enterCheck.bind(this))
@@ -436,7 +435,7 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
-                onClick={isReadOnly ? ()=>{} : (e) => {
+                onClick={isReadOnly ? ()=>{} : () => {
                         if (!this.state.isEnter) {
                             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                             handleClick.bind(this)(value);
