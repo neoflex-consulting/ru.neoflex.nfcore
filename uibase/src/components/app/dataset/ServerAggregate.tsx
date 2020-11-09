@@ -286,15 +286,16 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '15px' }}>
+            <Form style={{ marginTop: '25px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <NeoTypography type={'h4_medium'} style={{color:'#333333', marginTop:'4px'}}>{t('total')}</NeoTypography>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
+                                   style={{top:'-6px'}}
                                    onClick={this.reset}>
                             <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
