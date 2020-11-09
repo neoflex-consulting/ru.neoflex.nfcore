@@ -485,17 +485,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
-                let description = undefined;
-                if (feature.get('eAnnotations').array().length !== 0) {
-                    feature.get('eAnnotations').array()[0].get('details').array()
-                        .forEach((e: any) => {
-                            if (e.get('key') === 'documentation') {
-                                description = e.get('value');
-                            }
-                        });
-                }
+                let description = getClassAnnotationByClassAndKey(feature, 'documentation');
                 if (!isContainment && !isContainer) preparedData.push({
-                    property: description !== undefined ?
+                    property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
                             <span style={{margin: "5px 10px 0 0"}}>
                                 {feature.get('name')}
