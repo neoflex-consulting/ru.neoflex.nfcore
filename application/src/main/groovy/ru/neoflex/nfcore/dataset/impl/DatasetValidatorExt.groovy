@@ -69,6 +69,9 @@ class DatasetValidatorExt extends DatasetValidator {
                 }
             }
         }
+        if ((datasetComponent.insertQuery || datasetComponent.deleteQuery || datasetComponent.updateQuery) && datasetComponent.dataset instanceof GroovyDataset) {
+            return validate(datasetComponent, diagnostics, context, "GroovyDataset can't have DML operations")
+        }
     }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {

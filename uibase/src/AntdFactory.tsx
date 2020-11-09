@@ -409,15 +409,19 @@ export class Button_ extends ViewContainer {
             isDisabled: this.viewObject.get('disabled'),
             isEnter: false,
         };
+        this.enterCheck = this.enterCheck.bind(this);
     }
 
     componentDidMount(): void {
         mountComponent.bind(this)();
+        window.addEventListener('keydown', this.enterCheck);
     }
 
     componentWillUnmount(): void {
         unmountComponent.bind(this)()
+        window.removeEventListener('keydown', this.enterCheck);
     }
+
     enterCheck(e: KeyboardEvent): void{
         if (e.key && e.key === "Enter" || e.key.endsWith("0") || e.key.endsWith("1") || e.key.endsWith("2") || e.key.endsWith("3") || e.key.endsWith("4") || e.key.endsWith("5") || e.key.endsWith("6") || e.key.endsWith("7") || e.key.endsWith("8") || e.key.endsWith("9")) {
             this.setState({isEnter: true})
@@ -426,7 +430,6 @@ export class Button_ extends ViewContainer {
 
 
     render = () => {
-        window.addEventListener('keydown', this.enterCheck.bind(this))
         const cssClass = createCssClass(this.viewObject);
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const { t } = this.props as WithTranslation;
@@ -436,6 +439,7 @@ export class Button_ extends ViewContainer {
             hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
+                className={cssClass}
                 onClick={isReadOnly ? ()=>{} : (e) => {
                         if (!this.state.isEnter) {
                             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
@@ -814,18 +818,12 @@ class HtmlContent_ extends ViewContainer {
         return (
             <div hidden={false}
                      aria-disabled={isReadOnly}
-                     style={{backgroundColor:`${this.viewObject.get('isError')? '#F8F1F3': '#F0FEFF'}`,
-                     color:`${this.viewObject.get('isError')? '#AD1457': '#0E5A7D'}`}}
                      className={`${cssClass} content`}
                      onClick={isReadOnly ? ()=>{} : () => {
                          const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                          handleClick.bind(this)(value);
                      }}
             >
-                {this.viewObject.get('isError') ?
-                    <NeoIcon icon={'info'} color={'#AD1457'} style={{margin: '5px 12px 0 0'}}/>
-                    :
-                    <NeoIcon icon={'info'} color={'#27677C'} style={{margin: '0 12px 0 0'}}/>}
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
             </div>

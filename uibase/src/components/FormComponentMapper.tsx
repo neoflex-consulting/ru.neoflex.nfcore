@@ -199,6 +199,16 @@ interface SelectComponentProps {
     edit?: boolean
 }
 
+interface TagComponentProps {
+    value: any,
+    onChange?: Function,
+    idx?: number,
+    ukey?: string,
+    eType: any,
+    id: string,
+    edit?: boolean
+}
+
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
     const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props
@@ -206,6 +216,27 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
     return (
         <Select
             mode={upperBound === -1 ? "multiple" : "default"}
+            value={value}
+            key={ukey + "_" + idx}
+            style={{ width: "300px" }}
+            onChange={(newValue: any) => {
+                onChange && onChange!(newValue)
+            }}
+            disabled={!edit}
+        >
+            {eType.eContents().map((obj: Ecore.EObject) =>
+                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
+        </Select>
+    )
+}
+
+function TagComponent(props: TagComponentProps): JSX.Element {
+
+    const { eType, value, idx, ukey, onChange, id, edit } = props;
+
+    return (
+        <Select
+            mode={"tags"}
             value={value}
             key={ukey + "_" + idx}
             style={{ width: "300px" }}
@@ -298,6 +329,18 @@ export default class ComponentMapper extends React.Component<Props, any>{
                     props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
                 }}
                 upperBound={props.upperBound}
+                edit={edit}
+            />
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && Array.isArray(value)) {
+            return <TagComponent
+                idx={idx}
+                ukey={ukey}
+                value={targetValue || eType.eContents()[0].get('name')}
+                eType={eType}
+                id={props.id}
+                onChange={(newValue: any) => {
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
+                }}
                 edit={edit}
             />
         } else {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore";
 import { API } from "../modules/api";
-import { Icon, Select, Tabs, Button, Form, Input, Row, Col } from "antd";
+import { Tabs, Button, Form } from "antd";
 import { FormComponentProps } from 'antd/lib/form/Form';
 import Checkbox from "antd/lib/checkbox";
 import AceEditor from "react-ace";
@@ -147,13 +147,12 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                     translate={ t }
                     setModalVisible={this.setModalVisible}
                 />}
-                <NeoRow style={{padding:'10px 36px'}}>
-                        <Form onSubmit={this.handleSubmit} className={'datasearch'} style={{width:'100%'}}>
+                        <Form onSubmit={this.handleSubmit} className={'datasearch'} style={{width:'100%', padding:'10px 36px'}}>
                             <Button
                                 title={t("createitem")}
                                 icon="plus"
                                 type="primary"
-                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'37px', zIndex:100}}
+                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:100}}
                                 size="large"
                                 onClick={()=>this.setModalVisible(true)}
                             />
@@ -164,16 +163,13 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
 
                                     <TabPane className={'datasearch_region'} tab={this.props.t('data search')} key='data_search'>
 
-                                        <NeoRow style={{justifyContent:'flex-start'}}>
-
                                             <FormItem>
-
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>
                                                 {getFieldDecorator('selectEClass', {
                                                     initialValue: this.props.specialEClass === undefined
                                                         ? undefined :
                                                         this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                                })(<>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>
+                                                })(
                                                     <NeoSelect
                                                         className={'EClass_select'}
                                                         width={'670px'}
@@ -194,37 +190,31 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                                     </option>)
                                                         }
                                                     </NeoSelect>
-                                                    </>
                                                 )}
                                             </FormItem>
-                                        </NeoRow>
-                                        <NeoRow style={{justifyContent:'flex-start'}}>
-                                            <FormItem>
+                                            <FormItem style={{display:'inline-block'}}>
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>Наименование</div>
                                                 {getFieldDecorator('name', {
                                                     rules: [{
                                                         required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
                                                         message: 'Please enter name'
                                                     }]
-                                                })(<>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>Наименование</div>
+                                                })(
                                                     <NeoInput width={'421px'} />
-                                                    </>
                                                 )}
                                             </FormItem>
-                                            <FormItem style={{ display: 'inline-block' }}>
+                                            <FormItem style={{display:'inline-block', marginTop:'10px'}}>
                                                 {getFieldDecorator('regular_expression', {
                                                     valuePropName: 'checked'
                                                 })(
                                                     <NeoInput type={'checkbox'} style={{ marginLeft: '10px', marginTop:'25px' }}>{t("regularexpression")}</NeoInput>
                                                 )}
                                             </FormItem>
-                                        </NeoRow>
-                                        <NeoRow style={{justifyContent:'flex-start'}}>
-                                            <FormItem style={{ display: 'inline-block' }}>
+                                            <FormItem>
+                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>Теги</div>
                                                 {getFieldDecorator('tags', {
                                                     rules: []
-                                                })(<>
-                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>Теги</div>
+                                                })(
                                                     <NeoSelect
                                                         allowClear={true}
                                                         mode={"tags"}
@@ -233,22 +223,29 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         placeholder={"Выберите из списка"}>
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
-                                                                    <Select.Option key={tag.get('name')}
+                                                                    <option key={tag.get('name')}
                                                                                    value={tag.get('name')}>
                                                                         {tag.get('name')}
-                                                                    </Select.Option>)
+                                                                    </option>)
                                                         }
                                                     </NeoSelect>
-                                                </>
                                                 )}
                                             </FormItem>
-                                        </NeoRow>
+                                        <FormItem style={{marginBottom:'20px'}}>
+
+                                            <NeoButton
+                                                title={t("searchsimple")}
+                                                type={(getFieldValue('name') !== undefined || getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
+                                                >
+                                                {t('searchsimple')}
+                                            </NeoButton>
+
+                                        </FormItem>
                                         {this.state.indicatorError ?
                                             <img alt={t('notfound')} src={ponyCat} className="error" />
                                             :
                                             undefined
                                         }
-
 
                                     </TabPane>
                                     <TabPane tab={this.props.t('json search')} key='json_search'>
@@ -280,19 +277,21 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 </div>
                                             )}
                                         </FormItem>
+                                        <FormItem style={{marginBottom:'20px'}}>
+
+                                            <NeoButton
+                                                title={t("searchsimple")}
+                                                >
+                                                {t('searchsimple')}
+                                            </NeoButton>
+
+                                        </FormItem>
                                     </TabPane>
                                 </Tabs>
                             )}
-                            <FormItem style={{marginBottom:'20px'}}>
 
-                                <Button disabled={getFieldValue('selectEClass') === undefined} title={t("searchsimple")} type="primary" htmlType="submit" style={{ width: '100px', fontSize: '17px' }}>
-                                    <Icon type="search" />
-                                </Button>
-
-                            </FormItem>
                         </Form>
-                </NeoRow>
-               
+
             </React.Fragment>
         );
     }
