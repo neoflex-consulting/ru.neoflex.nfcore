@@ -456,15 +456,16 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '29px' }}>
+            <Form style={{ marginTop: '25px' }}>
                 <Form.Item style={{ marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
-                        <NeoTypography type={'h4_medium'} style={{color:'#333333', marginTop:'4px'}}>{t('highlight')}</NeoTypography>
+                        <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('highlight')}</NeoTypography>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent: "flex-end"}}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
+                                   style={{top:'-6px'}}
                                    onClick={this.reset}>
                             <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
