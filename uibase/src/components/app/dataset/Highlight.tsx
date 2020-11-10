@@ -233,7 +233,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     </Form.Item>
             </NeoCol>
             <NeoCol span={4} style={{alignItems:'flex-start', padding:'0 20px', justifyContent:'space-between'}}>
-                <NeoHint title={value.t("   background color")}>
+                <NeoHint title={value.t("background color")}>
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('background', value.index)}

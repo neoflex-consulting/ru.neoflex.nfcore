@@ -623,6 +623,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     onEdit = () => {
+        const {t} = this.props
         if (this.props.isEditMode) {
             this.gridOptions.getRowClass = (params: any): string => {
                 if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.delete)
