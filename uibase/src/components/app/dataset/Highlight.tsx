@@ -9,7 +9,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoHint, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -233,6 +233,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     </Form.Item>
             </NeoCol>
             <NeoCol span={4} style={{alignItems:'flex-start', padding:'0 20px', justifyContent:'space-between'}}>
+                <NeoHint title={value.t("   background color")}>
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('background', value.index)}
@@ -240,17 +241,18 @@ const SortableItem = SortableElement(({value}: any) => {
                 >
                     <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
                 </NeoButton>
+                </NeoHint>
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'320px'}
-                    title={'Выбор цвета фона'}
+                    title={value.t("choose background color")}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
                     mask={false}
                     footer={[<Form onSubmit={value.handleSubmit}>
                         <NeoButton type={'secondary'} key="back" onClick={() => value.handleColorMenu('background', value.index)}>
-                            Отменить
+                            {value.t("cancel")}
                         </NeoButton>
                         <NeoButton
                             title="run query"
@@ -262,17 +264,17 @@ const SortableItem = SortableElement(({value}: any) => {
                                     value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
                                 }), true)
                             }}>
-                            ОК
+                            {value.t("apply")}
                         </NeoButton></Form>,
                     ]}>
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                         <Radio.Button
                             style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
                             onClick={()=>value.handleColorPicker('solid')} value="solid"
-                            checked={value.solidPicker}>Основной</Radio.Button>
+                            checked={value.solidPicker}>{value.t("main")}</Radio.Button>
                         <Radio.Button
                             onClick={()=>value.handleColorPicker('gradient')} value="gradient"
-                            checked={!value.solidPicker}>Расширенный</Radio.Button>
+                            checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
                     </Radio.Group>
                     {value.solidPicker && (
                         <ColorPicker value={value} type={'background'}/>
@@ -281,6 +283,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         <SketchColorPicker value={value} type={'background'} />
                     )}
                 </Modal>
+                <NeoHint title={value.t("text color")}>
                 <NeoButton
                     type={'link'}
                     onClick={() => value.handleColorMenu('text', value.index)}
@@ -288,17 +291,18 @@ const SortableItem = SortableElement(({value}: any) => {
                 >
                     <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
                 </NeoButton>
+                </NeoHint>
                 <Modal
                     getContainer={() => document.getElementById ('filterButton') as HTMLElement}
                     width={'320px'}
-                    title={'Выбор цвета текста'}
+                    title={value.t("choose text color")}
                     visible={value.textColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
                     mask={false}
                     footer={[<Form onSubmit={value.handleSubmit}>
                         <NeoButton type={"secondary"} key="back" onClick={() => value.handleColorMenu('text', value.index)}>
-                            Отменить
+                            {value.t("cancel")}
                         </NeoButton>
                         <NeoButton
                             title="run query"
@@ -308,7 +312,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 columnName: 'color',
                                 value: value.stateColor !== undefined ? value.stateColor : value.color
                             }), true)}>
-                            ОК
+                            {value.t("apply")}
                         </NeoButton></Form>,
                     ]}
                 >
@@ -316,10 +320,10 @@ const SortableItem = SortableElement(({value}: any) => {
                         <Radio.Button
                             style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
                             onClick={()=>value.handleColorPicker('solid')} value="solid"
-                            checked={value.solidPicker}>Основной</Radio.Button>
+                            checked={value.solidPicker}>{value.t("main")}</Radio.Button>
                         <Radio.Button
                             onClick={()=>value.handleColorPicker('gradient')} value="gradient"
-                            checked={!value.solidPicker}>Расширенный</Radio.Button>
+                            checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
                     </Radio.Group>
                     {value.solidPicker && (
                         <ColorPicker value={value} type={'text'} />
