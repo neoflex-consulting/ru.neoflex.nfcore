@@ -155,6 +155,7 @@
 #referenceTree .ant-menu-item-selected {
     background-color: #FFF8E0;
     color: #333333;
+    font-weight: 500;
 }
 
 #referenceTree li.ant-menu-item,
@@ -164,13 +165,44 @@
     color: #333333;
 }
 
+#referenceTree.ant-menu-vertical .ant-menu-item,
+#referenceTree.ant-menu-vertical-left .ant-menu-item,
+#referenceTree.ant-menu-vertical-right .ant-menu-item,
+#referenceTree.ant-menu-inline .ant-menu-item,
+#referenceTree.ant-menu-vertical .ant-menu-submenu-title,
+#referenceTree.ant-menu-vertical-left .ant-menu-submenu-title,
+#referenceTree.ant-menu-vertical-right .ant-menu-submenu-title,
+#referenceTree.ant-menu-inline .ant-menu-submenu-title {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#referenceTree .ant-menu-submenu-title {
+    font-weight: 500;
+}
+
+#referenceTree > .ant-menu-item {
+    font-weight: 500;
+}
+
+#referenceTree.ant-menu-inline,
+#referenceTree.ant-menu-vertical, .ant-menu-vertical-left{
+    border-right: 1px solid transparent;
+}
+
 #referenceTree li.ant-menu-submenu > div {
     border-right: 3px transparent;
 }
 
 #referenceTree li.ant-menu-submenu-selected > div {
-    background-color: #FFF8E0;
-    border-right: 3px solid #FFCC66;
+    /*background-color: #FFF8E0;
+    border-right: 3px solid #FFCC66;*/
+    color: #B38136;
+    font-weight: 500;
+}
+
+#referenceTree li.ant-menu-submenu-selected > div > div > div > svg {
+    fill: #B38136;
 }
 
 #referenceTree .ant-menu-vertical .ant-menu-item::after,
@@ -189,26 +221,47 @@
 }
 
 #referenceTree .ant-menu-submenu-title:hover {
-    color: #333333;
+    color: #B38136;
 }
 
 #referenceTree .ant-menu-submenu-title:hover .ant-menu-submenu-arrow::before,
 #referenceTree .ant-menu-submenu-title:hover .ant-menu-submenu-arrow::after {
-    background: #333333 !important;
+    background: #666666 !important;
 }
 
 #referenceTree .ant-menu-submenu-arrow::before,
 #referenceTree .ant-menu-submenu-arrow::after {
-    background: #333333 !important;
+    background: #666666 !important;
 }
 
 #referenceTree .menu-content {
     display: inline-flex;
+    min-width: 233px;
 }
+
+#referenceTree .menu-content:hover {
+    color: #B38136;
+    fill: #B38136;
+}
+
 
 #referenceTree .menu-content > div > svg {
     margin: 12px 12px 12px 0;
+    fill: currentColor;
 }
+
+#referenceTree * {
+    white-space: pre-wrap;
+    height: auto;
+}
+
+/*#referenceTree .menu-content:not(.menu-with-icon) {
+    background-color: #ffadd2;
+}
+
+#referenceTree .menu-content.menu-with-icon {
+    background-color: #0e5a7d;
+}*/
 
 #referenceTree.ant-menu-vertical .ant-menu-item,
 #referenceTree.ant-menu-vertical-left .ant-menu-item,
@@ -223,6 +276,10 @@
 
 #referenceTree.short-size > li > div > i {
     display: none;
+}
+
+#referenceTree .menu-content > .menu-content {
+    padding-left: 40px;
 }
 
 .application-footer  {
@@ -331,3 +388,4 @@
 .pane.horizontal.primary {
     overflow-x:hidden;
 }
+
