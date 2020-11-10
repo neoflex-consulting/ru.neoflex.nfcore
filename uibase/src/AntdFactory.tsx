@@ -1,7 +1,7 @@
 import {View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, Typography} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
 import UserComponent from './components/app/UserComponent';
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
@@ -31,7 +31,6 @@ import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
 
-const { Paragraph } = Typography;
 const marginBottom = '20px';
 
 let startResource: Object;
@@ -423,7 +422,7 @@ export class Button_ extends ViewContainer {
     }
 
     enterCheck(e: KeyboardEvent): void{
-        if (e.key && e.key === "Enter" || e.key.endsWith("0") || e.key.endsWith("1") || e.key.endsWith("2") || e.key.endsWith("3") || e.key.endsWith("4") || e.key.endsWith("5") || e.key.endsWith("6") || e.key.endsWith("7") || e.key.endsWith("8") || e.key.endsWith("9")) {
+        if (e.key && e.key === "Enter") {
             this.setState({isEnter: true})
         }
     }

@@ -548,9 +548,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         if (type == DataType.DATE || type == DataType.TIMESTAMP) {
                             def map = [:]
                             map["column"] = currentColumn.datasetColumn.name
-                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(DAY FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(MONTH FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(MONTH FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(YEAR FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(YEAR FROM CAST('${filters[i].value}' AS DATE)))"
+                            map["select"] = "(EXTRACT(DAY FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(DAY FROM CAST('${filters[i].value}' AS DATE)) AND " +
+                                    "EXTRACT(MONTH FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(MONTH FROM CAST('${filters[i].value}' AS DATE)) AND " +
+                                    "EXTRACT(YEAR FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(YEAR FROM CAST('${filters[i].value}' AS DATE)))"
                             serverFilters.add(map)
                         } else {
                             def map = [:]
@@ -595,22 +595,22 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         map["column"] = groupBy[i].value
                             def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                         if (operator == 'AVG') {
-                            map["select"] = "AVG(\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "AVG(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'COUNT') {
-                            map["select"] = "COUNT(\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "COUNT(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'COUNT_DISTINCT') {
-                            map["select"] = "COUNT(DISTINCT \"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "COUNT(DISTINCT ${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'MAX') {
-                            map["select"] = "MAX(\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "MAX(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'MIN') {
-                            map["select"] = "MIN(\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "MIN(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'SUM') {
-                            map["select"] = "SUM(\"${groupBy[i].datasetColumn}\") as \"${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}\""
+                            map["select"] = "SUM(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (!serverGroupByAggregation.contains(map)) {
                             serverGroupByAggregation.add(map)
@@ -620,7 +620,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 for (int i = 0; i <= allColumns.size() - 1; ++i) {
                     def map = [:]
                     if (!serverGroupByAggregation.column.contains(allColumns[i])) {
-                        map["select"] = "\"${allColumns[i]}\""
+                        map["select"] = "${allColumns[i]}"
                         if (!serverGroupBy.contains(map)) {
                             serverGroupBy.add(map)
                         }
@@ -662,11 +662,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     namesOfOperationsInServerAggregations.add("Среднее:")
                                 }
                                 if (operator == 'COUNT') {
-                                    map["select"] = "COUNT(\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "count(${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
                                     namesOfOperationsInServerAggregations.add("Счетчик:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
-                                    map["select"] = "COUNT(DISTINCT \"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "count(distinct (${aggregations[j].datasetColumn})) as ${aggregations[j].datasetColumn}"
                                     namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
                                 }
                                 if (operator == 'MAX') {
@@ -691,7 +691,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         if (isExcluded) {
                             def map = [:]
                             map["column"] = allColumns[i]
-                            map["select"] = "NULL as \"${allColumns[i]}\""
+                            map["select"] = "NULL as ${allColumns[i]}"
                             if (map) {
                                 serverAggregations.add(map)
                             }
@@ -709,10 +709,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         map["column"] = sorts[i].datasetColumn
                         def operator = getConvertSort(sorts[i].operation.toString().toLowerCase())
                         if (operator == 'ASC') {
-                            map["select"] = "\"${sorts[i].datasetColumn}\" ASC"
+                            map["select"] = "${sorts[i].datasetColumn} ASC"
                         }
                         if (operator == 'DESC') {
-                            map["select"] = "\"${sorts[i].datasetColumn}\" DESC"
+                            map["select"] =  "${sorts[i].datasetColumn} DESC"
                         }
                         if (!serverSorts.contains(map)) {
                             serverSorts.add(map)
@@ -727,7 +727,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
                     def map = [:]
                     map["column"] = calculatedExpression[i].datasetColumn
-                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter)} as \"${calculatedExpression[i].datasetColumn}\""
+                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter)} as ${calculatedExpression[i].datasetColumn}"
                     if (!serverCalculatedExpression.contains(map)) {
                         serverCalculatedExpression.add(map)
                     }
@@ -771,7 +771,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             logger.info("connectionToDB", "Starting query = " + currentQuery)
             logger.info("connectionToDB", "parameters = " + parameters)
             //Add Named Parameters
-            p = new NamedParameterStatement(jdbcConnection, currentQuery);
+                p = new NamedParameterStatement(jdbcConnection, currentQuery);
             try {
                 if (parameters) {
                     p = JdbcUtils.getNamedParameterStatement(parameters, p)
@@ -787,15 +787,23 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 String key
                                 String value
                                 def object
-                                for (int i = 1; i <= allColumns.size(); ++i) {
-                                    int index = i + (j*allColumns.size())
-                                    object = rs.getObject(index)
-                                    value = (object == null ? null : object.toString())
-                                    if (value != null){
-                                        value = namesOfOperationsInServerAggregations[g] + value
-                                        g++
-                                    }
-                                    key = "${rs.metaData.getColumnName(index)}"
+                                def columnNames = ["names", "user", "time", "objectName"]
+                                    for (int i = 1; i <= allColumns.size(); ++i) {
+
+                                        int index = i + (j*allColumns.size())
+                                        if (index >= rs.fieldNames.size() + 1){
+
+
+                                        }
+                                        else {
+                                            object = rs.getObject(index)
+                                            value = (object == null ? null : object.toString())
+                                            if (value != null) {
+                                                value = namesOfOperationsInServerAggregations[g] + value
+                                                g++
+                                            }
+                                            key = "${rs.metaData.getColumnName(index)}"
+                                        }
                                     map[key] = value
                                 }
                                 rowData.add(map)
@@ -811,20 +819,20 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         def object
                         for (int i = 1; i <= columnCount; ++i) {
                             object = rs.getObject(i)
-//                            if (object instanceof Date && object.cdate != null) {
-//                                value = (object == null ? null :
-//                                "${object.cdate.year}-${object.cdate.month}-${object.cdate.dayOfMonth} ${object.cdate.dayOfMonth} ${object.cdate.hours}:${object.cdate.minutes}:${object.cdate.seconds}"
-//                                )
-//                            }
-//                            else {
-                                value = (object == null ? null : object.toString())
-//                            }
+
+                           if (object instanceof Date && object.toLocalDate() != null && object.toLocalDateTime() != null) {
+                              value = object.toLocalDate().toString() + " " + object.toGMTString().substring(11, 19) ;
+                           }
+                           else {
+                                value = (object == null ? null : object.toString());
+                          }
 
                             if ( value != null && datasetOperations.size() > 0) {
                                 value = namesOfOperationsInServerAggregations[g] + value
                                 g++
                             }
                             key = "${rs.metaData.getColumnName(i)}"
+
                             map[key] = value
                         }
                         rowData.add(map)

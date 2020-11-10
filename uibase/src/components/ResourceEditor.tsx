@@ -22,9 +22,12 @@ import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
+import {NeoIcon} from "neo-icon/lib";
+import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
 
 interface ITargetObject {
     eClass: string,
+
     [key: string]: any
 }
 
@@ -467,7 +470,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         let featureList: any = undefined;
         let invisibleFields = "";
         let disableFields = "";
-        let test = "";
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
             featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
             invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'invisible', true)},`;
@@ -482,8 +484,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
+                let description = getClassAnnotationByClassAndKey(feature, 'documentation');
                 if (!isContainment && !isContainer) preparedData.push({
-                    property: feature.get('name'),
+                    property: description !== "" ?
+                        <div style={{display: "inline-flex"}}>
+                            <span style={{margin: "5px 10px 0 0"}}>
+                                {feature.get('name')}
+                            </span>
+                            <NeoHint title={description}>
+                                <NeoButton type={'link'}>
+                                    <NeoIcon icon={'question'} color={NeoColor.violete_4}/>
+                                </NeoButton>
+                            </NeoHint>
+                        </div>
+                        : feature.get('name'),
                     value: FormComponentMapper.getComponent({
                         value: targetObject[feature.get('name')],
                         targetObject: targetObject,

@@ -2,7 +2,6 @@ import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
-import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
@@ -31,7 +30,7 @@ interface State {
     log: string;
 }
 
-const defaultVerticalSplitterSize = "233px";
+const defaultVerticalSplitterSize = "300px";
 const defaultHorizontalSplitterSize = "400px";
 const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[0]}px`;
 
@@ -40,7 +39,11 @@ function getStoredSize() {
 }
 
 function setStoredSize(size = defaultVerticalSplitterSize) {
-    localStorage.setItem('mainapp_refsplitter_pos', size)
+    if (parseInt(size) < 0) {
+        localStorage.setItem('mainapp_refsplitter_pos', "0px")
+    } else {
+        localStorage.setItem('mainapp_refsplitter_pos', size)
+    }
 }
 
 function splitLog(log:string) {
@@ -120,7 +123,8 @@ export class MainApp extends React.Component<any, State> {
                                         })
                                     );
                                     if (this.props.pathFull.length !== 1) {
-                                        this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)});
+                                        this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)},
+                                            ()=>this.setVerticalSplitterWidth(getStoredSize()));
                                     }
                                 }
                             })
@@ -177,7 +181,8 @@ export class MainApp extends React.Component<any, State> {
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
-                            this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)})
+                            this.setState({hideReferences: parseInt(getStoredSize()) <= parseInt(verticalSplitterShortSize)},
+                                ()=>this.setVerticalSplitterWidth(getStoredSize()))
                         }
                     }
                 })
@@ -253,9 +258,11 @@ export class MainApp extends React.Component<any, State> {
                     onClick={() => {
                         if (this.state.hideReferences) {
                             const size = getStoredSize();
-                            this.setVerticalSplitterWidth(size && (parseInt(size) < 233) ? defaultVerticalSplitterSize : size!)
+                            this.setVerticalSplitterWidth(size && (parseInt(size) < 233) ? defaultVerticalSplitterSize : size!);
+                            setStoredSize(size && (parseInt(size) < 233) ? defaultVerticalSplitterSize : size!);
                         } else {
-                            this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
+                            this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth);
+                            setStoredSize(this.refSplitterRef.current.panePrimary.props.style.minWidth);
                         }
                         this.setState({hideReferences: !this.state.hideReferences})
                     }}>
@@ -375,6 +382,7 @@ export class MainApp extends React.Component<any, State> {
             <Layout style={{backgroundColor: backgroundColor}}>
                 <Menu
                     id={"referenceTree"}
+                    inlineIndent={29}
                     className={`${isShortSize && "short-size"}`}
                     openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
@@ -405,7 +413,7 @@ export class MainApp extends React.Component<any, State> {
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
         const icon = eObject.get('icon') && <NeoIcon_ {...this.props} viewObject={eObject.get('icon')}/>;
-        const content = isShortSize ? <div className={"menu-content"}>{icon}</div> : <div className={"menu-content"}>{icon}{code}</div>;
+        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}{code}</div>;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')

@@ -1,8 +1,5 @@
 import React from 'react';
-import {faTrash} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {Button} from "antd";
-import { NeoButton } from 'neo-design';
+import {NeoButton} from 'neo-design';
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
