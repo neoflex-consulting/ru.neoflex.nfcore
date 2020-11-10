@@ -1767,10 +1767,7 @@ a.linksInMoreWord:hover{
   color: #424D78 !important;
   border-radius: 4px !important;
   background-color: #fff !important;
-}
-
-.ant-select-selection--multiple .ant-select-selection__choice__content {
-  margin-right: 10px;
+  padding: 0 30px 0 10px !important;
 }
 
 .ant-select-selection--multiple .ant-select-selection__choice__remove .ant-select-remove-icon {

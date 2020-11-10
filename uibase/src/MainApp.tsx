@@ -2,7 +2,6 @@ import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
-import {Icon as IconFA} from 'react-fa';
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"

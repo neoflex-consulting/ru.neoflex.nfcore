@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from 'react';
+import React, {Fragment} from 'react';
 import Ecore from 'ecore';
 import {Button, DatePicker, Input, Select} from 'antd';
 import moment from 'moment';
@@ -27,7 +27,6 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
     }
 
     const InputComponent = types[props.type];
-    const [isEdited, setIsEdited] = useState<boolean>(false);
 
     const { value, idx, ukey, onChange, edit } = props;
 
@@ -55,7 +54,6 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                         overflow: 'auto',
                         resize: 'none'
                     }}
-                    onClick={() => setIsEdited(true)}
                 />}
         </Fragment>
     )
