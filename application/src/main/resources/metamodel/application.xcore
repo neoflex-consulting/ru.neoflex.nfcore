@@ -41,7 +41,8 @@ abstract class GridComponent {
     boolean isEditGridComponent
 }
 
-@Ecore(constraints="IsValid", documentation="Компоненты, написанные на typeScript")
+@NFCore(documentation="Компоненты, написанные на typeScript")
+@Ecore(constraints="IsValid")
 class UserComponent extends Component {
     String componentClassName
 }
@@ -59,7 +60,8 @@ class GlobalSettings extends Tagged {
     refers AppModule dashboard
 }
 
-@Ecore(constraints="IsValid", documentation="Модуль - составная часть глобального приложения")
+@NFCore(documentation="Модуль - составная часть глобального приложения")
+@Ecore(constraints="IsValid")
 class AppModule extends Tagged {
     QName name
         @NFCore(documentation="Стартовая страница приложения или модуля")
@@ -70,13 +72,14 @@ class AppModule extends Tagged {
     boolean useParentReferenceTree
 }
 
-@NFCore(disabled="grantType")
-@Ecore(constraints="IsValid", documentation="Глобальное приложение - отображается в верхнем меню")
+@NFCore(disabled="grantType", documentation="Глобальное приложение - отображается в верхнем меню")
+@Ecore(constraints="IsValid")
 class Application extends AppModule {
+        @NFCore(documentation="Календарь со всеми выходными днями в году")
 	boolean checkRights
-	    @Ecore(documentation="Права доступа: чтение, запись, чтение и запись, отказано")
+	    @NFCore(documentation="Права доступа: чтение, запись, чтение и запись, отказано")
     GrantType grantType = "Write"
-        @Ecore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
+        @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
     Integer headerOrder
 }
 
@@ -109,6 +112,7 @@ class Calendar extends ViewElement {
     refers YearBook yearBook
     String defaultTitle
     refers NotificationStatus defaultStatus
+        @NFCore(documentation="Функция запроса к БД для получения всех экземпляров уведомления за период с и по")
     op JSON getNotificationInstances(String dateFrom, String dateTo)
     op JSON createNotification(JSON newNotification)
 }
