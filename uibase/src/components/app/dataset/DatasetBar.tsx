@@ -783,7 +783,7 @@ class DatasetBar extends React.Component<props, State> {
             "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
             <div className={'block space-between ' + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                 <div className='flex-bar-item'>
-                    <NeoHint  title={this.props.t('edit')}>
+                    <NeoHint  title={this.props.t('back to table')}>
                     <NeoButton
                         type={'link'}
                         className={'element-top-margin'}

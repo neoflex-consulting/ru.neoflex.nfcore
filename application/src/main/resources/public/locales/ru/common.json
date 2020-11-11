@@ -395,7 +395,7 @@
         "computational expression": "Вычислительное выражение",
         "create a calculation using column aliases": "Создайте вычисление, используя псевдонимы столбцов",
         "select the columns you want to hide": "Выберите колонки, которые вы хотите скрыть",
-        "bar chart": "Линейчатая",
+        "bar chart": "Линейная",
         "pie chart": "Круговая",
         "graph": "График",
         "select operation": "Выберите операцию",
