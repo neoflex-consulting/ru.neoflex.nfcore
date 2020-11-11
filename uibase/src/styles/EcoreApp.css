@@ -214,14 +214,16 @@ li:hover .lang-title {
 }
 
 .ant-menu-item > a:hover{
-
 	text-decoration: unset!important;
-
+	color: white!important;
 }
 
 
 .ant-menu-item > a:hover .typography.typography-h4-light.namesOfDevMenu{
 	color: white!important;
 }
+
+
+
 
 
