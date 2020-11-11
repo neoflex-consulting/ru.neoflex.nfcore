@@ -938,7 +938,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             currentPage = {this.state.paginationCurrentPage}
                             totalNumberOfPage = {this.state.paginationTotalPage}
                             paginationPageSize = {this.state.paginationPageSize}
-                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>r.isVisible__).length}
+                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>!(r.isVisible__ === false)).length}
                             grid = {this.grid}
                         />
                     </div>}
