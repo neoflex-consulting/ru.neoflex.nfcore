@@ -54,11 +54,21 @@
     flex-direction: row;
 }
 
-.action-menu-item > .checkboxDiagram > label {
+.checkbox-diagram {
+    margin-top: 8px;
+    margin-left: 16px;
+}
+
+.checkbox-diagram .input-checkbox {
+    display: unset!important;
+    padding-left: unset!important;
+}
+
+.action-menu-item .checkbox-diagram > label {
     margin-left: 6px;
 }
 
-.action-menu-item > .checkboxDiagram > span {
+.action-menu-item .checkbox-diagram > span {
     margin-left: 38px;
 }
 
@@ -85,42 +95,19 @@
 }
 
 .search-input {
+    margin-top: 4px !important;
     margin-left: 16px;
     height: 32px;
-}
-
-.element-top-margin {
-    margin-top: 4px !important;
 }
 
 .back-button {
     margin-left: 0 !important;
 }
 
-.verticalLine {
-    border-left: 1px solid;
+.vertical-line {
+    border-left: 1px solid #B3B3B3;
     height: 40px !important;
     margin-left: 16px;
-}
-
-.margin-top {
-    margin-top: 8px;
-}
-
-.margin-top-fullscreen {
-    margin-top: 4px;
-}
-
-.margin-top-button {
-    margin-top: 4px;
-}
-
-.margin-left {
-    margin-left: 16px;
-}
-
-.inter-button-margin {
-    margin-left: 8px;
 }
 
 .export-menu {
@@ -129,7 +116,7 @@
 
 .diagram-select {
     width: 200px;
-    margin-top: 4px
+    margin-top: 4px !important;
 }
 
 .space-between {
@@ -153,4 +140,32 @@
     font-weight: normal;
     font-style: normal;
     margin-left: 30px
+}
+
+.bar-button {
+    margin-top: 4px;
+}
+
+.bar-button--margin-small {
+    margin-top: 4px;
+    margin-left: 8px;
+}
+
+.bar-button--margin-medium {
+    margin-top: 4px;
+    margin-left: 16px;
+}
+
+.export-download-icon {
+    margin-top: 9px;
+    margin-left: 16px;
+}
+
+.full-screen-icon {
+    margin-top: 4px;
+    margin-left: 8px;
+}
+
+.dataset-component-select {
+    margin-top: 4px !important;
 }
