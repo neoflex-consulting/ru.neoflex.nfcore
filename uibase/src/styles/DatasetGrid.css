@@ -94,3 +94,8 @@
 #datasetGrid .input-checkbox {
     margin: 0 auto -10px auto;
 }
+
+#datasetGrid .ag-body-horizontal-scroll-viewport,
+#datasetGrid .ag-body-horizontal-scroll {
+    min-height: 20px !important;
+}

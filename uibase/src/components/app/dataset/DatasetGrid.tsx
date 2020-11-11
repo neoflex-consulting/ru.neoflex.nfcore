@@ -62,6 +62,7 @@ interface Props {
     valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
     className?: any;
+    hidePagination?: boolean
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -623,7 +624,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     onEdit = () => {
-        const {t} = this.props
         if (this.props.isEditMode) {
             this.gridOptions.getRowClass = (params: any): string => {
                 if (this.buffer.includes(params.data) && params.data.operationMark__ === dmlOperation.delete)
@@ -931,17 +931,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         />
                     </ConfigProvider>
                     }
-                    <div id="datasetPaginator"
+                    {!this.props.hidePagination && <div id="datasetPaginator"
                          style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", minWidth: "375px", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
                             totalNumberOfPage = {this.state.paginationTotalPage}
                             paginationPageSize = {this.state.paginationPageSize}
-                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>r.isVisible__).length}
+                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>!(r.isVisible__ === false)).length}
                             grid = {this.grid}
                         />
-                    </div>
+                    </div>}
                 </div>
             </div>
         )

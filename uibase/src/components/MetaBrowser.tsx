@@ -204,12 +204,14 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 let eStructuralFeatures = eClassifier.get('eStructuralFeatures');
                 if (eStructuralFeatures) {
                     for (let eStructuralFeature of eStructuralFeatures.array()) {
+                        let description = getClassAnnotationByClassAndKey(eStructuralFeature,'documentation');
                         children2.push({
                             key: eStructuralFeature.eURI(),
                             name: this.getName(eStructuralFeature),
                             type: eStructuralFeature.eClass.get('name'),
                             depth: 1,
                             isVisible__: false,
+                            description: description,
                             showParent: () => {
                                 child.isVisible__ = true;
                                 child.isExpanded = true;
@@ -222,12 +224,14 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 let eLiterals = eClassifier.get('eLiterals');
                 if (eLiterals) {
                     for (let eLiteral of eLiterals.array()) {
+                        let description = getClassAnnotationByClassAndKey(eLiteral,'documentation');
                         children2.push({
                             key: eLiteral.eURI(),
                             name: eLiteral.get('name'),
                             type: eLiteral.eClass.get('name'),
                             depth: 1,
                             isVisible__: false,
+                            description: description,
                             showParent: ()=>{
                                 child.isVisible__ = true;
                                 child.isExpanded = true;
@@ -240,12 +244,14 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 let eOperations = eClassifier.get('eOperations');
                 if (eOperations) {
                     for (let eOperation of eOperations.array()) {
+                        let description = getClassAnnotationByClassAndKey(eOperation,'documentation');
                         children2.push({
                             key: eOperation.eURI(),
                             name: this.getName(eOperation),
                             type: eOperation.eClass.get('name'),
                             depth: 1,
                             isVisible__: false,
+                            description: description,
                             showParent: ()=> {
                                 child.isVisible__ = true;
                                 child.isExpanded = true;
