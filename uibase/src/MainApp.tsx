@@ -293,7 +293,7 @@ export class MainApp extends React.Component<any, State> {
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
                         onClick={()=>{
-                            this.setState({hideLog:!this.state.hideLog, hideURL: true, activeTab: "log"});
+                            this.setState({hideLog:!this.state.hideLog, hideURL: true, activeTab: this.state.activeTab === "log" ? "" : "log"});
                             API.instance().fetchLog().then(log=>{
                                 this.setState({log:log}, ()=>{
                                     if (this.debugRef.current) {
@@ -309,7 +309,7 @@ export class MainApp extends React.Component<any, State> {
                         className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideURL ? this.props.t("show url") : this.props.t("hide url")}
-                        onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL, activeTab: "url"}, ()=>{
+                        onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL, activeTab: this.state.activeTab === "url" ? "" : "url"}, ()=>{
                             if (this.debugRef.current) {
                                 this.debugRef.current.scrollIntoView(true)
                             }

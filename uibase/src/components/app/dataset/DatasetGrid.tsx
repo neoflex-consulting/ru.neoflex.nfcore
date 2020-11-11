@@ -705,6 +705,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         })
     };
 
+    isDataSelected = () => {
+        return this.grid.current && this.grid.current.api && !!this.grid.current.api.getSelectedNodes().length
+    };
+
     markDeleted = (data: {[key: string]: unknown}) => {
         //Если до этого была обновлена
         if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete && data.prevOperationMark__ === dmlOperation.update) {
@@ -776,15 +780,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     copySelected = () => {
-        let position = 0;
-        const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
-            position = sn.childIndex + 1;
-            return {
-                ...sn.data,
-                operationMark__ : dmlOperation.insert
-            }
-        });
-        this.copy(selected, position);
+        if (this.isDataSelected()) {
+            let position = 0;
+            const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
+                position = sn.childIndex + 1;
+                return {
+                    ...sn.data,
+                    operationMark__ : dmlOperation.insert
+                }
+            });
+            this.copy(selected, position);
+        }
     };
 
     undoChanges = (data: {[key: string]: unknown}) => {

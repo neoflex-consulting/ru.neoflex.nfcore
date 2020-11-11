@@ -84,12 +84,12 @@ class Application extends AppModule {
 }
 
 /* Views */
-@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
 	String name
 	container ViewContainer parent opposite children
 	boolean checkRights
+    @NFCore(disabled="true")
     GrantType grantType = "Write"
     boolean hidden
     boolean disabled
@@ -251,11 +251,11 @@ class CssClass extends Tagged {
 }
 
 /* Trees */
-@NFCore(disabled="grantType")
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
     String name
 	boolean checkRights
+    @NFCore(disabled="true")
     GrantType grantType = "Write"
     contains Icon icon
 }

@@ -1239,8 +1239,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 19px!important;;
   }
 
-  .namesOfDevMenu:hover{
-    color: white!important;
+  .headerDev-menu li:hover .namesOfDevMenu {
+    color: white !important;
   }
   .devMenuSmallWidth{
     display: none;
