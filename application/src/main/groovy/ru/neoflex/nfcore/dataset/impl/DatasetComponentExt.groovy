@@ -558,26 +558,26 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                             if (operator == 'LIKE') {
                                 map["select"] = "(${filters[i].datasetColumn} ${operator} ${filters[i].value} OR " +
-                                        "${filters[i].datasetColumn} ${operator} '%${filters[i].value}' OR " +
-                                        "${filters[i].datasetColumn} ${operator} '${filters[i].value}%' OR " +
-                                        "${filters[i].datasetColumn} ${operator} '%${filters[i].value}%')"
+                                        "${filters[i].datasetColumn}.asString() ${operator} '%${filters[i].value}' OR " +
+                                        "${filters[i].datasetColumn}.asString() ${operator} '${filters[i].value}%' OR " +
+                                        "${filters[i].datasetColumn}.asString() ${operator} '%${filters[i].value}%')"
                             } else if (operator == 'NOT LIKE') {
                                 map["select"] = "NOT (${filters[i].datasetColumn} LIKE '${filters[i].value}') AND " +
-                                        "NOT (${filters[i].datasetColumn} LIKE '%${filters[i].value}') AND " +
-                                        "NOT (${filters[i].datasetColumn} LIKE '${filters[i].value}%') AND " +
-                                        "NOT (${filters[i].datasetColumn} LIKE '%${filters[i].value}%')"
+                                        "NOT (${filters[i].datasetColumn}.asString() LIKE '%${filters[i].value}') AND " +
+                                        "NOT (${filters[i].datasetColumn}.asString() LIKE '${filters[i].value}%') AND " +
+                                        "NOT (${filters[i].datasetColumn}.asString() LIKE '%${filters[i].value}%')"
                             } else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
-                                map["select"] = "${filters[i].datasetColumn} ${operator}"
+                                map["select"] = "${filters[i].datasetColumn}.asString() ${operator}"
                             } else if (operator == 'LIKE_START') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) LIKE LOWER('${filters[i].value}%')"
+                                map["select"] = "${filters[i].datasetColumn}.asString() LIKE '${filters[i].value}%'"
                             } else if (operator == 'LIKE_NOT_START') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) NOT LIKE LOWER('${filters[i].value}%')"
-                            } else if (operator == 'LIKE_END') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) LIKE LOWER('%${filters[i].value}')"
+                                map["select"] = "NOT (${filters[i].datasetColumn}.asString()  LIKE '${filters[i].value}%')"
+                                } else if (operator == 'LIKE_END') {
+                                map["select"] = "${filters[i].datasetColumn} LIKE '%${filters[i].value}'"
                             } else if (operator == 'LIKE_NOT_END') {
-                                map["select"] = "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) NOT LIKE LOWER('%${filters[i].value}')"
+                                map["select"] = "NOT (${filters[i].datasetColumn}.asString()  LIKE '%${filters[i].value}')"
                             } else {
-                                map["select"] = "${filters[i].datasetColumn} ${operator} '${filters[i].value}'"
+                                map["select"] = "${filters[i].datasetColumn}.asString() ${operator} '${filters[i].value}'"
                             }
                             if (!serverFilters.contains(map)) {
                                 serverFilters.add(map)
@@ -595,22 +595,22 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         map["column"] = groupBy[i].value
                             def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                         if (operator == 'AVG') {
-                            map["select"] = "AVG(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "avg(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'COUNT') {
-                            map["select"] = "COUNT(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "count(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'COUNT_DISTINCT') {
-                            map["select"] = "COUNT(DISTINCT ${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "count(distinct (${groupBy[i].datasetColumn})) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'MAX') {
-                            map["select"] = "MAX(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "max(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'MIN') {
-                            map["select"] = "MIN(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "min(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (operator == 'SUM') {
-                            map["select"] = "SUM(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "sum(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
                         }
                         if (!serverGroupByAggregation.contains(map)) {
                             serverGroupByAggregation.add(map)
@@ -658,27 +658,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 map["column"] = aggregations[j].datasetColumn
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
-                                    map["select"] = "AVG(\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "AVG(${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Среднее:")
                                 }
                                 if (operator == 'COUNT') {
-                                    map["select"] = "count(${aggregations[j].datasetColumn}) as ${aggregations[j].datasetColumn}"
+                                    map["select"] = "count(${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Счетчик:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
-                                    map["select"] = "count(distinct (${aggregations[j].datasetColumn})) as ${aggregations[j].datasetColumn}"
+                                    map["select"] = "count(distinct (${aggregations[j].datasetColumn}))"
                                     namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
                                 }
                                 if (operator == 'MAX') {
-                                    map["select"] = "MAX(\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "MAX(${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Максимум:")
                                 }
                                 if (operator == 'MIN') {
-                                    map["select"] = "MIN(\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "MIN(${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Минимум:")
                                 }
                                 if (operator == 'SUM') {
-                                    map["select"] = "SUM(\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
+                                    map["select"] = "SUM(${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Сумма:")
                                 }
                                 if (!serverAggregations.contains(map)) {
@@ -787,10 +787,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 String key
                                 String value
                                 def object
-                                def columnNames = ["names", "user", "time", "objectName"]
                                     for (int i = 1; i <= allColumns.size(); ++i) {
-
-                                        int index = i + (j*allColumns.size())
+                                        int index    = i + (j*allColumns.size())
                                         if (index >= rs.fieldNames.size() + 1){
 
 
@@ -803,6 +801,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                                 g++
                                             }
                                             key = "${rs.metaData.getColumnName(index)}"
+                                        }
+                                        for (int d = 0; d < allColumns.size(); d++){
+                                            if (key.contains(allColumns[d])){
+                                                key = allColumns[d]
+                                                d = column.size()
+                                            }
                                         }
                                     map[key] = value
                                 }
@@ -832,8 +836,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 g++
                             }
                             key = "${rs.metaData.getColumnName(i)}"
-
+                            for (int d = 0; d < allColumns.size(); d++){
+                                if (key.contains(allColumns[d])){
+                                    key = allColumns[d]
+                                    d = column.size()
+                                }
+                            }
                             map[key] = value
+
                         }
                         rowData.add(map)
                     }}
