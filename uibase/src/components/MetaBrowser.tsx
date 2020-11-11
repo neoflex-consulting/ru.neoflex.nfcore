@@ -29,7 +29,9 @@ interface State {
 
 class MetaBrowser extends React.Component<Props & WithTranslation, State> {
 
+
     gridRef : any;
+    height: any;
 
     state = {
         ePackages: Ecore.EPackage.Registry.ePackages(),
@@ -43,7 +45,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             show:any,
             hide:any,
             isVisible__:boolean
-        }[]
+        }[],
     };
 
     componentDidMount(): void {
@@ -54,6 +56,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                 })
         })
         this.gridRef = React.createRef();
+        this.height = window.innerHeight;
     }
 
     getName = (eObject: any): string => {
@@ -333,7 +336,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                         this.gridRef = ref;
                                     }}
                                     paginationPageSize={40}
-                                    height={460}
+                                    height={this.height > 1078 ? 874 : this.height > 920 ? 690 : 504}
                                     rowData = {eObj.children}
                                     columnDefs = {this.getColDefs()}
                                     highlightClassFunction = {(params: any) => {
