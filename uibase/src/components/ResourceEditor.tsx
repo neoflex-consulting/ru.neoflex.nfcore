@@ -20,7 +20,7 @@ import moment from 'moment';
 import FetchSpinner from "./FetchSpinner";
 import {Helmet} from "react-helmet";
 import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
-import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
+import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
@@ -221,14 +221,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
-                    const invisibleFields = `,${getClassAnnotationByClassAndKey(feature.eContainer && feature.eContainer, 'invisible', true)},`;
+                    const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
                             :
                             json[feature.get('name')] ? [json[feature.get('name')]] : [];
                         return <Tree.TreeNode
-                            className={invisibleFields.includes(`,${feature.get('name')},`) ? "hidden-leaf" : ""}
+                            className={!isVisible ? "hidden-leaf" : ""}
                             parentUpdater={json.updater}
                             upperBound={upperBound}
                             isArray={true}
@@ -468,24 +468,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
         const preparedData: Array<Object> = [];
         let featureList: any = undefined;
-        let invisibleFields = "";
-        let disableFields = "";
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
             featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
-            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'invisible', true)},`;
-            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.getEObject(targetObject._id).eClass, 'disabled', true)},`;
                     }
         else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
             featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures');
-            invisibleFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'invisible', true)},`;
-            disableFields = `,${getClassAnnotationByClassAndKey(mainEObject.eContainer.eContents()[0].eClass, 'disabled', true)},`;
         }
         if (featureList !== undefined) {
             featureList.forEach((feature: Ecore.EObject, idx: Number) => {
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
-                let description = getClassAnnotationByClassAndKey(feature, 'documentation');
-                if (!isContainment && !isContainer && !invisibleFields.includes(`,${feature.get('name')},`)) preparedData.push({
+                const description = getFieldAnnotationByKey(feature.get('eAnnotations'), 'documentation');
+                const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
+                const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
+                if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
                             <span style={{margin: "5px 10px 0 0"}}>
@@ -512,7 +508,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         onEClassBrowse: this.onEClassBrowse,
                         onBrowse: this.onBrowse,
                         mainEObject: mainEObject,
-                        edit: this.state.edit && !disableFields.includes(`,${feature.get('name')},`)
+                        edit: this.state.edit && !isDisabled
                     }),
                     key: feature.get('name') + idx
                 })
