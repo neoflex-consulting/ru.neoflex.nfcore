@@ -49,14 +49,14 @@ public class GroovyTests {
         List args = new ArrayList();
         args.add(superAdmin);
         Object result =  groovy.eval(superAdmin, "isEObjectPermitted", args);
-        Assert.assertEquals(GrantType.ALL.getValue(), result);
+        Assert.assertEquals(GrantType.WRITE.getValue(), result);
     }
 
     public static Role createSuperAdminRole() {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
         superAdmin.setName("SuperAdmin");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
-        allPermission.setGrantType(GrantType.ALL);
+        allPermission.setGrantType(GrantType.WRITE);
         superAdmin.getGrants().add(allPermission);
         return superAdmin;
     }
@@ -72,7 +72,7 @@ public class GroovyTests {
         Class scriptClass = Thread.currentThread().getContextClassLoader().loadClass(svcClassName);
         Method declaredMethod = scriptClass.getDeclaredMethod(methodName, new Class[] {Role.class, EObject.class} );
         Object result = declaredMethod.invoke(null, new Object[]{role, role});
-        Assert.assertEquals(GrantType.ALL.getValue(), result);
+        Assert.assertEquals(GrantType.WRITE.getValue(), result);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class GroovyTests {
         String svcClassName = "ru.neoflex.nfcore.base.auth.endpoint.Test";
         String methodName = "permitted";
         Object result =  groovy.callStatic(svcClassName, methodName, args);
-        Assert.assertEquals(GrantType.ALL.getValue(), result);
+        Assert.assertEquals(GrantType.WRITE.getValue(), result);
     }
 
     @Test

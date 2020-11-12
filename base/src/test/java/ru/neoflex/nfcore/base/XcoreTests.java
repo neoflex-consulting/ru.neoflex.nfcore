@@ -38,7 +38,7 @@ public class XcoreTests {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
         superAdmin.setName("SuperAdmin");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
-        allPermission.setGrantType(GrantType.ALL);
+        allPermission.setGrantType(GrantType.WRITE);
         superAdmin.getGrants().add(allPermission);
         Role securityOfficer = AuthFactory.eINSTANCE.createRole();
         securityOfficer.setName("SecurityOfficer");

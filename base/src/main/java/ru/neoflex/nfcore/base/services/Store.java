@@ -19,6 +19,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
 import ru.neoflex.nfcore.base.auth.User;
@@ -70,9 +71,10 @@ public class Store implements EventsRegistration {
         registerAfterSave((resource, resource2) -> {
             ObjectNode result = EmfJson.resourceToTree(this, resource2);
             messagingTemplate.convertAndSend("/topic/afterSave", result);
-            if (resource2.getContents().get(0).eClass().getName().equals("User")) {
+            UserDetails userDetails = getUserDetails();
+            if (resource2.getContents().get(0).eClass().getName().equals("User") && userDetails != null) {
                 Object updatedUserName = ((User)resource2.getContents().get(0)).getName();
-                String currentUserName = Objects.requireNonNull(getUserDetails()).getUsername();
+                String currentUserName = userDetails.getUsername();
                 if (updatedUserName.equals(currentUserName)) {
                     SecurityContextHolder.getContext().setAuthentication(null);
                 }

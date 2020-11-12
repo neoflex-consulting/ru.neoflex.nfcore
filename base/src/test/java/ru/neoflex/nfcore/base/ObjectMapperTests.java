@@ -45,7 +45,7 @@ public class ObjectMapperTests {
     public void enumTest() throws JsonProcessingException {
         //ObjectMapper mapper = context.getMapper();
         ObjectMapper mapper = new ObjectMapper();
-        GrantType grantType = GrantType.ALL;
+        GrantType grantType = GrantType.WRITE;
         Object deserGrantType = mapper.treeToValue(mapper.valueToTree(grantType), GrantType.class);
         Assert.assertEquals(grantType, deserGrantType);
 
