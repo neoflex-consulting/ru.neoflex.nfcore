@@ -151,7 +151,7 @@
 }
 
 .tools-export-objects-region {
-    min-height: 206px;
+    min-height: 220px;
     display: flex;
     flex-direction: column
 }
