@@ -202,32 +202,33 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 visible.push(elem.field)
             }
         }
-        let tableData = [];
+        let data = [];
         for (const [index, elem] of this.state.rowData.entries()) {
-            let dataRow = [];
+            let objectRow = [];
             for (const el of visible) {
-                for (const prop in elem) {
-                    if (el === prop && this.props.valueFormatter) {
-                        let params = {
-                            value: elem[prop],
-                            data: elem,
-                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
-                            node: this.gridOptions.api?.getRowNode(index)
-                        };
-                        const formatted = this.props.valueFormatter(params);
-                        dataRow.push(formatted)
-                    } else if (el === prop) {
-                        dataRow.push(elem[prop])
+                let params = {
+                    value: elem[el],
+                    data: elem,
+                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                    node: this.gridOptions.api?.getRowNode(index)
+                };
+                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                const cellStyle = params.colDef.cellStyle(params);
+                objectRow.push({
+                    value: this.props.valueFormatter ? this.props.valueFormatter(params) : elem[el],
+                    highlight: {
+                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
                     }
-                }
+                });
             }
-            tableData.push(dataRow)
+            data.push(objectRow);
         }
         return  {
             hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
-            gridData:(tableData.length === 0) ? [] : tableData,
-            gridHeader:(gridHeader.length === 0) ? [] : gridHeader
+            gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
+            gridData: data
         };
     }
 
