@@ -72,12 +72,12 @@ class AppModule extends Tagged {
     boolean useParentReferenceTree
 }
 
-@NFCore(disabled="grantType", documentation="Глобальное приложение - отображается в верхнем меню")
+@NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
-        @NFCore(documentation="Календарь со всеми выходными днями в году")
-	boolean checkRights
-	    @NFCore(documentation="Права доступа: чтение, запись, чтение и запись, отказано")
+        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
+    boolean checkRights
+	    @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
     GrantType grantType = "Write"
         @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
     Integer headerOrder
@@ -88,11 +88,15 @@ class Application extends AppModule {
 abstract class ViewElement extends DynamicActionElement {
 	String name
 	container ViewContainer parent opposite children
+	    @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
-    @NFCore(disabled="true")
+        @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
     GrantType grantType = "Write"
+        @NFCore(documentation="Скрытие элемента от пользователя. Да/Нет")
     boolean hidden
+        @NFCore(documentation="Дэактиваиця элемента от пользователя. Да/Нет")
     boolean disabled
+        @NFCore(documentation="CSS классы, подключаемые к оформлению объекта, созданные в приложении")
     refers CssClass[] cssClass
 }
 
@@ -254,8 +258,9 @@ class CssClass extends Tagged {
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
     String name
+        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
-    @NFCore(disabled="true")
+        @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
     GrantType grantType = "Write"
     contains Icon icon
 }

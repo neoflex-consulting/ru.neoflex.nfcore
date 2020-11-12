@@ -6,6 +6,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.neoflex.nfcore.base.auth.AuthPackage
 import ru.neoflex.nfcore.base.auth.Role
+import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 
@@ -29,7 +30,7 @@ class AuthPackageInit {
         Context.current.store.registerAfterSave(new BiConsumer<Resource, Resource>() {
             @Override
             void accept(Resource oldResource, Resource resource) {
-                if (resource.contents.count {eObject->eObject instanceof Role} > 0) {
+                if (resource.contents.count {eObject->eObject instanceof Role || eObject instanceof User} > 0) {
                     Context.current.authorization.clearRolesCache()
                 }
             }

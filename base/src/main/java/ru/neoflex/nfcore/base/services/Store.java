@@ -16,8 +16,12 @@ import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
+import ru.neoflex.nfcore.base.auth.User;
 import ru.neoflex.nfcore.base.services.providers.*;
 import ru.neoflex.nfcore.base.types.TypesPackage;
 import ru.neoflex.nfcore.base.util.EmfJson;
@@ -25,9 +29,12 @@ import ru.neoflex.nfcore.base.util.EmfJson;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static ru.neoflex.nfcore.base.services.Authorization.getUserDetails;
 
 @Service("ru.neoflex.nfcore.base.services.Store")
 public class Store implements EventsRegistration {
@@ -62,9 +69,23 @@ public class Store implements EventsRegistration {
     public void init() {
         registerAfterSave((resource, resource2) -> {
             ObjectNode result = EmfJson.resourceToTree(this, resource2);
-            messagingTemplate.convertAndSend("/topic/afterSave", result.get("uri"));
+            messagingTemplate.convertAndSend("/topic/afterSave", result);
+            if (resource2.getContents().get(0).eClass().getName().equals("User")) {
+                Object updatedUserName = ((User)resource2.getContents().get(0)).getName();
+                String currentUserName = Objects.requireNonNull(getUserDetails()).getUsername();
+                if (updatedUserName.equals(currentUserName)) {
+                    SecurityContextHolder.getContext().setAuthentication(null);
+                }
+            }
+
         });
     }
+    public void logout(Authentication old) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(old);
+        //SecurityContextHolder.clearContext();
+    }
+
 
     public ResourceSet createResourceSet() throws IOException {
         return provider.createResourceSet(getCurrentTransaction());
