@@ -244,55 +244,48 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 visible.push(elem.field)
             }
         }
-        let tableData = [];
-        let tableMaskData = [];
+        let data = [];
         for (const [index, elem] of this.state.rowData.entries()) {
-            let dataRow = [];
-            let maskRow = [];
+            let objectRow = [];
             for (const el of visible) {
-                for (const prop in elem) {
-                    if (el === prop && this.props.valueFormatter) {
-                        let params = {
-                            value: elem[prop],
-                            data: elem,
-                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
-                            node: this.gridOptions.api?.getRowNode(index)
-                        };
-                        let dateTZ = undefined;
-                        if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
-                            dateTZ = new Date(params.value);
-                        }
-                        dataRow.push(params.colDef.type === appTypes.String ? params.value
-                                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                                        : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
-                                        : params.value);
-                        if (this.props.excelCellMask) {
-                            let mask = this.props.excelCellMask(params);
-                            mask = params.colDef.type === appTypes.Timestamp && !mask
-                                ? "dd.mm.yyyy hh:mm:ss"
-                                : params.colDef.type === appTypes.Date && !mask
-                                    ? "dd.mm.yyyy"
-                                    : mask;
-                            maskRow.push(mask)
-                        }
-                    } else if (el === prop) {
-                        dataRow.push(elem[prop])
-                    }
+                const params = {
+                    value: elem[el],
+                    data: elem,
+                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                    node: this.gridOptions.api?.getRowNode(index)
+                };
+                let dateTZ = undefined;
+                if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
+                    dateTZ = new Date(params.value);
                 }
+                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                const cellStyle = params.colDef.cellStyle(params);
+                const mask = this.props.excelCellMask && this.props.excelCellMask(params);
+                objectRow.push({
+                    value: params.colDef.type === appTypes.String ? params.value
+                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
+                            : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                : params.value,
+                    mask: params.colDef.type === appTypes.Timestamp && !mask
+                        ? "dd.mm.yyyy hh:mm:ss"
+                        : params.colDef.type === appTypes.Date && !mask
+                            ? "dd.mm.yyyy"
+                            : mask,
+                    highlight: {
+                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
+                    }
+                })
             }
-            tableData.push(dataRow);
-            if (this.props.excelCellMask) {
-                tableMaskData.push(maskRow)
-            }
+            data.push(objectRow);
         }
         return  {
             hidden: this.props.hidden,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),
-                cellsMasks: tableMaskData,
                 columns: header,
-                rows: (tableData.length === 0) ? [[]] : tableData
+                data: data
             },
             gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
