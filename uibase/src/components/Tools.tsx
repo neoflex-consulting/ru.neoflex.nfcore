@@ -265,7 +265,7 @@ class Tools extends React.Component<any, State> {
         </div>;
 
         const exportObjectsRegion = <div
-            className={"tools-region-element tools-export-objects-region"}>
+            className={"tools-export-objects-region"}>
             <p className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}}>
                 <NeoTypography type={"body_regular"}>{t("export metadata")}</NeoTypography>
             </p>
@@ -326,7 +326,7 @@ class Tools extends React.Component<any, State> {
             </div>
         </div>;
 
-        const exportSQL = <div
+        /*const exportSQL = <div
             className={"tools-export-sql"}>
             <p className={"tools-highlighted-text tools-margin-left tools-margin-top"}><NeoTypography type={"capture_regular"} style={{color:'#5E6785'}}>{t("export master data")}</NeoTypography></p>
             <NeoInput
@@ -336,7 +336,7 @@ class Tools extends React.Component<any, State> {
                 placeholder="SQL"
                 value={this.state.sql}
                 onChange={(e:any) => this.setState({sql: e.target.value})}/>
-        </div>;
+        </div>;*/
 
         const exportButtonRegion = <div className={"tools-button-region"}>
             <NeoButton
@@ -514,7 +514,6 @@ class Tools extends React.Component<any, State> {
                             {exportAllObjectsRegion}
                             {exportFilesRegion}
                             {exportObjectsRegion}
-                            {exportSQL}
                         </div>
                         {exportButtonRegion}
                     </NeoTabs.NeoTabPane>
