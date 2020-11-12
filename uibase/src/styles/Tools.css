@@ -130,7 +130,7 @@
 }
 
 .tools-export-region {
-    min-height: 448px;
+    min-height: 300px;
     width: 100%;
     z-index: 10;
     background: #FFFFFF;
@@ -151,7 +151,7 @@
 }
 
 .tools-export-objects-region {
-    min-height: 206px;
+    min-height: 220px;
     display: flex;
     flex-direction: column
 }
@@ -176,6 +176,8 @@
     width: 100%;
     border-bottom: 1px solid #D9D9D9;
 }
+
+
 
 .tools-icon-container {
     min-width: 275px;
