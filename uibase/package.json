@@ -36,7 +36,7 @@
     "array-move": "2.2.1",
     "brace": "^0.11.1",
     "date-fns": "^2.9.0",
-    "docx": "^5.0.2",
+    "docx": "5.4.0",
     "dom-to-image": "^2.6.0",
     "dompurify": "2.0.1",
     "ecore": "^0.12.0",
