@@ -82,12 +82,12 @@ class ObjectPermission extends Permission {
     }
 }
 
-class Resource {
+class ApplicationResource {
     QName name
 }
 
 class ResourcePermission extends Permission {
-    refers Resource resource
+    refers ApplicationResource Resource
     op int isResourcePermitted(String path) {
         if (path.startsWith(getResource().name)) return this.grantType.getValue()
         else return GrantType::UNKNOWN_VALUE

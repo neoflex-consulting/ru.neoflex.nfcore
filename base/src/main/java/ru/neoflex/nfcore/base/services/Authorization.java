@@ -1,10 +1,12 @@
 package ru.neoflex.nfcore.base.services;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,7 @@ import ru.neoflex.nfcore.base.auth.GrantType;
 import ru.neoflex.nfcore.base.auth.Role;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,6 +76,16 @@ public class Authorization {
         UserDetails userDetails = getUserDetails();
         if (userDetails != null) {
             result = userDetails.getAuthorities().stream()
+                    .map(a->getAllRoles().getOrDefault(a.getAuthority(), null))
+                    .filter(r->r != null).collect(Collectors.toList());
+        }
+        return result;
+    }
+
+    public List<Role> getAuthoritiesRoles(HashSet<GrantedAuthority> authorities) {
+        List<Role> result = new ArrayList<>();
+        if (authorities != null) {
+            result = authorities.stream()
                     .map(a->getAllRoles().getOrDefault(a.getAuthority(), null))
                     .filter(r->r != null).collect(Collectors.toList());
         }

@@ -28,6 +28,7 @@ import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
 import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import {Prohibited} from "./components/Prohibited";
 
 const backgroundColor = "#2a356c";
 
@@ -113,6 +114,10 @@ class EcoreApp extends React.Component<any, State> {
             getUserProfile: true,
         }
     }
+
+    isDeveloper = () => {
+        return this.state.principal && this.state.principal.principal.developer;
+    };
 
     updateContext = (context: any, cb?: ()=>void) => {
         this.setState((state, props) => {
@@ -586,7 +591,7 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <Layout style={{height: '90vh', marginTop: '80px'}}>
                 <FetchSpinner/>
-                <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
+                {(this.props.location.pathname.startsWith('/app') || (!this.props.location.pathname.startsWith('/app') && this.isDeveloper())) && <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>
                         <NeoCol className={'headerAppNameSpanLarge'} span={5} style={{height: 'inherit'}}>
                             <div className={window.location.pathname.includes('developer' +
@@ -739,9 +744,9 @@ class EcoreApp extends React.Component<any, State> {
                                         <NeoButton type={'link'}
                                                    style={{marginRight:'10px'}}
                                         >
-                                            <Link to={`/developer/data`}>
+                                            {this.isDeveloper() && <Link to={`/developer/data`}>
                                                 <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
-                                            </Link>
+                                            </Link>}
                                         </NeoButton>
                                         </NeoHint>
                                 }
@@ -779,17 +784,17 @@ class EcoreApp extends React.Component<any, State> {
                             </div>
                         </NeoCol>
                     </NeoRow>
-                </Header>
+                </Header>}
                 <Switch>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/test' component={this.renderTest}/>
-                    <Route path='/developer/metadata' component={MetaBrowser}/>
-                    <Route path='/developer/query' component={QueryRunner}/>
-                    <Route exact={true} path='/developer/data' component={DataBrowser}/>
-                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => <ResourceEditor principal={this.state.principal} {...props}/>}/>
-                    <Route path='/developer/tools' component={Tools}/>
-                    <Route path='/developer/masterdata' component={MasterdataBrowser}/>
-                    <Route path='/developer/filesystem' component={FilesystemBrowser}/>
+                    <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
+                    <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
+                    <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>
+                    <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
+                    <Route path='/developer/filesystem' component={this.isDeveloper() ? FilesystemBrowser : Prohibited}/>
                 </Switch>
             </Layout>
         )
