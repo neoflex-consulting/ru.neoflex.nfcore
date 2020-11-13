@@ -25,6 +25,8 @@ import {docxElementExportType, docxExportObject, handleExportDocx} from "../../.
 import {saveAs} from "file-saver";
 import domtoimage from "dom-to-image";
 import {Resizable} from "re-resizable";
+import {Link} from "react-router-dom";
+import {encodeAppURL} from "../../../EcoreApp";
 
 const myNote = 'Личная заметка';
 
@@ -448,6 +450,23 @@ class Calendar extends React.Component<any, any> {
                 undefined,
                 params
             )
+        }
+    }
+
+    openNotification2(notification: any, context: any): any  {
+        let params: Object[] = [{
+            parameterName: 'reportDate',
+            parameterValue: notification.contents[0]['notificationDateOn'],
+            parameterDataType: "Date"
+        }];
+        if (notification.contents[0]['AppModuleName'] !== null) {
+            let path: any = context.getURL(
+                notification.contents[0]['AppModuleName'],
+                false,
+                undefined,
+                params
+            )
+            return path
         }
     }
 
@@ -1061,6 +1080,7 @@ class Calendar extends React.Component<any, any> {
                                     <div className="notification-btn" key={`btn-div-${index}`}
                                     style={{backgroundColor: r.contents[0]['statusColor'] ? r.contents[0]['statusColor'] : "white"}}
                                     >
+
                                     <NeoButton
                                         onClick={ () => this.openNotification(r, context)}
                                         key={`${index}`}
@@ -1068,9 +1088,13 @@ class Calendar extends React.Component<any, any> {
 [отчетная дата "на": ${dateFns.format(dateFns.parseISO(r.contents[0]['notificationDateOn']), "P ",{locale: ru})}]
 [интервал: ${t(r.contents[0]['calculationInterval'])}]`}
                                     >
+                                         <Link to={encodeAppURL(this.openNotification2(r, context))}>
                                             {r.contents[0]['notificationShortName'] || r.contents[0]['notificationName']}
+                                        </Link>
                                     </NeoButton>
+
                                     </div>
+
                                 )
                                 : ""}
                         </div>

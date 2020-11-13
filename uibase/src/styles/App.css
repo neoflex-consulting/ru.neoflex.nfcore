@@ -1747,6 +1747,22 @@ a.linksInMoreWord:hover{
   margin: 0 auto;
 }
 
+/*a.ant-pagination-item-link::after{
+  content: "";
+  position: absolute;
+  top: -29%;
+  left: 15%;
+  transform: rotate(180deg)!important;
+  border: 5px solid #2A356C;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: #2A356C;
+  border-bottom-color: transparent;
+  width: 0;
+  height: 0;
+  margin: 0 auto;
+}*/
+
 .datasearch_region .input-checkbox {
   margin: 18px 0 0 16px;
 }
