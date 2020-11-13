@@ -10,17 +10,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.neoflex.nfcore.base.auth.*;
+import ru.neoflex.nfcore.base.components.CurrentUser;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserDetail implements UserDetailsService {
 
     @Autowired
     Store store;
+
+    @Autowired
+    Context context;
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
@@ -64,10 +66,16 @@ public class UserDetail implements UserDetailsService {
                     }
                 }
 
-                //PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+                int grant = 0;
+                for (Role role: context.getAuthorization().getAuthoritiesRoles(au)) {
+                    grant |= role.isResourcePermitted("/system/developer");
+                }
 
-                UserDetails userDetails = new User(userName, /*encoder.encode(password)*/password, true, true, true, true,
-                        au);
+                GrantType developerGrant = Authorization.getGrantType(grant);
+                //PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+                UserDetails userDetails = new CurrentUser(userName, /*encoder.encode(password)*/password, true, true, true, true,
+                        au,
+                        developerGrant == GrantType.WRITE);
                 return userDetails;
             });
         } catch (Exception e) {

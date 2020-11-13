@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.EObject
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.neoflex.nfcore.base.auth.*
 import ru.neoflex.nfcore.base.services.Context
+import ru.neoflex.nfcore.base.util.DocFinder
 
 class UserInit extends UserImpl {
     static Role createSU() {
@@ -23,6 +24,29 @@ class UserInit extends UserImpl {
         actuator.setDescription("ACTUATOR - access to spring endpoints")
         Context.current.store.createEObject(actuator)
         return actuator
+    }
+
+    static ApplicationResource createDeveloperResource() {
+        def developer = DocFinder.create(Context.current.store, AuthPackage.Literals.APPLICATION_RESOURCE, [name: "\\system\\developer"]).execute().resources
+        if (developer.size() > 0) {
+            return developer[0].contents[0] as ApplicationResource;
+        } else {
+            def resource = AuthFactory.eINSTANCE.createApplicationResource()
+            resource.setName("\\system\\developer")
+            Context.current.store.createEObject(resource)
+            return resource
+        }
+    }
+
+    static Role createDeveloper() {
+        def developer = AuthFactory.eINSTANCE.createRole()
+        developer.setName("developer")
+        developer.setDescription("developer - access to developer menu")
+        def permission = AuthFactory.eINSTANCE.createResourcePermission()
+        permission.setResource(createDeveloperResource())
+        developer.grants.add(0, permission)
+        Context.current.store.createEObject(developer)
+        return developer
     }
 
     static User createAdmin(String name, String password, Role... roles) {
