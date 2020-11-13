@@ -85,8 +85,21 @@ public class Store implements EventsRegistration {
             else {
                 messagingTemplate.convertAndSend("/topic/afterSave", result);
             }
-
         });
+//        registerBeforeDelete((resource) -> {
+//            UserDetails userDetails = getUserDetails();
+//
+//            if (resource.getContents().get(0).eClass().getName().equals("User") && userDetails != null) {
+//                Object updatedUserName = ((User)resource.getContents().get(0)).getName();
+//                String currentUserName = userDetails.getUsername();
+//                if (updatedUserName.equals(currentUserName)) {
+//                    SecurityContextHolder.getContext().setAuthentication(null);
+//                }
+//                else {
+//                    messagingTemplate.convertAndSend("/topic/disconnectFlag", updatedUserName);
+//                }
+//            }
+//        });
     }
     public void logout(Authentication old) {
         SecurityContext context = SecurityContextHolder.getContext();
