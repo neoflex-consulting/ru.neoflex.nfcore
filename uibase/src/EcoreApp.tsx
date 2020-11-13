@@ -926,11 +926,12 @@ class EcoreApp extends React.Component<any, State> {
             handleError(error: Error): void {
                 if (error.status === 401) {
                     _this.setState({principal: undefined});
+                    _this.notification(t('notification'), t('re-authorization required'),"info")
                 }
-                if (error.status === 504 || error.error === "Unknown error") {
+                else if (error.status === 504 || error.error === "Unknown error") {
                     _this.notification(t('notification'), t('server is not available'),"info")
                 }
-                if ((error.status === 500 && error.message !== undefined) && error.message.includes('duplicated key')) {
+                else if ((error.status === 500 && error.message !== undefined) && error.message.includes('duplicated key')) {
                     _this.notification(t('notification'), t('the name is not unique'),"error")
                 }
                 else {

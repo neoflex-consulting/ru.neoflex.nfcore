@@ -7,6 +7,7 @@
 )
 package ru.neoflex.nfcore.base.auth
 import org.eclipse.emf.ecore.EObject
+import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
@@ -15,17 +16,26 @@ import org.eclipse.emf.ecore.util.EcoreUtil
 
 annotation "ru.neoflex.nfcore" as NFCore
 
+@NFCore(documentation="Данные о создании и изменении объекта")
 class Audit {
+        @NFCore(documentation="Автор созданного объекта")
     String createdBy
+        @NFCore(documentation="Дата и время, когда был создан объект")
     Timestamp created
+        @NFCore(documentation="Автор последнего изменения объекта")
     String modifiedBy
+        @NFCore(documentation="Дата и время, когда был изменен объект в последный раз")
     Timestamp modified
 }
 
-class Role {
+@NFCore(documentation="Роль пользователя в приложении")
+class Role extends Tagged {
     QName name
+        @NFCore(documentation="Описание роли")
     Text description
+        @NFCore(documentation="Права доступа роли")
     contains Permission[] grants opposite role
+        @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 
     op int isEObjectPermitted(EObject eObject) {
@@ -49,7 +59,6 @@ enum GrantType {
     Unknown =0
     Read    =1
     Write   =2
-    All     =3
     Denied  =4
 }
 

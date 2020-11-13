@@ -1,4 +1,4 @@
-import {Document, Media, Packer, Paragraph, Table, TableCell, TableRow, TextRun} from "docx";
+import {Document, Media, Packer, Paragraph, Table, TableCell, TableRow, TextRun, } from "docx";
 
 
 export enum docxElementExportType {
@@ -15,7 +15,7 @@ export interface docxExportObject {
         width: number,
         height: number
     },
-    gridData?: string[][],
+    gridData?: {value:string, highlight:{color:string, background:string}}[][],
     gridHeader?: {
         headerName: string,
         columnSpan: number
@@ -54,7 +54,10 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
                             tableRow.push(new TableCell({
                                 children: [new Paragraph((cell === null) ? "" : cell.headerName)],
                                 columnSpan:cell.columnSpan,
-                                rowSpan:cell.rowSpan
+                                rowSpan:cell.rowSpan,
+                                shading: {
+                                    fill: "9bbb59",
+                                }
                             }));
                         }
                         tableRows.push(new TableRow({
@@ -65,7 +68,17 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
                     for (const row of docxData.gridData) {
                         let tableRow: TableCell[] = [];
                         for (const cell of row) {
-                            tableRow.push(new TableCell({children: [new Paragraph((cell === null) ? "" : cell)]}));
+                            tableRow.push(new TableCell({
+                                children: [new Paragraph({
+                                    children: [new TextRun({
+                                        text: (cell.value === null) ? "" : cell.value,
+                                        color: cell.highlight.color && cell.highlight.color.replace('#',''),
+                                    })]
+                                })],
+                                shading: {
+                                    fill: cell.highlight.background && cell.highlight.background.replace('#',''),
+                                },
+                            }));
                         }
                         tableRows.push(new TableRow({
                             children: tableRow

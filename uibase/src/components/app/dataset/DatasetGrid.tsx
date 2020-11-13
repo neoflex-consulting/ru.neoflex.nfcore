@@ -62,6 +62,7 @@ interface Props {
     valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
     className?: any;
+    hidePagination?: boolean
 }
 
 class DatasetGrid extends React.Component<Props & any, any> {
@@ -201,32 +202,33 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 visible.push(elem.field)
             }
         }
-        let tableData = [];
+        let data = [];
         for (const [index, elem] of this.state.rowData.entries()) {
-            let dataRow = [];
+            let objectRow = [];
             for (const el of visible) {
-                for (const prop in elem) {
-                    if (el === prop && this.props.valueFormatter) {
-                        let params = {
-                            value: elem[prop],
-                            data: elem,
-                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
-                            node: this.gridOptions.api?.getRowNode(index)
-                        };
-                        const formatted = this.props.valueFormatter(params);
-                        dataRow.push(formatted)
-                    } else if (el === prop) {
-                        dataRow.push(elem[prop])
+                let params = {
+                    value: elem[el],
+                    data: elem,
+                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                    node: this.gridOptions.api?.getRowNode(index)
+                };
+                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                const cellStyle = params.colDef.cellStyle(params);
+                objectRow.push({
+                    value: this.props.valueFormatter ? this.props.valueFormatter(params) : elem[el],
+                    highlight: {
+                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
                     }
-                }
+                });
             }
-            tableData.push(dataRow)
+            data.push(objectRow);
         }
         return  {
             hidden: this.props.hidden,
             docxComponentType : docxElementExportType.grid,
-            gridData:(tableData.length === 0) ? [] : tableData,
-            gridHeader:(gridHeader.length === 0) ? [] : gridHeader
+            gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
+            gridData: data
         };
     }
 
@@ -243,55 +245,48 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 visible.push(elem.field)
             }
         }
-        let tableData = [];
-        let tableMaskData = [];
+        let data = [];
         for (const [index, elem] of this.state.rowData.entries()) {
-            let dataRow = [];
-            let maskRow = [];
+            let objectRow = [];
             for (const el of visible) {
-                for (const prop in elem) {
-                    if (el === prop && this.props.valueFormatter) {
-                        let params = {
-                            value: elem[prop],
-                            data: elem,
-                            colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === prop),
-                            node: this.gridOptions.api?.getRowNode(index)
-                        };
-                        let dateTZ = undefined;
-                        if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
-                            dateTZ = new Date(params.value);
-                        }
-                        dataRow.push(params.colDef.type === appTypes.String ? params.value
-                                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                                        : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
-                                        : params.value);
-                        if (this.props.excelCellMask) {
-                            let mask = this.props.excelCellMask(params);
-                            mask = params.colDef.type === appTypes.Timestamp && !mask
-                                ? "dd.mm.yyyy hh:mm:ss"
-                                : params.colDef.type === appTypes.Date && !mask
-                                    ? "dd.mm.yyyy"
-                                    : mask;
-                            maskRow.push(mask)
-                        }
-                    } else if (el === prop) {
-                        dataRow.push(elem[prop])
-                    }
+                const params = {
+                    value: elem[el],
+                    data: elem,
+                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                    node: this.gridOptions.api?.getRowNode(index)
+                };
+                let dateTZ = undefined;
+                if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
+                    dateTZ = new Date(params.value);
                 }
+                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                const cellStyle = params.colDef.cellStyle(params);
+                const mask = this.props.excelCellMask && this.props.excelCellMask(params);
+                objectRow.push({
+                    value: params.colDef.type === appTypes.String ? params.value
+                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
+                            : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                : params.value,
+                    mask: params.colDef.type === appTypes.Timestamp && !mask
+                        ? "dd.mm.yyyy hh:mm:ss"
+                        : params.colDef.type === appTypes.Date && !mask
+                            ? "dd.mm.yyyy"
+                            : mask,
+                    highlight: {
+                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
+                    }
+                })
             }
-            tableData.push(dataRow);
-            if (this.props.excelCellMask) {
-                tableMaskData.push(maskRow)
-            }
+            data.push(objectRow);
         }
         return  {
             hidden: this.props.hidden,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 tableName: this.props.viewObject.get('name'),
-                cellsMasks: tableMaskData,
                 columns: header,
-                rows: (tableData.length === 0) ? [[]] : tableData
+                data: data
             },
             gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
         };
@@ -704,6 +699,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         })
     };
 
+    isDataSelected = () => {
+        return this.grid.current && this.grid.current.api && !!this.grid.current.api.getSelectedNodes().length
+    };
+
     markDeleted = (data: {[key: string]: unknown}) => {
         //Если до этого была обновлена
         if (this.buffer.includes(data) && data.operationMark__ === dmlOperation.delete && data.prevOperationMark__ === dmlOperation.update) {
@@ -775,15 +774,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
     };
 
     copySelected = () => {
-        let position = 0;
-        const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
-            position = sn.childIndex + 1;
-            return {
-                ...sn.data,
-                operationMark__ : dmlOperation.insert
-            }
-        });
-        this.copy(selected, position);
+        if (this.isDataSelected()) {
+            let position = 0;
+            const selected = this.grid.current.api.getSelectedNodes().map((sn:any) => {
+                position = sn.childIndex + 1;
+                return {
+                    ...sn.data,
+                    operationMark__ : dmlOperation.insert
+                }
+            });
+            this.copy(selected, position);
+        }
     };
 
     undoChanges = (data: {[key: string]: unknown}) => {
@@ -930,17 +931,17 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         />
                     </ConfigProvider>
                     }
-                    <div id="datasetPaginator"
+                    {!this.props.hidePagination && <div id="datasetPaginator"
                          style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", minWidth: "375px", backgroundColor: "#E6E6E6"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
                             totalNumberOfPage = {this.state.paginationTotalPage}
                             paginationPageSize = {this.state.paginationPageSize}
-                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>r.isVisible__).length}
+                            totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>!(r.isVisible__ === false)).length}
                             grid = {this.grid}
                         />
-                    </div>
+                    </div>}
                 </div>
             </div>
         )

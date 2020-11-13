@@ -3,7 +3,7 @@ ru.neoflex.nfcore.dsl.EcoreBuilder.build "auth", "Role", {
     attr "name", "My Role!"
     attr "description", "Test Role to build with EcoreBuilder"
     contains "grants", "auth", "ObjectPermission", {
-        attr "grantType", "All"
+        attr "grantType", "Write"
         refers "eObject", "auth_UserProfile_ivanov", "parameter2"
     }
     contains "audit", "auth", "Audit", {

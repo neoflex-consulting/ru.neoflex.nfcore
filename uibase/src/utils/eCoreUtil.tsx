@@ -2,9 +2,10 @@ import Ecore from "ecore";
 
 const searchSource = "ru.neoflex.nfcore";
 
-type classAnnotationKey = "invisible"|"disabled"|"documentation";
+type classAnnotationKey = "documentation";
+type fieldAnnotationKey = "invisible"|"disabled"|"documentation";
 
-export function getClassAnnotationByKey(annotations: Ecore.EList, key: classAnnotationKey) {
+function getAnnotationByKey(annotations: Ecore.EList, key: classAnnotationKey|fieldAnnotationKey) {
     let retVal = "";
     annotations.each( (a:Ecore.EObject) => {
         if (a.get('source') === searchSource) {
@@ -18,6 +19,14 @@ export function getClassAnnotationByKey(annotations: Ecore.EList, key: classAnno
     return retVal
 }
 
+export function getClassAnnotationByKey(annotations: Ecore.EList, key: classAnnotationKey) {
+    return getAnnotationByKey(annotations, key)
+}
+
+export function getFieldAnnotationByKey(annotations: Ecore.EList, key: fieldAnnotationKey) {
+    return getAnnotationByKey(annotations, key)
+}
+
 export function getClassAnnotationByClassAndKey(eClass: Ecore.EClass, key: classAnnotationKey, checkParents = false) {
     let retVal = "";
     if (checkParents) {
@@ -27,3 +36,4 @@ export function getClassAnnotationByClassAndKey(eClass: Ecore.EClass, key: class
     }
     return retVal !== "" ? retVal + "," + getClassAnnotationByKey(eClass.get('eAnnotations'), key) : getClassAnnotationByKey(eClass.get('eAnnotations'), key)
 }
+

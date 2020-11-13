@@ -102,7 +102,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
-                        <NeoInput className={"search-column"} value={this.filter} type={"search"} onChange={(event: any)=>{
+                        <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
                             this.filter = event.currentTarget.value;
                             this.setState({parametersArray:this.state.parametersArray!
                                     .map(p=>{

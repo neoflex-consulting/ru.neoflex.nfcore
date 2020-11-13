@@ -11,11 +11,13 @@ import ru.neoflex.nfcore.base.types.QName
 annotation "ru.neoflex.nfcore" as NFCore
 
 @Ecore(constraints="IsValid")
-@NFCore(documentation="Тег - используется для пометки элементов приложения, для упрощения дальнейшего поиска",invisible="tags")
-class Tag extends Tagged {
+@NFCore(documentation="Тег - используется для пометки элементов приложения, для упрощения дальнейшего поиска")
+class Tag {
     QName name
 }
 
+@NFCore(documentation="Массив тегов - используется для расширения классов приложения")
 abstract class Tagged {
+        @NFCore(documentation="Теги - используются для пометки элементов приложения, для упрощения дальнейшего поиска")
     refers Tag[] tags
 }

@@ -297,6 +297,7 @@
         "String": "String",
         "Date": "Date",
         "Boolean": "Boolean",
+        "Timestamp": "Date and time",
 
         "format": "Mask",
         "integerMask": "###0",
@@ -325,6 +326,7 @@
         "quick filter": "Search",
         "copy selected": "Copy selected",
         "edit is prohibited" : "Edit is prohibited",
+        "data menu": "Options menu",
         "undo changes": "Undo changes",
         "copy": "Copy",
         "download with table": "Download with table",
@@ -407,6 +409,7 @@
         "success": "Успешно",
         "the name is not unique": "The name is not unique. Try again",
         "server is not available": "Server is not available",
+        "re-authorization required": "Re-authorization required",
 
         "expand all": "Expand all",
         "collapse all": "Collapse all",
