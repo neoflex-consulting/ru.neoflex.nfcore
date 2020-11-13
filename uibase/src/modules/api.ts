@@ -632,6 +632,7 @@ export class API implements IErrorHandler {
                 this.stompClient.subscribe('/topic/disconnectFlag', message => {
                     if (message.body !== undefined && userName !== undefined) {
                         if (userName === message.body) {
+                            this.stompClient.deactivate();
                             this.logout()
                         }
                     }
