@@ -16,6 +16,8 @@ class Tag {
     QName name
 }
 
+@NFCore(documentation="Массив тегов - используется для расширения классов приложения")
 abstract class Tagged {
+        @NFCore(documentation="Теги - используются для пометки элементов приложения, для упрощения дальнейшего поиска")
     refers Tag[] tags
 }

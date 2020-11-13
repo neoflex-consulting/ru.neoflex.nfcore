@@ -24,10 +24,9 @@ export interface excelExportObject {
         height: number
     },
     gridData?: {
-        tableName:string,
-        cellsMasks:string[][],
+        tableName:string
         columns:any[],
-        rows:string[][]
+        data:{value:string, mask:string, highlight:{color:string, background:string}}[][]
     },
     textData?: string,
     gridHeader?: {
@@ -35,6 +34,29 @@ export interface excelExportObject {
         columnSpan: number
         rowSpan: number
     }[][]
+}
+
+function addTableData(excelData: excelExportObject, worksheet: ExcelJS.Worksheet, offset: number) {
+    if (excelData.gridData) {
+        for (const [rowIndex, row]of excelData.gridData.data.entries()) {
+            for (const [columnIndex, cell] of row.entries()) {
+                //Data
+                worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).value = cell.value;
+                //Formatting
+                worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).numFmt = cell.mask;
+                //Highlight color
+                worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).fill = {
+                    type: 'pattern',
+                    pattern:"solid",
+                    fgColor:{argb: cell.highlight.background && cell.highlight.background.replace('#','')}
+                };
+                //font color
+                worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).font = {
+                    color: {argb: cell.highlight.color && cell.highlight.color.replace('#','')}
+                }
+            }
+        }
+    }
 }
 
 async function handleExportExcel(handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: any) {
@@ -76,22 +98,9 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                     fgColor:{argb:'9bbb59'}
                 }
             }
-            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
-                for (const [columnIndex, cell] of row.entries()) {
-                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex+ 1}`).value = cell
-                }
-            }
+            addTableData(excelData, worksheet, offset + 1);
             worksheet.autoFilter = `A${offset}:${encode(excelData.gridData.columns.length-1)}${offset}`;
-
-            //Formatting
-            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
-                for (const [cellIndex, cell] of row.entries()) {
-                    if (cell) {
-                        worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset+1}`).numFmt = cell
-                    }
-                }
-            }
-            offset += excelData.gridData.rows.length;
+            offset += excelData.gridData.data.length;
         }
         if (excelData.excelComponentType === excelElementExportType.text && excelData.textData !== undefined) {
             //Добавление текста
@@ -140,21 +149,8 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
                 }
                 offset += 1;
             }
-            //Data
-            for (const [rowIndex, row]of excelData.gridData.rows.entries()) {
-                for (const [columnIndex, cell] of row.entries()) {
-                    worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).value = cell
-                }
-            }
-            //Formatting
-            for (const [rowIndex, row] of excelData.gridData.cellsMasks.entries()) {
-                for (const [cellIndex, cell] of row.entries()) {
-                    if (cell) {
-                        worksheet.getCell(`${encode(cellIndex)}:${rowIndex+offset}`).numFmt = cell
-                    }
-                }
-            }
-            offset += 1 + excelData.gridData.rows.length;
+            addTableData(excelData, worksheet, offset);
+            offset += 1 + excelData.gridData.data.length;
         }
         offset += 1;
         worksheet.columns && worksheet.columns.forEach(c=>{

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore";
 import {API} from "../modules/api";
-import {Button, Form, Tabs} from "antd";
+import {Button, Form, Tabs, Select} from "antd";
 import {FormComponentProps} from 'antd/lib/form/Form';
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
@@ -23,6 +23,8 @@ interface State {
     classes: Ecore.EObject[];
     indicatorError: boolean;
     createResModalVisible: boolean;
+    selectTags: number;
+    selectCount: number;
 }
 
 class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
@@ -31,7 +33,9 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         tags: [],
         classes: [],
         indicatorError: false,
-        createResModalVisible: false
+        createResModalVisible: false,
+        selectTags: 2,
+        selectCount: 0
     };
 
     handleSubmit = (e: any) => {
@@ -131,6 +135,9 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
     };
 
+    // handleSelect = () => {
+    //     this.state.selectTags === 2 ? this.setState({selectTags: 0}) : this.setState({selectTags: 2})
+    // }
 
     render() {
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
@@ -151,7 +158,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                 title={t("createitem")}
                                 icon="plus"
                                 type="primary"
-                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:100}}
+                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1}}
                                 size="large"
                                 onClick={()=>this.setModalVisible(true)}
                             />
@@ -219,15 +226,38 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         mode={"tags"}
                                                         disabled={this.checkEClass()}
                                                         width={'670px'}
-                                                        placeholder={"Выберите из списка"}>
+                                                        onChange={(event:any) => {
+                                                            this.setState({selectCount: event.toString().split(',').length})
+                                                        }}
+                                                        placeholder={"Выберите из списка"}
+                                                        defaultValue={'more'}
+                                                        maxTagCount={this.state.selectTags}
+                                                        maxTagPlaceholder={this.state.selectTags !== 2 ?
+                                                            <NeoButton
+                                                                style={{color:'red'}}
+                                                                type={'link'}
+                                                                onClick={()=>this.state.selectTags === 2 ? this.setState({selectTags: this.state.selectCount-1}) : this.setState({selectTags: 2})
+                                                                }>Свернуть</NeoButton>
+                                                        :
+                                                            <NeoButton
+                                                                style={{color:'red'}}
+                                                                type={'link'}
+                                                                onClick={()=>this.state.selectTags === 2 ? this.setState({selectTags: this.state.selectCount-1}) : this.setState({selectTags: 2})
+                                                                }>Еще {this.state.selectCount-2}</NeoButton>
+                                                        }
+
+                                                    >
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
-                                                                    <option key={tag.get('name')}
-                                                                                   value={tag.get('name')}>
-                                                                        {tag.get('name')}
-                                                                    </option>)
+                                                                <option key={tag.get('name')}
+                                                                        value={tag.get('name')}>
+                                                                    {tag.get('name')}
+                                                                </option>)
                                                         }
-                                                    </NeoSelect>
+                                                        <option value={'more'}>
+                                                            More
+                                                        </option>
+                                                     </NeoSelect>
                                                 )}
                                             </FormItem>
                                         <FormItem style={{marginBottom:'20px'}}>

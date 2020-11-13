@@ -6,6 +6,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.neoflex.nfcore.base.auth.AuthPackage
 import ru.neoflex.nfcore.base.auth.Role
+import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.util.DocFinder
 
@@ -29,7 +30,7 @@ class AuthPackageInit {
         Context.current.store.registerAfterSave(new BiConsumer<Resource, Resource>() {
             @Override
             void accept(Resource oldResource, Resource resource) {
-                if (resource.contents.count {eObject->eObject instanceof Role} > 0) {
+                if (resource.contents.count {eObject->eObject instanceof Role || eObject instanceof User} > 0) {
                     Context.current.authorization.clearRolesCache()
                 }
             }
@@ -60,10 +61,12 @@ class AuthPackageInit {
         def su = sus.size() > 0 ? sus[0].contents[0] : UserInit.createSU()
         def actuators = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "ACTUATOR"]).execute().resources
         def actuator = actuators.size() > 0 ? actuators[0].contents[0] : UserInit.createActuator()
+        def developers = DocFinder.create(Context.current.store, AuthPackage.Literals.ROLE, [name: "developer"]).execute().resources
+        def developer = developers.size() > 0 ? developers[0].contents[0] : UserInit.createDeveloper()
         def admins = DocFinder.create(Context.current.store, AuthPackage.Literals.USER, [name: "admin"]).execute().resources
         if (admins.size() == 0) {
-            UserInit.createAdmin("admin", "admin", su, actuator)
-            UserInit.createAdmin("anna", "anna", su, actuator)
+            UserInit.createAdmin("admin", "admin", su, actuator, developer)
+            UserInit.createAdmin("anna", "anna", su, actuator, developer)
         }
         else {
             Context.current.store.saveResource(admins[0])

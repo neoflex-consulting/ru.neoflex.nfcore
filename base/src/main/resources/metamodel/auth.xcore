@@ -7,6 +7,7 @@
 )
 package ru.neoflex.nfcore.base.auth
 import org.eclipse.emf.ecore.EObject
+import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.base.types.Timestamp
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
@@ -28,7 +29,7 @@ class Audit {
 }
 
 @NFCore(documentation="Роль пользователя в приложении")
-class Role {
+class Role extends Tagged {
     QName name
         @NFCore(documentation="Описание роли")
     Text description
@@ -58,7 +59,6 @@ enum GrantType {
     Unknown =0
     Read    =1
     Write   =2
-    All     =3
     Denied  =4
 }
 
@@ -82,12 +82,12 @@ class ObjectPermission extends Permission {
     }
 }
 
-class Resource {
+class ApplicationResource {
     QName name
 }
 
 class ResourcePermission extends Permission {
-    refers Resource resource
+    refers ApplicationResource Resource
     op int isResourcePermitted(String path) {
         if (path.startsWith(getResource().name)) return this.grantType.getValue()
         else return GrantType::UNKNOWN_VALUE

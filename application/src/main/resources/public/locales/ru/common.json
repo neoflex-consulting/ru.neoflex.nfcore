@@ -406,6 +406,7 @@
         "success": "Успешно",
         "the name is not unique": "Наименование не уникально. Попробуйте еще раз",
         "server is not available": "Сервер недоступен",
+        "re-authorization required": "Необходима повторная авторизация",
 
         "expand all": "Раскрыть вложенные",
         "collapse all": "Скрыть вложенные",
