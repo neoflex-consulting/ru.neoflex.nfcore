@@ -46,6 +46,7 @@ export class Login extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages()
+        this.authenticate()
     }
 
     render() {
