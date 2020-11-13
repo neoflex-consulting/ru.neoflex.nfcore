@@ -617,7 +617,7 @@ export class API implements IErrorHandler {
         return this.fetchText("/actuator/logfile")
     }
 
-    stompConnect = () => {
+    stompConnect = (userName: String) => {
         this.stompClient = new Client();
 
         this.stompClient.configure({
@@ -628,6 +628,13 @@ export class API implements IErrorHandler {
             onConnect: () => {
                 this.stompClient.subscribe('/topic/afterSave', message => {
                     console.log('ON CONNECT: ', JSON.parse(message.body));
+                });
+                this.stompClient.subscribe('/topic/disconnectFlag', message => {
+                    if (message.body !== undefined && userName !== undefined) {
+                        if (userName === message.body) {
+                            this.logout()
+                        }
+                    }
                 });
             },
             debug: (str) => {
