@@ -158,7 +158,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                 title={t("createitem")}
                                 icon="plus"
                                 type="primary"
-                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:100}}
+                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1}}
                                 size="large"
                                 onClick={()=>this.setModalVisible(true)}
                             />
