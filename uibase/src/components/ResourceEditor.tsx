@@ -873,7 +873,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     cloneResource = () => {
-        const {t} = this.props
+        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
@@ -919,6 +919,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false) => {
+        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
@@ -946,7 +947,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     this.redirect();
                 }
             }).catch(() => {
-                this.setState({ isSaving: false, isModified: true })
+                this.setState({ isSaving: false, isModified: true });
             })
         }
     };

@@ -62,7 +62,7 @@ public class GitDBTests {
         Role superAdmin = AuthFactory.eINSTANCE.createRole();
         superAdmin.setName("SuperAdminRole_TEST");
         Permission allPermission = AuthFactory.eINSTANCE.createAllPermission();
-        allPermission.setGrantType(GrantType.ALL);
+        allPermission.setGrantType(GrantType.WRITE);
         superAdmin.getGrants().add(allPermission);
         return superAdmin;
     }

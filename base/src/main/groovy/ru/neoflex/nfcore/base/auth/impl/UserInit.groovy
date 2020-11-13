@@ -12,7 +12,7 @@ class UserInit extends UserImpl {
         superUserRole.setName("su")
         superUserRole.setDescription("Super User Role - All Permissions granted")
         def allPermission = AuthFactory.eINSTANCE.createAllPermission()
-        allPermission.setGrantType(GrantType.ALL)
+        allPermission.setGrantType(GrantType.WRITE)
         superUserRole.getGrants().add(allPermission)
         Context.current.store.createEObject(superUserRole)
         return superUserRole
