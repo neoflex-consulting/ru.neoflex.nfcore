@@ -329,11 +329,11 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 upperBound={props.upperBound}
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && Array.isArray(value)) {
+        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}
-                value={targetValue || eType.eContents()[0].get('name')}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()[0].get('name'))}
                 eType={eType}
                 id={props.id}
                 onChange={(newValue: any) => {

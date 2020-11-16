@@ -48,6 +48,7 @@ export class API implements IErrorHandler {
     private processHandlers: ((processes: any[])=>void)[];
     private stompClient: Client;
     public onServerDown: () => void;
+    public userName: String;
 
     private constructor() {
         this.errorHandlers = [this];
@@ -617,7 +618,8 @@ export class API implements IErrorHandler {
         return this.fetchText("/actuator/logfile")
     }
 
-    stompConnect = () => {
+    stompConnect = (userName: String) => {
+        this.userName = userName;
         this.stompClient = new Client();
 
         this.stompClient.configure({
@@ -628,6 +630,14 @@ export class API implements IErrorHandler {
             onConnect: () => {
                 this.stompClient.subscribe('/topic/afterSave', message => {
                     console.log('ON CONNECT: ', JSON.parse(message.body));
+                });
+                this.stompClient.subscribe('/topic/disconnectFlag', message => {
+                    if (message.body !== undefined && this.userName !== undefined) {
+                        if (this.userName === message.body) {
+                            this.stompClient.deactivate();
+                            this.logout()
+                        }
+                    }
                 });
             },
             debug: (str) => {
