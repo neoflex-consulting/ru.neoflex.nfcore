@@ -215,7 +215,7 @@ public class Exporter {
             if (nameAttribute != null) {
                 String name = (String) eObject.eGet(nameAttribute);
                 if (name != null && name.length() > 0) {
-                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name.replaceAll("/", "_");
                     byte[] refsBytes = exportExternalRefs(eObject);
                     if (refsBytes != null) {
                         logger.info("Export " + fileName + REFS);
@@ -247,7 +247,7 @@ public class Exporter {
             if (nameAttribute != null) {
                 String name = (String) eObject.eGet(nameAttribute);
                 if (name != null && name.length() > 0) {
-                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name;
+                    String fileName = ePackage.getName() + "_" + eClass.getName() + "_" + name.replaceAll("/", "_");
                     logger.info("Export " + fileName + XMI);
                     byte[] bytes = exportEObjectWithoutExternalRefs(eObject);
                     ZipEntry zipEntry = new ZipEntry(fileName + XMI);
