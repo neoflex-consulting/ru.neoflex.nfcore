@@ -68,7 +68,7 @@ public class UserDetail implements UserDetailsService {
 
                 int grant = 0;
                 for (Role role: context.getAuthorization().getAuthoritiesRoles(au)) {
-                    grant |= role.isResourcePermitted("/system/developer");
+                    grant |= role.isResourcePermitted("//system//developer");
                 }
 
                 GrantType developerGrant = Authorization.getGrantType(grant);
