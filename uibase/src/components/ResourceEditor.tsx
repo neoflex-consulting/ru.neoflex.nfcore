@@ -64,7 +64,8 @@ interface State {
     clipboardObject: ITargetObject,
     edit: boolean,
     expandedKeys: string[],
-    saveMenuVisible: boolean
+    saveMenuVisible: boolean,
+    removalProcess: boolean
 }
 
 
@@ -132,7 +133,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         clipboardObject: { eClass: "" },
         edit: false,
         expandedKeys: [],
-        saveMenuVisible: false
+        saveMenuVisible: false,
+        removalProcess: false
     };
 
     refresh = (refresh: boolean): void => {
@@ -143,6 +145,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     delete = (): void => {
         const ref: string = `${this.state.resource.get('uri')}?rev=${this.state.resource.rev}`;
+        this.setState({removalProcess: true});
         API.instance().deleteResource(ref).then(() => {
             this.props.history.push('/developer/data')
         })
@@ -898,7 +901,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     changeEdit = (redirect: boolean) => {
-        if (this.state.edit) {
+        if (this.state.removalProcess) {
+            if (this.state.edit) {
+                API.instance().deleteLock(this.state.mainEObject._id)
+                    .then(() => {this.setState({edit: false});})
+                    .catch(() => {this.setState({edit: false});})
+            }
+        }
+        else if (this.state.edit) {
             API.instance().deleteLock(this.state.mainEObject._id)
                 .then(() => {
                     this.save(false, redirect);
