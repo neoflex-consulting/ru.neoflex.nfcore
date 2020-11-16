@@ -27,14 +27,14 @@ class UserInit extends UserImpl {
     }
 
     static ApplicationResource createDeveloperResource() {
-        def developer = DocFinder.create(Context.current.store, AuthPackage.Literals.APPLICATION_RESOURCE, [name: "\\system\\developer"]).execute().resources
+        def developer = DocFinder.create(Context.current.store, AuthPackage.Literals.APPLICATION_RESOURCE, [name: "//system//developer"]).execute().resources
         if (developer.size() > 0) {
             return developer[0].contents[0] as ApplicationResource;
         } else {
-            def resource = AuthFactory.eINSTANCE.createApplicationResource()
-            resource.setName("\\system\\developer")
-            Context.current.store.createEObject(resource)
-            return resource
+            def applicationResource = AuthFactory.eINSTANCE.createApplicationResource()
+            applicationResource.setName("//system//developer")
+            Context.current.store.createEObject(applicationResource)
+            return applicationResource
         }
     }
 
