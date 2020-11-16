@@ -790,10 +790,10 @@ class Calendar extends React.Component<any, any> {
         const menu = (<Menu
             key='actionMenu'
             onClick={this.onActionMenu}
-            style={{width: '150px'}}
+            className={"export-menu"}
         >
-            <Menu.Item key='exportToDocx'>
-                {t("export to docx")}
+            <Menu.Item className={"action-menu-item"} key='exportToDocx'>
+                <NeoIcon icon={'fileWord'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("export to docx")}
             </Menu.Item>
         </Menu>);
         return (

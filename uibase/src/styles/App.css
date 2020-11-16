@@ -1747,7 +1747,7 @@ a.linksInMoreWord:hover{
   margin: 0 auto;
 }
 
-/*a.ant-pagination-item-link::after{
+/*li.ant-pagination-jump-next.ant-pagination-jump-next-custom-icon::before{
   content: "";
   position: absolute;
   top: -29%;
