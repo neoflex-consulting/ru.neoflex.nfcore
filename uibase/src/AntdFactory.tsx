@@ -93,47 +93,37 @@ function unmountComponent(this: any, isExportable = false, isCleanContext = fals
     }
 }
 
-function handleChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+function handleContextChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String", callback?: ()=>void) {
     let contextItemValues = this.props.context.contextItemValues;
     let globalValues = this.props.context.globalValues;
-    contextValue = contextValue ? contextValue : currentValue;
     const parameterObj = {
         parameterName: this.viewObject.get('name'),
-        parameterValue: (currentValue === undefined) ? null : contextValue,
+        parameterValue: (currentValue === undefined) ? null : contextValue ? contextValue : currentValue,
         parameterDataType: dataType
     };
     contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
     if (this.viewObject.get('isGlobal')) {
         globalValues.set(this.viewObject.get('name'), parameterObj)
     }
-    this.setState({currentValue:currentValue});
     this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-        ()=>this.props.context.notifyAllEventHandlers({
-            type:eventType.change,
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            value:contextValue
-        }));
+        callback);
+}
+
+function handleChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+    handleContextChange.bind(this)(currentValue, contextValue, dataType, ()=>this.props.context.notifyAllEventHandlers({
+        type:eventType.change,
+        itemId:this.viewObject.get('name')+this.viewObject._id,
+        value: contextValue ? contextValue : currentValue
+    }));
+    this.setState({currentValue:currentValue});
 }
 
 function handleClick(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
-    let contextItemValues = this.props.context.contextItemValues;
-    let globalValues = this.props.context.globalValues;
-    contextValue = contextValue ? contextValue : currentValue;
-    const parameterObj = {
-        parameterName: this.viewObject.get('name'),
-        parameterValue: (currentValue === undefined) ? null : contextValue,
-        parameterDataType: dataType
-    };
-    contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, parameterObj);
-    if (this.viewObject.get('isGlobal')) {
-        globalValues.set(this.viewObject.get('name'), parameterObj)
-    }
-    this.props.context.updateContext!({contextItemValues: contextItemValues, globalValues: globalValues},
-        ()=>    this.props.context.notifyAllEventHandlers({
-            type: eventType.click,
-            itemId:this.viewObject.get('name')+this.viewObject._id,
-            value:contextValue
-        }));
+    handleContextChange.bind(this)(currentValue, contextValue, dataType, ()=>    this.props.context.notifyAllEventHandlers({
+        type: eventType.click,
+        itemId:this.viewObject.get('name')+this.viewObject._id,
+        value: contextValue ? contextValue : currentValue
+    }));
 }
 
 function createCssClass(viewObject: any){
@@ -686,7 +676,6 @@ export class DatePicker_ extends ViewContainer {
             ? this.viewObject.get('value')
             : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
-
         this.state = {
             defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
             currentValue: formatedValue,
@@ -721,8 +710,10 @@ export class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        this.onChange(this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format));
         mountComponent.bind(this)(true);
+        const value = this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format);
+        const formattedCurrentValue = moment(value, this.state.mask).format(this.state.format);
+        handleContextChange.bind(this)(value, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
     }
 
     componentWillUnmount(): void {
@@ -741,12 +732,20 @@ export class DatePicker_ extends ViewContainer {
         handleChange.bind(this)(currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
     };
 
+    onClick = () => {
+        //Возвращаем формат по умолчанию
+        const formattedCurrentValue = moment(this.state.currentValue, this.state.mask).format(this.state.format);
+        handleClick.bind(this)(this.state.currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
+    };
+
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}
-                 style={{marginBottom: marginBottom}}>
+                 style={{marginBottom: marginBottom}}
+                 onClick={()=>this.onClick()}
+            >
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
                         key={this.viewObject._id}
@@ -1047,12 +1046,13 @@ export class Checkbox_ extends ViewContainer {
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
-        value = value ? value : this.viewObject.get('value') || "";
+        value = value ? value : this.viewObject.get('value') || "default";
         const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label')
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
             currentValue: value,
+            defaultValue: value,
             checked: value === agValue ? true : this.viewObject.get('isChecked')
         };
         if (this.viewObject.get('isGlobal')) {
@@ -1064,12 +1064,21 @@ export class Checkbox_ extends ViewContainer {
     }
 
     componentDidMount(): void {
+        mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value)=>{
+                this.onChange.bind(this)(value ? value : "", true)
+            }}] as IAction[]);
+        const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
         if (this.viewObject.get('isChecked')) {
-            this.onChecked(this.state.checked);
+            if (this.props.isAgComponent) {
+                const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
+                handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, value));
+            } else {
+                handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, this.state.defaultValue));
+            }
+            this.setState({checked: true});
         } else {
-            this.onChange('');
+            handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, ''));
         }
-        mountComponent.bind(this)();
     }
 
     componentWillUnmount(): void {
@@ -1077,7 +1086,7 @@ export class Checkbox_ extends ViewContainer {
     }
 
     getValue() {
-        return this.state.checked ? this.viewObject.get('value') : undefined;
+        return this.state.checked ? this.state.currentValue : undefined;
     }
 
     changeSelection = (currentValue: string, newValue: string) => {
@@ -1095,16 +1104,25 @@ export class Checkbox_ extends ViewContainer {
             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
             this.onChange(value)
         } else {
-            this.onChange(this.state.currentValue)
+            this.onChange(this.state.defaultValue)
         }
-        this.setState({checked:isChecked});
+        this.setState({checked: isChecked});
     };
 
-    onChange = (currentValue: string) => {
-        let contextItemValues = this.props.context.contextItemValues;
-        let currentContextValue = contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-        let newContextValue = this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, currentValue);
+    onChange = (currentValue: string, isSetValueCall = false) => {
+        const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
+        const newContextValue = this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, currentValue)
         handleChange.bind(this)(newContextValue);
+        if (isSetValueCall) {
+            this.setState({checked: newContextValue.length >= currentValue.length});
+        } else {
+            //Emulate click
+            this.props.context.notifyAllEventHandlers({
+                type: eventType.click,
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: newContextValue
+            })
+        }
     };
 
     render = () => {
@@ -1116,12 +1134,15 @@ export class Checkbox_ extends ViewContainer {
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
                 <NeoInput
+                    name={"checkbox"}
                     className={cssClass}
                     type={'checkbox'}
                     checked={this.state.checked}
+                    value={this.state.currentValue}
                     onChange={isReadOnly ? ()=>{} : (e:any) => {
                         this.onChecked(e.currentTarget.checked);
                     }}
+                    disabled={isReadOnly}
                 >{this.viewObject.get('label')}</NeoInput>
             </div>
         )
@@ -1181,7 +1202,6 @@ class Typography_ extends ViewContainer {
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <NeoParagraph
-                    key={this.viewObject._id}
                     type={typographyType}
                     className={cssClass}
                     copyable={drawObject.get('buttonCopyable')}
@@ -1404,6 +1424,78 @@ export class NeoIcon_ extends ViewContainer {
     }
 }
 
+export class RadioGroup_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        let value;
+        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        }
+        value = value ? value : this.viewObject.get('value') || "";
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+            currentValue: value,
+        };
+        if (this.viewObject.get('isGlobal')) {
+            this.props.context.globalValues.set(this.viewObject.get('name'),{
+                parameterName: this.viewObject.get('name'),
+                parameterValue: value
+            })
+        }
+    }
+
+    componentDidMount(): void {
+        mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value) => {
+                this.onChange.bind(this)(value ? value : "", true)
+            }}] as IAction[]);
+        handleContextChange.bind(this)(this.state.currentValue);
+    }
+
+    componentWillUnmount(): void {
+        unmountComponent.bind(this)()
+    }
+
+    onChange = (currentValue: string, isSetValueCall = false) => {
+        handleChange.bind(this)(currentValue);
+        if (!isSetValueCall) {
+            //Emulate click
+            this.props.context.notifyAllEventHandlers({
+                type: eventType.click,
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: currentValue
+        })
+        }
+    };
+
+    onClick  = (currentValue: string) => {
+        handleClick.bind(this)(currentValue)
+    };
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        const cssClass = createCssClass(this.viewObject);
+        return (<div style={{display: "flex", flexDirection: this.viewObject.get('isVerticalGroup') ? "column" : "row"}}
+                     hidden={this.state.isHidden || this.props.isParentHidden}>
+                {this.viewObject.get('radioBoxes').map((box:string, index:number)=>{
+                    return <NeoInput
+                        key={`${this.viewObject.eURI()}${box}${index}`}
+                        disabled={isReadOnly}
+                        checked={this.state.currentValue === box}
+                        className={cssClass}
+                        type={"radio"}
+                        name={this.viewObject.get('name')}
+                        onChange={isReadOnly ? ()=>{} : (event:any)=>{
+                            this.onChange(event.currentTarget.labels[0].outerText)
+                        }}
+                    >{box}
+                    </NeoInput>
+                })}
+            </div>
+        )
+    }
+}
+
 class Collapse_ extends ViewContainer {
 
     constructor(props: any) {
@@ -1424,7 +1516,7 @@ class Collapse_ extends ViewContainer {
     render = () => {
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <Collapse
                     className={cssClass}
                     defaultActiveKey={['1']}
@@ -1517,6 +1609,7 @@ class AntdFactory implements ViewFactory {
         this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
         this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
         this.components.set('ru.neoflex.nfcore.application#//NeoIcon', NeoIcon_);
+        this.components.set('ru.neoflex.nfcore.application#//RadioGroup', RadioGroup_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

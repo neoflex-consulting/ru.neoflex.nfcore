@@ -311,6 +311,11 @@ class Message extends DynamicActionElement, Tagged {
     String message
 }
 
+class RadioGroup extends ViewElement, ValueItem {
+    boolean isVerticalGroup
+    String[] radioBoxes
+}
+
 enum TextAlign {
     Left
     Center
