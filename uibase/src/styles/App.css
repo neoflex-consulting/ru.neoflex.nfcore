@@ -376,77 +376,7 @@ height: 8px!important;
 }
 /* Paginator ! */
 
-.ant-pagination.mini .ant-pagination-prev, .ant-pagination.mini .ant-pagination-next {
-  line-height: 22px !important;
-}
 
-.ant-select-sm .ant-select-selection--single {
-  height: 24px !important;
-  width: 104px;
-  margin-left: 40px;
-}
-.ant-select-sm .ant-select-selection--single:hover {
-  border: 1px solid #424D78 !important;
-}
-
-.ant-pagination.mini .ant-pagination-options-quick-jumper input {
-  margin-left: 16px;
-  width: 36px !important;
-  box-shadow: unset!important;
-}
-
-.ant-pagination.mini .ant-pagination-options-quick-jumper input:hover{
-  border: 1px solid #424D78 !important;
-}
-
-.ant-pagination-options-quick-jumper input:focus,
-.ant-pagination-options-quick-jumper input:hover {
-  box-shadow: none !important;
-  border: 1px solid #2A356C !important;
-}
-
-.ant-select-focused .ant-select-selection, .ant-select-selection:focus, .ant-select-selection:active{
-  border-color: #424D78 !important;
-  box-shadow: unset!important;
-}
-.ant-pagination.mini .ant-pagination-item{
-  margin: 0 5px !important;
-}
-.ant-pagination.mini .ant-select-sm .ant-select-selection--single{
-  margin-left: 12px;
-}
-.ant-pagination-item-link{
-  margin-left: 20px;
-  margin-right: 20px;
-}
-.ant-pagination.mini .ant-pagination-options-quick-jumper {
-  margin-left: 12px;
-}
-
-.ant-pagination.mini .ant-pagination-item-active {
-  font-weight: 500;
-  background: #FFF8E0;
-  border: 1px solid #FFCC66;
-  box-sizing: border-box;
-  border-radius: 2px;
-}
-
-.ant-pagination.mini .ant-select-sm .ant-select-selection__rendered {
-  margin-left: 12px;
-  line-height: 22px;
-}
-
-.ant-pagination.mini .ant-pagination-prev
-  :hover{
-    font-size: 12px;
-     color: #022af8;
-   }
-
-.ant-pagination.mini .ant-pagination-next
-:hover{
-  font-size: 12px;
-  color: #022af8;
-}
 
 /*DropDown*/
 
@@ -1747,6 +1677,10 @@ a.linksInMoreWord:hover{
   margin: 0 auto;
 }
 
+.action-menu-item:first-child{
+  margin-top: unset!important;
+}
+
 /*li.ant-pagination-jump-next.ant-pagination-jump-next-custom-icon::before{
   content: "";
   position: absolute;
@@ -1796,7 +1730,3 @@ a.linksInMoreWord:hover{
   border: 1.5px solid #424D78;
 }
 
-.datasearch__filter__drawer .ant-drawer-close,
-.datasearch__filter__drawer .ant-pagination {
-  display: none;
-}
