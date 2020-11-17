@@ -452,12 +452,18 @@ export class Select_ extends ViewContainer {
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             this.urlCurrentValue = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
-        value = this.urlCurrentValue ? this.urlCurrentValue : this.viewObject.get('value') || "";
 
-        let defaultAgGridValue = "";
+        let agValue = "";
         if (this.props.isAgEdit) {
-            defaultAgGridValue = this.props.data[this.props.colData]
+            agValue = this.props.data[this.props.colData]
+        } else {
+            agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '');
         }
+        value = this.urlCurrentValue
+            ? this.urlCurrentValue
+            : this.viewObject.get('value')
+                ? this.viewObject.get('value')
+                : agValue;
         this.state = {
             selectData: [],
             params: [],
@@ -465,7 +471,7 @@ export class Select_ extends ViewContainer {
             dataset: undefined,
             isHidden: this.viewObject.get('hidden'),
             isDisabled: this.viewObject.get('disabled'),
-            defaultAgGridValue: defaultAgGridValue,
+            defaultAgGridValue: agValue,
             isFirstLoad: true
         };
         if (this.viewObject.get('isGlobal')) {
@@ -492,7 +498,7 @@ export class Select_ extends ViewContainer {
         };
     }
 
-    onChange = (currentValue: string|string[]) => {
+    prepareString = (currentValue: string|string[]) => {
         if (typeof currentValue === 'string') {
             const found = this.state.selectData.find((d: { value: string }) => d.value === currentValue)
             this.selected = found && found.key
@@ -505,7 +511,23 @@ export class Select_ extends ViewContainer {
             this.selected = temp.join(",");
             currentValue = currentValue.join(",");
         }
-        handleChange.bind(this)(currentValue)
+        return currentValue
+    };
+
+    onChange = (currentValue: string|string[], isSetValueCall = false) => {
+        handleChange.bind(this)(this.prepareString(currentValue));
+        this.setState({
+            currentValue: currentValue
+        });
+        //Emulate click event
+        if (!isSetValueCall) {
+            this.props.context.notifyAllEventHandlers({
+                type: eventType.click,
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: this.prepareString(currentValue)
+            })
+
+        }
     };
 
     componentDidMount(): void {
@@ -535,7 +557,9 @@ export class Select_ extends ViewContainer {
         } else if (this.viewObject.get('staticValues')) {
             this.getStaticValues(this.viewObject.get('staticValues'))
         }
-        mountComponent.bind(this)(true,[{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
+        mountComponent.bind(this)(true,[{actionType: actionType.setValue, callback: (value:string)=>{
+                this.onChange.bind(this)(value.includes(',') ? value.split(',') : value, true)
+            }}] as IAction[]);
     }
 
     componentWillUnmount(): void {
@@ -633,9 +657,6 @@ export class Select_ extends ViewContainer {
                     value={(this.state.currentValue)? this.state.currentValue: undefined}
                     onChange={(currentValue: string|string[]) => {
                         this.onChange(currentValue);
-                        this.setState({
-                            currentValue: currentValue
-                        })
                     }}
                 >
                     {
@@ -670,11 +691,14 @@ export class DatePicker_ extends ViewContainer {
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
+        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '1900-01-01');
         value = value
             ? value
             : this.viewObject.get('value')
-            ? this.viewObject.get('value')
-            : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
+                ? this.viewObject.get('value')
+                : agValue
+                        ? agValue
+                        : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
         this.state = {
             defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
@@ -710,7 +734,7 @@ export class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        mountComponent.bind(this)(true);
+        mountComponent.bind(this)(true, [{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
         const value = this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format);
         const formattedCurrentValue = moment(value, this.state.mask).format(this.state.format);
         handleContextChange.bind(this)(value, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
@@ -940,7 +964,7 @@ class ValueHolder_ extends ViewContainer {
     }
 }
 
-class Input_ extends ViewContainer {
+export class Input_ extends ViewContainer {
     private timer : number;
     constructor(props: any) {
         super(props);
@@ -948,7 +972,12 @@ class Input_ extends ViewContainer {
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
-        value = value ? value : this.viewObject.get('value') || "";
+        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '');
+        value = value
+            ? value
+            : this.viewObject.get('value')
+                ? this.viewObject.get('value')
+                : agValue;
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
@@ -991,6 +1020,10 @@ class Input_ extends ViewContainer {
         handleChange.bind(this)(currentValue)
     };
 
+    onClick = (currentValue: string) => {
+        handleClick.bind(this)(currentValue)
+    };
+
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
@@ -1012,6 +1045,9 @@ class Input_ extends ViewContainer {
                         defaultValue={Number(this.viewObject.get('value') || this.viewObject.get('minValue') || 1)}
                         onChange={(currentValue: any) => {
                             this.onChange(String(currentValue))
+                        }}
+                        onClick={(event: any) => {
+                            this.onClick(String(event.target.value))
                         }}
                         value={this.state.currentValue}
                     />
@@ -1047,7 +1083,7 @@ export class Checkbox_ extends ViewContainer {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
         value = value ? value : this.viewObject.get('value') || "default";
-        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label')
+        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
@@ -1432,10 +1468,12 @@ export class RadioGroup_ extends ViewContainer {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
         value = value ? value : this.viewObject.get('value') || "";
+        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
             currentValue: value,
+            gridBoxes: agValue
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -1475,9 +1513,25 @@ export class RadioGroup_ extends ViewContainer {
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
+        const contextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
         return (<div style={{display: "flex", flexDirection: this.viewObject.get('isVerticalGroup') ? "column" : "row"}}
                      hidden={this.state.isHidden || this.props.isParentHidden}>
-                {this.viewObject.get('radioBoxes').map((box:string, index:number)=>{
+                {this.props.isAgComponent
+                    ? this.state.gridBoxes && this.state.gridBoxes.split(',').map((box:string, index:number)=>{
+                        return <NeoInput
+                            key={`${this.viewObject.eURI()}${box}${index}`}
+                            disabled={isReadOnly}
+                            checked={contextValue && contextValue.parameterValue === box}
+                            className={cssClass}
+                            type={"radio"}
+                            name={this.viewObject.get('name')}
+                            onChange={isReadOnly ? ()=>{} : (event:any)=>{
+                                this.onChange(event.currentTarget.labels[0].outerText)
+                            }}
+                        >{box}
+                        </NeoInput>
+                    })
+                    : this.viewObject.get('radioBoxes').map((box:string, index:number)=>{
                     return <NeoInput
                         key={`${this.viewObject.eURI()}${box}${index}`}
                         disabled={isReadOnly}

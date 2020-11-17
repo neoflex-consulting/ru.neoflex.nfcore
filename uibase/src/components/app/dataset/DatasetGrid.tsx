@@ -8,7 +8,7 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import {Button_, Checkbox_, Href_, Select_} from '../../../AntdFactory';
+import {Button_, Checkbox_, DatePicker_, Href_, Input_, RadioGroup_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
 import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
@@ -92,6 +92,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     buttonComponent: Button_,
                     hrefComponent: Href_,
                     checkboxComponent: Checkbox_,
+                    radioGroupComponent: RadioGroup_,
+                    datePickerComponent: DatePicker_,
+                    inputComponent: Input_,
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
@@ -588,6 +591,12 @@ class DatasetGrid extends React.Component<Props & any, any> {
             return 'selectComponent'
         } else if (className === "//Checkbox") {
             return 'checkboxComponent'
+        } else if (className === "//RadioGroup") {
+            return 'radioGroupComponent'
+        } else if (className === "//DatePicker") {
+            return 'datePickerComponent'
+        } else if (className === "//Input") {
+            return 'inputComponent'
         } else {
             return className
         }
