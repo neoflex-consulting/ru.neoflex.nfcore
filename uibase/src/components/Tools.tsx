@@ -313,7 +313,7 @@ class Tools extends React.Component<any, State> {
                         </NeoTag>
                     )}
                 </div>
-                <div style={{marginTop: "100px"}}/>
+                <div style={{marginTop: "15px"}}/>
                 <NeoDrawer
                     title={this.props.t("select data")}
                     width={'50vw'}

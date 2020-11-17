@@ -47,6 +47,7 @@
     margin-bottom: auto !important;
 }
 
+
 .tools-vertical-center-element {
     margin-left: auto !important;
     margin-right: auto !important;
@@ -151,7 +152,7 @@
 }
 
 .tools-export-objects-region {
-    min-height: 220px;
+    min-height: 206px;
     display: flex;
     flex-direction: column
 }

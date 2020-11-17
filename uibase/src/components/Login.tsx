@@ -4,6 +4,7 @@ import {API} from "../modules/api";
 import {WithTranslation, withTranslation} from "react-i18next";
 import _map from "lodash/map"
 import {NeoButton, NeoInput} from "neo-design/lib";
+import FetchSpinner from "./FetchSpinner";
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -15,6 +16,7 @@ interface State {
     password: string | undefined;
     count: number;
     languages: Array<string>;
+    waitMinute: boolean;
 }
 
 export class Login extends React.Component<any, State> {
@@ -24,6 +26,7 @@ export class Login extends React.Component<any, State> {
         password: undefined,
         count: 0,
         languages: [],
+        waitMinute: true
     };
 
     authenticate = () => {
@@ -46,6 +49,9 @@ export class Login extends React.Component<any, State> {
 
     componentDidMount(): void {
         if (!this.state.languages.length) this.getLanguages()
+        this.authenticate().catch(() => {
+            this.setState({ waitMinute: false })
+        })
     }
 
     render() {
@@ -63,69 +69,74 @@ export class Login extends React.Component<any, State> {
                 </Menu.Item>
             )}
         </Menu>;
+
         return (
-            <div className={"backGroundImage"}>
-                <Col className={"firstColumn"}>
+            this.state.waitMinute
+                ?
+                <FetchSpinner/>
+                :
+                <div className={"backGroundImage"}>
+                    <Col className={"firstColumn"}>
                         <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
                         <div className={"secondLine"}>Налогового мониторинга</div>
                         <div className={"yellowLineColumn1"}/>
-                </Col>
+                    </Col>
 
+                    <Col className={"secondColumn"}>
+                        {this.state.languages.length !== 0 &&
+                        <Dropdown overlay={langMenu} placement="bottomCenter">
+                            <div className="lang-login">
+                                {languages.includes(storeLangValue.toUpperCase()) ? storeLangValue.toUpperCase() : 'US'}
+                            </div>
+                        </Dropdown>
+                        }
+                        <Row>
+                            <div className={"nameOfApp"}>Neoflex Reporting</div>
+                        </Row>
 
-                <Col className={"secondColumn"}>
-                    {this.state.languages.length !== 0 &&
-                    <Dropdown overlay={langMenu} placement="bottomCenter">
-                        <div className="lang-login">
-                            {languages.includes(storeLangValue.toUpperCase()) ? storeLangValue.toUpperCase() : 'US'}
-                        </div>
-                    </Dropdown>
-                    }
-                    <Row>
-                        <div className={"nameOfApp"}>Neoflex Reporting</div>
-                    </Row>
-
-                    <Row>
-                        <div className={"authorizing"}>{t('authorization')}</div>
-                    </Row>
-                    <Row className={"Login"}>
+                        <Row>
+                            <div className={"authorizing"}>{t('authorization')}</div>
+                        </Row>
+                        <Row className={"Login"}>
                             {t('login')}
-                    </Row>
-                    <div className={"inputLogin"}>
-                        <NeoInput
-                            autofocus
-                            className="input-login"
-                            key="user"
-                            onChange={(e: any) => {
-                                this.setState({ userName: e.target.value })
-                            }}
-                            onKeyUp={this.authenticateIfEnterPress}
-                        />
+                        </Row>
+                        <div className={"inputLogin"}>
+                            <NeoInput
+                                autofocus
+                                className="input-login"
+                                key="user"
+                                onChange={(e: any) => {
+                                    this.setState({ userName: e.target.value })
+                                }}
+                                onKeyUp={this.authenticateIfEnterPress}
+                            />
                         </div>
-                    <Row className={"Password"}>
+                        <Row className={"Password"}>
                             {t('password')}
-                    </Row>
-                    <div className={"inputPassword"}>
-                        <NeoInput
-                            password
-                            className="input-login"
-                            key="pass"
-                            onChange={(e: any) => {
-                                this.setState({ password: e.target.value })
-                            }}
-                            onKeyUp={this.authenticateIfEnterPress}
-                        />
-                    </div>
-                    <Row className={"button"} style={{textAlign: "center"}}>
-                    <NeoButton key="conbutton" className={"loginButton"}
-                               onClick={this.authenticate}>
-                        {t('login')}
-                    </NeoButton>
-                    </Row>
-                    <div className={"yellowLineColumn2"}/>
-                </Col>
-            </div>
+                        </Row>
+                        <div className={"inputPassword"}>
+                            <NeoInput
+                                password
+                                className="input-login"
+                                key="pass"
+                                onChange={(e: any) => {
+                                    this.setState({ password: e.target.value })
+                                }}
+                                onKeyUp={this.authenticateIfEnterPress}
+                            />
+                        </div>
+                        <Row className={"button"} style={{textAlign: "center"}}>
+                            <NeoButton key="conbutton" className={"loginButton"}
+                                       onClick={this.authenticate}>
+                                {t('login')}
+                            </NeoButton>
+                        </Row>
+                        <div className={"yellowLineColumn2"}/>
+                    </Col>
+                </div>
         )
     }
+
 }
 
 export default withTranslation()(Login)

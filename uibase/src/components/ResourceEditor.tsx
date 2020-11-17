@@ -64,7 +64,8 @@ interface State {
     clipboardObject: ITargetObject,
     edit: boolean,
     expandedKeys: string[],
-    saveMenuVisible: boolean
+    saveMenuVisible: boolean,
+    removalProcess: boolean
 }
 
 
@@ -132,7 +133,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         clipboardObject: { eClass: "" },
         edit: false,
         expandedKeys: [],
-        saveMenuVisible: false
+        saveMenuVisible: false,
+        removalProcess: false
     };
 
     refresh = (refresh: boolean): void => {
@@ -143,6 +145,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     delete = (): void => {
         const ref: string = `${this.state.resource.get('uri')}?rev=${this.state.resource.rev}`;
+        this.setState({removalProcess: true});
+        this.changeEdit(false, true);
         API.instance().deleteResource(ref).then(() => {
             this.props.history.push('/developer/data')
         })
@@ -877,9 +881,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
-        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
-        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone}`);
+        contents(resource.eContents()[0]).forEach(eObject => {
+            (eObject as any)._id = null
+        });
+        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
         resource.set('uri', "");
+        this.changeEdit(false, true)
         if (resource && this.props.match.params.id !== 'new') {
             API.instance().saveResource(resource).then((resource: any) => {
                 const targetObject: { [key: string]: any } = this.state.targetObject;
@@ -897,8 +904,18 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
-    changeEdit = (redirect: boolean) => {
-        if (this.state.edit) {
+    changeEdit = (redirect: boolean, removalProcess?: boolean) => {
+        if (removalProcess) {
+            if (this.state.edit) {
+                API.instance().deleteLock(this.state.mainEObject._id)
+                    .then(() => {
+                        this.setState({edit: false})
+                    })
+                    .catch(() => {
+                        this.setState({edit: false})
+                    })
+            }
+        } else if (this.state.edit) {
             API.instance().deleteLock(this.state.mainEObject._id)
                 .then(() => {
                     this.save(false, redirect);
@@ -978,7 +995,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     componentWillUnmount() {
-        this.changeEdit(true);
+        if (!this.state.removalProcess) {
+            this.changeEdit(true)
+        }
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
     }
