@@ -74,6 +74,17 @@ function splitLog(log:string) {
     return arr
 }
 
+function splitPath(path:string|undefined) {
+    let arr:string[] = [];
+    if (path) {
+        while (path.split("/").length > 1) {
+            path = path.split("/").slice(0,-1).join("/");
+            arr.push(path)
+        }
+    }
+    return arr;
+}
+
 export class MainApp extends React.Component<any, State> {
     private refSplitterRef: React.RefObject<any> = React.createRef();
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
@@ -112,7 +123,6 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(this.state.eClassAppModule, name, 999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-
                         let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
@@ -131,7 +141,6 @@ export class MainApp extends React.Component<any, State> {
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
                                         this.setState({hideReferences: true})
-
                                     }
                                 } else {
                                     this.props.context.updateContext!(
@@ -213,9 +222,7 @@ export class MainApp extends React.Component<any, State> {
             API.instance().findByKindAndName(this.state.eClassAppModule, appModuleName, 999).then(resources => {
                 if (resources.length > 0) {
                     const objectApp = resources[0].eContents()[0];
-                    this.props.context.updateContext!(
-                        ({applicationReferenceTree: objectApp.get('referenceTree')})
-                    );
+                    this.props.context.updateContext!(({applicationReferenceTree: objectApp.get('referenceTree')}));
                     this.setState({hideReferences: parseInt(getVerticalStoredSize()) <= parseInt(verticalSplitterShortSize)})
                 }
             })
@@ -236,6 +243,12 @@ export class MainApp extends React.Component<any, State> {
         if (this.props.context !== prevProps.context) {
             //В момент инициализации даем понять адаптивным элементам что нужно пересчитать размеры
             window.dispatchEvent(new Event('appAdaptiveResize'));
+        }
+        if (this.props.pathFull !== prevProps.pathFull) {
+            const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+            this.setState({openKeys: splitPath(currentAppModule.tree.length && currentAppModule.tree.length > 0
+                    ? currentAppModule.tree.join('/')
+                    : this.appModuleMap.get(currentAppModule.appModule))})
         }
     }
 
@@ -385,16 +398,6 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderReferences = (isShortSize = false) => {
-        function splitPath(path:string|undefined) {
-            let arr:string[] = [];
-            if (path) {
-                while (path.split("/").length > 1) {
-                    path = path.split("/").slice(0,-1).join("/");
-                    arr.push(path)
-                }
-            }
-            return arr;
-        }
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
@@ -407,14 +410,15 @@ export class MainApp extends React.Component<any, State> {
                     id={"referenceTree"}
                     inlineIndent={29}
                     className={`${isShortSize && "short-size"}`}
-                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
+                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
                     onSelect={params => {
+                        this.setState({openKeys: splitPath(params.key)});
                         const cb = cbs.get(params.key);
                         if (cb) cb();
                     }}
                     onOpenChange={openKeys => {
-                        this.setState({openKeys:openKeys});
+                        this.setState({openKeys: openKeys.filter(ok=>!this.state.openKeys.includes(ok))});
                         //Восстанавливаем ширину если были в свернутом виде
                         if (this.state.hideReferences) {
                             setVerticalStoredSize(defaultVerticalSplitterSize);
