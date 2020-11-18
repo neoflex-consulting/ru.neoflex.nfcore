@@ -425,5 +425,7 @@
         "show log": "Show log",
         "hide log": "Hide log",
         "show url decode": "Show url decode",
-        "hide url decode": "Hide url decode"
+        "hide url decode": "Hide url decode",
+
+        "change log": "Change log"
 }

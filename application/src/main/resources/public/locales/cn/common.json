@@ -392,6 +392,8 @@
         "show log": "顯示服務器日誌",
         "hide log": "隱藏服務器日誌",
         "show url decode": "顯示解碼的URL",
-        "hide url decode": "隱藏解碼的URL"
+        "hide url decode": "隱藏解碼的URL",
+
+        "change log": "變更資訊提供"
 
 }
