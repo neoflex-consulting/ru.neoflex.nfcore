@@ -352,7 +352,7 @@ export class MainApp extends React.Component<any, State> {
                     key: index,
                     appModule: up.appModule ? up.appModule : "null",
                     treeNode: up.tree.length > 0 && up.tree.join("/"),
-                    useParentReferenceTree: up.useParentReferenceTree.toString(),
+                    useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{
                         return <p key={`p${index}${paramIndex}`}>name: <b>{p.parameterName}</b>, value: <b>{p.parameterValue ? p.parameterValue : "null"}</b>, data type: <b>{p.parameterDataType ? p.parameterDataType : "String"}</b>;</p>
                     })

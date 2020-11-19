@@ -220,7 +220,7 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     refers DatasetColumn datasetValueColumn
 }
 
-class DatePicker extends ViewElement, ValueItem {
+class DatePicker extends ViewElement, ValueItem, GridComponent {
     boolean allowClear
     refers FormatMask formatMask
     boolean showTime
@@ -231,7 +231,7 @@ class HtmlContent extends ViewElement, CommandElement {
 }
 
 //add TextArea
-class Input extends ViewElement, ValueItem {
+class Input extends ViewElement, ValueItem, GridComponent {
     InputType inputType = "InputString"
     String minValue = "1"
     String maxValue = "99"
@@ -309,6 +309,11 @@ class Message extends DynamicActionElement, Tagged {
     MessageType messageType
     String header
     String message
+}
+
+class RadioGroup extends ViewElement, ValueItem, GridComponent  {
+    boolean isVerticalGroup
+    String[] radioBoxes
 }
 
 enum TextAlign {
