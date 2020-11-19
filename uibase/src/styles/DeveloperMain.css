@@ -11,7 +11,6 @@
 }
 
 .interactive-area {
-    border: 1px solid #D9D9D9;
     width: 100%;
     height: calc(100% - 63px);
     margin: 25px 16px 38px 56px;
@@ -45,7 +44,6 @@
 }
 
 .grid-area {
-    margin: 16px 0 0 0;
     height: calc(100% - 193px);
 }
 
@@ -54,8 +52,23 @@
     text-decoration-color: #B38136 !important;
 }
 
-.grid-area #datasetGrid {
-    height: 100% !important;
+.grid-area > .table {
+    padding: 0 0 0 0 !important;
+    box-sizing: border-box;
+}
+
+.grid-area td,
+.grid-area th {
+    padding: 11px 16px 11px 16px !important;
+}
+
+.interactive-area .developer_paginator {
+    padding: 0 0 0 0 !important;
+}
+
+.interactive-area .developer_paginator > #paginator {
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
 }
 
 .buttons-bar button:nth-child(1) > div {
@@ -80,6 +93,7 @@
     border-radius: 4px 4px 0 0;
     width: 100%;
     margin: 16px 0 0 0;
+    height: 50px;
 }
 
 .grid-search > .typography {
@@ -87,7 +101,7 @@
 }
 
 .grid-search > .input-search {
-    margin: 12px 24px 12px 0
+    margin: auto 24px auto 0
 }
 
 .grid-search > .btn {

@@ -7,6 +7,7 @@ import moment, {Moment} from "moment";
 import {API} from "../modules/api";
 import Ecore from "ecore";
 import {NeoIcon} from "neo-icon/lib";
+import Paginator from "./app/Paginator";
 
 interface Props {
     history: any
@@ -16,7 +17,9 @@ interface State {
     logEntries: ILogEntry[],
     applications: IApplicationData[],
     currentSection?: {name: string, modules: IModuleData[]}
-    filter: string
+    filter: string,
+    currentPage: number,
+    paginationPageSize: number
 }
 
 interface IApplicationData {
@@ -54,7 +57,9 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
         this.state = {
             logEntries: [],
             applications: [],
-            filter: ""
+            filter: "",
+            currentPage: 1,
+            paginationPageSize: 10
         };
     }
 
@@ -160,6 +165,8 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     }
 
     render() {
+        const filteredData = this.getDataSource()
+            .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0)
         return (
             <div className={"developer-main"}>
                 <div className={"interactive-area"}>
@@ -207,20 +214,31 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                         </NeoButton>}
                     </div>
                     <div className={"grid-area"}>
-                        {/*<DatasetGrid
-                            paginationPageSize={40}
-                            height={400}
-                            rowData = {[]}
-                            columnDefs = {[]}
-                        />*/}
                         <NeoTable
+                            className={"developer_table"}
                             /*scroll={{x: 300}}*/
                             columns={this.getColumns()}
-                            dataSource={this.getDataSource()
-                                .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0)}
+                            dataSource={filteredData}
                             bordered={true}
-                            style={{whiteSpace: "pre", padding:'6px 35px'}}
+                            style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
+                            pagination={{current: this.state.currentPage}}
                         />
+                        <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
+                            <Paginator
+                                {...this.props}
+                                currentPage = {this.state.currentPage}
+                                totalNumberOfPage = {Math.ceil(filteredData.length/this.state.paginationPageSize)}
+                                paginationPageSize = {this.state.paginationPageSize}
+                                totalNumberOfRows = {filteredData.length}
+                                onPageChange={(page: number) => {
+                                    this.setState({currentPage: page})
+                                }}
+                                onPageSizeChange={(size: number)=>{
+                                    this.setState({paginationPageSize: size})
+                                }}
+                                neoTable={true}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className={"application-changes"}>
