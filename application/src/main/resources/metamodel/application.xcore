@@ -25,30 +25,25 @@ annotation "ru.neoflex.nfcore" as NFCore
 
 /* Components */
 abstract class Component extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
 }
 
-abstract class ViewComponent {
-    contains ViewElement view
-}
-
+@NFCore(documentation="Интерфейс, которым аннотируются все классы методом 'extends', которые должны быть доступны для использования в EventAction или EventHandler")
 abstract class DynamicActionElement {
-
 }
 
+@NFCore(documentation="Интерфейс, которым аннотируются все классы методом 'extends', которые должны быть доступны для использования в таблицах, в строках с данными")
 abstract class GridComponent {
+        @NFCore(documentation="Определяет значение, передаваемое из таблицы в компоненту. Варианты: String - напрямую значение из ячейки; Object - вся строка целиком; None - пустая строка")
     GridComponentValueType returnValueType
+        @NFCore(documentation="Определает, будет ли компонент отображаться в режиме редактирования таблицы")
     boolean isEditGridComponent
-}
-
-@NFCore(documentation="Компоненты, написанные на typeScript")
-@Ecore(constraints="IsValid")
-class UserComponent extends Component {
-    String componentClassName
 }
 
 @NFCore(documentation="Глобальные настройки приложения")
 class GlobalSettings extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
         @NFCore(documentation="Календарь со всеми выходными днями в году")
     refers YearBook weekendCalendar
@@ -63,6 +58,7 @@ class GlobalSettings extends Tagged {
 @NFCore(documentation="Модуль - составная часть глобального приложения")
 @Ecore(constraints="IsValid")
 class AppModule extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
         @NFCore(documentation="Стартовая страница приложения или модуля")
     contains ViewElement view
@@ -70,22 +66,24 @@ class AppModule extends Tagged {
     contains CatalogNode referenceTree
         @NFCore(documentation="Использование Меню с модулями от родительского приложения или модуля")
     boolean useParentReferenceTree
+        @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
+    GrantType grantType = "Write"
+        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
+    boolean checkRights
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
-        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
-    boolean checkRights
-	    @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
-    GrantType grantType = "Write"
         @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
     Integer headerOrder
 }
 
 /* Views */
+@NFCore(documentation="Элементы визуального интрфеса, доступные в меню 'view' в Application и AppModule")
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
 	String name
 	container ViewContainer parent opposite children
 	    @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
@@ -99,6 +97,8 @@ abstract class ViewElement extends DynamicActionElement {
         @NFCore(documentation="CSS классы, подключаемые к оформлению объекта, созданные в приложении")
     refers CssClass[] cssClass
 }
+
+
 
 abstract class ViewContainer extends ViewElement {
 	contains ViewElement[] children opposite parent
@@ -126,6 +126,7 @@ class Collapse extends ViewContainer{
 }
 
 class YearBook extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     contains Day[] days
     op JSON recreateWeekend(String year)
@@ -141,10 +142,6 @@ class Day {
 @GenModel(documentation="max span value = 24 in one row")
 class Column extends ViewContainer {
     String span = "24"
-}
-
-class ComponentElement extends ViewElement {
-	refers Component component
 }
 
 class NeoIcon extends Icon {
@@ -250,6 +247,7 @@ class Button extends ViewElement, GridComponent {
 
 @Ecore(constraints="IsValid")
 class CssClass extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     String style
 }
@@ -305,6 +303,7 @@ class Href extends ViewElement, GridComponent {
 }
 
 class Message extends DynamicActionElement, Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     MessageType messageType
     String header

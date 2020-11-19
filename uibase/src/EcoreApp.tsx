@@ -740,15 +740,15 @@ class EcoreApp extends React.Component<any, State> {
                                         </NeoButton>
                                         </NeoHint>
                                         :
-                                        <NeoHint  title={this.props.t('developer menu')}>
-                                        <NeoButton type={'link'}
-                                                   style={{marginRight:'10px'}}
-                                        >
-                                            {this.isDeveloper() && <Link to={`/developer/data`}>
-                                                <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
-                                            </Link>}
-                                        </NeoButton>
-                                        </NeoHint>
+                                        this.isDeveloper() &&
+                                                <NeoHint  title={this.props.t('developer menu')}>
+                                                    <NeoButton type={'link'} style={{marginRight:'10px'}}>
+                                                        <Link to={`/developer/data`}>
+                                                            <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
+                                                        </Link>
+                                                    </NeoButton>
+                                                </NeoHint>
+
                                 }
                                 <NeoHint title={this.props.t('auto-close notification')}>
                             <NeoButton

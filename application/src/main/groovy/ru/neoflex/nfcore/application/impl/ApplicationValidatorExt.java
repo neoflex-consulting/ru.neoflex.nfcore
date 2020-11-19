@@ -14,16 +14,6 @@ import java.util.Map;
 public class ApplicationValidatorExt extends ApplicationValidator {
 
     @Override
-    public boolean validateUserComponent_IsValid(UserComponent userComponent, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        if (userComponent.getComponentClassName() == null) {
-            return validate(userComponent, diagnostics, context, "componentClassName - must be set");
-        }
-        else {
-            return false;
-        }
-    }
-
-    @Override
     public boolean validateAppModule_IsValid(AppModule appModule, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (appModule.isUseParentReferenceTree() && appModule.getReferenceTree() != null) {
             return validate(appModule, diagnostics, context, "field useParentReferenceTree - must be set 'false'");

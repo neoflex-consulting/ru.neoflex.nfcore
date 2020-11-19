@@ -72,17 +72,14 @@ public class Authorization {
     }
 
     public List<Role> getUserRoles() {
-        List<Role> result = new ArrayList<>();
         UserDetails userDetails = getUserDetails();
         if (userDetails != null) {
-            result = userDetails.getAuthorities().stream()
-                    .map(a->getAllRoles().getOrDefault(a.getAuthority(), null))
-                    .filter(r->r != null).collect(Collectors.toList());
+            return getAuthoritiesRoles(userDetails.getAuthorities());
         }
-        return result;
+        return Collections.emptyList();
     }
 
-    public List<Role> getAuthoritiesRoles(HashSet<GrantedAuthority> authorities) {
+    public List<Role> getAuthoritiesRoles(Collection<? extends GrantedAuthority> authorities) {
         List<Role> result = new ArrayList<>();
         if (authorities != null) {
             result = authorities.stream()
@@ -101,8 +98,12 @@ public class Authorization {
     }
 
     public int isResourcePermitted(final String path) {
+        return isResourcePermitted(getUserRoles(), path);
+    }
+
+    public int isResourcePermitted(Collection<Role> roles, final String path) {
         int result = 0;
-        for (Role role: getUserRoles()) {
+        for (Role role: roles) {
             result |= role.isResourcePermitted(path);
         }
         return result;

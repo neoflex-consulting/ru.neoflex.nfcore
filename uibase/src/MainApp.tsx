@@ -15,6 +15,7 @@ import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import Column from "antd/es/table/Column";
+import {Prohibited} from "./components/Prohibited";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
@@ -112,7 +113,6 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(this.state.eClassAppModule, name, 999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-
                         let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {

@@ -18,6 +18,7 @@ import java.util.*;
 @Service
 public class UserDetail implements UserDetailsService {
 
+    public static final String SYSTEM_DEVELOPER = "/system/developer";
     @Autowired
     Store store;
 
@@ -66,14 +67,9 @@ public class UserDetail implements UserDetailsService {
                     }
                 }
 
-                int grant = 0;
-                for (Role role: context.getAuthorization().getAuthoritiesRoles(au)) {
-                    grant |= role.isResourcePermitted("//system//developer");
-                }
-
+                int grant = context.getAuthorization().isResourcePermitted(context.getAuthorization().getAuthoritiesRoles(au), SYSTEM_DEVELOPER);
                 GrantType developerGrant = Authorization.getGrantType(grant);
-                //PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-                UserDetails userDetails = new CurrentUser(userName, /*encoder.encode(password)*/password, true, true, true, true,
+                UserDetails userDetails = new CurrentUser(userName, password, true, true, true, true,
                         au,
                         developerGrant == GrantType.WRITE);
                 return userDetails;
