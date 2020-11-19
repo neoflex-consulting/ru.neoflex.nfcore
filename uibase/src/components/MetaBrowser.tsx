@@ -138,19 +138,19 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
         rowData.set('field', 'type');
         rowData.set('headerName', this.props.t('metadata type'));
         rowData.set('textAlign','right');
-        rowData.set('width', '242');
+        rowData.set('width', '120');
         colDef.push(rowData);
         rowData = new Map();
         rowData.set('field', 'key');
         rowData.set('headerName', this.props.t('metadata uri'));
         rowData.set('textAlign','right');
-        rowData.set('width', '532');
+        rowData.set('width', '500');
         colDef.push(rowData);
         rowData = new Map();
         rowData.set('field', 'description');
         rowData.set('headerName', this.props.t('description'));
         rowData.set('textAlign','right');
-        rowData.set('width', '600');
+        rowData.set('width', '1100');
         colDef.push(rowData);
         return colDef
     };
