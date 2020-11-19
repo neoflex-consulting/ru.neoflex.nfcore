@@ -12,6 +12,7 @@ import {Helmet} from "react-helmet";
 import './../styles/Data.css'
 import {NeoDrawer, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import Paginator from "./app/Paginator";
 
 
 interface Props {
@@ -29,10 +30,14 @@ interface State {
     result: string;
     selectedRowKeys: any[];
     filterMenuVisible:any;
+    paginationPageSize?: number;
+    currentPage?: number;
+
 }
 
 class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
     private refDataSearchRef: any = React.createRef();
+    private grid: React.RefObject<any>;
 
     state = {
         resources: [],
@@ -42,8 +47,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         notFoundActivator: false,
         result: '',
         selectedRowKeys: [],
-        filterMenuVisible:false
-    };
+        filterMenuVisible:false,
+        paginationPageSize: 10,
+        currentPage: 1,
+ }
 
     handleSearch = (resources : Ecore.Resource[]): void => {
         this.setState({selectedRowKeys: []});
@@ -207,7 +214,8 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 mask={false}
                 title={`Поиск по ${name}`}
                 visible={this.state.filterMenuVisible}
-                width={711}>
+                width={711}
+                >
                 <SearchFilter onName={name} onTitle={title} tableData={this.filteredData()}
                               tableDataFilter={this.changeTableData}/>
             </NeoDrawer>})
@@ -217,6 +225,9 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         this.setState({tableDataFilter})
     };
 
+    onPageChange = (page: number) => {
+        this.setState({currentPage: page})
+    }
 
     render() {
         const {t} = this.props;
@@ -281,13 +292,29 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                  />
                              </div>
                              :
+                             <>
                              <NeoTable
+                                 className={'developer_table'}
                                  scroll={{x: columnsWidth}}
                                  columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                  dataSource={this.filteredData()}
                                  bordered={true}
-                                 style={{whiteSpace: "pre", padding:'6px 35px'}}
+                                 style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
+                                 pagination={{current: this.state.currentPage}}
                              />
+                             <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
+                             <Paginator
+                                     {...this.props}
+                                     currentPage = {this.state.currentPage}
+                                     totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
+                                     paginationPageSize = {this.state.paginationPageSize}
+                                     totalNumberOfRows = {this.filteredData().length}
+                                     grid = {this.grid}
+                                     onPageChange={this.onPageChange}
+                                     neoTable={true}
+                                 />
+                             </div>
+                             </>
                      }
                  </div>
              </div>

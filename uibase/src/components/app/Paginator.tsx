@@ -18,6 +18,8 @@ interface Props {
     grid: any;
     t: any;
     tReady: any;
+    onPageChange?: any;
+    neoTable?: boolean;
 }
 
 class PagesView extends React.Component<any, any> {
@@ -54,7 +56,13 @@ class Paginator extends React.Component<Props, any> {
 
 
     onSomePage = (e : any) => {
-        this.props.grid.current.api.paginationGoToPage(e - 1);
+        if(this.props.neoTable) {
+            e === 0 ? this.props.onPageChange(1)
+                :
+            this.props.onPageChange(e)
+        }else {
+            this.props.grid.current.api.paginationGoToPage(e - 1);
+        }
     };
 
     paginationSetPageSize = (pageSize : any) =>{
