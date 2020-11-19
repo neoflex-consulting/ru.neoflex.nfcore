@@ -1707,20 +1707,9 @@ a.linksInMoreWord:hover{
 
 
 
-
-
 /*Notification message*/
 .ant-notification {
   z-index: 100000 !important;
-}
-
-
-.ant-select-selection--multiple .ant-select-selection__choice {
-  border: 1px solid #424D78 !important;
-  color: #424D78 !important;
-  border-radius: 4px !important;
-  background-color: #fff !important;
-  padding: 0 30px 0 10px !important;
 }
 
 .ant-select-selection--multiple .ant-select-selection__choice__remove .ant-select-remove-icon {
@@ -1730,3 +1719,50 @@ a.linksInMoreWord:hover{
   border: 1.5px solid #424D78;
 }
 
+
+/*DataSearch Drawer*/
+
+.datasearch__filter__drawer .table {
+  /*overflow-x: hidden !important;*/
+}
+
+.datasearch__filter__drawer .ant-drawer-body {
+padding: 3px 24px;
+}
+
+.datasearch__filter__drawer .ant-drawer-close,
+.datasearch__filter__drawer .ant-pagination {
+  display: none;
+}
+
+.datasearch__filter__drawer thead th:first-child,
+.datasearch__filter__drawer tbody td:first-child{
+  width: 9%;
+  padding-left: 40px !important;
+}
+
+.datasearch__filter__drawer tbody td:nth-child(2){
+  display: block;
+  /*overflow: hidden;*/
+  /*text-overflow: ellipsis;*/
+  width: 645px;
+  height: 40px;
+  border-collapse: unset;
+  padding-right: 30px !important;
+}
+
+.ant-table-tbody > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td {
+  background: #FFF8E0 !important;
+}
+
+.developer_table .ant-pagination {
+  display: none;
+}
+.developer_paginator #paginator {
+  padding: 10px 0px;
+  margin: 0 !important;
+  background-color: #E6E6E6;
+}
+.developer_paginator #paginator #pageView {
+  bottom: 11px;
+}
