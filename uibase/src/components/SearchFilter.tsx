@@ -100,15 +100,15 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         value={this.state.selectedKeys[0]}
                         onChange={(e:any) => this.setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
-                        width={'492px'}
-                        style={{ width: 188, marginBottom: 8, marginRight:'24px', display: "inline-block"}}
+                        width={'628px'}
+                        style={{ marginRight:'24px', display: "inline-block"}}
                         defaultChecked={true}
                         allowClear={true}
                     />
                     <NeoTable
                         size={"small"}
                         pagination={{pageSize: this.filterDataSource(this.props.onName, this.state.selectedKeys[0]).length}}
-                        style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", maxHeight: "664px", marginTop: "15px", overflow:'scroll' }}
+                        style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", marginTop: "15px", overflow:'auto', top:'95px', bottom:'145px' }}
                         columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName}]}
                         dataSource={this.filterDataSource(this.props.onName, this.state.selectedKeys[0])}
                         rowSelection={rowSelection}
