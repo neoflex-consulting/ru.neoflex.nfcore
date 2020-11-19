@@ -1,10 +1,4 @@
 .change-log {
-    font-family: Roboto, serif;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 16px;
-    letter-spacing: 0;
     text-align: left;
     border: 1px solid #D9D9D9;
     height: 100%;
@@ -26,36 +20,20 @@
     border-radius: 8px 8px 0 0;
 }
 
-.change-log-header > span {
-    font-size: 20px;
-    font-weight: 500;
-    color: #424D78;
+.change-log-header > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 0 0;
 }
 
 .log-day {
     padding: 16px 16px 0 16px;
-    color: #424D78;
-}
-
-.log-day-entry:not(:nth-child(2)) {
-    padding: 16px 0 0 0;
-}
-
-.log-day-entry:nth-child(2) {
-    padding: 14px 0 0 0;
 }
 
 .log-day-entry > div {
     display: inline-flex;
     justify-content: space-between;
     width: 100%;
-    color: #B3B3B3;
 }
 
-.log-day-entry > span {
-    padding: 6px 0 0 0;
-}
-
-.log-day-entry {
-    color: #333333;
-}

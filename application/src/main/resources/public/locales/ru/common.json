@@ -424,8 +424,10 @@
         "show url decode": "Показать раскодированный URL",
         "hide url decode": "Спрятать раскодированный URL",
 
-        "change log": "Лента изменений"
-
+        "change log": "Лента изменений",
+        "create application": "Создать раздел",
+        "create application module": "Создать модуль",
+        "universal editor": "Универсальный редактор"
 }
 
 

@@ -427,5 +427,8 @@
         "show url decode": "Show url decode",
         "hide url decode": "Hide url decode",
 
-        "change log": "Change log"
+        "change log": "Change log",
+        "create application": "Create application",
+        "create application module": "Create application module",
+        "universal editor": "Universal editor"
 }

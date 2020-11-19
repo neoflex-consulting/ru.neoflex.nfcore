@@ -3,6 +3,7 @@ import {WithTranslation, withTranslation} from "react-i18next";
 import './../styles/ChangeLogView.css'
 import moment, {Moment} from "moment";
 import {defaultDateFormat } from "../utils/consts";
+import {NeoColor, NeoParagraph} from "neo-design/lib";
 
 export interface ILogEntry {
     logDateTime: Moment,
@@ -41,16 +42,18 @@ class ChangeLogView extends React.Component<Props & WithTranslation, State> {
         return (
             <div className={"change-log"}>
                 <div className={"change-log-header"}>
-                    <span>{this.props.t('change log')}</span>
+                    <NeoParagraph type={"h3_medium"} style={{color:NeoColor.violete_5}}>{this.props.t('change log')}</NeoParagraph>
                 </div>
                 {splitEntriesByDays(this.props.logEntries).map(de => {
-                    return <div className={"log-day"}><span>{`${de.date.format('DD.MM.YYYY')}`}</span>{de.entries.map(e=>{
+                    return <div className={"log-day"}>
+                        <NeoParagraph type={"capture_regular"} style={{color:NeoColor.violete_5}}>{`${de.date.format('DD.MM.YYYY')}`}</NeoParagraph>
+                        {de.entries.map(e=>{
                         return <div className={"log-day-entry"}>
                             <div>
-                                <span>{e.logDateTime.format('HH:mm')}</span>
-                                <span>{e.author}</span>
+                                <NeoParagraph type={"capture_regular"} style={{color:NeoColor.grey_5}}>{e.logDateTime.format('HH:mm')}</NeoParagraph>
+                                <NeoParagraph type={"capture_regular"} style={{color:NeoColor.grey_5}}>{e.author}</NeoParagraph>
                             </div>
-                            <span>{e.change}</span>
+                            <NeoParagraph type={"capture_regular"} style={{color:NeoColor.grey_9}}>{e.change}</NeoParagraph>
                         </div>
                     })}</div>
                 })}
