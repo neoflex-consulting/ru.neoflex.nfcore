@@ -2,7 +2,7 @@ import {View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
-import UserComponent from './components/app/UserComponent';
+
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
 import {API} from './modules/api';
@@ -269,15 +269,6 @@ class TabsViewReport_ extends ViewContainer {
                 </NeoTabs>
             </div>
         )
-    }
-}
-
-class ComponentElement_ extends ViewContainer {
-    render = () => {
-        if (this.viewObject.eClass.get('name') === 'ComponentElement' && this.viewObject.get('component')) {
-            const componentClassName = this.viewObject.get('component').get('componentClassName');
-            return<UserComponent key={this.viewObject._id} {...this.props} componentClassName={componentClassName}/>
-        } else return <div>Not found</div>
     }
 }
 
@@ -1641,7 +1632,6 @@ class AntdFactory implements ViewFactory {
 
     constructor() {
         this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
-        this.components.set('ru.neoflex.nfcore.application#//ComponentElement', ComponentElement_);
         this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
         this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
         this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);

@@ -4,9 +4,11 @@ import org.eclipse.emf.ecore.EObject
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.neoflex.nfcore.base.auth.*
 import ru.neoflex.nfcore.base.services.Context
+import ru.neoflex.nfcore.base.services.UserDetail
 import ru.neoflex.nfcore.base.util.DocFinder
 
 class UserInit extends UserImpl {
+
     static Role createSU() {
         def superUserRole = AuthFactory.eINSTANCE.createRole()
         superUserRole.setName("su")
@@ -27,12 +29,12 @@ class UserInit extends UserImpl {
     }
 
     static ApplicationResource createDeveloperResource() {
-        def developer = DocFinder.create(Context.current.store, AuthPackage.Literals.APPLICATION_RESOURCE, [name: "//system//developer"]).execute().resources
+        def developer = DocFinder.create(Context.current.store, AuthPackage.Literals.APPLICATION_RESOURCE, [name: UserDetail.SYSTEM_DEVELOPER]).execute().resources
         if (developer.size() > 0) {
             return developer[0].contents[0] as ApplicationResource;
         } else {
             def applicationResource = AuthFactory.eINSTANCE.createApplicationResource()
-            applicationResource.setName("//system//developer")
+            applicationResource.setName(UserDetail.SYSTEM_DEVELOPER)
             Context.current.store.createEObject(applicationResource)
             return applicationResource
         }

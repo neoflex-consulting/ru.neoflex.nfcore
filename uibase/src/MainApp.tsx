@@ -15,6 +15,7 @@ import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import Column from "antd/es/table/Column";
+import {Prohibited} from "./components/Prohibited";
 
 const FooterHeight = '2em';
 const backgroundColor = "#fdfdfd";
