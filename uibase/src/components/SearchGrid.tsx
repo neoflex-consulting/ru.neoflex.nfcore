@@ -226,7 +226,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     };
 
     onPageChange = (page: number) => {
-        this.setState({currentPage: page})
+        this.setState({currentPage: page === 0 ? 1 : page})
     }
 
     render() {
@@ -311,7 +311,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                      totalNumberOfRows = {this.filteredData().length}
                                      grid = {this.grid}
                                      onPageChange={this.onPageChange}
-                                     neoTable={true}
+                                     onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
                                  />
                              </div>
                              </>

@@ -29,6 +29,7 @@ import 'neo-design/dist/neoDesign.css';
 import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
+import DeveloperMain from "./components/DeveloperMain";
 
 const backgroundColor = "#2a356c";
 
@@ -790,6 +791,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/test' component={this.renderTest}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
+                    <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
                     <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>

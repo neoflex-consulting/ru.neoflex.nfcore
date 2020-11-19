@@ -392,6 +392,19 @@
         "show log": "顯示服務器日誌",
         "hide log": "隱藏服務器日誌",
         "show url decode": "顯示解碼的URL",
-        "hide url decode": "隱藏解碼的URL"
+        "hide url decode": "隱藏解碼的URL",
+
+        "change log": "變更資訊提供",
+        "create application": "創建部分",
+        "create application module": "創建模塊",
+        "universal editor": "通用編輯器",
+
+        "back to sections": "返回部分列表",
+        "section name": "部分名稱",
+        "module name": "模塊名稱",
+        "change date": "最後更改日期",
+        "modules": "模塊",
+        "status": "狀態",
+        "author": "作者"
 
 }

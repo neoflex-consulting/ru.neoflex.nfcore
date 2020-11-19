@@ -274,6 +274,11 @@
     padding-left: 40px;
 }
 
+#referenceTree .menu-content:not(.menu-with-icon) {
+    /*should match referenceTree inlineIndent*/
+    padding-left: 29px;
+}
+
 .application-footer  {
     display: inline-flex;
     border-top: 1px #F2F2F2 solid;
