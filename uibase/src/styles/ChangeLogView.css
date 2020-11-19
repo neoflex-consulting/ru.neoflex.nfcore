@@ -27,6 +27,11 @@
     margin: 0 0 0 0;
 }
 
+.change-log-body {
+    height: calc(100% - 55px);
+    overflow-y: auto;
+}
+
 .log-day {
     padding: 16px 16px 0 16px;
 }

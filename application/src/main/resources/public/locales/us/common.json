@@ -430,5 +430,13 @@
         "change log": "Change log",
         "create application": "Create application",
         "create application module": "Create application module",
-        "universal editor": "Universal editor"
+        "universal editor": "Universal editor",
+
+        "back to sections": "Back to sections",
+        "section name": "Section name",
+        "module name": "Module name",
+        "change date": "Change date",
+        "modules": "Modules",
+        "status": "Status",
+        "author": "Author"
 }

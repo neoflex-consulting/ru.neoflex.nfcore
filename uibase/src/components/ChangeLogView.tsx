@@ -44,11 +44,12 @@ class ChangeLogView extends React.Component<Props & WithTranslation, State> {
                 <div className={"change-log-header"}>
                     <NeoParagraph type={"h3_medium"} style={{color:NeoColor.violete_5}}>{this.props.t('change log')}</NeoParagraph>
                 </div>
-                {splitEntriesByDays(this.props.logEntries).map(de => {
-                    return <div className={"log-day"}>
+                <div className={"change-log-body"}>
+                {splitEntriesByDays(this.props.logEntries).map((de, index) => {
+                    return <div className={"log-day"} key={`day${index}`}>
                         <NeoParagraph type={"capture_regular"} style={{color:NeoColor.violete_5}}>{`${de.date.format('DD.MM.YYYY')}`}</NeoParagraph>
-                        {de.entries.map(e=>{
-                        return <div className={"log-day-entry"}>
+                        {de.entries.map((e, eIndex)=>{
+                        return <div className={"log-day-entry"} key={`entry${eIndex}`}>
                             <div>
                                 <NeoParagraph type={"capture_regular"} style={{color:NeoColor.grey_5}}>{e.logDateTime.format('HH:mm')}</NeoParagraph>
                                 <NeoParagraph type={"capture_regular"} style={{color:NeoColor.grey_5}}>{e.author}</NeoParagraph>
@@ -57,6 +58,7 @@ class ChangeLogView extends React.Component<Props & WithTranslation, State> {
                         </div>
                     })}</div>
                 })}
+                </div>
             </div>
         )
     }

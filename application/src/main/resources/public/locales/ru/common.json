@@ -427,7 +427,15 @@
         "change log": "Лента изменений",
         "create application": "Создать раздел",
         "create application module": "Создать модуль",
-        "universal editor": "Универсальный редактор"
+        "universal editor": "Универсальный редактор",
+
+        "back to sections": "Вернуться к списку секций",
+        "section name": "Название раздела",
+        "module name": "Название модуля",
+        "change date": "Дата последних изменений",
+        "modules": "Модули",
+        "status": "Статус",
+        "author": "Автор"
 }
 
 

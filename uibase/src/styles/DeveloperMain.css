@@ -49,6 +49,11 @@
     height: calc(100% - 193px);
 }
 
+.grid-area a:hover {
+    color: #B38136 !important;
+    text-decoration-color: #B38136 !important;
+}
+
 .grid-area #datasetGrid {
     height: 100% !important;
 }
@@ -64,3 +69,32 @@
 .buttons-bar button:nth-child(3) > div {
     margin: 38px 0 24px 0;
 }
+
+.grid-search {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    /*align-items: baseline;*/
+    background: #E6E6E6;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px 4px 0 0;
+    width: 100%;
+    margin: 16px 0 0 0;
+}
+
+.grid-search > .typography {
+    margin: auto 0 auto 120px;
+}
+
+.grid-search > .input-search {
+    margin: 12px 24px 12px 0
+}
+
+.grid-search > .btn {
+    margin: auto 0 auto 18px
+}
+
+.grid-search > .btn > .typography {
+    margin: auto 0 auto 8px;
+}
+
