@@ -236,7 +236,6 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                                 onPageSizeChange={(size: number)=>{
                                     this.setState({paginationPageSize: size})
                                 }}
-                                neoTable={true}
                             />
                         </div>
                     </div>
