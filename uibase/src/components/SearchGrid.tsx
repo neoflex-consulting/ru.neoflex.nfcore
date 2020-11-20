@@ -10,7 +10,7 @@ import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import './../styles/Data.css'
-import {NeoDrawer, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
 
@@ -242,9 +242,15 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 width: 100,
                 render: (text:string, record:any) => {
                     const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
-                        <NeoIcon icon={"edit"}/>
+                        <NeoButton type={'link'} title={'Редактировать'}>
+                            <NeoIcon icon={"edit"}/>
+                        </NeoButton>
                     </Link>;
-                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}><NeoIcon icon={"rubbish"}/></span>;
+                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>
+                        <NeoButton type={'link'} title={'Удалить'}>
+                            <NeoIcon icon={"rubbish"}/>
+                        </NeoButton>
+                    </span>;
                     return [editButton, deleteButton]
                 }
             }];
