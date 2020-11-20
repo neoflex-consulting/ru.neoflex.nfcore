@@ -46,7 +46,8 @@
     height: calc(100% - 193px);
 }
 
-.grid-area td > button:hover {
+.grid-area td > button:hover,
+.grid-area td > a:hover{
     color: #B38136 !important;
     text-decoration-color: #B38136 !important;
 }

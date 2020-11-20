@@ -436,7 +436,11 @@
         "modules": "Модули",
         "status": "Статус",
         "author": "Автор",
-        "main page": "Главная"
+        "main page": "Главная",
+        "delete module": "Удаление модуля",
+        "delete section": "Удаления раздела",
+        "delete module with references": "Удалить модуль?",
+        "delete section with references": "Удалить раздел вместе с зависимыми модулями?"
 }
 
 

@@ -439,5 +439,9 @@
         "modules": "Modules",
         "status": "Status",
         "author": "Author",
-        "main page": "Main"
+        "main page": "Main",
+        "delete module": "Delete module",
+        "delete section": "Delete section",
+        "delete module with references": "Delete module with references",
+        "delete section with references": "Delete section with references"
 }
