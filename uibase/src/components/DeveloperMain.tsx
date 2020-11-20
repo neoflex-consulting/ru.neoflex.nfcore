@@ -176,7 +176,7 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
 
     render() {
         const filteredData = this.getDataSource()
-            .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0)
+            .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0);
         return (
             <div className={"developer-main"}>
                 <div className={"interactive-area"}>
@@ -260,7 +260,7 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                            visible={true}
                            onLeftButtonClick={()=>{
                                API.instance().deleteResource(this.state.deleteObject!.ref).then(()=>{
-                                   this.setState({deleteObject:undefined})
+                                   this.setState({deleteObject:undefined});
                                    this.getGridData()
                                })
                            }}
