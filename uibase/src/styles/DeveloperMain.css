@@ -1,7 +1,6 @@
 .developer-main {
     display: flex;
-    width: 100vw;
-    height: 100%;
+    height: calc(100% - 40px);
 }
 
 .application-changes {
@@ -47,7 +46,7 @@
     height: calc(100% - 193px);
 }
 
-.grid-area a:hover {
+.grid-area td > button:hover {
     color: #B38136 !important;
     text-decoration-color: #B38136 !important;
 }
@@ -55,11 +54,23 @@
 .grid-area > .table {
     padding: 0 0 0 0 !important;
     box-sizing: border-box;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .grid-area td,
 .grid-area th {
-    padding: 11px 16px 11px 16px !important;
+    padding: 2px 16px 2px 16px !important;
+}
+
+.grid-area .ant-table-bordered .ant-table-tbody > tr > td {
+    border-left: 1px #E6E6E6 solid !important;
+    border-right: 1px #E6E6E6 solid !important;
+    border-bottom: none !important;
+    border-top: none !important;
+}
+
+.grid-area thead > tr > th {
+    text-align: center !important;
 }
 
 .interactive-area .developer_paginator {
@@ -97,7 +108,7 @@
 }
 
 .grid-search > .typography {
-    margin: auto 0 auto 120px;
+    margin: auto 0 auto 0;
 }
 
 .grid-search > .input-search {
@@ -105,10 +116,14 @@
 }
 
 .grid-search > .btn {
-    margin: auto 0 auto 18px
+    margin: auto 56px auto 18px
 }
 
 .grid-search > .btn > .typography {
     margin: auto 0 auto 8px;
+}
+
+.grid-search > .btn > div > svg {
+    fill: #333333;
 }
 

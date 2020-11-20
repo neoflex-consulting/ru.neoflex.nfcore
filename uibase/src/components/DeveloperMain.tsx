@@ -64,12 +64,13 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     }
 
     getModules = (modules: Ecore.EObject[]): IModuleData[] => {
-        return modules.map(m=>{
+        return modules.map((m,index)=>{
             return {
-                name: <a onClick={()=>{
-                    const {id, rev} = API.parseRef(m.eURI());
-                    this.props.history.push({ pathname: `/developer/data/editor/${id}/${rev}`})
-                }}>{m.get('name')}</a>,
+                key: `module${index}`,
+                name: <NeoButton style={{color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
+                    const {id} = API.parseRef(m.eURI());
+                    this.props.history.push({ pathname: `/developer/data/editor/${id}/${m.eResource().rev}`})
+                }}>{m.get('name')}</NeoButton>,
                 changeDate: undefined,
                 status: undefined,
                 author: undefined,
@@ -78,17 +79,18 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     };
 
     prepareData = (resources: Ecore.Resource[]) => {
-        return resources.map(r => {
+        return resources.map((r,index) => {
             const refObjs = r.eContents()[0].get('referenceTree')
                 ? getReferencedObjects(r.eContents()[0].get('referenceTree'))
                 : [];
             return {
-                name: <a onClick={()=>{
-                    const {id, rev} = API.parseRef(r.eContents()[0].eURI());
-                    refObjs.length !== 0
-                        ? this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs)}, filter:""})
-                        : this.props.history.push({ pathname: `/developer/data/editor/${id}/${rev}`})
-                }}>{r.eContents()[0].get('name')}</a>,
+                key: `section${index}`,
+                name: <NeoButton style={{color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
+                        const {id, rev} = API.parseRef(r.eContents()[0].eURI());
+                        refObjs.length !== 0
+                            ? this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs)}, filter:""})
+                            : this.props.history.push({ pathname: `/developer/data/editor/${id}/${rev}`})
+                    }}>{r.eContents()[0].get('name')}</NeoButton>,
                 modules: refObjs.length,
                 changeDate: undefined,
                 status: undefined,
@@ -117,16 +119,16 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
 
     getColumns = () => {
         return this.state.currentSection ? [
-            {title: this.props.t("module name"), dataIndex: "name"},
-            {title: this.props.t("change date"), dataIndex: "changeDate"},
-            {title: this.props.t("status"), dataIndex: "status"},
-            {title: this.props.t("author"), dataIndex: "author"}
+            {title: this.props.t("module name"), dataIndex: "name", width: "30%", align: "left"},
+            {title: this.props.t("change date"), dataIndex: "changeDate", width: "40%", align: "center"},
+            {title: this.props.t("status"), dataIndex: "status", width: "10%", align: "center"},
+            {title: this.props.t("author"), dataIndex: "author", width: "20%", align: "center"}
         ] : [
-            {title: this.props.t("section name"), dataIndex: "name"},
-            {title: this.props.t("modules"), dataIndex: "modules"},
-            {title: this.props.t("change date"), dataIndex: "changeDate"},
-            {title: this.props.t("status"), dataIndex: "status"},
-            {title: this.props.t("author"), dataIndex: "author"}
+            {title: this.props.t("section name"), dataIndex: "name", width: "30%", align: "left"},
+            {title: this.props.t("modules"), dataIndex: "modules", width: "10%", align: "center"},
+            {title: this.props.t("change date"), dataIndex: "changeDate", width: "30%", align: "center"},
+            {title: this.props.t("status"), dataIndex: "status", width: "10%", align: "center"},
+            {title: this.props.t("author"), dataIndex: "author", width: "20%", align: "center"}
         ]
     };
 
@@ -220,12 +222,10 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                             columns={this.getColumns()}
                             dataSource={filteredData}
                             bordered={true}
-                            style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
                             pagination={{current: this.state.currentPage}}
                         />
                         <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
                             <Paginator
-                                {...this.props}
                                 currentPage = {this.state.currentPage}
                                 totalNumberOfPage = {Math.ceil(filteredData.length/this.state.paginationPageSize)}
                                 paginationPageSize = {this.state.paginationPageSize}

@@ -626,6 +626,17 @@ class EcoreApp extends React.Component<any, State> {
                                             <div>
                                     <div className="headerDev-menu">
                                         <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
+                                                <Link to={`/developer/main`}>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/main') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('main page')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('main page')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
                                                     <span>
