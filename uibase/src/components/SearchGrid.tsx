@@ -300,7 +300,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                  dataSource={this.filteredData()}
                                  bordered={true}
                                  style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
-                                 pagination={{current: this.state.currentPage}}
+                                 pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
                              />
                              <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
                              <Paginator
