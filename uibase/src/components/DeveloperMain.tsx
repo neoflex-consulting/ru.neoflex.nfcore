@@ -230,7 +230,7 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                             columns={this.getColumns()}
                             dataSource={filteredData}
                             bordered={true}
-                            pagination={{current: this.state.currentPage}}
+                            pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
                         />
                         <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
                             <Paginator
