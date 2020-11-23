@@ -256,7 +256,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                         }
 
                                     </TabPane>
-                                    <TabPane tab={this.props.t('json search')} key='json_search'>
+                                    <TabPane className={'datasearch_region'} tab={this.props.t('json search')} key='json_search'>
                                         <FormItem>
                                             {getFieldDecorator('json_field', {
                                                 initialValue: JSON.stringify({
