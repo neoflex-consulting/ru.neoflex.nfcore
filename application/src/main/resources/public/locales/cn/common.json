@@ -405,6 +405,11 @@
         "change date": "最後更改日期",
         "modules": "模塊",
         "status": "狀態",
-        "author": "作者"
+        "author": "作者",
+        "main page": "家",
+        "delete module": "刪除模塊",
+        "delete section": "正在刪除部分",
+        "delete module with references": "刪除模塊？",
+        "delete section with references": "刪除帶有相關模塊的部分？"
 
 }

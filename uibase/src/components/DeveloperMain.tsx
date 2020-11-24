@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {NeoButton, NeoColor, NeoInput, NeoParagraph, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoInput, NeoModal, NeoParagraph, NeoTable} from "neo-design/lib";
 import './../styles/DeveloperMain.css'
 import ChangeLogView, {ILogEntry} from "./ChangeLogView";
 import moment, {Moment} from "moment";
@@ -19,7 +19,9 @@ interface State {
     currentSection?: {name: string, modules: IModuleData[]}
     filter: string,
     currentPage: number,
-    paginationPageSize: number
+    paginationPageSize: number,
+    isModalVisible: boolean,
+    deleteObject?: {ref: string, type: "section"|"module"}
 }
 
 interface IApplicationData {
@@ -29,14 +31,16 @@ interface IApplicationData {
     status?: string,
     author?: string,
     class: string,
-    childrenModules: Ecore.EObject[]
+    childrenModules: Ecore.EObject[],
+    delete: JSX.Element,
 }
 
 interface IModuleData {
     name: JSX.Element,
     changeDate?: Moment,
     status?: string,
-    author?: string
+    author?: string,
+    delete: JSX.Element,
 }
 
 function getReferencedObjects(tree: Ecore.EObject, referencedObjects:Ecore.EObject[] = []): Ecore.EObject[] {
@@ -59,40 +63,48 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
             applications: [],
             filter: "",
             currentPage: 1,
-            paginationPageSize: 10
+            paginationPageSize: 10,
+            isModalVisible: true,
+            deleteObject: undefined
         };
     }
 
     getModules = (modules: Ecore.EObject[]): IModuleData[] => {
-        return modules.map(m=>{
+        return modules.map((m,index)=>{
             return {
-                name: <a onClick={()=>{
-                    const {id, rev} = API.parseRef(m.eURI());
-                    this.props.history.push({ pathname: `/developer/data/editor/${id}/${rev}`})
-                }}>{m.get('name')}</a>,
+                key: `module${index}`,
+                name: <a style={{color:NeoColor.grey_9, textDecoration:"underline"}}
+                         href={`/developer/data/editor/${API.parseRef(m.eURI()).id}/${m.eResource().rev}`}>{m.get('name')}</a>,
                 changeDate: undefined,
                 status: undefined,
                 author: undefined,
+                delete: <NeoButton onClick={()=>{
+                    this.setState({deleteObject: {ref: `${m.eResource().get('uri')}?rev=${m.eResource().rev}`, type: "module"}})
+                }} type={"link"}><NeoIcon icon={"rubbish"}/></NeoButton>
             }
         })
     };
 
     prepareData = (resources: Ecore.Resource[]) => {
-        return resources.map(r => {
+        return resources.map((r,index) => {
             const refObjs = r.eContents()[0].get('referenceTree')
                 ? getReferencedObjects(r.eContents()[0].get('referenceTree'))
                 : [];
             return {
-                name: <a onClick={()=>{
-                    const {id, rev} = API.parseRef(r.eContents()[0].eURI());
-                    refObjs.length !== 0
-                        ? this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs)}, filter:""})
-                        : this.props.history.push({ pathname: `/developer/data/editor/${id}/${rev}`})
-                }}>{r.eContents()[0].get('name')}</a>,
+                key: `section${index}`,
+                name: refObjs.length !== 0
+                    ? <NeoButton style={{color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
+                        this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs)}, filter:""})
+                    }}>{r.eContents()[0].get('name')}</NeoButton>
+                    : <a style={{color:NeoColor.grey_9, textDecoration:"underline"}}
+                         href={`/developer/data/editor/${API.parseRef(r.eURI()).id}/${r.eResource().rev}`}>{r.eContents()[0].get('name')}</a>,
                 modules: refObjs.length,
                 changeDate: undefined,
                 status: undefined,
                 author: undefined,
+                delete: <NeoButton onClick={()=>{
+                    this.setState({deleteObject: {ref: `${r.get('uri')}?rev=${r.rev}`, type: "section"}})
+                }} type={"link"}><NeoIcon icon={"rubbish"}/></NeoButton>,
                 class: r.eContents()[0].eClass.get('name'),
                 childrenModules: refObjs,
             } as IApplicationData
@@ -105,11 +117,7 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                 .filter(c=> c.get('name') === "AppModule")
                 .forEach(c => {
                     API.instance().findByKindAndName(c).then(resources=>{
-                        this.setState((state, props) => {
-                            return {
-                                applications: state.applications.concat(this.prepareData(resources))
-                            };
-                        })
+                        this.setState({applications: this.prepareData(resources)})
                     })
                 })
         });
@@ -117,16 +125,18 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
 
     getColumns = () => {
         return this.state.currentSection ? [
-            {title: this.props.t("module name"), dataIndex: "name"},
-            {title: this.props.t("change date"), dataIndex: "changeDate"},
-            {title: this.props.t("status"), dataIndex: "status"},
-            {title: this.props.t("author"), dataIndex: "author"}
+            {title: this.props.t("module name"), dataIndex: "name", width: "30%", align: "left"},
+            {title: this.props.t("change date"), dataIndex: "changeDate", width: "40%", align: "center"},
+            {title: this.props.t("status"), dataIndex: "status", width: "10%", align: "center"},
+            {title: this.props.t("author"), dataIndex: "author", width: "15%", align: "center"},
+            {title: "", dataIndex: "delete", width: "5%", align: "center"}
         ] : [
-            {title: this.props.t("section name"), dataIndex: "name"},
-            {title: this.props.t("modules"), dataIndex: "modules"},
-            {title: this.props.t("change date"), dataIndex: "changeDate"},
-            {title: this.props.t("status"), dataIndex: "status"},
-            {title: this.props.t("author"), dataIndex: "author"}
+            {title: this.props.t("section name"), dataIndex: "name", width: "30%", align: "left"},
+            {title: this.props.t("modules"), dataIndex: "modules", width: "10%", align: "center"},
+            {title: this.props.t("change date"), dataIndex: "changeDate", width: "30%", align: "center"},
+            {title: this.props.t("status"), dataIndex: "status", width: "10%", align: "center"},
+            {title: this.props.t("author"), dataIndex: "author", width: "15%", align: "center"},
+            {title: "", dataIndex: "delete", width: "5%", align: "center"}
         ]
     };
 
@@ -166,7 +176,7 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
 
     render() {
         const filteredData = this.getDataSource()
-            .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0)
+            .filter(d=>this.state.filter === "" || d.name.props.children.search(new RegExp(this.state.filter,"i")) >= 0);
         return (
             <div className={"developer-main"}>
                 <div className={"interactive-area"}>
@@ -220,12 +230,10 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                             columns={this.getColumns()}
                             dataSource={filteredData}
                             bordered={true}
-                            style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
-                            pagination={{current: this.state.currentPage}}
+                            pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
                         />
                         <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
                             <Paginator
-                                {...this.props}
                                 currentPage = {this.state.currentPage}
                                 totalNumberOfPage = {Math.ceil(filteredData.length/this.state.paginationPageSize)}
                                 paginationPageSize = {this.state.paginationPageSize}
@@ -245,6 +253,22 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                         logEntries={this.state.logEntries}
                     />
                 </div>
+                {!!this.state.deleteObject && <NeoModal onCancel={()=>this.setState({deleteObject:undefined})}
+                          closable={true} type={'edit'}
+                           title={this.state.deleteObject ? this.props.t(`delete ${this.state.deleteObject.type}`) : this.props.t(`delete module`)}
+                           content={this.state.deleteObject ? this.props.t(`delete ${this.state.deleteObject.type} with references`) : this.props.t(`delete module with references`)}
+                           visible={true}
+                           onLeftButtonClick={()=>{
+                               API.instance().deleteResource(this.state.deleteObject!.ref).then(()=>{
+                                   this.setState({deleteObject:undefined});
+                                   this.getGridData()
+                               })
+                           }}
+                           onRightButtonClick={()=>this.setState({deleteObject:undefined})}
+                           textOfLeftButton={this.props.t("delete")}
+                           textOfRightButton={this.props.t("cancel")}
+                >
+                </NeoModal>}
             </div>
         )
     }

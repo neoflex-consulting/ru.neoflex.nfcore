@@ -195,7 +195,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 )}
                                             </FormItem>
                                             <FormItem style={{display:'inline-block'}}>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>Наименование</div>
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>
                                                 {getFieldDecorator('name', {
                                                     rules: [{
                                                         required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
@@ -213,7 +213,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 )}
                                             </FormItem>
                                             <FormItem>
-                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>Теги</div>
+                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('tags')}</div>
                                                 {getFieldDecorator('tags', {
                                                     rules: []
                                                 })(
@@ -225,7 +225,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         onChange={(event:any) => {
                                                             this.setState({selectCount: event.toString().split(',').length})
                                                         }}
-                                                        placeholder={"Выберите из списка"}
+                                                        placeholder={t('choose from the list')}
                                                         maxTagTextLength={15}
                                                         maxTagCount={this.state.selectTags}
                                                         maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}

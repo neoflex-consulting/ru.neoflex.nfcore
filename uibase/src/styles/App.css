@@ -1289,7 +1289,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   }
 
   .app-header {
-    height: 64px !important;
+    height: 80px !important;
   }
 
   .HeaderWithNamesSmallScreen {
@@ -1721,9 +1721,8 @@ a.linksInMoreWord:hover{
 
 
 /*DataSearch Drawer*/
-
 .datasearch__filter__drawer .table {
-  /*overflow-x: hidden !important;*/
+  overflow-x: hidden !important;
 }
 
 .datasearch__filter__drawer .ant-drawer-body {
@@ -1743,16 +1742,31 @@ padding: 3px 24px;
 
 .datasearch__filter__drawer tbody td:nth-child(2){
   display: block;
-  /*overflow: hidden;*/
-  /*text-overflow: ellipsis;*/
-  width: 645px;
-  height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 590px;
+  /*height: 49px;*/
   border-collapse: unset;
-  padding-right: 30px !important;
+  padding-right: 10px !important;
+  line-height: 2.6;
+}
+
+.datasearch__filter__drawer tbody td:nth-child(2).open {
+  overflow-wrap: break-spaces;
+  white-space: normal;
+}
+
+.datasearch__filter__drawer tbody td:last-child {
+  width: 20px;
 }
 
 .ant-table-tbody > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td {
   background: #FFF8E0 !important;
+}
+
+.ant-table-tbody > tr > td,
+.ant-table-bordered .ant-table-tbody > tr > td {
+  border-bottom: none !important;
 }
 
 .developer_table .ant-pagination {
@@ -1765,4 +1779,10 @@ padding: 3px 24px;
 }
 .developer_paginator #paginator #pageView {
   bottom: 11px;
+}
+
+#root,
+#root > div,
+#root > div > section {
+  height: 100%;
 }

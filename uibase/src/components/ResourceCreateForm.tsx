@@ -1,8 +1,9 @@
 import React from 'react'
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
-import { Modal, Select, Button, Input } from 'antd';
+import { Modal, Select, Button, } from 'antd';
 import { Link } from 'react-router-dom';
+import {NeoInput, NeoSelect} from "neo-design/lib";
 
 interface Props {
     classes: Ecore.EClass[]
@@ -38,22 +39,23 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         return (
             <Modal
                 key="create_resource"
-                width={'400px'}
+                width={'432px'}
                 title={t('createitem')}
                 visible={this.props.createResModalVisible}
-                footer={this.state.selectedEClass && this.state.name ? 
+                footer={this.state.selectedEClass && this.state.name ?
                     <Button type="primary">
                         <Link to={{ pathname: `/developer/data/editor/new/resource`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
                             <span id="edit">{t('ok')}</span>
                         </Link>
                     </Button>
-                    : 
+                    :
                     null}
                 onCancel={()=>this.props.setModalVisible(false)}
             >
-                <Select
+                <NeoSelect
                     showSearch
-                    style={{ width: '100%', marginBottom: '10px' }}
+                    width={'384px'}
+                    style={{ marginBottom: '10px' }}
                     placeholder={t('eClass')}
                     onChange={this.handleSelectClass}
                 >
@@ -63,13 +65,14 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                                 .find((feature: Ecore.EStructuralFeature) =>
                                     feature.get('eType').get('name') === 'QName'))
                         .map((eclass: Ecore.EObject) =>
-                            <Select.Option key={eclass.get('name')}
+                            <option key={eclass.get('name')}
                                            value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
                                 {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                            </Select.Option>)
+                            </option>)
                     }
-                </Select>
-                <Input 
+                </NeoSelect>
+                <NeoInput
+                    width={'384px'}
                     placeholder={t('itemname')}
                     value={this.state.name} 
                     onChange={this.onChangeName}

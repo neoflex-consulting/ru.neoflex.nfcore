@@ -101,6 +101,7 @@ class EcoreApp extends React.Component<any, State> {
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
             getFullPath: this.getFullPath,
+            isDeveloper: this.isDeveloper,
         };
         this.state = {
             principal: undefined,
@@ -590,7 +591,7 @@ class EcoreApp extends React.Component<any, State> {
 
 
         return (
-            <Layout style={{height: '90vh', marginTop: '80px'}}>
+            <Layout style={{height: 'calc(100% - 80px)', marginTop: '80px'}}>
                 <FetchSpinner/>
                 {(this.props.location.pathname.startsWith('/app') || (!this.props.location.pathname.startsWith('/app') && this.isDeveloper())) && <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>
@@ -626,6 +627,17 @@ class EcoreApp extends React.Component<any, State> {
                                             <div>
                                     <div className="headerDev-menu">
                                         <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
+                                                <Link to={`/developer/main`}>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/main') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('main page')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('main page')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
                                                     <span>
@@ -744,7 +756,7 @@ class EcoreApp extends React.Component<any, State> {
                                         this.isDeveloper() &&
                                                 <NeoHint  title={this.props.t('developer menu')}>
                                                     <NeoButton type={'link'} style={{marginRight:'10px'}}>
-                                                        <Link to={`/developer/data`}>
+                                                        <Link to={`/developer/main`}>
                                                             <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
                                                         </Link>
                                                     </NeoButton>
