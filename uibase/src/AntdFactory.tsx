@@ -688,8 +688,8 @@ export class DatePicker_ extends ViewContainer {
             : this.viewObject.get('value')
                 ? this.viewObject.get('value')
                 : agValue
-                        ? agValue
-                        : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
+                    ? agValue
+                    : moment().format(this.viewObject.get('showTime') ? defaultTimestampFormat : defaultDateFormat);
         const formatedValue:string = mask ? moment(value, format).format(mask) : value;
         this.state = {
             defaultDate: mask ? moment(formatedValue, mask) : moment(value, format),
@@ -743,6 +743,7 @@ export class DatePicker_ extends ViewContainer {
 
     onChange = (currentValue: string) => {
         //Возвращаем формат по умолчанию
+        this.onClick()
         const formattedCurrentValue = moment(currentValue, this.state.mask).format(this.state.format);
         handleChange.bind(this)(currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
     };
@@ -759,7 +760,6 @@ export class DatePicker_ extends ViewContainer {
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}
                  style={{marginBottom: marginBottom}}
-                 onClick={()=>this.onClick()}
             >
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
