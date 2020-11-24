@@ -1289,7 +1289,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   }
 
   .app-header {
-    height: 64px !important;
+    height: 80px !important;
   }
 
   .HeaderWithNamesSmallScreen {
@@ -1765,4 +1765,10 @@ padding: 3px 24px;
 }
 .developer_paginator #paginator #pageView {
   bottom: 11px;
+}
+
+#root,
+#root > div,
+#root > div > section {
+  height: 100%;
 }

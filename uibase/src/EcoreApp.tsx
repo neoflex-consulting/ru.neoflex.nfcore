@@ -101,6 +101,7 @@ class EcoreApp extends React.Component<any, State> {
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
             getFullPath: this.getFullPath,
+            isDeveloper: this.isDeveloper,
         };
         this.state = {
             principal: undefined,
@@ -590,7 +591,7 @@ class EcoreApp extends React.Component<any, State> {
 
 
         return (
-            <Layout style={{height: '90vh', marginTop: '80px'}}>
+            <Layout style={{height: 'calc(100% - 80px)', marginTop: '80px'}}>
                 <FetchSpinner/>
                 {(this.props.location.pathname.startsWith('/app') || (!this.props.location.pathname.startsWith('/app') && this.isDeveloper())) && <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>

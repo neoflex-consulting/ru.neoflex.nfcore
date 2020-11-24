@@ -15,9 +15,8 @@ import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import Column from "antd/es/table/Column";
-import {Prohibited} from "./components/Prohibited";
 
-const FooterHeight = '2em';
+const FooterHeight = '37px';
 const backgroundColor = "#fdfdfd";
 
 interface State {
@@ -301,7 +300,7 @@ export class MainApp extends React.Component<any, State> {
                     <NeoIcon icon={"table"} />
                 </NeoButton>
                 <div id={"verticalLine"}/>
-                <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
+                {this.props.context.isDeveloper() && <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
                     <NeoTabs.NeoTabPane key={"log"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
@@ -331,7 +330,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
                     </NeoButton>}/>
-                </NeoTabs>
+                </NeoTabs>}
             </div>
         )
     };
@@ -505,7 +504,7 @@ export class MainApp extends React.Component<any, State> {
         const hasIcons: boolean = this.props.context.applicationReferenceTree
             && this.props.context.applicationReferenceTree.get('children').filter((c: Ecore.EObject)=> c.get('icon')).length > 0;
         return (
-            <div style={{flexGrow: 1}}>
+            <div style={{flexGrow: 1, height:"100%"}}>
                 <Helmet>
                     <title>{this.props.showTabTitle ? this.props.appModuleName : undefined}</title>
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
@@ -578,7 +577,7 @@ export class MainApp extends React.Component<any, State> {
                                 </div>
                             </Splitter>
                         </div>
-                        <div style={{height: `${FooterHeight}`}}>
+                        <div className={"application-footer-container"} style={{height: `${FooterHeight}`}}>
                             {this.renderFooter()}
                         </div>
                     </div>

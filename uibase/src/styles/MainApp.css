@@ -38,6 +38,10 @@
     transform: scale(1.2);
 }
 
+.leftSplitter {
+    overflow-y: auto;
+}
+
 /*ServerFilter*/
 .leftSplitter .ant-tree-node-content-wrapper-open {
     color: #B38136!important;
@@ -438,4 +442,9 @@
 
 #urlContent td {
     vertical-align: baseline;
+}
+
+.application-footer-container {
+    position: sticky;
+    top: 0
 }
