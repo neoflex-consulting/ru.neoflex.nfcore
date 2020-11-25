@@ -5,6 +5,26 @@ abstract class CalculatorAdapter {
         return "substring(${arg1},${arg2},${arg3})"
     }
 
+    String replace(String arg1, String arg2, String arg3) {
+        return "replace(${arg1},${arg2},${arg3})"
+    }
+
+    String toDate(String arg1, String arg2){
+        return "${arg1}.format('${arg2}')"
+    }
+
+    String toNumber(String arg1, String arg2){
+        return "${arg1}.asDecimal()"
+    }
+
+    String Equal(String arg1, String arg2){
+        return "${arg1}.asDecimal()"
+    }
+
+    String toString(String arg1, String arg2){
+        return "${arg1}.toString('${arg2}')"
+    }
+
     String lower(String arg1) {
         return "lower(${arg1})"
     }
@@ -61,12 +81,19 @@ abstract class CalculatorAdapter {
         return "second(${arg1})"
     }
 
+    String nullIf(String arg1, String arg2) {
+        return "nullif(${arg1},${arg2})"
+    }
+
+
     static CalculatorAdapter getDBAdapter(String driver) {
         switch (driver) {
             case "org.postgresql.Driver":
                 return PostgreCalculatorAdapter.getInstance()
             case "oracle.jdbc.driver.OracleDriver":
                 return OracleCalculatorAdapter.getInstance()
+            case "com.orientechnologies.orient.jdbc.OrientJdbcDriver":
+                return OrientDBCalculatorAdapter.getInstance()
             default:
                 return DefaultCalculatorAdapter.getInstance()
         }
@@ -204,6 +231,113 @@ class OracleCalculatorAdapter extends CalculatorAdapter {
     @Override
     String second(String arg1) {
         return "extract(second from ${arg1})"
+    }
+
+}
+
+class OrientDBCalculatorAdapter extends CalculatorAdapter {
+    private static final INSTANCE = new OrientDBCalculatorAdapter()
+    static getInstance() { return INSTANCE }
+
+
+    @Override
+    String lower(String arg1) {
+        return "${arg1}.toLowerCase()"
+    }
+
+    @Override
+    String upper(String arg1) {
+        return "${arg1}.toUpperCase()"
+    }
+
+    @Override
+    String substring(String arg1, String arg2, String arg3) {
+        return "${arg1}.substring(${arg2},${arg3})"
+    }
+
+    @Override
+    String pi() {
+        return "2*asin(1)"
+    }
+
+    @Override
+    String log10(String arg1) {
+        return "log(10,${arg1})"
+    }
+
+    @Override
+    String ceiling(String arg1) {
+        return "ceil(${arg1})"
+    }
+
+    @Override
+    String curdate() {
+        return "to_char(current_date,'YYYY-MM-DD')"
+    }
+
+    @Override
+    String curtime() {
+        return "to_char(current_date,'HH24:Mi:SS')"
+    }
+
+    @Override
+    String year(String arg1) {
+        return "${arg1}.format('yyyy')"
+    }
+
+    @Override
+    String month(String arg1) {
+        return "${arg1}.format('MM')"
+    }
+
+    @Override
+    String day(String arg1) {
+        return "${arg1}.format('dd')"
+    }
+
+    @Override
+    String hour(String arg1) {
+        return "${arg1}.format('HH')"
+    }
+
+    @Override
+    String minute(String arg1) {
+        return "${arg1}.format('mm')"
+    }
+
+    @Override
+    String second(String arg1) {
+        return "${arg1}.format('ss')"
+    }
+
+    @Override
+    String toDate(String arg1, String arg2){
+        return "${arg1}.asDate().format('${arg2}')"
+    }
+
+    @Override
+    String nullIf(String arg1, String arg2) {
+        return "ifnull(${arg1},${arg2})"
+    }
+
+    @Override
+    String length(String arg1) {
+        return "${arg1}.length()"
+    }
+
+    @Override
+    String replace(String arg1, String arg2, String arg3) {
+        return "${arg1}.replace('${arg2}','${arg3}')"
+    }
+
+    @Override
+    String toString(String arg1, String arg2){
+        return "${arg1}.format('${arg2}').asString()"
+    }
+
+    @Override
+    String toNumber(String arg1, String arg2){
+        return "${arg1}.asDecimal()"
     }
 }
 
