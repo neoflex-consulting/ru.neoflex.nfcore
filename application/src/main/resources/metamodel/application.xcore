@@ -68,7 +68,7 @@ class AppModule extends Tagged {
     boolean useParentReferenceTree
         @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
     GrantType grantType = "Write"
-        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
+        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его права доступа, а после выставляет значение поля grantType")
     boolean checkRights
 }
 
@@ -133,7 +133,6 @@ class Calendar extends ViewElement {
 
 @NFCore(documentation="Область которую можно свернуть/развернуть")
 class Collapse extends ViewContainer {
-
 }
 
 @NFCore(documentation="Перечень дней (рабочих, выходных, праздничных). Применяется в глобальных настройках приложения 'GlobalSettings'")
@@ -150,7 +149,7 @@ class YearBook extends Tagged {
     op JSON recreateWorkingDays(String year)
 }
 
-@NFCore(documentation="День. Применяется в YearBook")
+@NFCore(documentation="Дата. Применяется в YearBook")
 class Day {
         @NFCore(documentation="Дата в календаре")
     Date date
@@ -160,7 +159,7 @@ class Day {
 
 @NFCore(documentation="Колонка, как элемент визуального интерфейса")
 class Column extends ViewContainer {
-        @NFCore(documentation="Динамическая ширина колонки. Мксимальное значение = 24 в одной строке")
+        @NFCore(documentation="Динамическая ширина колонки. Максимальное значение = 24 в одной строке")
     String span = "24"
 }
 
@@ -199,12 +198,12 @@ class DatasetView extends ViewElement, CommandElement {
 class GroovyCommand extends ViewElement, CommandElement {
         @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
     Text command
-         @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
+        @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
     String gitResourcePath
-        @NFCore(documentation="")
-    String gitStaticClass
-        @NFCore(documentation="")
-    String gitStaticMethod
+        @NFCore(documentation="Полный путь к классу. Например: 'ru.neoflex.nfcore.dataset.JdbcConnection'")
+    String staticClass
+        @NFCore(documentation="Статический метод из класса 'staticClass'")
+    String staticMethod
         @NFCore(documentation="Eval - запуск кода из command; Resource - запуск кода из gitResourcePath с параметрами из command; Static - запуск модуля с параметрами из command")
     GroovyCommandType commandType = "Eval"
         @NFCore(documentation="Запуск кода в момент инициализации")

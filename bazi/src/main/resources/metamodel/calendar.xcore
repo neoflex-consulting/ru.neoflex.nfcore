@@ -1,0 +1,54 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.bazi/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.bazi.calendar
+
+import ru.neoflex.nfcore.bazi.natalChart.Pillar
+
+class Calendar {
+    contains YearBook[] yearBook
+    op String createYears(String yearFrom, String yearTo)
+}
+
+class YearBook {
+    Integer name
+    contains Pillar year
+    contains Month[] months
+}
+
+class Month {
+    Months name
+    contains Pillar month
+    contains Day[] days
+}
+
+class Day {
+    Integer name
+    contains Pillar day
+    contains Hour[] hours
+}
+
+class Hour {
+    Date timeFrom
+    Date timeTo
+    contains Pillar day
+}
+
+enum Months {
+    January
+    February
+    March
+    April
+    May
+    June
+    July
+    August
+    September
+    October
+    November
+    December
+}
