@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
-import {Layout, Menu, Table} from "antd";
+import {Form, Layout, Menu, Table} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
@@ -11,12 +11,11 @@ import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
 import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoInput, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
-import Column from "antd/es/table/Column";
 
-const FooterHeight = '37px';
+const FooterHeight = '39px';
 const backgroundColor = "#fdfdfd";
 
 interface State {
@@ -292,12 +291,12 @@ export class MainApp extends React.Component<any, State> {
                             })
                         }}
                         type={"link"}>
-                        <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("logs")}
+                        <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("Logs")}
                     </NeoButton>}/>
                     <NeoTabs.NeoTabPane key={"url"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
-                        title={this.state.hideURL ? this.props.t("show url") : this.props.t("hide url")}
+                        title={this.state.hideURL ? this.props.t("show url decode") : this.props.t("show url decode")}
                         onClick={()=>this.setState({hideLog: true, hideURL:!this.state.hideURL, activeTab: this.state.activeTab === "url" ? "" : "url"}, ()=>{
                             if (this.debugRef.current) {
                                 this.debugRef.current.scrollIntoView(true)
@@ -351,16 +350,19 @@ export class MainApp extends React.Component<any, State> {
                 <div id={"debugInnerBar"} >
                     <NeoButton type={"link"} onClick={()=>!this.state.hideURL && this.setState({hideURL:true, activeTab:""})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
                 </div>
-                <div style={{height:"100%"}} id={"urlContent"} ref={this.debugRef}>
-                    <Table dataSource={dataSource} pagination={false} >
-                        <Column title="App module" dataIndex="appModule" key="appModule" width={"20%"}/>
-                        <Column title="Tree node" dataIndex="treeNode" key="treeNode" width={"20%"}/>
-                        <Column title="Use parent reference tree" dataIndex="useParentReferenceTree" key="useParentReferenceTree" width={"10%"}/>
-                        <Column title="Parameters" key="parameters" width={"50%"} render={(text, record:any) => {
-                            return <div>{record.parameters}</div>
-                        }}/>
-                    </Table>
-                </div>
+                <NeoTable
+                    className={"url-content"}
+                    size={"small"}
+                    pagination={false}
+                    columns={[
+                        {title: "App module", dataIndex: "appModule", key: "appModule", width: "15%"},
+                        {title: "Tree node", dataIndex: "treeNode", key: "treeNode", width: "30%"},
+                        {title: "Use parent reference tree", dataIndex: "useParentReferenceTree", key: "useParentReferenceTree", width: "15%"},
+                        {title: "Parameters", dataIndex: "parameters", key: "parameters", width: "40%", render: (text:any, record:any) => {
+                                return <div>{record.parameters}</div>}}
+                    ]}
+                    dataSource={dataSource}
+                />
             </div>
         }
         return content
@@ -554,7 +556,7 @@ export class MainApp extends React.Component<any, State> {
                                 </div>
                             </Splitter>
                         </div>
-                        <div className={"application-footer-container"} style={{height: `${FooterHeight}`}}>
+                        <div className={"application-footer-container"} style={{minHeight: `${FooterHeight}`}}>
                             {this.renderFooter()}
                         </div>
                     </div>
