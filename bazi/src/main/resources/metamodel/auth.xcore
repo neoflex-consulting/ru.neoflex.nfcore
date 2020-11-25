@@ -1,0 +1,33 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.base/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.bazi.auth
+
+
+abstract class Authority {
+    String name
+    String description
+}
+
+class Role extends Authority {
+}
+
+class Group extends Authority {
+}
+
+class User extends Authority {
+    String email
+    String mobile
+    String password
+    refers Role[] roles
+    refers Group[] groups
+}
+
+class UserProfile {
+    String userName
+    contains Parameter[] params
+}
