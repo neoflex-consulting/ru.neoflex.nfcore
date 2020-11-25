@@ -7,9 +7,12 @@
 )
 package ru.neoflex.nfcore.bazi.natalChart
 
-import ru.neoflex.nfcore.bazi.spirits.Spirit
+import ru.neoflex.nfcore.bazi.spirit.Spirit
 
-class Profile {
+annotation "ru.neoflex.nfcore" as BaZi
+
+@BaZi(documentation="Входные данные для расчета Натальной карты")
+class Parameters {
     String name
     Integer minutes
     Integer hour
@@ -21,21 +24,24 @@ class Profile {
     Sex sex
     boolean joinedRatHour
     TimeCategory timeCategory
-    refers NatalChart natalChart
 }
 
+@BaZi(documentation="Время, по которому будут прооизводится расчеты: Местное солнечное время, ррезиновое время или 2-х часовки (если не известен час рождения)")
 enum TimeCategory {
     LocalSolarTime
     RubberTime
     TwoHours
 }
 
+@BaZi(documentation="Пол")
 enum Sex {
     Male
     Female
 }
 
+@BaZi(documentation="Нательная карта")
 class NatalChart {
+    contains Parameters parameters
     contains Pillar hour
     contains Pillar day
     contains Pillar month
@@ -44,6 +50,7 @@ class NatalChart {
     contains BabyTact[] babyTact
 }
 
+@BaZi(documentation="Столп в карте. Применяется к дате рождения(час, день, месяц, год), к тактам, и к обычному календарю")
 class Pillar {
     God god
     Elements sky
@@ -54,6 +61,7 @@ class Pillar {
     refers Spirit[] Spirit
 }
 
+@BaZi(documentation="Такт в карте рождения. Длительность такта - 10 лет. У каждого человека они начинаются с разного возраста.")
 class Tact extends Pillar {
     Integer yearFrom
     Integer yearTo
@@ -61,16 +69,19 @@ class Tact extends Pillar {
     Integer ageTo
 }
 
+@BaZi(documentation="Детские такты. Это все года до активации обычного такта")
 class BabyTact extends Pillar {
     Integer year
     Integer age
 }
 
+@BaZi(documentation="Скрытые небесный столпы. Входят в состав обычного столпа. Возможное воличествоЖ от 1 до 3")
 class HiddenPillar {
     God god
     Elements sky
 }
 
+@BaZi(documentation="Божествка в карте Ба Цзы. Всего 10. Каждый небесный ствол имеет Божество, рассчитанное исходя из Господина Дня")
 enum God {
     Friends
     RobWealth
@@ -84,6 +95,7 @@ enum God {
     DirectResource
 }
 
+@BaZi(documentation="Элементы в карте Ба Цзы. Всего 10. Из них состоит вся карта")
 enum Elements {
     TreeYin
     TreeYang
@@ -97,6 +109,7 @@ enum Elements {
     WaterYang
 }
 
+@BaZi(documentation="Фаза Ци. У каждого столпа есть фаза ци 1-ой и 2-ой степени")
 enum QiPhase {
     DiscoveringTheQi   = 1
     CirculatingTheQi   = 2

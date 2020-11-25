@@ -5,11 +5,15 @@
     rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
-package ru.neoflex.nfcore.bazi.auth
+package ru.neoflex.nfcore.bazi.authority
 
+import ru.neoflex.nfcore.bazi.natalChart.NatalChart
+import ru.neoflex.nfcore.bazi.type.QName
+
+annotation "ru.neoflex.nfcore" as BaZi
 
 abstract class Authority {
-    String name
+    QName name
     String description
 }
 
@@ -20,14 +24,16 @@ class Group extends Authority {
 }
 
 class User extends Authority {
-    String email
-    String mobile
+    QName email
+    QName mobile
     String password
     refers Role[] roles
     refers Group[] groups
+    refers NatalChart[] charts
 }
 
 class UserProfile {
+    QName name
     String userName
     contains Parameter[] params
 }
