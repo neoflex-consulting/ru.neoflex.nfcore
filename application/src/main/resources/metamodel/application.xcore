@@ -258,54 +258,82 @@ class Typography extends ViewElement {
     TypographyType typographyType
 }
 
+@NFCore(documentation="Выпадающий список")
 class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
+        @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
+        @NFCore(documentation="Режим отображения опций внутри выпадающего списка: Default, Multiple, Tags")
     SelectMode mode = "Default"
+        @NFCore(documentation="Значения для списка беруться из 'dataset'")
     boolean isDynamic
+         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'")
     String staticValues
+        @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика")
     refers Dataset dataset
+        @NFCore(documentation="Ссылка на столбец из 'dataset' с ключами значений для выпадающего списка")
     refers DatasetColumn datasetKeyColumn
+        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для выпадающего списка")
     refers DatasetColumn datasetValueColumn
 }
 
+@NFCore(documentation="Компонента для выбора дат")
 class DatePicker extends ViewElement, ValueItem, GridComponent {
+        @NFCore(documentation="Показывать кнопку очистки поля")
     boolean allowClear
+        @NFCore(documentation="Формат отображения поля. Имеет первый приоритет.")
     refers FormatMask formatMask
+        @NFCore(documentation="Формат отображения поля. Имеет второй приоритет. Если true, то = 'YYYY-MM-DD HH:mm:ss', если false, то = 'YYYY-MM-DD'")
     boolean showTime
 }
 
+@NFCore(documentation="Любой Html контент")
 class HtmlContent extends ViewElement, CommandElement {
+        @NFCore(documentation="Например: В 'valueItems' ссылка на ValueHolder с именем 'errorMessage', а в поле 'htmlContent' указана ссылка на него через двоеточие ':errorMessage'")
     String htmlContent
 }
 
-//add TextArea
+@NFCore(documentation="Текстовое поле")
 class Input extends ViewElement, ValueItem, GridComponent {
+        @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
+        @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber")
     String minValue = "1"
+        @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber")
     String maxValue = "99"
+        @NFCore(documentation="Шаг значений, если inputType = InputNumber")
     String step = "1"
+        @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
 }
 
+@NFCore(documentation="Компонента с флагом")
 class Checkbox extends ViewElement, GridComponent, ValueItem {
+        @NFCore(documentation="Ярлык. Отображается справа от компоненты")
     String label
+        @NFCore(documentation="Определяет, установлен ли флаг")
     boolean isChecked
 }
 
+@NFCore(documentation="Кнопка")
 class Button extends ViewElement, GridComponent {
+        @NFCore(documentation="Ярлык. Отображается внутри компоненты")
     String label
 }
 
+@NFCore(documentation="Стили")
 @Ecore(constraints="IsValid")
 class CssClass extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Например: 'height: 40px; padding: 0 16px; box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1); border-radius: 4px; display: flex !important;'")
     String style
 }
 
 /* Trees */
+@NFCore(documentation="Меню с модулями - область слева в пользовательском режиме")
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
         @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
@@ -315,18 +343,22 @@ abstract class TreeNode {
     contains Icon icon
 }
 
+@NFCore(documentation="Внешний модуль")
 class AppModuleNode extends TreeNode {
+        @NFCore(documentation="Ссылка на внешний модуль")
     refers AppModule AppModule
-    //refers EObject eObject
 }
 
+@NFCore(documentation="Папка")
 class CatalogNode extends TreeNode {
+        @NFCore(documentation="Содержимое папки")
     contains TreeNode[] children
 }
 
+@NFCore(documentation="Внутренний модуль")
 class ViewNode extends TreeNode {
+        @NFCore(documentation="Содержимое внутреннего модуля")
     contains ViewElement view
-    refers EObject eObject
 }
 
 class EventAction {
