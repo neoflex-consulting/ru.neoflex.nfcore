@@ -74,15 +74,17 @@ function splitLog(log:string) {
     return arr
 }
 
-function splitPath(path:string|undefined) {
-    let arr:string[] = [];
-    if (path) {
-        while (path.split("/").length > 1) {
-            path = path.split("/").slice(0,-1).join("/");
-            arr.push(path)
-        }
+function getOpenedPath(arr: string[]) : string[] {
+    if (arr.length === 1) {
+        return arr
+    } else {
+        const path = arr[arr.length - 1];
+        return arr.filter(s=>{
+            if (path && ((path.search(s + "/") >= 0) || path === s)) {
+                return s
+            }
+        })
     }
-    return arr;
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -90,11 +92,11 @@ export class MainApp extends React.Component<any, State> {
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
     private debugRef: React.RefObject<HTMLDivElement> = React.createRef();
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
-    private appModuleMap:Map<string,string>;
+    private appModuleMap:Map<string,string[]>;
 
     constructor(props: any) {
         super(props);
-        this.appModuleMap = new Map<string,string>();
+        this.appModuleMap = new Map<string,string[]>();
         this.state = {
             pathBreadcrumb: [],
             openKeys: [],
@@ -174,37 +176,12 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
                             else {
-                                let treeChildren = objectApp.get('referenceTree').eContents();
-                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-
-                                if (objectApp.get('name') === currentAppModule.appModule) {
-                                    let currentTree: any[] = currentAppModule['tree'];
-                                    for (let i = 0; i <= currentTree.length - 1; i++) {
-                                        for (let t of treeChildren
-                                            .filter((t: any) => t.get('name') === currentTree[i])) {
-                                            if (t.eContents().length !== 0) {
-                                                treeChildren = t.eContents();
-                                            }
-                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
-                                                treeChildren = t.get('AppModule').get('view')
-                                            }
-                                        }
-                                    }
-                                    this.props.context.updateContext!(
-                                        ({
-                                            viewObject: treeChildren[0] || treeChildren,
-                                            applicationReferenceTree: objectApp.get('referenceTree')
-                                        })
-                                    );
-                                }
-                                else {
-                                    this.props.context.updateContext!(
-                                        ({
-                                            viewObject: objectApp.get('view'),
-                                            applicationReferenceTree: objectApp.get('referenceTree')
-                                        })
-                                    );
-                                }
+                                this.props.context.updateContext!(
+                                    ({
+                                        viewObject: objectApp.get('view'),
+                                        applicationReferenceTree: objectApp.get('referenceTree')
+                                    })
+                                );
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
@@ -229,7 +206,6 @@ export class MainApp extends React.Component<any, State> {
         }
     };
 
-
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.props.context.viewObject !== undefined && this.props.context.viewObject !== null) {
             if (this.props.context.viewObject.eResource().eContents()[0].get('name') !== this.props.pathFull[0].appModule
@@ -243,12 +219,6 @@ export class MainApp extends React.Component<any, State> {
         if (this.props.context !== prevProps.context) {
             //В момент инициализации даем понять адаптивным элементам что нужно пересчитать размеры
             window.dispatchEvent(new Event('appAdaptiveResize'));
-        }
-        if (this.props.pathFull !== prevProps.pathFull) {
-            const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-            this.setState({openKeys: splitPath(currentAppModule.tree.length && currentAppModule.tree.length > 0
-                    ? currentAppModule.tree.join('/')
-                    : this.appModuleMap.get(currentAppModule.appModule))})
         }
     }
 
@@ -264,6 +234,12 @@ export class MainApp extends React.Component<any, State> {
         this.getEClassAppModule();
         window.addEventListener("appAdaptiveResize", this.handleResize);
         window.addEventListener("resize", this.handleResize);
+        const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+        this.setState({openKeys: currentAppModule.tree && currentAppModule.tree.length > 0
+                ? currentAppModule.tree
+                : this.appModuleMap.get(currentAppModule.appModule)
+                    ? this.appModuleMap.get(currentAppModule.appModule)
+                    : [] })
     }
 
     componentWillUnmount() {
@@ -364,7 +340,7 @@ export class MainApp extends React.Component<any, State> {
                 return {
                     key: index,
                     appModule: up.appModule ? up.appModule : "null",
-                    treeNode: up.tree.length > 0 && up.tree.join("/"),
+                    treeNode: up.tree.length > 0 && up.tree[up.tree.length - 1],
                     useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{
                         return <p key={`p${index}${paramIndex}`}>name: <b>{p.parameterName}</b>, value: <b>{p.parameterValue ? p.parameterValue : "null"}</b>, data type: <b>{p.parameterDataType ? p.parameterDataType : "String"}</b>;</p>
@@ -403,7 +379,9 @@ export class MainApp extends React.Component<any, State> {
         const referenceTree = viewReferenceTree || applicationReferenceTree;
         const cbs = new Map<string, () => void>();
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') : this.appModuleMap.get(currentAppModule.appModule);
+        const pathReferenceTree = currentAppModule.tree && currentAppModule.tree.length > 0
+            ? currentAppModule.tree[currentAppModule.tree.length - 1]
+            : this.appModuleMap.get(currentAppModule.appModule) && this.appModuleMap.get(currentAppModule.appModule)![this.appModuleMap.get(currentAppModule.appModule)!.length - 1];
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
                 <Menu
@@ -413,12 +391,11 @@ export class MainApp extends React.Component<any, State> {
                     openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
                     onSelect={params => {
-                        this.setState({openKeys: splitPath(params.key)});
                         const cb = cbs.get(params.key);
                         if (cb) cb();
                     }}
                     onOpenChange={openKeys => {
-                        this.setState({openKeys: openKeys.filter(ok=>!this.state.openKeys.includes(ok))});
+                        this.setState({openKeys: getOpenedPath(openKeys)});
                         //Восстанавливаем ширину если были в свернутом виде
                         if (this.state.hideReferences) {
                             setVerticalStoredSize(defaultVerticalSplitterSize);
@@ -453,30 +430,30 @@ export class MainApp extends React.Component<any, State> {
         if (eObject.isKindOf('AppModuleNode')) {
             cbs.set(key, () => {
                 if (eObject.get('AppModule')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             });
             if (eObject.get('AppModule'))
-                this.appModuleMap.set(eObject.get('AppModule').get('name'), key);
+                this.appModuleMap.set(eObject.get('AppModule').get('name'), this.state.openKeys.concat(key));
         }
         else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {
                 if (eObject.get('view')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
         else if (eObject.isKindOf('EClassNode')) {
             cbs.set(key, () => {
                 if (eObject.get('aClass') && eObject.get('view')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
         else if (eObject.isKindOf('DynamicNode')) {
             cbs.set(key, () => {
                 if (eObject.get('methodName') && eObject.get('eObject')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
@@ -493,11 +470,11 @@ export class MainApp extends React.Component<any, State> {
         )
     };
 
-    private setURL(eObject: Ecore.EObject, key: any) {
+    private setURL(eObject: Ecore.EObject, keys: string[]) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
-        let treeValue = key;
+        let tree = keys;
         let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
-        this.props.context.changeURL!(appModuleName, useParentReferenceTree, treeValue)
+        this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
     }
 
     render = () => {

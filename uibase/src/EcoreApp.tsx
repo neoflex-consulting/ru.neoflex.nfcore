@@ -372,9 +372,9 @@ class EcoreApp extends React.Component<any, State> {
         return true
     };
 
-    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
-            const path = this.getURL(appModuleName, useParentReferenceTree, treeValue, params);
+            const path = this.getURL(appModuleName, useParentReferenceTree, tree, params);
             if (path) {
                 this.setState({pathFull: path});
                 this.props.history.push(encodeAppURL(path));
@@ -382,12 +382,12 @@ class EcoreApp extends React.Component<any, State> {
         }
     };
 
-    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
+    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
             let path: any[] = [];
             let urlElement: ConfigUrlElement = {
                 appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                tree: tree !== undefined ? tree : [],
                 params: params,
                 useParentReferenceTree: useParentReferenceTree || false
             };
@@ -395,11 +395,11 @@ class EcoreApp extends React.Component<any, State> {
             if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
                 path.push(urlElement)
             }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            else if (this.state.pathFull && appModuleName === this.state.appModuleName && tree !== undefined) {
                 this.state.pathFull.forEach( (p:any) => {
                     urlElement = p;
                     if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = treeValue.split('/');
+                        urlElement.tree = tree;
                         urlElement.params = params;
                         path.push(urlElement)
                     }
@@ -425,7 +425,7 @@ class EcoreApp extends React.Component<any, State> {
                         path.push(p);
                     });
                     urlElement.appModule = appModuleName;
-                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                    urlElement.tree = tree !== undefined ? tree : [];
                     urlElement.params = params ? params : [];
                     this.state.context.globalValues?.forEach(obj => {
                         urlElement.params = urlElement.params!.concat(obj)
