@@ -11,12 +11,12 @@ import ru.neoflex.nfcore.bazi.spirits.Spirit
 
 class Profile {
     String name
-    String minutes
-    String hour
-    String day
-    String month
-    String year
-    String UTC
+    Integer minutes
+    Integer hour
+    Integer day
+    Integer month
+    Integer year
+    Integer UTC
     String placeOfBirth
     Sex sex
     boolean joinedRatHour
