@@ -38,6 +38,10 @@
     transform: scale(1.2);
 }
 
+.leftSplitter {
+    overflow-y: auto;
+}
+
 /*ServerFilter*/
 .leftSplitter .ant-tree-node-content-wrapper-open {
     color: #B38136!important;
@@ -274,6 +278,11 @@
     padding-left: 40px;
 }
 
+#referenceTree .menu-content:not(.menu-with-icon) {
+    /*should match referenceTree inlineIndent*/
+    padding-left: 29px;
+}
+
 .application-footer  {
     display: inline-flex;
     border-top: 1px #F2F2F2 solid;
@@ -433,4 +442,9 @@
 
 #urlContent td {
     vertical-align: baseline;
+}
+
+.application-footer-container {
+    position: sticky;
+    top: 0
 }

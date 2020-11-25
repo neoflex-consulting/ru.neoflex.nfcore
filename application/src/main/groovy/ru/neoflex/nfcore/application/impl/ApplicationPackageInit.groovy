@@ -38,13 +38,13 @@ class ApplicationPackageInit {
                     if (eObject instanceof AppModule) {
                         processViewElement(eObject.view)
                         processTreeNode(eObject.referenceTree)
-                        if (eObject instanceof Application) {
+//                        if (eObject instanceof Application) {
                             eObject.grantType = GrantType.WRITE
                             if (eObject.checkRights) {
                                 int grant = Context.current.authorization.isEObjectPermitted(eObject)
                                 eObject.grantType = Authorization.getGrantType(grant)
                             }
-                        }
+//                        }
                     }
                 }
             }

@@ -429,5 +429,23 @@
         "show log": "Show log",
         "hide log": "Hide log",
         "show url decode": "Show url decode",
-        "hide url decode": "Hide url decode"
+        "hide url decode": "Hide url decode",
+
+        "change log": "Change log",
+        "create application": "Create application",
+        "create application module": "Create application module",
+        "universal editor": "Universal editor",
+
+        "back to sections": "Back to sections",
+        "section name": "Section name",
+        "module name": "Module name",
+        "change date": "Change date",
+        "modules": "Modules",
+        "status": "Status",
+        "author": "Author",
+        "main page": "Main",
+        "delete module": "Delete module",
+        "delete section": "Delete section",
+        "delete module with references": "Delete module with references",
+        "delete section with references": "Delete section with references"
 }

@@ -53,7 +53,14 @@ function addTableData(excelData: excelExportObject, worksheet: ExcelJS.Worksheet
                 //font color
                 worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).font = {
                     color: {argb: cell.highlight.color && cell.highlight.color.replace('#','')}
-                }
+                };
+                //Borders
+                worksheet.getCell(`${encode(columnIndex)}:${offset + rowIndex}`).border = {
+                    top: {style:'thin'},
+                    left: {style:'thin'},
+                    bottom: {style:'thin'},
+                    right: {style:'thin'}
+                };
             }
         }
     }

@@ -3,6 +3,7 @@ import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {NeoButton, NeoInput, NeoTable} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
     onName: any;
@@ -52,14 +53,17 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
         for (let td of this.props.tableData){
             let tdName: string = td[name];
                 if (searchText === "" || searchText === undefined) {
-                    if (result.every((value) => value[name] !== tdName))
-                    {result.push(td)}
+                    if (result.every((value) => value[name] !== tdName)) {
+                        result.push(td)
+                    }
                 }
                 else if (tdName.toLowerCase().includes(searchText.toLowerCase()) && result.every((value) =>
                         value[name] !== tdName))
                 {result.push(td)}
+
         }
         result.sort((a: any, b: any) => this.sortColumns(a, b, name, "stringType"));
+        console.log('RESULT', result.sort((a: any, b: any) => this.sortColumns(a, b, name, "stringType")))
         return result
     };
 
@@ -91,7 +95,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                 selectedRowKeys,
                 onChange: this.onSelectChange
             };
-            console.log('LENGTH', this.filterDataSource(this.props.onName, this.state.selectedKeys[0]))
+
             return (
                 <Form style={{ padding: '9px 16px' }} >
                     <NeoInput
@@ -100,16 +104,31 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         value={this.state.selectedKeys[0]}
                         onChange={(e:any) => this.setSelectedKeys(e.target.value ? [e.target.value] : [])}
                         onPressEnter={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
-                        width={'492px'}
-                        style={{ width: 188, marginBottom: 8, marginRight:'24px', display: "inline-block"}}
+                        width={'628px'}
+                        style={{ marginRight:'24px', display: "inline-block"}}
                         defaultChecked={true}
                         allowClear={true}
                     />
                     <NeoTable
                         size={"small"}
                         pagination={{pageSize: this.filterDataSource(this.props.onName, this.state.selectedKeys[0]).length}}
-                        style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", maxHeight: "664px", marginTop: "15px", overflow:'scroll' }}
-                        columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName}]}
+                        style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", marginTop: "15px", overflow:'auto', top:'95px', bottom:'145px' }}
+                        columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName},
+                            {
+                            dataIndex: 'action',
+                            key: 'action',
+                            render: (text:string, record:any) => {
+                                const editButton = <NeoButton
+                                    type={'link'}
+                                    title={t('edit')}
+                                    onClick={(e)=> {}}
+                                    style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
+                                        <NeoIcon icon={"ellipsis"}/>
+                                    </NeoButton>
+                                return [editButton]
+                            }
+                        }
+                        ]}
                         dataSource={this.filterDataSource(this.props.onName, this.state.selectedKeys[0])}
                         rowSelection={rowSelection}
                     />

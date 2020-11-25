@@ -426,8 +426,25 @@
         "show log": "Показать серверный лог",
         "hide log": "Спрятать серверный лог",
         "show url decode": "Показать раскодированный URL",
-        "hide url decode": "Спрятать раскодированный URL"
+        "hide url decode": "Спрятать раскодированный URL",
 
+        "change log": "Лента изменений",
+        "create application": "Создать раздел",
+        "create application module": "Создать модуль",
+        "universal editor": "Универсальный редактор",
+
+        "back to sections": "Вернуться к списку секций",
+        "section name": "Название раздела",
+        "module name": "Название модуля",
+        "change date": "Дата последних изменений",
+        "modules": "Модули",
+        "status": "Статус",
+        "author": "Автор",
+        "main page": "Главная",
+        "delete module": "Удаление модуля",
+        "delete section": "Удаления раздела",
+        "delete module with references": "Удалить модуль?",
+        "delete section with references": "Удалить раздел вместе с зависимыми модулями?"
 }
 
 

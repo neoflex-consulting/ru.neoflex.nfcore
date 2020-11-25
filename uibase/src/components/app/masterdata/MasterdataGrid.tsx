@@ -140,6 +140,8 @@ class MasterdataGrid extends React.Component<Props&WithTranslation, any> {
                         totalNumberOfPage = {this.state.paginationTotalPage}
                         paginationPageSize = {this.state.paginationPageSize}
                         totalNumberOfRows = {this.state.rowData && this.state.rowData.length}
+                        onPageSizeChange = {(size)=>{this.grid.current.api.paginationSetPageSize(size)}}
+                        onPageChange={(page)=>this.grid.current.api.paginationGoToPage(page - 1)}
                         grid = {this.grid}
                     />
                 </div>

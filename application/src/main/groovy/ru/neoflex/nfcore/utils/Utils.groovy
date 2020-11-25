@@ -47,16 +47,4 @@ class Utils {
         return resources.resources
     }
 
-    static def findUserComponent(EClass eClass, String name, String componentClassName) {
-        def resources = DocFinder.create(Context.current.store, eClass, [name: name])
-                .execute().resourceSet
-        if (resources.resources.empty) {
-            def eObject = EcoreUtil.create(eClass)
-            eObject.eSet(eClass.getEStructuralFeature("name"), name)
-            if (componentClassName != "") {eObject.eSet(eClass.getEStructuralFeature("componentClassName"), componentClassName)}
-            resources.resources.add(Context.current.store.createEObject(eObject))
-        }
-        return resources.resources.get(0).contents.get(0)
-    }
-
 }

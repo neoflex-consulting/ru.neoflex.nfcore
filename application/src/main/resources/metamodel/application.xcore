@@ -25,30 +25,25 @@ annotation "ru.neoflex.nfcore" as NFCore
 
 /* Components */
 abstract class Component extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
 }
 
-abstract class ViewComponent {
-    contains ViewElement view
-}
-
+@NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в EventAction или EventHandler")
 abstract class DynamicActionElement {
-
 }
 
+@NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
 abstract class GridComponent {
+        @NFCore(documentation="Определяет значение, передаваемое из таблицы в компоненту. Варианты: String - напрямую значение из ячейки; Object - вся строка целиком; None - пустая строка")
     GridComponentValueType returnValueType
+        @NFCore(documentation="Определает, будет ли компонент отображаться в режиме редактирования таблицы")
     boolean isEditGridComponent
-}
-
-@NFCore(documentation="Компоненты, написанные на typeScript")
-@Ecore(constraints="IsValid")
-class UserComponent extends Component {
-    String componentClassName
 }
 
 @NFCore(documentation="Глобальные настройки приложения")
 class GlobalSettings extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
         @NFCore(documentation="Календарь со всеми выходными днями в году")
     refers YearBook weekendCalendar
@@ -63,6 +58,7 @@ class GlobalSettings extends Tagged {
 @NFCore(documentation="Модуль - составная часть глобального приложения")
 @Ecore(constraints="IsValid")
 class AppModule extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
         @NFCore(documentation="Стартовая страница приложения или модуля")
     contains ViewElement view
@@ -70,23 +66,26 @@ class AppModule extends Tagged {
     contains CatalogNode referenceTree
         @NFCore(documentation="Использование Меню с модулями от родительского приложения или модуля")
     boolean useParentReferenceTree
+        @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
+    GrantType grantType = "Write"
+        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его права доступа, а после выставляет значение поля grantType")
+    boolean checkRights
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
-        @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
-    boolean checkRights
-	    @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
-    GrantType grantType = "Write"
         @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
     Integer headerOrder
 }
 
 /* Views */
+@NFCore(documentation="Элементы визуального интрфеса, доступные в меню 'view' в Application и AppModule")
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
 	String name
+	    @NFCore(documentation="Контейнер для элементов визуального интрфеса, доступных в меню 'view' в Application и AppModule")
 	container ViewContainer parent opposite children
 	    @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
@@ -94,189 +93,272 @@ abstract class ViewElement extends DynamicActionElement {
     GrantType grantType = "Write"
         @NFCore(documentation="Скрытие элемента от пользователя. Да/Нет")
     boolean hidden
-        @NFCore(documentation="Дэактиваиця элемента от пользователя. Да/Нет")
+        @NFCore(documentation="Деактиваиця элемента от пользователя. Да/Нет")
     boolean disabled
         @NFCore(documentation="CSS классы, подключаемые к оформлению объекта, созданные в приложении")
     refers CssClass[] cssClass
 }
 
+@NFCore(documentation="Контейнер для элементов визуального интрфеса, доступных в меню 'view' в Application и AppModule")
 abstract class ViewContainer extends ViewElement {
+        @NFCore(documentation="Элементы визуального интрфеса, доступные в меню 'view' в Application и AppModule")
 	contains ViewElement[] children opposite parent
 }
 
+@NFCore(documentation="Иконка, как элемент визуального интерфейса")
 abstract class Icon extends ViewElement {	
 }
 
+@NFCore(documentation="Таблица справочников")
 class MasterdataView extends ViewElement {
+        @NFCore(documentation="Тип сущности из мастерданных")
     refers EntityType entityType
 }
 
+@NFCore(documentation="Календарь, как элемент визуального интерфейса")
 class Calendar extends ViewElement {
+        @NFCore(documentation="Массив уведомлений, который отображаются в календаре")
     refers Notification[] notifications
+        @NFCore(documentation="Календарь рабочих дней, на основании из которого высчитаваются подписи '1 рабочий день'...")
     refers YearBook yearBook
+        @NFCore(documentation="Подпись для выходных и праздничных дней в календаре")
     String defaultTitle
+        @NFCore(documentation="Статус, который присваивается всем уведомлениям, созданным из пользовательского интерфейса")
     refers NotificationStatus defaultStatus
         @NFCore(documentation="Функция запроса к БД для получения всех экземпляров уведомления за период с и по")
     op JSON getNotificationInstances(String dateFrom, String dateTo)
+        @NFCore(documentation="Функция запроса к БД для создания нового уведомления")
     op JSON createNotification(JSON newNotification)
 }
 
-class Collapse extends ViewContainer{
-
+@NFCore(documentation="Область которую можно свернуть/развернуть")
+class Collapse extends ViewContainer {
 }
 
+@NFCore(documentation="Перечень дней (рабочих, выходных, праздничных). Применяется в глобальных настройках приложения 'GlobalSettings'")
 class YearBook extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Перечень дней")
     contains Day[] days
+        @NFCore(documentation="Функция удаления всех имеющихся дней за выбранный год и создание новых (СБ, ВС)")
     op JSON recreateWeekend(String year)
+        @NFCore(documentation="Функция копирования всех дней за выбранный год 'yearFrom' и создания аналогичных дней в году 'yearTo'")
     op JSON copyHolidays(String yearFrom, String yearTo)
+        @NFCore(documentation="Функция удаления всех дней за выбранный год и пересозданиях всех дней, которые не входят в YearBooks выходных и праздничных дней из GlobalSettings")
     op JSON recreateWorkingDays(String year)
 }
 
+@NFCore(documentation="Дата. Применяется в YearBook")
 class Day {
+        @NFCore(documentation="Дата в календаре")
     Date date
+        @NFCore(documentation="Подпись, которая будет отображаться в календаре у этого дня")
     String title
 }
 
-@GenModel(documentation="max span value = 24 in one row")
+@NFCore(documentation="Колонка, как элемент визуального интерфейса")
 class Column extends ViewContainer {
+        @NFCore(documentation="Динамическая ширина колонки. Максимальное значение = 24 в одной строке")
     String span = "24"
 }
 
-class ComponentElement extends ViewElement {
-	refers Component component
-}
-
+@NFCore(documentation="Иконка из пакета neo-icon")
 class NeoIcon extends Icon {
+        @NFCore(documentation="Код иконки из пакета neo-icon")
 	NeoIconCodes iconCode
 }
 
+@NFCore(documentation="Контейнер для компонент")
 class Form extends ViewContainer {
 }
 
+@NFCore(documentation="Значение, передаваемое в URL")
 abstract class ValueItem {
+        @NFCore(documentation="Передаваемое значение")
     String value
+        @NFCore(documentation="Если true, то значение передается в URL при переходах между страницами")
     boolean isGlobal
 }
 
+@NFCore(documentation="Элемент, который принимает значения ValueItem из URL")
 abstract class CommandElement {
+        @NFCore(documentation="Значения, передаваемые через URL")
     refers ValueItem[] valueItems
 }
 
+@NFCore(documentation="Таблица")
 @Ecore(constraints="IsValid")
 class DatasetView extends ViewElement, CommandElement {
+          @NFCore(documentation="Данные для таблицы")
     refers DatasetComponent datasetComponent
 }
 
+@NFCore(documentation="Исполняемый код, написанный на groovy")
 class GroovyCommand extends ViewElement, CommandElement {
+        @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
     Text command
+        @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
     String gitResourcePath
-    String gitStaticClass
-    String gitStaticMethod
+        @NFCore(documentation="Полный путь к классу. Например: 'ru.neoflex.nfcore.dataset.JdbcConnection'")
+    String staticClass
+        @NFCore(documentation="Статический метод из класса 'staticClass'")
+    String staticMethod
+        @NFCore(documentation="Eval - запуск кода из command; Resource - запуск кода из gitResourcePath с параметрами из command; Static - запуск модуля с параметрами из command")
     GroovyCommandType commandType = "Eval"
+        @NFCore(documentation="Запуск кода в момент инициализации")
     boolean executeOnStartup
+        @NFCore(documentation="Скачивание данных в файл file.txt после исполнения кода")
     boolean downloadFile
 }
 
+@NFCore(documentation="Переменная, используемая в модуле")
 class ValueHolder extends ViewElement, ValueItem {
 }
 
+@NFCore(documentation="Вкладки - контейнер")
 class TabsViewReport extends ViewContainer {
+        @NFCore(documentation="Расположение Вкладок: сверху, снизу, справа, слева")
     TabPosition tabPosition = "Top"
 }
 
+@NFCore(documentation="Строка - контейнер")
 class Row extends ViewContainer {
 }
 
+@NFCore(documentation="Область, выделенная контуром - контейнер")
 class Region extends ViewContainer {
 }
 
+@NFCore(documentation="Текстовое поле")
 class Typography extends ViewElement {
+        @NFCore(documentation="Выравнивание поля. Возможные значения: Left, Center, Justify (по ширине), Right")
     TextAlign textAlign
+        @NFCore(documentation="Кнопка копирования текста")
     boolean buttonCopyable
+        @NFCore(documentation="Кнопка редактирования текста")
     boolean buttonEditable
+        @NFCore(documentation="Сколько строк текста показывать 'по умолчанию'")
     String ellipsisRow = "999"
+        @NFCore(documentation="Добавляет тесту стиль кода")
     boolean codeStyle
+        @NFCore(documentation="Добавляет тесту стиль удаленного текста")
     boolean deleteStyle
+        @NFCore(documentation="Добавляет тесту стиль неактивного поля")
     boolean disabledStyle
+        @NFCore(documentation="Выделение текста цветом")
     boolean markStyle
+         @NFCore(documentation="Подчеркивание текста")
     boolean underlineStyle
+        @NFCore(documentation="Жирный текст")
     boolean strongStyle
+        @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
+        @NFCore(documentation="Набор стилей текста для Neoflex Reporting")
     TypographyType typographyType
 }
 
-class Color {
-    String name
-}
-
+@NFCore(documentation="Выпадающий список")
 class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
+        @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
+        @NFCore(documentation="Режим отображения опций внутри выпадающего списка: Default, Multiple, Tags")
     SelectMode mode = "Default"
+        @NFCore(documentation="Значения для списка беруться из 'dataset'")
     boolean isDynamic
+         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'")
     String staticValues
+        @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика")
     refers Dataset dataset
+        @NFCore(documentation="Ссылка на столбец из 'dataset' с ключами значений для выпадающего списка")
     refers DatasetColumn datasetKeyColumn
+        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для выпадающего списка")
     refers DatasetColumn datasetValueColumn
 }
 
-class DatePicker extends ViewElement, ValueItem {
+@NFCore(documentation="Компонента для выбора дат")
+class DatePicker extends ViewElement, ValueItem, GridComponent {
+        @NFCore(documentation="Показывать кнопку очистки поля")
     boolean allowClear
+        @NFCore(documentation="Формат отображения поля. Имеет первый приоритет.")
     refers FormatMask formatMask
+        @NFCore(documentation="Формат отображения поля. Имеет второй приоритет. Если true, то = 'YYYY-MM-DD HH:mm:ss', если false, то = 'YYYY-MM-DD'")
     boolean showTime
 }
 
+@NFCore(documentation="Любой Html контент")
 class HtmlContent extends ViewElement, CommandElement {
+        @NFCore(documentation="Например: В 'valueItems' ссылка на ValueHolder с именем 'errorMessage', а в поле 'htmlContent' указана ссылка на него через двоеточие ':errorMessage'")
     String htmlContent
 }
 
-//add TextArea
-class Input extends ViewElement, ValueItem {
+@NFCore(documentation="Текстовое поле")
+class Input extends ViewElement, ValueItem, GridComponent {
+        @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
+        @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber")
     String minValue = "1"
+        @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber")
     String maxValue = "99"
+        @NFCore(documentation="Шаг значений, если inputType = InputNumber")
     String step = "1"
+        @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
 }
 
+@NFCore(documentation="Компонента с флагом")
 class Checkbox extends ViewElement, GridComponent, ValueItem {
+        @NFCore(documentation="Ярлык. Отображается справа от компоненты")
     String label
+        @NFCore(documentation="Определяет, установлен ли флаг")
     boolean isChecked
 }
 
+@NFCore(documentation="Кнопка")
 class Button extends ViewElement, GridComponent {
+        @NFCore(documentation="Ярлык. Отображается внутри компоненты")
     String label
 }
 
+@NFCore(documentation="Стили")
 @Ecore(constraints="IsValid")
 class CssClass extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Например: 'height: 40px; padding: 0 16px; box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1); border-radius: 4px; display: flex !important;'")
     String style
 }
 
 /* Trees */
+@NFCore(documentation="Меню с модулями - область слева в пользовательском режиме")
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
         @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
         @NFCore(disabled="true", documentation="Права доступа: чтение, чтение и запись, отказано. (поле только для чтения)")
     GrantType grantType = "Write"
+        @NFCore(documentation="Иконка, как элемент визуального интерфейса")
     contains Icon icon
 }
 
+@NFCore(documentation="Внешний модуль")
 class AppModuleNode extends TreeNode {
+        @NFCore(documentation="Ссылка на внешний модуль")
     refers AppModule AppModule
-    //refers EObject eObject
 }
 
+@NFCore(documentation="Папка")
 class CatalogNode extends TreeNode {
+        @NFCore(documentation="Содержимое папки")
     contains TreeNode[] children
 }
 
+@NFCore(documentation="Внутренний модуль")
 class ViewNode extends TreeNode {
+        @NFCore(documentation="Содержимое внутреннего модуля")
     contains ViewElement view
-    refers EObject eObject
 }
 
 class EventAction {
@@ -305,10 +387,16 @@ class Href extends ViewElement, GridComponent {
 }
 
 class Message extends DynamicActionElement, Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     MessageType messageType
     String header
     String message
+}
+
+class RadioGroup extends ViewElement, ValueItem, GridComponent  {
+    boolean isVerticalGroup
+    String[] radioBoxes
 }
 
 enum TextAlign {
@@ -404,6 +492,7 @@ enum TypographyType {
     capture_light
 }
 
+@NFCore(documentation="Код иконки из пакета neo-icon")
 enum NeoIconCodes {
     notification,
     notificationOff,

@@ -16,7 +16,7 @@ import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import Column from "antd/es/table/Column";
 
-const FooterHeight = '2em';
+const FooterHeight = '37px';
 const backgroundColor = "#fdfdfd";
 
 interface State {
@@ -74,16 +74,29 @@ function splitLog(log:string) {
     return arr
 }
 
+function getOpenedPath(arr: string[]) : string[] {
+    if (arr.length === 1) {
+        return arr
+    } else {
+        const path = arr[arr.length - 1];
+        return arr.filter(s=>{
+            if (path && ((path.search(s + "/") >= 0) || path === s)) {
+                return s
+            }
+        })
+    }
+}
+
 export class MainApp extends React.Component<any, State> {
     private refSplitterRef: React.RefObject<any> = React.createRef();
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
     private debugRef: React.RefObject<HTMLDivElement> = React.createRef();
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
-    private appModuleMap:Map<string,string>;
+    private appModuleMap:Map<string,string[]>;
 
     constructor(props: any) {
         super(props);
-        this.appModuleMap = new Map<string,string>();
+        this.appModuleMap = new Map<string,string[]>();
         this.state = {
             pathBreadcrumb: [],
             openKeys: [],
@@ -112,7 +125,6 @@ export class MainApp extends React.Component<any, State> {
                 API.instance().findByKindAndName(this.state.eClassAppModule, name, 999).then(resources => {
                     if (resources.length > 0) {
                         const objectApp = resources[0].eContents()[0];
-
                         let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
                         if (currentAppModule.tree.length === 0) {
                             this.setState({objectApp}, () => {
@@ -131,7 +143,6 @@ export class MainApp extends React.Component<any, State> {
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
                                         this.setState({hideReferences: true})
-
                                     }
                                 } else {
                                     this.props.context.updateContext!(
@@ -165,37 +176,12 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
                             else {
-                                let treeChildren = objectApp.get('referenceTree').eContents();
-                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-
-                                if (objectApp.get('name') === currentAppModule.appModule) {
-                                    let currentTree: any[] = currentAppModule['tree'];
-                                    for (let i = 0; i <= currentTree.length - 1; i++) {
-                                        for (let t of treeChildren
-                                            .filter((t: any) => t.get('name') === currentTree[i])) {
-                                            if (t.eContents().length !== 0) {
-                                                treeChildren = t.eContents();
-                                            }
-                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
-                                                treeChildren = t.get('AppModule').get('view')
-                                            }
-                                        }
-                                    }
-                                    this.props.context.updateContext!(
-                                        ({
-                                            viewObject: treeChildren[0] || treeChildren,
-                                            applicationReferenceTree: objectApp.get('referenceTree')
-                                        })
-                                    );
-                                }
-                                else {
-                                    this.props.context.updateContext!(
-                                        ({
-                                            viewObject: objectApp.get('view'),
-                                            applicationReferenceTree: objectApp.get('referenceTree')
-                                        })
-                                    );
-                                }
+                                this.props.context.updateContext!(
+                                    ({
+                                        viewObject: objectApp.get('view'),
+                                        applicationReferenceTree: objectApp.get('referenceTree')
+                                    })
+                                );
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
@@ -213,15 +199,12 @@ export class MainApp extends React.Component<any, State> {
             API.instance().findByKindAndName(this.state.eClassAppModule, appModuleName, 999).then(resources => {
                 if (resources.length > 0) {
                     const objectApp = resources[0].eContents()[0];
-                    this.props.context.updateContext!(
-                        ({applicationReferenceTree: objectApp.get('referenceTree')})
-                    );
+                    this.props.context.updateContext!(({applicationReferenceTree: objectApp.get('referenceTree')}));
                     this.setState({hideReferences: parseInt(getVerticalStoredSize()) <= parseInt(verticalSplitterShortSize)})
                 }
             })
         }
     };
-
 
     componentDidUpdate(prevProps: any, prevState: any): void {
         if (this.props.context.viewObject !== undefined && this.props.context.viewObject !== null) {
@@ -251,6 +234,12 @@ export class MainApp extends React.Component<any, State> {
         this.getEClassAppModule();
         window.addEventListener("appAdaptiveResize", this.handleResize);
         window.addEventListener("resize", this.handleResize);
+        const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+        this.setState({openKeys: currentAppModule.tree && currentAppModule.tree.length > 0
+                ? currentAppModule.tree
+                : this.appModuleMap.get(currentAppModule.appModule)
+                    ? this.appModuleMap.get(currentAppModule.appModule)
+                    : [] })
     }
 
     componentWillUnmount() {
@@ -287,7 +276,7 @@ export class MainApp extends React.Component<any, State> {
                     <NeoIcon icon={"table"} />
                 </NeoButton>
                 <div id={"verticalLine"}/>
-                <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
+                {this.props.context.isDeveloper() && <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
                     <NeoTabs.NeoTabPane key={"log"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
@@ -317,7 +306,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
                     </NeoButton>}/>
-                </NeoTabs>
+                </NeoTabs>}
             </div>
         )
     };
@@ -351,8 +340,8 @@ export class MainApp extends React.Component<any, State> {
                 return {
                     key: index,
                     appModule: up.appModule ? up.appModule : "null",
-                    treeNode: up.tree.length > 0 && up.tree.join("/"),
-                    useParentReferenceTree: up.useParentReferenceTree.toString(),
+                    treeNode: up.tree.length > 0 && up.tree[up.tree.length - 1],
+                    useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{
                         return <p key={`p${index}${paramIndex}`}>name: <b>{p.parameterName}</b>, value: <b>{p.parameterValue ? p.parameterValue : "null"}</b>, data type: <b>{p.parameterDataType ? p.parameterDataType : "String"}</b>;</p>
                     })
@@ -385,36 +374,28 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderReferences = (isShortSize = false) => {
-        function splitPath(path:string|undefined) {
-            let arr:string[] = [];
-            if (path) {
-                while (path.split("/").length > 1) {
-                    path = path.split("/").slice(0,-1).join("/");
-                    arr.push(path)
-                }
-            }
-            return arr;
-        }
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
         const cbs = new Map<string, () => void>();
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-        const pathReferenceTree = currentAppModule.tree.length && currentAppModule.tree.length > 0 ? currentAppModule.tree.join('/') : this.appModuleMap.get(currentAppModule.appModule);
+        const pathReferenceTree = currentAppModule.tree && currentAppModule.tree.length > 0
+            ? currentAppModule.tree[currentAppModule.tree.length - 1]
+            : this.appModuleMap.get(currentAppModule.appModule) && this.appModuleMap.get(currentAppModule.appModule)![this.appModuleMap.get(currentAppModule.appModule)!.length - 1];
         return !referenceTree ? null : (
             <Layout style={{backgroundColor: backgroundColor}}>
                 <Menu
                     id={"referenceTree"}
                     inlineIndent={29}
                     className={`${isShortSize && "short-size"}`}
-                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys.length > 0 ? this.state.openKeys : splitPath(pathReferenceTree)}
+                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
                     onSelect={params => {
                         const cb = cbs.get(params.key);
                         if (cb) cb();
                     }}
                     onOpenChange={openKeys => {
-                        this.setState({openKeys:openKeys});
+                        this.setState({openKeys: getOpenedPath(openKeys)});
                         //Восстанавливаем ширину если были в свернутом виде
                         if (this.state.hideReferences) {
                             setVerticalStoredSize(defaultVerticalSplitterSize);
@@ -449,30 +430,30 @@ export class MainApp extends React.Component<any, State> {
         if (eObject.isKindOf('AppModuleNode')) {
             cbs.set(key, () => {
                 if (eObject.get('AppModule')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             });
             if (eObject.get('AppModule'))
-                this.appModuleMap.set(eObject.get('AppModule').get('name'), key);
+                this.appModuleMap.set(eObject.get('AppModule').get('name'), this.state.openKeys.concat(key));
         }
         else if (eObject.isKindOf('ViewNode') ) {
             cbs.set(key, () => {
                 if (eObject.get('view')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
         else if (eObject.isKindOf('EClassNode')) {
             cbs.set(key, () => {
                 if (eObject.get('aClass') && eObject.get('view')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
         else if (eObject.isKindOf('DynamicNode')) {
             cbs.set(key, () => {
                 if (eObject.get('methodName') && eObject.get('eObject')) {
-                    this.setURL(eObject, key);
+                    this.setURL(eObject, this.state.openKeys.concat(key));
                 }
             })
         }
@@ -489,18 +470,18 @@ export class MainApp extends React.Component<any, State> {
         )
     };
 
-    private setURL(eObject: Ecore.EObject, key: any) {
+    private setURL(eObject: Ecore.EObject, keys: string[]) {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
-        let treeValue = key;
+        let tree = keys;
         let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
-        this.props.context.changeURL!(appModuleName, useParentReferenceTree, treeValue)
+        this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
     }
 
     render = () => {
         const hasIcons: boolean = this.props.context.applicationReferenceTree
             && this.props.context.applicationReferenceTree.get('children').filter((c: Ecore.EObject)=> c.get('icon')).length > 0;
         return (
-            <div style={{flexGrow: 1}}>
+            <div style={{flexGrow: 1, height:"100%"}}>
                 <Helmet>
                     <title>{this.props.showTabTitle ? this.props.appModuleName : undefined}</title>
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
@@ -573,7 +554,7 @@ export class MainApp extends React.Component<any, State> {
                                 </div>
                             </Splitter>
                         </div>
-                        <div style={{height: `${FooterHeight}`}}>
+                        <div className={"application-footer-container"} style={{height: `${FooterHeight}`}}>
                             {this.renderFooter()}
                         </div>
                     </div>

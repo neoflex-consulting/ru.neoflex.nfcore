@@ -90,4 +90,5 @@ export interface IMainContext {
     removeEventHandler?: (name: string)=>void;
     notifyAllEventHandlers?: (event: IEvent)=>void;
     getFullPath?: ()=>ConfigUrlElement[];
+    isDeveloper?: ()=>boolean;
 }

@@ -1,0 +1,130 @@
+.developer-main {
+    display: flex;
+    height: calc(100% - 40px);
+}
+
+.application-changes {
+    width: 320px;
+    height: calc(100% - 63px);
+    margin: 25px 56px 38px 0;
+}
+
+.interactive-area {
+    width: 100%;
+    height: calc(100% - 63px);
+    margin: 25px 16px 38px 56px;
+}
+
+.buttons-bar {
+    height: 177px;
+    display: inline-flex;
+    width: 100%;
+
+}
+
+.buttons-bar button {
+    height: 100%;
+    width: 100%;
+    background: #ffffff;
+    outline: unset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+
+    border: 1px solid #D9D9D9;
+    box-sizing: border-box;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.buttons-bar button:nth-child(2) {
+    margin: 0 16px 0 16px;
+}
+
+.grid-area {
+    height: calc(100% - 193px);
+}
+
+.grid-area td > button:hover,
+.grid-area td > a:hover{
+    color: #B38136 !important;
+    text-decoration-color: #B38136 !important;
+}
+
+.grid-area > .table {
+    padding: 0 0 0 0 !important;
+    box-sizing: border-box;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.grid-area td,
+.grid-area th {
+    padding: 2px 16px 2px 16px !important;
+}
+
+.grid-area .ant-table-bordered .ant-table-tbody > tr > td {
+    border-left: 1px #E6E6E6 solid !important;
+    border-right: 1px #E6E6E6 solid !important;
+    border-bottom: none !important;
+    border-top: none !important;
+}
+
+.grid-area thead > tr > th {
+    text-align: center !important;
+}
+
+.interactive-area .developer_paginator {
+    padding: 0 0 0 0 !important;
+}
+
+.interactive-area .developer_paginator > #paginator {
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
+}
+
+.buttons-bar button:nth-child(1) > div {
+    margin: 24px 0 24px 0;
+}
+
+.buttons-bar button:nth-child(2) > div {
+    margin: 26px 0 24px 0;
+}
+
+.buttons-bar button:nth-child(3) > div {
+    margin: 38px 0 24px 0;
+}
+
+.grid-search {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    /*align-items: baseline;*/
+    background: #E6E6E6;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px 4px 0 0;
+    width: 100%;
+    margin: 16px 0 0 0;
+    height: 50px;
+}
+
+.grid-search > .typography {
+    margin: auto 0 auto 0;
+}
+
+.grid-search > .input-search {
+    margin: auto 24px auto 0
+}
+
+.grid-search > .btn {
+    margin: auto 56px auto 18px
+}
+
+.grid-search > .btn > .typography {
+    margin: auto 0 auto 8px;
+}
+
+.grid-search > .btn > div > svg {
+    fill: #333333;
+}
+

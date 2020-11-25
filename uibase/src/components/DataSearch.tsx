@@ -34,7 +34,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         classes: [],
         indicatorError: false,
         createResModalVisible: false,
-        selectTags: 2,
+        selectTags: 4,
         selectCount: 0
     };
 
@@ -135,10 +135,6 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
     };
 
-    // handleSelect = () => {
-    //     this.state.selectTags === 2 ? this.setState({selectTags: 0}) : this.setState({selectTags: 2})
-    // }
-
     render() {
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
@@ -199,7 +195,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 )}
                                             </FormItem>
                                             <FormItem style={{display:'inline-block'}}>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>Наименование</div>
+                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>
                                                 {getFieldDecorator('name', {
                                                     rules: [{
                                                         required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
@@ -217,7 +213,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                 )}
                                             </FormItem>
                                             <FormItem>
-                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>Теги</div>
+                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('tags')}</div>
                                                 {getFieldDecorator('tags', {
                                                     rules: []
                                                 })(
@@ -229,23 +225,10 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         onChange={(event:any) => {
                                                             this.setState({selectCount: event.toString().split(',').length})
                                                         }}
-                                                        placeholder={"Выберите из списка"}
-                                                        defaultValue={'more'}
+                                                        placeholder={t('choose from the list')}
+                                                        maxTagTextLength={15}
                                                         maxTagCount={this.state.selectTags}
-                                                        maxTagPlaceholder={this.state.selectTags !== 2 ?
-                                                            <NeoButton
-                                                                style={{color:'red'}}
-                                                                type={'link'}
-                                                                onClick={()=>this.state.selectTags === 2 ? this.setState({selectTags: this.state.selectCount-1}) : this.setState({selectTags: 2})
-                                                                }>Свернуть</NeoButton>
-                                                        :
-                                                            <NeoButton
-                                                                style={{color:'red'}}
-                                                                type={'link'}
-                                                                onClick={()=>this.state.selectTags === 2 ? this.setState({selectTags: this.state.selectCount-1}) : this.setState({selectTags: 2})
-                                                                }>Еще {this.state.selectCount-2}</NeoButton>
-                                                        }
-
+                                                        maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
                                                     >
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
@@ -254,16 +237,12 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                                     {tag.get('name')}
                                                                 </option>)
                                                         }
-                                                        <option value={'more'}>
-                                                            More
-                                                        </option>
                                                      </NeoSelect>
                                                 )}
                                             </FormItem>
                                         <FormItem style={{marginBottom:'20px'}}>
 
                                             <NeoButton
-                                                title={t("searchsimple")}
                                                 type={(getFieldValue('name') !== undefined || getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
                                                 >
                                                 {t('searchsimple')}
@@ -277,7 +256,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                         }
 
                                     </TabPane>
-                                    <TabPane tab={this.props.t('json search')} key='json_search'>
+                                    <TabPane className={'datasearch_region'} tab={this.props.t('json search')} key='json_search'>
                                         <FormItem>
                                             {getFieldDecorator('json_field', {
                                                 initialValue: JSON.stringify({

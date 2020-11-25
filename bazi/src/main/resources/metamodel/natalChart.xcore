@@ -1,0 +1,113 @@
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="ru.neoflex.nfcore.bazi/src/java/java-gen",
+    complianceLevel="7.0",
+    rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl",
+    rootExtendsInterface="org.eclipse.emf.ecore.EObject"
+)
+package ru.neoflex.nfcore.bazi.natalChart
+
+import ru.neoflex.nfcore.bazi.spirits.Spirit
+
+class Profile {
+    String name
+    Integer minutes
+    Integer hour
+    Integer day
+    Integer month
+    Integer year
+    Integer UTC
+    String placeOfBirth
+    Sex sex
+    boolean joinedRatHour
+    TimeCategory timeCategory
+    refers NatalChart natalChart
+}
+
+enum TimeCategory {
+    LocalSolarTime
+    RubberTime
+    TwoHours
+}
+
+enum Sex {
+    Male
+    Female
+}
+
+class NatalChart {
+    contains Pillar hour
+    contains Pillar day
+    contains Pillar month
+    contains Pillar year
+    contains Tact[] tact
+    contains BabyTact[] babyTact
+}
+
+class Pillar {
+    God god
+    Elements sky
+    Elements earth
+    QiPhase qiPhaseFirstDegree
+    QiPhase qiPhaseSecondDegree
+    contains HiddenPillar[] hiddenPillar
+    refers Spirit[] Spirit
+}
+
+class Tact extends Pillar {
+    Integer yearFrom
+    Integer yearTo
+    Integer ageFrom
+    Integer ageTo
+}
+
+class BabyTact extends Pillar {
+    Integer year
+    Integer age
+}
+
+class HiddenPillar {
+    God god
+    Elements sky
+}
+
+enum God {
+    Friends
+    RobWealth
+    EatingGod
+    HurtingOfficer
+    IndirectWealth
+    DirectWealth
+    SevenKilling
+    DirectOfficer
+    IndirectResource
+    DirectResource
+}
+
+enum Elements {
+    TreeYin
+    TreeYang
+    FireYin
+    FireYang
+    EarthYin
+    EarthYang
+    MetalYin
+    MetalYang
+    WaterYin
+    WaterYang
+}
+
+enum QiPhase {
+    DiscoveringTheQi   = 1
+    CirculatingTheQi   = 2
+    GatheringTheQi     = 3
+    AligningTheQi      = 4
+    ProtectingTheQi    = 5
+    PurifyingTheQi     = 6
+    MobilizingTheQi    = 7
+    DirectingTheQi     = 8
+    ConsolidatingTheQi = 9
+    TransformingTheQi  = 10
+    UnifyingTheQi      = 11
+    TransmittingTheQi  = 12
+}

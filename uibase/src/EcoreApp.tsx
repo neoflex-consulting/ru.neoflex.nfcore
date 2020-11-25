@@ -29,6 +29,7 @@ import 'neo-design/dist/neoDesign.css';
 import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
+import DeveloperMain from "./components/DeveloperMain";
 
 const backgroundColor = "#2a356c";
 
@@ -100,6 +101,7 @@ class EcoreApp extends React.Component<any, State> {
             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
             getFullPath: this.getFullPath,
+            isDeveloper: this.isDeveloper,
         };
         this.state = {
             principal: undefined,
@@ -370,9 +372,9 @@ class EcoreApp extends React.Component<any, State> {
         return true
     };
 
-    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
+    changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
-            const path = this.getURL(appModuleName, useParentReferenceTree, treeValue, params);
+            const path = this.getURL(appModuleName, useParentReferenceTree, tree, params);
             if (path) {
                 this.setState({pathFull: path});
                 this.props.history.push(encodeAppURL(path));
@@ -380,12 +382,12 @@ class EcoreApp extends React.Component<any, State> {
         }
     };
 
-    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, treeValue?: string, params?: IServerNamedParam[]) => {
+    getURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
             let path: any[] = [];
             let urlElement: ConfigUrlElement = {
                 appModule: appModuleName,
-                tree: treeValue !== undefined ? treeValue.split('/') : [],
+                tree: tree !== undefined ? tree : [],
                 params: params,
                 useParentReferenceTree: useParentReferenceTree || false
             };
@@ -393,11 +395,11 @@ class EcoreApp extends React.Component<any, State> {
             if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
                 path.push(urlElement)
             }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && treeValue !== undefined) {
+            else if (this.state.pathFull && appModuleName === this.state.appModuleName && tree !== undefined) {
                 this.state.pathFull.forEach( (p:any) => {
                     urlElement = p;
                     if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = treeValue.split('/');
+                        urlElement.tree = tree;
                         urlElement.params = params;
                         path.push(urlElement)
                     }
@@ -423,7 +425,7 @@ class EcoreApp extends React.Component<any, State> {
                         path.push(p);
                     });
                     urlElement.appModule = appModuleName;
-                    urlElement.tree = treeValue !== undefined ? treeValue.split('/') : [];
+                    urlElement.tree = tree !== undefined ? tree : [];
                     urlElement.params = params ? params : [];
                     this.state.context.globalValues?.forEach(obj => {
                         urlElement.params = urlElement.params!.concat(obj)
@@ -589,7 +591,7 @@ class EcoreApp extends React.Component<any, State> {
 
 
         return (
-            <Layout style={{height: '90vh', marginTop: '80px'}}>
+            <Layout style={{height: 'calc(100% - 80px)', marginTop: '80px'}}>
                 <FetchSpinner/>
                 {(this.props.location.pathname.startsWith('/app') || (!this.props.location.pathname.startsWith('/app') && this.isDeveloper())) && <Header className="app-header" style={{height: '80px', padding: '0', backgroundColor: backgroundColor}}>
                     <NeoRow style={{height: '80px'}}>
@@ -625,6 +627,17 @@ class EcoreApp extends React.Component<any, State> {
                                             <div>
                                     <div className="headerDev-menu">
                                         <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
+                                                <Link to={`/developer/main`}>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/main') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('main page')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('main page')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
                                                 <Link to={`/developer/metadata`}>
                                                     <span>
@@ -740,15 +753,15 @@ class EcoreApp extends React.Component<any, State> {
                                         </NeoButton>
                                         </NeoHint>
                                         :
-                                        <NeoHint  title={this.props.t('developer menu')}>
-                                        <NeoButton type={'link'}
-                                                   style={{marginRight:'10px'}}
-                                        >
-                                            {this.isDeveloper() && <Link to={`/developer/data`}>
-                                                <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
-                                            </Link>}
-                                        </NeoButton>
-                                        </NeoHint>
+                                        this.isDeveloper() &&
+                                                <NeoHint  title={this.props.t('developer menu')}>
+                                                    <NeoButton type={'link'} style={{marginRight:'10px'}}>
+                                                        <Link to={`/developer/main`}>
+                                                            <NeoIcon className={'changeToDevelopButton'} icon={'settings'} color={'white'} />
+                                                        </Link>
+                                                    </NeoButton>
+                                                </NeoHint>
+
                                 }
                                 <NeoHint title={this.props.t('auto-close notification')}>
                             <NeoButton
@@ -790,6 +803,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/test' component={this.renderTest}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
+                    <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
                     <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>

@@ -10,8 +10,9 @@ import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import './../styles/Data.css'
-import {NeoDrawer, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import Paginator from "./app/Paginator";
 
 
 interface Props {
@@ -29,10 +30,14 @@ interface State {
     result: string;
     selectedRowKeys: any[];
     filterMenuVisible:any;
+    paginationPageSize?: number;
+    currentPage?: number;
+
 }
 
 class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
     private refDataSearchRef: any = React.createRef();
+    private grid: React.RefObject<any>;
 
     state = {
         resources: [],
@@ -42,8 +47,10 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         notFoundActivator: false,
         result: '',
         selectedRowKeys: [],
-        filterMenuVisible:false
-    };
+        filterMenuVisible:false,
+        paginationPageSize: 10,
+        currentPage: 1,
+ }
 
     handleSearch = (resources : Ecore.Resource[]): void => {
         this.setState({selectedRowKeys: []});
@@ -207,7 +214,8 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 mask={false}
                 title={`Поиск по ${name}`}
                 visible={this.state.filterMenuVisible}
-                width={711}>
+                width={711}
+                >
                 <SearchFilter onName={name} onTitle={title} tableData={this.filteredData()}
                               tableDataFilter={this.changeTableData}/>
             </NeoDrawer>})
@@ -217,6 +225,9 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         this.setState({tableDataFilter})
     };
 
+    onPageChange = (page: number) => {
+        this.setState({currentPage: page === 0 ? 1 : page})
+    }
 
     render() {
         const {t} = this.props;
@@ -231,9 +242,15 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 width: 100,
                 render: (text:string, record:any) => {
                     const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
-                        <NeoIcon icon={"edit"}/>
+                        <NeoButton type={'link'} title={'Редактировать'}>
+                            <NeoIcon icon={"edit"}/>
+                        </NeoButton>
                     </Link>;
-                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}><NeoIcon icon={"rubbish"}/></span>;
+                    const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>
+                        <NeoButton type={'link'} title={'Удалить'}>
+                            <NeoIcon icon={"rubbish"}/>
+                        </NeoButton>
+                    </span>;
                     return [editButton, deleteButton]
                 }
             }];
@@ -281,13 +298,29 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                  />
                              </div>
                              :
+                             <>
                              <NeoTable
+                                 className={'developer_table'}
                                  scroll={{x: columnsWidth}}
                                  columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
                                  dataSource={this.filteredData()}
                                  bordered={true}
-                                 style={{whiteSpace: "pre", padding:'6px 35px'}}
+                                 style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
+                                 pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
                              />
+                             <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
+                             <Paginator
+                                     {...this.props}
+                                     currentPage = {this.state.currentPage}
+                                     totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
+                                     paginationPageSize = {this.state.paginationPageSize}
+                                     totalNumberOfRows = {this.filteredData().length}
+                                     grid = {this.grid}
+                                     onPageChange={this.onPageChange}
+                                     onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
+                                 />
+                             </div>
+                             </>
                      }
                  </div>
              </div>
