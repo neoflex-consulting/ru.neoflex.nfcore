@@ -11,50 +11,84 @@ import ru.neoflex.nfcore.base.types.Date
 import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.AppModule
 
-class ReportingDateOn {
-    String name
-}
+annotation "ru.neoflex.nfcore" as NFCore
 
+@NFCore(documentation="Событие в календаре")
 @Ecore(constraints="IsValid")
 class Notification extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
 	QName name
+	    @NFCore(documentation="Короткое имя объекта. Отображается в календаре")
 	String shortName
+	    @NFCore(documentation="Внушний модуль, подкличенный к событию")
 	refers AppModule AppModule
+	    @NFCore(documentation="Статус уведомления 'по умолчанию'")
 	refers NotificationStatus defaultStatus
+	    @NFCore(documentation="Отчетность сдается по выходным?")
 	boolean weekendReporting
+	    @NFCore(documentation="Периодичность сдачи отчетности. Варианты: Ежедневная, ежемесячная, ежеквартальная, годовая")
 	Periodicity periodicity
+	    @NFCore(documentation="Отчетная дата на какое-то число")
 	contains ReportingDateOn[] reportingDateOn
+	    @NFCore(documentation="Рабочий день сдачи. Исходя из него рассчитывается дата, которая отображается в календаре и записывается в NotificationInstance. Правило: deadlineDay >= reportingDateOn")
 	String deadlineDay
+	    @NFCore(documentation="Время сдачи, которое отображается в календаре")
 	String deadlineTime
+	    @NFCore(documentation="Интервал расчета. За какой период берутся данные. Варианты: за день, за месяц, за квартар, от начала года")
 	CalculationInterval calculationInterval
 }
 
+@NFCore(documentation="Отчетная дата на какое-то число")
+class ReportingDateOn {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+    String name
+}
+
+@NFCore(documentation="Экземпляр уведомления Notification за какую-то дату")
 @Ecore(constraints="IsValid")
 class NotificationInstance extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Ссылка на родителя")
     refers Notification notification
+        @NFCore(documentation="Дата, отображаемая в календаре. Рассчитывается на основании deadlineDay из Notification")
 	Date calendarDate
+	    @NFCore(documentation="Текущий статус")
 	refers NotificationStatus[] status
 }
 
+@NFCore(documentation="Экзепляр объекта NotificationInstance для создания запросов к бэку")
 class NotificationInstanceDTO {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
+        @NFCore(documentation="Имя уведомления")
     String notificationName
+        @NFCore(documentation="Короткое имя уведомления")
     String notificationShortName
+        @NFCore(documentation="Имя модуля")
     String AppModuleName
+        @NFCore(documentation="Дата в календаре")
     String calendarDate
+        @NFCore(documentation="Маркер уведомления")
 	String statusColor
+	    @NFCore(documentation="Отчетная дата на")
 	String notificationDateOn
+	    @NFCore(documentation="Интервал расчета")
 	String calculationInterval
 }
 
+@NFCore(documentation="Статус уведомления")
 @Ecore(constraints="IsValid", documentation="some documentation")
 class NotificationStatus extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
 	QName name
-	String[1] color
+	    @NFCore(documentation="Маркер уведомления")
+	String color
+	    @NFCore(documentation="Описание статуса")
 	String description
 }
 
+@NFCore(documentation="Периодичность сдачи отчетности")
 enum Periodicity {
     Day
     Month
@@ -62,6 +96,7 @@ enum Periodicity {
     Year
 }
 
+@NFCore(documentation="Интервал расчета. За какой период берутся данные")
 enum CalculationInterval {
     PerDay
     PerMonth
