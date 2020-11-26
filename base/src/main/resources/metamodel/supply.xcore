@@ -16,8 +16,9 @@ annotation "ru.neoflex.nfcore" as NFCore
 class Supply {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
-    @NFCore(documentation="Дата поставки фиксируется во время импорта поставки")
+        @NFCore(documentation="Дата поставки фиксируется во время импорта поставки")
     Timestamp date
+        @NFCore(documentation="Описание поставки")
     String description
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit

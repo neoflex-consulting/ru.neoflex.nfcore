@@ -39,6 +39,7 @@ class Role extends Tagged {
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 
+        @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isEObjectPermitted(EObject eObject) {
         var i = 0
         for (Permission grant: grants) {
@@ -46,7 +47,7 @@ class Role extends Tagged {
         }
         return i
     }
-
+@       NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {
         var i = 0
         for (Permission grant: grants) {
@@ -56,6 +57,7 @@ class Role extends Tagged {
     }
 }
 
+@NFCore(documentation="Права доступа. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
 enum GrantType {
     Unknown =0
     Read    =1
@@ -63,8 +65,11 @@ enum GrantType {
     Denied  =4
 }
 
+@NFCore(documentation="Доступ")
 abstract class Permission {
+        @NFCore(documentation="")
     container Role role opposite grants
+        @NFCore(documentation="")
     GrantType grantType
     op int isEObjectPermitted(EObject eObject) {GrantType::UNKNOWN_VALUE}
     op int isResourcePermitted(String path) {GrantType::UNKNOWN_VALUE}
