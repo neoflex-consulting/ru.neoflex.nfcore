@@ -49,7 +49,7 @@ public class EmfJson {
                 },
                 (ValueWriter<EObject, Object>) (eObject, context) -> {
                     Resource resource = EMFContext.getResource(context, eObject);
-                    return resource.getURIFragment(eObject);
+                    return resource != null ? resource.getURIFragment(eObject) : null;
                 }));
         mapper.registerModule(emfModule);
         mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
