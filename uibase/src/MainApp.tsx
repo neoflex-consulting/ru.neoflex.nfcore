@@ -133,7 +133,8 @@ export class MainApp extends React.Component<any, State> {
                                             ({
                                                 viewObject: objectApp.get('view'),
                                                 variablesObject: objectApp.get('variables'),
-                                                eventHandlersObjects: objectApp.get('eventHandlers')
+                                                eventHandlersObjects: objectApp.get('eventHandlers'),
+                                                groovyCommandObject: objectApp.get('groovyCommands'),
                                             })
                                         );
                                         let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -146,6 +147,7 @@ export class MainApp extends React.Component<any, State> {
                                                 viewObject: objectApp.get('view'),
                                                 variablesObject: objectApp.get('variables'),
                                                 eventHandlersObjects: objectApp.get('eventHandlers'),
+                                                groovyCommandObject: objectApp.get('groovyCommands'),
                                                 applicationReferenceTree: undefined}),
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
@@ -157,6 +159,7 @@ export class MainApp extends React.Component<any, State> {
                                             viewObject: objectApp.get('view'),
                                             variablesObject: objectApp.get('variables'),
                                             eventHandlersObjects: objectApp.get('eventHandlers'),
+                                            groovyCommandObject: objectApp.get('groovyCommands'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
                                         })
                                     );
@@ -174,6 +177,7 @@ export class MainApp extends React.Component<any, State> {
                                             viewObject: objectApp.get('view'),
                                             variablesObject: objectApp.get('variables'),
                                             eventHandlersObjects: objectApp.get('eventHandlers'),
+                                            groovyCommandObject: objectApp.get('groovyCommands'),
                                         })
                                     );
                                     let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -186,6 +190,7 @@ export class MainApp extends React.Component<any, State> {
                                             viewObject: objectApp.get('view'),
                                             variablesObject: objectApp.get('variables'),
                                             eventHandlersObjects: objectApp.get('eventHandlers'),
+                                            groovyCommandObject: objectApp.get('groovyCommands'),
                                             applicationReferenceTree: undefined
                                         }),
                                         ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
@@ -199,6 +204,7 @@ export class MainApp extends React.Component<any, State> {
                                         viewObject: objectApp.get('view'),
                                         variablesObject: objectApp.get('variables'),
                                         eventHandlersObjects: objectApp.get('eventHandlers'),
+                                        groovyCommandObject: objectApp.get('groovyCommands'),
                                         applicationReferenceTree: objectApp.get('referenceTree')
                                     })
                                 );
@@ -405,6 +411,15 @@ export class MainApp extends React.Component<any, State> {
             : null
     };
 
+    renderGroovyCommands = () => {
+        const groovys: Ecore.EList = this.props.context.groovyCommandObject;
+        return groovys
+            ? groovys.array().map(g=>{
+                return this.viewFactory.createView(g, this.props)
+            })
+            : null
+    };
+
     renderEventHandlers = () => {
         const eventHandlers: Ecore.EList = this.props.context.eventHandlersObjects;
         return eventHandlers
@@ -528,12 +543,9 @@ export class MainApp extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
                 </Helmet>
                 <FetchSpinner/>
-                <div>
-                        {this.renderVariables()}
-                    </div>
-                <div>
-                        {this.renderEventHandlers()}
-                    </div>
+                {this.renderVariables()}
+                {this.renderEventHandlers()}
+                {this.renderGroovyCommands()}
                 <Splitter
                     allowResize={!this.state.hideReferences}
                     ref={this.refSplitterRef}

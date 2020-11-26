@@ -74,6 +74,8 @@ class AppModule extends Tagged {
     contains ValueHolder[] variables
         @NFCore(documentation="Обработчики событий в модуле")
     contains EventHandler[] eventHandlers
+        @NFCore(documentation="Исполняемый код groovy")
+    contains GroovyCommand[] groovyCommands
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
@@ -199,7 +201,9 @@ class DatasetView extends ViewElement, CommandElement {
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")
-class GroovyCommand extends ViewElement, CommandElement {
+class GroovyCommand extends DynamicActionElement, CommandElement {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+    String name
         @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
     Text command
         @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
@@ -218,6 +222,7 @@ class GroovyCommand extends ViewElement, CommandElement {
 
 @NFCore(documentation="Переменная, используемая в модуле")
 class ValueHolder extends DynamicActionElement, ValueItem {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
 	String name
 }
 
@@ -374,7 +379,8 @@ class EventAction {
     refers DynamicActionElement[] redirectParams
 }
 
-class EventHandler extends DynamicActionElement {
+class EventHandler {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     Event event
     refers DynamicActionElement[] listenItem
