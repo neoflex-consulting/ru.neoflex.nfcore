@@ -374,7 +374,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
                     def map = [:]
                     map["column"] = calculatedExpression[i].datasetColumn
-                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter)} as \"${calculatedExpression[i].datasetColumn}\""
+                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter, false)} as \"${calculatedExpression[i].datasetColumn}\""
                     if (!serverCalculatedExpression.contains(map)) {
                         serverCalculatedExpression.add(map)
                     }
@@ -595,22 +595,22 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         map["column"] = groupBy[i].value
                             def operator = getConvertAggregate(groupBy[i].operation.toString().toLowerCase())
                         if (operator == 'AVG') {
-                            map["select"] = "avg(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "avg(${groupBy[i].datasetColumn}) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (operator == 'COUNT') {
-                            map["select"] = "count(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "count(${groupBy[i].datasetColumn}) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (operator == 'COUNT_DISTINCT') {
-                            map["select"] = "count(distinct (${groupBy[i].datasetColumn})) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "count(distinct (${groupBy[i].datasetColumn})) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (operator == 'MAX') {
-                            map["select"] = "max(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "max(${groupBy[i].datasetColumn}) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (operator == 'MIN') {
-                            map["select"] = "min(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "min(${groupBy[i].datasetColumn}) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (operator == 'SUM') {
-                            map["select"] = "sum(${groupBy[i].datasetColumn}) as ${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}"
+                            map["select"] = "sum(${groupBy[i].datasetColumn}) as `${groupBy[i].value ? groupBy[i].value : groupBy[i].datasetColumn}`"
                         }
                         if (!serverGroupByAggregation.contains(map)) {
                             serverGroupByAggregation.add(map)
@@ -666,7 +666,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     namesOfOperationsInServerAggregations.add("Счетчик:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
-                                    map["select"] = "count(distinct (${aggregations[j].datasetColumn}))"
+                                    map["select"] = "distinct (${aggregations[j].datasetColumn})"
                                     namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
                                 }
                                 if (operator == 'MAX') {
@@ -722,12 +722,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
             }
 
             //Calculated expressions
-            if (calculatedExpression) {
+                if (calculatedExpression) {
                 def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
                 for (int i = 0; i <= calculatedExpression.size() - 1; ++i) {
                     def map = [:]
-                    map["column"] = calculatedExpression[i].datasetColumn
-                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter)} as ${calculatedExpression[i].datasetColumn}"
+                    map["column"] = calculatedExpression[i].datasetColumn.toString()
+                    map["select"] = "${replaceCalculatorFunctions(calculatedExpression[i].operation,calculatorAdapter, true)} as `${calculatedExpression[i].datasetColumn.toString()}`"
                     if (!serverCalculatedExpression.contains(map)) {
                         serverCalculatedExpression.add(map)
                     }
@@ -881,6 +881,16 @@ class DatasetComponentExt extends DatasetComponentImpl {
         executeDML(parameters, DMLQueryType.DELETE, this.deleteQuery)
     }
 
+    String deleteQuotes(String name){
+        String newName = "";
+        for (int i = 0; i < name.size(); i++){
+            if(name[i] != "\""){
+                newName = newName + name[i];
+            }
+        }
+        return newName;
+    }
+
     void executeDML(EList<QueryParameter> parameters, DMLQueryType queryType, DMLQuery dmlQuery) {
         def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
         def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
@@ -1023,7 +1033,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         else if (sort == Sort.FROM_ZTO_A.toString().toLowerCase()) {return 'DESC'}
     }
 
-    String replaceCalculatorFunctions(String expression, CalculatorAdapter calculatorAdapter) {
+    String replaceCalculatorFunctions(String expression, CalculatorAdapter calculatorAdapter, boolean isOrientDB) {
         def pattern = /[a-zA-Z0-9_]+\([a-zA-Z0-9_,."']*\)/
         List<String> result = (expression =~ pattern ).findAll()
         if (result.size() > 0) {
@@ -1031,13 +1041,33 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 List<String> args = (func =~ /[a-zA-Z0-9._"']+/).findAll()
                 switch (args[0]) {
                     case CalculatorFunction.SUBSTRING.getName():
-                        expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3])); break;
+                        expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.UPPER.getName():
                         expression = expression.replace(func, calculatorAdapter.upper(args[1])); break;
                     case CalculatorFunction.LOWER.getName():
                         expression = expression.replace(func, calculatorAdapter.lower(args[1])); break;
                     case CalculatorFunction.LENGTH.getName():
-                        expression = expression.replace(func, calculatorAdapter.length(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.length(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
+                    case CalculatorFunction.TO_NUMBER.getName():
+                        expression = expression.replace(func, calculatorAdapter.toNumber(args[1], args[2]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
+                    case CalculatorFunction.REPLACE.getName():
+                        expression = expression.replace(func, calculatorAdapter.replace(args[1], args[2], args[3]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.PI.getName():
                         expression = expression.replace(func, calculatorAdapter.pi()); break;
                     case CalculatorFunction.LOG10.getName():
@@ -1048,18 +1078,60 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         expression = expression.replace(func, calculatorAdapter.curdate()); break;
                     case CalculatorFunction.CURTIME.getName():
                         expression = expression.replace(func, calculatorAdapter.curtime()); break;
+                    case CalculatorFunction.TO_DATE.getName():
+                        expression = expression.replace(func, calculatorAdapter.toDate(args[1], args[2]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
+                    case CalculatorFunction.TO_CHAR.getName():
+                        expression = expression.replace(func, calculatorAdapter.toString(args[1], args[2]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
+                    case CalculatorFunction.NULLIF.getName():
+                        expression = expression.replace(func, calculatorAdapter.nullIf(args[1], args[2]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.YEAR.getName():
-                        expression = expression.replace(func, calculatorAdapter.year(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.year(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.MONTH.getName():
-                        expression = expression.replace(func, calculatorAdapter.month(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.month(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.DAY.getName():
-                        expression = expression.replace(func, calculatorAdapter.day(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.day(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.HOUR.getName():
-                        expression = expression.replace(func, calculatorAdapter.hour(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.hour(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.MINUTE.getName():
-                        expression = expression.replace(func, calculatorAdapter.minute(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.minute(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     case CalculatorFunction.SECOND.getName():
-                        expression = expression.replace(func, calculatorAdapter.second(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.second(args[1]));
+                        if (isOrientDB){
+                            expression = deleteQuotes(expression);
+                        }
+                        break;
                     default:
                         break;
                 }

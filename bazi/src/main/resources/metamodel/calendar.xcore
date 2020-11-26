@@ -9,12 +9,15 @@ package ru.neoflex.nfcore.bazi.calendar
 
 import ru.neoflex.nfcore.bazi.natalChart.Pillar
 
+annotation "ru.neoflex.nfcore" as BaZi
+
+@BaZi(documentation="Солнечный календарь с годами +- 60 лет от текущего. Генерируются встроенной функцией один раз")
 class Calendar {
-    contains YearBook[] yearBook
+    contains Year[] year
     op String createYears(String yearFrom, String yearTo)
 }
 
-class YearBook {
+class Year {
     Integer name
     contains Pillar year
     contains Month[] months

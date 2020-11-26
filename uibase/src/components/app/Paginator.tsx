@@ -5,7 +5,7 @@ import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
 import Ch from 'antd/es/locale/zh_TW';
 import NeoIcon from "neo-icon/lib/icon";
-import {NeoButton} from "neo-design/lib";
+import {NeoButton, NeoHint} from "neo-design/lib";
 import '../../styles/Paginator.css';
 import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
 
@@ -79,11 +79,28 @@ class Paginator extends React.Component<Props, any> {
         window.removeEventListener("resize", this.handleResize);
     }
 
+    itemRender = (current: any, type: any, originalElement: any) => {
+        const {t} = this.props
+        if (type === 'prev') {
+            return <NeoHint  title={t('previous page')}><NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"arrowLeft"}/></NeoHint>
+        }
+        if (type === 'next') {
+            return <NeoHint title={t('next page')}><NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"arrowRight"}/></NeoHint>
+        }
+        if (type === 'jump-prev') {
+            return <NeoHint title={t('previous 5 pages')}><NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"doubleLeft"}/></NeoHint>
+        }
+        if (type === 'jump-next') {
+            return <NeoHint title={t('next 5 pages')}> <NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"doubleRight"}/></NeoHint>
+        }
+        return originalElement;
+    }
+
     render() {
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
                 <div ref={this.paginatorRef}
-                    id={"paginator"} className={`${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
+                    id={"paginator"} className={    `${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
                     style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
                     {this.props.totalNumberOfPage > 1 ? <NeoButton id={"toFirst"} type={this.props.currentPage === 1 ? "disabled" : undefined} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton> : null}
                     {this.props.totalNumberOfPage > 1 ? <NeoButton id={"toLast"} type={this.props.currentPage === this.props.totalNumberOfPage ? "disabled" : undefined} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton> : null}
@@ -105,6 +122,7 @@ class Paginator extends React.Component<Props, any> {
                         pageSize={this.state.paginationPageSize}
                         pageSizeOptions={['10', '20', '30', '40', '100']}
                         onShowSizeChange={(p: any, pageSize : any) => this.paginationSetPageSize(pageSize)}
+                        itemRender={this.itemRender}
                     />
                 </div>
             </ConfigProvider>

@@ -22,6 +22,24 @@
     margin-right: 90px !important;
 }
 
+#paginator .Arrow{
+    width: 16px;
+    height: 24px;
+    background: transparent;
+    padding: 0;
+}
+
+#paginator .Arrow svg{
+    margin-top: 1px;
+    width: 16px;
+    height: 13px;
+    fill: #333333;
+}
+
+#paginator .Arrow svg:hover {
+    fill: #022af7;
+}
+
 #paginator #toFirst {
     width: 16px;
     height: 24px;
@@ -29,6 +47,7 @@
     padding: 0;
     margin-top: -0.5px;
 }
+
 
 #paginator #toFirst svg{
     margin-top: 1px;
@@ -40,6 +59,18 @@
 #paginator #toFirst svg:hover {
     fill: #022af7;
 }
+
+#paginator .Arrow{
+    margin-top: 1px;
+    width: 16px;
+    height: 13px;
+    fill: #333333;
+}
+
+#paginator .Arrow:hover{
+    fill: #022af7;
+}
+
 
 #paginator #toLast {
     position: absolute;
