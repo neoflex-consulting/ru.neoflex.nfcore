@@ -97,7 +97,6 @@ public class EmfJson {
         result.withArray("contents").addAll(
                 jsonResource.getContents().stream().map(mapper::<JsonNode>valueToTree).collect(Collectors.toList())
         );
-//        resource.getContents().addAll(jsonResource.getContents());
         return result;
     }
 
