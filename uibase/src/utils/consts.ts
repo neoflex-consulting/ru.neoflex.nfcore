@@ -78,7 +78,6 @@ enum actionType {
     hide="hide",
     enable="enable",
     disable="disable",
-    clear="clear",
     setValue="setValue",
     showMessage="showMessage",
     redirect="redirect",
