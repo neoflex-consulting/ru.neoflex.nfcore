@@ -24,7 +24,7 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent,
+    GridReadyEvent, SuppressKeyboardEventParams,
     ValueFormatterParams
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
@@ -128,7 +128,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
             this.gridOptions.onColumnResized = this.handleResize;
             this.gridOptions.onDisplayedColumnsChanged = this.handleResize;
             this.gridOptions.onVirtualColumnsChanged = this.handleResize;
+            this.gridOptions.suppressKeyboardEvent = this.suppressKeyboardEvent;
         }
+    };
+
+    //suppress edit keys (enter, backspace) in normal mode
+    suppressKeyboardEvent = (params: SuppressKeyboardEventParams) => {
+        return !this.props.isEditMode;
     };
 
     onFilterChanged = () => {
