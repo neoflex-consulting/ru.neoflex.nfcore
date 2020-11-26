@@ -217,7 +217,8 @@ class GroovyCommand extends ViewElement, CommandElement {
 }
 
 @NFCore(documentation="Переменная, используемая в модуле")
-class ValueHolder extends ViewElement, ValueItem {
+class ValueHolder extends DynamicActionElement, ValueItem {
+	String name
 }
 
 @NFCore(documentation="Вкладки - контейнер")
@@ -373,7 +374,8 @@ class EventAction {
     refers DynamicActionElement[] redirectParams
 }
 
-class EventHandler extends ViewElement {
+class EventHandler extends DynamicActionElement {
+    String name
     Event event
     refers DynamicActionElement[] listenItem
     contains EventAction[] eventActions
