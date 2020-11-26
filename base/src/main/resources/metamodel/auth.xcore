@@ -30,6 +30,7 @@ class Audit {
 
 @NFCore(documentation="Роль пользователя в приложении")
 class Role extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
         @NFCore(documentation="Описание роли")
     Text description
@@ -38,6 +39,7 @@ class Role extends Tagged {
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 
+        @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isEObjectPermitted(EObject eObject) {
         var i = 0
         for (Permission grant: grants) {
@@ -45,7 +47,7 @@ class Role extends Tagged {
         }
         return i
     }
-
+@       NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {
         var i = 0
         for (Permission grant: grants) {
@@ -55,6 +57,7 @@ class Role extends Tagged {
     }
 }
 
+@NFCore(documentation="Права доступа. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
 enum GrantType {
     Unknown =0
     Read    =1
@@ -62,8 +65,11 @@ enum GrantType {
     Denied  =4
 }
 
+@NFCore(documentation="Доступ")
 abstract class Permission {
+        @NFCore(documentation="")
     container Role role opposite grants
+        @NFCore(documentation="")
     GrantType grantType
     op int isEObjectPermitted(EObject eObject) {GrantType::UNKNOWN_VALUE}
     op int isResourcePermitted(String path) {GrantType::UNKNOWN_VALUE}
@@ -83,6 +89,7 @@ class ObjectPermission extends Permission {
 }
 
 class ApplicationResource {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
 }
 
@@ -95,9 +102,11 @@ class ResourcePermission extends Permission {
 }
 
 abstract class Authority {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     Text description
     refers Role[] roles
+        @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 }
 
@@ -122,6 +131,7 @@ class Group extends Authority {
 // User Profile (to save ui settings)
 @NFCore(internal="true", documentation="Пользовательский профиль - в нём хранится информация о текущих параметрах выбранных пользователем (аналог cookies)")
 class UserProfile {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     String userName
     contains Parameter[] params
@@ -134,8 +144,10 @@ class Parameter {
 
 @NFCore(internal="true", documentation="Экземпляр класса, взятый раз редактирование, на текущий момент")
 class CurrentLock {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     String objectName
+        @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 }
 
