@@ -70,12 +70,16 @@ class AppModule extends Tagged {
     GrantType grantType = "Write"
         @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его права доступа, а после выставляет значение поля grantType")
     boolean checkRights
+        @NFCore(documentation="Переменные используемые в модуле")
+    contains ValueHolder[] variables
+        @NFCore(documentation="Обработчики событий в модуле")
+    contains EventHandler[] eventHandlers
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
-        @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
+        @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню. Если не заполнено то приложение будет выведено после всех других приложений у которых номер указан")
     Integer headerOrder
 }
 
