@@ -725,7 +725,9 @@ export class DatePicker_ extends ViewContainer {
     }
 
     componentDidMount(): void {
-        mountComponent.bind(this)(true, [{actionType: actionType.setValue, callback: this.onChange.bind(this)}] as IAction[]);
+        mountComponent.bind(this)(true, [{actionType: actionType.setValue, callback: (value)=>{
+                this.onChange.bind(this)(value ? value : "", true)
+            }}] as IAction[]);
         const value = this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format);
         const formattedCurrentValue = moment(value, this.state.mask).format(this.state.format);
         handleContextChange.bind(this)(value, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
@@ -741,17 +743,18 @@ export class DatePicker_ extends ViewContainer {
         }
     }
 
-    onChange = (currentValue: string) => {
+    onChange = (currentValue: string, isSetValueCall: boolean = false) => {
         //Возвращаем формат по умолчанию
-        this.onClick()
         const formattedCurrentValue = moment(currentValue, this.state.mask).format(this.state.format);
         handleChange.bind(this)(currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
-    };
-
-    onClick = () => {
-        //Возвращаем формат по умолчанию
-        const formattedCurrentValue = moment(this.state.currentValue, this.state.mask).format(this.state.format);
-        handleClick.bind(this)(this.state.currentValue, formattedCurrentValue, this.viewObject.get('showTime') ? "Timestamp" : "Date");
+        if (!isSetValueCall) {
+            //Emulate click
+            this.props.context.notifyAllEventHandlers({
+                type: eventType.click,
+                itemId:this.viewObject.get('name')+this.viewObject._id,
+                value: currentValue
+            })
+        }
     };
 
     render = () => {
