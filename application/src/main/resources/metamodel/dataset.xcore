@@ -98,6 +98,7 @@ class DatasetComponent extends Tagged {
     refers Dataset dataset
     contains DatasetColumnView[] column
     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
+        @NFCore(documentation="Возвращает список функций для калькультора в зависимости от базы данных")
     op JSON getAllFunctions()
     contains QueryParameter[] serverParameters
     boolean useServerFilter
