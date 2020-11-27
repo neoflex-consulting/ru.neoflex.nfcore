@@ -1035,6 +1035,7 @@ class DatasetView extends React.Component<any, State> {
         )
     }
 
+
     getAggregatedRows(aggregationParams: IServerQueryParam[], rowData: {[key: string]: unknown}[]) {
         const numAggRows = _(aggregationParams)
             .countBy('operation')
@@ -1775,6 +1776,7 @@ class DatasetView extends React.Component<any, State> {
                                 defaultColumnDefs={this.state.defaultLeafColumnDefs}
                                 formatMasks={this.state.formatMasks}
                                 handleDrawerVisability={this.handleDrawerVisibility}
+                                currentDatasetComponent={this.state.currentDatasetComponent}
                             />
                             :
                             <Calculator/>
