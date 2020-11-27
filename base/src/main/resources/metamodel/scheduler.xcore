@@ -15,6 +15,8 @@ import ru.neoflex.nfcore.base.auth.Audit
 import org.springframework.scheduling.TaskScheduler
 import java.util.concurrent.ScheduledFuture
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 type Exception wraps java.lang.Exception
 type TaskScheduler wraps org.springframework.scheduling.TaskScheduler
 type ScheduledFuture wraps java.util.concurrent.ScheduledFuture<?>
@@ -103,26 +105,28 @@ class Parameter {
 }
 
 class ScheduledTask {
-  QName name
-  boolean enabled
-  String branch
-  refers EObject eObject
-  contains Parameter[] parameters
-  Text script
-  contains SchedulingPolicy schedulingPolicy
-  contains BackOffPolicyFactory backOffPolicyFactory
-  contains RetryPolicyFactory retryPolicyFactory
-  boolean imporsonate
-  String runAsUser
-  Password runAsPassword
-  Timestamp lastScheduleTime
-  Timestamp lastRunTime
-  Text lastResult
-  Timestamp lastErrorTime
-  Text lastError
-  contains Audit audit
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
+    QName name
+    boolean enabled
+    String branch
+    refers EObject eObject
+    contains Parameter[] parameters
+    Text script
+    contains SchedulingPolicy schedulingPolicy
+    contains BackOffPolicyFactory backOffPolicyFactory
+    contains RetryPolicyFactory retryPolicyFactory
+    boolean imporsonate
+    String runAsUser
+    Password runAsPassword
+    Timestamp lastScheduleTime
+    Timestamp lastRunTime
+    Text lastResult
+    Timestamp lastErrorTime
+    Text lastError
+        @NFCore(documentation="Данные о создании и изменении объекта")
+    contains Audit audit
 
-  op Object refreshScheduler() throws Exception
-  op Object debugRescheduleAll() throws Exception
-  op Object debugExecute() throws Exception
+    op Object refreshScheduler() throws Exception
+    op Object debugRescheduleAll() throws Exception
+    op Object debugExecute() throws Exception
 }

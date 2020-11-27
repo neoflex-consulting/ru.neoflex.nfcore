@@ -16,9 +16,13 @@ import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.Typography
 import ru.neoflex.nfcore.application.GridComponent
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 /*JdbcDriver*/
+@NFCore(documentation="Jdbc драйвер")
 @Ecore(constraints="IsValid")
 class JdbcDriver extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     String driverClassName
     String[] extLibraries
@@ -28,6 +32,7 @@ class JdbcDriver extends Tagged {
 /*JdbcConnection*/
 @Ecore(constraints="IsValid")
 class JdbcConnection extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     refers JdbcDriver driver
     String url
@@ -37,6 +42,7 @@ class JdbcConnection extends Tagged {
 
 /*Dataset*/
 abstract class Dataset extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     op JSON deleteAllColumns()
     contains DatasetColumn[] datasetColumn
@@ -81,35 +87,37 @@ class Diagram {
 /*View*/
 @Ecore(constraints="IsValid")
 class DatasetComponent extends Tagged {
-     QName name //default сделать по умолчанию (не редактируемый)
-     refers User owner
-     contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
-     Access access //Публичный, закрытый доступ
-     op JSON createAllColumns()
-     op JSON deleteAllColumns()
-     refers Dataset dataset
-     contains DatasetColumnView[] column
-     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
-     op JSON getAllFunctions()
-     contains QueryParameter[] serverParameters
-     boolean useServerFilter
-     //Состав серверного фильтра
-     contains QueryFilter[] serverFilter
-     contains QueryAggregate[] serverAggregation
-     contains QuerySort[] serverSort
-     contains QueryGroupBy[] serverGroupBy
-     contains QueryCalculatedExpression[] serverCalculatedExpression
-     contains QueryGroupByColumn[] groupByColumn
-     contains Highlight[] highlight
-     contains Pivot[] pivot
-     contains Diagram[] diagram
-     contains HiddenColumn[] hiddenColumn
-     contains DMLQuery insertQuery
-     contains DMLQuery updateQuery
-     contains DMLQuery deleteQuery
-     op void executeInsert(QueryParameter[] parameters)
-     op void executeUpdate(QueryParameter[] parameters)
-     op void executeDelete(QueryParameter[] parameters)
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
+    QName name
+    refers User owner
+        @NFCore(documentation="Данные о создании и изменении объекта")
+    contains Audit audit
+    Access access //Публичный, закрытый доступ
+    op JSON createAllColumns()
+    op JSON deleteAllColumns()
+    refers Dataset dataset
+    contains DatasetColumnView[] column
+    op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
+    op JSON getAllFunctions()
+    contains QueryParameter[] serverParameters
+    boolean useServerFilter
+        //Состав серверного фильтра
+    contains QueryFilter[] serverFilter
+    contains QueryAggregate[] serverAggregation
+    contains QuerySort[] serverSort
+    contains QueryGroupBy[] serverGroupBy
+    contains QueryCalculatedExpression[] serverCalculatedExpression
+    contains QueryGroupByColumn[] groupByColumn
+    contains Highlight[] highlight
+    contains Pivot[] pivot
+    contains Diagram[] diagram
+    contains HiddenColumn[] hiddenColumn
+    contains DMLQuery insertQuery
+    contains DMLQuery updateQuery
+    contains DMLQuery deleteQuery
+    op void executeInsert(QueryParameter[] parameters)
+    op void executeUpdate(QueryParameter[] parameters)
+    op void executeDelete(QueryParameter[] parameters)
 }
 
 class DMLQuery {
@@ -152,6 +160,7 @@ class ColumnGroup extends DatasetColumnView {
 }
 
 class FormatMask extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     String value
     boolean isDynamic

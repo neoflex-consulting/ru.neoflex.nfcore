@@ -178,7 +178,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         allowClear={true}
                                                         showSearch={true}
                                                         disabled={!!this.props.specialEClass}
-                                                        placeholder="EClass">
+                                                        placeholder={t('eClass')}>
                                                         {
                                                             this.state.classes
                                                                 .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')

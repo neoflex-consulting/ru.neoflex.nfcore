@@ -9,7 +9,9 @@ package ru.neoflex.nfcore.base.types
 import java.sql.Timestamp
 import java.util.Date
 
+annotation "ru.neoflex.nfcore" as NFCore
 
+    @NFCore(documentation="Формат даты со временем. По умолчанию 'yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 type Timestamp wraps Timestamp
 create {
     try {
@@ -22,6 +24,7 @@ create {
 convert {
     if (it !== null) new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(it);
 }
+    @NFCore(documentation="Формат даты. По умолчанию 'yyyy-MM-dd'")
 type Date wraps Date
 create {
     try {
@@ -34,8 +37,13 @@ create {
 convert {
     if (it !== null) new java.text.SimpleDateFormat("yyyy-MM-dd").format(it);
 }
+    @NFCore(documentation="Пароль. Зашифрованный текст")
 type Password wraps String
+    @NFCore(documentation="Обычный текст")
 type Text wraps String
+    @NFCore(documentation="URL")
 type URL wraps String
+    @NFCore(documentation="Уникальное имя объекта во всем приложении")
 type QName wraps String
+    @NFCore(documentation="Текст в формате JSON {'a':'b'}")
 type JSON wraps String

@@ -334,7 +334,7 @@ class DatasetView extends React.Component<any, State> {
                 const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
                 const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
                 rowData.set('field', c.get('name'));
-                rowData.set('headerName', c.get('headerName').get('name'));
+                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
                 rowData.set('hide', c.get('hide'));
                 rowData.set('pinned', c.get('pinned'));
