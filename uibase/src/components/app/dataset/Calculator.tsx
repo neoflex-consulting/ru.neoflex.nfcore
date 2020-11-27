@@ -7,7 +7,7 @@ import {IServerQueryParam} from "../../../MainContext";
 import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
 import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
-import {EObject} from "ecore";
+import Ecore, {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
 import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
@@ -30,6 +30,7 @@ interface Props {
     defaultColumnDefs?: Array<any>;
     formatMasks?: {key:string,value:string}[]
     handleDrawerVisability?: any;
+    currentDatasetComponent?: Ecore.Resource;
 }
 
 interface CalculatorEventHandlerProps {
@@ -176,7 +177,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 
     getAllEnumValues(ePackageName:string, enumName:string, paramName:string) {
-        API.instance().findEnum(ePackageName, enumName)
+        API.instance().findEnum(    ePackageName, enumName)
             .then((result: EObject[]) => {
                 const paramValue = result.map( (o: any) => {return o});
                 this.setState<never>({
@@ -184,6 +185,16 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 })
             })
     };
+
+    getALLFunctions(resource_: Ecore.Resource){
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'getAllFunctions';
+        API.instance().call(ref, methodName, []).then((json: string) => {
+            let result = JSON.parse(json);
+            alert(result)
+        })
+    }
 
     handleCalculate = (e: any) => {
         let newString = "";
