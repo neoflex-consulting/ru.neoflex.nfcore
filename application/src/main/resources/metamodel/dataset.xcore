@@ -102,8 +102,9 @@ class Diagram {
     String diagramName
         @NFCore(documentation="Тип диаграммы: Line, Bar, Pie")
     DiagramType diagramType
-        @NFCore(documentation="")
+        @NFCore(documentation="Подпись по горизонтали")
     String axisXLegend
+        @NFCore(documentation="Подпись по вертикали")
     String axisYLegend
     AxisXPositionType axisXPosition
     AxisYPositionType axisYPosition
@@ -132,12 +133,13 @@ class DatasetComponent extends Tagged {
     op JSON deleteAllColumns()
         @NFCore(documentation="Ссылка на Набор данных")
     refers Dataset dataset
+        @NFCore(documentation="Колонки")
     contains DatasetColumnView[] column
+        @NFCore(documentation="Запустить запрос к Базе данных")
     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
         @NFCore(documentation="Возвращает список функций для калькультора в зависимости от базы данных")
     op JSON getAllFunctions()
     contains QueryParameter[] serverParameters
-    boolean useServerFilter
         //Состав серверного фильтра
     contains QueryFilter[] serverFilter
     contains QueryAggregate[] serverAggregation
@@ -171,30 +173,41 @@ class DatasetColumn {
     DataType convertDataType
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Колонки")
 abstract class DatasetColumnView {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     contains Typography headerName //название столбца
+        @NFCore(documentation="Скрыть/показать колонку")
     boolean hide
+        @NFCore(documentation="Текст, отображаемый при наведении мыши на заголовок колонки")
     String headerTooltip
+        @NFCore(documentation="Отображать текст из 'headerTooltip'")
     boolean showTooltipField
-    Pinned pinned = "Undefined"
+        @NFCore(documentation="Закрепить столбец. Варианты: Undefined, Left, Right")
+    Pinned pinned
+        @NFCore(documentation="Возможность изменения ширины колонки пользователем")
     boolean resizable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Подробное описание колонки")
 class RdbmsColumn extends DatasetColumnView {
-    refers FormatMask formatMask //Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
+        @NFCore(documentation="Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)")
+    refers FormatMask formatMask
+        @NFCore(documentation="Формат того, как выкачиваются данные в Excel (два знака после запятой, с точнок, как текст, как число...)")
     refers FormatMask excelFormatMask
-    String defaultValue //Если пришло значение null, то что отображать в ячейке
+        @NFCore(documentation="Если пришло значение null, то отображать 'defaultValue' в ячейке")
+    String defaultValue
+        @NFCore(documentation="Редактируемая колонка")
     boolean editable
-    boolean sortable
-    boolean suppressMenu
+        @NFCore(documentation="Определение первичного ключа для редактирования таблицы")
     boolean isPrimaryKey
-    TextAlign textAlign = "Undefined"
+        @NFCore(documentation="Выравнивание текста. Варианты: Undefined, Left, Right, Center")
+    TextAlign textAlign
     String componentRenderCondition
+        @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
     contains GridComponent component
+        @NFCore(documentation="Ссылка на соответствующую колонку из 'dataset'")
     refers DatasetColumn datasetColumn
 }
 
