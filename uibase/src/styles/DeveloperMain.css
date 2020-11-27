@@ -105,7 +105,7 @@
     border-radius: 4px 4px 0 0;
     width: 100%;
     margin: 16px 0 0 0;
-    height: 50px;
+    height: 52px;
 }
 
 .grid-search > .typography {
@@ -128,3 +128,7 @@
     fill: #333333;
 }
 
+.grid-area tbody tr,
+.grid-area thead tr {
+    height: 45px
+}
