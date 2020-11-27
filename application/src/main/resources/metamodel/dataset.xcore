@@ -24,55 +24,85 @@ annotation "ru.neoflex.nfcore" as NFCore
 class JdbcDriver extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Название драйвера. Например: 'JdbcDriverPostgresqlTest'")
     String driverClassName
+        @NFCore(documentation="Ссылки на файлы с драйверами")
     String[] extLibraries
+        @NFCore(documentation="Шаблон URL")
 	String urlPattern
 }
 
 /*JdbcConnection*/
+@NFCore(documentation="Подключение к Базе данных")
 @Ecore(constraints="IsValid")
 class JdbcConnection extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Jdbc драйвер")
     refers JdbcDriver driver
+        @NFCore(documentation="Путь к Базе данных. Например: 'jdbc:postgresql://NRStudio-Master.neoflex.ru:5432/nrtest'")
     String url
+        @NFCore(documentation="Логин от Базы данных")
     String userName
+        @NFCore(documentation="Пароль от Базы данных")
     Password password
 }
 
 /*Dataset*/
+@NFCore(documentation="Набор данных (таблица)")
 abstract class Dataset extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
-    op JSON deleteAllColumns()
+        @NFCore(documentation="Список со всеми колонками в наборе данных")
     contains DatasetColumn[] datasetColumn
+        @NFCore(documentation="Удаление всех колонок из Набора данных")
+    op JSON deleteAllColumns()
 }
 
+@NFCore(documentation="Набор данных, подключаемый из Базы данных через Jdbc")
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
+        @NFCore(documentation="Подключение к Базе данных")
     refers JdbcConnection connection
+        @NFCore(documentation="Формат формирования запроса. Возможные значение: UseTableName - используя только имя таблицы и схему, UseQuery - используя только сам запрос")
     QueryType queryType
-    Text query //тут, так как для каждого dataset своя валидаия
+        @NFCore(documentation="Запрос к Базе данных")
+    Text query
+        @NFCore(documentation="Схема для запроса к Базе данных")
     Text schemaName
+         @NFCore(documentation="Название таблицы для запроса к Базе данных")
     Text tableName
+        @NFCore(documentation="Вывести на экран все таблицы")
     op JSON showAllTables()
+        @NFCore(documentation="Загрузить все колонки из таблицы в Базе данных")
     op JSON loadAllColumns()
+        @NFCore(documentation="Запустить запрос к Базе данных")
     op JSON runQueryDataset(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="Набор данных, без подключения к Базе данных")
 class GroovyDataset extends Dataset {
-    op JSON loadAllColumns()
-    op JSON runQueryDataset(QueryParameter[] parameters)
+        @NFCore(documentation="Исполняемый код на Groovy для запроса данных")
     String runQueryGroovyCode
+        @NFCore(documentation="Исполняемый код на Groovy для создания колонок")
     String loadAllColumnGroovyCode
+        @NFCore(documentation="Запуск кода из 'loadAllColumnGroovyCode'")
+    op JSON loadAllColumns()
+        @NFCore(documentation="Запуск кода из 'runQueryGroovyCode'")
+    op JSON runQueryDataset(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="Сводная таблица")
 class Pivot {
 }
 
+@NFCore(documentation="Диаграмма")
 class Diagram {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String diagramName
+        @NFCore(documentation="Тип диаграммы: Line, Bar, Pie")
     DiagramType diagramType
+        @NFCore(documentation="")
     String axisXLegend
     String axisYLegend
     AxisXPositionType axisXPosition
@@ -125,12 +155,14 @@ class DMLQuery {
 }
 
 class DatasetColumn {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     String rdbmsDataType
     DataType convertDataType
 }
 
 abstract class DatasetColumnView {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     contains Typography headerName //название столбца
     boolean hide
@@ -316,6 +348,7 @@ enum HighlightType {
     Column
     Row
 }
+
 
 enum DiagramType {
     Line
