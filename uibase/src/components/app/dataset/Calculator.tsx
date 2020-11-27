@@ -154,7 +154,6 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
 
     componentDidMount(): void {
         if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}
-        this.getALLFunctions(this.props.cu)
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
