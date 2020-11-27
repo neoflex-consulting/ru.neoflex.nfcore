@@ -157,11 +157,13 @@ class DatasetComponent extends Tagged {
     op void executeDelete(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="")
 class DMLQuery {
     String queryText
     boolean generateFromModel
 }
 
+@NFCore(documentation="")
 class DatasetColumn {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
@@ -169,6 +171,7 @@ class DatasetColumn {
     DataType convertDataType
 }
 
+@NFCore(documentation="")
 abstract class DatasetColumnView {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
@@ -180,6 +183,7 @@ abstract class DatasetColumnView {
     boolean resizable
 }
 
+@NFCore(documentation="")
 class RdbmsColumn extends DatasetColumnView {
     refers FormatMask formatMask //Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
     refers FormatMask excelFormatMask
@@ -194,17 +198,21 @@ class RdbmsColumn extends DatasetColumnView {
     refers DatasetColumn datasetColumn
 }
 
+@NFCore(documentation="")
 class ColumnGroup extends DatasetColumnView {
     contains DatasetColumnView[] column
 }
 
+@NFCore(documentation="")
 class FormatMask extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="")
     String value
     boolean isDynamic
 }
 
+@NFCore(documentation="")
 class QueryParameter {
     String parameterName
     String parameterValue
@@ -216,6 +224,7 @@ class QueryParameter {
     boolean isPrimaryKey
 }
 
+@NFCore(documentation="")
 class QueryFilter {
     String datasetColumn
     Operations operation
@@ -223,18 +232,21 @@ class QueryFilter {
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryAggregate {
     String datasetColumn
     Aggregate operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QuerySort {
     String datasetColumn
     Sort operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryGroupBy {
     String datasetColumn
     Aggregate operation
@@ -242,11 +254,13 @@ class QueryGroupBy {
     String value
 }
 
+@NFCore(documentation="")
 class QueryGroupByColumn {
     String datasetColumn
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryCalculatedExpression {
     String datasetColumn
     String operation
@@ -255,21 +269,25 @@ class QueryCalculatedExpression {
     boolean enable
 }
 
+@NFCore(documentation="")
 class HiddenColumn {
     String datasetColumn
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryConditionDTO {
     String datasetColumn
     String operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryFilterDTO extends QueryConditionDTO {
     String value
 }
 
+@NFCore(documentation="")
 class Highlight {
     HighlightType highlightType
     String datasetColumn
@@ -280,11 +298,13 @@ class Highlight {
     String color
 }
 
+@NFCore(documentation="")
 enum QueryType {
     UseTableName
     UseQuery
 }
 
+@NFCore(documentation="")
 enum Operations {
     EqualTo
     NotEqual
@@ -302,6 +322,7 @@ enum Operations {
     NotEndOn
 }
 
+@NFCore(documentation="")
 enum Aggregate {
     Average
     Count
@@ -311,29 +332,34 @@ enum Aggregate {
     Sum
 }
 
+@NFCore(documentation="")
 enum Sort {
     FromAtoZ
     FromZtoA
 }
 
+@NFCore(documentation="")
 enum Access {
     Public
     Private
     Default
 }
 
+@NFCore(documentation="")
 enum Filter {
     TextColumnFilter
     NumberColumnFilter
     DateColumnFilter
 }
 
+@NFCore(documentation="")
 enum Pinned {
     Undefined
     Left
     Right
 }
 
+@NFCore(documentation="")
 enum TextAlign {
     Undefined
     Left
@@ -341,6 +367,7 @@ enum TextAlign {
     Center
 }
 
+@NFCore(documentation="")
 enum DataType {
     Undefined
     Boolean
@@ -351,19 +378,21 @@ enum DataType {
     Timestamp
 }
 
+@NFCore(documentation="")
 enum HighlightType {
     Cell
     Column
     Row
 }
 
-
+@NFCore(documentation="")
 enum DiagramType {
     Line
     Bar
     Pie
 }
 
+@NFCore(documentation="")
 enum LegendAnchorPositionType {
     TopLeft
     Top
@@ -376,16 +405,19 @@ enum LegendAnchorPositionType {
     BottomRight
 }
 
+@NFCore(documentation="")
 enum AxisXPositionType {
     Top
     Bottom
 }
 
+@NFCore(documentation="")
 enum AxisYPositionType {
     Left
     Right
 }
 
+@NFCore(documentation="Функции для калькулятора")
 enum CalculatorFunction {
     abs as "abs(<column>)"
     mod as "mod(<column1>,<column2>)"
@@ -439,6 +471,7 @@ enum CalculatorFunction {
     lesserEqual as "<="
 }
 
+@NFCore(documentation="")
 enum DMLQueryType {
     Insert,
     Update,
