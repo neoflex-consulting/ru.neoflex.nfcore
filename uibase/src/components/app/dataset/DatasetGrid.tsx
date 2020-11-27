@@ -10,7 +10,7 @@ import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import {Button_, Checkbox_, DatePicker_, Href_, Input_, RadioGroup_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
+import {agGridColumnTypes, appTypes, dmlOperation, grantType} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -588,8 +588,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    getComponent = (className: string) => {
-        if (className === "//Href") {
+    getComponent = (className: string, objectGrantType: any) => {
+        if (objectGrantType === grantType.denied) {
+            return ""
+        } else if (className === "//Href") {
             return 'hrefComponent'
         } else if (className === "//Button") {
             return 'buttonComponent'
@@ -867,13 +869,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         showMenuCopyButton: this.props.showMenuCopyButton,
                         isAgComponent: true
                     } : undefined,
-                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass._id : colDef.get('component')) : function (params: any) {
+                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass._id : colDef.get('component')
+                        , colDef.get('component') && colDef.get('component').get('grantType')) : function (params: any) {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
                         ? this.getComponent(colDef.get('editComponent').eClass
                             ? colDef.get('editComponent').eClass._id
-                            : colDef.get('editComponent'))
+                            : colDef.get('editComponent'), colDef.get('component') && colDef.get('component').get('grantType'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,

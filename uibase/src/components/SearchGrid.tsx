@@ -212,7 +212,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             <NeoDrawer
                 className={'datasearch__filter__drawer'}
                 mask={false}
-                title={`Поиск по ${name}`}
+                title={`${this.props.t('search by')} ${name}`}
                 visible={this.state.filterMenuVisible}
                 width={711}
                 >

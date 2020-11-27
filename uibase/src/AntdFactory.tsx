@@ -866,7 +866,9 @@ class GroovyCommand_ extends ViewContainer {
     execute = () => {
         const commandType = this.viewObject.get('commandType')||"Eval";
         const command = this.viewObject.get('command');
-        const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+        const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems')
+            , this.props.context.contextItemValues
+            , this.props.pathFull[this.props.pathFull.length - 1].params))
         if (commandType === "Resource") {
 
             API.instance().fetchJson('/script/resource?path='+this.viewObject.get('gitResourcePath'), {

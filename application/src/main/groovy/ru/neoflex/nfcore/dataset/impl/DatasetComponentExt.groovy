@@ -80,6 +80,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         })
     }
 
+
     @Override
     String runQuery(
             EList<QueryParameter> parameters,
@@ -117,6 +118,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
         else {
             throw new IllegalArgumentException("Please created columns in this object.")
         }
+    }
+
+    @Override
+    String getAllFunctions() {
+        CalculatorFunction.
+        return "super.getAllFunctions()"
     }
 
     List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
