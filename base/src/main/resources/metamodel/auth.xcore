@@ -126,10 +126,6 @@ abstract class Authority {
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 }
-@NFCore(documentation="Контейнер для элементов визуального интрфеса, доступных в меню 'view' в Application и AppModule")
-	container ViewContainer parent opposite children
-	       @NFCore(documentation="Элементы визуального интрфеса, доступные в меню 'view' в Application и AppModule")
-    	contains ViewElement[] children opposite parent
 
 @NFCore(documentation="Проверка подлинности пароля")
 abstract class Authenticator {
