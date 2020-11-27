@@ -35,6 +35,32 @@ const marginBottom = '20px';
 
 let startResource: Object;
 
+export enum AntdFactoryClasses {
+    Column='ru.neoflex.nfcore.application#//Column',
+    Form='ru.neoflex.nfcore.application#//Form',
+    TabsViewReport='ru.neoflex.nfcore.application#//TabsViewReport',
+    DatasetView='ru.neoflex.nfcore.application#//DatasetView',
+    Typography='ru.neoflex.nfcore.application#//Typography',
+    Select='ru.neoflex.nfcore.application#//Select',
+    DatePicker='ru.neoflex.nfcore.application#//DatePicker',
+    HtmlContent='ru.neoflex.nfcore.application#//HtmlContent',
+    Button='ru.neoflex.nfcore.application#//Button',
+    Input='ru.neoflex.nfcore.application#//Input',
+    Row='ru.neoflex.nfcore.application#//Row',
+    Calendar='ru.neoflex.nfcore.application#//Calendar',
+    GroovyCommand='ru.neoflex.nfcore.application#//GroovyCommand',
+    ValueHolder='ru.neoflex.nfcore.application#//ValueHolder',
+    MasterdataView='ru.neoflex.nfcore.application#//MasterdataView',
+    EventHandler='ru.neoflex.nfcore.application#//EventHandler',
+    Drawer='ru.neoflex.nfcore.application#//Drawer',
+    Href='ru.neoflex.nfcore.application#//Href',
+    Collapse='ru.neoflex.nfcore.application#//Collapse',
+    Region='ru.neoflex.nfcore.application#//Region',
+    Checkbox='ru.neoflex.nfcore.application#//Checkbox',
+    NeoIcon='ru.neoflex.nfcore.application#//NeoIcon',
+    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup'
+}
+
 function getAgGridValue(this: any, returnValueType: string, defaultValue: string) {
     if (returnValueType === 'object') {
         return this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get(defaultValue)}
@@ -1636,29 +1662,29 @@ class AntdFactory implements ViewFactory {
     components = new Map<string, typeof View>();
 
     constructor() {
-        this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
-        this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
-        this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);
-        this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
-        this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
-        this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
-        this.components.set('ru.neoflex.nfcore.application#//HtmlContent', HtmlContent_);
-        this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
-        this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
-        this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
-        this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
-        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
-        this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
-        this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
-        this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
-        this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
-        this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
-        this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
-        this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
-        this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
-        this.components.set('ru.neoflex.nfcore.application#//NeoIcon', NeoIcon_);
-        this.components.set('ru.neoflex.nfcore.application#//RadioGroup', RadioGroup_);
+        this.components.set(AntdFactoryClasses.Column, Col_);
+        this.components.set(AntdFactoryClasses.Form, Form_);
+        this.components.set(AntdFactoryClasses.TabsViewReport, TabsViewReport_);
+        this.components.set(AntdFactoryClasses.DatasetView, DatasetView_);
+        this.components.set(AntdFactoryClasses.Typography, Typography_);
+        this.components.set(AntdFactoryClasses.Select, Select_);
+        this.components.set(AntdFactoryClasses.DatePicker, DatePicker_);
+        this.components.set(AntdFactoryClasses.HtmlContent, HtmlContent_);
+        this.components.set(AntdFactoryClasses.Button, Button_);
+        this.components.set(AntdFactoryClasses.Input, Input_);
+        this.components.set(AntdFactoryClasses.Row, Row_);
+        this.components.set(AntdFactoryClasses.Calendar, Calendar_);
+        this.components.set(AntdFactoryClasses.GroovyCommand, GroovyCommand_);
+        this.components.set(AntdFactoryClasses.ValueHolder, ValueHolder_);
+        this.components.set(AntdFactoryClasses.MasterdataView, MasterdataView_);
+        this.components.set(AntdFactoryClasses.EventHandler, EventHandler_);
+        this.components.set(AntdFactoryClasses.Drawer, Drawer_);
+        this.components.set(AntdFactoryClasses.Href, Href_);
+        this.components.set(AntdFactoryClasses.Collapse, Collapse_);
+        this.components.set(AntdFactoryClasses.Region, Region_);
+        this.components.set(AntdFactoryClasses.Checkbox, Checkbox_);
+        this.components.set(AntdFactoryClasses.NeoIcon, NeoIcon_);
+        this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
     }
 
     createView(viewObject: Ecore.EObject, props: any): JSX.Element {

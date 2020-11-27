@@ -8,9 +8,12 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import {Button_, Checkbox_, DatePicker_, Href_, Input_, RadioGroup_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {agGridColumnTypes, appTypes, dmlOperation, grantType} from "../../../utils/consts";
+import {
+    agGridColumnTypes,
+    appTypes,
+    dmlOperation,
+} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -29,6 +32,9 @@ import {
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
+import {ViewRegistry} from "../../../ViewRegistry";
+import {getStringValuesFromEnum} from "../../../utils/enumUtils";
+import {AntdFactoryClasses} from "../../../AntdFactory";
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
@@ -65,6 +71,18 @@ interface Props {
     hidePagination?: boolean
 }
 
+class AntdFactoryWrapper extends React.Component<any, {}> {
+    private viewFactory = ViewRegistry.INSTANCE.get('antd');
+
+    constructor(props:any) {
+        super(props);
+    }
+
+    render() {
+        return this.viewFactory.createView(this.props.viewObject, this.props)
+    }
+}
+
 class DatasetGrid extends React.Component<Props & any, any> {
 
     private grid: React.RefObject<any>;
@@ -88,17 +106,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
             locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
-                    selectComponent: Select_,
-                    buttonComponent: Button_,
-                    hrefComponent: Href_,
-                    checkboxComponent: Checkbox_,
-                    radioGroupComponent: RadioGroup_,
-                    datePickerComponent: DatePicker_,
-                    inputComponent: Input_,
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
                     expand: Expand,
+                    antdFactory: AntdFactoryWrapper
                 },
                 defaultColDef: {
                     resizable: true,
@@ -588,23 +600,9 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    getComponent = (className: string, objectGrantType: any) => {
-        if (objectGrantType === grantType.denied) {
-            return ""
-        } else if (className === "//Href") {
-            return 'hrefComponent'
-        } else if (className === "//Button") {
-            return 'buttonComponent'
-        } else if (className === "//Select") {
-            return 'selectComponent'
-        } else if (className === "//Checkbox") {
-            return 'checkboxComponent'
-        } else if (className === "//RadioGroup") {
-            return 'radioGroupComponent'
-        } else if (className === "//DatePicker") {
-            return 'datePickerComponent'
-        } else if (className === "//Input") {
-            return 'inputComponent'
+    getComponent = (className: string) => {
+        if (getStringValuesFromEnum(AntdFactoryClasses).includes(className)) {
+            return 'antdFactory'
         } else {
             return className
         }
@@ -869,14 +867,13 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         showMenuCopyButton: this.props.showMenuCopyButton,
                         isAgComponent: true
                     } : undefined,
-                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass._id : colDef.get('component')
-                        , colDef.get('component') && colDef.get('component').get('grantType')) : function (params: any) {
+                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass.eURI() : colDef.get('component')) : function (params: any) {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
                         ? this.getComponent(colDef.get('editComponent').eClass
-                            ? colDef.get('editComponent').eClass._id
-                            : colDef.get('editComponent'), colDef.get('component') && colDef.get('component').get('grantType'))
+                            ? colDef.get('editComponent').eClass.eURI()
+                            : colDef.get('editComponent'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,
