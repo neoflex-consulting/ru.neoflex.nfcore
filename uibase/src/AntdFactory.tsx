@@ -1,4 +1,4 @@
-import {View, ViewFactory} from './View'
+import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
@@ -873,7 +873,7 @@ class HtmlContent_ extends ViewContainer {
     }
 }
 
-class GroovyCommand_ extends ViewContainer {
+class GroovyCommand_ extends Component {
     componentDidMount(): void {
         if (this.viewObject.get('executeOnStartup')) {
             this.execute()
@@ -940,14 +940,13 @@ class GroovyCommand_ extends ViewContainer {
             })
         }
     };
+
     render = () => {
-        return (
-            <div/>
-        )
+        return null
     }
 }
 
-class ValueHolder_ extends ViewContainer {
+class ValueHolder_ extends Component {
     constructor(props: any) {
         super(props);
         let value;
@@ -980,9 +979,7 @@ class ValueHolder_ extends ViewContainer {
     }
 
     render = () => {
-        return (
-            <div/>
-        )
+        return null
     }
 }
 
@@ -1280,7 +1277,7 @@ class Typography_ extends ViewContainer {
     }
 }
 
-class EventHandler_ extends ViewContainer {
+class EventHandler_ extends Component {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -1411,8 +1408,8 @@ class EventHandler_ extends ViewContainer {
         unmountComponent.bind(this)(false, true)
     }
 
-    render = () => {
-        return <div/>
+    render() {
+        return null
     }
 }
 
@@ -1659,7 +1656,7 @@ class MasterdataView_ extends ViewContainer {
 
 class AntdFactory implements ViewFactory {
     name = 'antd';
-    components = new Map<string, typeof View>();
+    components = new Map<string, typeof Component>();
 
     constructor() {
         this.components.set(AntdFactoryClasses.Column, Col_);
