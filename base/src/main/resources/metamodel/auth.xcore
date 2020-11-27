@@ -47,7 +47,7 @@ class Role extends Tagged {
         }
         return i
     }
-@       NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
+        @NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {
         var i = 0
         for (Permission grant: grants) {
@@ -65,66 +65,97 @@ enum GrantType {
     Denied  =4
 }
 
-@NFCore(documentation="Доступ")
+@NFCore(documentation="Права доступа")
 abstract class Permission {
-        @NFCore(documentation="")
+        @NFCore(documentation="На какие роли распространяется")
     container Role role opposite grants
         @NFCore(documentation="")
     GrantType grantType
+        @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isEObjectPermitted(EObject eObject) {GrantType::UNKNOWN_VALUE}
+        @NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {GrantType::UNKNOWN_VALUE}
 }
 
+@NFCore(documentation="Права все приложения")
 class AllPermission extends Permission {
+        @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isEObjectPermitted(EObject eObject) {this.grantType.getValue()}
+        @NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {this.grantType.getValue()}
 }
 
+@NFCore(documentation="Права на определенный объект")
 class ObjectPermission extends Permission {
+        @NFCore(documentation="Объект, который подчинается правилам")
     refers EObject eObject
+
+        @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isEObjectPermitted(EObject eObject) {
         if (getEObject() !== null && EcoreUtil.getURI(getEObject()).trimQuery() == EcoreUtil.getURI(eObject).trimQuery()) return this.grantType.getValue()
         else return GrantType::UNKNOWN_VALUE
     }
 }
 
+@NFCore(documentation="Ссылка на ресурс во внутренней файлово системе. Например: '/system/developer'")
 class ApplicationResource {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
 }
 
+@NFCore(documentation="Права на определенный ресурс")
 class ResourcePermission extends Permission {
+        @NFCore(documentation="Ссылка на ресурс во внутренней файлово системе. Например: '/system/developer'")
     refers ApplicationResource Resource
+
+        @NFCore(documentation="Функция проверки прав доступа пользователя к ресурсу. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
     op int isResourcePermitted(String path) {
         if (path.startsWith(getResource().name)) return this.grantType.getValue()
         else return GrantType::UNKNOWN_VALUE
     }
 }
 
+@NFCore(documentation="Полномочия")
 abstract class Authority {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Описание")
     Text description
+        @NFCore(documentation="Группа ролей")
     refers Role[] roles
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 }
+@NFCore(documentation="Контейнер для элементов визуального интрфеса, доступных в меню 'view' в Application и AppModule")
+	container ViewContainer parent opposite children
+	       @NFCore(documentation="Элементы визуального интрфеса, доступные в меню 'view' в Application и AppModule")
+    	contains ViewElement[] children opposite parent
 
+@NFCore(documentation="Проверка подлинности пароля")
 abstract class Authenticator {
+        @NFCore(documentation="Ссылка на пользователя этого пароля")
     refers User user opposite authenticators
+        @NFCore(documentation="Запрет использования пароля")
     boolean disabled
 }
 
+@NFCore(documentation="Зашифрованный пароль")
 class PasswordAuthenticator extends Authenticator {
+        @NFCore(documentation="Пароль")
     Password password
 }
 
+@NFCore(documentation="Пользователь")
 class User extends Authority {
+        @NFCore(documentation="email пользователя")
     String email
+        @NFCore(documentation="Контейнер для паролей пользователя")
     contains Authenticator[] authenticators opposite user
+        @NFCore(documentation="Группы, в которые включен пользователь")
     refers Group[] groups
 }
 
+@NFCore(documentation="Группа с определенными правами доступа")
 class Group extends Authority {
 }
 
@@ -133,10 +164,13 @@ class Group extends Authority {
 class UserProfile {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Имя пользователя")
     String userName
+        @NFCore(documentation="Параметры, к виде JSON приведенного к строке")
     contains Parameter[] params
 }
 
+@NFCore(documentation="Пара ключ - значение для UserProfile")
 class Parameter {
     String key
     String value
@@ -146,15 +180,20 @@ class Parameter {
 class CurrentLock {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Название заблокированного объекта")
     String objectName
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
 }
 
-@NFCore(internal="true", documentation="История радактирования экземпляра класса")
+@NFCore(internal="true", documentation="История радактирования экземпляра класса. Сейчас не используется")
 class EditHistory {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Ссылка на пользователя")
     refers User user
+        @NFCore(documentation="Дата и время блокировки объекта")
     Timestamp lockDate
+        @NFCore(documentation="Дата и время снятия блокировки с объекта")
     Timestamp unlockDate
 }

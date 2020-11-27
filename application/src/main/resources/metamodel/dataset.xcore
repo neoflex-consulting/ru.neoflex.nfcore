@@ -115,16 +115,22 @@ class Diagram {
 }
 
 /*View*/
+@NFCore(documentation="Обработанный (агрегированный) набор данных")
 @Ecore(constraints="IsValid")
 class DatasetComponent extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Владелец обработанного (агрегированного) набора данных")
     refers User owner
         @NFCore(documentation="Данные о создании и изменении объекта")
     contains Audit audit
-    Access access //Публичный, закрытый доступ
+        @NFCore(documentation="Права доступа. Варианты: Public, Private, Default")
+    Access access
+        @NFCore(documentation="Создание всех колонок из 'dataset'")
     op JSON createAllColumns()
+        @NFCore(documentation="Удаление всех колонок")
     op JSON deleteAllColumns()
+        @NFCore(documentation="Ссылка на Набор данных")
     refers Dataset dataset
     contains DatasetColumnView[] column
     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
