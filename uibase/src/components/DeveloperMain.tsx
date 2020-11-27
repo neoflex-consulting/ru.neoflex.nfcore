@@ -94,11 +94,11 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
                 key: `section${index}`,
                 name: refObjs.length !== 0
                     ? <NeoButton style={{color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
-                        this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs)}, filter:""})
+                        this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs.concat(r.eContents()[0]))}, filter:""})
                     }}>{r.eContents()[0].get('name')}</NeoButton>
                     : <a style={{color:NeoColor.grey_9, textDecoration:"underline"}}
                          href={`/developer/data/editor/${API.parseRef(r.eURI()).id}/${r.eResource().rev}`}>{r.eContents()[0].get('name')}</a>,
-                modules: refObjs.length,
+                modules: refObjs.length > 0 ? refObjs.length + 1 : 0,
                 changeDate: undefined,
                 status: undefined,
                 author: undefined,
