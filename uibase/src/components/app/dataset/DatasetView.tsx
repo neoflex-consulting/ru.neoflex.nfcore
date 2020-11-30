@@ -96,7 +96,6 @@ interface State {
     serverCalculatedExpression: IServerQueryParam[];
     hiddenColumns: IServerQueryParam[];
     queryParams: IServerNamedParam[]
-    useServerFilter: boolean;
     filtersMenuVisible: boolean;
     aggregatesMenuVisible: boolean;
     aggregatesGroupsMenuVisible: boolean;
@@ -174,7 +173,6 @@ class DatasetView extends React.Component<any, State> {
             serverCalculatedExpression: [],
             queryParams: [],
             hiddenColumns: [],
-            useServerFilter: false,
             filtersMenuVisible: false,
             fullScreenOn: false,
             aggregatesMenuVisible: false,
@@ -342,8 +340,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('sort', c.get('sort'));
                 rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
-                rowData.set('sortable', false);
-                rowData.set('suppressMenu', c.get('suppressMenu'));
                 rowData.set('resizable', c.get('resizable'));
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 rowData.set('type', type);
@@ -684,7 +680,7 @@ class DatasetView extends React.Component<any, State> {
                     datasetColumn: c.datasetColumn,
                     enable: c.enable
                 }
-            }).filter(hiddenColumn => hiddenColumn.datasetColumn);
+                }).filter(hiddenColumn => hiddenColumn.datasetColumn);
             this.setState({
                 serverFilters: (parameterName === paramType.filter || parameterName === undefined) ? serverFilters : this.state.serverFilters,
                 serverAggregates: (parameterName === paramType.aggregate || parameterName === undefined) ? serverAggregates : this.state.serverAggregates,
@@ -694,8 +690,8 @@ class DatasetView extends React.Component<any, State> {
                 highlights: (parameterName === paramType.highlights || parameterName === undefined) ? highlights : this.state.highlights,
                 serverCalculatedExpression: (parameterName === paramType.calculations || parameterName === undefined) ? serverCalculatedExpression : this.state.serverCalculatedExpression,
                 diagrams,
-                hiddenColumns,
-                useServerFilter: (resource) ? resource.eContents()[0].get('useServerFilter') : false});
+                hiddenColumns
+            });
             this.prepParamsAndRun(resource,
                 serverFilters,
                 serverAggregates,
@@ -759,8 +755,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('sort', colDef.get('sort'));
                 rowData.set('editable', this.state.isReadOnly ? false : colDef.get('editable'));
                 rowData.set('checkboxSelection', colDef.get('checkboxSelection'));
-                rowData.set('sortable', colDef.get('sortable'));
-                rowData.set('suppressMenu', colDef.get('suppressMenu'));
                 rowData.set('resizable', colDef.get('resizable'));
                 rowData.set('type', colDef.get('type'));
                 rowData.set('onCellDoubleClicked', colDef.get('onCellDoubleClicked'));
@@ -792,8 +786,6 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('sort', true);
                 rowData.set('editable', false);
                 rowData.set('checkboxSelection', false);
-                rowData.set('sortable', true);
-                rowData.set('suppressMenu', false);
                 rowData.set('resizable', false);
                 rowData.set('type', element.type);
                 rowData.set('valueFormatter',this.valueFormatter);

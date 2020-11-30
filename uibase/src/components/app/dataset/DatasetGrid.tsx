@@ -108,8 +108,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     antdFactory: AntdFactoryWrapper
                 },
                 defaultColDef: {
-                    resizable: true,
-                    sortable: true,
+                    resizable: true
                 }
             },
             cellStyle: {},
@@ -607,9 +606,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
         return this.buffer
     };
 
-    /*getGridOptions = () => {
-        return this.gridOptions
-    };*/
 
     resetBuffer = () => {
         this.grid.current.api.applyTransaction({ remove: this.buffer
@@ -850,8 +846,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     editable: colDef.get('editable') || false,
                     pinned: colDef.get('pinned') === 'Left' ? 'left' : colDef.get('pinned') === 'Right' ? 'right' : false,
                     resizable: colDef.get('resizable') || false,
-                    sortable: colDef.get('sortable') || false,
-                    suppressMenu: colDef.get('suppressMenu') || false,
                     cellStyle: this.state ? this.state.cellStyle : undefined,
                     cellRendererParams: (colDef.get('component')) ? {
                         ...this.props,
@@ -922,7 +916,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
                             //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
                             suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
-                            suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                             allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
                             headerHeight={48} //высота header в px (25 по умолчанию)
                             rowHeight={40} //высота row в px
