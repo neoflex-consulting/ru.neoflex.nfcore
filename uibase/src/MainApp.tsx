@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
-import {Form, Layout, Menu, Table} from "antd";
+import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
@@ -11,7 +11,7 @@ import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
 import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor, NeoInput, NeoTable, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 
@@ -76,14 +76,13 @@ function splitLog(log:string) {
 function getOpenedPath(arr: string[]) : string[] {
     if (arr.length === 1) {
         return arr
-    } else {
-        const path = arr[arr.length - 1];
-        return arr.filter(s=>{
+    }
+    const path = arr[arr.length - 1];
+    return arr.filter(s=>{
             if (path && ((path.search(s + "/") >= 0) || path === s)) {
                 return s
             }
         })
-    }
 }
 
 export class MainApp extends React.Component<any, State> {

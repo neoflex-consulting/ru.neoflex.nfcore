@@ -73,11 +73,6 @@ interface Props {
 
 class AntdFactoryWrapper extends React.Component<any, {}> {
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
-
-    constructor(props:any) {
-        super(props);
-    }
-
     render() {
         return this.viewFactory.createView(this.props.viewObject, this.props)
     }
