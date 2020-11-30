@@ -1685,7 +1685,7 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
     }
 
-    createView(viewObject: Ecore.EObject, props: any): JSX.Element {
+    createView(viewObject: Ecore.EObject, props: any, ref: any): JSX.Element {
         if (startResource === undefined) {
             startResource = viewObject.eResource().to()
         }
@@ -1695,10 +1695,10 @@ class AntdFactory implements ViewFactory {
         }
         const isAccessDenied = viewObject.get('grantType') === grantType.denied;
         return (
-            isAccessDenied ? <div/> : <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} />
+            isAccessDenied ? <div/> : <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} ref={ref}/>
         )
-
     }
+
 
 }
 

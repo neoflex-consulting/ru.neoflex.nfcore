@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {createRef} from 'react';
 import {AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import {ConfigProvider} from 'antd';
@@ -40,45 +40,46 @@ const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
 
 interface Props {
-    hide?: boolean,
-    onCtrlA?: Function,
-    onCtrlShiftA?: Function,
-    highlights?: {[key: string]: unknown}[];
-    headerSelection?: boolean,
-    onHeaderSelection?: Function,
-    activeReportDateField: boolean,
+    hidden?: boolean,
+    highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
     columnDefs: Map<String,any>[],
     leafColumnDefs: Map<String,any>[],
-    paginationCurrentPage?: number,
-    paginationTotalPage?: number,
     paginationPageSize?: number,
-    showUniqRow?: boolean,
-    saveChanges?: (newParam: any, paramName: string) => void;
-    numberOfNewLines: boolean,
-    onApplyEditChanges?: (buffer: any[]) => void;
     isEditMode?: boolean;
     showEditDeleteButton?: boolean;
     showMenuCopyButton?: boolean;
     aggregatedRows?: {[key: string]: unknown}[];
     height?: number;
     width?: number;
-    highlightClassFunction?: ()=>{};
+    highlightClassFunction?: (params: any) => string | string[];
     valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
-    className?: any;
-    hidePagination?: boolean
+    className?: string;
+    hidePagination?: boolean;
+    i18n: any;
+    t: any;
+    viewObject: any;
+    context: any;
 }
 
 class AntdFactoryWrapper extends React.Component<any, {}> {
+    private componentRef = createRef<any>();
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
+
+    getValue = () => {
+        return this.componentRef.current
+            && this.componentRef.current.getValue
+            && this.componentRef.current.getValue()
+    };
+
     render() {
-        return this.viewFactory.createView(this.props.viewObject, this.props)
+        return this.viewFactory.createView(this.props.viewObject, this.props, this.componentRef)
     }
 }
 
-class DatasetGrid extends React.Component<Props & any, any> {
+class DatasetGrid extends React.Component<Props, any> {
 
     private grid: React.RefObject<any>;
     private gridOptions: GridOptions;
@@ -91,8 +92,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             hidden: false,
             themes: [],
             operations: [],
-            showUniqRow: this.props.showUniqRow,
-            numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: this.props.paginationPageSize ? this.props.paginationPageSize : 10,
             isGridReady: false,
             columnDefs: this.colDefsToObject(this.props.columnDefs),
@@ -230,7 +229,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                 const cellStyle = params.colDef.cellStyle(params);
                 objectRow.push({
-                    value: this.props.valueFormatter ? this.props.valueFormatter(params) : elem[el],
+                    value: this.props.valueFormatter ? this.props.valueFormatter(params as ValueFormatterParams) : elem[el],
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -240,7 +239,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             data.push(objectRow);
         }
         return  {
-            hidden: this.props.hidden,
+            hidden: this.props.hidden!,
             docxComponentType : docxElementExportType.grid,
             gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
             gridData: data
@@ -276,7 +275,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 }
                 const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                 const cellStyle = params.colDef.cellStyle(params);
-                const mask = this.props.excelCellMask && this.props.excelCellMask(params);
+                const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
                 objectRow.push({
                     value: params.colDef.type === appTypes.String ? params.value
                         : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
@@ -286,7 +285,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         ? "dd.mm.yyyy hh:mm:ss"
                         : params.colDef.type === appTypes.Date && !mask
                             ? "dd.mm.yyyy"
-                            : mask,
+                            : mask || "",
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -296,10 +295,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             data.push(objectRow);
         }
         return  {
-            hidden: this.props.hidden,
+            hidden: this.props.hidden!,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
-                tableName: this.props.viewObject.get('name'),
+                tableName: this.props.viewObject.get('name') || "",
                 columns: header,
                 data: data
             },
@@ -889,7 +888,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const {gridOptions} = this.state;
         return (
             <div id="datasetGrid"
-                 hidden={this.props.hide}
+                 hidden={this.props.hidden}
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
