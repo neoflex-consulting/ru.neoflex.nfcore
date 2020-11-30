@@ -80,6 +80,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         })
     }
 
+
     @Override
     String runQuery(
             EList<QueryParameter> parameters,
@@ -119,6 +120,12 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
+    @Override
+    String getAllFunctions() {
+        CalculatorFunction.
+        return "super.getAllFunctions()"
+    }
+
     List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
         for (col in column) {
             if (col instanceof ColumnGroup && col.column != null) {
@@ -156,6 +163,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     if (leafColumns[i].class.toString().toLowerCase().contains('rdbms')) {
                         if (queryColumns.size() != 0 && queryColumns.contains("${leafColumns[i].name}")) {
                             throw new IllegalArgumentException("Please, change your query in Dataset. It has similar column`s name")
+                        } else if (leafColumns[i] instanceof RdbmsColumnImpl && (leafColumns[i] as RdbmsColumnImpl).datasetColumn == null) {
+                            queryColumns.add("null")
                         } else {
                             queryColumns.add("t.\"${leafColumns[i].name}\"")
                         }

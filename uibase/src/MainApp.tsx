@@ -130,7 +130,12 @@ export class MainApp extends React.Component<any, State> {
                                 if (objectApp.get('referenceTree') === null) {
                                     if (currentAppModule.useParentReferenceTree) {
                                         this.props.context.updateContext!(
-                                            ({viewObject: objectApp.get('view')})
+                                            ({
+                                                viewObject: objectApp.get('view'),
+                                                variableList: objectApp.get('variables'),
+                                                eventHandlerList: objectApp.get('eventHandlers'),
+                                                groovyCommandList: objectApp.get('groovyCommands'),
+                                            })
                                         );
                                         let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
                                         if (app.length !== 0 && this.props.context.applicationReferenceTree === undefined) {
@@ -138,7 +143,12 @@ export class MainApp extends React.Component<any, State> {
                                         }
                                     } else {
                                         this.props.context.updateContext!(
-                                            ({viewObject: objectApp.get('view'), applicationReferenceTree: undefined}),
+                                            ({
+                                                viewObject: objectApp.get('view'),
+                                                variableList: objectApp.get('variables'),
+                                                eventHandlerList: objectApp.get('eventHandlers'),
+                                                groovyCommandList: objectApp.get('groovyCommands'),
+                                                applicationReferenceTree: undefined}),
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
                                         this.setState({hideReferences: true})
@@ -147,6 +157,9 @@ export class MainApp extends React.Component<any, State> {
                                     this.props.context.updateContext!(
                                         ({
                                             viewObject: objectApp.get('view'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
                                         })
                                     );
@@ -160,7 +173,12 @@ export class MainApp extends React.Component<any, State> {
                             if (objectApp.get('referenceTree') === null) {
                                 if (currentAppModule.useParentReferenceTree) {
                                     this.props.context.updateContext!(
-                                        ({viewObject: objectApp.get('view')})
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                        })
                                     );
                                     let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
                                     if (app.length !== 0 && this.props.context.applicationReferenceTree === undefined) {
@@ -168,7 +186,13 @@ export class MainApp extends React.Component<any, State> {
                                     }
                                 } else {
                                     this.props.context.updateContext!(
-                                        ({viewObject: objectApp.get('view'), applicationReferenceTree: undefined}),
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                            applicationReferenceTree: undefined
+                                        }),
                                         ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                     );
                                     this.setState({hideReferences: true})
@@ -178,6 +202,9 @@ export class MainApp extends React.Component<any, State> {
                                 this.props.context.updateContext!(
                                     ({
                                         viewObject: objectApp.get('view'),
+                                        variableList: objectApp.get('variables'),
+                                        eventHandlerList: objectApp.get('eventHandlers'),
+                                        groovyCommandList: objectApp.get('groovyCommands'),
                                         applicationReferenceTree: objectApp.get('referenceTree')
                                     })
                                 );
@@ -375,6 +402,12 @@ export class MainApp extends React.Component<any, State> {
         return this.viewFactory.createView(viewObject, this.props)
     };
 
+    renderEList = (list: Ecore.EList) => {
+        return list && list.array().map(v=>{
+            return this.viewFactory.createView(v, this.props)
+        })
+    };
+
     renderReferences = (isShortSize = false) => {
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
@@ -489,6 +522,9 @@ export class MainApp extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
                 </Helmet>
                 <FetchSpinner/>
+                {this.renderEList(this.props.context.variableList)}
+                {this.renderEList(this.props.context.groovyCommandList)}
+                {this.renderEList(this.props.context.eventHandlerList)}
                 <Splitter
                     allowResize={!this.state.hideReferences}
                     ref={this.refSplitterRef}

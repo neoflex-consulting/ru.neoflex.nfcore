@@ -9,6 +9,9 @@ package ru.neoflex.nfcore.locales
 import ru.neoflex.nfcore.base.types.QName
 import ru.neoflex.nfcore.base.types.Text
 
+annotation "ru.neoflex.nfcore" as NFCore
+
+@NFCore(documentation="Язык")
 class Lang {
 	QName name
 }

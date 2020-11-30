@@ -13,6 +13,7 @@ annotation "ru.neoflex.nfcore" as NFCore
 @Ecore(constraints="IsValid")
 @NFCore(documentation="Тег - используется для пометки элементов приложения, для упрощения дальнейшего поиска")
 class Tag {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
 }
 

@@ -16,58 +16,95 @@ import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.Typography
 import ru.neoflex.nfcore.application.GridComponent
 
+annotation "ru.neoflex.nfcore" as NFCore
+
 /*JdbcDriver*/
+@NFCore(documentation="Jdbc драйвер")
 @Ecore(constraints="IsValid")
 class JdbcDriver extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Название драйвера. Например: 'JdbcDriverPostgresqlTest'")
     String driverClassName
+        @NFCore(documentation="Ссылки на файлы с драйверами")
     String[] extLibraries
+        @NFCore(documentation="Шаблон URL")
 	String urlPattern
 }
 
 /*JdbcConnection*/
+@NFCore(documentation="Подключение к Базе данных")
 @Ecore(constraints="IsValid")
 class JdbcConnection extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Jdbc драйвер")
     refers JdbcDriver driver
+        @NFCore(documentation="Путь к Базе данных. Например: 'jdbc:postgresql://NRStudio-Master.neoflex.ru:5432/nrtest'")
     String url
+        @NFCore(documentation="Логин от Базы данных")
     String userName
+        @NFCore(documentation="Пароль от Базы данных")
     Password password
 }
 
 /*Dataset*/
+@NFCore(documentation="Набор данных (таблица)")
 abstract class Dataset extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
-    op JSON deleteAllColumns()
+        @NFCore(documentation="Список со всеми колонками в наборе данных")
     contains DatasetColumn[] datasetColumn
+        @NFCore(documentation="Удаление всех колонок из Набора данных")
+    op JSON deleteAllColumns()
 }
 
+@NFCore(documentation="Набор данных, подключаемый из Базы данных через Jdbc")
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
+        @NFCore(documentation="Подключение к Базе данных")
     refers JdbcConnection connection
+        @NFCore(documentation="Формат формирования запроса. Возможные значение: UseTableName - используя только имя таблицы и схему, UseQuery - используя только сам запрос")
     QueryType queryType
-    Text query //тут, так как для каждого dataset своя валидаия
+        @NFCore(documentation="Запрос к Базе данных")
+    Text query
+        @NFCore(documentation="Схема для запроса к Базе данных")
     Text schemaName
+         @NFCore(documentation="Название таблицы для запроса к Базе данных")
     Text tableName
+        @NFCore(documentation="Вывести на экран все таблицы")
     op JSON showAllTables()
+        @NFCore(documentation="Загрузить все колонки из таблицы в Базе данных")
     op JSON loadAllColumns()
+        @NFCore(documentation="Запустить запрос к Базе данных")
     op JSON runQueryDataset(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="Набор данных, без подключения к Базе данных")
 class GroovyDataset extends Dataset {
-    op JSON loadAllColumns()
-    op JSON runQueryDataset(QueryParameter[] parameters)
+        @NFCore(documentation="Исполняемый код на Groovy для запроса данных")
     String runQueryGroovyCode
+        @NFCore(documentation="Исполняемый код на Groovy для создания колонок")
     String loadAllColumnGroovyCode
+        @NFCore(documentation="Запуск кода из 'loadAllColumnGroovyCode'")
+    op JSON loadAllColumns()
+        @NFCore(documentation="Запуск кода из 'runQueryGroovyCode'")
+    op JSON runQueryDataset(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="Сводная таблица")
 class Pivot {
 }
 
+@NFCore(documentation="Диаграмма")
 class Diagram {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String diagramName
+        @NFCore(documentation="Тип диаграммы: Line, Bar, Pie")
     DiagramType diagramType
+        @NFCore(documentation="Подпись по горизонтали")
     String axisXLegend
+        @NFCore(documentation="Подпись по вертикали")
     String axisYLegend
     AxisXPositionType axisXPosition
     AxisYPositionType axisYPosition
@@ -79,83 +116,116 @@ class Diagram {
 }
 
 /*View*/
+@NFCore(documentation="Обработанный (агрегированный) набор данных")
 @Ecore(constraints="IsValid")
 class DatasetComponent extends Tagged {
-     QName name //default сделать по умолчанию (не редактируемый)
-     refers User owner
-     contains Audit audit // createdBy + created(time) + modifiedBy + modified(time)
-     Access access //Публичный, закрытый доступ
-     op JSON createAllColumns()
-     op JSON deleteAllColumns()
-     refers Dataset dataset
-     contains DatasetColumnView[] column
-     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
-     contains QueryParameter[] serverParameters
-     boolean useServerFilter
-     //Состав серверного фильтра
-     contains QueryFilter[] serverFilter
-     contains QueryAggregate[] serverAggregation
-     contains QuerySort[] serverSort
-     contains QueryGroupBy[] serverGroupBy
-     contains QueryCalculatedExpression[] serverCalculatedExpression
-     contains QueryGroupByColumn[] groupByColumn
-     contains Highlight[] highlight
-     contains Pivot[] pivot
-     contains Diagram[] diagram
-     contains HiddenColumn[] hiddenColumn
-     contains DMLQuery insertQuery
-     contains DMLQuery updateQuery
-     contains DMLQuery deleteQuery
-     op void executeInsert(QueryParameter[] parameters)
-     op void executeUpdate(QueryParameter[] parameters)
-     op void executeDelete(QueryParameter[] parameters)
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
+    QName name
+        @NFCore(documentation="Владелец обработанного (агрегированного) набора данных")
+    refers User owner
+        @NFCore(documentation="Данные о создании и изменении объекта")
+    contains Audit audit
+        @NFCore(documentation="Права доступа. Варианты: Public, Private, Default")
+    Access access
+        @NFCore(documentation="Создание всех колонок из 'dataset'")
+    op JSON createAllColumns()
+        @NFCore(documentation="Удаление всех колонок")
+    op JSON deleteAllColumns()
+        @NFCore(documentation="Ссылка на Набор данных")
+    refers Dataset dataset
+        @NFCore(documentation="Колонки")
+    contains DatasetColumnView[] column
+        @NFCore(documentation="Запустить запрос к Базе данных")
+    op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
+        @NFCore(documentation="Возвращает список функций для калькультора в зависимости от базы данных")
+    op JSON getAllFunctions()
+    contains QueryParameter[] serverParameters
+        //Состав серверного фильтра
+    contains QueryFilter[] serverFilter
+    contains QueryAggregate[] serverAggregation
+    contains QuerySort[] serverSort
+    contains QueryGroupBy[] serverGroupBy
+    contains QueryCalculatedExpression[] serverCalculatedExpression
+    contains QueryGroupByColumn[] groupByColumn
+    contains Highlight[] highlight
+    contains Pivot[] pivot
+    contains Diagram[] diagram
+    contains HiddenColumn[] hiddenColumn
+    contains DMLQuery insertQuery
+    contains DMLQuery updateQuery
+    contains DMLQuery deleteQuery
+    op void executeInsert(QueryParameter[] parameters)
+    op void executeUpdate(QueryParameter[] parameters)
+    op void executeDelete(QueryParameter[] parameters)
 }
 
+@NFCore(documentation="")
 class DMLQuery {
     String queryText
     boolean generateFromModel
 }
 
+@NFCore(documentation="")
 class DatasetColumn {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     String rdbmsDataType
     DataType convertDataType
 }
 
+@NFCore(documentation="Колонки")
 abstract class DatasetColumnView {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
     contains Typography headerName //название столбца
+        @NFCore(documentation="Скрыть/показать колонку")
     boolean hide
+        @NFCore(documentation="Текст, отображаемый при наведении мыши на заголовок колонки")
     String headerTooltip
+        @NFCore(documentation="Отображать текст из 'headerTooltip'")
     boolean showTooltipField
-    Pinned pinned = "Undefined"
+        @NFCore(documentation="Закрепить столбец. Варианты: Undefined, Left, Right")
+    Pinned pinned
+        @NFCore(documentation="Возможность изменения ширины колонки пользователем")
     boolean resizable
 }
 
+@NFCore(documentation="Подробное описание колонки")
 class RdbmsColumn extends DatasetColumnView {
-    refers FormatMask formatMask //Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)
+        @NFCore(documentation="Формат того, как отображаются данные (два знака после запятой, с точнок, как текст, как число...)")
+    refers FormatMask formatMask
+        @NFCore(documentation="Формат того, как выкачиваются данные в Excel (два знака после запятой, с точнок, как текст, как число...)")
     refers FormatMask excelFormatMask
-    String defaultValue //Если пришло значение null, то что отображать в ячейке
+        @NFCore(documentation="Если пришло значение null, то отображать 'defaultValue' в ячейке")
+    String defaultValue
+        @NFCore(documentation="Редактируемая колонка")
     boolean editable
-    boolean sortable
-    boolean suppressMenu
+        @NFCore(documentation="Определение первичного ключа для редактирования таблицы")
     boolean isPrimaryKey
-    TextAlign textAlign = "Undefined"
+        @NFCore(documentation="Выравнивание текста. Варианты: Undefined, Left, Right, Center")
+    TextAlign textAlign
     String componentRenderCondition
+        @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
     contains GridComponent component
+        @NFCore(documentation="Ссылка на соответствующую колонку из 'dataset'")
     refers DatasetColumn datasetColumn
 }
 
+@NFCore(documentation="")
 class ColumnGroup extends DatasetColumnView {
     contains DatasetColumnView[] column
 }
 
+@NFCore(documentation="")
 class FormatMask extends Tagged {
+        @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="")
     String value
     boolean isDynamic
 }
 
+@NFCore(documentation="")
 class QueryParameter {
     String parameterName
     String parameterValue
@@ -167,6 +237,7 @@ class QueryParameter {
     boolean isPrimaryKey
 }
 
+@NFCore(documentation="")
 class QueryFilter {
     String datasetColumn
     Operations operation
@@ -174,18 +245,21 @@ class QueryFilter {
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryAggregate {
     String datasetColumn
     Aggregate operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QuerySort {
     String datasetColumn
     Sort operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryGroupBy {
     String datasetColumn
     Aggregate operation
@@ -193,11 +267,13 @@ class QueryGroupBy {
     String value
 }
 
+@NFCore(documentation="")
 class QueryGroupByColumn {
     String datasetColumn
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryCalculatedExpression {
     String datasetColumn
     String operation
@@ -206,21 +282,25 @@ class QueryCalculatedExpression {
     boolean enable
 }
 
+@NFCore(documentation="")
 class HiddenColumn {
     String datasetColumn
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryConditionDTO {
     String datasetColumn
     String operation
     boolean enable
 }
 
+@NFCore(documentation="")
 class QueryFilterDTO extends QueryConditionDTO {
     String value
 }
 
+@NFCore(documentation="")
 class Highlight {
     HighlightType highlightType
     String datasetColumn
@@ -231,11 +311,13 @@ class Highlight {
     String color
 }
 
+@NFCore(documentation="")
 enum QueryType {
     UseTableName
     UseQuery
 }
 
+@NFCore(documentation="")
 enum Operations {
     EqualTo
     NotEqual
@@ -253,6 +335,7 @@ enum Operations {
     NotEndOn
 }
 
+@NFCore(documentation="")
 enum Aggregate {
     Average
     Count
@@ -262,29 +345,34 @@ enum Aggregate {
     Sum
 }
 
+@NFCore(documentation="")
 enum Sort {
     FromAtoZ
     FromZtoA
 }
 
+@NFCore(documentation="")
 enum Access {
     Public
     Private
     Default
 }
 
+@NFCore(documentation="")
 enum Filter {
     TextColumnFilter
     NumberColumnFilter
     DateColumnFilter
 }
 
+@NFCore(documentation="")
 enum Pinned {
     Undefined
     Left
     Right
 }
 
+@NFCore(documentation="")
 enum TextAlign {
     Undefined
     Left
@@ -292,6 +380,7 @@ enum TextAlign {
     Center
 }
 
+@NFCore(documentation="")
 enum DataType {
     Undefined
     Boolean
@@ -302,18 +391,21 @@ enum DataType {
     Timestamp
 }
 
+@NFCore(documentation="")
 enum HighlightType {
     Cell
     Column
     Row
 }
 
+@NFCore(documentation="")
 enum DiagramType {
     Line
     Bar
     Pie
 }
 
+@NFCore(documentation="")
 enum LegendAnchorPositionType {
     TopLeft
     Top
@@ -326,16 +418,19 @@ enum LegendAnchorPositionType {
     BottomRight
 }
 
+@NFCore(documentation="")
 enum AxisXPositionType {
     Top
     Bottom
 }
 
+@NFCore(documentation="")
 enum AxisYPositionType {
     Left
     Right
 }
 
+@NFCore(documentation="Функции для калькулятора")
 enum CalculatorFunction {
     abs as "abs(<column>)"
     mod as "mod(<column1>,<column2>)"
@@ -389,6 +484,7 @@ enum CalculatorFunction {
     lesserEqual as "<="
 }
 
+@NFCore(documentation="")
 enum DMLQueryType {
     Insert,
     Update,

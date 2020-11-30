@@ -6,7 +6,6 @@
     rootExtendsInterface="org.eclipse.emf.ecore.EObject"
 )
 package ru.neoflex.nfcore.application
-import org.eclipse.emf.ecore.EObject
 import ru.neoflex.nfcore.dataset.DatasetComponent
 import ru.neoflex.nfcore.dataset.Dataset
 import ru.neoflex.nfcore.dataset.DatasetColumn
@@ -70,12 +69,18 @@ class AppModule extends Tagged {
     GrantType grantType = "Write"
         @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его права доступа, а после выставляет значение поля grantType")
     boolean checkRights
+        @NFCore(documentation="Переменные используемые в модуле")
+    contains ValueHolder[] variables
+        @NFCore(documentation="Обработчики событий в модуле")
+    contains EventHandler[] eventHandlers
+        @NFCore(documentation="Исполняемый код groovy")
+    contains GroovyCommand[] groovyCommands
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
 @Ecore(constraints="IsValid")
 class Application extends AppModule {
-        @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню")
+        @NFCore(documentation="Порядковый номер отображения названия приложения в верхнем меню. Если не заполнено то приложение будет выведено после всех других приложений у которых номер указан")
     Integer headerOrder
 }
 
@@ -195,7 +200,9 @@ class DatasetView extends ViewElement, CommandElement {
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")
-class GroovyCommand extends ViewElement, CommandElement {
+class GroovyCommand extends DynamicActionElement, CommandElement {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+    String name
         @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
     Text command
         @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
@@ -213,7 +220,9 @@ class GroovyCommand extends ViewElement, CommandElement {
 }
 
 @NFCore(documentation="Переменная, используемая в модуле")
-class ValueHolder extends ViewElement, ValueItem {
+class ValueHolder extends DynamicActionElement, ValueItem {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+	String name
 }
 
 @NFCore(documentation="Вкладки - контейнер")
@@ -361,44 +370,71 @@ class ViewNode extends TreeNode {
     contains ViewElement view
 }
 
+@NFCore(documentation="Обработка слушаемого события из eventHandler")
 class EventAction {
+        @NFCore(documentation="Доступные действия: execute, show, hide, enable, disable, setValue, showMessage, redirect, backToLastPage")
     Action action
+        @NFCore(documentation="Компонента, к которой будет направлено действие. Не заполняется при: action = redirect, backToLastPage")
     refers DynamicActionElement triggerItem
+        @NFCore(documentation="Ключ объекта. Заполняется если: в качестве значения для action = setValue находится объект")
     String valueObjectKey
+        @NFCore(documentation="Переход на внешний модуль. Заполняется при: action = redirect")
     refers AppModule redirectTo
+        @NFCore(documentation="Параметры, передаваемые вместе с модулем из 'redirectTo'. Заполняется при: action = redirect")
     refers DynamicActionElement[] redirectParams
 }
 
-class EventHandler extends ViewElement {
+@NFCore(documentation="Обработчик события")
+class EventHandler {
+        @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+    String name
+        @NFCore(documentation="Событие. Возможные значения: click, change, componentLoad")
     Event event
+        @NFCore(documentation="Компонента, к которой будет направлено действие")
     refers DynamicActionElement[] listenItem
+        @NFCore(documentation="Обработка слушаемого события")
     contains EventAction[] eventActions
+        @NFCore(documentation="Обязательное условие для выполнения действия. Например: ':variable' != '0'")
     String condition
+        @NFCore(documentation="Компонента, к которой применяются условия из condition. Например: 'variable ValueHolder'")
     refers DynamicActionElement[] conditionItems
 }
 
+@NFCore(documentation="Панель, которая выдвигается с края экрана")
 class Drawer extends ViewContainer {
+        @NFCore(documentation="Расположение Панели: сверху, снизу, справа, слева")
     TabPosition position
 }
 
+@NFCore(documentation="Адрес документа, на который следует перейти")
 class Href extends ViewElement, GridComponent {
+        @NFCore(documentation="Ярлык. Отображается внутри компоненты")
     String label
+        @NFCore(documentation="Адрес документа")
     String ref
 }
 
+@NFCore(documentation="Уведомление")
 class Message extends DynamicActionElement, Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
+        @NFCore(documentation="Тип уведомления. Возможные значения: success, error, info, warning, open")
     MessageType messageType
+        @NFCore(documentation="Заголовок уведомления")
     String header
+        @NFCore(documentation="Текст уведомления")
     String message
 }
 
+@NFCore(documentation="Контейнер для переключателей")
 class RadioGroup extends ViewElement, ValueItem, GridComponent  {
+        @NFCore(documentation="true - вериткальное отображение, false - горизонтальное отображение")
     boolean isVerticalGroup
+        @NFCore(documentation="Значения для переключителей")
     String[] radioBoxes
 }
 
+@NFCore(documentation="Выравнивание поля")
 enum TextAlign {
     Left
     Center
@@ -406,6 +442,7 @@ enum TextAlign {
     Right
 }
 
+@NFCore(documentation="Расположение: сверху, снизу, справа, слева")
 enum TabPosition {
     Top
     Right
@@ -413,65 +450,63 @@ enum TabPosition {
     Left
 }
 
+@NFCore(documentation="Режим отображения опций внутри выпадающего списка")
 enum SelectMode {
     Default
     Multiple
     Tags
 }
 
+@NFCore(documentation="Формат данных")
 enum InputType {
     InputNumber
     InputString
 }
 
-
-enum Colors {
-    Yellow
-    Green
-    Blue
-    Orange
-    Red
-}
-
+@NFCore(documentation="Eval - запуск кода из command; Resource - запуск кода из gitResourcePath с параметрами из command; Static - запуск модуля с параметрами из command")
 enum GroovyCommandType {
-    Eval,
-    Static,
+    Eval
+    Static
     Resource
 }
 
+@NFCore(documentation="Доступные действия")
 enum Action {
     execute
     show
     hide
     enable
     disable
-    //clear
     setValue
     showMessage
     redirect
     backToLastPage
 }
 
+@NFCore(documentation="Событие")
 enum Event {
     click
     change
     componentLoad
 }
 
+@NFCore(documentation="Тип значения, передаваемого из таблицы в компоненту")
 enum GridComponentValueType {
     string
     object
     none
 }
 
+@NFCore(documentation="Тип уведомления")
 enum MessageType {
-    success,
-    error,
-    info,
-    warning,
+    success
+    error
+    info
+    warning
     open
 }
 
+@NFCore(documentation="Набор стилей текста для Neoflex Reporting")
 enum TypographyType {
     capture_regular
     h1_regular
