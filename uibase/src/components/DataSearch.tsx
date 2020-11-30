@@ -9,7 +9,7 @@ import ponyCat from '../icons/ponyCat.png';
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
-import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoOption, NeoSelect} from "neo-design/lib";
 
 const FormItem = Form.Item;
 
@@ -34,7 +34,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         classes: [],
         indicatorError: false,
         createResModalVisible: false,
-        selectTags: 4,
+        selectTags: 6,
         selectCount: 0
     };
 
@@ -218,6 +218,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                     rules: []
                                                 })(
                                                     <NeoSelect
+                                                        className={'tags-select'}
                                                         allowClear={true}
                                                         mode={"tags"}
                                                         disabled={this.checkEClass()}
@@ -226,16 +227,18 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                             this.setState({selectCount: event.toString().split(',').length})
                                                         }}
                                                         placeholder={t('choose from the list')}
-                                                        maxTagTextLength={15}
+                                                        maxTagTextLength={7}
                                                         maxTagCount={this.state.selectTags}
                                                         maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
                                                     >
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
-                                                                <option key={tag.get('name')}
-                                                                        value={tag.get('name')}>
-                                                                    {tag.get('name')}
-                                                                </option>)
+
+                                                                    <NeoOption key={tag.get('name')}
+                                                                            value={tag.get('name')}>
+                                                                        {tag.get('name')}
+                                                                    </NeoOption>
+                                                                )
                                                         }
                                                      </NeoSelect>
                                                 )}
