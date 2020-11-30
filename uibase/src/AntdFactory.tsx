@@ -1320,6 +1320,7 @@ class EventHandler_ extends Component {
                         // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
+                        componentCondition = false;
                         this.props.context.notification("EventHandler.condition",
                             this.props.t("exception while evaluating") + ` ${replaceNamedParam(this.viewObject.get('condition'), params)}`,
                             "warning")
