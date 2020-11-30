@@ -1,7 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore";
 
-export class View extends React.Component<any, any> {
+export class Component extends React.Component<any, any> {
     protected viewObject: Ecore.EObject;
     protected viewFactory: ViewFactory;
 
@@ -10,7 +10,9 @@ export class View extends React.Component<any, any> {
         this.viewObject = props.viewObject;
         this.viewFactory = props.viewFactory;
     }
+}
 
+export class View extends Component {
     render = () => {
         return <span>{this.viewObject.eClass.eURI()}</span>
     }
