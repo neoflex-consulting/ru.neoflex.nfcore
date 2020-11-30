@@ -13,9 +13,11 @@ import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import ru.neoflex.nfcore.utils.JdbcUtils
+import org.eclipse.emf.common.util.ECollections
 
 import java.sql.Connection
 import java.sql.ResultSet
+import java.util.stream.Collector
 
 class JdbcDatasetExt extends JdbcDatasetImpl {
     private static final Logger logger = LoggerFactory.getLogger(JdbcDatasetExt.class);
@@ -71,34 +73,39 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
             try {
                 try {
                     try {
-
                         jdbcConnection = (connection as JdbcConnectionExt).connect()
                         resultSet = getResultSet(jdbcConnection, false, null as EList<QueryParameter>, ps)
                         currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
                         if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
                             ODatabaseRecordThreadLocal.instance().set(currentDb);
                         }
-                        def jdbcDatasetRef = Context.current.store.getRef(resourceSet.resources.get(0))
-                        def jdbcDataset = resourceSet.resources.get(0).contents.get(0) as JdbcDataset
-
-                        def columnCount = resultSet.metaData.columnCount
-                        if (columnCount > 0) {
-                            for (int i = 1; i <= columnCount; ++i) {
-                                def object = resultSet.metaData.getColumnName(i)
-                                def columnType = resultSet.metaData.getColumnTypeName(i)
-                                def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
-                                datasetColumn.rdbmsDataType = columnType == null ? 'String' : columnType.toString()
-                                datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
-                                datasetColumn.name = object.toString()
-                                jdbcDataset.datasetColumn.each { c->
-                                    if (c.name == object.toString()) {
-                                        throw new IllegalArgumentException("Please, change your query. It has similar column`s name")
-                                    }
+                        def resource = resourceSet.resources.get(0);
+                        def jdbcDataset = resource.contents.get(0) as JdbcDataset
+                        def labels = []
+                        if (resultSet.metaData.columnCount > 0) {
+                            for (int i = 1; i <= resultSet.metaData.columnCount; ++i) {
+                                def columnName = resultSet.metaData.getColumnLabel(i).toString()
+                                labels.push(columnName)
+                                if (jdbcDataset.datasetColumn.find{c-> c.name == columnName} != null) {
+                                    logger.info("Similar column name ${columnName} skipped")
+                                } else {
+                                    def columnType = resultSet.metaData.getColumnTypeName(i)
+                                    def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
+                                    datasetColumn.rdbmsDataType = columnType == null ? 'String' : columnType.toString()
+                                    datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
+                                    datasetColumn.name = columnName
+                                    jdbcDataset.datasetColumn.add(datasetColumn)
                                 }
-                                jdbcDataset.datasetColumn.add(datasetColumn)
                             }
-                            Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
-                            Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
+                            //remove all non-query columns
+                            jdbcDataset.datasetColumn.removeAll(jdbcDataset.datasetColumn
+                                    .stream()
+                                    .filter({ c -> (labels.find { l -> l == c.name} == null) })
+                                    .findAll())
+                            //Sort as query field order
+                            ECollections.sort(jdbcDataset.datasetColumn, Comparator.comparing{obj-> labels.reverse().indexOf((obj as DatasetColumnImpl).name)})
+                            //saving resource to prevent missing ref in datasetComponent
+                            Context.current.store.saveResource(resource)
                             return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created")
                         }
                     } finally {

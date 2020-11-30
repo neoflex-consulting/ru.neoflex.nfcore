@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
+import org.eclipse.emf.common.util.ECollections
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.ResourceSet
 import ru.neoflex.nfcore.application.ApplicationFactory
@@ -33,23 +34,30 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     if (datasetComponent.dataset.datasetColumn != null) {
                         def columns = datasetComponent.dataset.datasetColumn
                         if (columns != []) {
+                            //remove all non-query columns expect column groups
+                            datasetComponent.column.removeAll(datasetComponent.column
+                                    .stream()
+                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).datasetColumn == l) || (!(c instanceof RdbmsColumn) && l.name == c.name)} == null) && !(c instanceof ColumnGroup) })
+                                    .findAll())
+                            //add columns
                             for (int i = 0; i <= columns.size() - 1; ++i) {
-                                def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
-                                rdbmsColumn.name = columns[i].name
-                                rdbmsColumn.datasetColumn = columns[i]
-                                def typography = ApplicationFactory.eINSTANCE.createTypography()
-                                typography.name = columns[i].name
-                                rdbmsColumn.headerName = typography
-                                rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
-                                rdbmsColumn.sortable = true
-                                rdbmsColumn.resizable = true
-                                datasetComponent.column.each { c->
-                                    if (c.name == columns[i].name.toString()) {
-                                        throw new IllegalArgumentException("Please modify your query in the 'dataset'. Has a similar column name")
-                                    }
+                                if (datasetComponent.column.find{c-> c.name == columns[i].name.toString()} != null) {
+                                    logger.info("createAllColumns", "Similar column name ${columns[i].name.toString()} skipped")
+                                } else {
+                                    def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
+                                    rdbmsColumn.name = columns[i].name
+                                    rdbmsColumn.datasetColumn = columns[i]
+                                    def typography = ApplicationFactory.eINSTANCE.createTypography()
+                                    typography.name = columns[i].name
+                                    rdbmsColumn.headerName = typography
+                                    rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
+                                    rdbmsColumn.sortable = true
+                                    rdbmsColumn.resizable = true
+                                    datasetComponent.column.add(rdbmsColumn)
                                 }
-                                datasetComponent.column.add(rdbmsColumn)
                             }
+                            //Sort as dataset field order
+                            ECollections.sort(datasetComponent.column, Comparator.comparing{ obj-> columns.indexOf(columns.find {c -> c.name == (obj as DatasetColumnView).name})})
                             Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
                             Context.current.store.commit("Entity was updated " + datasetComponentRef)
                             return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created")
