@@ -44,13 +44,14 @@ export default function Operations(props: Props): JSX.Element {
                 notification.info({
                     btn,
                     key,
-                    message: key,
+                    message: key.split('\\n').join('\n'),
                     duration: null,
                     style: {
                         width: 450,
                         marginLeft: -52,
                         marginTop: 16,
                         wordWrap: "break-word",
+                        whiteSpace: "break-spaces",
                         fontWeight: 350
                     },
                 })

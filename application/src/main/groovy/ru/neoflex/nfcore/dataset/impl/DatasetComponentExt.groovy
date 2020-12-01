@@ -31,6 +31,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 if (!resource.resources.empty) {
                     def datasetComponentRef = Context.current.store.getRef(resource.resources[0])
                     def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
+                    def skippedColumns = ""
                     if (datasetComponent.dataset.datasetColumn != null) {
                         def columns = datasetComponent.dataset.datasetColumn
                         if (columns != []) {
@@ -42,7 +43,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             //add columns
                             for (int i = 0; i <= columns.size() - 1; ++i) {
                                 if (datasetComponent.column.find{c-> c.name == columns[i].name.toString()} != null) {
-                                    logger.info("createAllColumns", "Similar column name ${columns[i].name.toString()} skipped")
+                                    skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
                                 } else {
                                     def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                                     rdbmsColumn.name = columns[i].name
@@ -59,7 +60,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             ECollections.sort(datasetComponent.column, Comparator.comparing{ obj-> columns.indexOf(columns.find {c -> c.name == (obj as DatasetColumnView).name})})
                             Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
                             Context.current.store.commit("Entity was updated " + datasetComponentRef)
-                            return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created")
+                            return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created${skippedColumns != "" ? skippedColumns : ""}")
                         }
                     }
                     return JsonOutput.toJson("The 'dataset' parameter is not specified OR the 'dataset' object does not contain columns")

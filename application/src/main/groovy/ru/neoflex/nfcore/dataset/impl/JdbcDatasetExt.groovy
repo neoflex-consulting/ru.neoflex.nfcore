@@ -82,12 +82,13 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                         def resource = resourceSet.resources.get(0);
                         def jdbcDataset = resource.contents.get(0) as JdbcDataset
                         def labels = []
+                        def skippedColumns = ""
                         if (resultSet.metaData.columnCount > 0) {
                             for (int i = 1; i <= resultSet.metaData.columnCount; ++i) {
                                 def columnName = resultSet.metaData.getColumnLabel(i).toString()
                                 labels.push(columnName)
                                 if (jdbcDataset.datasetColumn.find{c-> c.name == columnName} != null) {
-                                    logger.info("Similar column name ${columnName} skipped")
+                                    skippedColumns += "\nExisting column ${columnName} skipped"
                                 } else {
                                     def columnType = resultSet.metaData.getColumnTypeName(i)
                                     def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
@@ -106,7 +107,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                             ECollections.sort(jdbcDataset.datasetColumn, Comparator.comparing{obj-> labels.reverse().indexOf((obj as DatasetColumnImpl).name)})
                             //saving resource to prevent missing ref in datasetComponent
                             Context.current.store.saveResource(resource)
-                            return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created")
+                            return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created${skippedColumns != "" ? skippedColumns : ""}")
                         }
                     } finally {
                         (resultSet) ? resultSet.close() : null
