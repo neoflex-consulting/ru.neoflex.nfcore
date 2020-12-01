@@ -1,6 +1,7 @@
 package ru.neoflex.nfcore.dataset.impl
 
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
+import groovy.json.JsonOutput
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.neoflex.nfcore.base.util.DriverShim
@@ -69,6 +70,17 @@ class JdbcConnectionExt extends JdbcConnectionImpl {
             if (currentDB != null) {
                 ODatabaseRecordThreadLocal.instance().set(currentDB);
             }
+        }
+    }
+
+    @Override
+    String testConnection() {
+        def jdbcConnection = null;
+        try {
+            jdbcConnection = this.connect()
+            return JsonOutput.toJson("Connection successful")
+        } finally {
+            jdbcConnection && jdbcConnection.close()
         }
     }
 }

@@ -11,13 +11,13 @@ import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
+import ru.neoflex.nfcore.dataset.impl.adapters.JdbcDatasetAdapter
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import ru.neoflex.nfcore.utils.JdbcUtils
 import org.eclipse.emf.common.util.ECollections
 
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.stream.Collector
 
 class JdbcDatasetExt extends JdbcDatasetImpl {
     private static final Logger logger = LoggerFactory.getLogger(JdbcDatasetExt.class);
@@ -35,7 +35,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 try {
                     try {
                         jdbcConnection = (connection as JdbcConnectionExt).connect()
-                        resultSet = getResultSet(jdbcConnection, false, parameters, ps)
+                        resultSet = getResultSet(jdbcConnection, parameters, ps)
                         currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
                         if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
                             ODatabaseRecordThreadLocal.instance().set(currentDb);
@@ -74,7 +74,7 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
                 try {
                     try {
                         jdbcConnection = (connection as JdbcConnectionExt).connect()
-                        resultSet = getResultSet(jdbcConnection, false, null as EList<QueryParameter>, ps)
+                        resultSet = getResultSet(jdbcConnection, null as EList<QueryParameter>, ps)
                         currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
                         if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
                             ODatabaseRecordThreadLocal.instance().set(currentDb);
@@ -145,64 +145,50 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String showAllTables() {
-        Connection jdbcConnection = null;
-        ResultSet resultSet = null;
-        NamedParameterStatement ps = null;
+        def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
+        //change to current thread
+        ODatabaseRecordThreadLocal.instance().set(ODatabaseRecordThreadLocal.instance().getIfDefined());
         def rowData = null
         try {
+            def stmt = jdbcConnection.createStatement()
             try {
+                def resultSet = jdbcConnection.createStatement().executeQuery(JdbcDatasetAdapter.getDBAdapter(connection.getDriver().getDriverClassName()).showAllTables())
+                logger.info(JdbcDatasetAdapter.getDBAdapter(connection.getDriver().getDriverClassName()).showAllTables())
                 try {
-                    jdbcConnection = (connection as JdbcConnectionExt).connect()
-                    resultSet = getResultSet(jdbcConnection, true, null as EList<QueryParameter>, ps)
                     rowData = JdbcConnectionExt.readResultSet(resultSet)
                 } finally {
-                    (resultSet) ? resultSet.close() : null
+                    resultSet.close()
                 }
             } finally {
-                (ps) ? ps.close() : null
+                stmt.close()
             }
         } finally {
-            (jdbcConnection) ? jdbcConnection.close() : null
+            jdbcConnection.close()
+            //restore db
+            ODatabaseRecordThreadLocal.instance().set(currentDb);
         }
         return JsonOutput.toJson(rowData)
     }
 
-    ResultSet getResultSet(Connection jdbcConnection, boolean showAllTables, EList<QueryParameter> parameters, NamedParameterStatement ps) {
+    ResultSet getResultSet(Connection jdbcConnection, EList<QueryParameter> parameters, NamedParameterStatement ps) {
         /*Execute query*/
         String currentQuery = ""
-        String currentQueryPostgresql = ""
-        if (showAllTables) {
-            currentQuery = "SELECT table_schema, table_name FROM information_schema.tables ORDER BY table_schema, table_name ASC"
+        if (queryType == QueryType.USE_TABLE_NAME) {
+            currentQuery = "SELECT * FROM ${schemaName == "" ? tableName : schemaName+"."+tableName}"
         }
-        else {
-            if (queryType == QueryType.USE_TABLE_NAME) {
-                currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
-            }
-            else if (queryType == QueryType.USE_QUERY && parameters == null) {
-                //Replace namedParameters
-                currentQuery = "SELECT * FROM (${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")})"
-                currentQueryPostgresql = "SELECT * FROM (${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")}) t"
-            } else {
-                currentQuery = "SELECT * FROM (${query})"
-                currentQueryPostgresql = "SELECT * FROM (${query}) t"
-            }
+        else if (queryType == QueryType.USE_QUERY && parameters == null) {
+            //Replace namedParameters
+            currentQuery = "${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")}"
+        } else {
+            currentQuery = "${query}"
         }
-
-        try {
-            ps = new NamedParameterStatement(jdbcConnection, currentQuery);
-            if (parameters && parameters.size() > 0 && currentQuery) {
-                ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQuery)
-            }
-            logger.info(currentQuery)
-            return ps.executeQuery()
-        } catch (e) {
-            ps = new NamedParameterStatement(jdbcConnection, currentQueryPostgresql);
-            if (parameters && parameters.size() > 0 && currentQueryPostgresql) {
-                ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQueryPostgresql)
-            }
-            logger.info(currentQueryPostgresql)
-            return ps.executeQuery()
+        ps = new NamedParameterStatement(jdbcConnection, currentQuery);
+        if (parameters && parameters.size() > 0 && currentQuery) {
+            ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQuery)
         }
+        logger.info(currentQuery)
+        return ps.executeQuery()
     }
 
     Object getConvertDataType(String rdbmsDataType) {
