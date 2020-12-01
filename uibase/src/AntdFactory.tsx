@@ -909,7 +909,9 @@ class GroovyCommand_ extends Component {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         } else if (commandType === "Static") {
             API.instance().fetchJson('/script/static/'+this.viewObject.get('gitStaticClass')+'/'+this.viewObject.get('gitStaticMethod'), {
                 method: 'POST',
@@ -923,7 +925,9 @@ class GroovyCommand_ extends Component {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         } else {
             API.instance().fetchJson('/script/eval', {
                 method: 'POST',
@@ -937,7 +941,9 @@ class GroovyCommand_ extends Component {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         }
     };
 
