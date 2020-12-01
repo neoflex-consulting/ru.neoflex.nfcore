@@ -1543,10 +1543,6 @@ class DatasetView extends React.Component<any, State> {
                     rowData = {this.state.rowData}
                     columnDefs = {this.state.columnDefs}
                     leafColumnDefs = {this.state.leafColumnDefs}
-                    currentTheme = {this.state.currentTheme}
-                    showUniqRow = {this.state.showUniqRow}
-                    saveChanges = {this.changeDatasetViewState}
-                    onApplyEditChanges = {this.onApplyEditChanges}
                     isEditMode = {this.state.isEditMode}
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}

@@ -3,7 +3,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
 import { Modal, Select, Button, } from 'antd';
 import { Link } from 'react-router-dom';
-import {NeoInput, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 
 interface Props {
     classes: Ecore.EClass[]
@@ -38,16 +38,22 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
         const {t} = this.props;
         return (
             <Modal
+                className={'datasearch__create__modal'}
                 key="create_resource"
                 width={'432px'}
                 title={t('createitem')}
                 visible={this.props.createResModalVisible}
                 footer={this.state.selectedEClass && this.state.name ?
-                    <Button type="primary">
+                    <>
+                    <NeoButton type="primary">
                         <Link to={{ pathname: `/developer/data/editor/new/resource`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
-                            <span id="edit">{t('ok')}</span>
+                            <span style={{color:'white'}}>{t('create')}</span>
                         </Link>
-                    </Button>
+                    </NeoButton>
+                    <NeoButton type="secondary" onClick={()=>this.props.setModalVisible(false)}>
+                            {t('cancel')}
+                    </NeoButton>
+                    </>
                     :
                     null}
                 onCancel={()=>this.props.setModalVisible(false)}

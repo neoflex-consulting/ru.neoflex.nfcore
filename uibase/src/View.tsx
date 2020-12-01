@@ -19,7 +19,7 @@ export class View extends Component {
 }
 
 export interface ViewFactory {
-    createView(viewObject: Ecore.EObject, props: any): JSX.Element;
+    createView(viewObject: Ecore.EObject, props: any, ref?: any): JSX.Element;
     name: string;
 }
 

@@ -383,66 +383,64 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     getURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
-        if (this.isDatasetComponentsBufferEmpty()) {
-            let path: any[] = [];
-            let urlElement: ConfigUrlElement = {
-                appModule: appModuleName,
-                tree: tree !== undefined ? tree : [],
-                params: params,
-                useParentReferenceTree: useParentReferenceTree || false
-            };
-            let appModuleNameThis = appModuleName || this.state.appModuleName;
-            if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
-                path.push(urlElement)
-            }
-            else if (this.state.pathFull && appModuleName === this.state.appModuleName && tree !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.tree = tree;
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
-                this.state.pathFull.forEach( (p:any) => {
-                    urlElement = p;
-                    if (p.appModule === appModuleNameThis) {
-                        urlElement.params = params;
-                        path.push(urlElement)
-                    }
-                    else {
-                        path.push(urlElement)
-                    }
-                });
-            } else if (appModuleName !== this.state.appModuleName) {
-                let splitPathFull: any = [];
-                if (splitPathFull.length === 0) {
-                    this.state.pathFull.forEach( (p:any, index: any) => {
-                        path.push(p);
-                    });
-                    urlElement.appModule = appModuleName;
-                    urlElement.tree = tree !== undefined ? tree : [];
-                    urlElement.params = params ? params : [];
-                    this.state.context.globalValues?.forEach(obj => {
-                        urlElement.params = urlElement.params!.concat(obj)
-                    });
-                    //Ограничить переходы
-                    if (path.length >= 50) {
-                        path.shift()
-                    }
-                    path.push(urlElement)
-                } else {
-                    path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
-                }
-            } else if (appModuleName === this.state.appModuleName) {
-                path = this.state.pathFull
-            }
-            return path
+        let path: any[] = [];
+        let urlElement: ConfigUrlElement = {
+            appModule: appModuleName,
+            tree: tree !== undefined ? tree : [],
+            params: params,
+            useParentReferenceTree: useParentReferenceTree || false
+        };
+        let appModuleNameThis = appModuleName || this.state.appModuleName;
+        if (appModuleName !== undefined && this.state.applicationNames.includes(appModuleName)){
+            path.push(urlElement)
         }
+        else if (this.state.pathFull && appModuleName === this.state.appModuleName && tree !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.tree = tree;
+                    urlElement.params = params;
+                    path.push(urlElement)
+                }
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (this.state.pathFull && appModuleName === this.state.appModuleName && params !== undefined) {
+            this.state.pathFull.forEach( (p:any) => {
+                urlElement = p;
+                if (p.appModule === appModuleNameThis) {
+                    urlElement.params = params;
+                    path.push(urlElement)
+                }
+                else {
+                    path.push(urlElement)
+                }
+            });
+        } else if (appModuleName !== this.state.appModuleName) {
+            let splitPathFull: any = [];
+            if (splitPathFull.length === 0) {
+                this.state.pathFull.forEach( (p:any, index: any) => {
+                    path.push(p);
+                });
+                urlElement.appModule = appModuleName;
+                urlElement.tree = tree !== undefined ? tree : [];
+                urlElement.params = params ? params : [];
+                this.state.context.globalValues?.forEach(obj => {
+                    urlElement.params = urlElement.params!.concat(obj)
+                });
+                //Ограничить переходы
+                if (path.length >= 50) {
+                    path.shift()
+                }
+                path.push(urlElement)
+            } else {
+                path = this.state.pathFull.splice(0, splitPathFull[0] + 1)
+            }
+        } else if (appModuleName === this.state.appModuleName) {
+            path = this.state.pathFull
+        }
+        return path
     };
 
     getFullPath = () => {
