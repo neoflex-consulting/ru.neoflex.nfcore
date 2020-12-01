@@ -51,7 +51,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     typography.name = columns[i].name
                                     rdbmsColumn.headerName = typography
                                     rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
-                                    rdbmsColumn.sortable = true
                                     rdbmsColumn.resizable = true
                                     datasetComponent.column.add(rdbmsColumn)
                                 }
