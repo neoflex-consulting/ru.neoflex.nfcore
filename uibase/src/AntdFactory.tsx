@@ -1685,7 +1685,7 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
     }
 
-    createView(viewObject: Ecore.EObject, props: any, ref: any): JSX.Element {
+    createView(viewObject: Ecore.EObject, props: any, ref?: any): JSX.Element {
         if (startResource === undefined) {
             startResource = viewObject.eResource().to()
         }
