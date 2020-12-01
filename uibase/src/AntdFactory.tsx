@@ -1370,7 +1370,7 @@ class EventHandler_ extends Component {
                         isHandled = true;
                     }
                     if (el.get('action') === actionType.backToLastPage) {
-                        if (this.props.pathFull.length > 2) {
+                        if (this.props.pathFull.length >= 2) {
                             const appModule = this.props.pathFull[this.props.pathFull.length - 2];
                             let params: Object[] = appModule.params;
                             this.props.context.changeURL!(appModule.appModule, true, undefined, params);
