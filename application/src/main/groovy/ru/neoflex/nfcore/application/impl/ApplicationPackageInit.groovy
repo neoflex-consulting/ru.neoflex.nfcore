@@ -26,7 +26,9 @@ class ApplicationPackageInit {
     }
 
     def static setAllViewElementsGrantType(EObject eObject) {
-        for (EObject contained: eObject.eAllContents()) {
+        Iterator iterator = eObject.eAllContents()
+        while (iterator.hasNext()) {
+            EObject contained = iterator.next()
             if (contained instanceof ViewElement) {
                 ViewElement viewElement = contained
                 setViewElementGrantType(viewElement)
