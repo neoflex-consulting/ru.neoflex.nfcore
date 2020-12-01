@@ -12,7 +12,7 @@ import Paginator from "../Paginator";
 import {
     agGridColumnTypes,
     appTypes,
-    dmlOperation,
+    dmlOperation, grantType,
 } from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
@@ -593,12 +593,13 @@ class DatasetGrid extends React.Component<Props, any> {
         }
     }
 
-    getComponent = (className: string) => {
-        if (getStringValuesFromEnum(AntdFactoryClasses).includes(className)) {
+    getGridComponent = (component: Ecore.EObject|string) => {
+        if (typeof component === "string") {
+            return component
+        } else if (getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
             return 'antdFactory'
-        } else {
-            return className
         }
+        return "";
     };
 
     getBuffer = () => {
@@ -855,13 +856,11 @@ class DatasetGrid extends React.Component<Props, any> {
                         showMenuCopyButton: this.props.showMenuCopyButton,
                         isAgComponent: true
                     } : undefined,
-                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass.eURI() : colDef.get('component')) : function (params: any) {
+                    cellRenderer: (colDef.get('component')) ? this.getGridComponent(colDef.get('component')) : function (params: any) {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
-                        ? this.getComponent(colDef.get('editComponent').eClass
-                            ? colDef.get('editComponent').eClass.eURI()
-                            : colDef.get('editComponent'))
+                        ? this.getGridComponent(colDef.get('component'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,
