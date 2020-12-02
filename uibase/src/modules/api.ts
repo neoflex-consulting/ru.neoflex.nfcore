@@ -1,4 +1,4 @@
-import Ecore, {EObject} from "ecore";
+import Ecore, {EObject, Resource} from "ecore";
 import _ from 'lodash';
 import {Client} from '@stomp/stompjs';
 
@@ -45,7 +45,7 @@ export class API implements IErrorHandler {
     private ePackagesPromise: Promise<Ecore.EPackage[]>;
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
-    private processHandlers: ((processes: any[])=>void)[];
+    private processHandlers: ((processes: any[]) => void)[];
     private stompClient: Client;
     public onServerDown: () => void;
     public userName: String;
@@ -67,10 +67,10 @@ export class API implements IErrorHandler {
     }
 
     init = () => {
-        this.fetchJson("/emf/packages").then(json => {
+        this.fetchJson("/emf/packages").then((json: any[]) => {
             let resourceSet = Ecore.ResourceSet.create();
             for (let i = 0; i < 2; ++i) {
-                for (let aPackage of json as any[]) {
+                for (let aPackage of json) {
                     let uri = aPackage['nsURI'];
                     let resource = resourceSet.create({uri});
                     resource.load(aPackage);
@@ -132,11 +132,11 @@ export class API implements IErrorHandler {
         this.fireProcesses()
     }
 
-    subscribeProcesses(handler: (processes: any[])=>void) {
+    subscribeProcesses(handler: (processes: any[]) => void) {
         this.processHandlers.push(handler)
     }
 
-    unsubscribeProcesses(handler: (processes: any[])=>void) {
+    unsubscribeProcesses(handler: (processes: any[]) => void) {
         this.processHandlers = this.processHandlers.filter(value => value !== handler)
     }
 
@@ -146,7 +146,7 @@ export class API implements IErrorHandler {
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<any> {
-        console.log("FETCH: " + input + ' ' + (init?JSON.stringify(init):''));
+        console.log("FETCH: " + input + ' ' + (init ? JSON.stringify(init) : ''));
         const pid = this.newProcess("FETCH", {input, init})
         return fetch(input, init).then(response => {
             if (!response.ok) {
@@ -194,6 +194,7 @@ export class API implements IErrorHandler {
         const ids = API.collectIds(object, new Set<string>());
         return API.collectReferences(object, new Set<string>(), ids, object._id);
     }
+
     static collectReferences(object: any, found: Set<string>, ids: Set<string>, rootId: string): Set<string> {
         if (!object || typeof object !== 'object') {
             return found;
@@ -205,8 +206,7 @@ export class API implements IErrorHandler {
                 if (!ids.has(id) && !ids.has(fragment)) {
                     object.$ref = id + '#' + fragment;
                     found.add(object.$ref);
-                }
-                else {
+                } else {
 //                    object.$ref = rootId + "#" + (fragment === "/" ? id : fragment);
                     object.$ref = (fragment === "/" ? id : fragment);
                 }
@@ -238,14 +238,13 @@ export class API implements IErrorHandler {
 
     static parseRef(ref: string): any {
         if (!ref) return {}
-        let id: string|undefined, query: string|undefined, resid: string|undefined, fragment: string|undefined;
+        let id: string | undefined, query: string | undefined, resid: string | undefined, fragment: string | undefined;
         [resid, fragment] = ref.split('#', 2);
         if (!fragment) {
             if (resid.startsWith("/")) {
                 fragment = resid
                 resid = undefined
-                }
-            else {
+            } else {
                 fragment = '/';
             }
         }
@@ -263,15 +262,9 @@ export class API implements IErrorHandler {
         let ref = object.$ref;
         if (ref) {
             if (!ref.includes("#")) {
-               object.$ref = rootId + '#' + ref;
+                object.$ref = rootId + '#' + ref;
             }
         }
-        // let id = object._id;
-        // if (id) {
-        //     if (!id.includes("#")) {
-        //         object._id = rootId + '#' + id;
-        //     }
-        // }
         for (var i in object) {
             if (object.hasOwnProperty(i)) {
                 API.fixReferences(object[i], rootId);
@@ -341,29 +334,45 @@ export class API implements IErrorHandler {
         return index
     }
 
-    loadResourceSet(resourceSet: Ecore.ResourceSet, jsonResources: any[]): Ecore.Resource[] {
-        const prepared = jsonResources.map(jr=>{
-            const {id, rev} = API.parseRef(jr.uri)
-            return {id, rev, jObject: jr.contents[0]}
-        })
-        const db: any = {}
-        prepared.forEach(p => {db[p.id] = p})
-        function create(id: any) {
-            const resource = resourceSet.create(id)
-            if (resource.get('contents').size() === 0) {
-                const {rev, jObject} = db[id]
-                resource.rev = rev
-                API.collectExtReferences(jObject).forEach(ref => create(API.parseRef(ref).id))
-                resource.load(jObject)
+    loadResourceSet(resourceSet: Ecore.ResourceSet, jsonResources: any[], fixRefs: boolean = true): Ecore.Resource[] {
+        function fix(object: any): void {
+            if (object && typeof object === 'object') {
+                const ref = object.$ref;
+                if (ref) {
+                    const {id, fragment} = API.parseRef(ref)
+                    object.$ref = fragment && fragment !== "/" ? fragment : id
+                }
+                for (var i in object) {
+                    if (object.hasOwnProperty(i)) {
+                        fix(object[i]);
+                    }
+                }
             }
-            return resource
         }
-        return prepared.map(p => create(p.id))
+
+        const revs: any = {}
+        jsonResources.forEach(jr => {
+            const {id, rev} = API.parseRef(jr.uri)
+            revs[id] = rev
+            if (fixRefs) {
+                fix(jr.contents[0])
+            }
+        })
+        const topObjects = jsonResources.map(jr => jr.contents[0])
+        const topResource = Ecore.ResourceSet.create().create("temp")
+        topResource.load(topObjects)
+        const topEObjects = topResource.get("contents") as Ecore.EObject[]
+        return topEObjects.map(eObject => {
+            const resource = resourceSet.create(eObject._id);
+            resource.rev = revs[eObject._id]
+            resource.get("contents").add(eObject)
+            return resource;
+        })
     }
 
     fetchResourceSet(ref: string, resourceSet: Ecore.ResourceSet): Promise<Ecore.Resource> {
         if (!resourceSet) {
-            resourceSet =  Ecore.ResourceSet.create();
+            resourceSet = Ecore.ResourceSet.create();
         }
         return this.fetchJson(`/emf/resourceset?ref=${ref}`).then(json => {
             return this.loadResourceSet(resourceSet, json.resources)[0]
@@ -390,7 +399,7 @@ export class API implements IErrorHandler {
                 if (alreadyLoaded) {
                     return Promise.resolve(alreadyLoaded);
                 }
-                return this.fetchResource(ref, level - 1, resourceSet, loading).then(resource=>{
+                return this.fetchResource(ref, level - 1, resourceSet, loading).then(resource => {
                     return Promise.resolve(resource.eContents()[0]);
                 })
             })
@@ -421,11 +430,11 @@ export class API implements IErrorHandler {
     findEnum(ePackageName: string, eEnumName: string): Promise<Ecore.EClass[]> {
         return this.fetchPackages().then(packages => {
             let eClassifiers = packages
-                .filter(p=>p.get('name') === ePackageName)
-                .map(p=>p.get('eClassifiers').array())
+                .filter(p => p.get('name') === ePackageName)
+                .map(p => p.get('eClassifiers').array())
                 .flat() as Ecore.EObject[];
-            return eClassifiers.filter(c=>c.get('name') === eEnumName)
-                .map(p=>p.get('eLiterals').array())
+            return eClassifiers.filter(c => c.get('name') === eEnumName)
+                .map(p => p.get('eLiterals').array())
                 .flat() as Ecore.EObject[]
         })
     }
@@ -433,16 +442,16 @@ export class API implements IErrorHandler {
     findClass(ePackageName: string, eClassName: string): Promise<Ecore.EClass> {
         return this.fetchPackages().then(packages => {
             let eClassifiers = packages
-                .filter(p=>p.get('name') === ePackageName)
-                .map(p=>p.get('eClassifiers').array())
+                .filter(p => p.get('name') === ePackageName)
+                .map(p => p.get('eClassifiers').array())
                 .flat() as Ecore.EObject[];
-            return eClassifiers.filter(c=>c.get('name') === eClassName)[0]
+            return eClassifiers.filter(c => c.get('name') === eClassName)[0]
         })
     }
 
     find(selection: any, level: number = 1, tags?: string): Promise<QueryResult> {
 
-        return this.fetchJson(`/emf/find${tags ? "?tags="+tags : ""}`, {
+        return this.fetchJson(`/emf/find${tags ? "?tags=" + tags : ""}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -461,8 +470,8 @@ export class API implements IErrorHandler {
         const basicPackages: Array<String> = ["ecore", "resources"]
         return this.fetchPackages().then(packages => {
             return packages
-                .filter(p=>includeBasicPackages || !basicPackages.includes(p.get('name')))
-                .map(p=>p.eContents().filter(c => c.isTypeOf('EClass')))
+                .filter(p => includeBasicPackages || !basicPackages.includes(p.get('name')))
+                .map(p => p.eContents().filter(c => c.isTypeOf('EClass')))
                 .flat() as Ecore.EClass[];
         })
     }
@@ -500,7 +509,7 @@ export class API implements IErrorHandler {
         if (objectName) {
             selection = {contents: {name: {"$regex": objectName}}}
         }
-        return this.find(selection, level, tags).then(r=>r.resources);
+        return this.find(selection, level, tags).then(r => r.resources);
     }
 
     findByTagsAndName(tags: string, objectName?: string, level: number = 1): Promise<Ecore.Resource[]> {
@@ -508,13 +517,13 @@ export class API implements IErrorHandler {
         if (objectName) {
             selection = {contents: {name: objectName}}
         }
-        return this.find(selection, level, tags).then(r=>r.resources);
+        return this.find(selection, level, tags).then(r => r.resources);
     }
 
     findByClassURI(classURI: string, selector: any, level: number = 1, tags?: string): Promise<Ecore.Resource[]> {
         let selection: any = {contents: {eClass: classURI}};
         selection = _.merge(selector, selection);
-        return this.find(selection, level, tags).then(r=>r.resources);
+        return this.find(selection, level, tags).then(r => r.resources);
     }
 
     deleteResource(ref: string): Promise<any> {
@@ -549,7 +558,7 @@ export class API implements IErrorHandler {
         })
     }
 
-    authenticate(login : any, password : any) {
+    authenticate(login: any, password: any) {
         if (login === undefined) {
             return this.fetchFirstAuthenticate('/system/user', this.getOpts({}))
                 .then(response => response.json())
