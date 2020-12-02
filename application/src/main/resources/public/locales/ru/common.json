@@ -445,7 +445,20 @@
         "delete module": "Удаление модуля",
         "delete section": "Удаления раздела",
         "delete module with references": "Удалить модуль?",
-        "delete section with references": "Удалить раздел вместе с зависимыми модулями?"
+        "delete section with references": "Удалить раздел вместе с зависимыми модулями?",
+
+        "showAllTables": "Показать все таблицы",
+        "loadAllColumns": "Загрузить все столбцы",
+        "runQueryDataset": "Запустить запрос",
+        "deleteAllColumns": "Удалить все столбцы",
+        "testConnection": "Проверить соединение",
+        "createAllColumns": "Загрузить все столбцы",
+        "runQuery": "Запустить запрос",
+        "isEObjectPermitted": "Проверить доступ к EObject ",
+        "isResourcePermitted": "Проверить доступ к Resource ",
+        "recreateWeekend": "Пересоздать выходные дни",
+        "copyHolidays": "Копировать выходные",
+        "recreateWorkingDays": "Пересоздать рабочие дни"
 }
 
 

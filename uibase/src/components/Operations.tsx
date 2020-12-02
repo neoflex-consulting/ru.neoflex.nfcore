@@ -185,7 +185,7 @@ export default function Operations(props: Props): JSX.Element {
             return <Menu onClick={onMenuSelect}> 
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
                     return <Menu.Item key={oper.get('name')}>
-                        {oper.get('name')}
+                        {t(oper.get('name'))}
                     </Menu.Item>
                 })}
             </Menu>
