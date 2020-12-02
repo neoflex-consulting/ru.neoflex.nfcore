@@ -6,6 +6,7 @@ import {API} from './../modules/api'
 import FormComponentMapper from './FormComponentMapper';
 import {TFunction} from 'i18next';
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
+import {NeoHint} from "neo-design/lib";
 
 interface Props {
     translate: TFunction,
@@ -186,7 +187,7 @@ export default function Operations(props: Props): JSX.Element {
             return <Menu onClick={onMenuSelect}> 
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
                     return <Menu.Item key={oper.get('name')}>
-                        {t(oper.get('name'))}
+                        <NeoHint title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
                     </Menu.Item>
                 })}
             </Menu>
