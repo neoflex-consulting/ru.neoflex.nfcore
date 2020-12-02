@@ -116,6 +116,11 @@ export class MainApp extends React.Component<any, State> {
     }
 
     loadObject = () => {
+        function parseTree(tree: string[]) {
+            return tree.map((value, index) => {
+                return index === 0 ? value : value.replace(tree[index-1]+"/","")
+            })
+        }
         let name: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
@@ -198,15 +203,42 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
                             else {
-                                this.props.context.updateContext!(
-                                    ({
-                                        viewObject: objectApp.get('view'),
-                                        variableList: objectApp.get('variables'),
-                                        eventHandlerList: objectApp.get('eventHandlers'),
-                                        groovyCommandList: objectApp.get('groovyCommands'),
-                                        applicationReferenceTree: objectApp.get('referenceTree')
-                                    })
-                                );
+                                let treeChildren = objectApp.get('referenceTree').eContents();
+                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+                                if (objectApp.get('name') === currentAppModule.appModule) {
+                                    let currentTree: any[] = parseTree(currentAppModule['tree']);
+                                    for (let i = 0; i <= currentTree.length - 1; i++) {
+                                        for (let t of treeChildren
+                                            .filter((t: any) => t.get('name') === currentTree[i])) {
+                                            if (t.eContents().length !== 0) {
+                                                treeChildren = t.eContents();
+                                            }
+                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
+                                                treeChildren = t.get('AppModule').get('view')
+                                            }
+                                        }
+                                    }
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: treeChildren[0] || treeChildren,
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands')
+                                        })
+                                    );
+                                }
+                                else {
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands')
+                                        })
+                                    );
+                                }
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
