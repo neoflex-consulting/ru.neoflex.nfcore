@@ -46,6 +46,8 @@ class JdbcConnection extends Tagged {
     String userName
         @NFCore(documentation="Пароль от Базы данных")
     Password password
+        @NFCore(documentation="Проверить запрос к Базе данных")
+    op JSON testConnection()
 }
 
 /*Dataset*/

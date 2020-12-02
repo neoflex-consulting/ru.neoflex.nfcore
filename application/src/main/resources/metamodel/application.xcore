@@ -205,11 +205,11 @@ class GroovyCommand extends DynamicActionElement, CommandElement {
     String name
         @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
     Text command
-        @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'")
+        @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'", renderConditions="{'commandType':'Resource'}")
     String gitResourcePath
-        @NFCore(documentation="Полный путь к классу. Например: 'ru.neoflex.nfcore.dataset.JdbcConnection'")
+        @NFCore(documentation="Полный путь к классу. Например: 'ru.neoflex.nfcore.dataset.JdbcConnection'", renderConditions="{'commandType':'Static'}")
     String staticClass
-        @NFCore(documentation="Статический метод из класса 'staticClass'")
+        @NFCore(documentation="Статический метод из класса 'staticClass'", renderConditions="{'commandType':'Static'}")
     String staticMethod
         @NFCore(documentation="Eval - запуск кода из command; Resource - запуск кода из gitResourcePath с параметрами из command; Static - запуск модуля с параметрами из command")
     GroovyCommandType commandType = "Eval"
@@ -305,11 +305,11 @@ class HtmlContent extends ViewElement, CommandElement {
 class Input extends ViewElement, ValueItem, GridComponent {
         @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
-        @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber")
+        @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
     String minValue = "1"
-        @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber")
+        @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
     String maxValue = "99"
-        @NFCore(documentation="Шаг значений, если inputType = InputNumber")
+        @NFCore(documentation="Шаг значений, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
     String step = "1"
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
@@ -374,13 +374,13 @@ class ViewNode extends TreeNode {
 class EventAction {
         @NFCore(documentation="Доступные действия: execute, show, hide, enable, disable, setValue, showMessage, redirect, backToLastPage")
     Action action
-        @NFCore(documentation="Компонента, к которой будет направлено действие. Не заполняется при: action = redirect, backToLastPage")
+        @NFCore(documentation="Компонента, к которой будет направлено действие. Не заполняется при: action = redirect, backToLastPage", renderConditions="{'action':['execute','show','hide','enable','disable','setValue','showMessage']}")
     refers DynamicActionElement triggerItem
-        @NFCore(documentation="Ключ объекта. Заполняется если: в качестве значения для action = setValue находится объект")
+        @NFCore(documentation="Ключ объекта. Заполняется если: в качестве значения для action = setValue находится объект", renderConditions="{'action':'setValue'}")
     String valueObjectKey
-        @NFCore(documentation="Переход на внешний модуль. Заполняется при: action = redirect")
+        @NFCore(documentation="Переход на внешний модуль. Заполняется при: action = redirect", renderConditions="{'action':'redirect'}")
     refers AppModule redirectTo
-        @NFCore(documentation="Параметры, передаваемые вместе с модулем из 'redirectTo'. Заполняется при: action = redirect")
+        @NFCore(documentation="Параметры, передаваемые вместе с модулем из 'redirectTo'. Заполняется при: action = redirect", renderConditions="{'action':'redirect'}")
     refers DynamicActionElement[] redirectParams
 }
 

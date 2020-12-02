@@ -470,6 +470,18 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
+        function shouldRenderProperty(targetObject: { [key: string]: any; }, annotationJSON: string) {
+            if (annotationJSON === "") {
+                return true
+            }
+            let isVisible = true;
+            for (const [key, value] of Object.entries(JSON.parse(annotationJSON.split("'").join("\"")))) {
+                isVisible = Array.isArray(value)
+                    ? value.includes(targetObject[key])
+                    : targetObject[key] === value
+            }
+            return isVisible
+        }
         const preparedData: Array<Object> = [];
         let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
@@ -483,7 +495,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const isContainment = Boolean(feature.get('containment'));
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
                 const description = getFieldAnnotationByKey(feature.get('eAnnotations'), 'documentation');
-                const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
+                const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true'
+                    && shouldRenderProperty(targetObject, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
