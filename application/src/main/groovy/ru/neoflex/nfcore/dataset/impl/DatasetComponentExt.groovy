@@ -404,7 +404,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName} t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -750,12 +750,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     }
                 }
             }
-
             String currentQuery
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query})"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName}"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -916,8 +915,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         String query;
         def jdbcDataset = this.dataset as JdbcDataset
         if (dmlQuery && dmlQuery.generateFromModel) {
-            if (jdbcDataset.schemaName == "" || !jdbcDataset.schemaName)
-                throw new IllegalArgumentException("jdbcDataset schema is not specified")
             if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
                 throw new IllegalArgumentException("jdbcDataset table is not specified")
 
@@ -947,14 +944,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             switch (queryType) {
                 case DMLQueryType.UPDATE:
                     query = """
-                    update ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                    update ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                        set ${values}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.DELETE:
                     query = """
                     delete
-                      from ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                      from ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.INSERT:
@@ -972,7 +969,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     : "''"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """
-                    insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
+                    insert into ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} (${columnDef})
                     values (${values})
                     """; break;
                 default:

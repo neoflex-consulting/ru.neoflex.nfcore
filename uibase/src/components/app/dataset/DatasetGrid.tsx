@@ -35,6 +35,7 @@ import Expand from "./gridComponents/Expand";
 import {ViewRegistry} from "../../../ViewRegistry";
 import {getStringValuesFromEnum} from "../../../utils/enumUtils";
 import {AntdFactoryClasses} from "../../../AntdFactory";
+import {TFunction} from "i18next";
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
@@ -44,8 +45,8 @@ interface Props {
     highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
-    columnDefs: Map<String,any>[],
-    leafColumnDefs: Map<String,any>[],
+    columnDefs: Map<String, unknown>[],
+    leafColumnDefs: Map<String, unknown>[],
     paginationPageSize?: number,
     isEditMode?: boolean;
     showEditDeleteButton?: boolean;
@@ -59,8 +60,8 @@ interface Props {
     className?: string;
     hidePagination?: boolean;
     i18n: any;
-    t: any;
-    viewObject: any;
+    t: TFunction;
+    viewObject: Ecore.EObject;
     context: any;
 }
 
@@ -596,7 +597,7 @@ class DatasetGrid extends React.Component<Props, any> {
     getGridComponent = (component: Ecore.EObject|string) => {
         if (typeof component === "string") {
             return component
-        } else if (getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
+        } else if (component && getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
             return 'antdFactory'
         }
         return "";
@@ -860,7 +861,7 @@ class DatasetGrid extends React.Component<Props, any> {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
-                        ? this.getGridComponent(colDef.get('component'))
+                        ? this.getGridComponent(colDef.get('editComponent'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,

@@ -1273,12 +1273,6 @@ class DatasetView extends React.Component<any, State> {
         }
         if (this.props.viewObject.get('datasetComponent').get(operationType)
             && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
-            && !this.props.viewObject.get('datasetComponent').get('dataset').get('schemaName')) {
-            restrictOperation = true;
-            this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset schema is not specified') ,"error")
-        }
-        if (this.props.viewObject.get('datasetComponent').get(operationType)
-            && this.props.viewObject.get('datasetComponent').get(operationType).get('generateFromModel')
             && !this.props.viewObject.get('datasetComponent').get('dataset').get('tableName')) {
             restrictOperation = true;
             this.props.context.notification(this.props.t('celleditorvalidation'), operationType + " " + this.props.t('jdbcdataset table is not specified') ,"error")
