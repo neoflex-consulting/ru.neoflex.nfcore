@@ -139,7 +139,7 @@ class DatasetComponent extends Tagged {
     contains DatasetColumnView[] column
         @NFCore(documentation="Запустить запрос к Базе данных")
     op JSON runQuery(QueryParameter[] parameters, QueryFilterDTO[] filters, QueryConditionDTO[] aggregations, QueryConditionDTO[] sorts, QueryFilterDTO[] groupBy, QueryConditionDTO[] calculatedExpression, QueryConditionDTO[] groupByColumn)
-        @NFCore(documentation="Возвращает список функций для калькультора в зависимости от базы данных")
+        @NFCore(documentation="Возвращает список функций для калькультора в зависимости от базы данных", invisible="true")
     op JSON getAllFunctions()
     contains QueryParameter[] serverParameters
         //Состав серверного фильтра
@@ -156,8 +156,11 @@ class DatasetComponent extends Tagged {
     contains DMLQuery insertQuery
     contains DMLQuery updateQuery
     contains DMLQuery deleteQuery
+        @NFCore(invisible="true")
     op void executeInsert(QueryParameter[] parameters)
+        @NFCore(invisible="true")
     op void executeUpdate(QueryParameter[] parameters)
+        @NFCore(invisible="true")
     op void executeDelete(QueryParameter[] parameters)
 }
 
