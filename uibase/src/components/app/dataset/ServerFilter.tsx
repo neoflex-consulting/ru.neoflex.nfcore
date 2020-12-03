@@ -133,8 +133,8 @@ const SortableItem = SortableElement(({value}: any) => {
                             initialValue: value.value,
                             rules: [{
                                 required:
-                                    value.datasetColumn ||
-                                    value.operation,
+                                    (value.datasetColumn ||
+                                    value.operation) && !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty'),
                                 message: ' '
                             }]
                         })(

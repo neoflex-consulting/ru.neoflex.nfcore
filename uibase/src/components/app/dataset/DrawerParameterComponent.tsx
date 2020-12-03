@@ -253,7 +253,7 @@ export class DrawerParameterComponent<T extends Props, V extends DrawerState> ex
             if (!err) {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
             } else {
-                this.props.context.notification('Sort notification', 'Please, correct the mistakes', 'error')
+                this.props.context.notification(this.paramNotification, 'Please, correct the mistakes', 'error')
             }
         })
     };
