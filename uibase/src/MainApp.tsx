@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Helmet} from 'react-helmet';
 import Splitter from './components/CustomSplitter'
-import {Form, Layout, Menu, Table} from "antd";
+import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
 import Ecore from "ecore"
@@ -11,7 +11,7 @@ import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
 import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor, NeoInput, NeoTable, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 
@@ -76,14 +76,13 @@ function splitLog(log:string) {
 function getOpenedPath(arr: string[]) : string[] {
     if (arr.length === 1) {
         return arr
-    } else {
-        const path = arr[arr.length - 1];
-        return arr.filter(s=>{
+    }
+    const path = arr[arr.length - 1];
+    return arr.filter(s=>{
             if (path && ((path.search(s + "/") >= 0) || path === s)) {
                 return s
             }
         })
-    }
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -117,6 +116,11 @@ export class MainApp extends React.Component<any, State> {
     }
 
     loadObject = () => {
+        function parseTree(tree: string[]) {
+            return tree.map((value, index) => {
+                return index === 0 ? value : value.replace(tree[index-1]+"/","")
+            })
+        }
         let name: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
@@ -132,9 +136,9 @@ export class MainApp extends React.Component<any, State> {
                                         this.props.context.updateContext!(
                                             ({
                                                 viewObject: objectApp.get('view'),
-                                                variablesObject: objectApp.get('variables'),
-                                                eventHandlersObjects: objectApp.get('eventHandlers'),
-                                                groovyCommandObject: objectApp.get('groovyCommands'),
+                                                variableList: objectApp.get('variables'),
+                                                eventHandlerList: objectApp.get('eventHandlers'),
+                                                groovyCommandList: objectApp.get('groovyCommands'),
                                             })
                                         );
                                         let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -145,9 +149,9 @@ export class MainApp extends React.Component<any, State> {
                                         this.props.context.updateContext!(
                                             ({
                                                 viewObject: objectApp.get('view'),
-                                                variablesObject: objectApp.get('variables'),
-                                                eventHandlersObjects: objectApp.get('eventHandlers'),
-                                                groovyCommandObject: objectApp.get('groovyCommands'),
+                                                variableList: objectApp.get('variables'),
+                                                eventHandlerList: objectApp.get('eventHandlers'),
+                                                groovyCommandList: objectApp.get('groovyCommands'),
                                                 applicationReferenceTree: undefined}),
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
@@ -157,9 +161,9 @@ export class MainApp extends React.Component<any, State> {
                                     this.props.context.updateContext!(
                                         ({
                                             viewObject: objectApp.get('view'),
-                                            variablesObject: objectApp.get('variables'),
-                                            eventHandlersObjects: objectApp.get('eventHandlers'),
-                                            groovyCommandObject: objectApp.get('groovyCommands'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
                                         })
                                     );
@@ -175,9 +179,9 @@ export class MainApp extends React.Component<any, State> {
                                     this.props.context.updateContext!(
                                         ({
                                             viewObject: objectApp.get('view'),
-                                            variablesObject: objectApp.get('variables'),
-                                            eventHandlersObjects: objectApp.get('eventHandlers'),
-                                            groovyCommandObject: objectApp.get('groovyCommands'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
                                         })
                                     );
                                     let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -188,9 +192,9 @@ export class MainApp extends React.Component<any, State> {
                                     this.props.context.updateContext!(
                                         ({
                                             viewObject: objectApp.get('view'),
-                                            variablesObject: objectApp.get('variables'),
-                                            eventHandlersObjects: objectApp.get('eventHandlers'),
-                                            groovyCommandObject: objectApp.get('groovyCommands'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
                                             applicationReferenceTree: undefined
                                         }),
                                         ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
@@ -199,15 +203,42 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
                             else {
-                                this.props.context.updateContext!(
-                                    ({
-                                        viewObject: objectApp.get('view'),
-                                        variablesObject: objectApp.get('variables'),
-                                        eventHandlersObjects: objectApp.get('eventHandlers'),
-                                        groovyCommandObject: objectApp.get('groovyCommands'),
-                                        applicationReferenceTree: objectApp.get('referenceTree')
-                                    })
-                                );
+                                let treeChildren = objectApp.get('referenceTree').eContents();
+                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+                                if (objectApp.get('name') === currentAppModule.appModule) {
+                                    let currentTree: any[] = parseTree(currentAppModule['tree']);
+                                    for (let i = 0; i <= currentTree.length - 1; i++) {
+                                        for (let t of treeChildren
+                                            .filter((t: any) => t.get('name') === currentTree[i])) {
+                                            if (t.eContents().length !== 0) {
+                                                treeChildren = t.eContents();
+                                            }
+                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
+                                                treeChildren = t.get('AppModule').get('view')
+                                            }
+                                        }
+                                    }
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: treeChildren[0] || treeChildren,
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands')
+                                        })
+                                    );
+                                }
+                                else {
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands')
+                                        })
+                                    );
+                                }
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
@@ -402,31 +433,10 @@ export class MainApp extends React.Component<any, State> {
         return this.viewFactory.createView(viewObject, this.props)
     };
 
-    renderVariables = () => {
-        const variables: Ecore.EList = this.props.context.variablesObject;
-        return variables
-            ? variables.array().map(v=>{
-                return this.viewFactory.createView(v, this.props)
-            })
-            : null
-    };
-
-    renderGroovyCommands = () => {
-        const groovys: Ecore.EList = this.props.context.groovyCommandObject;
-        return groovys
-            ? groovys.array().map(g=>{
-                return this.viewFactory.createView(g, this.props)
-            })
-            : null
-    };
-
-    renderEventHandlers = () => {
-        const eventHandlers: Ecore.EList = this.props.context.eventHandlersObjects;
-        return eventHandlers
-            ? eventHandlers.array().map(eh=>{
-                return this.viewFactory.createView(eh, this.props)
-            })
-            : null
+    renderEList = (list: Ecore.EList) => {
+        return list && list.array().map(v=>{
+            return this.viewFactory.createView(v, this.props)
+        })
     };
 
     renderReferences = (isShortSize = false) => {
@@ -543,9 +553,9 @@ export class MainApp extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
                 </Helmet>
                 <FetchSpinner/>
-                {this.renderVariables()}
-                {this.renderEventHandlers()}
-                {this.renderGroovyCommands()}
+                {this.renderEList(this.props.context.variableList)}
+                {this.renderEList(this.props.context.groovyCommandList)}
+                {this.renderEList(this.props.context.eventHandlerList)}
                 <Splitter
                     allowResize={!this.state.hideReferences}
                     ref={this.refSplitterRef}

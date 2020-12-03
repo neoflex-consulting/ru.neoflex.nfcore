@@ -3,6 +3,7 @@ package ru.neoflex.nfcore.dataset.impl
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.sun.jmx.remote.util.ClassLogger
 import groovy.json.JsonOutput
+import org.eclipse.emf.common.util.ECollections
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.ResourceSet
 import ru.neoflex.nfcore.application.ApplicationFactory
@@ -30,29 +31,36 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 if (!resource.resources.empty) {
                     def datasetComponentRef = Context.current.store.getRef(resource.resources[0])
                     def datasetComponent = resource.resources.get(0).contents.get(0) as DatasetComponent
+                    def skippedColumns = ""
                     if (datasetComponent.dataset.datasetColumn != null) {
                         def columns = datasetComponent.dataset.datasetColumn
                         if (columns != []) {
+                            //remove all non-query columns expect column groups
+                            datasetComponent.column.removeAll(datasetComponent.column
+                                    .stream()
+                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).datasetColumn == l) || (!(c instanceof RdbmsColumn) && l.name == c.name)} == null) && !(c instanceof ColumnGroup) })
+                                    .findAll())
+                            //add columns
                             for (int i = 0; i <= columns.size() - 1; ++i) {
-                                def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
-                                rdbmsColumn.name = columns[i].name
-                                rdbmsColumn.datasetColumn = columns[i]
-                                def typography = ApplicationFactory.eINSTANCE.createTypography()
-                                typography.name = columns[i].name
-                                rdbmsColumn.headerName = typography
-                                rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
-                                rdbmsColumn.sortable = true
-                                rdbmsColumn.resizable = true
-                                datasetComponent.column.each { c->
-                                    if (c.name == columns[i].name.toString()) {
-                                        throw new IllegalArgumentException("Please modify your query in the 'dataset'. Has a similar column name")
-                                    }
+                                if (datasetComponent.column.find{c-> c.name == columns[i].name.toString()} != null) {
+                                    skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
+                                } else {
+                                    def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
+                                    rdbmsColumn.name = columns[i].name
+                                    rdbmsColumn.datasetColumn = columns[i]
+                                    def typography = ApplicationFactory.eINSTANCE.createTypography()
+                                    typography.name = columns[i].name
+                                    rdbmsColumn.headerName = typography
+                                    rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
+                                    rdbmsColumn.resizable = true
+                                    datasetComponent.column.add(rdbmsColumn)
                                 }
-                                datasetComponent.column.add(rdbmsColumn)
                             }
+                            //Sort as dataset field order
+                            ECollections.sort(datasetComponent.column, Comparator.comparing{ obj-> columns.indexOf(columns.find {c -> c.name == (obj as DatasetColumnView).name})})
                             Context.current.store.updateEObject(datasetComponentRef, datasetComponent)
                             Context.current.store.commit("Entity was updated " + datasetComponentRef)
-                            return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created")
+                            return JsonOutput.toJson("Columns in entity " + datasetComponent.name + " were created${skippedColumns != "" ? skippedColumns : ""}")
                         }
                     }
                     return JsonOutput.toJson("The 'dataset' parameter is not specified OR the 'dataset' object does not contain columns")
@@ -415,7 +423,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName} t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -761,12 +769,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     }
                 }
             }
-
             String currentQuery
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query})"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName}"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -927,8 +934,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         String query;
         def jdbcDataset = this.dataset as JdbcDataset
         if (dmlQuery && dmlQuery.generateFromModel) {
-            if (jdbcDataset.schemaName == "" || !jdbcDataset.schemaName)
-                throw new IllegalArgumentException("jdbcDataset schema is not specified")
             if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
                 throw new IllegalArgumentException("jdbcDataset table is not specified")
 
@@ -958,14 +963,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             switch (queryType) {
                 case DMLQueryType.UPDATE:
                     query = """
-                    update ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                    update ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                        set ${values}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.DELETE:
                     query = """
                     delete
-                      from ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                      from ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.INSERT:
@@ -983,7 +988,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     : "''"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """
-                    insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
+                    insert into ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} (${columnDef})
                     values (${values})
                     """; break;
                 default:

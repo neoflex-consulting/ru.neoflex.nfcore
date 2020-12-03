@@ -58,42 +58,51 @@ public class DeploySupply {
                             }).collect(Collectors.toList()));
             paths.sort(Comparator.comparing(o -> o.getFileName().toString()));
             String[] suffixes = {XMI, REFS, "/post_install.groovy"};
+            final List<String> exception = new ArrayList<>();
             for (Path path : paths) {
                 context.transact("DeploySupply " + path.getFileName().toString(), () -> {
-                    logger.info("Load XMI files from " + path.getFileName().toString());
-                    new Exporter(store).processZipXmi(path);
-                    logger.info("Load REFS files from " + path.getFileName().toString());
-                    new Exporter(store).processZipRefs(path);
-                    new Exporter(store).processZipFile(path,
-                            p -> Arrays.stream(suffixes).filter(s -> p.toString().toLowerCase().endsWith(s)).count() == 0,
-                            (p, bytes) -> {
-                                Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
-                                try {
-                                    logger.info("Copy file " + path.getFileName().toString() + p.toString() + " to git");
-                                    Files.createDirectories(to.getParent());
-                                    Files.write(to, bytes);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                return null;
-                            });
-                    new Exporter(store).processZipFile(path, (p) -> p.getFileName().toString().equals("post_install.groovy"), (p, bytes) -> {
-                        try {
-                            logger.info("Evaluate " + path.getFileName().toString() + p.toString());
-                            String code = new String(bytes, "utf-8");
-                            context.getGroovy().eval(code, new HashMap<>());
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                        return null;
-                    });
-                    logger.info("Create Supply instance " + path.getFileName().toString());
-                    Supply supply = SupplyFactory.eINSTANCE.createSupply();
-                    supply.setName(path.getFileName().toString());
-                    supply.setDate(new Timestamp((new Date()).getTime()));
-                    store.createEObject(supply);
+                    try {
+                        logger.info("Load XMI files from " + path.getFileName().toString());
+                        new Exporter(store).processZipXmi(path);
+                        logger.info("Load REFS files from " + path.getFileName().toString());
+                        new Exporter(store).processZipRefs(path);
+                        new Exporter(store).processZipFile(path,
+                                p -> Arrays.stream(suffixes).filter(s -> p.toString().toLowerCase().endsWith(s)).count() == 0,
+                                (p, bytes) -> {
+                                    Path to = Transaction.getCurrent().getFileSystem().getRootPath().resolve(p.toString());
+                                    try {
+                                        logger.info("Copy file " + path.getFileName().toString() + p.toString() + " to git");
+                                        Files.createDirectories(to.getParent());
+                                        Files.write(to, bytes);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    return null;
+                                });
+                        new Exporter(store).processZipFile(path, (p) -> p.getFileName().toString().equals("post_install.groovy"), (p, bytes) -> {
+                            try {
+                                logger.info("Evaluate " + path.getFileName().toString() + p.toString());
+                                String code = new String(bytes, "utf-8");
+                                context.getGroovy().eval(code, new HashMap<>());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                            return null;
+                        });
+                        logger.info("Create Supply instance " + path.getFileName().toString());
+                        Supply supply = SupplyFactory.eINSTANCE.createSupply();
+                        supply.setName(path.getFileName().toString());
+                        supply.setDate(new Timestamp((new Date()).getTime()));
+                        store.createEObject(supply);
+                    } catch (Exception e) {
+                        exception.add(String.format("\nException while deploying %s: %s", path.getFileName().toString(), e.getMessage()));
+                    }
                     return null;
                 });
+            }
+            String exp = exception.stream().map(Object::toString).collect(Collectors.joining(","));
+            if (!exp.equals("")) {
+                throw new RuntimeException(exp);
             }
         } catch (Throwable e) {
             logger.error("", e);

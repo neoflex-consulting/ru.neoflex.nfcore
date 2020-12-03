@@ -1,5 +1,6 @@
 package ru.neoflex.nfcore.dataset.impl
 
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.EList
@@ -11,45 +12,35 @@ import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
 import ru.neoflex.nfcore.base.util.DocFinder
 import ru.neoflex.nfcore.dataset.*
+import ru.neoflex.nfcore.dataset.impl.adapters.JdbcDatasetAdapter
 import ru.neoflex.nfcore.jdbcLoader.NamedParameterStatement
 import ru.neoflex.nfcore.utils.JdbcUtils
+import org.eclipse.emf.common.util.ECollections
 
 import java.sql.Connection
 import java.sql.ResultSet
 
 class JdbcDatasetExt extends JdbcDatasetImpl {
     private static final Logger logger = LoggerFactory.getLogger(JdbcDatasetExt.class);
+    private ODatabaseDocumentInternal currentDb;
+    private ODatabaseDocumentInternal newCurrentDb;
 
     @Override
     String runQueryDataset(EList<QueryParameter> parameters) {
         if (datasetColumn) {
-            def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
-            def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
-            Connection jdbcConnection = null;
-            ResultSet resultSet = null;
-            NamedParameterStatement ps = null;
             def rowData = null
+            Connection jdbcConnection = this.getAndCheckConnection()
             try {
+                NamedParameterStatement ps = null;
+                ResultSet resultSet = getResultSet(jdbcConnection, parameters, ps)
                 try {
-                    try {
-                        jdbcConnection = (connection as JdbcConnectionExt).connect()
-                        resultSet = getResultSet(jdbcConnection, false, parameters, ps)
-                        currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
-                        if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
-                            ODatabaseRecordThreadLocal.instance().set(currentDb);
-                        }
-                        rowData = JdbcConnectionExt.readResultSet(resultSet)
-                    } finally {
-                        (resultSet) ? resultSet.close() : null
-                    }
+                    rowData = JdbcConnectionExt.readResultSet(resultSet)
                 } finally {
-                    (ps) ? ps.close() : null
+                    resultSet && resultSet.close()
+                    ps && ps.close()
                 }
             } finally {
-                if (currentDb != null && currentDbNew != null && currentDbNew.getURL() == currentDb.getURL()) {
-                    (jdbcConnection) ? jdbcConnection.close() : null
-                }
-                ODatabaseRecordThreadLocal.instance().set(currentDb);
+                this.closeConnection(jdbcConnection)
             }
             return JsonOutput.toJson(rowData)
         } else {
@@ -62,56 +53,48 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         def resourceSet = DocFinder.create(Context.current.store, DatasetPackage.Literals.JDBC_DATASET, [name: this.name])
                 .execute().resourceSet
         if (!resourceSet.resources.empty) {
-            def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
-            def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
             EcoreUtil.resolveAll(resourceSet)
-            Connection jdbcConnection = null;
-            ResultSet resultSet = null;
-            NamedParameterStatement ps = null;
+            Connection jdbcConnection = this.getAndCheckConnection()
             try {
+                NamedParameterStatement ps = null;
+                ResultSet resultSet = getResultSet(jdbcConnection, null as EList<QueryParameter>, ps)
                 try {
-                    try {
-
-                        jdbcConnection = (connection as JdbcConnectionExt).connect()
-                        resultSet = getResultSet(jdbcConnection, false, null as EList<QueryParameter>, ps)
-                        currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
-                        if (currentDb != null && currentDbNew != null && currentDbNew.getURL() != currentDb.getURL()) {
-                            ODatabaseRecordThreadLocal.instance().set(currentDb);
-                        }
-                        def jdbcDatasetRef = Context.current.store.getRef(resourceSet.resources.get(0))
-                        def jdbcDataset = resourceSet.resources.get(0).contents.get(0) as JdbcDataset
-
-                        def columnCount = resultSet.metaData.columnCount
-                        if (columnCount > 0) {
-                            for (int i = 1; i <= columnCount; ++i) {
-                                def object = resultSet.metaData.getColumnName(i)
+                    def resource = resourceSet.resources.get(0);
+                    def jdbcDataset = resource.contents.get(0) as JdbcDataset
+                    def labels = []
+                    def skippedColumns = ""
+                    if (resultSet.metaData.columnCount > 0) {
+                        for (int i = 1; i <= resultSet.metaData.columnCount; ++i) {
+                            def columnName = resultSet.metaData.getColumnLabel(i).toString()
+                            labels.push(columnName)
+                            if (jdbcDataset.datasetColumn.find{c-> c.name == columnName} != null) {
+                                skippedColumns += "\nExisting column ${columnName} skipped"
+                            } else {
                                 def columnType = resultSet.metaData.getColumnTypeName(i)
                                 def datasetColumn = DatasetFactory.eINSTANCE.createDatasetColumn()
                                 datasetColumn.rdbmsDataType = columnType == null ? 'String' : columnType.toString()
                                 datasetColumn.convertDataType = getConvertDataType(columnType.toString().toLowerCase())
-                                datasetColumn.name = object.toString()
-                                jdbcDataset.datasetColumn.each { c->
-                                    if (c.name == object.toString()) {
-                                        throw new IllegalArgumentException("Please, change your query. It has similar column`s name")
-                                    }
-                                }
+                                datasetColumn.name = columnName
                                 jdbcDataset.datasetColumn.add(datasetColumn)
                             }
-                            Context.current.store.updateEObject(jdbcDatasetRef, jdbcDataset)
-                            Context.current.store.commit("Entity was updated " + jdbcDatasetRef)
-                            return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created")
                         }
-                    } finally {
-                        (resultSet) ? resultSet.close() : null
+                        //remove all non-query columns
+                        jdbcDataset.datasetColumn.removeAll(jdbcDataset.datasetColumn
+                                .stream()
+                                .filter({ c -> (labels.find { l -> l == c.name} == null) })
+                                .findAll())
+                        //Sort as query field order
+                        ECollections.sort(jdbcDataset.datasetColumn, Comparator.comparing{obj-> labels.reverse().indexOf((obj as DatasetColumnImpl).name)})
+                        //saving resource to prevent missing ref in datasetComponent
+                        Context.current.store.saveResource(resource)
+                        return JsonOutput.toJson("Columns in entity " + jdbcDataset.name + " were created${skippedColumns != "" ? skippedColumns : ""}")
                     }
                 } finally {
-                    (ps) ? ps.close() : null
+                    resultSet && resultSet.close()
+                    ps && ps.close()
                 }
             } finally {
-                if (currentDb != null && currentDbNew != null && currentDbNew.getURL() == currentDb.getURL()) {
-                    (jdbcConnection) ? jdbcConnection.close() : null
-                }
-                ODatabaseRecordThreadLocal.instance().set(currentDb);
+                this.closeConnection(jdbcConnection)
             }
         }
     }
@@ -137,64 +120,51 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
 
     @Override
     String showAllTables() {
-        Connection jdbcConnection = null;
-        ResultSet resultSet = null;
-        NamedParameterStatement ps = null;
+        Connection jdbcConnection = this.getAndCheckConnection()
         def rowData = null
         try {
+            def stmt = jdbcConnection.createStatement()
             try {
+                def resultSet = jdbcConnection.createStatement().executeQuery(JdbcDatasetAdapter.getDBAdapter(connection.getDriver().getDriverClassName()).showAllTables())
+                logger.info(JdbcDatasetAdapter.getDBAdapter(connection.getDriver().getDriverClassName()).showAllTables())
                 try {
-                    jdbcConnection = (connection as JdbcConnectionExt).connect()
-                    resultSet = getResultSet(jdbcConnection, true, null as EList<QueryParameter>, ps)
                     rowData = JdbcConnectionExt.readResultSet(resultSet)
                 } finally {
-                    (resultSet) ? resultSet.close() : null
+                    resultSet.close()
                 }
             } finally {
-                (ps) ? ps.close() : null
+                stmt.close()
             }
         } finally {
-            (jdbcConnection) ? jdbcConnection.close() : null
+            this.closeConnection(jdbcConnection)
         }
         return JsonOutput.toJson(rowData)
     }
 
-    ResultSet getResultSet(Connection jdbcConnection, boolean showAllTables, EList<QueryParameter> parameters, NamedParameterStatement ps) {
+    ResultSet getResultSet(Connection jdbcConnection, EList<QueryParameter> parameters, NamedParameterStatement ps) {
         /*Execute query*/
         String currentQuery = ""
-        String currentQueryPostgresql = ""
-        if (showAllTables) {
-            currentQuery = "SELECT table_schema, table_name FROM information_schema.tables ORDER BY table_schema, table_name ASC"
+        ResultSet set = null
+        if (queryType == QueryType.USE_TABLE_NAME) {
+            currentQuery = "SELECT * FROM ${schemaName == "" ? tableName : schemaName+"."+tableName}"
         }
-        else {
-            if (queryType == QueryType.USE_TABLE_NAME) {
-                currentQuery = "SELECT * FROM ${schemaName}.${tableName}"
-            }
-            else if (queryType == QueryType.USE_QUERY && parameters == null) {
-                //Replace namedParameters
-                currentQuery = "SELECT * FROM (${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")})"
-                currentQueryPostgresql = "SELECT * FROM (${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")}) t"
-            } else {
-                currentQuery = "SELECT * FROM (${query})"
-                currentQueryPostgresql = "SELECT * FROM (${query}) t"
-            }
+        else if (queryType == QueryType.USE_QUERY && parameters == null) {
+            //Replace namedParameters
+            currentQuery = "${query.replaceAll(/:[а-яА-ЯA-Za-z0-9_]+/, "null")}"
+        } else {
+            currentQuery = "${query}"
         }
-
+        ps = new NamedParameterStatement(jdbcConnection, currentQuery);
+        if (parameters && parameters.size() > 0 && currentQuery) {
+            ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQuery)
+        }
+        logger.info(currentQuery)
         try {
-            ps = new NamedParameterStatement(jdbcConnection, currentQuery);
-            if (parameters && parameters.size() > 0 && currentQuery) {
-                ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQuery)
-            }
-            logger.info(currentQuery)
-            return ps.executeQuery()
-        } catch (e) {
-            ps = new NamedParameterStatement(jdbcConnection, currentQueryPostgresql);
-            if (parameters && parameters.size() > 0 && currentQueryPostgresql) {
-                ps = JdbcUtils.getNamedParameterStatement(parameters, ps, currentQueryPostgresql)
-            }
-            logger.info(currentQueryPostgresql)
-            return ps.executeQuery()
+            set = ps.executeQuery()
+        } finally {
+            this.changeOrientDB(this.currentDb)
         }
+        return set
     }
 
     Object getConvertDataType(String rdbmsDataType) {
@@ -214,6 +184,27 @@ class JdbcDatasetExt extends JdbcDatasetImpl {
         else if (rdbmsDataType.indexOf('timestamp') != -1) {return DataType.TIMESTAMP}
 
         else {return DataType.STRING}
+    }
+
+    Connection getAndCheckConnection() {
+        this.currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        Connection jdbcConnection = (connection as JdbcConnectionExt).connect()
+        this.newCurrentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
+        //check if not in same thread and change to current thread
+        this.changeOrientDB(this.currentDb)
+        return jdbcConnection
+    }
+
+    void closeConnection(Connection jdbcConnection) {
+        jdbcConnection.close()
+        //restore db
+        this.changeOrientDB(this.currentDb)
+    }
+
+    void changeOrientDB(ODatabaseDocumentInternal db) {
+        if (this.currentDb != null && this.newCurrentDb != null && this.currentDb.getURL() != this.newCurrentDb.getURL()) {
+            ODatabaseRecordThreadLocal.instance().set(db);
+        }
     }
 
 }

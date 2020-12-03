@@ -1,4 +1,4 @@
-import {View, ViewFactory} from './View'
+import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
@@ -34,6 +34,32 @@ import {SvgName} from "neo-icon/lib/icon/icon";
 const marginBottom = '20px';
 
 let startResource: Object;
+
+export enum AntdFactoryClasses {
+    Column='ru.neoflex.nfcore.application#//Column',
+    Form='ru.neoflex.nfcore.application#//Form',
+    TabsViewReport='ru.neoflex.nfcore.application#//TabsViewReport',
+    DatasetView='ru.neoflex.nfcore.application#//DatasetView',
+    Typography='ru.neoflex.nfcore.application#//Typography',
+    Select='ru.neoflex.nfcore.application#//Select',
+    DatePicker='ru.neoflex.nfcore.application#//DatePicker',
+    HtmlContent='ru.neoflex.nfcore.application#//HtmlContent',
+    Button='ru.neoflex.nfcore.application#//Button',
+    Input='ru.neoflex.nfcore.application#//Input',
+    Row='ru.neoflex.nfcore.application#//Row',
+    Calendar='ru.neoflex.nfcore.application#//Calendar',
+    GroovyCommand='ru.neoflex.nfcore.application#//GroovyCommand',
+    ValueHolder='ru.neoflex.nfcore.application#//ValueHolder',
+    MasterdataView='ru.neoflex.nfcore.application#//MasterdataView',
+    EventHandler='ru.neoflex.nfcore.application#//EventHandler',
+    Drawer='ru.neoflex.nfcore.application#//Drawer',
+    Href='ru.neoflex.nfcore.application#//Href',
+    Collapse='ru.neoflex.nfcore.application#//Collapse',
+    Region='ru.neoflex.nfcore.application#//Region',
+    Checkbox='ru.neoflex.nfcore.application#//Checkbox',
+    NeoIcon='ru.neoflex.nfcore.application#//NeoIcon',
+    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup'
+}
 
 function getAgGridValue(this: any, returnValueType: string, defaultValue: string) {
     if (returnValueType === 'object') {
@@ -849,7 +875,7 @@ class HtmlContent_ extends ViewContainer {
     }
 }
 
-class GroovyCommand_ extends ViewContainer {
+class GroovyCommand_ extends Component {
     componentDidMount(): void {
         if (this.viewObject.get('executeOnStartup')) {
             this.execute()
@@ -868,7 +894,9 @@ class GroovyCommand_ extends ViewContainer {
     execute = () => {
         const commandType = this.viewObject.get('commandType')||"Eval";
         const command = this.viewObject.get('command');
-        const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+        const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems')
+            , this.props.context.contextItemValues
+            , this.props.pathFull[this.props.pathFull.length - 1].params))
         if (commandType === "Resource") {
 
             API.instance().fetchJson('/script/resource?path='+this.viewObject.get('gitResourcePath'), {
@@ -883,7 +911,9 @@ class GroovyCommand_ extends ViewContainer {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         } else if (commandType === "Static") {
             API.instance().fetchJson('/script/static/'+this.viewObject.get('gitStaticClass')+'/'+this.viewObject.get('gitStaticMethod'), {
                 method: 'POST',
@@ -897,7 +927,9 @@ class GroovyCommand_ extends ViewContainer {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         } else {
             API.instance().fetchJson('/script/eval', {
                 method: 'POST',
@@ -911,17 +943,18 @@ class GroovyCommand_ extends ViewContainer {
                     saveAs(new Blob([res]), "file.txt");
                     console.log("Document created successfully");
                 }
-            })
+            }).catch(reason => this.props.context.notification("EventHandler.condition",
+                this.props.t("exception while evaluating") + ` GroovyCommand.${this.viewObject.get('name')} \nreason=${reason}`,
+                "error"))
         }
     };
+
     render = () => {
-        return (
-            <div/>
-        )
+        return null
     }
 }
 
-class ValueHolder_ extends ViewContainer {
+class ValueHolder_ extends Component {
     constructor(props: any) {
         super(props);
         let value;
@@ -954,9 +987,7 @@ class ValueHolder_ extends ViewContainer {
     }
 
     render = () => {
-        return (
-            <div/>
-        )
+        return null
     }
 }
 
@@ -1254,7 +1285,7 @@ class Typography_ extends ViewContainer {
     }
 }
 
-class EventHandler_ extends ViewContainer {
+class EventHandler_ extends Component {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -1297,6 +1328,7 @@ class EventHandler_ extends ViewContainer {
                         // eslint-disable-next-line
                         componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
                     } catch (e) {
+                        componentCondition = false;
                         this.props.context.notification("EventHandler.condition",
                             this.props.t("exception while evaluating") + ` ${replaceNamedParam(this.viewObject.get('condition'), params)}`,
                             "warning")
@@ -1346,7 +1378,7 @@ class EventHandler_ extends ViewContainer {
                         isHandled = true;
                     }
                     if (el.get('action') === actionType.backToLastPage) {
-                        if (this.props.pathFull.length > 2) {
+                        if (this.props.pathFull.length >= 2) {
                             const appModule = this.props.pathFull[this.props.pathFull.length - 2];
                             let params: Object[] = appModule.params;
                             this.props.context.changeURL!(appModule.appModule, true, undefined, params);
@@ -1385,8 +1417,8 @@ class EventHandler_ extends ViewContainer {
         unmountComponent.bind(this)(false, true)
     }
 
-    render = () => {
-        return <div/>
+    render() {
+        return null
     }
 }
 
@@ -1633,35 +1665,35 @@ class MasterdataView_ extends ViewContainer {
 
 class AntdFactory implements ViewFactory {
     name = 'antd';
-    components = new Map<string, typeof View>();
+    components = new Map<string, typeof Component>();
 
     constructor() {
-        this.components.set('ru.neoflex.nfcore.application#//Column', Col_);
-        this.components.set('ru.neoflex.nfcore.application#//Form', Form_);
-        this.components.set('ru.neoflex.nfcore.application#//TabsViewReport', TabsViewReport_);
-        this.components.set('ru.neoflex.nfcore.application#//DatasetView', DatasetView_);
-        this.components.set('ru.neoflex.nfcore.application#//Typography', Typography_);
-        this.components.set('ru.neoflex.nfcore.application#//Select', Select_);
-        this.components.set('ru.neoflex.nfcore.application#//DatePicker', DatePicker_);
-        this.components.set('ru.neoflex.nfcore.application#//HtmlContent', HtmlContent_);
-        this.components.set('ru.neoflex.nfcore.application#//Button', Button_);
-        this.components.set('ru.neoflex.nfcore.application#//Input', Input_);
-        this.components.set('ru.neoflex.nfcore.application#//Row', Row_);
-        this.components.set('ru.neoflex.nfcore.application#//Calendar', Calendar_);
-        this.components.set('ru.neoflex.nfcore.application#//GroovyCommand', GroovyCommand_);
-        this.components.set('ru.neoflex.nfcore.application#//ValueHolder', ValueHolder_);
-        this.components.set('ru.neoflex.nfcore.application#//MasterdataView', MasterdataView_);
-        this.components.set('ru.neoflex.nfcore.application#//EventHandler', EventHandler_);
-        this.components.set('ru.neoflex.nfcore.application#//Drawer', Drawer_);
-        this.components.set('ru.neoflex.nfcore.application#//Href', Href_);
-        this.components.set('ru.neoflex.nfcore.application#//Collapse', Collapse_);
-        this.components.set('ru.neoflex.nfcore.application#//Region', Region_);
-        this.components.set('ru.neoflex.nfcore.application#//Checkbox', Checkbox_);
-        this.components.set('ru.neoflex.nfcore.application#//NeoIcon', NeoIcon_);
-        this.components.set('ru.neoflex.nfcore.application#//RadioGroup', RadioGroup_);
+        this.components.set(AntdFactoryClasses.Column, Col_);
+        this.components.set(AntdFactoryClasses.Form, Form_);
+        this.components.set(AntdFactoryClasses.TabsViewReport, TabsViewReport_);
+        this.components.set(AntdFactoryClasses.DatasetView, DatasetView_);
+        this.components.set(AntdFactoryClasses.Typography, Typography_);
+        this.components.set(AntdFactoryClasses.Select, Select_);
+        this.components.set(AntdFactoryClasses.DatePicker, DatePicker_);
+        this.components.set(AntdFactoryClasses.HtmlContent, HtmlContent_);
+        this.components.set(AntdFactoryClasses.Button, Button_);
+        this.components.set(AntdFactoryClasses.Input, Input_);
+        this.components.set(AntdFactoryClasses.Row, Row_);
+        this.components.set(AntdFactoryClasses.Calendar, Calendar_);
+        this.components.set(AntdFactoryClasses.GroovyCommand, GroovyCommand_);
+        this.components.set(AntdFactoryClasses.ValueHolder, ValueHolder_);
+        this.components.set(AntdFactoryClasses.MasterdataView, MasterdataView_);
+        this.components.set(AntdFactoryClasses.EventHandler, EventHandler_);
+        this.components.set(AntdFactoryClasses.Drawer, Drawer_);
+        this.components.set(AntdFactoryClasses.Href, Href_);
+        this.components.set(AntdFactoryClasses.Collapse, Collapse_);
+        this.components.set(AntdFactoryClasses.Region, Region_);
+        this.components.set(AntdFactoryClasses.Checkbox, Checkbox_);
+        this.components.set(AntdFactoryClasses.NeoIcon, NeoIcon_);
+        this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
     }
 
-    createView(viewObject: Ecore.EObject, props: any): JSX.Element {
+    createView(viewObject: Ecore.EObject, props: any, ref?: any): JSX.Element {
         if (startResource === undefined) {
             startResource = viewObject.eResource().to()
         }
@@ -1671,10 +1703,10 @@ class AntdFactory implements ViewFactory {
         }
         const isAccessDenied = viewObject.get('grantType') === grantType.denied;
         return (
-            isAccessDenied ? <div/> : <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} />
+            isAccessDenied ? <div/> : <Component {...props} key={viewObject._id.toString() + '_1'} viewObject={viewObject} viewFactory={this} ref={ref}/>
         )
-
     }
+
 
 }
 

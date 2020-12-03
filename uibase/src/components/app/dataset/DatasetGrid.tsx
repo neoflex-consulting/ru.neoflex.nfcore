@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {createRef} from 'react';
 import {AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import {ConfigProvider} from 'antd';
@@ -8,9 +8,12 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import {Button_, Checkbox_, DatePicker_, Href_, Input_, RadioGroup_, Select_} from '../../../AntdFactory';
 import Paginator from "../Paginator";
-import {agGridColumnTypes, appTypes, dmlOperation} from "../../../utils/consts";
+import {
+    agGridColumnTypes,
+    appTypes,
+    dmlOperation, grantType,
+} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -29,43 +32,55 @@ import {
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
 import Expand from "./gridComponents/Expand";
+import {ViewRegistry} from "../../../ViewRegistry";
+import {getStringValuesFromEnum} from "../../../utils/enumUtils";
+import {AntdFactoryClasses} from "../../../AntdFactory";
+import {TFunction} from "i18next";
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
 
 interface Props {
-    hide?: boolean,
-    onCtrlA?: Function,
-    onCtrlShiftA?: Function,
-    highlights?: {[key: string]: unknown}[];
-    headerSelection?: boolean,
-    onHeaderSelection?: Function,
-    activeReportDateField: boolean,
+    hidden?: boolean,
+    highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
-    columnDefs: Map<String,any>[],
-    leafColumnDefs: Map<String,any>[],
-    paginationCurrentPage?: number,
-    paginationTotalPage?: number,
+    columnDefs: Map<String, unknown>[],
+    leafColumnDefs: Map<String, unknown>[],
     paginationPageSize?: number,
-    showUniqRow?: boolean,
-    saveChanges?: (newParam: any, paramName: string) => void;
-    numberOfNewLines: boolean,
-    onApplyEditChanges?: (buffer: any[]) => void;
     isEditMode?: boolean;
     showEditDeleteButton?: boolean;
     showMenuCopyButton?: boolean;
     aggregatedRows?: {[key: string]: unknown}[];
     height?: number;
     width?: number;
-    highlightClassFunction?: ()=>{};
+    highlightClassFunction?: (params: any) => string | string[];
     valueFormatter?: (params: ValueFormatterParams)=>string|undefined;
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
-    className?: any;
-    hidePagination?: boolean
+    className?: string;
+    hidePagination?: boolean;
+    i18n: any;
+    t: TFunction;
+    viewObject: Ecore.EObject;
+    context: any;
 }
 
-class DatasetGrid extends React.Component<Props & any, any> {
+class AntdFactoryWrapper extends React.Component<any, {}> {
+    private componentRef = createRef<any>();
+    private viewFactory = ViewRegistry.INSTANCE.get('antd');
+
+    getValue = () => {
+        return this.componentRef.current
+            && this.componentRef.current.getValue
+            && this.componentRef.current.getValue()
+    };
+
+    render() {
+        return this.viewFactory.createView(this.props.viewObject, this.props, this.componentRef)
+    }
+}
+
+class DatasetGrid extends React.Component<Props, any> {
 
     private grid: React.RefObject<any>;
     private gridOptions: GridOptions;
@@ -78,8 +93,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
             hidden: false,
             themes: [],
             operations: [],
-            showUniqRow: this.props.showUniqRow,
-            numberOfNewLines: this.props.numberOfNewLines,
             paginationPageSize: this.props.paginationPageSize ? this.props.paginationPageSize : 10,
             isGridReady: false,
             columnDefs: this.colDefsToObject(this.props.columnDefs),
@@ -88,21 +101,14 @@ class DatasetGrid extends React.Component<Props & any, any> {
             locale: switchAntdLocale(this.props.i18n, this.props.t),
             gridOptions: {
                 frameworkComponents: {
-                    selectComponent: Select_,
-                    buttonComponent: Button_,
-                    hrefComponent: Href_,
-                    checkboxComponent: Checkbox_,
-                    radioGroupComponent: RadioGroup_,
-                    datePickerComponent: DatePicker_,
-                    inputComponent: Input_,
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
                     expand: Expand,
+                    antdFactory: AntdFactoryWrapper
                 },
                 defaultColDef: {
-                    resizable: true,
-                    sortable: true,
+                    resizable: true
                 }
             },
             cellStyle: {},
@@ -224,7 +230,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                 const cellStyle = params.colDef.cellStyle(params);
                 objectRow.push({
-                    value: this.props.valueFormatter ? this.props.valueFormatter(params) : elem[el],
+                    value: this.props.valueFormatter ? this.props.valueFormatter(params as ValueFormatterParams) : elem[el],
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -234,7 +240,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
             data.push(objectRow);
         }
         return  {
-            hidden: this.props.hidden,
+            hidden: this.props.hidden!,
             docxComponentType : docxElementExportType.grid,
             gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
             gridData: data
@@ -270,7 +276,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                 }
                 const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                 const cellStyle = params.colDef.cellStyle(params);
-                const mask = this.props.excelCellMask && this.props.excelCellMask(params);
+                const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
                 objectRow.push({
                     value: params.colDef.type === appTypes.String ? params.value
                         : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
@@ -280,7 +286,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         ? "dd.mm.yyyy hh:mm:ss"
                         : params.colDef.type === appTypes.Date && !mask
                             ? "dd.mm.yyyy"
-                            : mask,
+                            : mask || "",
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -290,10 +296,10 @@ class DatasetGrid extends React.Component<Props & any, any> {
             data.push(objectRow);
         }
         return  {
-            hidden: this.props.hidden,
+            hidden: this.props.hidden!,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
-                tableName: this.props.viewObject.get('name'),
+                tableName: this.props.viewObject.get('name') || "",
                 columns: header,
                 data: data
             },
@@ -588,33 +594,19 @@ class DatasetGrid extends React.Component<Props & any, any> {
         }
     }
 
-    getComponent = (className: string) => {
-        if (className === "//Href") {
-            return 'hrefComponent'
-        } else if (className === "//Button") {
-            return 'buttonComponent'
-        } else if (className === "//Select") {
-            return 'selectComponent'
-        } else if (className === "//Checkbox") {
-            return 'checkboxComponent'
-        } else if (className === "//RadioGroup") {
-            return 'radioGroupComponent'
-        } else if (className === "//DatePicker") {
-            return 'datePickerComponent'
-        } else if (className === "//Input") {
-            return 'inputComponent'
-        } else {
-            return className
+    getGridComponent = (component: Ecore.EObject|string) => {
+        if (typeof component === "string") {
+            return component
+        } else if (component && getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
+            return 'antdFactory'
         }
+        return "";
     };
 
     getBuffer = () => {
         return this.buffer
     };
 
-    /*getGridOptions = () => {
-        return this.gridOptions
-    };*/
 
     resetBuffer = () => {
         this.grid.current.api.applyTransaction({ remove: this.buffer
@@ -855,8 +847,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                     editable: colDef.get('editable') || false,
                     pinned: colDef.get('pinned') === 'Left' ? 'left' : colDef.get('pinned') === 'Right' ? 'right' : false,
                     resizable: colDef.get('resizable') || false,
-                    sortable: colDef.get('sortable') || false,
-                    suppressMenu: colDef.get('suppressMenu') || false,
                     cellStyle: this.state ? this.state.cellStyle : undefined,
                     cellRendererParams: (colDef.get('component')) ? {
                         ...this.props,
@@ -867,13 +857,11 @@ class DatasetGrid extends React.Component<Props & any, any> {
                         showMenuCopyButton: this.props.showMenuCopyButton,
                         isAgComponent: true
                     } : undefined,
-                    cellRenderer: (colDef.get('component')) ? this.getComponent(colDef.get('component').eClass ? colDef.get('component').eClass._id : colDef.get('component')) : function (params: any) {
+                    cellRenderer: (colDef.get('component')) ? this.getGridComponent(colDef.get('component')) : function (params: any) {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
-                        ? this.getComponent(colDef.get('editComponent').eClass
-                            ? colDef.get('editComponent').eClass._id
-                            : colDef.get('editComponent'))
+                        ? this.getGridComponent(colDef.get('editComponent'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,
@@ -900,7 +888,7 @@ class DatasetGrid extends React.Component<Props & any, any> {
         const {gridOptions} = this.state;
         return (
             <div id="datasetGrid"
-                 hidden={this.props.hide}
+                 hidden={this.props.hidden}
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
@@ -927,7 +915,6 @@ class DatasetGrid extends React.Component<Props & any, any> {
                             //Выполняет глубокую проверку значений старых и новых данных и подгружает обновленные
                             //rowDataChangeDetectionStrategy={'DeepValueCheck' as ChangeDetectionStrategyType}
                             suppressFieldDotNotation //позволяет не обращать внимание на точки в названиях полей
-                            suppressMenuHide //Всегда отображать инконку меню у каждого столбца, а не только при наведении мыши (слева три полосочки)
                             allowDragFromColumnsToolPanel //Возможность переупорядочивать и закреплять столбцы, перетаскивать столбцы из панели инструментов столбцов в грид
                             headerHeight={48} //высота header в px (25 по умолчанию)
                             rowHeight={40} //высота row в px

@@ -1760,6 +1760,16 @@ padding: 3px 24px;
   width: 20px;
 }
 
+/*Datasearch create form modal*/
+
+.datasearch__create__modal .ant-modal-footer {
+  text-align: unset;
+}
+
+.datasearch__create__modal .ant-modal-footer button{
+  margin-right: 8px;
+}
+
 .ant-table-tbody > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td {
   background: #FFF8E0 !important;
 }
