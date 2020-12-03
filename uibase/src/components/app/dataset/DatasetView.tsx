@@ -1127,12 +1127,12 @@ class DatasetView extends React.Component<any, State> {
         }
     }
 
-    onChangeDatasetComponent(e: any): void {
-        let params: any = {name: e};
+    onChangeDatasetComponent(datasetComponentName: string): void {
+        let params: any = {name: datasetComponentName};
         this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
-            .filter((c: any) => c.eContents()[0].get('name') === e);
-        this.setState({currentDatasetComponent: currentDatasetComponent[0]});
+            .filter((c: any) => c.eContents()[0].get('name') === datasetComponentName);
+        this.setState({currentDatasetComponent: currentDatasetComponent[0]},()=>this.saveDatasetComponentToUrl(datasetComponentName));
         this.findColumnDefs(currentDatasetComponent[0]);
     }
 
@@ -1288,11 +1288,14 @@ class DatasetView extends React.Component<any, State> {
 
     saveDatasetComponentToUrl = (datasetComponentName: string) => {
         const urlParams = this.props.pathFull[this.props.pathFull.length - 1];
-        const found = urlParams.params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI())
-        if (found) {
-            found.parameterValue = datasetComponentName
-        } else {
-            urlParams.params = urlParams.params.concat({
+        const params = urlParams.params ? urlParams.params.map((p: IServerNamedParam)=>{
+            return {
+                ...p,
+                parameterValue: p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI() ? datasetComponentName : p.parameterValue
+            }
+        }) : [];
+        if (!(urlParams.params && urlParams.params.find((p:any)=>p.parameterName === this.props.viewObject.get('name')+this.props.viewObject.eURI()))) {
+            params.push({
                 parameterName: this.props.viewObject.get('name')+this.props.viewObject.eURI(),
                 parameterValue: datasetComponentName
             })
@@ -1300,7 +1303,7 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.changeURL(urlParams.appModule,
             urlParams.useParentReferenceTree,
             undefined,
-            urlParams.params);
+            params);
     };
 
     handleSaveMenu = () => {
@@ -1447,10 +1450,9 @@ class DatasetView extends React.Component<any, State> {
                             })
                         }
                     }}
-                    onChangeDatasetComponent={(e: any) => {
+                    onChangeDatasetComponent={(e: string) => {
                         if (e) {
                             this.onChangeDatasetComponent(e);
-                            this.saveDatasetComponentToUrl(e);
                         } else {
                             this.setState({deleteMenuVisible:true})
                         }
