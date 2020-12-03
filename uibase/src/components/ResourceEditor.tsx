@@ -499,6 +499,22 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     && shouldRenderProperty(targetObject, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
                 const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
+                const props = {
+                    value: targetObject[feature.get('name')],
+                    targetObject: targetObject,
+                    eObject: feature,
+                    eType: feature.get('eType'),
+                    upperBound: feature.get('upperBound'),
+                    idx: idx,
+                    ukey: key,
+                    onChange: this.onTablePropertyChange,
+                    handleDeleteSingleRef: this.handleDeleteSingleRef,
+                    handleDeleteRef: this.handleDeleteRef,
+                    onEClassBrowse: this.onEClassBrowse,
+                    onBrowse: this.onBrowse,
+                    mainEObject: mainEObject,
+                    edit: this.state.edit && !isDisabled
+                };
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
@@ -512,23 +528,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             </NeoHint>
                         </div>
                         : feature.get('name'),
-                    value: FormComponentMapper.getComponent({
-                        value: targetObject[feature.get('name')],
-                        targetObject: targetObject,
-                        eObject: feature,
-                        eType: feature.get('eType'),
-                        upperBound: feature.get('upperBound'),
-                        idx: idx,
-                        ukey: key,
-                        onChange: this.onTablePropertyChange,
-                        handleDeleteSingleRef: this.handleDeleteSingleRef,
-                        handleDeleteRef: this.handleDeleteRef,
-                        onEClassBrowse: this.onEClassBrowse,
-                        onBrowse: this.onBrowse,
-                        mainEObject: mainEObject,
-                        edit: this.state.edit && !isDisabled,
-                        expandable: isExpandable
-                    }),
+                    value: isExpandable
+                        ? FormComponentMapper.getComponentWrapper({
+                            type: "expand",
+                            wrappedComponent: FormComponentMapper.getComponent(props),
+                            expandedComponent: FormComponentMapper.getComponent({...props, expanded: true})
+                        })
+                        : FormComponentMapper.getComponent(props),
                     key: feature.get('name') + idx
                 })
             });
@@ -951,7 +957,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false) => {
-        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {

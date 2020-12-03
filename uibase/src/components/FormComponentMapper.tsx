@@ -44,7 +44,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
-                    autosize={{ maxRows: expanded ? null : 10 }}
+                    autoSize={{ maxRows: expanded ? null : 10 }}
                     value={innerValue}
                     onChange={(e: any) => {
                         setInnerValue(e.target.value)
@@ -269,7 +269,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
     const { expandedComponent, children } = props;
     const [expanded, setExpanded] = useState(false);
 
-    return <div className={"expand-component-container"}>
+    return <div key={"expandComponentContainer"} className={"expand-component-container"}>
         {children}
         <NeoButton type={"link"} onClick={()=>setExpanded(!expanded)}><NeoIcon icon={"search"}/></NeoButton>
         {expanded && <Modal
@@ -301,12 +301,21 @@ interface Props {
 
 export default class ComponentMapper extends React.Component<Props, any> {
 
+    static getComponentWrapper(props: {type:"expand", wrappedComponent: JSX.Element, expandedComponent:JSX.Element}) {
+        const { type, wrappedComponent, expandedComponent} = props;
+        if (type === "expand") {
+            return <ExpandComponent
+                expandedComponent={expandedComponent}>
+                {wrappedComponent}
+            </ExpandComponent>
+        }
+    }
+
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expandable, expanded } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
-        let component;
         if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
-            component = <SelectRefObject
+            return <SelectRefObject
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -320,7 +329,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
-            component = <BooleanSelect
+            return <BooleanSelect
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -330,7 +339,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
-            component = <DatePickerComponent
+            return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -338,7 +347,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
-            component = <DatePickerComponent
+            return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -346,7 +355,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
-            component =  <EditableTextArea
+            return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -355,7 +364,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EEnum')) {
-            component =  <SelectComponent
+            return <SelectComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue || eType.eContents()[0].get('name')}
@@ -368,7 +377,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
-            component =  <TagComponent
+            return <TagComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue || (eType.eContents()[0] && eType.eContents()[0].get('name'))}
@@ -380,7 +389,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
             />
         } else {
-            component = <EditableTextArea
+            return <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -390,9 +399,6 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 expanded={expanded}
             />
         }
-        return expandable
-            ? <ExpandComponent expandedComponent={ComponentMapper.getComponent({...props, expandable: false, expanded: true})}>{component}</ExpandComponent>
-            : component
     }
 
 }
