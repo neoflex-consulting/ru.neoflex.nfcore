@@ -284,11 +284,13 @@ class DatasetGrid extends React.Component<Props, any> {
                                 : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
                                 : params.value
                             : null,
-                    mask: params.colDef.type === appTypes.Timestamp && !mask
-                        ? "dd.mm.yyyy hh:mm:ss"
-                        : params.colDef.type === appTypes.Date && !mask
-                            ? "dd.mm.yyyy"
-                            : mask || "",
+                    mask: mask
+                        ? mask
+                            : params.colDef.type === appTypes.Timestamp ? "dd.mm.yyyy hh:mm:ss"
+                            : params.colDef.type === appTypes.Date ? "dd.mm.yyyy"
+                            : params.colDef.type === appTypes.Decimal ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
+                            : params.colDef.type === appTypes.Integer ? "### ### ### ###;-### ### ### ###;0"
+                        : "",
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
