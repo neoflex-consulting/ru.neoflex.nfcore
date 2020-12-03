@@ -278,10 +278,12 @@ class DatasetGrid extends React.Component<Props, any> {
                 const cellStyle = params.colDef.cellStyle(params);
                 const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
                 objectRow.push({
-                    value: params.colDef.type === appTypes.String ? params.value
-                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                            : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
-                                : params.value,
+                    value: params.value
+                            ? params.colDef.type === appTypes.String ? params.value
+                                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
+                                : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                : params.value
+                            : null,
                     mask: params.colDef.type === appTypes.Timestamp && !mask
                         ? "dd.mm.yyyy hh:mm:ss"
                         : params.colDef.type === appTypes.Date && !mask
