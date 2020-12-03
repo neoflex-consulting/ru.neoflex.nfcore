@@ -193,7 +193,6 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         const methodName: string = 'getAllFunctions';
         API.instance().call(ref, methodName, []).then((json: string) => {
           let  result: string = JSON.stringify(json);
-          alert(result);
             API.instance().findEnum(    "dataset", "CalculatorFunction")
                 .then((json: EObject[]) => {
                     const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
