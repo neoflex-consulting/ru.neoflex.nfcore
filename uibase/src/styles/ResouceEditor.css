@@ -1,3 +1,7 @@
 .hidden-leaf {
     display: none;
 }
+
+.modal-add-resource > .ant-modal-content {
+    width: 100%;
+}
