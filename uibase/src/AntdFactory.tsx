@@ -521,6 +521,7 @@ export class Select_ extends ViewContainer {
         }
     };
 
+
     componentDidMount(): void {
         if (this.viewObject.get('isDynamic')
             && this.viewObject.get('dataset')) {
@@ -552,6 +553,7 @@ export class Select_ extends ViewContainer {
                 this.onChange.bind(this)(value.includes(',') ? value.split(',') : value, true)
             }}] as IAction[]);
     }
+
 
     componentWillUnmount(): void {
         unmountComponent.bind(this)(true, true)

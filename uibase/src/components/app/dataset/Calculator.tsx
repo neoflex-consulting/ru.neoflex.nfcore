@@ -153,7 +153,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 
     componentDidMount(): void {
-        if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}
+        /*if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}*/
+        this.getALLFunctions(this.props.currentDatasetComponent.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -185,15 +186,24 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 })
             })
     };
-
+    /*if (result.includes(o._id.substr(21, o._id.size)))*/
     getALLFunctions(resource_: Ecore.Resource){
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
         const methodName: string = 'getAllFunctions';
         API.instance().call(ref, methodName, []).then((json: string) => {
-            let result = JSON.parse(json);
-            alert(result)
+          let  result: string = JSON.stringify(json);
+          alert(result);
+            API.instance().findEnum(    "dataset", "CalculatorFunction")
+                .then((json: EObject[]) => {
+                    const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
+                        return o});
+                    this.setState({
+                        calculatorFunction: paramValue
+                    })
+                })
         })
+
     }
 
     handleCalculate = (e: any) => {
@@ -446,7 +456,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     {this.t("functions/operators")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto" }}>
-                                    <CreateFunctions
+                                        <CreateFunctions
                                         onButtonClick={this.handleCalculate}
                                         functions={this.state.calculatorFunction}
                                         t={this.t}
