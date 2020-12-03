@@ -1266,6 +1266,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     </Select>
                 </Modal>}
                 {this.state.modalResourceVisible && <Modal
+                    className={"modal-add-resource"}
                     key="add_resource_modal"
                     width={'1000px'}
                     title={t('addresources')}
