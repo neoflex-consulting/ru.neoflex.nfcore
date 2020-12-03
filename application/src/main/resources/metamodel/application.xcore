@@ -297,7 +297,7 @@ class DatePicker extends ViewElement, ValueItem, GridComponent {
 
 @NFCore(documentation="Любой Html контент")
 class HtmlContent extends ViewElement, CommandElement {
-        @NFCore(documentation="Например: В 'valueItems' ссылка на ValueHolder с именем 'errorMessage', а в поле 'htmlContent' указана ссылка на него через двоеточие ':errorMessage'")
+        @NFCore(documentation="Например: В 'valueItems' ссылка на ValueHolder с именем 'errorMessage', а в поле 'htmlContent' указана ссылка на него через двоеточие ':errorMessage'", expandable="true")
     String htmlContent
 }
 

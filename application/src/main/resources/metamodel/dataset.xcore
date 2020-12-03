@@ -40,7 +40,7 @@ class JdbcConnection extends Tagged {
     QName name
         @NFCore(documentation="Jdbc драйвер")
     refers JdbcDriver driver
-        @NFCore(documentation="Путь к Базе данных. Например: 'jdbc:postgresql://NRStudio-Master.neoflex.ru:5432/nrtest'")
+        @NFCore(documentation="Путь к Базе данных. Например: 'jdbc:postgresql://NRStudio-Master.neoflex.ru:5432/nrtest'", expandable="true")
     String url
         @NFCore(documentation="Логин от Базы данных")
     String userName
@@ -68,7 +68,7 @@ class JdbcDataset extends Dataset {
     refers JdbcConnection connection
         @NFCore(documentation="Формат формирования запроса. Возможные значение: UseTableName - используя только имя таблицы и схему, UseQuery - используя только сам запрос")
     QueryType queryType
-        @NFCore(documentation="Запрос к Базе данных")
+        @NFCore(documentation="Запрос к Базе данных", expandable="true")
     Text query
         @NFCore(documentation="Схема для запроса к Базе данных")
     Text schemaName
@@ -84,9 +84,9 @@ class JdbcDataset extends Dataset {
 
 @NFCore(documentation="Набор данных, без подключения к Базе данных")
 class GroovyDataset extends Dataset {
-        @NFCore(documentation="Исполняемый код на Groovy для запроса данных")
+        @NFCore(documentation="Исполняемый код на Groovy для запроса данных", expandable="true")
     String runQueryGroovyCode
-        @NFCore(documentation="Исполняемый код на Groovy для создания колонок")
+        @NFCore(documentation="Исполняемый код на Groovy для создания колонок", expandable="true")
     String loadAllColumnGroovyCode
         @NFCore(documentation="Запуск кода из 'loadAllColumnGroovyCode'")
     op JSON loadAllColumns()
@@ -166,6 +166,7 @@ class DatasetComponent extends Tagged {
 
 @NFCore(documentation="")
 class DMLQuery {
+        @NFCore(expandable="true")
     String queryText
     boolean generateFromModel
 }

@@ -1,10 +1,12 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import Ecore from 'ecore';
-import {Button, DatePicker, Input, Select} from 'antd';
+import {Button, DatePicker, Input, Modal, Select} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
-import {NeoTag} from "neo-design/lib";
+import {NeoButton, NeoTag} from "neo-design/lib";
+import './../styles/ComponentMapper.css'
+import {NeoIcon} from "neo-icon/lib";
 
 
 interface EditableTextAreaProps {
@@ -14,21 +16,27 @@ interface EditableTextAreaProps {
     type: any,
     idx?: number,
     ukey?: string,
-    edit?: boolean
+    edit?: boolean,
+    expanded?: boolean
 }
 
 function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
-    const TextArea = Input.TextArea
-    const Password = Input.Password
+    const TextArea = Input.TextArea;
+    const Password = Input.Password;
 
     const types: { [key: string]: any } = {
         text: TextArea,
         password: Password
-    }
+    };
 
     const InputComponent = types[props.type];
 
-    const { value, idx, ukey, onChange, edit } = props;
+    const { value, idx, ukey, onChange, edit, expanded } = props;
+    const [innerValue, setInnerValue] = useState(value);
+
+    useEffect(() => {
+        setInnerValue(value)
+    },[value]);
 
     return (
         <Fragment key="editableTextArea">
@@ -36,18 +44,20 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
-                    autosize={{ maxRows: 15 }}
-                    defaultValue={value}
+                    autosize={{ maxRows: expanded ? null : 10 }}
+                    value={innerValue}
+                    onChange={(e: any) => {
+                        setInnerValue(e.target.value)
+                    }}
                     onBlur={(e: any) => {
                         onChange && onChange!(e)
                     }}
-
                 />
                 :
                 <InputComponent
                     readOnly
                     key={`textview_${ukey}${idx}`}
-                    autosize={{ maxRows: 15 }}
+                    autosize={{ maxRows: expanded ? null : 10 }}
                     value={value}
                     style={{
                         whiteSpace: 'pre',
@@ -207,6 +217,11 @@ interface TagComponentProps {
     edit?: boolean
 }
 
+interface ExpandComponentProps {
+    expandedComponent: JSX.Element,
+    children: JSX.Element
+}
+
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
     const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props
@@ -249,6 +264,27 @@ function TagComponent(props: TagComponentProps): JSX.Element {
     )
 }
 
+function ExpandComponent(props: ExpandComponentProps): JSX.Element {
+
+    const { expandedComponent, children } = props;
+    const [expanded, setExpanded] = useState(false);
+
+    return <div className={"expand-component-container"}>
+        {children}
+        <NeoButton type={"link"} onClick={()=>setExpanded(!expanded)}><NeoIcon icon={"search"}/></NeoButton>
+        {expanded && <Modal
+            width={1000}
+            className={"expand-modal"}
+            key={`ExpandModal`}
+            visible={expanded}
+            footer={null}
+            onCancel={()=>setExpanded(!expanded)}
+        >
+            {expandedComponent}
+        </Modal>}
+    </div>
+}
+
 interface Props {
     value: any,
     targetObject?: { [key: string]: any },
@@ -259,16 +295,18 @@ interface Props {
     idx?: number,
     ukey?: string,
     id?: string,
-    edit?: boolean
+    edit?: boolean,
+    expanded?: boolean
 }
 
-export default class ComponentMapper extends React.Component<Props, any>{
+export default class ComponentMapper extends React.Component<Props, any> {
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expandable, expanded } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
+        let component;
         if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
-            return <SelectRefObject
+            component = <SelectRefObject
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -282,7 +320,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
-            return <BooleanSelect
+            component = <BooleanSelect
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -292,7 +330,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
-            return <DatePickerComponent
+            component = <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -300,7 +338,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
-            return <DatePickerComponent
+            component = <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -308,7 +346,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Password") {
-            return <EditableTextArea
+            component =  <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
@@ -317,7 +355,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EEnum')) {
-            return <SelectComponent
+            component =  <SelectComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue || eType.eContents()[0].get('name')}
@@ -330,7 +368,7 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
-            return <TagComponent
+            component =  <TagComponent
                 idx={idx}
                 ukey={ukey}
                 value={targetValue || (eType.eContents()[0] && eType.eContents()[0].get('name'))}
@@ -342,15 +380,19 @@ export default class ComponentMapper extends React.Component<Props, any>{
                 edit={edit}
             />
         } else {
-            return <EditableTextArea
+            component = <EditableTextArea
                 idx={idx}
                 ukey={ukey}
                 value={targetValue}
                 onChange={(e: any) => props.onChange && props.onChange!(e.target.value, 'EditableTextArea', targetObject, props.eObject)}
                 type="text"
                 edit={edit}
+                expanded={expanded}
             />
         }
+        return expandable
+            ? <ExpandComponent expandedComponent={ComponentMapper.getComponent({...props, expandable: false, expanded: true})}>{component}</ExpandComponent>
+            : component
     }
 
 }

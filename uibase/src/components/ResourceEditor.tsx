@@ -498,6 +498,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true'
                     && shouldRenderProperty(targetObject, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
+                const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
@@ -525,7 +526,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         onEClassBrowse: this.onEClassBrowse,
                         onBrowse: this.onBrowse,
                         mainEObject: mainEObject,
-                        edit: this.state.edit && !isDisabled
+                        edit: this.state.edit && !isDisabled,
+                        expandable: isExpandable
                     }),
                     key: feature.get('name') + idx
                 })
