@@ -17,9 +17,6 @@ abstract class CalculatorAdapter {
         return "${arg1}.asDecimal()"
     }
 
-    String Equal(String arg1, String arg2){
-        return "${arg1}.asDecimal()"
-    }
 
     String toString(String arg1, String arg2){
         return "${arg1}.toString('${arg2}')"

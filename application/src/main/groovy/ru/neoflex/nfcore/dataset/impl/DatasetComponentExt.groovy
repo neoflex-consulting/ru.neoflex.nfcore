@@ -129,10 +129,29 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String getAllFunctions() {
-        CalculatorFunction.
-        return "super.getAllFunctions()"
-    }
+        String getAllFunctions() {
+        def calcFunctions = []
+        def jdbcDataset = dataset as JdbcDataset
+        def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
+                for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
+                    String str = calculatorAdapter.metaClass.delegate.allMethods[i].mopName
+                    str = str.substring(8,str.size())
+                    for (CalculatorFunction cf : CalculatorFunction.values()){
+                    if (str.equals(cf.name) || str.equals(cf.name + "s") || cf.name.equals("to_char") && str.equals("toString") || cf.name.equals("to_number") && str.equals("toNumber") || cf.name.equals("to_date") && str.equals("toDate")){
+                        boolean flag = false;
+                        for (int j = 0; j < calcFunctions.size(); j++){
+                            if (calcFunctions[j] == cf.name){
+                                flag = true;
+                            }
+                        }
+                        if (!flag) {
+                            calcFunctions.add(cf.name)
+                        }
+                        }
+                     }
+                }
+                return calcFunctions;
+             }
 
     List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
         for (col in column) {
@@ -1053,7 +1072,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (result.size() > 0) {
             for (func in result) {
                 List<String> args = (func =~ /[a-zA-Z0-9._"']+/).findAll()
-                switch (args[0]) {
+                    switch (args[0]) {
                     case CalculatorFunction.SUBSTRING.getName():
                         expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3]));
                         if (isOrientDB){
