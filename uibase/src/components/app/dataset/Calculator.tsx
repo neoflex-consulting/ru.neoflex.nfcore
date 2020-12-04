@@ -361,7 +361,14 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     message: ' '
                                 }]
                             })(
-                                <NeoInput width={'310px'} placeholder={this.t("Enter new column name")}/>
+                                <NeoInput
+                                    width={'310px'}
+                                    placeholder={this.t("Enter new column name")}
+                                    onPressEnter={(e: { preventDefault: () => any; })=>{
+                                        e.preventDefault();
+                                        this.handleSubmit(e)
+                                    }}
+                                />
                             )
                         }
                     </NeoCol>
