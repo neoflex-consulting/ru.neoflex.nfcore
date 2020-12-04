@@ -279,9 +279,9 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     String staticValues
         @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика")
     refers Dataset dataset
-        @NFCore(documentation="Ссылка на столбец из 'dataset' с ключами значений для выпадающего списка")
+        @NFCore(documentation="Ссылка на столбец из 'dataset' значения которых будут отображаться визуально в select")
     refers DatasetColumn datasetKeyColumn
-        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для выпадающего списка")
+        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для ключей datasetKeyColumn, которые будут передаваться между компонентами")
     refers DatasetColumn datasetValueColumn
 }
 
