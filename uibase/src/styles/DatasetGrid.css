@@ -70,7 +70,7 @@
 
 #datasetGrid .ag-row:hover {
     outline: 1px solid #E6E6E6;
-    background: #FAFAFA !important;
+    /*background: #FAFAFA !important;*/
     box-sizing: border-box;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 100;
