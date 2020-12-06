@@ -9,7 +9,6 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>ru.neoflex.meta</groupId>
     <artifactId>emf-orientdb</artifactId>
     <name>emf-orientdb</name>
     <description>OrientDB storage for EMF objects</description>

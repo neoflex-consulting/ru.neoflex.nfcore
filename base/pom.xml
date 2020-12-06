@@ -61,15 +61,15 @@
         <dependency>
             <groupId>org.emfjson</groupId>
             <artifactId>emfjson-jackson</artifactId>
-            <version>1.3.0</version>
+            <version>1.3.1-arch7tect</version>
         </dependency>
         <dependency>
-            <groupId>ru.neoflex.meta</groupId>
+            <groupId>ru.neoflex.nfcore</groupId>
             <artifactId>emf-git</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>ru.neoflex.meta</groupId>
+            <groupId>ru.neoflex.nfcore</groupId>
             <artifactId>emf-orientdb</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

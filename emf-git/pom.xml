@@ -10,7 +10,6 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>ru.neoflex.meta</groupId>
     <artifactId>emf-git</artifactId>
     <name>emf-git</name>
     <description>Git storage for EMF objects</description>
