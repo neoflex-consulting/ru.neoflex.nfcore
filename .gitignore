@@ -6,11 +6,12 @@ target/
 workspace/
 application/workspace
 base/workspace
-**/java-gen/**
-**test/java-gen/**
+/**/java-gen/**
 .mvn/
 parent.iml
 
 
 /.metadata/
 uireport/package-lock.json
+/emf-git/src/test/java-gen/
+/emf-orientdb/src/test/java-gen/

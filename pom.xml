@@ -2,22 +2,588 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.fork>true</maven.compiler.fork>
+        <emf.version>2.23.0</emf.version>
+        <emf-xmi.version>2.16.0</emf-xmi.version>
+        <emf-common.version>2.20.0</emf-common.version>
+        <xtext.version>2.24.0</xtext.version>
+        <ecore-xtext.version>1.4.0</ecore-xtext.version>
+        <ecore-xcore.version>1.14.0</ecore-xcore.version>
+        <ecore-xcore-lib.version>1.5.0</ecore-xcore-lib.version>
+        <emf-codegen.version>2.16.0</emf-codegen.version>
+        <emf-codegen-ecore.version>2.18.0</emf-codegen-ecore.version>
+        <c3p0.version>0.9.5.5</c3p0.version>
+        <hibernate.version>5.4.18.Final</hibernate.version>
+        <h2.version>1.4.200</h2.version>
+        <drools.version>7.46.0.Final</drools.version>
+        <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+        <gmavenplus-plugin.version>1.7.1</gmavenplus-plugin.version>
+        <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <springfox-swagger2.version>3.0.0</springfox-swagger2.version>
+        <groovy.version>3.0.7</groovy.version>
+        <slf4j-log4j12.version>1.7.5</slf4j-log4j12.version>
+        <javax.persistence-api.version>2.2</javax.persistence-api.version>
+        <org.eclipse.emf.codegen.ecore.version>2.24.0</org.eclipse.emf.codegen.ecore.version>
+        <postgresql.version>42.2.18</postgresql.version>
+        <surefire-junit4.version>2.22.2</surefire-junit4.version>
+        <org.eclipse.text.version>3.5.101</org.eclipse.text.version>
+        <org.eclipse.core.resources.version>3.7.100</org.eclipse.core.resources.version>
+        <commons-lang3.version>3.10</commons-lang3.version>
+        <orientdb.version>3.1.5</orientdb.version>
+        <epsilon-core.version>1.5.1</epsilon-core.version>
+        <org.eclipse.jgit.http.server.version>5.9.0.202009080501-r</org.eclipse.jgit.http.server.version>
+        <ssh-shell-spring-boot-starter.version>1.5.3</ssh-shell-spring-boot-starter.version>
+        <jansi.version>2.0.1</jansi.version>
+        <incremental-compiler.version>0.13.15</incremental-compiler.version>
+        <org.eclipse.jgit.version>5.9.0.202009080501-r</org.eclipse.jgit.version>
+    </properties>
+
     <groupId>ru.neoflex.nfcore</groupId>
     <artifactId>parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Neoflex EMF Framework Parent Project</name>
 
-    <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.fork>true</maven.compiler.fork>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.3.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.common</artifactId>
+                <version>${emf-common.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore</artifactId>
+                <version>${emf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>runtime</artifactId>
+                <version>3.10.0-v20140318-2214</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore.xcore</artifactId>
+                <version>${ecore-xcore.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
+                <version>${ecore-xcore-lib.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+                <version>${emf-xmi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j-log4j12.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>javax.persistence-api</artifactId>
+                <version>${javax.persistence-api.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
+                <version>${org.eclipse.emf.codegen.ecore.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mchange</groupId>
+                <artifactId>c3p0</artifactId>
+                <version>${c3p0.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-c3p0</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox-swagger2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox-swagger2.version}</version>
+            </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>org.codehaus.groovy</groupId>-->
+<!--                <artifactId>groovy</artifactId>-->
+<!--                <version>${groovy.version}</version>-->
+<!--            </dependency>-->
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <type>pom</type>
+                <version>${groovy.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.xtext</groupId>
+                <artifactId>org.eclipse.xtext</artifactId>
+                <version>${xtext.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.drools</groupId>
+                <artifactId>drools-core</artifactId>
+                <version>${drools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.drools</groupId>
+                <artifactId>drools-compiler</artifactId>
+                <version>${drools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.drools</groupId>
+                <artifactId>drools-mvel</artifactId>
+                <version>${drools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-etl</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-client</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-core</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-server</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-tools</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-lucene</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-studio</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.epsilon</groupId>
+                <artifactId>epsilon-core</artifactId>
+                <version>${epsilon-core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.epsilon</groupId>
+                <artifactId>epsilon-emf</artifactId>
+                <version>${epsilon-core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.epsilon</groupId>
+                <artifactId>epsilon-hutn</artifactId>
+                <version>${epsilon-core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit.http.server</artifactId>
+                <version>${org.eclipse.jgit.http.server.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.fonimus</groupId>
+                <artifactId>ssh-shell-spring-boot-starter</artifactId>
+                <version>${ssh-shell-spring-boot-starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.fusesource.jansi</groupId>
+                <artifactId>jansi</artifactId>
+                <version>${jansi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.typesafe.sbt</groupId>
+                <artifactId>incremental-compiler</artifactId>
+                <version>${incremental-compiler.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit</artifactId>
+                <version>${org.eclipse.jgit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.orientechnologies</groupId>
+                <artifactId>orientdb-jdbc</artifactId>
+                <version>${orientdb.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit4</artifactId>
+                            <version>${surefire-junit4.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10</version>
+                    <configuration>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                        <failOnError>false</failOnError>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${maven-release-plugin.version}</version>
+                    <configuration>
+                        <tagNameFormat>@{project.version}</tagNameFormat>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>add-source</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${basedir}/src/main/java-gen</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>add-test-source</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>add-test-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${basedir}/src/test/java-gen</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.xtext</groupId>
+                    <artifactId>xtext-maven-plugin</artifactId>
+                    <version>${xtext.version}</version>
+                    <executions>
+                        <execution>
+                            <id>generate-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <configuration>
+                                <languages>
+                                    <language>
+                                        <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+                                    </language>
+                                    <language>
+                                        <setup>org.eclipse.emf.codegen.ecore.xtext.GenModelSupport</setup>
+                                    </language>
+                                    <language>
+                                        <setup>org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup</setup>
+                                        <outputConfigurations>
+                                            <outputConfiguration>
+                                                <outputDirectory>${project.basedir}/src/main/java-gen</outputDirectory>
+                                            </outputConfiguration>
+                                        </outputConfigurations>
+                                    </language>
+                                </languages>
+                                <sourceRoots>
+                                    <root>${basedir}/src/main/resources/metamodel</root>
+                                </sourceRoots>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>generate-test-sources</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <configuration>
+                                <languages>
+                                    <language>
+                                        <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+                                    </language>
+                                    <language>
+                                        <setup>org.eclipse.emf.codegen.ecore.xtext.GenModelSupport</setup>
+                                    </language>
+                                    <language>
+                                        <setup>org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup</setup>
+                                        <outputConfigurations>
+                                            <outputConfiguration>
+                                                <outputDirectory>${project.basedir}/src/test/java-gen</outputDirectory>
+                                            </outputConfiguration>
+                                        </outputConfigurations>
+                                    </language>
+                                </languages>
+                                <sourceRoots>
+                                    <root>${basedir}/src/test/resources</root>
+                                </sourceRoots>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.eclipse.text</groupId>
+                            <artifactId>org.eclipse.text</artifactId>
+                            <version>${org.eclipse.text.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.core</groupId>
+                            <artifactId>org.eclipse.core.resources</artifactId>
+                            <version>${org.eclipse.core.resources.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.xtext</groupId>
+                            <artifactId>org.eclipse.xtext.ecore</artifactId>
+                            <version>${xtext.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.codegen.ecore.xtext</artifactId>
+                            <version>${ecore-xtext.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.common</artifactId>
+                            <version>${emf-common.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.ecore</artifactId>
+                            <version>${emf.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+                            <version>${emf-xmi.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.codegen</artifactId>
+                            <version>${emf-codegen.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
+                            <version>${emf.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.ecore.xcore</artifactId>
+                            <version>${ecore-xcore.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.emf</groupId>
+                            <artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
+                            <version>${ecore-xcore-lib.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.gmavenplus</groupId>
+                    <artifactId>gmavenplus-plugin</artifactId>
+                    <version>${gmavenplus-plugin.version}</version>
+                    <configuration>
+                        <stubsOutputDirectory>${project.build.directory}/generated-groovy-stubs</stubsOutputDirectory>
+                        <testStubsOutputDirectory>${project.build.directory}/generated-groovy-test-stubs
+                        </testStubsOutputDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>addSources</goal>
+                                <goal>addTestSources</goal>
+                                <goal>generateStubs</goal>
+                                <goal>compile</goal>
+                                <goal>generateTestStubs</goal>
+                                <goal>compileTests</goal>
+                                <goal>removeStubs</goal>
+                                <goal>removeTestStubs</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${project.basedir}/src/main/java-gen</directory>
+                            </fileset>
+                            <fileset>
+                                <directory>${project.basedir}/src/test/java-gen</directory>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <modules>
-        <module>emfjson-jackson</module>
         <module>emf-git</module>
         <module>base</module>
         <module>application</module>
