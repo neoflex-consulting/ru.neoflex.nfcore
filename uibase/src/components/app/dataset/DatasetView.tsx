@@ -1424,6 +1424,7 @@ class DatasetView extends React.Component<any, State> {
                     serverGroupBy={this.state.serverGroupBy}
                     groupByColumn={this.state.groupByColumn}
                     serverCalculatedExpression={this.state.serverCalculatedExpression}
+                    highlights={this.state.highlights}
                     barMode={barMode}
                     currentDatasetComponent={this.state.currentDatasetComponent}
                     allDatasetComponents={this.state.allDatasetComponents}

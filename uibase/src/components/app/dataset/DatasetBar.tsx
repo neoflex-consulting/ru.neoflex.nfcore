@@ -56,6 +56,7 @@ interface props {
     serverGroupBy: IServerQueryParam[],
     groupByColumn: IServerQueryParam[],
     serverCalculatedExpression: IServerQueryParam[],
+    highlights: IServerQueryParam[],
     barMode: "edit"|"diagram"|"normal",
     t: any,
     i18n: any,
@@ -352,6 +353,11 @@ class DatasetBar extends React.Component<props, State> {
         let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy  = false;
         this.props.serverFilters.forEach(element => {
             if (element.datasetColumn !== undefined && element.value !== undefined && element.operation !== undefined){
+                isFilter = true;
+            }
+        });
+        this.props.highlights.forEach(element => {
+            if (element.datasetColumn !== undefined || element.value !== undefined || element.highlightType !== undefined || element.backgroundColor !== undefined){
                 isFilter = true;
             }
         });
