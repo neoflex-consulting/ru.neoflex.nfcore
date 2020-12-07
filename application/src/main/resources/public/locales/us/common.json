@@ -461,5 +461,7 @@
         "isResourcePermitted": "Is Resource permitted ",
         "recreateWeekend": "Recreate weekend",
         "copyHolidays": "Copy Holidays",
-        "recreateWorkingDays": "Recreate working days"
+        "recreateWorkingDays": "Recreate working days",
+        "first page": "First page",
+        "last page": "Last page"
 }

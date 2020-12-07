@@ -42,7 +42,6 @@ class PagesView extends React.Component<any, any> {
 }
 
 class Paginator extends React.Component<Props, any> {
-
     paginatorRef = React.createRef<HTMLDivElement>();
 
     constructor(props: any) {
@@ -79,8 +78,22 @@ class Paginator extends React.Component<Props, any> {
         window.removeEventListener("resize", this.handleResize);
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any): void {
+        if (this.props.currentPage !== prevProps.currentPage
+            || this.props.totalNumberOfPage !== prevProps.totalNumberOfPage
+        ) {
+            const size = (`${this.props.totalNumberOfRows}`.length * 10 * 3) + 40;
+            const cssClass = document.createElement('style');
+            cssClass.innerHTML = `
+                .paginator.paginator-large .ant-pagination-next { margin-right: ${size}px }
+                .paginator .page-view-container { min-width: ${size}px }
+            `;
+            document.getElementsByTagName('head')[0].appendChild(cssClass);
+        }
+    }
+
     itemRender = (current: any, type: any, originalElement: any) => {
-        const {t} = this.props
+        const {t} = this.props;
         if (type === 'prev') {
             return <NeoHint  title={t('previous page')}><NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"arrowLeft"}/></NeoHint>
         }
@@ -94,24 +107,26 @@ class Paginator extends React.Component<Props, any> {
             return <NeoHint title={t('next 5 pages')}> <NeoIcon className={"Arrow"} style={{marginTop: "4.5px"}} icon={"doubleRight"}/></NeoHint>
         }
         return originalElement;
-    }
+    };
 
     render() {
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
                 <div ref={this.paginatorRef}
-                    id={"paginator"} className={    `${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
+                    className={    `paginator ${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
                     style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
-                    {this.props.totalNumberOfPage > 1 ? <NeoButton id={"toFirst"} type={this.props.currentPage === 1 ? "disabled" : undefined} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton> : null}
-                    {this.props.totalNumberOfPage > 1 ? <NeoButton id={"toLast"} type={this.props.currentPage === this.props.totalNumberOfPage ? "disabled" : undefined} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton> : null}
-                    {this.props.totalNumberOfRows && (this.state.paginatorSize >= adaptiveElementSize.medium)
-                        ?
-                          <PagesView
-                              currentPage={this.props.currentPage}
-                              paginationPageSize={this.state.paginationPageSize}
-                              totalNumberOfRows={this.props.totalNumberOfRows}
-                          />
-                        : null}
+                    {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('first page')}><NeoButton className={"jump-first"} type={"link"} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton></NeoHint> : null}
+                    <div className={"page-view-container"}>
+                        {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('last page')}><NeoButton className={"jump-last"} type={"link"} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton></NeoHint> : null}
+                        {this.props.totalNumberOfRows && (this.state.paginatorSize >= adaptiveElementSize.medium)
+                            ?
+                              <PagesView
+                                  currentPage={this.props.currentPage}
+                                  paginationPageSize={this.state.paginationPageSize}
+                                  totalNumberOfRows={this.props.totalNumberOfRows}
+                              />
+                            : null}
+                    </div>
                     <Pagination
                         size="small"
                         current={this.props.currentPage}

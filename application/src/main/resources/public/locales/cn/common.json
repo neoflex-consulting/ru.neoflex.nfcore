@@ -424,5 +424,7 @@
         "isResourcePermitted": "檢查資源訪問",
         "recreateWeekend": "重新創建週末",
         "copyHolidays": "複製假期",
-        "recreateWorkingDays": "重新創建工作日"
+        "recreateWorkingDays": "重新創建工作日",
+        "first page": "第一頁",
+        "last page": "最後一頁"
 }
