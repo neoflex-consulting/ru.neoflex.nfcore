@@ -1,6 +1,6 @@
 import React from "react";
 import {Pagination, ConfigProvider} from "antd";
-import {withTranslation} from "react-i18next";
+import {WithTranslation, withTranslation} from "react-i18next";
 import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
 import Ch from 'antd/es/locale/zh_TW';
@@ -9,15 +9,11 @@ import {NeoButton, NeoHint} from "neo-design/lib";
 import '../../styles/Paginator.css';
 import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
 
-interface Props {
+interface Props extends WithTranslation{
     paginationPageSize: number,
     currentPage: number,
     totalNumberOfPage: number;
     totalNumberOfRows: number;
-    i18n: any;
-    grid?: any;
-    t: any;
-    tReady: any;
     onPageChange: (page:number)=>void;
     onPageSizeChange: (size:number)=>void;
 }
