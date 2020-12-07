@@ -378,7 +378,11 @@ class DatasetBar extends React.Component<props, State> {
                 serverGroupBy = true;
             }
         });
-
+        this.props.groupByColumn.forEach(element => {
+            if (element.datasetColumn !== undefined) {
+                serverGroupBy = true;
+            }
+        });
 
         return !this.props.isServerFunctionsHidden
             ?

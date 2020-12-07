@@ -1168,7 +1168,7 @@ class DatasetView extends React.Component<any, State> {
 
     //Меняем фильтры, выполняем запрос и пишем в userProfilePromise
 
-    onChangeParams = (newServerParam: any[], paramName: paramType): void => {
+    onChangeParams = (newServerParam: IServerQueryParam[]|undefined, paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
@@ -1657,6 +1657,10 @@ class DatasetView extends React.Component<any, State> {
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.groupByColumn}
                                     handleDrawerVisability={this.handleDrawerVisibility}
+                                    onReset={()=> {
+                                        this.setState({serverGroupBy:[], groupByColumn:[]});
+                                        this.onChangeParams(undefined, paramType.group);
+                                    }}
                                 />
                                 :
                                 <ServerGroupByColumn/>
