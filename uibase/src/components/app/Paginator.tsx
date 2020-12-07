@@ -82,7 +82,7 @@ class Paginator extends React.Component<Props, any> {
             const cssClass = document.createElement('style');
             cssClass.innerHTML = `
                 .paginator.paginator-large .ant-pagination-next { margin-right: ${size}px }
-                .paginator .page-view-container { min-width: ${size}px }
+                .paginator.paginator-large .page-view-container { min-width: ${size}px }
             `;
             document.getElementsByTagName('head')[0].appendChild(cssClass);
         }

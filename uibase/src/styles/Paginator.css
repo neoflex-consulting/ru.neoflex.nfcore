@@ -17,6 +17,15 @@
     bottom: 1px;
 }
 
+.paginator.paginator-small .page-view-container {
+    right: 0;
+}
+
+.paginator.single-page .page-view-container {
+    justify-content: center;
+    bottom: 3px;
+}
+
 .paginator.single-page > .page-view-container {
     right: 128px !important;
 }
