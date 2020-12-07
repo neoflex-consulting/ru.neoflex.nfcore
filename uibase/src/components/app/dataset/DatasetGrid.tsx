@@ -897,14 +897,14 @@ class DatasetGrid extends React.Component<Props, any> {
                      boxSizing: 'border-box',
                      // height: '100%',
                      backgroundColor: backgroundColor,
-                     height: this.props.height ? this.props.height : 460 + 40 /*paginator*/ ,
+                     height: this.props.height ? this.props.height : 460 + (!this.props.hidePagination ? 40 : 0) /*paginator*/ ,
                  }}
                  className={'ag-theme-material'}
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     className={this.props.className}
                     style={{
-                        height: this.props.height ? this.props.height : 460 ,
+                        height: this.props.height ? this.props.height : 460,
                         width: this.props.width ? this.props.width : "99,5%",
                         minWidth: "375px"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
