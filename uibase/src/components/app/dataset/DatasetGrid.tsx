@@ -896,7 +896,9 @@ class DatasetGrid extends React.Component<Props, any> {
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
-                     backgroundColor: backgroundColor}}
+                     backgroundColor: backgroundColor,
+                     height: this.props.height ? this.props.height : 460 + 40 /*paginator*/ ,
+                 }}
                  className={'ag-theme-material'}
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
