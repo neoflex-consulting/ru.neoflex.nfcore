@@ -321,7 +321,16 @@ class DatasetGrid extends React.Component<Props, any> {
         });
         return leafColumnDefs;
     }
-    
+
+    cleanCheckboxContext = () => {
+        this.props.columnDefs.forEach(c=>{
+            const component = (c.get('component') || c.get('editComponent')) as Ecore.EObject;
+            if (component && component.eClass.eURI() === AntdFactoryClasses.Checkbox) {
+                this.props.context.contextItemValues.delete(component.get('name') + component._id)
+            }
+        })
+    };
+
     componentDidMount(): void {
         if (this.props.context) {
             this.props.context.addDocxHandler(this.getDocxData.bind(this));
@@ -334,6 +343,8 @@ class DatasetGrid extends React.Component<Props, any> {
             this.props.context.removeDocxHandler();
             this.props.context.removeExcelHandler();
         }
+        //чистка конекста за checkbox'и
+        this.cleanCheckboxContext()
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -341,6 +352,8 @@ class DatasetGrid extends React.Component<Props, any> {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
+            //При обновлении сбрасываем значения в context для checkbox'в
+            this.cleanCheckboxContext()
             this.setState({rowData: this.props.rowData})
         }
         if (!_.isEqual(prevProps.columnDefs, this.props.columnDefs)) {

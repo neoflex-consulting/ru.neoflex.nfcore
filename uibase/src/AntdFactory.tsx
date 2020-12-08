@@ -1107,24 +1107,63 @@ export class Input_ extends ViewContainer {
 export class Checkbox_ extends ViewContainer {
     constructor(props: any) {
         super(props);
-        let value, agValue;
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
-        }
-        const temp = getAgGridValue.bind(this)(this.viewObject.get('returnValueType'), 'label');
-        value = value ? value : this.viewObject.get('value') || "default";
-        agValue = typeof temp === "string" ? temp : JSON.stringify(temp);
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
-            currentValue: value,
-            defaultValue: value,
-            checked: value === agValue ? true : this.viewObject.get('isChecked')
         };
+        const URLvalue = this.props.pathFull[this.props.pathFull.length - 1].params !== undefined && getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'))
+        //в гриде
+        if (this.props.isAgComponent && !this.props.isAgEdit) {
+            const returnValueType = this.viewObject.get('returnValueType') || "string";
+            const agValue = getAgGridValue.bind(this)(returnValueType);
+            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
+            const currentValue = currentContextValue
+                ? currentContextValue.parameterValue
+                : returnValueType === "string"
+                    ? ""
+                    : [];
+            if (!currentContextValue) {
+                handleContextChange.bind(this)(currentValue)
+            }
+            this.state = {
+                ...this.state,
+                currentValue: currentValue,
+                defaultValue: agValue,
+                checked: this.isChecked(currentValue, agValue)
+            };
+        //в редакторе грида
+        } else if (this.props.isAgComponent && this.props.isAgEdit) {
+            const currentValue = getAgGridValue.bind(this)("string") as string || "";
+            const defaultValue = this.viewObject.get('value') || "default";
+            this.state = {
+                ...this.state,
+                currentValue: currentValue,
+                defaultValue: defaultValue,
+                checked: this.isChecked(currentValue, defaultValue)
+            };
+        //как обычный viewElement
+        } else {
+            const defaultValue = this.viewObject.get('value') || "default";
+            const currentValue = URLvalue
+                ? URLvalue
+                : this.viewObject.get('isChecked')
+                    ? defaultValue
+                    : "";
+            const checked = currentValue === defaultValue ? true : this.viewObject.get('isChecked');
+            if (checked) {
+                handleContextChange.bind(this)(currentValue)
+            }
+            this.state = {
+                ...this.state,
+                currentValue: currentValue,
+                defaultValue: defaultValue,
+                checked: checked
+            };
+        }
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
                 parameterName: this.viewObject.get('name'),
-                parameterValue: value
+                parameterValue: this.state.currentValue
             })
         }
     }
@@ -1133,30 +1172,26 @@ export class Checkbox_ extends ViewContainer {
         mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value)=>{
                 this.onChange.bind(this)(typeof value === "string" ? value : "", true)
             }}] as IAction[]);
-        if (this.props.isAgComponent) {
-            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-            handleContextChange.bind(this)(this.viewObject.get('isChecked')
-                ? this.changeSelection(currentContextValue ? currentContextValue.parameterValue : null, getAgGridValue.bind(this)(this.viewObject.get('returnValueType')))
-                : this.viewObject.get('returnValueType') === "object"
-                    ? []
-                    : "")
-        } else {
-            handleContextChange.bind(this)(this.viewObject.get('isChecked')
-                ? this.changeSelection(null, this.state.defaultValue)
-                : "")
-        }
-        if (this.viewObject.get('isChecked')) {
-            this.setState({checked: true});
-        }
     }
 
     componentWillUnmount(): void {
-        unmountComponent.bind(this)(false, true)
+        //Контекс для Grid checkbox'ов чистит DatasetGrid
+        unmountComponent.bind(this)(false, !this.props.isAgComponent)
     }
 
     getValue() {
-        return this.state.checked ? this.state.currentValue : undefined;
+        return this.state.checked ? this.state.defaultValue : undefined;
     }
+
+    isChecked = (currentValue:string|{[key:string]:string|number|null}[], defaultValue:string|{[key:string]:string|number|null}) => {
+        if (typeof currentValue !== "object" && typeof defaultValue !== "object") {
+            return currentValue.split(contextStringSeparator).includes(defaultValue)
+        } else {
+            return typeof currentValue === "object" && currentValue.find((cv:{[key:string]:string|number|null}) => {
+                return JSON.stringify(cv) === JSON.stringify(defaultValue)
+            });
+        }
+    };
 
     changeSelection = (currentValue: string|{[key:string]:string|number|null}[]|null, newValue: string|{[key:string]:string|number|null}) : string|{[key:string]:string|number|null}[] => {
         if (typeof currentValue === "string" && typeof newValue === "string") {
@@ -1177,9 +1212,8 @@ export class Checkbox_ extends ViewContainer {
     };
 
     onChecked = (isChecked: boolean) => {
-        if (this.props.isAgComponent) {
-            const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
-            this.onChange(value)
+        if (this.props.isAgComponent && !this.props.isGridEdit) {
+            this.onChange(getAgGridValue.bind(this)(this.viewObject.get('returnValueType')))
         } else {
             this.onChange(this.state.defaultValue)
         }
