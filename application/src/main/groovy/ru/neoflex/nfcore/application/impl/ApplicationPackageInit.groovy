@@ -52,7 +52,7 @@ class ApplicationPackageInit {
         Context.current.store.registerAfterLoad(new Consumer<Resource>() {
             @Override
             void accept(Resource resource) {
-                resource.contents.each {eObject->
+                for (eObject in resource.contents) {
                     if (eObject instanceof AppModule) {
                         processViewElement(eObject.view)
                         processTreeNode(eObject.referenceTree)
